@@ -1,0 +1,44 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30717.126
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lisbeth.Bot.API", "Lisbeth.Bot\Lisbeth.Bot.API.csproj", "{6E6B77F3-5EAB-4F8A-ABE0-85488E92F140}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "API", "API", "{C9A9EFBD-B40A-426D-96FA-355690AC5788}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Application", "Application", "{74CCF4F4-2A89-4F3E-84CA-145BD23E8B94}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DataAccessLayer", "DataAccessLayer", "{B80166FC-BBDA-4C6F-8E77-6F7B06E1A542}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Domain", "Domain", "{21CD71F0-8AAB-4DE2-87F6-747D03D7C31E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{3B6DE2E5-8E8F-419F-A374-CC10683D251B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Unit", "Unit", "{2D8D6CC5-F937-4FEA-9F9D-74061984B909}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Integration", "Integration", "{788E11A7-AF45-45A9-9C44-604E13555724}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6E6B77F3-5EAB-4F8A-ABE0-85488E92F140}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E6B77F3-5EAB-4F8A-ABE0-85488E92F140}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E6B77F3-5EAB-4F8A-ABE0-85488E92F140}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E6B77F3-5EAB-4F8A-ABE0-85488E92F140}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{6E6B77F3-5EAB-4F8A-ABE0-85488E92F140} = {C9A9EFBD-B40A-426D-96FA-355690AC5788}
+		{2D8D6CC5-F937-4FEA-9F9D-74061984B909} = {3B6DE2E5-8E8F-419F-A374-CC10683D251B}
+		{788E11A7-AF45-45A9-9C44-604E13555724} = {3B6DE2E5-8E8F-419F-A374-CC10683D251B}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3C163F40-9FA0-4EFA-8813-DB6531FE8C3D}
+	EndGlobalSection
+EndGlobal
