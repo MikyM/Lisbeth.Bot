@@ -1,11 +1,18 @@
 using Autofac;
-using Lisbeth.Bot.API.Autofac;
+using Lisbeth.Bot.API.Helpers;
+using Lisbeth.Bot.DataAccessLayer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.ApplicationModels;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using MikyM.Discord;
+using OpenTracing;
+using OpenTracing.Mock;
+using Serilog;
 
 namespace Lisbeth.Bot.API
 {
@@ -21,12 +28,18 @@ namespace Lisbeth.Bot.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
-            services.AddControllers();
+            //services.AddDbContext<LisbethBotDbContext>(options =>
+                //options.UseNpgsql(Configuration.GetConnectionString("LisbethBotDb")));
+            services.AddDbContext<LisbethBotDbContext>(options => options.UseInMemoryDatabase("testDb"));
+            services.AddControllers(options =>
+            {
+                options.Conventions.Add(new RouteTokenTransformerConvention(new SlugifyParameterTransformer()));
+            });
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Lisbeth.Bot", Version = "v1" });
             });
+            services.ConfigureDiscord(Configuration);
         }
 
         /// <summary>
@@ -59,6 +72,8 @@ namespace Lisbeth.Bot.API
             {
                 endpoints.MapControllers();
             });
+
+            app.UseSerilogRequestLogging();
         }
     }
 }

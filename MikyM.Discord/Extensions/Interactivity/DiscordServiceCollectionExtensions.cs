@@ -36,10 +36,7 @@ namespace MikyM.Discord.Extensions.Interactivity
 
                 extension?.Invoke(ext);
 
-                //
-                // This is intentional; we don't need this "service", just the execution flow ;)
-                // 
-                return null;
+                return new DiscordExtensionsConfiguration();
             });
 
             return services;

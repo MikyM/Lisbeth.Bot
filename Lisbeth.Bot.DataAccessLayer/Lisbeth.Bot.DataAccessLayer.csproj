@@ -5,11 +5,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Lisbeth.Bot.Domain\Lisbeth.Bot.Domain.csproj" />
     <ProjectReference Include="..\MikyM.Common.DataAccessLayer\MikyM.Common.DataAccessLayer.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Repositories\Interfaces\" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.10" />
   </ItemGroup>
 
 </Project>

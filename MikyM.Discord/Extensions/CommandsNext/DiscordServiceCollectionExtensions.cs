@@ -81,7 +81,7 @@ namespace MikyM.Discord.Extensions.CommandsNext
                 //
                 // This is intentional; we don't need this "service", just the execution flow ;)
                 // 
-                return null;
+                return  new DiscordExtensionsConfiguration();
             });
 
             if (!autoRegisterSubscribers)

@@ -34,7 +34,7 @@ namespace MikyM.Discord.Extensions.VoiceNext
                 //
                 // This is intentional; we don't need this "service", just the execution flow ;)
                 // 
-                return null;
+                return new DiscordExtensionsConfiguration();
             });
 
             return services;

@@ -1,6 +1,4 @@
-﻿using System;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.EventArgs;
+﻿using DSharpPlus.SlashCommands;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using MikyM.Discord.Extensions.SlashCommands.Attributes;
@@ -9,6 +7,7 @@ using MikyM.Discord.Extensions.SlashCommands.Util;
 using MikyM.Discord.Interfaces;
 using MikyM.Discord.Util;
 using OpenTracing;
+using System;
 
 namespace MikyM.Discord.Extensions.SlashCommands
 {
@@ -113,7 +112,7 @@ namespace MikyM.Discord.Extensions.SlashCommands
                 //
                 // This is intentional; we don't need this "service", just the execution flow ;)
                 // 
-                return null;
+                return new DiscordExtensionsConfiguration();
             });
 
             if (!autoRegisterSubscribers)

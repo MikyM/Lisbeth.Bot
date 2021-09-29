@@ -12,7 +12,7 @@ using MikyM.Common.DataAccessLayer.Repositories;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
 using Module = Autofac.Module;
 
-namespace Lisbeth.Bot.API.Autofac
+namespace Lisbeth.Bot.API
 {
     public class AutofacContainerModule : Module
     {

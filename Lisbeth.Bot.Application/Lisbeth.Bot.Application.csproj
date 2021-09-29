@@ -11,6 +11,13 @@
   <ItemGroup>
     <ProjectReference Include="..\Lisbeth.Bot.DataAccessLayer\Lisbeth.Bot.DataAccessLayer.csproj" />
     <ProjectReference Include="..\MikyM.Common.Application\MikyM.Common.Application.csproj" />
+    <ProjectReference Include="..\MikyM.Discord\MikyM.Discord.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Discord\EventHandlers\TimedEventHandlers\" />
+    <Folder Include="Discord\RegularCommands\" />
+    <Folder Include="Util\" />
   </ItemGroup>
 
 </Project>

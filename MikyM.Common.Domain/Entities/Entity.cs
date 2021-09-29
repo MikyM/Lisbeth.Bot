@@ -30,6 +30,11 @@ namespace MikyM.Common.Domain.Entities
             Id = id;
         }
 
+        public override string ToString()
+        {
+            return this.Id.ToString();
+        }
+
         public override bool Equals(object obj)
         {
             if (obj is not Entity<TId> other)
