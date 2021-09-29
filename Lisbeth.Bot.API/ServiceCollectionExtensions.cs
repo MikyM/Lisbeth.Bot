@@ -21,7 +21,7 @@ namespace Lisbeth.Bot.API
             services.AddSingleton<ITracer>(provider => new MockTracer());
             services.AddDiscord(options =>
             {
-                options.Token = "ODU0MzI5OTE5NTU0NDUzNTE0.YMiWvQ.Y3AEfhcNXRPpLNQdQV7WBRiAW_w";
+                options.Token = Environment.GetEnvironmentVariable("LisbethTstToken");
                 options.Intents = DiscordIntents.All;
             });
             services.AddDiscordHostedService();
