@@ -50,7 +50,7 @@ namespace MikyM.Discord.Extensions.CommandsNext
 
                 extension?.Invoke(ext);
 
-                ext.CommandExecuted += async delegate(CommandsNextExtension sender, CommandExecutionEventArgs args)
+                ext.CommandExecuted += async (sender, args) =>
                 {
                     using var workScope = provider.GetRequiredService<ITracer>()
                         .BuildSpan(nameof(ext.CommandExecuted))
@@ -64,7 +64,7 @@ namespace MikyM.Discord.Extensions.CommandsNext
                         await eventsSubscriber.CommandsOnCommandExecuted(sender, args);
                 };
 
-                ext.CommandErrored += async delegate(CommandsNextExtension sender, CommandErrorEventArgs args)
+                ext.CommandErrored += async (sender, args) =>
                 {
                     using var workScope = provider.GetRequiredService<ITracer>()
                         .BuildSpan(nameof(ext.CommandErrored))

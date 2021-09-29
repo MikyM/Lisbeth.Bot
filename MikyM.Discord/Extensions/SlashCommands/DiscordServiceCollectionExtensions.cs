@@ -51,7 +51,7 @@ namespace MikyM.Discord.Extensions.SlashCommands
 
                 extension?.Invoke(ext);
 
-                ext.ContextMenuErrored += async delegate(SlashCommandsExtension sender, ContextMenuErrorEventArgs args)
+                ext.ContextMenuErrored += async (sender, args) =>
                 {
                     using var workScope = provider.GetRequiredService<ITracer>()
                         .BuildSpan(nameof(ext.ContextMenuErrored))
@@ -66,7 +66,7 @@ namespace MikyM.Discord.Extensions.SlashCommands
                 };
 
                 ext.ContextMenuExecuted +=
-                    async delegate(SlashCommandsExtension sender, ContextMenuExecutedEventArgs args)
+                    async (sender, args) =>
                     {
                         using var workScope = provider.GetRequiredService<ITracer>()
                             .BuildSpan(nameof(ext.ContextMenuExecuted))
@@ -81,7 +81,7 @@ namespace MikyM.Discord.Extensions.SlashCommands
                     };
 
                 ext.SlashCommandErrored +=
-                    async delegate(SlashCommandsExtension sender, SlashCommandErrorEventArgs args)
+                    async (sender, args) =>
                     {
                         using var workScope = provider.GetRequiredService<ITracer>()
                             .BuildSpan(nameof(ext.SlashCommandErrored))
@@ -96,7 +96,7 @@ namespace MikyM.Discord.Extensions.SlashCommands
                     };
 
                 ext.SlashCommandExecuted +=
-                    async delegate(SlashCommandsExtension sender, SlashCommandExecutedEventArgs args)
+                    async (sender, args) =>
                     {
                         using var workScope = provider.GetRequiredService<ITracer>()
                             .BuildSpan(nameof(ext.SlashCommandExecuted))

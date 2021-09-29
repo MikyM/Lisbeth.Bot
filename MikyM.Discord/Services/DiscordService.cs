@@ -24,18 +24,13 @@ namespace MikyM.Discord.Services
         protected readonly ILogger<DiscordService> Logger;
 
         protected readonly IOptions<DiscordConfiguration> DiscordOptions;
-        
+
         protected readonly IServiceProvider ServiceProvider;
 
         protected readonly ITracer Tracer;
 
-        public DiscordService(
-            IServiceProvider serviceProvider,
-            ILoggerFactory logFactory,
-            ILogger<DiscordService> logger,
-            ITracer tracer,
-            IOptions<DiscordConfiguration> discordOptions
-        )
+        public DiscordService(IServiceProvider serviceProvider, ILoggerFactory logFactory,
+            ILogger<DiscordService> logger, ITracer tracer, IOptions<DiscordConfiguration> discordOptions)
         {
             ServiceProvider = serviceProvider;
             Logger = logger;
@@ -84,33 +79,23 @@ namespace MikyM.Discord.Services
             // 
             var property = typeof(DiscordConfiguration).GetProperty("Intents");
             property = property.DeclaringType.GetProperty("Intents");
-            var intents = (DiscordIntents)property.GetValue(DiscordOptions.Value,
+            var intents = (DiscordIntents) property.GetValue(DiscordOptions.Value,
                 BindingFlags.NonPublic | BindingFlags.Instance, null, null, null);
 
             //
             // Merge/enrich intents the user requested with those the subscribers require
             // 
 
-            if (channelEventsSubscriber.Any())
-                intents |= DiscordIntents.Guilds;
-            if (guildEventSubscribers.Any())
-                intents |= DiscordIntents.Guilds | DiscordIntents.GuildEmojis;
-            if (guildBanEventsSubscriber.Any())
-                intents |= DiscordIntents.GuildBans;
-            if (guildMemberEventsSubscriber.Any())
-                intents |= DiscordIntents.GuildMembers;
-            if (guildRoleEventsSubscriber.Any())
-                intents |= DiscordIntents.Guilds;
-            if (inviteEventsSubscriber.Any())
-                intents |= DiscordIntents.GuildInvites;
-            if (messageEventsSubscriber.Any())
-                intents |= DiscordIntents.GuildMessages;
-            if (messageReactionAddedEventsSubscriber.Any())
-                intents |= DiscordIntents.GuildMessageReactions;
-            if (presenceUserEventsSubscriber.Any())
-                intents |= DiscordIntents.GuildPresences;
-            if (voiceEventsSubscriber.Any())
-                intents |= DiscordIntents.GuildVoiceStates;
+            if (channelEventsSubscriber.Any()) intents |= DiscordIntents.Guilds;
+            if (guildEventSubscribers.Any()) intents |= DiscordIntents.Guilds | DiscordIntents.GuildEmojis;
+            if (guildBanEventsSubscriber.Any()) intents |= DiscordIntents.GuildBans;
+            if (guildMemberEventsSubscriber.Any()) intents |= DiscordIntents.GuildMembers;
+            if (guildRoleEventsSubscriber.Any()) intents |= DiscordIntents.Guilds;
+            if (inviteEventsSubscriber.Any()) intents |= DiscordIntents.GuildInvites;
+            if (messageEventsSubscriber.Any()) intents |= DiscordIntents.GuildMessages;
+            if (messageReactionAddedEventsSubscriber.Any()) intents |= DiscordIntents.GuildMessageReactions;
+            if (presenceUserEventsSubscriber.Any()) intents |= DiscordIntents.GuildPresences;
+            if (voiceEventsSubscriber.Any()) intents |= DiscordIntents.GuildVoiceStates;
 
             #endregion
 
@@ -135,7 +120,7 @@ namespace MikyM.Discord.Services
 
             #region WebSocket
 
-            Client.SocketErrored += async delegate (DiscordClient sender, SocketErrorEventArgs args)
+            Client.SocketErrored += async (sender, args) =>
             {
                 using var workScope = Tracer
                     .BuildSpan(nameof(Client.SocketErrored))
@@ -148,7 +133,7 @@ namespace MikyM.Discord.Services
                     await eventSubscriber.DiscordOnSocketErrored(sender, args);
             };
 
-            Client.SocketOpened += async delegate (DiscordClient sender, SocketEventArgs args)
+            Client.SocketOpened += async (sender, args) =>
             {
                 using var workScope = Tracer
                     .BuildSpan(nameof(Client.SocketOpened))
@@ -161,7 +146,7 @@ namespace MikyM.Discord.Services
                     await eventSubscriber.DiscordOnSocketOpened(sender, args);
             };
 
-            Client.SocketClosed += async delegate (DiscordClient sender, SocketCloseEventArgs args)
+            Client.SocketClosed += async (sender, args) =>
             {
                 using var workScope = Tracer
                     .BuildSpan(nameof(Client.SocketClosed))
@@ -174,12 +159,9 @@ namespace MikyM.Discord.Services
                     await eventSubscriber.DiscordOnSocketClosed(sender, args);
             };
 
-            Client.Ready += async delegate (DiscordClient sender, ReadyEventArgs args)
+            Client.Ready += async (sender, args) =>
             {
-                using var workScope = Tracer
-                    .BuildSpan(nameof(Client.Ready))
-                    .IgnoreActiveSpan()
-                    .StartActive(true);
+                using var workScope = Tracer.BuildSpan(nameof(Client.Ready)).IgnoreActiveSpan().StartActive(true);
 
                 using var scope = ServiceProvider.CreateScope();
 
@@ -187,12 +169,9 @@ namespace MikyM.Discord.Services
                     await eventSubscriber.DiscordOnReady(sender, args);
             };
 
-            Client.Resumed += async delegate (DiscordClient sender, ReadyEventArgs args)
+            Client.Resumed += async (sender, args) =>
             {
-                using var workScope = Tracer
-                    .BuildSpan(nameof(Client.Resumed))
-                    .IgnoreActiveSpan()
-                    .StartActive(true);
+                using var workScope = Tracer.BuildSpan(nameof(Client.Resumed)).IgnoreActiveSpan().StartActive(true);
 
                 using var scope = ServiceProvider.CreateScope();
 
@@ -200,12 +179,9 @@ namespace MikyM.Discord.Services
                     await eventSubscriber.DiscordOnResumed(sender, args);
             };
 
-            Client.Heartbeated += async delegate (DiscordClient sender, HeartbeatEventArgs args)
+            Client.Heartbeated += async (sender, args) =>
             {
-                using var workScope = Tracer
-                    .BuildSpan(nameof(Client.Heartbeated))
-                    .IgnoreActiveSpan()
-                    .StartActive(true);
+                using var workScope = Tracer.BuildSpan(nameof(Client.Heartbeated)).IgnoreActiveSpan().StartActive(true);
 
                 using var scope = ServiceProvider.CreateScope();
 
@@ -213,12 +189,9 @@ namespace MikyM.Discord.Services
                     await eventSubscriber.DiscordOnHeartbeated(sender, args);
             };
 
-            Client.Zombied += async delegate (DiscordClient sender, ZombiedEventArgs args)
+            Client.Zombied += async (sender, args) =>
             {
-                using var workScope = Tracer
-                    .BuildSpan(nameof(Client.Zombied))
-                    .IgnoreActiveSpan()
-                    .StartActive(true);
+                using var workScope = Tracer.BuildSpan(nameof(Client.Zombied)).IgnoreActiveSpan().StartActive(true);
 
                 using var scope = ServiceProvider.CreateScope();
 
@@ -230,10 +203,9 @@ namespace MikyM.Discord.Services
 
             #region Channel
 
-            Client.ChannelCreated += async delegate (DiscordClient sender, ChannelCreateEventArgs args)
+            Client.ChannelCreated += async (sender, args) =>
             {
-                using var workScope = Tracer
-                    .BuildSpan(nameof(Client.ChannelCreated))
+                using var workScope = Tracer.BuildSpan(nameof(Client.ChannelCreated))
                     .IgnoreActiveSpan()
                     .StartActive(true);
                 workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
@@ -245,10 +217,9 @@ namespace MikyM.Discord.Services
                     await eventSubscriber.DiscordOnChannelCreated(sender, args);
             };
 
-            Client.ChannelUpdated += async delegate (DiscordClient sender, ChannelUpdateEventArgs args)
+            Client.ChannelUpdated += async (sender, args) =>
             {
-                using var workScope = Tracer
-                    .BuildSpan(nameof(Client.ChannelUpdated))
+                using var workScope = Tracer.BuildSpan(nameof(Client.ChannelUpdated))
                     .IgnoreActiveSpan()
                     .StartActive(true);
                 workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
@@ -261,10 +232,9 @@ namespace MikyM.Discord.Services
                     await eventSubscriber.DiscordOnChannelUpdated(sender, args);
             };
 
-            Client.ChannelDeleted += async delegate (DiscordClient sender, ChannelDeleteEventArgs args)
+            Client.ChannelDeleted += async (sender, args) =>
             {
-                using var workScope = Tracer
-                    .BuildSpan(nameof(Client.ChannelDeleted))
+                using var workScope = Tracer.BuildSpan(nameof(Client.ChannelDeleted))
                     .IgnoreActiveSpan()
                     .StartActive(true);
                 workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
@@ -276,10 +246,9 @@ namespace MikyM.Discord.Services
                     await eventSubscriber.DiscordOnChannelDeleted(sender, args);
             };
 
-            Client.DmChannelDeleted += async delegate (DiscordClient sender, DmChannelDeleteEventArgs args)
+            Client.DmChannelDeleted += async (sender, args) =>
             {
-                using var workScope = Tracer
-                    .BuildSpan(nameof(Client.DmChannelDeleted))
+                using var workScope = Tracer.BuildSpan(nameof(Client.DmChannelDeleted))
                     .IgnoreActiveSpan()
                     .StartActive(true);
                 workScope.Span.SetTag("Channel.Id", args.Channel.Id.ToString());
@@ -290,10 +259,9 @@ namespace MikyM.Discord.Services
                     await eventSubscriber.DiscordOnDmChannelDeleted(sender, args);
             };
 
-            Client.ChannelPinsUpdated += async delegate (DiscordClient sender, ChannelPinsUpdateEventArgs args)
+            Client.ChannelPinsUpdated += async (sender, args) =>
             {
-                using var workScope = Tracer
-                    .BuildSpan(nameof(Client.ChannelPinsUpdated))
+                using var workScope = Tracer.BuildSpan(nameof(Client.ChannelPinsUpdated))
                     .IgnoreActiveSpan()
                     .StartActive(true);
                 workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
@@ -309,7 +277,7 @@ namespace MikyM.Discord.Services
 
             #region Guild
 
-            Client.GuildCreated += async delegate (DiscordClient sender, GuildCreateEventArgs args)
+            Client.GuildCreated += async (sender, args) =>
             {
                 using var workScope = Tracer
                     .BuildSpan(nameof(Client.GuildCreated))
@@ -323,10 +291,9 @@ namespace MikyM.Discord.Services
                     await eventSubscriber.DiscordOnGuildCreated(sender, args);
             };
 
-            Client.GuildAvailable += async delegate (DiscordClient sender, GuildCreateEventArgs args)
+            Client.GuildAvailable += async (sender, args) =>
             {
-                using var workScope = Tracer
-                    .BuildSpan(nameof(Client.GuildAvailable))
+                using var workScope = Tracer.BuildSpan(nameof(Client.GuildAvailable))
                     .IgnoreActiveSpan()
                     .StartActive(true);
                 workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
@@ -337,7 +304,7 @@ namespace MikyM.Discord.Services
                     await eventSubscriber.DiscordOnGuildAvailable(sender, args);
             };
 
-            Client.GuildUpdated += async delegate (DiscordClient sender, GuildUpdateEventArgs args)
+            Client.GuildUpdated += async (sender, args) =>
             {
                 using var workScope = Tracer
                     .BuildSpan(nameof(Client.GuildUpdated))
@@ -351,7 +318,7 @@ namespace MikyM.Discord.Services
                     await eventSubscriber.DiscordOnGuildUpdated(sender, args);
             };
 
-            Client.GuildDeleted += async delegate (DiscordClient sender, GuildDeleteEventArgs args)
+            Client.GuildDeleted += async (sender, args) =>
             {
                 using var workScope = Tracer
                     .BuildSpan(nameof(Client.GuildDeleted))
@@ -365,10 +332,9 @@ namespace MikyM.Discord.Services
                     await eventSubscriber.DiscordOnGuildDeleted(sender, args);
             };
 
-            Client.GuildUnavailable += async delegate (DiscordClient sender, GuildDeleteEventArgs args)
+            Client.GuildUnavailable += async (sender, args) =>
             {
-                using var workScope = Tracer
-                    .BuildSpan(nameof(Client.GuildUnavailable))
+                using var workScope = Tracer.BuildSpan(nameof(Client.GuildUnavailable))
                     .IgnoreActiveSpan()
                     .StartActive(true);
                 workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
@@ -379,24 +345,21 @@ namespace MikyM.Discord.Services
                     await eventSubscriber.DiscordOnGuildUnavailable(sender, args);
             };
 
-            Client.GuildDownloadCompleted +=
-                async delegate (DiscordClient sender, GuildDownloadCompletedEventArgs args)
-                {
-                    using var workScope = Tracer
-                        .BuildSpan(nameof(Client.GuildDownloadCompleted))
-                        .IgnoreActiveSpan()
-                        .StartActive(true);
-
-                    using var scope = ServiceProvider.CreateScope();
-
-                    foreach (var eventSubscriber in scope.GetDiscordGuildEventsSubscribers())
-                        await eventSubscriber.DiscordOnGuildDownloadCompleted(sender, args);
-                };
-
-            Client.GuildEmojisUpdated += async delegate (DiscordClient sender, GuildEmojisUpdateEventArgs args)
+            Client.GuildDownloadCompleted += async (sender, args) =>
             {
-                using var workScope = Tracer
-                    .BuildSpan(nameof(Client.GuildEmojisUpdated))
+                using var workScope = Tracer.BuildSpan(nameof(Client.GuildDownloadCompleted))
+                    .IgnoreActiveSpan()
+                    .StartActive(true);
+
+                using var scope = ServiceProvider.CreateScope();
+
+                foreach (var eventSubscriber in scope.GetDiscordGuildEventsSubscribers())
+                    await eventSubscriber.DiscordOnGuildDownloadCompleted(sender, args);
+            };
+
+            Client.GuildEmojisUpdated += async (sender, args) =>
+            {
+                using var workScope = Tracer.BuildSpan(nameof(Client.GuildEmojisUpdated))
                     .IgnoreActiveSpan()
                     .StartActive(true);
                 workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
@@ -407,10 +370,9 @@ namespace MikyM.Discord.Services
                     await eventSubscriber.DiscordOnGuildEmojisUpdated(sender, args);
             };
 
-            Client.GuildStickersUpdated += async delegate (DiscordClient sender, GuildStickersUpdateEventArgs args)
+            Client.GuildStickersUpdated += async (sender, args) =>
             {
-                using var workScope = Tracer
-                    .BuildSpan(nameof(Client.GuildStickersUpdated))
+                using var workScope = Tracer.BuildSpan(nameof(Client.GuildStickersUpdated))
                     .IgnoreActiveSpan()
                     .StartActive(true);
                 workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
@@ -421,26 +383,24 @@ namespace MikyM.Discord.Services
                     await eventSubscriber.DiscordOnGuildStickersUpdated(sender, args);
             };
 
-            Client.GuildIntegrationsUpdated +=
-                async delegate (DiscordClient sender, GuildIntegrationsUpdateEventArgs args)
-                {
-                    using var workScope = Tracer
-                        .BuildSpan(nameof(Client.GuildIntegrationsUpdated))
-                        .IgnoreActiveSpan()
-                        .StartActive(true);
-                    workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
+            Client.GuildIntegrationsUpdated += async (sender, args) =>
+            {
+                using var workScope = Tracer.BuildSpan(nameof(Client.GuildIntegrationsUpdated))
+                    .IgnoreActiveSpan()
+                    .StartActive(true);
+                workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
 
-                    using var scope = ServiceProvider.CreateScope();
+                using var scope = ServiceProvider.CreateScope();
 
-                    foreach (var eventSubscriber in scope.GetDiscordGuildEventsSubscribers())
-                        await eventSubscriber.DiscordOnGuildIntegrationsUpdated(sender, args);
-                };
+                foreach (var eventSubscriber in scope.GetDiscordGuildEventsSubscribers())
+                    await eventSubscriber.DiscordOnGuildIntegrationsUpdated(sender, args);
+            };
 
             #endregion
 
             #region Guild Ban
 
-            Client.GuildBanAdded += async delegate (DiscordClient sender, GuildBanAddEventArgs args)
+            Client.GuildBanAdded += async (sender, args) =>
             {
                 using var workScope = Tracer
                     .BuildSpan(nameof(Client.GuildBanAdded))
@@ -455,10 +415,9 @@ namespace MikyM.Discord.Services
                     await eventSubscriber.DiscordOnGuildBanAdded(sender, args);
             };
 
-            Client.GuildBanRemoved += async delegate (DiscordClient sender, GuildBanRemoveEventArgs args)
+            Client.GuildBanRemoved += async (sender, args) =>
             {
-                using var workScope = Tracer
-                    .BuildSpan(nameof(Client.GuildBanRemoved))
+                using var workScope = Tracer.BuildSpan(nameof(Client.GuildBanRemoved))
                     .IgnoreActiveSpan()
                     .StartActive(true);
                 workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
@@ -474,10 +433,9 @@ namespace MikyM.Discord.Services
 
             #region Guild Member
 
-            Client.GuildMemberAdded += async delegate (DiscordClient sender, GuildMemberAddEventArgs args)
+            Client.GuildMemberAdded += async (sender, args) =>
             {
-                using var workScope = Tracer
-                    .BuildSpan(nameof(Client.GuildMemberAdded))
+                using var workScope = Tracer.BuildSpan(nameof(Client.GuildMemberAdded))
                     .IgnoreActiveSpan()
                     .StartActive(true);
                 workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
@@ -489,10 +447,9 @@ namespace MikyM.Discord.Services
                     await eventSubscriber.DiscordOnGuildMemberAdded(sender, args);
             };
 
-            Client.GuildMemberRemoved += async delegate (DiscordClient sender, GuildMemberRemoveEventArgs args)
+            Client.GuildMemberRemoved += async (sender, args) =>
             {
-                using var workScope = Tracer
-                    .BuildSpan(nameof(Client.GuildMemberRemoved))
+                using var workScope = Tracer.BuildSpan(nameof(Client.GuildMemberRemoved))
                     .IgnoreActiveSpan()
                     .StartActive(true);
                 workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
@@ -504,10 +461,9 @@ namespace MikyM.Discord.Services
                     await eventSubscriber.DiscordOnGuildMemberRemoved(sender, args);
             };
 
-            Client.GuildMemberUpdated += async delegate (DiscordClient sender, GuildMemberUpdateEventArgs args)
+            Client.GuildMemberUpdated += async (sender, args) =>
             {
-                using var workScope = Tracer
-                    .BuildSpan(nameof(Client.GuildMemberUpdated))
+                using var workScope = Tracer.BuildSpan(nameof(Client.GuildMemberUpdated))
                     .IgnoreActiveSpan()
                     .StartActive(true);
                 workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
@@ -519,10 +475,9 @@ namespace MikyM.Discord.Services
                     await eventSubscriber.DiscordOnGuildMemberUpdated(sender, args);
             };
 
-            Client.GuildMembersChunked += async delegate (DiscordClient sender, GuildMembersChunkEventArgs args)
+            Client.GuildMembersChunked += async (sender, args) =>
             {
-                using var workScope = Tracer
-                    .BuildSpan(nameof(Client.GuildMembersChunked))
+                using var workScope = Tracer.BuildSpan(nameof(Client.GuildMembersChunked))
                     .IgnoreActiveSpan()
                     .StartActive(true);
                 workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
@@ -537,10 +492,9 @@ namespace MikyM.Discord.Services
 
             #region Guild Role
 
-            Client.GuildRoleCreated += async delegate (DiscordClient sender, GuildRoleCreateEventArgs args)
+            Client.GuildRoleCreated += async (sender, args) =>
             {
-                using var workScope = Tracer
-                    .BuildSpan(nameof(Client.GuildRoleCreated))
+                using var workScope = Tracer.BuildSpan(nameof(Client.GuildRoleCreated))
                     .IgnoreActiveSpan()
                     .StartActive(true);
                 workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
@@ -552,10 +506,9 @@ namespace MikyM.Discord.Services
                     await eventSubscriber.DiscordOnGuildRoleCreated(sender, args);
             };
 
-            Client.GuildRoleUpdated += async delegate (DiscordClient sender, GuildRoleUpdateEventArgs args)
+            Client.GuildRoleUpdated += async (sender, args) =>
             {
-                using var workScope = Tracer
-                    .BuildSpan(nameof(Client.GuildRoleUpdated))
+                using var workScope = Tracer.BuildSpan(nameof(Client.GuildRoleUpdated))
                     .IgnoreActiveSpan()
                     .StartActive(true);
                 workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
@@ -568,10 +521,9 @@ namespace MikyM.Discord.Services
                     await eventSubscriber.DiscordOnGuildRoleUpdated(sender, args);
             };
 
-            Client.GuildRoleDeleted += async delegate (DiscordClient sender, GuildRoleDeleteEventArgs args)
+            Client.GuildRoleDeleted += async (sender, args) =>
             {
-                using var workScope = Tracer
-                    .BuildSpan(nameof(Client.GuildRoleDeleted))
+                using var workScope = Tracer.BuildSpan(nameof(Client.GuildRoleDeleted))
                     .IgnoreActiveSpan()
                     .StartActive(true);
                 workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
@@ -587,23 +539,23 @@ namespace MikyM.Discord.Services
 
             #region Invite
 
-            Client.InviteCreated += async delegate (DiscordClient sender, InviteCreateEventArgs args)
-                {
-                    using var workScope = Tracer
-                        .BuildSpan(nameof(Client.InviteCreated))
-                        .IgnoreActiveSpan()
-                        .StartActive(true);
-                    workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
-                    workScope.Span.SetTag("Channel.Id", args.Channel.Id.ToString());
-                    workScope.Span.SetTag("Invite.Code", args.Invite.Code.ToString());
+            Client.InviteCreated += async (sender, args) =>
+            {
+                using var workScope = Tracer
+                    .BuildSpan(nameof(Client.InviteCreated))
+                    .IgnoreActiveSpan()
+                    .StartActive(true);
+                workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
+                workScope.Span.SetTag("Channel.Id", args.Channel.Id.ToString());
+                workScope.Span.SetTag("Invite.Code", args.Invite.Code.ToString());
 
-                    using var scope = ServiceProvider.CreateScope();
+                using var scope = ServiceProvider.CreateScope();
 
-                    foreach (var eventSubscriber in scope.GetDiscordInviteEventsSubscribers())
-                        await eventSubscriber.DiscordOnInviteCreated(sender, args);
-                };
+                foreach (var eventSubscriber in scope.GetDiscordInviteEventsSubscribers())
+                    await eventSubscriber.DiscordOnInviteCreated(sender, args);
+            };
 
-            Client.InviteDeleted += async delegate (DiscordClient sender, InviteDeleteEventArgs args)
+            Client.InviteDeleted += async (sender, args) =>
             {
                 using var workScope = Tracer
                     .BuildSpan(nameof(Client.InviteDeleted))
@@ -623,14 +575,12 @@ namespace MikyM.Discord.Services
 
             #region Message
 
-            Client.MessageCreated += async delegate (DiscordClient sender, MessageCreateEventArgs args)
+            Client.MessageCreated += async (sender, args) =>
             {
-                using var workScope = Tracer
-                    .BuildSpan(nameof(Client.MessageCreated))
+                using var workScope = Tracer.BuildSpan(nameof(Client.MessageCreated))
                     .IgnoreActiveSpan()
                     .StartActive(true);
-                if (args.Guild != null)
-                    workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
+                if (args.Guild != null) workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
                 workScope.Span.SetTag("Channel.Id", args.Channel.Id.ToString());
                 workScope.Span.SetTag("Author.Id", args.Author.Id.ToString());
                 workScope.Span.SetTag("Message.Id", args.Message.Id.ToString());
@@ -641,10 +591,9 @@ namespace MikyM.Discord.Services
                     await eventSubscriber.DiscordOnMessageCreated(sender, args);
             };
 
-            Client.MessageAcknowledged += async delegate (DiscordClient sender, MessageAcknowledgeEventArgs args)
+            Client.MessageAcknowledged += async (sender, args) =>
             {
-                using var workScope = Tracer
-                    .BuildSpan(nameof(Client.MessageAcknowledged))
+                using var workScope = Tracer.BuildSpan(nameof(Client.MessageAcknowledged))
                     .IgnoreActiveSpan()
                     .StartActive(true);
                 workScope.Span.SetTag("Channel.Id", args.Channel.Id.ToString());
@@ -656,14 +605,12 @@ namespace MikyM.Discord.Services
                     await eventSubscriber.DiscordOnMessageAcknowledged(sender, args);
             };
 
-            Client.MessageUpdated += async delegate (DiscordClient sender, MessageUpdateEventArgs args)
+            Client.MessageUpdated += async (sender, args) =>
             {
-                using var workScope = Tracer
-                    .BuildSpan(nameof(Client.MessageUpdated))
+                using var workScope = Tracer.BuildSpan(nameof(Client.MessageUpdated))
                     .IgnoreActiveSpan()
                     .StartActive(true);
-                if (args.Guild != null)
-                    workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
+                if (args.Guild != null) workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
                 workScope.Span.SetTag("Channel.Id", args.Channel.Id.ToString());
                 workScope.Span.SetTag("Author.Id", args.Author.Id.ToString());
                 workScope.Span.SetTag("Message.Id", args.Message.Id.ToString());
@@ -674,14 +621,12 @@ namespace MikyM.Discord.Services
                     await eventSubscriber.DiscordOnMessageUpdated(sender, args);
             };
 
-            Client.MessageDeleted += async delegate (DiscordClient sender, MessageDeleteEventArgs args)
+            Client.MessageDeleted += async (sender, args) =>
             {
-                using var workScope = Tracer
-                    .BuildSpan(nameof(Client.MessageDeleted))
+                using var workScope = Tracer.BuildSpan(nameof(Client.MessageDeleted))
                     .IgnoreActiveSpan()
                     .StartActive(true);
-                if (args.Guild != null)
-                    workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
+                if (args.Guild != null) workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
                 workScope.Span.SetTag("Channel.Id", args.Channel.Id.ToString());
                 workScope.Span.SetTag("Message.Id", args.Message.Id.ToString());
 
@@ -691,14 +636,12 @@ namespace MikyM.Discord.Services
                     await eventSubscriber.DiscordOnMessageDeleted(sender, args);
             };
 
-            Client.MessagesBulkDeleted += async delegate (DiscordClient sender, MessageBulkDeleteEventArgs args)
+            Client.MessagesBulkDeleted += async (sender, args) =>
             {
-                using var workScope = Tracer
-                    .BuildSpan(nameof(Client.MessagesBulkDeleted))
+                using var workScope = Tracer.BuildSpan(nameof(Client.MessagesBulkDeleted))
                     .IgnoreActiveSpan()
                     .StartActive(true);
-                if (args.Guild != null)
-                    workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
+                if (args.Guild != null) workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
                 workScope.Span.SetTag("Channel.Id", args.Channel.Id.ToString());
 
                 using var scope = ServiceProvider.CreateScope();
@@ -711,10 +654,9 @@ namespace MikyM.Discord.Services
 
             #region Message Reaction
 
-            Client.MessageReactionAdded += async delegate (DiscordClient sender, MessageReactionAddEventArgs args)
+            Client.MessageReactionAdded += async (sender, args) =>
             {
-                using var workScope = Tracer
-                    .BuildSpan(nameof(Client.MessageReactionAdded))
+                using var workScope = Tracer.BuildSpan(nameof(Client.MessageReactionAdded))
                     .IgnoreActiveSpan()
                     .StartActive(true);
                 workScope.Span.SetTag("Guild.Id", args.Guild.Id);
@@ -728,67 +670,60 @@ namespace MikyM.Discord.Services
                     await eventSubscriber.DiscordOnMessageReactionAdded(sender, args);
             };
 
-            Client.MessageReactionRemoved +=
-                async delegate (DiscordClient sender, MessageReactionRemoveEventArgs args)
-                {
-                    using var workScope = Tracer
-                        .BuildSpan(nameof(Client.MessageReactionRemoved))
-                        .IgnoreActiveSpan()
-                        .StartActive(true);
-                    workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
-                    workScope.Span.SetTag("Channel.Id", args.Channel.Id.ToString());
-                    workScope.Span.SetTag("User.Id", args.User.Id.ToString());
-                    workScope.Span.SetTag("Message.Id", args.Message.Id.ToString());
+            Client.MessageReactionRemoved += async (sender, args) =>
+            {
+                using var workScope = Tracer.BuildSpan(nameof(Client.MessageReactionRemoved))
+                    .IgnoreActiveSpan()
+                    .StartActive(true);
+                workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
+                workScope.Span.SetTag("Channel.Id", args.Channel.Id.ToString());
+                workScope.Span.SetTag("User.Id", args.User.Id.ToString());
+                workScope.Span.SetTag("Message.Id", args.Message.Id.ToString());
 
-                    using var scope = ServiceProvider.CreateScope();
+                using var scope = ServiceProvider.CreateScope();
 
-                    foreach (var eventSubscriber in scope.GetDiscordMessageReactionAddedEventsSubscribers())
-                        await eventSubscriber.DiscordOnMessageReactionRemoved(sender, args);
-                };
+                foreach (var eventSubscriber in scope.GetDiscordMessageReactionAddedEventsSubscribers())
+                    await eventSubscriber.DiscordOnMessageReactionRemoved(sender, args);
+            };
 
-            Client.MessageReactionsCleared +=
-                async delegate (DiscordClient sender, MessageReactionsClearEventArgs args)
-                {
-                    using var workScope = Tracer
-                        .BuildSpan(nameof(Client.MessageReactionsCleared))
-                        .IgnoreActiveSpan()
-                        .StartActive(true);
-                    workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
-                    workScope.Span.SetTag("Channel.Id", args.Channel.Id.ToString());
-                    workScope.Span.SetTag("Message.Id", args.Message.Id.ToString());
+            Client.MessageReactionsCleared += async (sender, args) =>
+            {
+                using var workScope = Tracer.BuildSpan(nameof(Client.MessageReactionsCleared))
+                    .IgnoreActiveSpan()
+                    .StartActive(true);
+                workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
+                workScope.Span.SetTag("Channel.Id", args.Channel.Id.ToString());
+                workScope.Span.SetTag("Message.Id", args.Message.Id.ToString());
 
-                    using var scope = ServiceProvider.CreateScope();
+                using var scope = ServiceProvider.CreateScope();
 
-                    foreach (var eventSubscriber in scope.GetDiscordMessageReactionAddedEventsSubscribers())
-                        await eventSubscriber.DiscordOnMessageReactionsCleared(sender, args);
-                };
+                foreach (var eventSubscriber in scope.GetDiscordMessageReactionAddedEventsSubscribers())
+                    await eventSubscriber.DiscordOnMessageReactionsCleared(sender, args);
+            };
 
-            Client.MessageReactionRemovedEmoji +=
-                async delegate (DiscordClient sender, MessageReactionRemoveEmojiEventArgs args)
-                {
-                    using var workScope = Tracer
-                        .BuildSpan(nameof(Client.MessageReactionRemovedEmoji))
-                        .IgnoreActiveSpan()
-                        .StartActive(true);
-                    workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
-                    workScope.Span.SetTag("Channel.Id", args.Channel.Id.ToString());
-                    workScope.Span.SetTag("Message.Id", args.Message.Id.ToString());
-                    workScope.Span.SetTag("Emoji.Id", args.Emoji.Id.ToString());
+            Client.MessageReactionRemovedEmoji += async (sender, args) =>
+            {
+                using var workScope = Tracer.BuildSpan(nameof(Client.MessageReactionRemovedEmoji))
+                    .IgnoreActiveSpan()
+                    .StartActive(true);
+                workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
+                workScope.Span.SetTag("Channel.Id", args.Channel.Id.ToString());
+                workScope.Span.SetTag("Message.Id", args.Message.Id.ToString());
+                workScope.Span.SetTag("Emoji.Id", args.Emoji.Id.ToString());
 
-                    using var scope = ServiceProvider.CreateScope();
+                using var scope = ServiceProvider.CreateScope();
 
-                    foreach (var eventSubscriber in scope.GetDiscordMessageReactionAddedEventsSubscribers())
-                        await eventSubscriber.DiscordOnMessageReactionRemovedEmoji(sender, args);
-                };
+                foreach (var eventSubscriber in scope.GetDiscordMessageReactionAddedEventsSubscribers())
+                    await eventSubscriber.DiscordOnMessageReactionRemovedEmoji(sender, args);
+            };
 
             #endregion
 
             #region Presence/User Update
 
-            Client.PresenceUpdated += async delegate (DiscordClient sender, PresenceUpdateEventArgs args)
+            Client.PresenceUpdated += async (sender, args) =>
             {
-                using var workScope = Tracer
-                    .BuildSpan(nameof(Client.PresenceUpdated))
+                using var workScope = Tracer.BuildSpan(nameof(Client.PresenceUpdated))
                     .IgnoreActiveSpan()
                     .StartActive(true);
                 workScope.Span.SetTag("User.Id", args.User.Id.ToString());
@@ -799,10 +734,9 @@ namespace MikyM.Discord.Services
                     await eventSubscriber.DiscordOnPresenceUpdated(sender, args);
             };
 
-            Client.UserSettingsUpdated += async delegate (DiscordClient sender, UserSettingsUpdateEventArgs args)
+            Client.UserSettingsUpdated += async (sender, args) =>
             {
-                using var workScope = Tracer
-                    .BuildSpan(nameof(Client.UserSettingsUpdated))
+                using var workScope = Tracer.BuildSpan(nameof(Client.UserSettingsUpdated))
                     .IgnoreActiveSpan()
                     .StartActive(true);
                 workScope.Span.SetTag("User.Id", args.User.Id.ToString());
@@ -813,12 +747,9 @@ namespace MikyM.Discord.Services
                     await eventSubscriber.DiscordOnUserSettingsUpdated(sender, args);
             };
 
-            Client.UserUpdated += async delegate (DiscordClient sender, UserUpdateEventArgs args)
+            Client.UserUpdated += async (sender, args) =>
             {
-                using var workScope = Tracer
-                    .BuildSpan(nameof(Client.UserUpdated))
-                    .IgnoreActiveSpan()
-                    .StartActive(true);
+                using var workScope = Tracer.BuildSpan(nameof(Client.UserUpdated)).IgnoreActiveSpan().StartActive(true);
                 workScope.Span.SetTag("UserBefore.Id", args.UserBefore.Id.ToString());
                 workScope.Span.SetTag("UserBefore.Id", args.UserBefore.Id.ToString());
 
@@ -832,15 +763,13 @@ namespace MikyM.Discord.Services
 
             #region Voice
 
-            Client.VoiceStateUpdated += async delegate (DiscordClient sender, VoiceStateUpdateEventArgs args)
+            Client.VoiceStateUpdated += async (sender, args) =>
             {
-                using var workScope = Tracer
-                    .BuildSpan(nameof(Client.VoiceStateUpdated))
+                using var workScope = Tracer.BuildSpan(nameof(Client.VoiceStateUpdated))
                     .IgnoreActiveSpan()
                     .StartActive(true);
                 workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
-                if (args.Channel != null)
-                    workScope.Span.SetTag("Channel.Id", args.Channel.Id.ToString());
+                if (args.Channel != null) workScope.Span.SetTag("Channel.Id", args.Channel.Id.ToString());
                 workScope.Span.SetTag("User.Id", args.User.Id.ToString());
 
                 using var scope = ServiceProvider.CreateScope();
@@ -849,10 +778,9 @@ namespace MikyM.Discord.Services
                     await eventSubscriber.DiscordOnVoiceStateUpdated(sender, args);
             };
 
-            Client.VoiceServerUpdated += async delegate (DiscordClient sender, VoiceServerUpdateEventArgs args)
+            Client.VoiceServerUpdated += async (sender, args) =>
             {
-                using var workScope = Tracer
-                    .BuildSpan(nameof(Client.VoiceServerUpdated))
+                using var workScope = Tracer.BuildSpan(nameof(Client.VoiceServerUpdated))
                     .IgnoreActiveSpan()
                     .StartActive(true);
                 workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
@@ -867,24 +795,22 @@ namespace MikyM.Discord.Services
 
             #region Misc
 
-            Client.ComponentInteractionCreated +=
-                async delegate (DiscordClient sender, ComponentInteractionCreateEventArgs args)
-                {
-                    using var workScope = Tracer
-                        .BuildSpan(nameof(Client.ComponentInteractionCreated))
-                        .IgnoreActiveSpan()
-                        .StartActive(true);
-                    workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
-                    workScope.Span.SetTag("Channel.Id", args.Channel.Id.ToString());
-                    workScope.Span.SetTag("User.Id", args.User.Id.ToString());
+            Client.ComponentInteractionCreated += async (sender, args) =>
+            {
+                using var workScope = Tracer.BuildSpan(nameof(Client.ComponentInteractionCreated))
+                    .IgnoreActiveSpan()
+                    .StartActive(true);
+                workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
+                workScope.Span.SetTag("Channel.Id", args.Channel.Id.ToString());
+                workScope.Span.SetTag("User.Id", args.User.Id.ToString());
 
-                    using var scope = ServiceProvider.CreateScope();
+                using var scope = ServiceProvider.CreateScope();
 
-                    foreach (var eventSubscriber in scope.GetDiscordMiscEventsSubscribers())
-                        await eventSubscriber.DiscordOnComponentInteractionCreated(sender, args);
-                };
+                foreach (var eventSubscriber in scope.GetDiscordMiscEventsSubscribers())
+                    await eventSubscriber.DiscordOnComponentInteractionCreated(sender, args);
+            };
 
-            Client.ClientErrored += async delegate (DiscordClient sender, ClientErrorEventArgs args)
+            Client.ClientErrored += async (sender, args) =>
             {
                 using var workScope = Tracer
                     .BuildSpan(nameof(Client.ClientErrored))
