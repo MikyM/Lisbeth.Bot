@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Reflection;
 using DSharpPlus;
 using DSharpPlus.EventArgs;
@@ -7,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MikyM.Discord.Interfaces;
+using MikyM.Discord.Util;
 using OpenTracing;
 
 namespace MikyM.Discord.Services
@@ -143,7 +145,7 @@ namespace MikyM.Discord.Services
                 using var scope = ServiceProvider.CreateScope();
 
                 foreach (var eventSubscriber in scope.GetDiscordWebSocketEventSubscribers())
-                    await eventSubscriber.DiscordOSocketErrored(sender, args);
+                    await eventSubscriber.DiscordOnSocketErrored(sender, args);
             };
 
             Client.SocketOpened += async delegate (DiscordClient sender, SocketEventArgs args)
