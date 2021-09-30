@@ -17,16 +17,20 @@ namespace MikyM.Common.Domain.Entities
     public abstract class Entity<TId>
     {
         public virtual TId Id { get; protected set; }
-        public virtual DateTime CreatedAt { get; } = DateTime.UtcNow;
-        public virtual DateTime? UpdatedAt { get; }
+        public virtual DateTime? CreatedAt { get; set; }
+        public virtual DateTime? UpdatedAt { get; set; }
         public virtual bool IsDisabled { get; set; }
 
         protected Entity()
         {
+            CreatedAt ??= DateTime.UtcNow;
+            UpdatedAt ??= CreatedAt;
         }
 
         protected Entity(TId id)
         {
+            CreatedAt ??= DateTime.UtcNow;
+            UpdatedAt ??= CreatedAt;
             Id = id;
         }
 

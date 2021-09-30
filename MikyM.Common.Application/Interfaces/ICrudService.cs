@@ -10,9 +10,9 @@ namespace MikyM.Common.Application.Interfaces
         Task<long> AddAsync<TPost>(TPost entry, bool shouldSave = false) where TPost : class;
         Task<IEnumerable<long>> AddRangeAsync<TPost>(IEnumerable<TPost> entries, bool shouldSave = false) where TPost : class;
 
-        Task UpdateAsync<TPatch>(TPatch entry, bool shouldSave = false) where TPatch : class;
+        Task BeginUpdateAsync<TPatch>(TPatch entry, bool shouldSave = false) where TPatch : class;
 
-        Task UpdateRangeAsync<TPatch>(IEnumerable<TPatch> entries, bool shouldSave = false)
+        Task BeginUpdateRangeAsync<TPatch>(IEnumerable<TPatch> entries, bool shouldSave = false)
             where TPatch : class;
 
         Task<long> AddOrUpdateAsync<TPut>(TPut entry, bool shouldSave = false) where TPut : class;

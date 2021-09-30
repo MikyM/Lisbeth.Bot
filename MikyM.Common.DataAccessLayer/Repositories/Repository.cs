@@ -10,7 +10,7 @@ namespace MikyM.Common.DataAccessLayer.Repositories
 {
     public class Repository<TEntity> : ReadOnlyRepository<TEntity>, IRepository<TEntity> where TEntity : AggregateRootEntity
     {
-        protected Repository(DbContext context) : base(context)
+        public Repository(DbContext context) : base(context)
         {
         }
 
@@ -34,17 +34,31 @@ namespace MikyM.Common.DataAccessLayer.Repositories
             _set.UpdateRange(entities);
         }
 
-        public virtual void Update(TEntity entity)
+        public virtual void BeginUpdate(TEntity entity)
         {
-            _context.Attach(entity).State = EntityState.Modified;
+            var local = _context.Set<TEntity>()
+                .Local
+                .FirstOrDefault(entry => entry.Id.Equals(entity.Id));
+
+            if (local != null)
+                _context.Entry(local).State = EntityState.Detached;
+
+            _context.Attach(entity);
         }
 
 
-        public virtual void UpdateRange(IEnumerable<TEntity> entities)
+        public virtual void BeginUpdateRange(IEnumerable<TEntity> entities)
         {
             foreach (var entity in entities)
             {
-                _context.Attach(entity).State = EntityState.Modified;
+                var local = _context.Set<TEntity>()
+                    .Local
+                    .FirstOrDefault(entry => entry.Id.Equals(entity.Id));
+
+                if (local != null)
+                    _context.Entry(local).State = EntityState.Detached;
+
+                _context.Attach(entity);
             }
         }
 
@@ -72,32 +86,33 @@ namespace MikyM.Common.DataAccessLayer.Repositories
 
         public virtual void Disable(TEntity entity)
         {
-            entity.IsDisabled = true;
-            Update(entity);
+
+/*            entity.IsDisabled = true;
+            Update(entity);*/
         }
 
         public virtual async Task DisableAsync(long id)
         {
-            var entity = await GetAsync(id);
+/*            var entity = await GetAsync(id);
             entity.IsDisabled = true;
-            Update(entity);
+            Update(entity);*/
         }
 
         public virtual void DisableRange(IEnumerable<TEntity> entities)
         {
-            var aggregateRootEntities = entities.ToList();
+/*            var aggregateRootEntities = entities.ToList();
             foreach (var entity in aggregateRootEntities)
             {
                 entity.IsDisabled = true;
             }
-            UpdateRange(aggregateRootEntities);
+            UpdateRange(aggregateRootEntities);*/
         }
 
         public virtual async Task DisableRangeAsync(IEnumerable<long> ids)
         {
-            var entities = await _set.Join(ids, ent => ent.Id, id => id, (ent, id) => ent).ToListAsync();
+/*            var entities = await _set.Join(ids, ent => ent.Id, id => id, (ent, id) => ent).ToListAsync();
             entities.ForEach(ent => ent.IsDisabled = true);
-            UpdateRange(entities);
+            UpdateRange(entities);*/
         }
     }
 }

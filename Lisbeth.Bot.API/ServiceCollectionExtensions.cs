@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using DSharpPlus;
 using DSharpPlus.Interactivity.Enums;
+using Lisbeth.Bot.Application.Discord.EventHandlers;
 using Lisbeth.Bot.Application.Discord.SlashCommands;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -49,9 +50,15 @@ namespace Lisbeth.Bot.API
                 options.IgnoreExtraArguments = true;
                 options.EnableDefaultHelp = false;
             });
+
             #endregion
+
+
+
             #region events
-            //services.AddDiscordMiscEventsSubscriber<BotModuleForMiscEvents>();
+
+            services.AddDiscordSlashCommandsEventsSubscriber<SlashCommandEvents>();
+
             #endregion
         }
     }

@@ -6,6 +6,7 @@ namespace Lisbeth.Bot.Domain.DTOs.Request
     {
         public long Id { get; set; }
         public ulong UserId { get; set; }
+        public ulong GuildId { get; set; }
         public DateTime? LiftedOn { get; set; } = DateTime.Now;
         public ulong LiftedById { get; set; }
 
@@ -13,9 +14,11 @@ namespace Lisbeth.Bot.Domain.DTOs.Request
         {
         }
 
-        public MuteDisableReqDto(ulong user)
+        public MuteDisableReqDto(ulong user, ulong guild, ulong liftedBy)
         {
             UserId = user;
+            GuildId = guild;
+            LiftedById = liftedBy;
         }
     }
 }

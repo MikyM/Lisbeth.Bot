@@ -1,6 +1,5 @@
 ﻿using Lisbeth.Bot.Domain.Entities.Base;
 using System;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Lisbeth.Bot.Domain.Entities
 {
@@ -8,10 +7,11 @@ namespace Lisbeth.Bot.Domain.Entities
     {
         public DateTime? LiftedOn { get; set; }
         public DateTime? MutedUntil { get; set; }
-        public DateTime? MutedOn { get; set; } = DateTime.Now;
+        public DateTime? MutedOn { get; set; } = DateTime.UtcNow;
         public ulong MutedById { get; set; }
         public ulong LiftedById { get; set; }
         public string Reason { get; set; } = "";
+
         public Mute()
         {
         }
@@ -32,6 +32,7 @@ namespace Lisbeth.Bot.Domain.Entities
         {
             this.LiftedById = liftedBy;
             this.LiftedOn = DateTime.Now;
+            this.IsDisabled = true;
         }
 
         public void Extend(ulong mutedBy, DateTime? mutedUntil, string reason = "No reason provided")

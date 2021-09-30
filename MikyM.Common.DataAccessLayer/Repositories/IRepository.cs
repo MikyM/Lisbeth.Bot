@@ -10,8 +10,8 @@ namespace MikyM.Common.DataAccessLayer.Repositories
         Task AddRangeAsync(IEnumerable<TEntity> entities);
         void AddOrUpdate(TEntity entity);
         void AddOrUpdateRange(IEnumerable<TEntity> entities);
-        void Update(TEntity entity);
-        void UpdateRange(IEnumerable<TEntity> entities);
+        void BeginUpdate(TEntity entity);
+        void BeginUpdateRange(IEnumerable<TEntity> entities);
         void Delete(TEntity entity);
         void Delete(long id);
         void DeleteRange(IEnumerable<TEntity> entities);

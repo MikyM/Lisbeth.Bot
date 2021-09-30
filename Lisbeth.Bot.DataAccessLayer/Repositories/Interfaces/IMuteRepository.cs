@@ -5,6 +5,6 @@ namespace Lisbeth.Bot.DataAccessLayer.Repositories.Interfaces
 {
     public interface IMuteRepository : IRepository<Mute>
     {
-        void Disable(Mute entity, ulong userId);
+
     }
 }

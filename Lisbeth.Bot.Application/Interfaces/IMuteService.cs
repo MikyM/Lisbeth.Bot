@@ -9,6 +9,6 @@ namespace Lisbeth.Bot.Application.Interfaces
     public interface IMuteService : ICrudService<Mute, LisbethBotDbContext>
     {
         Task<long> AddOrUpdateAsync(MuteReqDto entry, bool shouldSave = false);
-        Task<bool> DisableAsync(MuteDisableReqDto entry, bool shouldSave = false);
+        Task<Mute> DisableAsync(MuteDisableReqDto entry, bool shouldSave = false);
     }
 }

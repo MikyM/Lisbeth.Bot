@@ -6,6 +6,7 @@ namespace Lisbeth.Bot.Domain.DTOs.Request
     {
         public long Id { get; set; }
         public ulong UserId { get; set; }
+        public ulong GuildId { get; set; }
         public DateTime? MutedUntil { get; set; }
         public ulong MutedById { get; set; }
         public string Reason { get; set; }
@@ -13,15 +14,17 @@ namespace Lisbeth.Bot.Domain.DTOs.Request
         public MuteReqDto()
         {
         }
-        public MuteReqDto(ulong user, ulong mutedById, DateTime? mutedUntil) : this(user, mutedById, mutedUntil, null)
+        public MuteReqDto(ulong user, ulong guild, ulong mutedById, DateTime? mutedUntil) : this(user, guild, mutedById, mutedUntil, null)
         {
             UserId = user;
+            GuildId = guild;
             MutedUntil = mutedUntil;
             MutedById = mutedById;
         }
-        public MuteReqDto(ulong user, ulong mutedById, DateTime? mutedUntil, string reason)
+        public MuteReqDto(ulong user, ulong guild, ulong mutedById, DateTime? mutedUntil, string reason)
         {
             UserId = user;
+            GuildId = guild;
             MutedUntil = mutedUntil;
             MutedById = mutedById;
             Reason = reason;

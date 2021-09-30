@@ -28,23 +28,30 @@ namespace MikyM.Common.DataAccessLayer.UnitOfWork
         public virtual TRepository GetRepository<TRepository>() where TRepository : IBaseRepository
         {
             _repositories ??= new();
+
             var type = typeof(TRepository);
             string name = type.FullName;
+
             if (_repositories.TryGetValue(name, out var repository)) return (TRepository)repository;
 
             var concrete =
                 UoFCache.CachedTypes.FirstOrDefault(x => type.IsAssignableFrom(x) && !x.IsAbstract && !x.IsInterface);
+
             if (concrete is not null)
             {
                 string concreteName = concrete.FullName;
+
                 if (_repositories.TryGetValue(concreteName, out var concreteRepo)) return (TRepository)concreteRepo;
+
                 if (_repositories.TryAdd(concreteName, (TRepository)Activator.CreateInstance(concrete, Context)))
                     return (TRepository)_repositories[concreteName];
                 throw new ArgumentException(
                     $"Concrete repository of type {concreteName} couldn't be added to and/or retrieved from cache.");
             }
 
-            if (_repositories.TryAdd(name, (TRepository)Activator.CreateInstance(type, Context))) return (TRepository)_repositories[name];
+            if (_repositories.TryAdd(name, (TRepository)Activator.CreateInstance(type, Context)))
+                return (TRepository)_repositories[name];
+
             throw new ArgumentException(
                 $"Concrete repository of type {name} couldn't be added to and/or retrieved from cache.");
         }

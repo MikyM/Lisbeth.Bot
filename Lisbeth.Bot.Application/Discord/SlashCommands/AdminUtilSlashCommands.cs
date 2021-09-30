@@ -1,19 +1,16 @@
-﻿using System;
+﻿using DSharpPlus;
+using DSharpPlus.Entities;
+using DSharpPlus.SlashCommands;
+using JetBrains.Annotations;
+using Lisbeth.Bot.DataAccessLayer;
+using Lisbeth.Bot.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
+using MikyM.Common.Application.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DSharpPlus;
-using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using JetBrains.Annotations;
-using Lisbeth.Bot.Application.Extensions;
-using Lisbeth.Bot.Application.Interfaces;
-using Lisbeth.Bot.DataAccessLayer;
-using Lisbeth.Bot.Domain.DTOs.Request;
-using Lisbeth.Bot.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
-using MikyM.Common.DataAccessLayer.Specifications;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands
 {
@@ -23,6 +20,22 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
     public class AdminUtilSlashCommands : ApplicationCommandModule
     {
         public LisbethBotDbContext _ctx { private get; set; }
+        public IReadOnlyService<Audit, LisbethBotDbContext> _service { private get; set; }
+
+        [SlashCommand("audit", "Gets last 10 audit logs.")]
+        public async Task AuditCommand(InteractionContext ctx)
+        {
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+            var res = await _service.GetBySpecificationsAsync<Audit>();
+            string botRes = "";
+
+            foreach (var resp in res)
+            {
+                botRes += $"\n Affected columns: {resp.AffectedColumns}, Table: {resp.TableName}, Old: {resp.OldValues}, New: {resp.NewValues}, Type: {resp.Type}";
+            }
+
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent(botRes));
+        }
 
         [SlashCommand("sql", "A command that runs sql query.")]
         public async Task MuteCommand(InteractionContext ctx,
@@ -54,7 +67,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     Description = string.Concat("Query: ", Formatter.InlineCode(query), "."),
                     Color = new DiscordColor(0x007FFF)
                 };
-                await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
+                await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
                 return;
             }
 
@@ -82,7 +95,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             if (dat.Count > 24)
                 embed.AddField("Display incomplete", string.Concat((dat.Count - 24).ToString("#,##0"), " results were omitted."), false);
 
-            await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
         }
     }
 }

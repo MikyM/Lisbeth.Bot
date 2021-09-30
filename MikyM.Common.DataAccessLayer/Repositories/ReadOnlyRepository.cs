@@ -11,10 +11,10 @@ namespace MikyM.Common.DataAccessLayer.Repositories
 {
     public class ReadOnlyRepository<TEntity> : IReadOnlyRepository<TEntity> where TEntity : AggregateRootEntity
     {
-        protected DbContext _context;
-        protected readonly DbSet<TEntity> _set;
+        public DbContext _context;
+        public readonly DbSet<TEntity> _set;
 
-        protected ReadOnlyRepository(DbContext context)
+        public ReadOnlyRepository(DbContext context)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _set = _context.Set<TEntity>();

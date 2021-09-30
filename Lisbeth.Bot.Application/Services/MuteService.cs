@@ -27,25 +27,30 @@ namespace Lisbeth.Bot.Application.Services
             if (mute is null) return await base.AddAsync(entry, shouldSave);
 
             mute.Extend(entry.MutedById, entry.MutedUntil, entry.Reason);
-            await base.UpdateAsync(entry, shouldSave);
+            //await base.UpdateAsync(entry, shouldSave);
             return mute.Id;
         }
 
-        public async Task<bool> DisableAsync(MuteDisableReqDto entry, bool shouldSave = false)
+        public async Task<Mute> DisableAsync(MuteDisableReqDto entry, bool shouldSave = false)
         {
             if (entry is null) throw new ArgumentNullException(nameof(entry));
 
-            var entities = await _unitOfWork.GetRepository<MuteRepository>()
-                .GetBySpecificationsAsync(new Specifications<Mute>(x => x.UserId == entry.UserId && !x.IsDisabled));
+            var res = await base.GetBySpecificationsAsync<Mute>(
+                new Specifications<Mute>(x => x.UserId == entry.UserId && !x.IsDisabled));
 
-            if (entities is null || !entities.Any())
-                return false;
+            if (res is null || !res.Any())
+                return null;
 
-            _unitOfWork.GetRepository<MuteRepository>()
-                .Disable(_mapper.Map<Mute>(entry), entry.LiftedById);
+            var entity = res[0];
 
-            if (shouldSave) await CommitAsync();
-            return true;
+            await base.BeginUpdateAsync(entity);
+            entity.IsDisabled = true;
+            entity.LiftedOn = DateTime.Now;
+            entity.LiftedById = entry.LiftedById;
+
+            if(shouldSave) await base.CommitAsync();
+
+            return entity;
         }
     }
 }

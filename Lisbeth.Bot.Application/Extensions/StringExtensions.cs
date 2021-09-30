@@ -5,10 +5,10 @@ namespace Lisbeth.Bot.Application.Extensions
 {
     public static class StringExtensions
     {
-        public static DateTime? ToDateTimeDuration(this string input)
+        public static (DateTime? FinalDateFromToday, TimeSpan Duration) ToDateTimeDuration(this string input)
         {
-            TimeSpan tmsp;
-            DateTime result;
+            TimeSpan tmsp = new TimeSpan();
+            DateTime? result;
 
             if (Int32.TryParse(input, out int inputInMinutes))
             {
@@ -30,7 +30,7 @@ namespace Lisbeth.Bot.Application.Extensions
 
                 if (!Char.IsDigit(input.First()))
                 {
-                    return null;
+                    return (null, tmsp);
                 }
 
                 foreach (char c in input)
@@ -45,7 +45,7 @@ namespace Lisbeth.Bot.Application.Extensions
                         }
                         else
                         {
-                            return null;
+                            return (null, tmsp);
                         }
                     }
                 }
@@ -55,7 +55,7 @@ namespace Lisbeth.Bot.Application.Extensions
                     case 'h':
                         if (parsedInput > 8784)
                         {
-                            return null;
+                            return (null, tmsp);
                         }
                         tmsp = TimeSpan.FromHours(parsedInput);
                         break;
@@ -63,7 +63,7 @@ namespace Lisbeth.Bot.Application.Extensions
                     case 'd':
                         if (parsedInput > 366)
                         {
-                            return null;
+                            return (null, tmsp);
                         }
                         tmsp = TimeSpan.FromDays(parsedInput);
                         break;
@@ -71,7 +71,7 @@ namespace Lisbeth.Bot.Application.Extensions
                     case 'w':
                         if (parsedInput > 53)
                         {
-                            return null;
+                            return (null, tmsp);
                         }
                         tmsp = TimeSpan.FromDays(parsedInput * 7);
                         break;
@@ -79,7 +79,7 @@ namespace Lisbeth.Bot.Application.Extensions
                     case 'm':
                         if (parsedInput > 12)
                         {
-                            return null;
+                            return (null, tmsp);
                         }
                         tmsp = TimeSpan.FromDays(parsedInput * 31);
                         break;
@@ -87,19 +87,19 @@ namespace Lisbeth.Bot.Application.Extensions
                     case 'y':
                         if (parsedInput > 1)
                         {
-                            return null;
+                            return (null, tmsp);
                         }
                         tmsp = TimeSpan.FromDays(parsedInput * 365);
                         break;
 
                     default:
-                        return null;
+                        return (null, tmsp);
                 }
 
                 result = DateTime.Now.Add(tmsp);
             }
 
-            return result;
+            return (result, tmsp);
         }
     }
 }

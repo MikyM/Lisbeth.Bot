@@ -8,8 +8,8 @@ namespace Lisbeth.Bot.API
     {
         public AutoMapperProfile()
         {
-            CreateMap<Mute, MuteReqDto>();
             CreateMap<MuteReqDto, Mute>();
+            CreateMap<MuteDisableReqDto, Mute>();
         }
     }
 }
