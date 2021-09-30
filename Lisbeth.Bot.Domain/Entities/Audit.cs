@@ -8,7 +8,8 @@ namespace Lisbeth.Bot.Domain.Entities
         None = 0,
         Create = 1,
         Update = 2,
-        Delete = 3
+        Disable = 3,
+        Delete = 4
     }
 
     public class Audit : EnvironmentSpecificEntity

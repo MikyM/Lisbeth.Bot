@@ -92,14 +92,24 @@ namespace Lisbeth.Bot.DataAccessLayer
                             auditEntry.NewValues[propertyName] = property.CurrentValue;
                             break;
                         case EntityState.Deleted:
-                            auditEntry.AuditType = AuditType.Delete;
+                            auditEntry.AuditType = AuditType.Disable;
                             auditEntry.OldValues[propertyName] = property.OriginalValue;
                             break;
                         case EntityState.Modified:
                             if (property.IsModified)
                             {
                                 auditEntry.ChangedColumns.Add(propertyName);
-                                auditEntry.AuditType = AuditType.Update;
+                                if (entry.Entity is Entity && propertyName == "IsDisabled" && property.IsModified)
+                                {
+                                    if (!(bool)property.OriginalValue && (bool)property.CurrentValue)
+                                    {
+                                        auditEntry.AuditType = AuditType.Disable;
+                                    }
+                                    else
+                                    {
+                                        auditEntry.AuditType = AuditType.Update;
+                                    }
+                                }
                                 auditEntry.OldValues[propertyName] = property.OriginalValue;
                                 auditEntry.NewValues[propertyName] = property.CurrentValue;
                             }
