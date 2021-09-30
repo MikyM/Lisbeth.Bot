@@ -34,10 +34,10 @@ namespace Lisbeth.Bot.API
             builder.RegisterGeneric(typeof(Repository<>)).As(typeof(IRepository<>))
                 .InstancePerLifetimeScope();
             // bulk register custom services - follow naming convention
-            builder.RegisterAssemblyTypes(typeof(SampleService).Assembly).Where(t => t.Name.EndsWith("Service"))
+            builder.RegisterAssemblyTypes(typeof(MuteService).Assembly).Where(t => t.Name.EndsWith("Service"))
                 .AsImplementedInterfaces().InstancePerLifetimeScope();
             // bulk register custom repositories - follow naming convention
-            builder.RegisterAssemblyTypes(typeof(SampleRepository).Assembly).Where(t => t.Name.EndsWith("Repository"))
+            builder.RegisterAssemblyTypes(typeof(MuteRepository).Assembly).Where(t => t.Name.EndsWith("Repository"))
                 .AsImplementedInterfaces().InstancePerLifetimeScope();
 
             // pagination stuff

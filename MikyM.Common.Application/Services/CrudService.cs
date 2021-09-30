@@ -63,7 +63,7 @@ namespace MikyM.Common.Application.Services
             return entities.Select(e => e.Id).ToList();
         }
 
-        public virtual async Task BeginUpdateAsync<TPatch>(TPatch entry, bool shouldSave = false) where TPatch : class
+        public virtual void BeginUpdate<TPatch>(TPatch entry) where TPatch : class
         {
             if (entry is null) throw new ArgumentNullException(nameof(entry));
 
@@ -75,11 +75,9 @@ namespace MikyM.Common.Application.Services
             {
                 _unitOfWork.GetRepository<Repository<TEntity>>().BeginUpdate(_mapper.Map<TEntity>(entry));
             }
-
-            if (shouldSave) await CommitAsync();
         }
 
-        public virtual async Task BeginUpdateRangeAsync<TPatch>(IEnumerable<TPatch> entries, bool shouldSave = false) where TPatch : class
+        public virtual void BeginUpdateRange<TPatch>(IEnumerable<TPatch> entries) where TPatch : class
         {
             if (entries is null) throw new ArgumentNullException(nameof(entries));
 
@@ -91,8 +89,6 @@ namespace MikyM.Common.Application.Services
             {
                 _unitOfWork.GetRepository<Repository<TEntity>>().BeginUpdateRange(_mapper.Map<IEnumerable<TEntity>>(entries));
             }
-            
-            if (shouldSave) await CommitAsync();
         }
 
         public virtual async Task<long> AddOrUpdateAsync<TPut>(TPut entry, bool shouldSave = false) where TPut : class

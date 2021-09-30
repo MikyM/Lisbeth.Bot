@@ -3,7 +3,6 @@ using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using JetBrains.Annotations;
 using Lisbeth.Bot.DataAccessLayer;
-using Lisbeth.Bot.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using MikyM.Common.Application.Interfaces;
 using System;
@@ -11,6 +10,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DSharpPlus.SlashCommands.Attributes;
+using MikyM.Common.Domain.Entities;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands
 {
@@ -22,6 +23,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
         public LisbethBotDbContext _ctx { private get; set; }
         public IReadOnlyService<Audit, LisbethBotDbContext> _service { private get; set; }
 
+        [SlashRequireOwner]
         [SlashCommand("audit", "Gets last 10 audit logs.")]
         public async Task AuditCommand(InteractionContext ctx)
         {
@@ -37,6 +39,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent(botRes));
         }
 
+        [SlashRequireOwner]
         [SlashCommand("sql", "A command that runs sql query.")]
         public async Task MuteCommand(InteractionContext ctx,
             [Option("query", "Sql query to be executed.")] string query)

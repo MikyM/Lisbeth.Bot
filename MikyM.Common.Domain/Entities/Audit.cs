@@ -1,7 +1,6 @@
 ﻿using System;
-using MikyM.Common.Domain.Entities;
 
-namespace Lisbeth.Bot.Domain.Entities
+namespace MikyM.Common.Domain.Entities
 {
     public enum AuditType
     {

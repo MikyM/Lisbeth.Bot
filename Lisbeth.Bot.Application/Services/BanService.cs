@@ -13,28 +13,28 @@ using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Services
 {
-    public class MuteService : CrudService<Mute, LisbethBotDbContext>, IMuteService
+    public class BanService : CrudService<Ban, LisbethBotDbContext>, IBanService
     {
-        public MuteService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof) { }
+        public BanService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof) { }
 
-        public async Task<(long Id, Mute FoundEntity)> AddOrExtendAsync(MuteReqDto req, bool shouldSave = false)
+        public async Task<(long Id, Ban FoundEntity)> AddOrExtendAsync(BanReqDto req, bool shouldSave = false)
         {
             if (req is null) throw new ArgumentNullException(nameof(req));
 
-            var res = await _unitOfWork.GetRepository<Repository<Mute>>()
-                .GetBySpecificationsAsync(new Specifications<Mute>(x => x.UserId == req.UserId && x.GuildId == req.GuildId && !x.IsDisabled));
+            var res = await _unitOfWork.GetRepository<Repository<Ban>>()
+                .GetBySpecificationsAsync(new Specifications<Ban>(x => x.UserId == req.UserId && x.GuildId == req.GuildId && !x.IsDisabled));
 
             var entity = res.FirstOrDefault();
             if (entity is null) return (await base.AddAsync(req, shouldSave), null);
 
-            if (entity.MutedUntil > req.MutedUntil) return (entity.Id, entity);
+            if (entity.BannedUntil > req.BannedUntil) return (entity.Id, entity);
 
             var shallowCopy = entity.ShallowCopy();
 
             base.BeginUpdate(entity);
-            entity.MutedById = req.MutedById;
-            entity.MutedOn = DateTime.UtcNow;
-            entity.MutedUntil = req.MutedUntil;
+            entity.BannedById = req.BannedById;
+            entity.BannedOn = DateTime.UtcNow;
+            entity.BannedUntil = req.BannedUntil;
             entity.Reason = req.Reason;
 
             if (shouldSave) await base.CommitAsync();
@@ -42,12 +42,12 @@ namespace Lisbeth.Bot.Application.Services
             return (entity.Id, shallowCopy);
         }
 
-        public async Task<Mute> DisableAsync(MuteDisableReqDto entry, bool shouldSave = false)
+        public async Task<Ban> DisableAsync(BanDisableReqDto entry, bool shouldSave = false)
         {
             if (entry is null) throw new ArgumentNullException(nameof(entry));
 
-            var res = await base.GetBySpecificationsAsync<Mute>(
-                new Specifications<Mute>(x => x.UserId == entry.UserId && x.GuildId == entry.GuildId && !x.IsDisabled));
+            var res = await base.GetBySpecificationsAsync<Ban>(
+                new Specifications<Ban>(x => x.UserId == entry.UserId && x.GuildId == entry.GuildId && !x.IsDisabled));
 
             var entity = res.FirstOrDefault();
             if (entity is null) return null;

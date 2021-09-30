@@ -1,5 +1,6 @@
 ﻿using Lisbeth.Bot.Domain.Entities.Base;
 using System;
+using MikyM.Common.Domain.Entities;
 
 namespace Lisbeth.Bot.Domain.Entities
 {
@@ -16,31 +17,9 @@ namespace Lisbeth.Bot.Domain.Entities
         {
         }
 
-        public Mute(ulong userId, ulong mutedBy, DateTime? mutedUntil) : this(userId, mutedBy, mutedUntil, "")
+        public Mute ShallowCopy()
         {
-        }
-
-        public Mute(ulong userId, ulong mutedBy, DateTime? mutedUntil, string reason)
-        {
-            this.UserId = userId;
-            this.MutedById = mutedBy;
-            this.MutedUntil = mutedUntil;
-            this.Reason = reason;
-        }
-
-        public void Lift(ulong liftedBy)
-        {
-            this.LiftedById = liftedBy;
-            this.LiftedOn = DateTime.Now;
-            this.IsDisabled = true;
-        }
-
-        public void Extend(ulong mutedBy, DateTime? mutedUntil, string reason = "No reason provided")
-        {
-            this.MutedById = mutedBy;
-            this.MutedUntil = mutedUntil;
-            this.MutedOn = DateTime.Now;
-            this.Reason = reason;
+            return (Mute)this.MemberwiseClone();
         }
     }
 }

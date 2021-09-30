@@ -1,14 +1,11 @@
 ﻿using Lisbeth.Bot.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
+using MikyM.Common.DataAccessLayer;
 using MikyM.Common.Domain.Entities;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Serilog;
 
 namespace Lisbeth.Bot.DataAccessLayer
 {
@@ -16,7 +13,6 @@ namespace Lisbeth.Bot.DataAccessLayer
     {
         public LisbethBotDbContext(DbContextOptions<LisbethBotDbContext> options) : base(options)
         {
-            ChangeTracker.StateChanged += OnEntityStateChanged;
         }
 
         public DbSet<Mute> Mutes { get; set; }
@@ -31,15 +27,7 @@ namespace Lisbeth.Bot.DataAccessLayer
             // fluent api to do
             base.OnModelCreating(modelBuilder);
         }
-
-        private static void OnEntityStateChanged(object? sender, EntityStateChangedEventArgs e)
-        {
-/*            if (e.NewState is EntityState.Modified && e.Entry.Entity is Entity)
-            {
-                ((Entity)e.Entry.Entity).UpdatedAt = DateTime.UtcNow;
-            }*/
-        }
-
+        
         public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess,
             CancellationToken cancellationToken = default)
         {
@@ -99,16 +87,10 @@ namespace Lisbeth.Bot.DataAccessLayer
                             if (property.IsModified)
                             {
                                 auditEntry.ChangedColumns.Add(propertyName);
-                                if (entry.Entity is Entity && propertyName == "IsDisabled" && property.IsModified)
+                                auditEntry.AuditType = AuditType.Update;
+                                if (entry.Entity is Entity && propertyName == "IsDisabled" && property.IsModified && !(bool)property.OriginalValue && (bool)property.CurrentValue)
                                 {
-                                    if (!(bool)property.OriginalValue && (bool)property.CurrentValue)
-                                    {
-                                        auditEntry.AuditType = AuditType.Disable;
-                                    }
-                                    else
-                                    {
-                                        auditEntry.AuditType = AuditType.Update;
-                                    }
+                                    auditEntry.AuditType = AuditType.Disable;
                                 }
                                 auditEntry.OldValues[propertyName] = property.OriginalValue;
                                 auditEntry.NewValues[propertyName] = property.CurrentValue;

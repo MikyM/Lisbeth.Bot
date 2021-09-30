@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text.Json;
-using Lisbeth.Bot.Domain.Entities;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using MikyM.Common.Domain.Entities;
 
-namespace Lisbeth.Bot.DataAccessLayer
+namespace MikyM.Common.DataAccessLayer
 {
     public class AuditEntry
     {
