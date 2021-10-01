@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using DSharpPlus;
+﻿using DSharpPlus;
 using DSharpPlus.Interactivity.Enums;
+using Lisbeth.Bot.Application.Discord.ApplicationCommands;
 using Lisbeth.Bot.Application.Discord.EventHandlers;
 using Lisbeth.Bot.Application.Discord.SlashCommands;
 using Microsoft.Extensions.Configuration;
@@ -12,6 +11,8 @@ using MikyM.Discord.Extensions.Interactivity;
 using MikyM.Discord.Extensions.SlashCommands;
 using OpenTracing;
 using OpenTracing.Mock;
+using System;
+using System.Collections.Generic;
 
 namespace Lisbeth.Bot.API
 {
@@ -30,10 +31,11 @@ namespace Lisbeth.Bot.API
             #region commands
             services.AddDiscordSlashCommands(_ => { }, extension =>
             {
-                extension.RegisterCommands<MuteSlashCommands>(790631933758799912);
-                extension.RegisterCommands<BanSlashCommands>(790631933758799912);
+                extension.RegisterCommands<MuteApplicationCommands>(790631933758799912);
+                extension.RegisterCommands<BanApplicationCommands>(790631933758799912);
                 extension.RegisterCommands<TicketSlashCommands>(790631933758799912);
                 extension.RegisterCommands<AdminUtilSlashCommands>(790631933758799912);
+                extension.RegisterCommands<ModUtilApplicationCommands>(790631933758799912);
             });
             services.AddDiscordInteractivity(options =>
             {

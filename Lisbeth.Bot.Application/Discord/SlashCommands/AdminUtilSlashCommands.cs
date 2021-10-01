@@ -1,17 +1,17 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
+using DSharpPlus.SlashCommands.Attributes;
 using JetBrains.Annotations;
 using Lisbeth.Bot.DataAccessLayer;
 using Microsoft.EntityFrameworkCore;
 using MikyM.Common.Application.Interfaces;
+using MikyM.Common.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DSharpPlus.SlashCommands.Attributes;
-using MikyM.Common.Domain.Entities;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands
 {
@@ -20,7 +20,9 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
     [UsedImplicitly]
     public class AdminUtilSlashCommands : ApplicationCommandModule
     {
+        [UsedImplicitly]
         public LisbethBotDbContext _ctx { private get; set; }
+        [UsedImplicitly]
         public IReadOnlyService<Audit, LisbethBotDbContext> _service { private get; set; }
 
         [SlashRequireOwner]
@@ -29,12 +31,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
             var res = await _service.GetBySpecificationsAsync<Audit>();
-            string botRes = "";
-
-            foreach (var resp in res)
-            {
-                botRes += $"\n Affected columns: {resp.AffectedColumns}, Table: {resp.TableName}, Old: {resp.OldValues}, New: {resp.NewValues}, Type: {resp.Type}";
-            }
+            string botRes = res.Aggregate("", (current, resp) => current + $"\n Affected columns: {resp.AffectedColumns}, Table: {resp.TableName}, Old: {resp.OldValues}, New: {resp.NewValues}, Type: {resp.Type}");
 
             await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent(botRes));
         }

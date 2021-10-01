@@ -12,10 +12,7 @@ namespace MikyM.Common.DataAccessLayer.Specifications
                 return query;
             }
 
-            if (specifications.FilterCondition != null)
-            {
-                query = query.Where(specifications.FilterCondition);
-            }
+            query = specifications.FilterConditions.Aggregate(query, (current, filterCondition) => current.Where(filterCondition));
 
             query = specifications.Includes.Aggregate(query, (current, include) => current.Include(include));
 
@@ -31,6 +28,11 @@ namespace MikyM.Common.DataAccessLayer.Specifications
             if (specifications.GroupBy != null)
             {
                 query = query.GroupBy(specifications.GroupBy).SelectMany(x => x);
+            }
+
+            if (specifications.Limit != 0)
+            {
+                query = query.Take(specifications.Limit);
             }
 
             return query;

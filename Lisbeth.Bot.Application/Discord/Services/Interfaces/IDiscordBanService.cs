@@ -9,5 +9,6 @@ namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
     {
         Task<DiscordEmbed> BanAsync(BanReqDto req, ulong logChannelId = 0, InteractionContext ctx = null);
         Task<DiscordEmbed> UnbanAsync(BanDisableReqDto req, ulong logChannelId = 0, InteractionContext ctx = null);
+        Task<DiscordEmbed> GetAsync(BanGetReqDto req, ulong logChannelId = 0, InteractionContext ctx = null);
     }
 }

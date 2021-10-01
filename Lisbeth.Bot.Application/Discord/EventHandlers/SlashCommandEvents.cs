@@ -26,11 +26,11 @@ namespace Lisbeth.Bot.Application.Discord.EventHandlers
             Log.Logger.Error(args.Exception.ToString());
             var noEntryEmoji = DiscordEmoji.FromName(sender.Client, ":x:");
             var embed = new DiscordEmbedBuilder();
-            var wbhk = new DiscordWebhookBuilder();
             embed.WithColor(new DiscordColor(170, 1, 20));
             embed.WithAuthor($"{noEntryEmoji} Command errored");
-            embed.WithDescription($"Exception thrown: {args.Exception.Message}");
-            args.Context.EditResponseAsync(wbhk.AddEmbed(embed.Build()));
+            embed.AddField("Type", args.Exception.GetType().ToString());
+            embed.AddField("Message", args.Exception.Message);
+            args.Context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
             return Task.CompletedTask;
         }
 

@@ -7,9 +7,9 @@ namespace Lisbeth.Bot.Domain.Entities
     public class Mute : DiscordAggregateRootEntity
     {
         public DateTime? LiftedOn { get; set; }
-        public DateTime? MutedUntil { get; set; }
-        public DateTime? MutedOn { get; set; } = DateTime.UtcNow;
-        public ulong MutedById { get; set; }
+        public DateTime? AppliedUntil { get; set; }
+        public DateTime? AppliedOn { get; set; } = DateTime.UtcNow;
+        public ulong AppliedById { get; set; }
         public ulong LiftedById { get; set; }
         public string Reason { get; set; } = "";
 

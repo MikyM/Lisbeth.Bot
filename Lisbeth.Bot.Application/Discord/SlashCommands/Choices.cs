@@ -2,19 +2,7 @@
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands
 {
-    public enum BanChoice
-    {
-        [ChoiceName("add")]
-        Add,
-        [ChoiceName("remove")]
-        Remove,
-        [ChoiceName("get")]
-        Get,
-        [ChoiceName("id")]
-        Id
-    }
-
-    public enum MuteChoice
+    public enum BanActionType
     {
         [ChoiceName("add")]
         Add,
@@ -24,11 +12,35 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
         Get
     }
 
-    public enum TicketChoice
+    public enum MuteActionType
     {
-        [ChoiceName("public")]
+        [ChoiceName("add")]
         Add,
-        [ChoiceName("private")]
+        [ChoiceName("remove")]
+        Remove,
+        [ChoiceName("get")]
+        Get
+    }
+
+    public enum PruneActionType
+    {
+        [ChoiceName("add")]
+        Add,
+        [ChoiceName("remove")]
+        Remove,
+        [ChoiceName("get")]
+        Get
+    }
+
+    public enum TicketActionType
+    {
+        [ChoiceName("open")]
+        Open,
+        [ChoiceName("close")]
+        Close,
+        [ChoiceName("add")]
+        Add,
+        [ChoiceName("remove")]
         Remove
     }
 }

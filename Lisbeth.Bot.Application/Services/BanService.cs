@@ -27,14 +27,14 @@ namespace Lisbeth.Bot.Application.Services
             var entity = res.FirstOrDefault();
             if (entity is null) return (await base.AddAsync(req, shouldSave), null);
 
-            if (entity.BannedUntil > req.BannedUntil) return (entity.Id, entity);
+            if (entity.AppliedUntil > req.AppliedUntil) return (entity.Id, entity);
 
             var shallowCopy = entity.ShallowCopy();
 
             base.BeginUpdate(entity);
-            entity.BannedById = req.BannedById;
-            entity.BannedOn = DateTime.UtcNow;
-            entity.BannedUntil = req.BannedUntil;
+            entity.AppliedById = req.AppliedById;
+            entity.AppliedOn = DateTime.UtcNow;
+            entity.AppliedUntil = req.AppliedUntil;
             entity.Reason = req.Reason;
 
             if (shouldSave) await base.CommitAsync();

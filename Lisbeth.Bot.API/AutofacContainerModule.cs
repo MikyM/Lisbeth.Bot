@@ -45,8 +45,8 @@ namespace Lisbeth.Bot.API
             builder.Register(x =>
             {
                 var accessor = x.Resolve<IHttpContextAccessor>();
-                var request = accessor.HttpContext.Request;
-                var uri = string.Concat(request.Scheme, "://", request.Host.ToUriComponent());
+                var request = accessor?.HttpContext?.Request;
+                var uri = string.Concat(request?.Scheme, "://", request?.Host.ToUriComponent());
                 return new UriService(uri);
             }).As<IUriService>().SingleInstance();
 

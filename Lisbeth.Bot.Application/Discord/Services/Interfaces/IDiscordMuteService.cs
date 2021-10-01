@@ -8,6 +8,13 @@ namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
     public interface IDiscordMuteService
     {
         Task<DiscordEmbed> MuteAsync(MuteReqDto req, ulong logChannelId = 0, InteractionContext ctx = null);
+        Task<DiscordEmbed> MuteAsync(MuteReqDto req, ulong logChannelId = 0, ContextMenuContext ctx = null);
+        Task<DiscordEmbed> MuteAsync(MuteReqDto req, ulong logChannelId = 0, DiscordGuild guild = null, DiscordMember member = null, DiscordUser moderator = null);
         Task<DiscordEmbed> UnmuteAsync(MuteDisableReqDto req, ulong logChannelId = 0, InteractionContext ctx = null);
+        Task<DiscordEmbed> UnmuteAsync(MuteDisableReqDto req, ulong logChannelId = 0, ContextMenuContext ctx = null);
+        Task<DiscordEmbed> UnmuteAsync(MuteDisableReqDto req, ulong logChannelId = 0, DiscordGuild guild = null, DiscordMember member = null, DiscordUser moderator = null);
+        Task<DiscordEmbed> GetAsync(MuteGetReqDto req, ulong logChannelId = 0, InteractionContext ctx = null);
+        Task<DiscordEmbed> GetAsync(MuteGetReqDto req, ulong logChannelId = 0, ContextMenuContext ctx = null);
+        Task<DiscordEmbed> GetAsync(MuteGetReqDto req, ulong logChannelId = 0, DiscordGuild guild = null, DiscordMember member = null, DiscordUser moderator = null);
     }
 }
