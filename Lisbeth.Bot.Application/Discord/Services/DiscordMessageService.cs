@@ -8,17 +8,18 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Lisbeth.Bot.Application.Services.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {
     public class DiscordMessageService : IDiscordMessageService
     {
         private readonly IDiscordService _discord;
-/*        private readonly IMessageService _messageService;*/
+        private readonly IPruneService _pruneService;
 
-        public DiscordMessageService(IDiscordService discord/*, IMessageService messageService*/)
+        public DiscordMessageService(IDiscordService discord, IPruneService pruneService)
         {
-/*            _messageService = messageService;*/
+            _pruneService = pruneService;
             _discord = discord;
         }
 
@@ -70,11 +71,11 @@ namespace Lisbeth.Bot.Application.Discord.Services
             {
                 try
                 {
-                    if (req.UserId != null && guild is not null) author = await guild.GetMemberAsync(req.UserId.Value);
+                    if (req.TargetAuthorId != null && guild is not null) author = await guild.GetMemberAsync(req.TargetAuthorId.Value);
                 }
                 catch (Exception)
                 {
-                    throw new ArgumentException($"User with Id: {req.UserId} isn't the guilds member.");
+                    throw new ArgumentException($"User with Id: {req.TargetAuthorId} isn't the guilds member.");
                 }
             }
 
@@ -82,12 +83,12 @@ namespace Lisbeth.Bot.Application.Discord.Services
             {
                 try
                 {
-                    if (req.RequestedById != null)
-                        moderator = await _discord.Client.GetUserAsync(req.RequestedById.Value);
+                    if (req.ModeratorId != null)
+                        moderator = await _discord.Client.GetUserAsync(req.ModeratorId.Value);
                 }
                 catch (Exception)
                 {
-                    throw new ArgumentException($"User with Id: {req.RequestedById} doesn't exist.");
+                    throw new ArgumentException($"User with Id: {req.ModeratorId} doesn't exist.");
                 }
             }
 
@@ -143,7 +144,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             }
             else
             {
-                if (req.MessageId is null && channel is not null && req.UserId is not null)
+                if (req.MessageId is null && channel is not null && req.TargetAuthorId is not null)
                 {
                     var messages = await channel.GetMessagesAsync();
                     messagesToDelete.AddRange(messages.Where(x => x.Author.Id == author.Id).OrderByDescending(x => x.Timestamp).Take(req.Count));
@@ -151,7 +152,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     await channel.DeleteMessagesAsync(messagesToDelete);
                 }
 
-                if (req.MessageId is null && channel is not null && req.UserId is null)
+                if (req.MessageId is null && channel is not null && req.TargetAuthorId is null)
                 {
                     var messages = await channel.GetMessagesAsync(req.Count);
                     messagesToDelete.AddRange(messages);
@@ -161,46 +162,61 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     await channel.DeleteMessagesAsync(messagesToDelete);
                 }
 
-                if (req.MessageId is not null && channel is not null && req.UserId is null)
+                if (req.MessageId is not null && channel is not null && req.TargetAuthorId is null)
                 {
                     DiscordMessage lastMessage = message;
-                    while (!messagesToDelete.Contains(message))
+                    while (true)
                     {
+                        await Task.Delay(300);
                         messagesToDelete.Clear();
                         messagesToDelete.AddRange(await channel.GetMessagesAfterAsync(lastMessage.Id));
                         if (idToSkip != 0)
                             messagesToDelete.RemoveAll(x => x.Interaction is not null && x.Interaction.Id == idToSkip);
+                        if (messagesToDelete.Count == 0)
+                            break;
                         deletedMessagesCount += messagesToDelete.Count;
                         lastMessage = messagesToDelete.Last();
                         await Task.Delay(200);
                         await channel.DeleteMessagesAsync(messagesToDelete);
-                        await Task.Delay(1000);
                     }
+
+                    await channel.DeleteMessageAsync(message);
+                    deletedMessagesCount++;
                 }
 
-                if (req.MessageId is not null && channel is not null && req.UserId is not null)
+                if (req.MessageId is not null && channel is not null && req.TargetAuthorId is not null)
                 {
                     DiscordMessage lastMessage = message;
-                    while (!messagesToDelete.Contains(message))
+                    while (true)
                     {
+                        await Task.Delay(300);
                         messagesToDelete.Clear();
                         var tempMessages = await channel.GetMessagesAfterAsync(lastMessage.Id);
+                        if (messagesToDelete.Count == 0)
+                            break;
                         messagesToDelete.AddRange(tempMessages.Where(x => x.Author.Id == author?.Id));
                         deletedMessagesCount += messagesToDelete.Count;
                         lastMessage = messagesToDelete.Last();
                         await Task.Delay(200);
                         await channel.DeleteMessagesAsync(messagesToDelete);
-                        await Task.Delay(1000);
                     }
+
+                    await channel.DeleteMessageAsync(message);
+                    deletedMessagesCount++;
                 }
             }
             embed.AddField("Moderator", moderator != null ? moderator.Mention : null, true);
             embed.AddField("Delete count", deletedMessagesCount.ToString(), true);
             embed.AddField("Channel", channel != null ? channel.Mention : null, true);
-            if (author is not null)
+
+
+            if (req.TargetAuthorId is not null)
             {
                 embed.AddField("Target author", author.Mention, true);
+                embed.WithAuthor($"Prune result | {author.GetFullUsername()}", null, author != null ? author.AvatarUrl : null);
             }
+
+            var res = await _pruneService.AddAsync(req, true);
 
             return embed;
         }

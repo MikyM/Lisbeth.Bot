@@ -576,8 +576,6 @@ namespace MikyM.Discord.Services
             #region Message
 
             Client.MessageCreated += async (sender, args) =>
-            
-            
             {
                 using var workScope = Tracer.BuildSpan(nameof(Client.MessageCreated))
                     .IgnoreActiveSpan()

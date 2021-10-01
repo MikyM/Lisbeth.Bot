@@ -20,7 +20,7 @@ namespace Lisbeth.Bot.API
     {
         public static void ConfigureDiscord(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddSingleton<ITracer>(provider => new MockTracer());
+            services.AddSingleton<ITracer>(_ => new MockTracer());
             services.AddDiscord(options =>
             {
                 options.Token = Environment.GetEnvironmentVariable("LisbethTstToken");
@@ -35,7 +35,7 @@ namespace Lisbeth.Bot.API
                 extension.RegisterCommands<BanApplicationCommands>(790631933758799912);
                 extension.RegisterCommands<TicketSlashCommands>(790631933758799912);
                 extension.RegisterCommands<AdminUtilSlashCommands>(790631933758799912);
-                extension.RegisterCommands<ModUtilApplicationCommands>(790631933758799912);
+                extension.RegisterCommands<PruneApplicationCommands>(790631933758799912);
             });
             services.AddDiscordInteractivity(options =>
             {

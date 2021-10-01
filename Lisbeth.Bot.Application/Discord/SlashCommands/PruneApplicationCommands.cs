@@ -16,12 +16,13 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
 {
     [SlashModuleLifespan(SlashModuleLifespan.Transient)]
     [UsedImplicitly]
-    public partial class ModUtilApplicationCommands : ApplicationCommandModule
+    public partial class PruneApplicationCommands : ApplicationCommandModule
     {
         [UsedImplicitly]
         // ReSharper disable once InconsistentNaming
         public IDiscordMessageService _discordMessageService { private get; set; }
 
+        [UsedImplicitly]
         [SlashRequireUserPermissions(Permissions.ManageMessages)]
         [SlashCommand("prune", "A command that allows banning a user.")]
         public async Task PruneCommand(InteractionContext ctx,

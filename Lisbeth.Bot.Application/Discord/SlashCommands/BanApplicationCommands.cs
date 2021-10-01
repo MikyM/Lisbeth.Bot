@@ -4,7 +4,6 @@ using DSharpPlus.SlashCommands;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Extensions;
-using Lisbeth.Bot.Application.Interfaces;
 using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.DataAccessLayer.Specifications;

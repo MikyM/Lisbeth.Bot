@@ -3,20 +3,20 @@
     public class PruneReqDto
     {
         public int Count { get; set; } = 100;
-        public ulong? UserId { get; set; }
+        public ulong? TargetAuthorId { get; set; }
         public ulong? MessageId { get; set; }
         public ulong? ChannelId { get; set; }
         public ulong? GuildId { get; set; }
-        public ulong? RequestedById { get; set; }
+        public ulong? ModeratorId { get; set; }
 
-        public PruneReqDto(int count, ulong? messageId = null, ulong? userId = null, ulong? channelId = null, ulong? guildId = null, ulong? requestedById = null)
+        public PruneReqDto(int count, ulong? messageId = null, ulong? targetAuthorId = null, ulong? channelId = null, ulong? guildId = null, ulong? moderatorId = null)
         {
             Count = count;
             MessageId = messageId;
-            UserId = userId;
+            TargetAuthorId = targetAuthorId;
             ChannelId = channelId;
             GuildId = guildId;
-            RequestedById = requestedById;
+            ModeratorId = moderatorId;
         }
     }
 }

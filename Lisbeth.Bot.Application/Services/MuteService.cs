@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Lisbeth.Bot.Application.Interfaces;
 using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.Entities;
@@ -10,6 +9,7 @@ using MikyM.Common.DataAccessLayer.UnitOfWork;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Lisbeth.Bot.Application.Services.Interfaces;
 
 namespace Lisbeth.Bot.Application.Services
 {

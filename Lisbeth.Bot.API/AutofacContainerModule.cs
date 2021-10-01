@@ -2,8 +2,8 @@
 using Autofac;
 using AutoMapper.Contrib.Autofac.DependencyInjection;
 using AutoMapper.Extensions.ExpressionMapping;
-using Lisbeth.Bot.Application.Interfaces;
 using Lisbeth.Bot.Application.Services;
+using Lisbeth.Bot.Application.Services.Interfaces;
 using Lisbeth.Bot.DataAccessLayer.Repositories;
 using Microsoft.AspNetCore.Http;
 using MikyM.Common.Application.Interfaces;

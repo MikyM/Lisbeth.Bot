@@ -20,7 +20,7 @@ namespace Lisbeth.Bot.DataAccessLayer
         public DbSet<Ban> Bans { get; set; }
         public DbSet<ServerBooster> ServerBoosters { get; set; }
         public DbSet<Audit> AuditLogs { get; set; }
-
+        public DbSet<Prune> Prunes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

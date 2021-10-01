@@ -2,7 +2,6 @@
 using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
-using Lisbeth.Bot.Application.Interfaces;
 using Lisbeth.Bot.DataAccessLayer.Specifications.MuteSpecifications;
 using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.Entities;
@@ -10,6 +9,7 @@ using MikyM.Discord.Interfaces;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Lisbeth.Bot.Application.Services.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {

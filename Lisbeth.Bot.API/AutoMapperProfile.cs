@@ -10,6 +10,7 @@ namespace Lisbeth.Bot.API
         {
             CreateMap<MuteReqDto, Mute>();
             CreateMap<MuteDisableReqDto, Mute>();
+            CreateMap<PruneReqDto, Prune>();
         }
     }
 }

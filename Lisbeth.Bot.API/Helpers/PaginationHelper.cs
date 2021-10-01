@@ -1,8 +1,8 @@
-﻿using Lisbeth.Bot.Application.Interfaces;
-using MikyM.Common.DataAccessLayer.Filters;
+﻿using MikyM.Common.DataAccessLayer.Filters;
 using System;
 using System.Collections.Generic;
 using Lisbeth.Bot.API.Models;
+using Lisbeth.Bot.Application.Services.Interfaces;
 
 namespace Lisbeth.Bot.API.Helpers
 {

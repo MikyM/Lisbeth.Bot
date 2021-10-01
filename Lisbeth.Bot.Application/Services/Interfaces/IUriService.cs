@@ -1,8 +1,8 @@
-﻿using MikyM.Common.DataAccessLayer.Filters;
-using System;
+﻿using System;
 using Microsoft.AspNetCore.Http;
+using MikyM.Common.DataAccessLayer.Filters;
 
-namespace Lisbeth.Bot.Application.Interfaces
+namespace Lisbeth.Bot.Application.Services.Interfaces
 {
     public interface IUriService
     {

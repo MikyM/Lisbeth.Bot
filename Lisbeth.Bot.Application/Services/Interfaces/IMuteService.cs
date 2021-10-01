@@ -1,10 +1,10 @@
-﻿using Lisbeth.Bot.DataAccessLayer;
+﻿using System.Threading.Tasks;
+using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.Application.Interfaces;
-using System.Threading.Tasks;
 
-namespace Lisbeth.Bot.Application.Interfaces
+namespace Lisbeth.Bot.Application.Services.Interfaces
 {
     public interface IMuteService : ICrudService<Mute, LisbethBotDbContext>
     {

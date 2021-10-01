@@ -1,19 +1,20 @@
-﻿using System.Threading.Tasks;
-using DSharpPlus;
+﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
-using JetBrains.Annotations;
 using Lisbeth.Bot.Domain.DTOs.Request;
+using System.Threading.Tasks;
+using JetBrains.Annotations;
 
 // ReSharper disable once CheckNamespace
 namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
 {
     // Menus for prunes
-    public partial class ModUtilApplicationCommands
+    public partial class PruneApplicationCommands
     {
         #region user
 
+        [UsedImplicitly]
         [SlashRequireUserPermissions(Permissions.ManageMessages)]
         [ContextMenu(ApplicationCommandType.UserContextMenu, "Prune last 10 messages")]
         public async Task PruneLastTenUserMenu(ContextMenuContext ctx)
@@ -31,9 +32,9 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
         #endregion
 
         #region message
-
+        [UsedImplicitly]
         [SlashRequireUserPermissions(Permissions.ManageMessages)]
-        [ContextMenu(ApplicationCommandType.MessageContextMenu, "Prune last 10 in channel")]
+        [ContextMenu(ApplicationCommandType.MessageContextMenu, "Prune last 10")]
         public async Task PruneLastTenFromThisMessageMenu(ContextMenuContext ctx)
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
@@ -46,8 +47,9 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
                 .AsEphemeral(true));
         }
 
+        [UsedImplicitly]
         [SlashRequireUserPermissions(Permissions.ManageMessages)]
-        [ContextMenu(ApplicationCommandType.MessageContextMenu, "Prune until this")]
+        [ContextMenu(ApplicationCommandType.MessageContextMenu, "Prune")]
         public async Task PruneUntilThisMessageMenu(ContextMenuContext ctx)
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
@@ -60,8 +62,9 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
                 .AsEphemeral(true));
         }
 
+        [UsedImplicitly]
         [SlashRequireUserPermissions(Permissions.ManageMessages)]
-        [ContextMenu(ApplicationCommandType.MessageContextMenu, "Author prune until this")]
+        [ContextMenu(ApplicationCommandType.MessageContextMenu, "Prune by author")]
         public async Task PruneUntilThisByThisAuthorMessageMenu(ContextMenuContext ctx)
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
