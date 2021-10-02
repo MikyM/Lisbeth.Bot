@@ -4,23 +4,24 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using VimeoDotNet;
+using VimeoDotNet.Net;
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport.Models
 {
-    public class Video
+    public class HtmlVideo
     {
         private string DiscordLink { get; set; }
-        private string VimeoLink { get; set; } = "";
         public static List<string> SupportedTypes { get; } = new List<string> { "mp4", "mov", "wmv", "avi", "flv" };
 
-        public Video(string discordLink)
+        public HtmlVideo(string discordLink)
         {
-            this.DiscordLink = discordLink;
+            DiscordLink ??= discordLink ?? throw new ArgumentNullException(nameof(discordLink));
         }
 
         public async Task<string> GetVimeoLink()
         {
-            if (!SupportedTypes.Any(x => x == this.DiscordLink.Split('.').Last()))
+            if (SupportedTypes.All(x => x != DiscordLink.Split('.').Last()))
             {
                 return "";
             }
@@ -29,7 +30,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Models
 
             using (HttpClient httpClient = HttpClientFactory.CreateClient())
             {
-                using HttpRequestMessage req = new HttpRequestMessage(HttpMethod.Get, this.DiscordLink);
+                using HttpRequestMessage req = new HttpRequestMessage(HttpMethod.Get, DiscordLink);
                 using HttpResponseMessage response = await httpClient.SendAsync(req).ConfigureAwait(false);
                 Stream stream = await response.Content.ReadAsStreamAsync();
                 request = await client.UploadEntireFileAsync(new BinaryContent(stream, "application/x-www-form-urlencoded"));
@@ -37,17 +38,15 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Models
             return $"https://player.vimeo.com/video/{request.ClipUri.Split('/').Last()}";
         }
 
-        public async Task<string> GetHtml()
+        public async Task<string> BuildAsync()
         {
             string link = await GetVimeoLink();
-            switch (link)
+            return link switch
             {
-                case "":
-                    return "";
-
-                default:
-                    return $"<div class=\"video\"><iframe src=\"{link}\" width=\"400\" height=\"240\" webkitallowfullscreen=\"\" mozallowfullscreen=\"\" allowfullscreen=\"\"></iframe></div>";
-            }
+                "" => "",
+                _ =>
+                    $"<div class=\"video\"><iframe src=\"{link}\" width=\"400\" height=\"240\" webkitallowfullscreen=\"\" mozallowfullscreen=\"\" allowfullscreen=\"\"></iframe></div>"
+            };
         }
     }
 }

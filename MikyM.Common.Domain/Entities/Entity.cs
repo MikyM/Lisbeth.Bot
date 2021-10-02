@@ -36,7 +36,7 @@ namespace MikyM.Common.Domain.Entities
 
         public override string ToString()
         {
-            return this.Id.ToString();
+            return Id.ToString();
         }
 
         public override bool Equals(object obj)

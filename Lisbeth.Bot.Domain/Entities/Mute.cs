@@ -19,7 +19,7 @@ namespace Lisbeth.Bot.Domain.Entities
 
         public Mute ShallowCopy()
         {
-            return (Mute)this.MemberwiseClone();
+            return (Mute)MemberwiseClone();
         }
     }
 }

@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Lisbeth.Bot.Application.Discord.ChatExport.Models;
 using Lisbeth.Bot.Domain.DTOs.Request;
 using MikyM.Common.DataAccessLayer.Specifications;
 
@@ -39,12 +40,12 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
 
             if (req.TicketId is not null)
             {
-                var resTicket = await _ticketService.GetBySpecificationsAsync<Ticket>(new Specifications<Ticket>(x => x.Id == req.TicketId && !x.IsDisabled));
+                var resTicket = await _ticketService.GetBySpecificationsAsync<Ticket>(new Specifications<Ticket>(x => x.Id == req.TicketId));
                 ticket = resTicket.FirstOrDefault();
             }
             else
             {
-                var resTicket = await _ticketService.GetBySpecificationsAsync<Ticket>(new Specifications<Ticket>(x => x.GuildId == req.GuildId && x.UserId == req.OwnerId && !x.IsDisabled));
+                var resTicket = await _ticketService.GetBySpecificationsAsync<Ticket>(new Specifications<Ticket>(x => x.GuildId == req.GuildId && x.UserId == req.OwnerId));
                 ticket = resTicket.FirstOrDefault();
             }
 
@@ -53,6 +54,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
             DiscordUser owner;
             DiscordChannel ticketLogChannel;
             DiscordChannel channel;
+            DiscordGuild guild;
 
             if (guildCfg is null)
             {
@@ -78,7 +80,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
             }
             try
             {
-                await _discord.Client.GetGuildAsync(guildCfg.GuildId);
+                guild = await _discord.Client.GetGuildAsync(guildCfg.GuildId);
             }
             catch (Exception)
             {
@@ -115,6 +117,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
             await Task.Delay(500);
             List<DiscordUser> users = new();
             List<DiscordMessage> messages = new();
+
             messages.AddRange(await channel.GetMessagesAsync());
 
             var embed = new DiscordEmbedBuilder();
@@ -146,7 +149,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
             }
             else
             {
-                throw new Exception("CSS file not found");
+                throw new Exception($"CSS file was not found at {path}");
             }
 
             path = Path.Combine(Directory.GetCurrentDirectory(), "ChatExport", "ChatExport.js");
@@ -158,15 +161,20 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
             }
             else
             {
-                throw new Exception("JS file not found");
+                throw new Exception($"JS file was not found at {path}");
             }
 
-            var htmlBuilder = new HtmlBuilder(messages, users, channel);
-            string html = await htmlBuilder.Build(css, js);
+            var htmlBuilder = new HtmlChatBuilder();
+            htmlBuilder.WithChannel(channel).WithUsers(users).WithMessages(messages).WithCss(css).WithJs(js);
+            string html = await htmlBuilder.BuildAsync();
+
+            var parser = new MarkdownParser(html, users, guild, _discord);
+            html = await parser.GetParsedContentAsync();
+
 
             string usersString = users.Aggregate("", (current, user) => current + $"{user.Mention}\n");
 
-            DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder();
+            var embedBuilder = new DiscordEmbedBuilder();
 
             embedBuilder.WithFooter(triggerUser is null
                 ? "This transcript has been automatically saved"

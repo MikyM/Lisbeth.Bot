@@ -28,9 +28,9 @@ namespace Lisbeth.Bot.Application.Discord.Services
         {
             if (req is null) throw new ArgumentNullException(nameof(req));
 
-            if (ctx is null) return await this.MuteAsync(req, logChannelId, null, null);
+            if (ctx is null) return await MuteAsync(req, logChannelId, null, null);
 
-            return await this.MuteAsync(req, logChannelId, ctx.Guild, 
+            return await MuteAsync(req, logChannelId, ctx.Guild, 
                 ctx.TargetMember != null 
                     ? ctx.TargetMember
                     : ctx.TargetMessage != null
@@ -42,9 +42,9 @@ namespace Lisbeth.Bot.Application.Discord.Services
         {
             if (req is null) throw new ArgumentNullException(nameof(req));
 
-            if (ctx is null) return await this.MuteAsync(req, logChannelId, null, null);
+            if (ctx is null) return await MuteAsync(req, logChannelId, null, null);
 
-            return await this.MuteAsync(req, logChannelId, ctx.Guild, (DiscordMember)ctx.ResolvedUserMentions[0], ctx.Member);
+            return await MuteAsync(req, logChannelId, ctx.Guild, (DiscordMember)ctx.ResolvedUserMentions[0], ctx.Member);
         }
 
         public async Task<DiscordEmbed> MuteAsync(MuteReqDto req, ulong logChannelId = 0, DiscordGuild guild = null, DiscordMember member = null, DiscordUser moderator = null)
@@ -225,16 +225,16 @@ namespace Lisbeth.Bot.Application.Discord.Services
         {
             if (req is null) throw new ArgumentNullException(nameof(req));
 
-            if (ctx is null) return await this.UnmuteAsync(req, logChannelId, null, null);
+            if (ctx is null) return await UnmuteAsync(req, logChannelId, null, null);
 
-            return await this.UnmuteAsync(req, logChannelId, ctx.Guild, ctx.TargetMember, ctx.Member);
+            return await UnmuteAsync(req, logChannelId, ctx.Guild, ctx.TargetMember, ctx.Member);
         }
 
         public async Task<DiscordEmbed> UnmuteAsync(MuteDisableReqDto req, ulong logChannelId = 0, InteractionContext ctx = null)
         {
             if (req is null) throw new ArgumentNullException(nameof(req));
 
-            if (ctx is null) return await this.UnmuteAsync(req, logChannelId, null, null);
+            if (ctx is null) return await UnmuteAsync(req, logChannelId, null, null);
 
             DiscordMember member;
             try
@@ -246,7 +246,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 throw new ArgumentException($"User with Id: {req.UserId} isn't the guilds member.");
             }
 
-            return await this.UnmuteAsync(req, logChannelId, ctx.Guild, member, ctx.Member);
+            return await UnmuteAsync(req, logChannelId, ctx.Guild, member, ctx.Member);
         }
 
         public async Task<DiscordEmbed> UnmuteAsync(MuteDisableReqDto req, ulong logChannelId = 0, DiscordGuild guild = null, DiscordMember member = null, DiscordUser moderator = null)
@@ -373,20 +373,20 @@ namespace Lisbeth.Bot.Application.Discord.Services
         {
             if (req is null) throw new ArgumentNullException(nameof(req));
 
-            if (ctx is null) return await this.GetAsync(req, logChannelId, null, null);
+            if (ctx is null) return await GetAsync(req, logChannelId, null, null);
 
             DiscordGuild guild = ctx.Guild;
             DiscordMember member = ctx.TargetMember;
             DiscordUser moderator = ctx.Member;
 
-            return await this.GetAsync(req, logChannelId, guild, member, moderator);
+            return await GetAsync(req, logChannelId, guild, member, moderator);
         }
 
         public async Task<DiscordEmbed> GetAsync(MuteGetReqDto req, ulong logChannelId = 0, InteractionContext ctx = null)
         {
             if (req is null) throw new ArgumentNullException(nameof(req));
 
-            if (ctx is null) return await this.GetAsync(req, logChannelId, null, null);
+            if (ctx is null) return await GetAsync(req, logChannelId, null, null);
 
             DiscordMember member = null;
 
@@ -399,7 +399,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 throw new ArgumentException($"User with Id: {req.UserId} isn't the guilds member.");
             }
 
-            return await this.GetAsync(req, logChannelId, ctx.Guild, member, ctx.Member);
+            return await GetAsync(req, logChannelId, ctx.Guild, member, ctx.Member);
         }
         public async Task<DiscordEmbed> GetAsync(MuteGetReqDto req, ulong logChannelId = 0, DiscordGuild guild = null, DiscordMember member = null, DiscordUser moderator = null)
         {

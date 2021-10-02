@@ -14,7 +14,7 @@ namespace Lisbeth.Bot.Domain.Entities
 
         public Ban ShallowCopy()
         {
-            return (Ban)this.MemberwiseClone();
+            return (Ban)MemberwiseClone();
         }
     }
 }

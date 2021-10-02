@@ -28,18 +28,18 @@ namespace Lisbeth.Bot.Application.Discord.Services
         {
             if (req is null) throw new ArgumentNullException(nameof(req));
 
-            if (ctx is null) return await this.PruneAsync(req, logChannelId, null, null);
+            if (ctx is null) return await PruneAsync(req, logChannelId, null, null);
 
-            return await this.PruneAsync(req, logChannelId, ctx.Channel, ctx.Guild, ctx.Member, ctx.ResolvedUserMentions?[0], null, isSingleMessageDelete, ctx.InteractionId);
+            return await PruneAsync(req, logChannelId, ctx.Channel, ctx.Guild, ctx.Member, ctx.ResolvedUserMentions?[0], null, isSingleMessageDelete, ctx.InteractionId);
         }
 
         public async Task<DiscordEmbed> PruneAsync(PruneReqDto req, ulong logChannelId = 0, ContextMenuContext ctx = null, bool isSingleMessageDelete = false)
         {
             if (req is null) throw new ArgumentNullException(nameof(req));
 
-            if (ctx is null) return await this.PruneAsync(req, logChannelId, null, null);
+            if (ctx is null) return await PruneAsync(req, logChannelId, null, null);
 
-            return await this.PruneAsync(req, logChannelId, ctx.Channel, ctx.Guild, ctx.Member, 
+            return await PruneAsync(req, logChannelId, ctx.Channel, ctx.Guild, ctx.Member, 
                 ctx.TargetMessage.Author != null 
                     ? ctx.TargetMessage.Author
                     : ctx.TargetUser != null 
