@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders
 {
-    public class HtmlChatBuilder
+    public class HtmlChatBuilder : IHtmlChatBuilder
     {
         public List<DiscordUser> Users { get; private set; }
         public List<DiscordMessage> Messages { get; private set; }
@@ -14,35 +14,35 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders
         public string Js { get; private set; }
         public string Css { get; private set; }
 
-        public HtmlChatBuilder WithUsers(List<DiscordUser> users)
+        public IHtmlChatBuilder WithUsers(List<DiscordUser> users)
         {
             Users ??= users ?? throw new ArgumentNullException(nameof(users));
 
             return this;
         }
 
-        public HtmlChatBuilder WithMessages(List<DiscordMessage> messages)
+        public IHtmlChatBuilder WithMessages(List<DiscordMessage> messages)
         {
             Messages ??= messages ?? throw new ArgumentNullException(nameof(messages));
 
             return this;
         }
 
-        public HtmlChatBuilder WithChannel(DiscordChannel channel)
+        public IHtmlChatBuilder WithChannel(DiscordChannel channel)
         {
             Channel ??= channel ?? throw new ArgumentNullException(nameof(channel));
 
             return this;
         }
 
-        public HtmlChatBuilder WithJs(string  js)
+        public IHtmlChatBuilder WithJs(string  js)
         {
             Js ??= js ?? throw new ArgumentNullException(nameof(js));
 
             return this;
         }
 
-        public HtmlChatBuilder WithCss(string css)
+        public IHtmlChatBuilder WithCss(string css)
         {
             Css ??= css ?? throw new ArgumentNullException(nameof(css));
 

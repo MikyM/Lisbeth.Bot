@@ -2,6 +2,7 @@
 using Autofac;
 using AutoMapper.Contrib.Autofac.DependencyInjection;
 using AutoMapper.Extensions.ExpressionMapping;
+using Lisbeth.Bot.Application.Discord.ChatExport.Builders;
 using Lisbeth.Bot.Application.Services;
 using Lisbeth.Bot.Application.Services.Interfaces;
 using Lisbeth.Bot.DataAccessLayer.Repositories;
@@ -38,6 +39,10 @@ namespace Lisbeth.Bot.API
                 .AsImplementedInterfaces().InstancePerLifetimeScope();
             // bulk register custom repositories - follow naming convention
             builder.RegisterAssemblyTypes(typeof(MuteRepository).Assembly).Where(t => t.Name.EndsWith("Repository"))
+                .AsImplementedInterfaces().InstancePerLifetimeScope();
+
+            // register chat builders
+            builder.RegisterAssemblyTypes(typeof(HtmlChatBuilder).Assembly).Where(t => t.Name.EndsWith("ChatBuilder"))
                 .AsImplementedInterfaces().InstancePerLifetimeScope();
 
             // pagination stuff

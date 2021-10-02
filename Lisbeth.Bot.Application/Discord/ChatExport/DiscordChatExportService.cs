@@ -24,17 +24,31 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
         private readonly IDiscordService _discord;
         private readonly IGuildService _guildService;
         private readonly ITicketService _ticketService;
+        private readonly IHtmlChatBuilder _htmlChatBuilder;
 
-        public DiscordChatExportService(IDiscordService discord, IGuildService guildService, ITicketService ticketService)
+        public DiscordChatExportService(IDiscordService discord, IGuildService guildService, ITicketService ticketService, IHtmlChatBuilder htmlChatBuilder)
         {
             _discord = discord;
             _guildService = guildService;
             _ticketService = ticketService;
+            _htmlChatBuilder = htmlChatBuilder;
         }
 
         public async Task<DiscordEmbed> ExportToHtml(TicketExportReqDto req, DiscordUser triggerUser = null)
         {
+            if (req is null)
+            {
+                throw new ArgumentNullException(nameof(req));
+            }
+
             var resGuild = await _guildService.GetBySpecificationsAsync<Guild>(new Specifications<Guild>(x => x.GuildId == req.GuildId && !x.IsDisabled));
+
+            var guildCfg = resGuild.FirstOrDefault();
+
+            if (guildCfg is null)
+            {
+                throw new ArgumentException("Guild doesn't exist in database.");
+            }
 
             Ticket ticket;
 
@@ -49,29 +63,14 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
                 ticket = resTicket.FirstOrDefault();
             }
 
-            var guildCfg = resGuild.FirstOrDefault();
-
             DiscordUser owner;
             DiscordChannel ticketLogChannel;
             DiscordChannel channel;
             DiscordGuild guild;
 
-            if (guildCfg is null)
-            {
-                throw new ArgumentException("Guild doesn't exist in database.");
-            }
-            if (req is null)
-            {
-                throw new ArgumentNullException(nameof(req));
-            }
-
             if (ticket is null)
             {
                 throw new ArgumentException("Ticket doesn't exist in database.");
-            }
-            if (req is null)
-            {
-                throw new ArgumentNullException(nameof(req));
             }
 
             if (guildCfg.TicketLogChannelId is null)
@@ -164,9 +163,8 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
                 throw new Exception($"JS file was not found at {path}");
             }
 
-            var htmlBuilder = new HtmlChatBuilder();
-            htmlBuilder.WithChannel(channel).WithUsers(users).WithMessages(messages).WithCss(css).WithJs(js);
-            string html = await htmlBuilder.BuildAsync();
+            _htmlChatBuilder.WithChannel(channel).WithUsers(users).WithMessages(messages).WithCss(css).WithJs(js);
+            string html = await _htmlChatBuilder.BuildAsync();
 
             var parser = new MarkdownParser(html, users, guild, _discord);
             html = await parser.GetParsedContentAsync();
