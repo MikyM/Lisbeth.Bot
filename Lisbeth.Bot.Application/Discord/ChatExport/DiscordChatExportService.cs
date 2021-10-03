@@ -24,14 +24,12 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
         private readonly IDiscordService _discord;
         private readonly IGuildService _guildService;
         private readonly ITicketService _ticketService;
-        private readonly IHtmlChatBuilder _htmlChatBuilder;
 
-        public DiscordChatExportService(IDiscordService discord, IGuildService guildService, ITicketService ticketService, IHtmlChatBuilder htmlChatBuilder)
+        public DiscordChatExportService(IDiscordService discord, IGuildService guildService, ITicketService ticketService)
         {
             _discord = discord;
             _guildService = guildService;
             _ticketService = ticketService;
-            _htmlChatBuilder = htmlChatBuilder;
         }
 
         public async Task<DiscordEmbed> ExportToHtml(TicketExportReqDto req, DiscordUser triggerUser = null)
@@ -163,8 +161,9 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
                 throw new Exception($"JS file was not found at {path}");
             }
 
-            _htmlChatBuilder.WithChannel(channel).WithUsers(users).WithMessages(messages).WithCss(css).WithJs(js);
-            string html = await _htmlChatBuilder.BuildAsync();
+            var htmlChatBuilder = new HtmlChatBuilder();
+            htmlChatBuilder.WithChannel(channel).WithUsers(users).WithMessages(messages).WithCss(css).WithJs(js);
+            string html = await htmlChatBuilder.BuildAsync();
 
             var parser = new MarkdownParser(html, users, guild, _discord);
             html = await parser.GetParsedContentAsync();

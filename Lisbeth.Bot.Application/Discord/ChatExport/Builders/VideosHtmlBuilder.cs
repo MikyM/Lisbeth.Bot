@@ -6,7 +6,7 @@ using Lisbeth.Bot.Application.Discord.ChatExport.Models;
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders
 {
-    public class VideosHtmlBuilder
+    public class VideosHtmlBuilder : IAsyncHtmlBuilder
     {
         public IReadOnlyList<DiscordAttachment> Videos { get; private set; }
 

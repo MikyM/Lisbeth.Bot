@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders
 {
-    public class ImagesHtmlBuilder
+    public class ImagesHtmlBuilder : IAsyncHtmlBuilder
     {
         public IReadOnlyList<DiscordAttachment> Images { get; private set; }
 

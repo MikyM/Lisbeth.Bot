@@ -7,7 +7,7 @@ using Lisbeth.Bot.Application.Discord.ChatExport.Models;
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders
 {
-    public class AttachmentsHtmlBuilder
+    public class AttachmentsHtmlBuilder : IAsyncHtmlBuilder
     {
         public IReadOnlyList<DiscordAttachment> Attachments { get; private set; }
 
@@ -23,7 +23,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders
             return this;
         }
 
-        public async Task<string> Build()
+        public async Task<string> BuildAsync()
         {
             if (Attachments.Count == 0)
             {

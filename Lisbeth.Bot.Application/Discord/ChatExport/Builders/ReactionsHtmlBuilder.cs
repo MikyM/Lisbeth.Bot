@@ -3,10 +3,11 @@ using Lisbeth.Bot.Application.Discord.ChatExport.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders
 {
-    public class ReactionsHtmlBuilder
+    public class ReactionsHtmlBuilder : IAsyncHtmlBuilder
     {
         public List<DiscordReaction> Reactions { get; private set; }
 
@@ -22,7 +23,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders
             return this;
         }
 
-        public string Build()
+        public Task<string> BuildAsync()
         {
             //Dictionary<DiscordReaction, int> reactions = Reactions.GroupBy(x => x).ToDictionary(x => x.Key, x => x.Count());
             string html = "";
@@ -33,7 +34,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders
                 html += reaction.Build();
             }
 
-            return $"<div class=\"message-reactions\">{html}</div>";
+            return Task.FromResult($"<div class=\"message-reactions\">{html}</div>");
         }
     }
 }

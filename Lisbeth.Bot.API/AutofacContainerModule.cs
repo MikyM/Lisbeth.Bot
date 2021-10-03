@@ -41,9 +41,9 @@ namespace Lisbeth.Bot.API
             builder.RegisterAssemblyTypes(typeof(MuteRepository).Assembly).Where(t => t.Name.EndsWith("Repository"))
                 .AsImplementedInterfaces().InstancePerLifetimeScope();
 
-            // register chat builders
+            /*// register chat builders
             builder.RegisterAssemblyTypes(typeof(HtmlChatBuilder).Assembly).Where(t => t.Name.EndsWith("ChatBuilder"))
-                .AsImplementedInterfaces().InstancePerLifetimeScope();
+                .AsImplementedInterfaces().InstancePerLifetimeScope();*/
 
             // pagination stuff
             builder.RegisterType<HttpContextAccessor>().As<IHttpContextAccessor>().SingleInstance();

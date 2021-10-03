@@ -6,7 +6,7 @@ using Lisbeth.Bot.Application.Discord.ChatExport.Models;
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders
 {
-    public class MessagesHtmlBuilder
+    public class MessagesHtmlBuilder : IAsyncHtmlBuilder
     {
         public List<DiscordMessage> Messages { get;private set; }
 
