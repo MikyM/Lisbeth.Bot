@@ -32,7 +32,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
             _ticketService = ticketService;
         }
 
-        public async Task<DiscordEmbed> ExportToHtml(TicketExportReqDto req, DiscordUser triggerUser = null)
+        public async Task<DiscordEmbed> ExportToHtmlAsync(TicketExportReqDto req, DiscordUser triggerUser = null)
         {
             if (req is null)
             {

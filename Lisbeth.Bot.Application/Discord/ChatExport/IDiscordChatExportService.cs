@@ -6,6 +6,6 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
 {
     public interface IDiscordChatExportService
     {
-        public Task<DiscordEmbed> ExportToHtml(TicketExportReqDto req, DiscordUser triggerUser = null);
+        public Task<DiscordEmbed> ExportToHtmlAsync(TicketExportReqDto req, DiscordUser triggerUser = null);
     }
 }
