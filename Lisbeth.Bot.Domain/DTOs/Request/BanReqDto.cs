@@ -22,28 +22,28 @@ namespace Lisbeth.Bot.Domain.DTOs.Request
     public class BanReqDto
     {
         public long Id { get; set; }
-        public ulong UserId { get; set; }
+        public ulong TargetUserId { get; set; }
         public ulong GuildId { get; set; }
-        public DateTime? AppliedUntil { get; set; }
-        public ulong AppliedById { get; set; }
+        public DateTime AppliedUntil { get; set; }
+        public ulong AppliedOnBehalfOfId { get; set; }
         public string Reason { get; set; }
 
         public BanReqDto()
         {
         }
-        public BanReqDto(ulong user, ulong guild, ulong appliedById, DateTime? appliedUntil) : this(user, guild, appliedById, appliedUntil, null)
+        public BanReqDto(ulong targetUserId, ulong guildId, ulong appliedOnBehalfOfId, DateTime appliedUntil) : this(targetUserId, guildId, appliedOnBehalfOfId, appliedUntil, null)
         {
-            UserId = user;
-            GuildId = guild;
+            TargetUserId = targetUserId;
+            GuildId = guildId;
             AppliedUntil = appliedUntil;
-            AppliedById = appliedById;
+            AppliedOnBehalfOfId = appliedOnBehalfOfId;
         }
-        public BanReqDto(ulong user, ulong guild, ulong appliedById, DateTime? appliedUntil, string reason)
+        public BanReqDto(ulong targetUserId, ulong guildId, ulong appliedOnBehalfOfId, DateTime appliedUntil, string reason)
         {
-            UserId = user;
-            GuildId = guild;
+            TargetUserId = targetUserId;
+            GuildId = guildId;
             AppliedUntil = appliedUntil;
-            AppliedById = appliedById;
+            AppliedOnBehalfOfId = appliedOnBehalfOfId;
             Reason = reason;
         }
     }

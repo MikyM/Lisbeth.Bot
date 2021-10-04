@@ -26,6 +26,7 @@ using Lisbeth.Bot.Application.Extensions;
 using Lisbeth.Bot.Domain.DTOs.Request;
 using System;
 using System.Threading.Tasks;
+using Lisbeth.Bot.Application.Services.Interfaces;
 
 // ReSharper disable once CheckNamespace
 namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
@@ -34,9 +35,9 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
     [UsedImplicitly]
     public partial class MuteApplicationCommands : ApplicationCommandModule
     {
-        [UsedImplicitly]
         // ReSharper disable once InconsistentNaming
         public IDiscordMuteService _discordMuteService { private get; set; }
+        public IDiscordMessageService _discordMessageService { private get; set; }
 
         [SlashRequireUserPermissions(Permissions.BanMembers)]
         [SlashCommand("mute", "A command that allows mute actions.")]

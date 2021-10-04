@@ -25,25 +25,25 @@ namespace Lisbeth.Bot.Domain.DTOs.Request
         public ulong TargetUserId { get; set; }
         public ulong GuildId { get; set; }
         public DateTime AppliedUntil { get; set; }
-        public ulong AppliedById { get; set; }
+        public ulong AppliedOnBehalfOfId { get; set; }
         public string Reason { get; set; }
 
         public MuteReqDto()
         {
         }
-        public MuteReqDto(ulong targetUserId, ulong guildId, ulong appliedById, DateTime appliedUntil) : this(targetUserId, guildId, appliedById, appliedUntil, null)
+        public MuteReqDto(ulong targetUserId, ulong guildId, ulong appliedOnBehalfOfId, DateTime appliedUntil) : this(targetUserId, guildId, appliedOnBehalfOfId, appliedUntil, null)
         {
             TargetUserId = targetUserId;
             GuildId = guildId;
             AppliedUntil = appliedUntil;
-            AppliedById = appliedById;
+            AppliedOnBehalfOfId = appliedOnBehalfOfId;
         }
-        public MuteReqDto(ulong targetUserId, ulong guildId, ulong appliedById, DateTime appliedUntil, string reason)
+        public MuteReqDto(ulong targetUserId, ulong guildId, ulong appliedOnBehalfOfId, DateTime appliedUntil, string reason)
         {
             TargetUserId = targetUserId;
             GuildId = guildId;
             AppliedUntil = appliedUntil;
-            AppliedById = appliedById;
+            AppliedOnBehalfOfId = appliedOnBehalfOfId;
             Reason = reason;
         }
     }

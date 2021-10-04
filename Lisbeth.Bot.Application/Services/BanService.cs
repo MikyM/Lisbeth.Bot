@@ -39,7 +39,7 @@ namespace Lisbeth.Bot.Application.Services
             if (req is null) throw new ArgumentNullException(nameof(req));
 
             var res = await _unitOfWork.GetRepository<Repository<Ban>>()
-                .GetBySpecificationsAsync(new Specifications<Ban>(x => x.UserId == req.UserId && x.GuildId == req.GuildId && !x.IsDisabled));
+                .GetBySpecificationsAsync(new Specifications<Ban>(x => x.UserId == req.TargetUserId && x.GuildId == req.GuildId && !x.IsDisabled));
 
             var entity = res.FirstOrDefault();
             if (entity is null) return (await base.AddAsync(req, shouldSave), null);
@@ -49,7 +49,7 @@ namespace Lisbeth.Bot.Application.Services
             var shallowCopy = entity.ShallowCopy();
 
             base.BeginUpdate(entity);
-            entity.AppliedById = req.AppliedById;
+            entity.AppliedById = req.AppliedOnBehalfOfId;
             entity.AppliedOn = DateTime.UtcNow;
             entity.AppliedUntil = req.AppliedUntil;
             entity.Reason = req.Reason;
@@ -64,7 +64,7 @@ namespace Lisbeth.Bot.Application.Services
             if (entry is null) throw new ArgumentNullException(nameof(entry));
 
             var res = await base.GetBySpecificationsAsync<Ban>(
-                new Specifications<Ban>(x => x.UserId == entry.UserId && x.GuildId == entry.GuildId && !x.IsDisabled));
+                new Specifications<Ban>(x => x.UserId == entry.TargetUserId && x.GuildId == entry.GuildId && !x.IsDisabled));
 
             var entity = res.FirstOrDefault();
             if (entity is null) return null;
@@ -72,7 +72,7 @@ namespace Lisbeth.Bot.Application.Services
             base.BeginUpdate(entity);
             entity.IsDisabled = true;
             entity.LiftedOn = DateTime.UtcNow;
-            entity.LiftedById = entry.LiftedById;
+            entity.LiftedById = entry.LiftedOnBehalfOfId;
 
             if (shouldSave) await base.CommitAsync();
 

@@ -25,17 +25,17 @@ namespace Lisbeth.Bot.Domain.DTOs.Request
         public ulong TargetUserId { get; set; }
         public ulong GuildId { get; set; }
         public DateTime LiftedOn { get; set; } = DateTime.UtcNow;
-        public ulong LiftedById { get; set; }
+        public ulong LiftedOnBehalfOfIdId { get; set; }
 
         public MuteDisableReqDto()
         {
         }
 
-        public MuteDisableReqDto(ulong targetUserId, ulong guildId, ulong liftedBy)
+        public MuteDisableReqDto(ulong targetUserId, ulong guildId, ulong liftedOnBehalfOfId)
         {
             TargetUserId = targetUserId;
             GuildId = guildId;
-            LiftedById = liftedBy;
+            LiftedOnBehalfOfIdId = liftedOnBehalfOfId;
         }
     }
 }

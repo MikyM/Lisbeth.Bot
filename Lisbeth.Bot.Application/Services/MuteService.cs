@@ -49,7 +49,7 @@ namespace Lisbeth.Bot.Application.Services
             var shallowCopy = entity.ShallowCopy();
 
             base.BeginUpdate(entity);
-            entity.AppliedById = req.AppliedById;
+            entity.AppliedById = req.AppliedOnBehalfOfId;
             entity.AppliedOn = DateTime.UtcNow;
             entity.AppliedUntil = req.AppliedUntil;
             entity.Reason = req.Reason;
@@ -72,7 +72,7 @@ namespace Lisbeth.Bot.Application.Services
             base.BeginUpdate(entity);
             entity.IsDisabled = true;
             entity.LiftedOn = DateTime.UtcNow;
-            entity.LiftedById = entry.LiftedById;
+            entity.LiftedById = entry.LiftedOnBehalfOfIdId;
 
             if (shouldSave) await base.CommitAsync();
 

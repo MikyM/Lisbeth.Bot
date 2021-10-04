@@ -75,11 +75,11 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             try
             {
-                moderator = await guild.GetMemberAsync(req.AppliedById);
+                moderator = await guild.GetMemberAsync(req.AppliedOnBehalfOfId);
             }
             catch (Exception)
             {
-                throw new ArgumentException($"User with Id: {req.AppliedById} doesn't exist or isn't this guild's target.");
+                throw new ArgumentException($"User with Id: {req.AppliedOnBehalfOfId} doesn't exist or isn't this guild's target.");
             }
 
             return await MuteAsync(guild, target, moderator, req.AppliedUntil, req.Reason, req);
@@ -269,11 +269,11 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             try
             {
-                moderator = await guild.GetMemberAsync(req.LiftedById);
+                moderator = await guild.GetMemberAsync(req.LiftedOnBehalfOfIdId);
             }
             catch (Exception)
             {
-                throw new ArgumentException($"User with Id: {req.LiftedById} doesn't exist or isn't this guild's target.");
+                throw new ArgumentException($"User with Id: {req.LiftedOnBehalfOfIdId} doesn't exist or isn't this guild's target.");
             }
 
             return await UnmuteAsync(guild, target, moderator, req);
@@ -363,7 +363,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 embed.WithFooter($"Case ID: {res.Id} | Member ID: {target.Id}");
             }
 
-            if (guildCfg.LogChannelId is not null) return embed; // means we're not sending to log channel
+            if (guildCfg.LogChannelId is null) return embed; // means we're not sending to log channel
 
             // means we're logging to log channel and returning an embed for interaction or other purposes
 
@@ -407,11 +407,11 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             try
             {
-                if (guild is not null) moderator = await guild.GetMemberAsync(req.OnBehalfId);
+                if (guild is not null) moderator = await guild.GetMemberAsync(req.OnBehalfOfId);
             }
             catch (Exception)
             {
-                throw new ArgumentException($"User with Id: {req.OnBehalfId} doesn't exist or isn't this guild's target.");
+                throw new ArgumentException($"User with Id: {req.OnBehalfOfId} doesn't exist or isn't this guild's target.");
             }
 
             try
@@ -518,7 +518,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 embed.WithFooter($"Case ID: unknown | User ID: {target.Id}");
             }
 
-            if (guildCfg.LogChannelId is not null) return embed; // means we're not sending to log channel
+            if (guildCfg.LogChannelId is null) return embed; // means we're not sending to log channel
 
             // means we're logging to log channel and returning an embed for interaction or other purposes
 

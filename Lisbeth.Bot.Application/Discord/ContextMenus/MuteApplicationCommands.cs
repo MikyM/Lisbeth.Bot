@@ -97,6 +97,8 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
 
             var embed = await _discordMuteService.MuteAsync(ctx, DateTime.MaxValue, "No reason provided - muted via message context menu");
 
+            //await _discordMessageService.PruneAsync()
+
             var msgs = await ctx.Channel.GetMessagesAsync();
 
             var msgsToDel = msgs.Where(x => x.Author.Id == ctx.TargetMessage.Author.Id).OrderByDescending(x => x.Timestamp).Take(10);

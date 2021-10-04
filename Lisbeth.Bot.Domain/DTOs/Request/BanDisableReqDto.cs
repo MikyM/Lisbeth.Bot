@@ -22,20 +22,20 @@ namespace Lisbeth.Bot.Domain.DTOs.Request
     public class BanDisableReqDto
     {
         public long Id { get; set; }
-        public ulong UserId { get; set; }
+        public ulong TargetUserId { get; set; }
         public ulong GuildId { get; set; }
-        public DateTime? LiftedOn { get; set; } = DateTime.UtcNow;
-        public ulong LiftedById { get; set; }
+        public DateTime LiftedOn { get; set; } = DateTime.UtcNow;
+        public ulong LiftedOnBehalfOfId { get; set; }
 
         public BanDisableReqDto()
         {
         }
 
-        public BanDisableReqDto(ulong user, ulong guild, ulong liftedBy)
+        public BanDisableReqDto(ulong targetUserId, ulong guildId, ulong liftedOnBehalfOfId)
         {
-            UserId = user;
-            GuildId = guild;
-            LiftedById = liftedBy;
+            TargetUserId = targetUserId;
+            GuildId = guildId;
+            LiftedOnBehalfOfId = liftedOnBehalfOfId;
         }
     }
 }

@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Domain.DTOs.Request;
 using System.Threading.Tasks;
@@ -24,8 +25,11 @@ namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
 {
     public interface IDiscordBanService
     {
-        Task<DiscordEmbed> BanAsync(BanReqDto req, ulong logChannelId = 0, InteractionContext ctx = null);
-        Task<DiscordEmbed> UnbanAsync(BanDisableReqDto req, ulong logChannelId = 0, InteractionContext ctx = null);
-        Task<DiscordEmbed> GetAsync(BanGetReqDto req, ulong logChannelId = 0, InteractionContext ctx = null);
+        Task<DiscordEmbed> BanAsync(BanReqDto req);
+        Task<DiscordEmbed> BanAsync(InteractionContext ctx, DateTime appliedUntil, string reason = "");
+        Task<DiscordEmbed> UnbanAsync(BanDisableReqDto req);
+        Task<DiscordEmbed> UnbanAsync(InteractionContext ctx);
+        Task<DiscordEmbed> GetAsync(BanGetReqDto req);
+        Task<DiscordEmbed> GetAsync(InteractionContext ctx);
     }
 }
