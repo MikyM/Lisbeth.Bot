@@ -21,21 +21,21 @@ namespace Lisbeth.Bot.Domain.DTOs.Request
 {
     public class MuteDisableReqDto
     {
-        public long Id { get; set; }
-        public ulong TargetUserId { get; set; }
-        public ulong GuildId { get; set; }
+        public long? Id { get; set; }
+        public ulong? TargetUserId { get; set; }
+        public ulong? GuildId { get; set; }
         public DateTime LiftedOn { get; set; } = DateTime.UtcNow;
-        public ulong LiftedOnBehalfOfIdId { get; set; }
+        public ulong RequestedOnBehalfOfIdId { get; set; }
 
         public MuteDisableReqDto()
         {
         }
 
-        public MuteDisableReqDto(ulong targetUserId, ulong guildId, ulong liftedOnBehalfOfId)
+        public MuteDisableReqDto(ulong? targetUserId, ulong? guildId, ulong requestedOnBehalfOfId)
         {
             TargetUserId = targetUserId;
             GuildId = guildId;
-            LiftedOnBehalfOfIdId = liftedOnBehalfOfId;
+            RequestedOnBehalfOfIdId = requestedOnBehalfOfId;
         }
     }
 }

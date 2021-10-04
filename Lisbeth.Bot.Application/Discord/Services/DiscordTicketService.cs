@@ -29,6 +29,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Lisbeth.Bot.DataAccessLayer.Specifications.TicketSpecifications;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {
@@ -48,16 +50,75 @@ namespace Lisbeth.Bot.Application.Discord.Services
             _guildService = guildService;
         }
 
-        public Task<DiscordMessageBuilder> CloseTicketAsync(TicketCloseReqDto req, DiscordInteraction intr = null)
+        public async Task<DiscordMessageBuilder> CloseTicketAsync(TicketCloseReqDto req)
         {
             if (req is null) throw new ArgumentNullException(nameof(req));
-            return intr is null
-                ? CloseTicketAsync(req, null, null)
-                : CloseTicketAsync(req, intr.Channel, intr.User, intr.Guild);
+
+
+            DiscordChannel target = null;
+            DiscordMember moderator;
+            Ticket ticket;
+
+            if (req.Id is null && req.ChannelId is null && (req.OwnerId is null || req.GuildId is null))
+                throw new ArgumentException("You must supply either a ticket Id or a channel Id or a user Id and a guild Id");
+            
+            if (req.Id is not null)
+            {
+                ticket = await _ticketService.GetAsync<Ticket>(req.Id.Value);
+                if (ticket is null)
+                    throw new ArgumentException(
+                        $"Ticket in guild with Id: {req.GuildId} and owner with Id: {req.OwnerId} doesn't exist in the database.");
+
+                req.ChannelId = ticket.ChannelId;
+                req.GuildId = ticket.GuildId;
+            }
+            else if (req.OwnerId is not null && req.GuildId is not null)
+            {
+                var res = await _ticketService.GetBySpecificationsAsync<Ticket>(new TicketBaseGetSpecifications(null, req.OwnerId, req.GuildId, null, false, 1));
+                ticket = res.FirstOrDefault();
+                if (ticket is null)
+                    throw new ArgumentException(
+                        $"Opened ticket in guild with Id: {req.GuildId} and owner with Id: {req.OwnerId} doesn't exist in the database.");
+
+                req.ChannelId = ticket.ChannelId;
+                req.GuildId = ticket.GuildId;
+            }
+            else
+            {
+                try
+                {
+                    target = await _discord.Client.GetChannelAsync(req.ChannelId.Value);
+                }
+                catch (Exception)
+                {
+                    throw new ArgumentException($"User with Id: {req.ChannelId} doesn't exist or isn't this guild's target.");
+                }
+            }
+
+            target ??= await _discord.Client.GetChannelAsync(req.ChannelId.Value);
+
+            var guild = target.Guild;
+
+            try
+            {
+                moderator = await guild.GetMemberAsync(req.RequestedById);
+            }
+            catch (Exception)
+            {
+                throw new ArgumentException($"User with Id: {req.RequestedById} doesn't exist or isn't this guild's target.");
+            }
+
+            return await CloseTicketAsync(guild, target, moderator, req);
         }
 
-        public async Task<DiscordMessageBuilder> CloseTicketAsync(TicketCloseReqDto req, DiscordChannel channel = null, DiscordUser user = null,
-            DiscordGuild guild = null)
+        public async Task<DiscordMessageBuilder> CloseTicketAsync(DiscordInteraction intr)
+        {
+            if (intr is null) throw new ArgumentNullException(nameof(intr));
+
+            return await CloseTicketAsync(intr.Guild, intr.Channel, (DiscordMember)intr.User);
+        }
+
+        private async Task<DiscordMessageBuilder> CloseTicketAsync(DiscordGuild guild, DiscordChannel target, DiscordMember moderator, TicketCloseReqDto req = null)
         {
             if (req is null) throw new ArgumentNullException(nameof(req));
 

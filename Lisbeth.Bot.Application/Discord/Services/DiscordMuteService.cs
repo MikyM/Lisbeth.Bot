@@ -75,11 +75,11 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             try
             {
-                moderator = await guild.GetMemberAsync(req.AppliedOnBehalfOfId);
+                moderator = await guild.GetMemberAsync(req.RequestedOnBehalfOfId);
             }
             catch (Exception)
             {
-                throw new ArgumentException($"User with Id: {req.AppliedOnBehalfOfId} doesn't exist or isn't this guild's target.");
+                throw new ArgumentException($"User with Id: {req.RequestedOnBehalfOfId} doesn't exist or isn't this guild's target.");
             }
 
             return await MuteAsync(guild, target, moderator, req.AppliedUntil, req.Reason, req);
@@ -248,10 +248,22 @@ namespace Lisbeth.Bot.Application.Discord.Services
             DiscordMember target;
             DiscordMember moderator;
             DiscordGuild guild;
+            Mute mute;
+
+            if (req.Id is null && (req.GuildId is null || req.TargetUserId is null))
+                throw new ArgumentException("You must supply either mute Id or guild Id and user Id");
+
+            if (req.Id is not null)
+            {
+                mute = await _muteService.GetAsync<Mute>(req.Id.Value);
+                if (mute is null) throw new ArgumentException("Mute not found");
+                req.GuildId = mute.GuildId;
+                req.TargetUserId = mute.UserId;
+            }
 
             try
             {
-                guild = await _discord.Client.GetGuildAsync(req.GuildId);
+                guild = await _discord.Client.GetGuildAsync(req.GuildId.Value);
             }
             catch (Exception)
             {
@@ -260,7 +272,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             try
             {
-                target = await guild.GetMemberAsync(req.TargetUserId);
+                target = await guild.GetMemberAsync(req.TargetUserId.Value);
             }
             catch (Exception)
             {
@@ -269,11 +281,11 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             try
             {
-                moderator = await guild.GetMemberAsync(req.LiftedOnBehalfOfIdId);
+                moderator = await guild.GetMemberAsync(req.RequestedOnBehalfOfIdId);
             }
             catch (Exception)
             {
-                throw new ArgumentException($"User with Id: {req.LiftedOnBehalfOfIdId} doesn't exist or isn't this guild's target.");
+                throw new ArgumentException($"User with Id: {req.RequestedOnBehalfOfIdId} doesn't exist or isn't this guild's target.");
             }
 
             return await UnmuteAsync(guild, target, moderator, req);
@@ -379,7 +391,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             return embed;
         }
 
-        public async Task<DiscordEmbed> GetAsync(MuteGetReqDto req)
+        public async Task<DiscordEmbed> GetSpecificUserGuildMuteAsync(MuteGetReqDto req)
         {
             if (req is null) throw new ArgumentNullException(nameof(req));
 
@@ -387,9 +399,23 @@ namespace Lisbeth.Bot.Application.Discord.Services
             DiscordMember moderator = null;
             DiscordGuild guild = null;
 
+            if (req.Id is null && (req.GuildId is null || req.TargetUserId is null))
+                throw new ArgumentException("You must supply either mute Id or guild Id and user Id");
+
+            if (req.Id is not null)
+            {
+                var mute = await _muteService.GetAsync<Ban>(req.Id.Value);
+                if (mute is null) throw new ArgumentException("Mute not found");
+                req.GuildId = mute.GuildId;
+                req.TargetUserId = mute.UserId;
+                req.AppliedById = mute.AppliedById;
+                req.LiftedById = mute.LiftedById;
+                req.AppliedOn = mute.AppliedOn;
+            }
+
             try
             {
-                if (req.GuildId != null) guild = await _discord.Client.GetGuildAsync(req.GuildId.Value);
+                guild = await _discord.Client.GetGuildAsync(req.GuildId.Value);
             }
             catch (Exception)
             {
@@ -398,7 +424,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             try
             {
-                if (req.TargetUserId != null && guild is not null) target = await guild.GetMemberAsync(req.TargetUserId.Value);
+                target = await guild.GetMemberAsync(req.TargetUserId.Value);
             }
             catch (Exception)
             {
@@ -407,20 +433,11 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             try
             {
-                if (guild is not null) moderator = await guild.GetMemberAsync(req.OnBehalfOfId);
+                moderator = await guild.GetMemberAsync(req.RequestedOnBehalfOfId);
             }
             catch (Exception)
             {
-                throw new ArgumentException($"User with Id: {req.OnBehalfOfId} doesn't exist or isn't this guild's target.");
-            }
-
-            try
-            {
-                if (req.LiftedById != null && guild is not null) moderator = await guild.GetMemberAsync(req.LiftedById.Value);
-            }
-            catch (Exception)
-            {
-                throw new ArgumentException($"User with Id: {req.LiftedById} doesn't exist or isn't this guild's target.");
+                throw new ArgumentException($"User with Id: {req.RequestedOnBehalfOfId} doesn't exist or isn't this guild's target.");
             }
 
             return await GetAsync(guild, target, moderator, req);

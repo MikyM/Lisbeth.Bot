@@ -23,8 +23,9 @@ namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
 {
     public interface IDiscordTicketService
     {
-        Task<DiscordMessageBuilder> CloseTicketAsync(TicketCloseReqDto req, DiscordInteraction intr = null);
-        Task<DiscordMessageBuilder> CloseTicketAsync(TicketCloseReqDto req, DiscordChannel channel = null, DiscordUser user = null, DiscordGuild guild = null);
+        Task<DiscordMessageBuilder> CloseTicketAsync(TicketCloseReqDto req);
+        Task<DiscordMessageBuilder> CloseTicketAsync(DiscordInteraction intr);
+        //Task<DiscordMessageBuilder> CloseTicketAsync(DiscordChannel target, DiscordMember moderator, DiscordGuild guild, TicketCloseReqDto req = null);
         Task<DiscordMessageBuilder> OpenTicketAsync(TicketOpenReqDto req, DiscordInteraction intr = null);
         Task<DiscordMessageBuilder> OpenTicketAsync(TicketOpenReqDto req, DiscordChannel channel = null, DiscordUser user = null, DiscordGuild guild = null);
         Task<DiscordMessageBuilder> ReopenTicketAsync(TicketReopenReqDto req, DiscordInteraction intr = null);

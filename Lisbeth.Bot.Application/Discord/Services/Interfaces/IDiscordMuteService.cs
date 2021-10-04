@@ -33,9 +33,9 @@ namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
         Task<DiscordEmbed> UnmuteAsync(ContextMenuContext ctx);
         Task<DiscordEmbed> UnmuteAsync(InteractionContext ctx);
         //Task<DiscordEmbed> UnmuteAsync(DiscordGuild guild, DiscordMember target, DiscordMember moderator, MuteDisableReqDto req = null);
-        Task<DiscordEmbed> GetAsync(MuteGetReqDto req);
+        Task<DiscordEmbed> GetSpecificUserGuildMuteAsync(MuteGetReqDto req);
         Task<DiscordEmbed> GetAsync(InteractionContext ctx);
         Task<DiscordEmbed> GetAsync(ContextMenuContext ctx);
-        //Task<DiscordEmbed> GetAsync(DiscordGuild guild, DiscordMember member, DiscordMember moderator, MuteGetReqDto req = null);
+        //Task<DiscordEmbed> GetSpecificUserGuildBanAsync(DiscordGuild guild, DiscordMember member, DiscordMember moderator, MuteGetReqDto req = null);
     }
 }

@@ -29,7 +29,7 @@ namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
         Task<DiscordEmbed> BanAsync(InteractionContext ctx, DateTime appliedUntil, string reason = "");
         Task<DiscordEmbed> UnbanAsync(BanDisableReqDto req);
         Task<DiscordEmbed> UnbanAsync(InteractionContext ctx);
-        Task<DiscordEmbed> GetAsync(BanGetReqDto req);
+        Task<DiscordEmbed> GetSpecificUserGuildBanAsync(BanGetReqDto req);
         Task<DiscordEmbed> GetAsync(InteractionContext ctx);
     }
 }

@@ -23,9 +23,9 @@ namespace Lisbeth.Bot.Domain.DTOs.Request
         public ulong? OwnerId { get; set; }
         public ulong? GuildId { get; set; }
         public ulong? ChannelId { get; set; }
-        public ulong? RequestedById { get; set; }
+        public ulong RequestedById { get; set; }
 
-        public TicketCloseReqDto(long? id, ulong? ownerId, ulong? guildId, ulong? channelId, ulong? requestedById)
+        public TicketCloseReqDto(long? id, ulong? ownerId, ulong? guildId, ulong? channelId, ulong requestedById)
         {
             Id = id;
             OwnerId = ownerId;
