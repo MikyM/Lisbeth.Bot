@@ -24,128 +24,131 @@ using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Discord.Interfaces;
 using System;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Services.Interfaces;
+using MikyM.Common.DataAccessLayer.Specifications;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {
+    [UsedImplicitly]
     public class DiscordMuteService : IDiscordMuteService
     {
         private readonly IDiscordService _discord;
         private readonly IMuteService _muteService;
+        private readonly IGuildService _guildService;
 
-        public DiscordMuteService(IDiscordService discord, IMuteService muteService)
+        public DiscordMuteService(IDiscordService discord, IMuteService muteService, IGuildService guildService)
         {
             _muteService = muteService;
             _discord = discord;
+            _guildService = guildService;
         }
 
-        public async Task<DiscordEmbed> MuteAsync(MuteReqDto req, ulong logChannelId = 0, ContextMenuContext ctx = null)
+        public async Task<DiscordEmbed> MuteAsync(MuteReqDto req)
         {
             if (req is null) throw new ArgumentNullException(nameof(req));
 
-            if (ctx is null) return await MuteAsync(req, logChannelId, null, null);
+            DiscordMember target;
+            DiscordMember moderator;
+            DiscordGuild guild;
 
-            return await MuteAsync(req, logChannelId, ctx.Guild, 
-                ctx.TargetMember != null 
-                    ? ctx.TargetMember
-                    : ctx.TargetMessage != null
-                        ? (DiscordMember)ctx.TargetMessage.Author
-                        : null, ctx.Member);
-        }
-
-        public async Task<DiscordEmbed> MuteAsync(MuteReqDto req, ulong logChannelId = 0, InteractionContext ctx = null)
-        {
-            if (req is null) throw new ArgumentNullException(nameof(req));
-
-            if (ctx is null) return await MuteAsync(req, logChannelId, null, null);
-
-            return await MuteAsync(req, logChannelId, ctx.Guild, (DiscordMember)ctx.ResolvedUserMentions[0], ctx.Member);
-        }
-
-        public async Task<DiscordEmbed> MuteAsync(MuteReqDto req, ulong logChannelId = 0, DiscordGuild guild = null, DiscordMember member = null, DiscordUser moderator = null)
-        {
-            if (req is null) throw new ArgumentNullException(nameof(req));
-
-            DiscordChannel channel = null;
-
-            if (guild is null)
+            try
             {
-                try
-                {
-                    guild = await _discord.Client.GetGuildAsync(req.GuildId);
-                }
-                catch (Exception)
-                {
-                    throw new ArgumentException($"Guild with Id: {req.GuildId} doesn't exist.");
-                }
+                guild = await _discord.Client.GetGuildAsync(req.GuildId);
             }
-
-            if (member is null)
+            catch (Exception)
             {
-                try
-                {
-                    member = await guild.GetMemberAsync(req.UserId);
-                }
-                catch (Exception)
-                {
-                    throw new ArgumentException($"User with Id: {req.UserId} isn't the guilds member.");
-                }
-            }
-
-            if (moderator is null)
-            {
-                try
-                {
-                    moderator = await _discord.Client.GetUserAsync(req.AppliedById);
-                }
-                catch (Exception)
-                {
-                    throw new ArgumentException($"User with Id: {req.AppliedById} doesn't exist.");
-                }
+                throw new ArgumentException($"Guild with Id: {req.GuildId} doesn't exist.");
             }
 
             try
             {
-                await _discord.Client.GetUserAsync(req.UserId);
+                target = await guild.GetMemberAsync(req.TargetUserId);
             }
             catch (Exception)
             {
-                throw new ArgumentException($"User with Id: {req.UserId} doesn't exist.");
+                throw new ArgumentException($"User with Id: {req.TargetUserId} doesn't exist or isn't this guild's target.");
             }
-            
-            if (logChannelId != 0)
+
+            try
+            {
+                moderator = await guild.GetMemberAsync(req.AppliedById);
+            }
+            catch (Exception)
+            {
+                throw new ArgumentException($"User with Id: {req.AppliedById} doesn't exist or isn't this guild's target.");
+            }
+
+            return await MuteAsync(guild, target, moderator, req.AppliedUntil, req.Reason, req);
+        }
+
+        public async Task<DiscordEmbed> MuteAsync(InteractionContext ctx, DateTime appliedUntil, string reason = "")
+        {
+            if (ctx is null) throw new ArgumentNullException(nameof(ctx));
+
+            return await MuteAsync(ctx.Guild, (DiscordMember)ctx.ResolvedUserMentions[0], ctx.Member, appliedUntil, reason);
+        }
+
+        public async Task<DiscordEmbed> MuteAsync(ContextMenuContext ctx, DateTime appliedUntil, string reason = "")
+        {
+            if (ctx is null) throw new ArgumentNullException(nameof(ctx));
+
+            return await MuteAsync(ctx.Guild, ctx.TargetMember, ctx.Member, appliedUntil, reason);
+        }
+
+        private async Task<DiscordEmbed> MuteAsync(DiscordGuild guild, DiscordMember target, DiscordMember moderator, DateTime appliedUntil, string reason = "", MuteReqDto req = null)
+        {
+            if (guild is null) throw new ArgumentNullException(nameof(guild));
+            if (target is null) throw new ArgumentNullException(nameof(target));
+            if (moderator is null) throw new ArgumentNullException(nameof(moderator));
+
+            DiscordChannel channel = null;
+
+            var guildRes =
+                await _guildService.GetBySpecificationsAsync<Guild>(
+                    new Specifications<Guild>(x => x.GuildId == guild.Id && !x.IsDisabled));
+            var guildCfg = guildRes.FirstOrDefault();
+
+            if (guildCfg is null) throw new ArgumentException($"Guild with Id: {guild.Id} doesn't exist in the database.");
+
+            if(!guildCfg.IsModerationEnabled) throw new ArgumentException($"Guild with Id: {guild.Id} doesn't have moderation module enabled.");
+
+            if (guildCfg.LogChannelId is not null)
             {
                 try
                 {
-                    channel = await _discord.Client.GetChannelAsync(logChannelId);
+                    channel = await _discord.Client.GetChannelAsync(guildCfg.LogChannelId.Value);
                 }
                 catch (Exception)
                 {
-                    throw new ArgumentException($"Channel with Id: {logChannelId} doesn't exist.");
+                    throw new ArgumentException($"Log channel with Id: {guildCfg.LogChannelId} doesn't exist.");
                 }
             }
 
-            if (req.AppliedUntil is null) throw new ArgumentException($"{nameof(req.AppliedUntil)} date was null");
+            if (appliedUntil < DateTime.UtcNow) throw new ArgumentException("Mute until date must be in the future.");
 
-            TimeSpan tmspDuration = req.AppliedUntil.Value.Subtract(DateTime.UtcNow);
+            TimeSpan tmspDuration = appliedUntil.Subtract(DateTime.UtcNow);
 
-            string lengthString = req.AppliedUntil.Value == DateTime.MaxValue ? "Permanent" : $"{tmspDuration.Days} days, {tmspDuration.Hours} hrs, {tmspDuration.Minutes} mins";
+            string lengthString = appliedUntil == DateTime.MaxValue ? "Permanent" : $"{tmspDuration.Days} days, {tmspDuration.Hours} hrs, {tmspDuration.Minutes} mins";
+
+            req ??= new MuteReqDto(target.Id, guild.Id, moderator.Id, appliedUntil, reason);
 
             var (id, foundEntity) = await _muteService.AddOrExtendAsync(req, true);
 
             var embed = new DiscordEmbedBuilder();
             embed.WithColor(0x18315C);
-            embed.WithAuthor($"Mute | {member.GetFullDisplayName()}", null, member.AvatarUrl);
+            embed.WithAuthor($"Mute | {target.GetFullDisplayName()}", null, target.AvatarUrl);
 
-            bool isMuted = member.Roles.FirstOrDefault(r => r.Name == "Muted") is not null;
+            bool isMuted = target.Roles.FirstOrDefault(r => r.Name == "Muted") is not null;
             bool resMute = true;
 
             if (foundEntity is null)
             {
                 if (!isMuted)
-                    resMute = await member.Mute(guild);
+                    resMute = await target.Mute(guild);
 
                 if (!resMute)
                 {
@@ -156,12 +159,12 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 }
                 else
                 {
-                    embed.AddField("User mention", member.Mention, true);
+                    embed.AddField("User mention", target.Mention, true);
                     embed.AddField("Moderator", moderator.Mention, true);
                     embed.AddField("Length", lengthString, true);
-                    embed.AddField("Muted until", req.AppliedUntil.ToString(), true);
+                    embed.AddField("Muted until", req.AppliedUntil.ToString(CultureInfo.InvariantCulture), true);
                     embed.AddField("Reason", req.Reason);
-                    embed.WithFooter($"Case ID: {id} | Member ID: {member.Id}");
+                    embed.WithFooter($"Case ID: {id} | Member ID: {target.Id}");
                 }
             }
             else
@@ -179,7 +182,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 if (foundEntity.AppliedUntil > req.AppliedUntil)
                 {
                     if (!isMuted)
-                        resMute = await member.Mute(guild);
+                        resMute = await target.Mute(guild);
 
                     if (!resMute)
                     {
@@ -197,7 +200,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 else
                 {
                     if (!isMuted)
-                        resMute = await member.Mute(guild);
+                        resMute = await target.Mute(guild);
 
                     if (!resMute)
                     {
@@ -208,21 +211,21 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     }
                     else
                     {
-                        embed.WithAuthor($"Extend Mute | {member.GetFullUsername()}", null, member.AvatarUrl);
+                        embed.WithAuthor($"Extend Mute | {target.GetFullUsername()}", null, target.AvatarUrl);
                         embed.AddField("Previous mute until", foundEntity.AppliedUntil.ToString(), true);
                         embed.AddField("Previous moderator", $"{(previousMod is not null ? previousMod.Mention : "Deleted user")}", true);
                         embed.AddField("Previous reason", foundEntity.Reason, true);
-                        embed.AddField("User mention", member.Mention, true);
+                        embed.AddField("User mention", target.Mention, true);
                         embed.AddField("Moderator", moderator.Mention, true);
                         embed.AddField("Length", lengthString, true);
-                        embed.AddField("Muted until", req.AppliedUntil.ToString(), true);
+                        embed.AddField("Muted until", req.AppliedUntil.ToString(CultureInfo.InvariantCulture), true);
                         embed.AddField("Reason", req.Reason);
-                        embed.WithFooter($"Case ID: {id} | Member ID: {member.Id}");
+                        embed.WithFooter($"Case ID: {id} | Member ID: {target.Id}");
                     }
                 }
             }
 
-            if (logChannelId == 0) return embed; // means we're not sending to log channel
+            if (guildCfg.LogChannelId is null) return embed; // means we're not sending to log channel
 
             // means we're logging to log channel and returning an embed for interaction or other purposes
 
@@ -232,109 +235,99 @@ namespace Lisbeth.Bot.Application.Discord.Services
             }
             catch (Exception)
             {
-                throw new ArgumentException($"Can't send messages in channel with Id: {logChannelId}.");
+                throw new ArgumentException($"Can't send messages in channel with Id: {channel?.Id}.");
             }
 
             return embed;
         }
 
-        public async Task<DiscordEmbed> UnmuteAsync(MuteDisableReqDto req, ulong logChannelId = 0, ContextMenuContext ctx = null)
+        public async Task<DiscordEmbed> UnmuteAsync(MuteDisableReqDto req)
         {
             if (req is null) throw new ArgumentNullException(nameof(req));
 
-            if (ctx is null) return await UnmuteAsync(req, logChannelId, null, null);
+            DiscordMember target;
+            DiscordMember moderator;
+            DiscordGuild guild;
 
-            return await UnmuteAsync(req, logChannelId, ctx.Guild, ctx.TargetMember, ctx.Member);
-        }
-
-        public async Task<DiscordEmbed> UnmuteAsync(MuteDisableReqDto req, ulong logChannelId = 0, InteractionContext ctx = null)
-        {
-            if (req is null) throw new ArgumentNullException(nameof(req));
-
-            if (ctx is null) return await UnmuteAsync(req, logChannelId, null, null);
-
-            DiscordMember member;
             try
             {
-                member = await ctx.Guild.GetMemberAsync(req.UserId);
+                guild = await _discord.Client.GetGuildAsync(req.GuildId);
             }
             catch (Exception)
             {
-                throw new ArgumentException($"User with Id: {req.UserId} isn't the guilds member.");
+                throw new ArgumentException($"Guild with Id: {req.GuildId} doesn't exist.");
             }
 
-            return await UnmuteAsync(req, logChannelId, ctx.Guild, member, ctx.Member);
+            try
+            {
+                target = await guild.GetMemberAsync(req.TargetUserId);
+            }
+            catch (Exception)
+            {
+                throw new ArgumentException($"User with Id: {req.TargetUserId} doesn't exist or isn't this guild's target.");
+            }
+
+            try
+            {
+                moderator = await guild.GetMemberAsync(req.LiftedById);
+            }
+            catch (Exception)
+            {
+                throw new ArgumentException($"User with Id: {req.LiftedById} doesn't exist or isn't this guild's target.");
+            }
+
+            return await UnmuteAsync(guild, target, moderator, req);
         }
 
-        public async Task<DiscordEmbed> UnmuteAsync(MuteDisableReqDto req, ulong logChannelId = 0, DiscordGuild guild = null, DiscordMember member = null, DiscordUser moderator = null)
+        public async Task<DiscordEmbed> UnmuteAsync(InteractionContext ctx)
         {
-            if (req is null) throw new ArgumentNullException(nameof(req));
+            if (ctx is null) throw new ArgumentNullException(nameof(ctx));
+
+            return await UnmuteAsync(ctx.Guild, (DiscordMember)ctx.ResolvedUserMentions[0], ctx.Member);
+        }
+
+        public async Task<DiscordEmbed> UnmuteAsync(ContextMenuContext ctx)
+        {
+            if (ctx is null) throw new ArgumentNullException(nameof(ctx));
+
+            return await UnmuteAsync(ctx.Guild, ctx.TargetMember, ctx.Member);
+        }
+
+        private async Task<DiscordEmbed> UnmuteAsync(DiscordGuild guild, DiscordMember target, DiscordUser moderator, MuteDisableReqDto req = null)
+        {
+            if (guild is null) throw new ArgumentNullException(nameof(guild));
+            if (target is null) throw new ArgumentNullException(nameof(target));
+            if (moderator is null) throw new ArgumentNullException(nameof(moderator));
 
             DiscordChannel channel = null;
 
-            if (guild is null)
+            var guildRes =
+                await _guildService.GetBySpecificationsAsync<Guild>(
+                    new Specifications<Guild>(x => x.GuildId == guild.Id && !x.IsDisabled));
+            var guildCfg = guildRes.FirstOrDefault();
+
+            if (guildCfg is null) throw new ArgumentException($"Guild with Id: {guild.Id} doesn't exist in the database.");
+
+            if (!guildCfg.IsModerationEnabled) throw new ArgumentException($"Guild with Id: {guild.Id} doesn't have moderation module enabled.");
+
+            if (guildCfg.LogChannelId is not null)
             {
                 try
                 {
-                    guild = await _discord.Client.GetGuildAsync(req.GuildId);
+                    channel = await _discord.Client.GetChannelAsync(guildCfg.LogChannelId.Value);
                 }
                 catch (Exception)
                 {
-                    throw new ArgumentException($"Guild with Id: {req.GuildId} doesn't exist.");
+                    throw new ArgumentException($"Log channel with Id: {guildCfg.LogChannelId} doesn't exist.");
                 }
             }
-
-            if (member is null)
-            {
-                try
-                {
-                    member = await guild.GetMemberAsync(req.UserId);
-                }
-                catch (Exception)
-                {
-                    throw new ArgumentException($"User with Id: {req.UserId} isn't the guilds member.");
-                }
-            }
-
-            if (moderator is null)
-            {
-                try
-                {
-                    moderator = await _discord.Client.GetUserAsync(req.LiftedById);
-                }
-                catch (Exception)
-                {
-                    throw new ArgumentException($"User with Id: {req.LiftedById} doesn't exist.");
-                }
-            }
-
-            try
-            {
-                await _discord.Client.GetUserAsync(req.UserId);
-            }
-            catch (Exception)
-            {
-                throw new ArgumentException($"User with Id: {req.UserId} doesn't exist.");
-            }
-
-            if (logChannelId != 0)
-            {
-                try
-                {
-                    channel = await _discord.Client.GetChannelAsync(logChannelId);
-                }
-                catch (Exception)
-                {
-                    throw new ArgumentException($"Channel with Id: {logChannelId} doesn't exist.");
-                }
-            }
-            
-            if (req.LiftedOn is null) throw new ArgumentException($"{nameof(req.LiftedOn)} date was null");
 
             var embed = new DiscordEmbedBuilder();
             embed.WithColor(0x18315C);
 
-            bool isMuted = member?.Roles.FirstOrDefault(r => r.Name == "Muted") is not null;
+            bool isMuted = target.Roles.FirstOrDefault(r => r.Name == "Muted") is not null;
+
+            req ??= new MuteDisableReqDto(target.Id, guild.Id, moderator.Id);
 
             var res = await _muteService.DisableAsync(req);
 
@@ -342,18 +335,18 @@ namespace Lisbeth.Bot.Application.Discord.Services
             {
                 if (isMuted)
                 {
-                    await member.Unmute(guild);
-                    embed.WithAuthor($"Unmute | {member.GetFullUsername()}", null, member.AvatarUrl);
+                    await target.Unmute(guild);
+                    embed.WithAuthor($"Unmute | {target.GetFullUsername()}", null, target.AvatarUrl);
                     embed.AddField("Moderator", moderator.Mention, true);
-                    embed.AddField("User mention", member.Mention, true);
+                    embed.AddField("User mention", target.Mention, true);
                     embed.WithDescription($"Successfully unmuted");
-                    embed.WithFooter($"Case ID: unknown | Member ID: {member.Id}");
+                    embed.WithFooter($"Case ID: unknown | Member ID: {target.Id}");
                 }
                 else
                 {
-                    embed.WithAuthor($"Unmute failed | {member.GetFullDisplayName()}", null, member?.AvatarUrl);
+                    embed.WithAuthor($"Unmute failed | {target.GetFullDisplayName()}", null, target.AvatarUrl);
                     embed.WithDescription($"This user isn't currently muted.");
-                    embed.WithFooter($"Case ID: unknown | Member ID: {member?.Id}");
+                    embed.WithFooter($"Case ID: unknown | Member ID: {target.Id}");
                 }
             }
             else
@@ -361,147 +354,154 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 await _muteService.CommitAsync();
 
                 if(isMuted)
-                    await member.Unmute(guild);
+                    await target.Unmute(guild);
 
-                embed.WithAuthor($"Unmute | {member.GetFullDisplayName()}", null, member?.AvatarUrl);
+                embed.WithAuthor($"Unmute | {target.GetFullDisplayName()}", null, target.AvatarUrl);
                 embed.AddField("Moderator", moderator.Mention, true);
-                embed.AddField("User mention", member?.Mention, true);
+                embed.AddField("User mention", target.Mention, true);
                 embed.WithDescription($"Successfully unmuted");
-                embed.WithFooter($"Case ID: {res.Id} | Member ID: {member?.Id}");
+                embed.WithFooter($"Case ID: {res.Id} | Member ID: {target.Id}");
             }
 
-            if (logChannelId == 0) return embed; // means we're not sending to log channel
+            if (guildCfg.LogChannelId is not null) return embed; // means we're not sending to log channel
 
             // means we're logging to log channel and returning an embed for interaction or other purposes
 
             try
             {
-                if (channel is not null) await channel.SendMessageAsync(embed.Build());
+                await channel.SendMessageAsync(embed.Build());
             }
             catch (Exception)
             {
-                throw new ArgumentException($"Can't send messages in channel with Id: {logChannelId}.");
+                throw new ArgumentException($"Can't send messages in channel with Id: {channel.Id}.");
             }
 
             return embed;
         }
 
-        public async Task<DiscordEmbed> GetAsync(MuteGetReqDto req, ulong logChannelId = 0, ContextMenuContext ctx = null)
+        public async Task<DiscordEmbed> GetAsync(MuteGetReqDto req)
         {
             if (req is null) throw new ArgumentNullException(nameof(req));
 
-            if (ctx is null) return await GetAsync(req, logChannelId, null, null);
-
-            DiscordGuild guild = ctx.Guild;
-            DiscordMember member = ctx.TargetMember;
-            DiscordUser moderator = ctx.Member;
-
-            return await GetAsync(req, logChannelId, guild, member, moderator);
-        }
-
-        public async Task<DiscordEmbed> GetAsync(MuteGetReqDto req, ulong logChannelId = 0, InteractionContext ctx = null)
-        {
-            if (req is null) throw new ArgumentNullException(nameof(req));
-
-            if (ctx is null) return await GetAsync(req, logChannelId, null, null);
-
-            DiscordMember member = null;
+            DiscordMember target = null;
+            DiscordMember moderator = null;
+            DiscordGuild guild = null;
 
             try
             {
-                if (req.UserId != null) member = await ctx.Guild.GetMemberAsync(req.UserId.Value);
+                if (req.GuildId != null) guild = await _discord.Client.GetGuildAsync(req.GuildId.Value);
             }
             catch (Exception)
             {
-                throw new ArgumentException($"User with Id: {req.UserId} isn't the guilds member.");
+                throw new ArgumentException($"Guild with Id: {req.GuildId} doesn't exist.");
             }
 
-            return await GetAsync(req, logChannelId, ctx.Guild, member, ctx.Member);
+            try
+            {
+                if (req.TargetUserId != null && guild is not null) target = await guild.GetMemberAsync(req.TargetUserId.Value);
+            }
+            catch (Exception)
+            {
+                throw new ArgumentException($"User with Id: {req.TargetUserId} doesn't exist or isn't this guild's target.");
+            }
+
+            try
+            {
+                if (guild is not null) moderator = await guild.GetMemberAsync(req.OnBehalfId);
+            }
+            catch (Exception)
+            {
+                throw new ArgumentException($"User with Id: {req.OnBehalfId} doesn't exist or isn't this guild's target.");
+            }
+
+            try
+            {
+                if (req.LiftedById != null && guild is not null) moderator = await guild.GetMemberAsync(req.LiftedById.Value);
+            }
+            catch (Exception)
+            {
+                throw new ArgumentException($"User with Id: {req.LiftedById} doesn't exist or isn't this guild's target.");
+            }
+
+            return await GetAsync(guild, target, moderator, req);
         }
-        public async Task<DiscordEmbed> GetAsync(MuteGetReqDto req, ulong logChannelId = 0, DiscordGuild guild = null, DiscordMember member = null, DiscordUser moderator = null)
+
+        public async Task<DiscordEmbed> GetAsync(InteractionContext ctx)
         {
-            if (req is null) throw new ArgumentNullException(nameof(req));
+            if (ctx is null) throw new ArgumentNullException(nameof(ctx));
 
-            var res = await _muteService.GetBySpecificationsAsync<Mute>(
-                new MuteBaseGetSpecifications(req.Id, req.UserId, req.GuildId, req.AppliedById, req.LiftedOn, req.AppliedOn, req.LiftedById));
+            return await GetAsync(ctx.Guild, (DiscordMember)ctx.ResolvedUserMentions[0], ctx.Member);
+        }
 
-            var entity = res.FirstOrDefault();
+        public async Task<DiscordEmbed> GetAsync(ContextMenuContext ctx)
+        {
+            if (ctx is null) throw new ArgumentNullException(nameof(ctx));
+
+            return await GetAsync(ctx.Guild, ctx.TargetMember, ctx.Member);
+        }
+
+        private async Task<DiscordEmbed> GetAsync(DiscordGuild guild, DiscordMember target, DiscordMember moderator, MuteGetReqDto req = null)
+        {
+            if (guild is null) throw new ArgumentNullException(nameof(guild));
+            if (target is null) throw new ArgumentNullException(nameof(target));
+            if (moderator is null) throw new ArgumentNullException(nameof(moderator));
+
+            var guildRes =
+                await _guildService.GetBySpecificationsAsync<Guild>(
+                    new Specifications<Guild>(x => x.GuildId == guild.Id && !x.IsDisabled));
+            var guildCfg = guildRes.FirstOrDefault();
+
+            if (guildCfg is null) throw new ArgumentException($"Guild with Id: {guild.Id} doesn't exist in the database.");
+
+            if (!guildCfg.IsModerationEnabled) throw new ArgumentException($"Guild with Id: {guild.Id} doesn't have moderation module enabled.");
 
             DiscordChannel channel = null;
 
-            if (guild is null)
+            if (guildCfg.LogChannelId is not null)
             {
                 try
                 {
-                    if (req.GuildId != null) guild = await _discord.Client.GetGuildAsync(req.GuildId.Value);
+                    channel = await _discord.Client.GetChannelAsync(guildCfg.LogChannelId.Value);
                 }
                 catch (Exception)
                 {
-                    throw new ArgumentException($"Guild with Id: {req.GuildId} doesn't exist.");
+                    throw new ArgumentException($"Log channel with Id: {guildCfg.LogChannelId} doesn't exist.");
                 }
             }
 
-            if (member is null)
-            {
-                try
-                {
-                    if (req.UserId != null && guild is not null) member = await guild.GetMemberAsync(req.UserId.Value);
-                }
-                catch (Exception)
-                {
-                    throw new ArgumentException($"User with Id: {req.UserId} isn't the guilds member.");
-                }
-            }
+            req ??= new MuteGetReqDto(moderator.Id, null, target.Id, guild.Id);
 
-            if (moderator is null)
-            {
-                try
-                {
-                    if (req.AppliedById != null) moderator = await _discord.Client.GetUserAsync(req.AppliedById.Value);
-                }
-                catch (Exception)
-                {
-                    throw new ArgumentException($"User with Id: {req.AppliedById} doesn't exist.");
-                }
-            }
+            var res = await _muteService.GetBySpecificationsAsync<Mute>(
+                new MuteBaseGetSpecifications(req.Id, req.TargetUserId, req.GuildId, req.AppliedById, req.LiftedOn, req.AppliedOn, req.LiftedById));
 
-            try
-            {
-                if (req.UserId != null) await _discord.Client.GetUserAsync(req.UserId.Value);
-            }
-            catch (Exception)
-            {
-                throw new ArgumentException($"User with Id: {req.UserId} doesn't exist.");
-            }
-
-            if (logChannelId != 0)
-            {
-                try
-                {
-                    channel = await _discord.Client.GetChannelAsync(logChannelId);
-                }
-                catch (Exception)
-                {
-                    throw new ArgumentException($"Channel with Id: {logChannelId} doesn't exist.");
-                }
-            }
-
+            var mute = res.FirstOrDefault();
+            
             var embed = new DiscordEmbedBuilder();
             embed.WithColor(0x18315C);
 
-            if (entity is not null)
+            if (mute is not null)
             {
-                embed.WithAuthor($"Mute Info | {member.GetFullDisplayName()}", null, member?.AvatarUrl);
-                embed.AddField("User mention", member?.Mention, true);
-                embed.AddField("Moderator", $"{(moderator is not null ? moderator.Mention : "Deleted user")}", true);
-                embed.AddField("Muted until", entity.AppliedUntil.ToString(), true);
-                embed.AddField("Reason", entity.Reason);
-                if (entity.LiftedById != 0)
+                DiscordUser mutingMod = null;
+                try
+                {
+                    mutingMod = await _discord.Client.GetUserAsync(mute.AppliedById);
+                }
+                catch (Exception)
+                {
+                    // ignore
+                }
+
+                embed.WithAuthor($"Mute Info | {target.GetFullDisplayName()}", null, target.AvatarUrl);
+                embed.AddField("User mention", target.Mention, true);
+                embed.AddField("Moderator", $"{(mutingMod is not null ? mutingMod.Mention : "Deleted user")}", true);
+                embed.AddField("Muted until", mute.AppliedUntil.ToString(), true);
+                embed.AddField("Reason", mute.Reason);
+                if (mute.LiftedById != 0)
                 {
                     DiscordUser liftingMod = null;
                     try
                     {
-                        liftingMod = await _discord.Client.GetUserAsync(entity.LiftedById);
+                        liftingMod = await _discord.Client.GetUserAsync(mute.LiftedById);
                     }
                     catch (Exception)
                     {
@@ -510,25 +510,25 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
                     embed.AddField("Was lifted by", $"{(liftingMod is not null ? liftingMod.Mention : "Deleted user")}");
                 }
-                embed.WithFooter($"Case ID: {entity.Id} | User ID: {member.Id}");
+                embed.WithFooter($"Case ID: {mute.Id} | User ID: {target.Id}");
             }
             else
             {
                 embed.WithDescription("No mute info found.");
-                embed.WithFooter($"Case ID: unknown | User ID: {member?.Id}");
+                embed.WithFooter($"Case ID: unknown | User ID: {target.Id}");
             }
 
-            if (logChannelId == 0) return embed; // means we're not sending to log channel
+            if (guildCfg.LogChannelId is not null) return embed; // means we're not sending to log channel
 
             // means we're logging to log channel and returning an embed for interaction or other purposes
 
             try
             {
-                if (channel is not null) await channel.SendMessageAsync(embed.Build());
+                await channel.SendMessageAsync(embed.Build());
             }
             catch (Exception)
             {
-                throw new ArgumentException($"Can't send messages in channel with Id: {logChannelId}.");
+                throw new ArgumentException($"Can't send messages in channel with Id: {channel.Id}.");
             }
 
             return embed;

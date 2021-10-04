@@ -64,7 +64,7 @@ namespace Lisbeth.Bot.Application.Services
             if (entry is null) throw new ArgumentNullException(nameof(entry));
 
             var res = await base.GetBySpecificationsAsync<Mute>(
-                new Specifications<Mute>(x => x.UserId == entry.UserId && x.GuildId == entry.GuildId && !x.IsDisabled));
+                new Specifications<Mute>(x => x.UserId == entry.TargetUserId && x.GuildId == entry.GuildId && !x.IsDisabled));
 
             var entity = res.FirstOrDefault();
             if (entity is null) return null;

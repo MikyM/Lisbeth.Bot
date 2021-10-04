@@ -22,19 +22,19 @@ namespace Lisbeth.Bot.Domain.DTOs.Request
     public class MuteDisableReqDto
     {
         public long Id { get; set; }
-        public ulong UserId { get; set; }
+        public ulong TargetUserId { get; set; }
         public ulong GuildId { get; set; }
-        public DateTime? LiftedOn { get; set; } = DateTime.UtcNow;
+        public DateTime LiftedOn { get; set; } = DateTime.UtcNow;
         public ulong LiftedById { get; set; }
 
         public MuteDisableReqDto()
         {
         }
 
-        public MuteDisableReqDto(ulong user, ulong guild, ulong liftedBy)
+        public MuteDisableReqDto(ulong targetUserId, ulong guildId, ulong liftedBy)
         {
-            UserId = user;
-            GuildId = guild;
+            TargetUserId = targetUserId;
+            GuildId = guildId;
             LiftedById = liftedBy;
         }
     }

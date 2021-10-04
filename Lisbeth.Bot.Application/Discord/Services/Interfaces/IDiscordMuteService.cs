@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Domain.DTOs.Request;
@@ -24,14 +25,17 @@ namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
 {
     public interface IDiscordMuteService
     {
-        Task<DiscordEmbed> MuteAsync(MuteReqDto req, ulong logChannelId = 0, InteractionContext ctx = null);
-        Task<DiscordEmbed> MuteAsync(MuteReqDto req, ulong logChannelId = 0, ContextMenuContext ctx = null);
-        Task<DiscordEmbed> MuteAsync(MuteReqDto req, ulong logChannelId = 0, DiscordGuild guild = null, DiscordMember member = null, DiscordUser moderator = null);
-        Task<DiscordEmbed> UnmuteAsync(MuteDisableReqDto req, ulong logChannelId = 0, InteractionContext ctx = null);
-        Task<DiscordEmbed> UnmuteAsync(MuteDisableReqDto req, ulong logChannelId = 0, ContextMenuContext ctx = null);
-        Task<DiscordEmbed> UnmuteAsync(MuteDisableReqDto req, ulong logChannelId = 0, DiscordGuild guild = null, DiscordMember member = null, DiscordUser moderator = null);
-        Task<DiscordEmbed> GetAsync(MuteGetReqDto req, ulong logChannelId = 0, InteractionContext ctx = null);
-        Task<DiscordEmbed> GetAsync(MuteGetReqDto req, ulong logChannelId = 0, ContextMenuContext ctx = null);
-        Task<DiscordEmbed> GetAsync(MuteGetReqDto req, ulong logChannelId = 0, DiscordGuild guild = null, DiscordMember member = null, DiscordUser moderator = null);
+        Task<DiscordEmbed> MuteAsync(MuteReqDto req);
+        Task<DiscordEmbed> MuteAsync(ContextMenuContext ctx, DateTime appliedUntil, string reason = "");
+        Task<DiscordEmbed> MuteAsync(InteractionContext ctx, DateTime appliedUntil, string reason = "");
+        //Task<DiscordEmbed> MuteAsync(DiscordGuild guild, DiscordMember target, DiscordMember moderator, DateTime appliedUntil, string reason = "", MuteReqDto req = null);
+        Task<DiscordEmbed> UnmuteAsync(MuteDisableReqDto req);
+        Task<DiscordEmbed> UnmuteAsync(ContextMenuContext ctx);
+        Task<DiscordEmbed> UnmuteAsync(InteractionContext ctx);
+        //Task<DiscordEmbed> UnmuteAsync(DiscordGuild guild, DiscordMember target, DiscordMember moderator, MuteDisableReqDto req = null);
+        Task<DiscordEmbed> GetAsync(MuteGetReqDto req);
+        Task<DiscordEmbed> GetAsync(InteractionContext ctx);
+        Task<DiscordEmbed> GetAsync(ContextMenuContext ctx);
+        //Task<DiscordEmbed> GetAsync(DiscordGuild guild, DiscordMember member, DiscordMember moderator, MuteGetReqDto req = null);
     }
 }

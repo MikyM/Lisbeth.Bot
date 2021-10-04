@@ -22,26 +22,26 @@ namespace Lisbeth.Bot.Domain.DTOs.Request
     public class MuteReqDto
     {
         public long Id { get; set; }
-        public ulong UserId { get; set; }
+        public ulong TargetUserId { get; set; }
         public ulong GuildId { get; set; }
-        public DateTime? AppliedUntil { get; set; }
+        public DateTime AppliedUntil { get; set; }
         public ulong AppliedById { get; set; }
         public string Reason { get; set; }
 
         public MuteReqDto()
         {
         }
-        public MuteReqDto(ulong user, ulong guild, ulong appliedById, DateTime? appliedUntil) : this(user, guild, appliedById, appliedUntil, null)
+        public MuteReqDto(ulong targetUserId, ulong guildId, ulong appliedById, DateTime appliedUntil) : this(targetUserId, guildId, appliedById, appliedUntil, null)
         {
-            UserId = user;
-            GuildId = guild;
+            TargetUserId = targetUserId;
+            GuildId = guildId;
             AppliedUntil = appliedUntil;
             AppliedById = appliedById;
         }
-        public MuteReqDto(ulong user, ulong guild, ulong appliedById, DateTime? appliedUntil, string reason)
+        public MuteReqDto(ulong targetUserId, ulong guildId, ulong appliedById, DateTime appliedUntil, string reason)
         {
-            UserId = user;
-            GuildId = guild;
+            TargetUserId = targetUserId;
+            GuildId = guildId;
             AppliedUntil = appliedUntil;
             AppliedById = appliedById;
             Reason = reason;

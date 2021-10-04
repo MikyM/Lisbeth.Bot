@@ -82,7 +82,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (ticket.IsDisabled)
             {
                 throw new ArgumentException(
-                    $"Ticket with Id: {ticket.Id}, UserId: {ticket.UserId}, GuildId: {ticket.GuildId} is already closed.");
+                    $"Ticket with Id: {ticket.Id}, TargetUserId: {ticket.UserId}, GuildId: {ticket.GuildId} is already closed.");
             }
 
             if (user is null)
