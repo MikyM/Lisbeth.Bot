@@ -15,19 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Microsoft.EntityFrameworkCore;
-using MikyM.Common.DataAccessLayer.Repositories;
-using System;
-using System.Threading.Tasks;
-
-namespace MikyM.Common.DataAccessLayer.UnitOfWork
+namespace Lisbeth.Bot.Application.Discord.Extensions
 {
-    public interface IUnitOfWork<TContext> : IDisposable where TContext : DbContext
+    public static class DiscordChannelExtensions
     {
-        TContext Context { get; }
-        TRepository GetRepository<TRepository>() where TRepository : IBaseRepository;
-        Task<int> CommitAsync();
-        Task RollbackAsync();
-        Task UseTransaction();
     }
 }
