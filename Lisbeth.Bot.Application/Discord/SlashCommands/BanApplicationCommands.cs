@@ -18,18 +18,13 @@
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
+using DSharpPlus.SlashCommands.Attributes;
 using JetBrains.Annotations;
-using Lisbeth.Bot.Application.Discord.Extensions;
+using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Application.Extensions;
 using Lisbeth.Bot.Domain.DTOs.Request;
-using Lisbeth.Bot.Domain.Entities;
-using MikyM.Common.DataAccessLayer.Specifications;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
-using DSharpPlus.SlashCommands.Attributes;
-using Lisbeth.Bot.Application.Discord.Services.Interfaces;
-using Npgsql;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands
 {
@@ -66,20 +61,17 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
 
                     ulong validId = user?.Id ?? (ulong)id;
 
-                    var newReq = new BanReqDto(validId, ctx.Guild.Id, ctx.Member.Id, liftsOn, reason);
-                    embed = await _discordBanService.BanAsync(newReq, 0, ctx);
+                    embed = await _discordBanService.BanAsync(ctx, liftsOn.Value, reason);
                     break;
                 case BanActionType.Remove:
                     if (id == 0)
                         throw new ArgumentException($"You must supply an Id of the user to unban.");
-                    var disReq = new BanDisableReqDto((ulong)id, ctx.Guild.Id, ctx.Member.Id);
-                    embed = await _discordBanService.UnbanAsync(disReq, 0, ctx);
+                    embed = await _discordBanService.UnbanAsync(ctx);
                     break;
                 case BanActionType.Get:
                     if (id == 0)
                         throw new ArgumentException($"You must supply an Id of the user to unban.");
-                    var getReq = new BanGetReqDto(null, (ulong)id, ctx.Guild.Id);
-                    embed = await _discordBanService.GetAsync(getReq, 0, ctx);
+                    embed = await _discordBanService.GetAsync(ctx);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(actionType), actionType, null);
