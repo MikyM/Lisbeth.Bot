@@ -57,16 +57,13 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
                     if (liftsOn is null)
                         throw new ArgumentException($"Parameter {nameof(length)} can't be parsed to a known duration.");
                     if (length is "") throw new ArgumentException($"Parameter {nameof(length)} can't be empty.");
-                    var newReq = new MuteReqDto(user.Id, ctx.Guild.Id, ctx.Member.Id, liftsOn, reason);
-                    embed = await _discordMuteService.MuteAsync(newReq, 0, ctx);
+                    embed = await _discordMuteService.MuteAsync(ctx, liftsOn.Value, reason);
                     break;
                 case MuteActionType.Remove:
-                    var disReq = new MuteDisableReqDto(user.Id, ctx.Guild.Id, ctx.Member.Id);
-                    embed = await _discordMuteService.UnmuteAsync(disReq, 0, ctx);
+                    embed = await _discordMuteService.UnmuteAsync(ctx);
                     break;
                 case MuteActionType.Get:
-                    var getReq = new MuteGetReqDto(null, user.Id, ctx.Guild.Id);
-                    embed = await _discordMuteService.GetAsync(getReq, 0, ctx);
+                    embed = await _discordMuteService.GetAsync(ctx);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(actionType), actionType, null);
