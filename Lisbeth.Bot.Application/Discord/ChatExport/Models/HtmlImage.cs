@@ -7,6 +7,8 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Autofac;
+using Lisbeth.Bot.Application.Helpers;
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport.Models
 {
@@ -26,10 +28,13 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Models
             {
                 return "";
             }
+
+            var httpClientFactory = ContainerProvider.Container.Resolve<IHttpClientFactory>();
+
             ApiClient apiClient = new ApiClient(Environment.GetEnvironmentVariable("IMGUR_KEY"));
             IImage imageUpload;
-            using HttpClient httpClient = HttpClientFactory.CreateClient();
-            using HttpClient imgurHttpClient = HttpClientFactory.CreateClient();
+            using HttpClient httpClient = httpClientFactory.CreateClient();
+            using HttpClient imgurHttpClient = httpClientFactory.CreateClient();
             using HttpRequestMessage req = new HttpRequestMessage(HttpMethod.Get, DiscordLink);
             using HttpResponseMessage response = await httpClient.SendAsync(req);
             Stream stream = await response.Content.ReadAsStreamAsync();

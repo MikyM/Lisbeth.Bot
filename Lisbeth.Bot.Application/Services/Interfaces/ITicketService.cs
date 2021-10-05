@@ -26,5 +26,9 @@ namespace Lisbeth.Bot.Application.Services.Interfaces
     public interface ITicketService : ICrudService<Ticket, LisbethBotDbContext>
     {
         Task<Ticket> CloseAsync(TicketCloseReqDto req);
+        Task<Ticket> CloseAsync(TicketCloseReqDto req, Ticket ticket);
+        Task<(Ticket Ticket, long Id)> OpenAsync(TicketOpenReqDto req, Guild guildCfg);
+        Task<Ticket> ReopenAsync(TicketReopenReqDto req, Ticket ticket);
+        Task<Ticket> ReopenAsync(TicketReopenReqDto req);
     }
 }

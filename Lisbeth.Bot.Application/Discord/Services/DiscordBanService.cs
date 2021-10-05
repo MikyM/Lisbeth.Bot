@@ -27,7 +27,9 @@ using System;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using DSharpPlus;
 using Lisbeth.Bot.Application.Services.Interfaces;
+using Lisbeth.Bot.DataAccessLayer.Specifications.GuildSpecifications;
 using MikyM.Common.DataAccessLayer.Specifications;
 
 namespace Lisbeth.Bot.Application.Discord.Services
@@ -90,23 +92,28 @@ namespace Lisbeth.Bot.Application.Discord.Services
             return await BanAsync(ctx.Guild, (DiscordMember)ctx.ResolvedUserMentions[0], ctx.Member, appliedUntil, reason);
         }
 
-        private async Task<DiscordEmbed> BanAsync(DiscordGuild guild, DiscordUser target, DiscordMember moderator, DateTime appliedUntil, string reason = "", BanReqDto req = null)
+        private async Task<DiscordEmbed> BanAsync(DiscordGuild guild, DiscordMember target, DiscordMember moderator, DateTime appliedUntil, string reason = "", BanReqDto req = null)
         {
             if (guild is null) throw new ArgumentNullException(nameof(guild));
             if (target is null) throw new ArgumentNullException(nameof(target));
             if (moderator is null) throw new ArgumentNullException(nameof(moderator));
 
+            if (moderator.Guild.Id != guild.Id) throw new ArgumentException(nameof(moderator));
+            if (target.Guild.Id != guild.Id) throw new ArgumentException(nameof(target));
+
+            if (!moderator.Permissions.HasPermission(Permissions.BanMembers)) throw new ArgumentException(nameof(moderator));
+            if (target.Permissions.HasPermission(Permissions.BanMembers)) throw new ArgumentException(nameof(target));
+
             DiscordBan ban;
             DiscordChannel channel = null;
 
             var guildRes =
-                await _guildService.GetBySpecificationsAsync<Guild>(
-                    new Specifications<Guild>(x => x.GuildId == guild.Id && !x.IsDisabled));
+                await _guildService.GetBySpecificationsAsync<Guild>(new ActiveGuildByDiscordIdWithModerationSpecifications(guild.Id));
             var guildCfg = guildRes.FirstOrDefault();
 
             if (guildCfg is null) throw new ArgumentException($"Guild with Id: {guild.Id} doesn't exist in the database.");
 
-            if (!guildCfg.IsModerationEnabled) throw new ArgumentException($"Guild with Id: {guild.Id} doesn't have moderation module enabled.");
+            if (guildCfg.ModerationConfig is null) throw new ArgumentException($"Guild with Id: {guild.Id} doesn't have moderation module enabled.");
 
             if (guildCfg.LogChannelId is not null)
             {
@@ -190,7 +197,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 }
             }
 
-            if (guildCfg.LogChannelId is null) return embed; // means we're not sending to log channel
+            if (!guildCfg.ModerationConfig.ShouldLogMemberEvents) return embed; // means we're not sending to log channel
 
             // means we're logging to log channel and returning an embed for interaction or other purposes
 
@@ -200,7 +207,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             }
             catch (Exception)
             {
-                throw new ArgumentException($"Can't send messages in channel with Id: {guildCfg.LogChannelId}.");
+                throw new ArgumentException($"Can't send messages in channel with Id: {guildCfg.ModerationConfig.MemberEventsLogChannelId}.");
             }
 
             return embed;
@@ -273,13 +280,12 @@ namespace Lisbeth.Bot.Application.Discord.Services
             DiscordBan ban;
 
             var guildRes =
-                await _guildService.GetBySpecificationsAsync<Guild>(
-                    new Specifications<Guild>(x => x.GuildId == guild.Id && !x.IsDisabled));
+                await _guildService.GetBySpecificationsAsync<Guild>(new ActiveGuildByDiscordIdWithModerationSpecifications(guild.Id));
             var guildCfg = guildRes.FirstOrDefault();
 
             if (guildCfg is null) throw new ArgumentException($"Guild with Id: {guild.Id} doesn't exist in the database.");
 
-            if (!guildCfg.IsModerationEnabled) throw new ArgumentException($"Guild with Id: {guild.Id} doesn't have moderation module enabled.");
+            if (guildCfg.ModerationConfig is null) throw new ArgumentException($"Guild with Id: {guild.Id} doesn't have moderation module enabled.");
 
             if (guildCfg.LogChannelId is not null)
             {
@@ -336,7 +342,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 embed.WithFooter($"Case ID: {res.Id} | Member ID: {target.Id}");
             }
 
-            if (guildCfg.LogChannelId is null) return embed; // means we're not sending to log channel
+            if (!guildCfg.ModerationConfig.ShouldLogMemberEvents) return embed; // means we're not sending to log channel
 
             // means we're logging to log channel and returning an embed for interaction or other purposes
 
@@ -346,7 +352,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             }
             catch (Exception)
             {
-                throw new ArgumentException($"Can't send messages in channel with Id: {channel.Id}.");
+                throw new ArgumentException($"Can't send messages in channel with Id: {guildCfg.ModerationConfig.MemberEventsLogChannelId}.");
             }
 
             return embed;
@@ -418,13 +424,12 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (moderator is null) throw new ArgumentNullException(nameof(moderator));
 
             var guildRes =
-                await _guildService.GetBySpecificationsAsync<Guild>(
-                    new Specifications<Guild>(x => x.GuildId == guild.Id && !x.IsDisabled));
+                await _guildService.GetBySpecificationsAsync<Guild>(new ActiveGuildByDiscordIdWithModerationSpecifications(guild.Id));
             var guildCfg = guildRes.FirstOrDefault();
 
             if (guildCfg is null) throw new ArgumentException($"Guild with Id: {guild.Id} doesn't exist in the database.");
 
-            if (!guildCfg.IsModerationEnabled) throw new ArgumentException($"Guild with Id: {guild.Id} doesn't have moderation module enabled.");
+            if (guildCfg.ModerationConfig is null) throw new ArgumentException($"Guild with Id: {guild.Id} doesn't have moderation module enabled.");
 
             DiscordChannel channel = null;
             DiscordBan discordBan;
@@ -513,7 +518,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 }
             }
 
-            if (guildCfg.LogChannelId is null) return embed; // means we're not sending to log channel
+            if (!guildCfg.ModerationConfig.ShouldLogMemberEvents) return embed; // means we're not sending to log channel
 
             // means we're logging to log channel and returning an embed for interaction or other purposes
 
@@ -523,7 +528,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             }
             catch (Exception)
             {
-                throw new ArgumentException($"Can't send messages in channel with Id: {guildCfg.LogChannelId}.");
+                throw new ArgumentException($"Can't send messages in channel with Id: {guildCfg.ModerationConfig.MemberEventsLogChannelId}.");
             }
 
             return embed;

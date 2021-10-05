@@ -16,7 +16,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Autofac;
+using Autofac.Extensions.DependencyInjection;
 using Lisbeth.Bot.API.Helpers;
+using Lisbeth.Bot.Application.Helpers;
 using Lisbeth.Bot.DataAccessLayer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -26,10 +28,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using MikyM.Discord;
-using OpenTracing;
-using OpenTracing.Mock;
 using Serilog;
+using System.Globalization;
 
 namespace Lisbeth.Bot.API
 {
@@ -45,8 +45,10 @@ namespace Lisbeth.Bot.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
+
             //services.AddDbContext<LisbethBotDbContext>(options =>
-                //options.UseNpgsql(Configuration.GetConnectionString("LisbethBotDb")));
+            //options.UseNpgsql(Configuration.GetConnectionString("LisbethBotDb")));
             services.AddDbContext<LisbethBotDbContext>(options => options.UseInMemoryDatabase("testDb"));
             services.AddControllers(options =>
             {
@@ -56,6 +58,7 @@ namespace Lisbeth.Bot.API
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Lisbeth.Bot", Version = "v1" });
             });
+            services.AddHttpClient();
             services.ConfigureDiscord(Configuration);
         }
 
@@ -72,6 +75,8 @@ namespace Lisbeth.Bot.API
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            ContainerProvider.Container = app.ApplicationServices.GetAutofacRoot();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

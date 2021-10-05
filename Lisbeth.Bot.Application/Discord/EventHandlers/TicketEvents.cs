@@ -45,7 +45,7 @@ namespace Lisbeth.Bot.Application.Discord.EventHandlers
                 _ = Task.Run(async () =>
                 {
                     var req = new TicketCloseReqDto(null, null, args.Interaction.GuildId, args.Interaction.ChannelId, args.Interaction.User.Id);
-                    return _discordTicketService.CloseTicketAsync(args.Interaction);
+                    return await _discordTicketService.CloseTicketAsync(args.Interaction);
                 });
             }
 

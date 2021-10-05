@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Autofac;
+using Lisbeth.Bot.Application.Helpers;
 using VimeoDotNet;
 using VimeoDotNet.Net;
 
@@ -25,16 +27,19 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Models
             {
                 return "";
             }
+
             var client = new VimeoClient(Environment.GetEnvironmentVariable("VIMEO_KEY"));
             IUploadRequest request;
 
-            using (HttpClient httpClient = HttpClientFactory.CreateClient())
+            using (HttpClient httpClient = ContainerProvider.Container.Resolve<IHttpClientFactory>().CreateClient())
             {
                 using HttpRequestMessage req = new HttpRequestMessage(HttpMethod.Get, DiscordLink);
                 using HttpResponseMessage response = await httpClient.SendAsync(req).ConfigureAwait(false);
                 Stream stream = await response.Content.ReadAsStreamAsync();
-                request = await client.UploadEntireFileAsync(new BinaryContent(stream, "application/x-www-form-urlencoded"));
+                request = await client.UploadEntireFileAsync(new BinaryContent(stream,
+                    "application/x-www-form-urlencoded"));
             }
+
             return $"https://player.vimeo.com/video/{request.ClipUri.Split('/').Last()}";
         }
 

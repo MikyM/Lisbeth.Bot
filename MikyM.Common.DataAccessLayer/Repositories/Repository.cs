@@ -57,8 +57,7 @@ namespace MikyM.Common.DataAccessLayer.Repositories
                 .Local
                 .FirstOrDefault(entry => entry.Id.Equals(entity.Id));
 
-            if (local != null)
-                _context.Entry(local).State = EntityState.Detached;
+            if (local != null) return;
 
             _context.Attach(entity);
         }
@@ -72,8 +71,7 @@ namespace MikyM.Common.DataAccessLayer.Repositories
                     .Local
                     .FirstOrDefault(entry => entry.Id.Equals(entity.Id));
 
-                if (local != null)
-                    _context.Entry(local).State = EntityState.Detached;
+                if (local != null) return;
 
                 _context.Attach(entity);
             }

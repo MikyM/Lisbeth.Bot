@@ -23,7 +23,8 @@ namespace Lisbeth.Bot.Domain.Entities
     {
         public ulong InviterId { get; set; }
         public ulong? LogChannelId { get; set; }
-        public ulong? TicketLogChannelId { get; set; }
-        public bool IsModerationEnabled { get; set; }
+
+        public TicketingConfig TicketingConfig { get; set; }
+        public ModerationConfig ModerationConfig { get; set; }
     }
 }

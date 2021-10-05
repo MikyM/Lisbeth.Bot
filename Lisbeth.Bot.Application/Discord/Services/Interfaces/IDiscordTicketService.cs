@@ -17,6 +17,7 @@
 
 using System.Threading.Tasks;
 using DSharpPlus.Entities;
+using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Domain.DTOs.Request;
 
 namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
@@ -26,9 +27,17 @@ namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
         Task<DiscordMessageBuilder> CloseTicketAsync(TicketCloseReqDto req);
         Task<DiscordMessageBuilder> CloseTicketAsync(DiscordInteraction intr);
         //Task<DiscordMessageBuilder> CloseTicketAsync(DiscordChannel target, DiscordMember moderator, DiscordGuild guild, TicketCloseReqDto req = null);
-        Task<DiscordMessageBuilder> OpenTicketAsync(TicketOpenReqDto req, DiscordInteraction intr = null);
-        Task<DiscordMessageBuilder> OpenTicketAsync(TicketOpenReqDto req, DiscordChannel channel = null, DiscordUser user = null, DiscordGuild guild = null);
-        Task<DiscordMessageBuilder> ReopenTicketAsync(TicketReopenReqDto req, DiscordInteraction intr = null);
-        Task<DiscordMessageBuilder> ReopenTicketAsync(TicketReopenReqDto req, DiscordChannel channel = null, DiscordUser user = null, DiscordGuild guild = null);
+        Task<DiscordMessageBuilder> OpenTicketAsync(TicketOpenReqDto req);
+        Task<DiscordMessageBuilder> OpenTicketAsync(DiscordInteraction intr);
+        //Task<DiscordMessageBuilder> OpenTicketAsync(DiscordChannel target, DiscordMember moderator, DiscordGuild guild, TicketCloseReqDto req = null);
+        Task<DiscordMessageBuilder> ReopenTicketAsync(TicketReopenReqDto req);
+        Task<DiscordMessageBuilder> ReopenTicketAsync(DiscordInteraction intr);
+        //Task<DiscordMessageBuilder> ReopenTicketAsync(DiscordChannel target, DiscordMember moderator, DiscordGuild guild, TicketCloseReqDto req = null);
+        Task<DiscordEmbed> AddToTicketAsync(TicketAddReqDto req);
+        Task<DiscordEmbed> AddToTicketAsync(InteractionContext intr);
+        //Task<DiscordMessageBuilder> ReopenTicketAsync(DiscordChannel target, DiscordMember moderator, DiscordGuild guild, TicketCloseReqDto req = null);
+        Task<DiscordEmbed> RemoveFromTicketAsync(TicketRemoveReqDto req);
+        Task<DiscordEmbed> RemoveFromTicketAsync(InteractionContext intr);
+        //Task<DiscordMessageBuilder> ReopenTicketAsync(DiscordChannel target, DiscordMember moderator, DiscordGuild guild, TicketCloseReqDto req = null);
     }
 }

@@ -27,6 +27,7 @@ using System;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using DSharpPlus;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Services.Interfaces;
 using MikyM.Common.DataAccessLayer.Specifications;
@@ -114,7 +115,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             if (guildCfg is null) throw new ArgumentException($"Guild with Id: {guild.Id} doesn't exist in the database.");
 
-            if(!guildCfg.IsModerationEnabled) throw new ArgumentException($"Guild with Id: {guild.Id} doesn't have moderation module enabled.");
+            if(guildCfg.ModerationConfig is null) throw new ArgumentException($"Guild with Id: {guild.Id} doesn't have moderation module enabled.");
 
             if (guildCfg.LogChannelId is not null)
             {
@@ -225,7 +226,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 }
             }
 
-            if (guildCfg.LogChannelId is null) return embed; // means we're not sending to log channel
+            if (!guildCfg.ModerationConfig.ShouldLogMemberEvents) return embed; // means we're not sending to log channel
 
             // means we're logging to log channel and returning an embed for interaction or other purposes
 
@@ -235,7 +236,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             }
             catch (Exception)
             {
-                throw new ArgumentException($"Can't send messages in channel with Id: {channel?.Id}.");
+                throw new ArgumentException($"Can't send messages in channel with Id: {guildCfg.ModerationConfig.MemberEventsLogChannelId}.");
             }
 
             return embed;
@@ -305,11 +306,17 @@ namespace Lisbeth.Bot.Application.Discord.Services
             return await UnmuteAsync(ctx.Guild, ctx.TargetMember, ctx.Member);
         }
 
-        private async Task<DiscordEmbed> UnmuteAsync(DiscordGuild guild, DiscordMember target, DiscordUser moderator, MuteDisableReqDto req = null)
+        private async Task<DiscordEmbed> UnmuteAsync(DiscordGuild guild, DiscordMember target, DiscordMember moderator, MuteDisableReqDto req = null)
         {
             if (guild is null) throw new ArgumentNullException(nameof(guild));
             if (target is null) throw new ArgumentNullException(nameof(target));
             if (moderator is null) throw new ArgumentNullException(nameof(moderator));
+
+            if (moderator.Guild.Id != guild.Id) throw new ArgumentException(nameof(moderator));
+            if (target.Guild.Id != guild.Id) throw new ArgumentException(nameof(target));
+
+            if (!moderator.Permissions.HasPermission(Permissions.BanMembers)) throw new ArgumentException(nameof(moderator));
+            if (target.Permissions.HasPermission(Permissions.BanMembers)) throw new ArgumentException(nameof(target));
 
             DiscordChannel channel = null;
 
@@ -320,7 +327,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             if (guildCfg is null) throw new ArgumentException($"Guild with Id: {guild.Id} doesn't exist in the database.");
 
-            if (!guildCfg.IsModerationEnabled) throw new ArgumentException($"Guild with Id: {guild.Id} doesn't have moderation module enabled.");
+            if (guildCfg.ModerationConfig is null) throw new ArgumentException($"Guild with Id: {guild.Id} doesn't have moderation module enabled.");
 
             if (guildCfg.LogChannelId is not null)
             {
@@ -375,7 +382,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 embed.WithFooter($"Case ID: {res.Id} | Member ID: {target.Id}");
             }
 
-            if (guildCfg.LogChannelId is null) return embed; // means we're not sending to log channel
+            if (!guildCfg.ModerationConfig.ShouldLogMemberEvents) return embed; // means we're not sending to log channel
 
             // means we're logging to log channel and returning an embed for interaction or other purposes
 
@@ -385,7 +392,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             }
             catch (Exception)
             {
-                throw new ArgumentException($"Can't send messages in channel with Id: {channel.Id}.");
+                throw new ArgumentException($"Can't send messages in channel with Id: {guildCfg.ModerationConfig.MemberEventsLogChannelId}.");
             }
 
             return embed;
@@ -395,9 +402,9 @@ namespace Lisbeth.Bot.Application.Discord.Services
         {
             if (req is null) throw new ArgumentNullException(nameof(req));
 
-            DiscordMember target = null;
-            DiscordMember moderator = null;
-            DiscordGuild guild = null;
+            DiscordMember target;
+            DiscordMember moderator;
+            DiscordGuild guild;
 
             if (req.Id is null && (req.GuildId is null || req.TargetUserId is null))
                 throw new ArgumentException("You must supply either mute Id or guild Id and user Id");
@@ -470,7 +477,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             if (guildCfg is null) throw new ArgumentException($"Guild with Id: {guild.Id} doesn't exist in the database.");
 
-            if (!guildCfg.IsModerationEnabled) throw new ArgumentException($"Guild with Id: {guild.Id} doesn't have moderation module enabled.");
+            if (guildCfg.ModerationConfig is null) throw new ArgumentException($"Guild with Id: {guild.Id} doesn't have moderation module enabled.");
 
             DiscordChannel channel = null;
 
@@ -535,7 +542,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 embed.WithFooter($"Case ID: unknown | User ID: {target.Id}");
             }
 
-            if (guildCfg.LogChannelId is null) return embed; // means we're not sending to log channel
+            if (!guildCfg.ModerationConfig.ShouldLogMemberEvents) return embed; // means we're not sending to log channel
 
             // means we're logging to log channel and returning an embed for interaction or other purposes
 
@@ -545,7 +552,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             }
             catch (Exception)
             {
-                throw new ArgumentException($"Can't send messages in channel with Id: {channel.Id}.");
+                throw new ArgumentException($"Can't send messages in channel with Id: {guildCfg.ModerationConfig.MemberEventsLogChannelId}.");
             }
 
             return embed;

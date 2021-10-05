@@ -15,11 +15,20 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Lisbeth.Bot.Domain.DTOs.Request
+using Autofac;
+
+namespace Lisbeth.Bot.Application.Helpers
 {
-    public class TicketOpenReqDto
+    /// <summary>
+    /// Autofac container provider for use ONLY with HTML builders.
+    /// For everything else use normal DI.
+    /// </summary>
+    public static class ContainerProvider
     {
-        public ulong GuildId { get; set; }
-        public ulong OwnerId { get; set; }
+        /// <summary>
+        /// Autofac container for use ONLY with HTML builders.
+        /// For everything else use normal DI.
+        /// </summary>
+        public static ILifetimeScope Container { get; set; }
     }
 }

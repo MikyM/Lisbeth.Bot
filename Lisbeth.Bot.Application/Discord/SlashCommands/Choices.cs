@@ -51,10 +51,6 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
 
     public enum TicketActionType
     {
-        [ChoiceName("open")]
-        Open,
-        [ChoiceName("close")]
-        Close,
         [ChoiceName("add")]
         Add,
         [ChoiceName("remove")]

@@ -39,7 +39,7 @@ namespace Lisbeth.Bot.Application.Services
         {
             if (req is null) throw new ArgumentNullException(nameof(req));
             
-            var res = await GetBySpecificationsAsync<Ticket>(new TicketBaseGetSpecifications(req.Id, req.OwnerId, req.GuildId, null, 1));
+            var res = await GetBySpecificationsAsync<Ticket>(new TicketBaseGetSpecifications(req.Id, req.OwnerId, req.GuildId, req.ChannelId, req.GuildSpecificId));
 
             var ticket = res.FirstOrDefault();
             if (ticket is null) return null;
@@ -48,6 +48,79 @@ namespace Lisbeth.Bot.Application.Services
             ticket.ClosedBy = req.RequestedById;
             ticket.ClosedOn = DateTime.UtcNow;
             ticket.IsDisabled = true;
+
+            return ticket;
+        }
+
+        public async Task<Ticket> CloseAsync(TicketCloseReqDto req, Ticket ticket)
+        {
+            if (req is null) throw new ArgumentNullException(nameof(req));
+
+            BeginUpdate(ticket);
+            ticket.ClosedBy = req.RequestedById;
+            ticket.ClosedOn = DateTime.UtcNow;
+            ticket.IsDisabled = true;
+            ticket.MessageCloseId = req.ClosedMessageId;
+
+            await CommitAsync();
+
+            return ticket;
+        }
+
+        public async Task<(Ticket Ticket, long Id)> OpenAsync(TicketOpenReqDto req, Guild guildCfg)
+        {
+            if (req is null) throw new ArgumentNullException(nameof(req));
+
+            var res = await GetBySpecificationsAsync<Ticket>(new TicketBaseGetSpecifications(null, req.OwnerId, req.GuildId));
+
+            var ticket = res.FirstOrDefault();
+            if (ticket is not null) return (null, 0);
+
+            var id = await AddAsync(req);
+
+            BeginUpdate(guildCfg);
+            guildCfg.TicketingConfig.LastTicketId++;
+
+            await CommitAsync();
+
+            var created = await GetAsync<Ticket>(id);
+
+            return (created, guildCfg.TicketingConfig.LastTicketId);
+        }
+
+        public async Task<Ticket> ReopenAsync(TicketReopenReqDto req, Ticket ticket)
+        {
+            if (req is null) throw new ArgumentNullException(nameof(req));
+
+            BeginUpdate(ticket);
+            ticket.ReopenedBy = req.RequestedById;
+            ticket.ReopenedOn = DateTime.UtcNow;
+            ticket.IsDisabled = false;
+            ticket.MessageCloseId = null;
+            ticket.MessageReopenId = req.ReopenMessageId;
+
+            await CommitAsync();
+
+            return ticket;
+        }
+
+        public async Task<Ticket> ReopenAsync(TicketReopenReqDto req)
+        {
+            if (req is null) throw new ArgumentNullException(nameof(req));
+
+            var res = await GetBySpecificationsAsync<Ticket>(new TicketBaseGetSpecifications(req.Id, req.OwnerId, req.GuildId, req.ChannelId, req.GuildSpecificId, true));
+            var ticket = res.FirstOrDefault();
+
+            if (ticket is null) return null;
+
+            BeginUpdate(ticket);
+            ticket.ReopenedBy = req.RequestedById;
+            ticket.ReopenedOn = DateTime.UtcNow;
+            ticket.IsDisabled = false;
+            ticket.MessageCloseId = null;
+            ticket.MessageReopenId = req.ReopenMessageId;
+
+            await CommitAsync();
 
             return ticket;
         }

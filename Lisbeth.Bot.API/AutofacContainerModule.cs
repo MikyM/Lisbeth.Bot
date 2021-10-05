@@ -15,11 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Reflection;
 using Autofac;
 using AutoMapper.Contrib.Autofac.DependencyInjection;
 using AutoMapper.Extensions.ExpressionMapping;
-using Lisbeth.Bot.Application.Discord.ChatExport.Builders;
 using Lisbeth.Bot.Application.Services;
 using Lisbeth.Bot.Application.Services.Interfaces;
 using Lisbeth.Bot.DataAccessLayer.Repositories;
@@ -28,6 +26,7 @@ using MikyM.Common.Application.Interfaces;
 using MikyM.Common.Application.Services;
 using MikyM.Common.DataAccessLayer.Repositories;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
+using System.Reflection;
 using Module = Autofac.Module;
 
 namespace Lisbeth.Bot.API

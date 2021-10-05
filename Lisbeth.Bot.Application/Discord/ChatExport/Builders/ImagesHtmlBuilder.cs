@@ -20,6 +20,7 @@ using Lisbeth.Bot.Application.Discord.ChatExport.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders
@@ -41,11 +42,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders
         }
         public async Task<string> BuildAsync()
         {
-            if (Images.Count == 0 || Images == null)
-            {
-                return "";
-            }
-
+            if (Images.Count == 0 || Images == null) return "";
             string imagesHtml = "";
             foreach (var attachment in Images)
             {

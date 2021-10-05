@@ -15,12 +15,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
 using JetBrains.Annotations;
+using Lisbeth.Bot.Application.Discord.Services.Interfaces;
+using System;
+using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands
 {
@@ -29,18 +31,35 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
     [UsedImplicitly]
     public class TicketSlashCommands : ApplicationCommandModule
     {
-        //public ITicketService _service { private get; set; }
+        // ReSharper disable once InconsistentNaming
+        public IDiscordTicketService _discordTicketService { private get; set; }
 
+        [UsedImplicitly]
         [SlashRequireUserPermissions(Permissions.BanMembers)]
-        [SlashCommand("add", "A command that allows a certain user or a role to see the ticket")]
-        public async Task AddCommand(InteractionContext ctx, [Option("target", "A user or a role to add")] SnowflakeObject target)
+        [SlashCommand("ticket", "A command that allows managing tickets")]
+        public async Task TicketHandlerCommand(InteractionContext ctx,
+            [Option("action", "Type of action to perform")] TicketActionType action,
+            [Option("target", "A user or a role to add")] SnowflakeObject target)
         {
-        }
+            if (target is null) throw new ArgumentNullException(nameof(target));
 
-        [SlashRequireUserPermissions(Permissions.BanMembers)]
-        [SlashCommand("remove", "A command that removes a certain user or a role from seeing the ticket")]
-        public async Task RemoveCommand(InteractionContext ctx, [Option("target", "A user or a role to remove")] SnowflakeObject target)
-        {
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+
+            DiscordEmbed embed;
+            switch (action)
+            {
+                case TicketActionType.Add:
+                    embed = await _discordTicketService.AddToTicketAsync(ctx);
+                    break;
+                case TicketActionType.Remove:
+                    embed = await _discordTicketService.RemoveFromTicketAsync(ctx);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(action), action, null);
+            }
+
+            await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(embed)
+                .AsEphemeral(true));
         }
     }
 }

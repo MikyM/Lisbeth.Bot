@@ -1,4 +1,5 @@
-﻿// This file is part of Lisbeth.Bot project
+﻿
+// This file is part of Lisbeth.Bot project
 //
 // Copyright (C) 2021 MikyM
 // 

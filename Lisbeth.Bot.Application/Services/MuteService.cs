@@ -39,7 +39,7 @@ namespace Lisbeth.Bot.Application.Services
             if (req is null) throw new ArgumentNullException(nameof(req));
 
             var res = await _unitOfWork.GetRepository<Repository<Mute>>()
-                .GetBySpecificationsAsync(new Specifications<Mute>(x => x.UserId == req.UserId && x.GuildId == req.GuildId && !x.IsDisabled));
+                .GetBySpecificationsAsync(new Specifications<Mute>(x => x.UserId == req.TargetUserId && x.GuildId == req.GuildId && !x.IsDisabled));
 
             var entity = res.FirstOrDefault();
             if (entity is null) return (await base.AddAsync(req, shouldSave), null);

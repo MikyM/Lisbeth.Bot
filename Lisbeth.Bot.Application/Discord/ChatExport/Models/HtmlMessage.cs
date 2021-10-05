@@ -27,21 +27,19 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Models
 
             if (Msg.Content != "" && Msg.Content is not null)
             {
-                MarkdownParser parser = new MarkdownParser(Msg.Content);
-                messageBot = await parser.GetParsedContentAsync();
                 messageBot = $"<div class=\"message-content\">{messageBot}</div>";
             }
 
             if (Msg.Attachments.Count != 0)
             {
                 AttachmentsHtmlBuilder attachmentsBuilder = new AttachmentsHtmlBuilder(Msg.Attachments);
-                attachmentsHtml = await attachmentsBuilder.Build();
+                attachmentsHtml = await attachmentsBuilder.BuildAsync();
             }
 
             if (Msg.Reactions.Count != 0)
             {
                 ReactionsHtmlBuilder reactionsHtmlBuilder = new ReactionsHtmlBuilder(Msg.Reactions.ToList());
-                reactionsHtml = reactionsHtmlBuilder.Build();
+                reactionsHtml = await reactionsHtmlBuilder.BuildAsync();
             }
 
             return $"<div class=\"message\">{messageTop}{messageBot}{attachmentsHtml}{reactionsHtml}</div><hr>";

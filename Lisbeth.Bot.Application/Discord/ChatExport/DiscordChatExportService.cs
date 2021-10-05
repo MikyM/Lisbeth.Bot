@@ -88,7 +88,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
                 throw new ArgumentException("Ticket doesn't exist in database.");
             }
 
-            if (guildCfg.TicketLogChannelId is null)
+            if (guildCfg.TicketingConfig.LogChannelId is null)
             {
                 throw new ArgumentException("Guild doesn't have ticketing log channel set.");
             }
@@ -103,11 +103,11 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
 
             try
             {
-                ticketLogChannel = await _discord.Client.GetChannelAsync(guildCfg.TicketLogChannelId.Value);
+                ticketLogChannel = await _discord.Client.GetChannelAsync(guildCfg.TicketingConfig.LogChannelId.Value);
             }
             catch (Exception)
             {
-                throw new ArgumentException($"Channel with Id: {guildCfg.TicketLogChannelId} doesn't exist.");
+                throw new ArgumentException($"Channel with Id: {guildCfg.TicketingConfig.LogChannelId} doesn't exist.");
             }
 
             try
