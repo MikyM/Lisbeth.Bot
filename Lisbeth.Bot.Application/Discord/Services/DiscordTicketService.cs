@@ -17,25 +17,22 @@
 
 using DSharpPlus;
 using DSharpPlus.Entities;
+using DSharpPlus.SlashCommands;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.ChatExport;
+using Lisbeth.Bot.Application.Discord.Exceptions;
+using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Application.Services.Interfaces;
+using Lisbeth.Bot.DataAccessLayer.Specifications.GuildSpecifications;
+using Lisbeth.Bot.DataAccessLayer.Specifications.TicketSpecifications;
 using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.Entities;
-using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Discord.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using DSharpPlus.SlashCommands;
-using Lisbeth.Bot.Application.Discord.Extensions;
-using Lisbeth.Bot.DataAccessLayer.Specifications.GuildSpecifications;
-using Lisbeth.Bot.DataAccessLayer.Specifications.TicketSpecifications;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Serilog;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {
@@ -61,7 +58,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (req is null) throw new ArgumentNullException(nameof(req));
 
             DiscordChannel target = null;
-            DiscordMember requestingMemeber;
+            DiscordMember requestingMember;
             Ticket ticket;
 
             if (req.Id is null && req.ChannelId is null && (req.OwnerId is null || req.GuildId is null) &&
@@ -109,10 +106,10 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 {
                     target = await _discord.Client.GetChannelAsync(req.ChannelId.Value);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    throw new ArgumentException(
-                        $"User with Id: {req.ChannelId} doesn't exist or isn't this guild's target.");
+                    throw new DiscordNotFoundException(
+                        $"User with Id: {req.ChannelId} doesn't exist or isn't this guild's member.", ex);
                 }
             }
 
@@ -122,15 +119,15 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             try
             {
-                requestingMemeber = await guild.GetMemberAsync(req.RequestedById);
+                requestingMember = await guild.GetMemberAsync(req.RequestedById);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw new ArgumentException(
-                    $"User with Id: {req.RequestedById} doesn't exist or isn't this guild's target.");
+                throw new DiscordNotFoundException(
+                $"User with Id: {req.RequestedById} doesn't exist or isn't this guild's member.", ex);
             }
 
-            return await CloseTicketAsync(guild, target, requestingMemeber, req);
+            return await CloseTicketAsync(guild, target, requestingMember, req);
         }
 
         public async Task<DiscordMessageBuilder> CloseTicketAsync(DiscordInteraction intr)
@@ -176,12 +173,12 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             if (ticket.UserId != requestingMember.Id ||
                 !requestingMember.Permissions.HasPermission(Permissions.BanMembers))
-                throw new ArgumentException($"Unauthorized.");
+                throw new DiscordNotAuthorizedException("Requesting member doesn't have moderator rights or isn't the ticket's owner.");
 
             var embed = new DiscordEmbedBuilder();
 
             embed.WithColor(new DiscordColor(0x18315C));
-            embed.WithAuthor($"Ticket closed");
+            embed.WithAuthor("Ticket closed");
             embed.AddField("Moderator", requestingMember.Mention);
             embed.WithFooter($"Ticket Id: {ticket.GuildSpecificId}");
 
@@ -234,10 +231,10 @@ namespace Lisbeth.Bot.Application.Discord.Services
             {
                 closedCat = await _discord.Client.GetChannelAsync(guildCfg.TicketingConfig.ClosedCategoryId);
             }
-            catch
+            catch (Exception ex)
             {
-                throw new ArgumentException(
-                    $"Closed category channel with Id {guildCfg.TicketingConfig.ClosedCategoryId} doesn't exist");
+                throw new DiscordNotFoundException(
+                $"Closed category channel with Id {guildCfg.TicketingConfig.ClosedCategoryId} doesn't exist", ex);
             }
 
             await target.ModifyAsync(x => x.Parent = closedCat);
@@ -252,10 +249,10 @@ namespace Lisbeth.Bot.Application.Discord.Services
             {
                 logChannel = await _discord.Client.GetChannelAsync(guildCfg.TicketingConfig.LogChannelId.Value);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw new ArgumentException(
-                    $"Channel with Id: {guildCfg.TicketingConfig.LogChannelId} doesn't exist. Couldn't send the log");
+                throw new DiscordNotFoundException(
+                $"Channel with Id: {guildCfg.TicketingConfig.LogChannelId} doesn't exist. Couldn't send the log", ex);
             }
 
             var exportReq = new TicketExportReqDto
@@ -291,18 +288,18 @@ namespace Lisbeth.Bot.Application.Discord.Services
             {
                 guild = await _discord.Client.GetGuildAsync(req.GuildId);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw new ArgumentException($"Guild with Id: {req.GuildId} doesn't exist");
+                throw new DiscordNotFoundException($"Guild with Id: {req.GuildId} doesn't exist", ex);
             }
 
             try
             {
                 owner = await guild.GetMemberAsync(req.OwnerId);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw new ArgumentException($"Member with Id: {req.OwnerId} doesn't exist or isn't the guilds member.");
+                throw new DiscordNotFoundException($"Member with Id: {req.OwnerId} doesn't exist or isn't the guilds member.", ex);
             }
 
             return await OpenTicketAsync(guild, owner, req);
@@ -338,7 +335,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             var (ticket, id) = await _ticketService.OpenAsync(req, guildCfg);
 
-            if (id == 0) throw new ArgumentException($"Member already has an opened ticket in this guild.");
+            if (id == 0) throw new ArgumentException("Member already has an opened ticket in this guild.");
 
             var embed = new DiscordEmbedBuilder();
 
@@ -356,9 +353,9 @@ namespace Lisbeth.Bot.Application.Discord.Services
             var modRoles = guild.Roles.Where(x => x.Value.Permissions.HasPermission(Permissions.BanMembers));
 
             List<DiscordOverwriteBuilder> overwrites = modRoles.Select(role =>
-                new DiscordOverwriteBuilder().For(role.Value).Allow(Permissions.AccessChannels)).ToList();
-            overwrites.Add(new DiscordOverwriteBuilder().For(guild.EveryoneRole).Deny(Permissions.AccessChannels));
-            overwrites.Add(new DiscordOverwriteBuilder().For(owner).Allow(Permissions.AccessChannels));
+                new DiscordOverwriteBuilder(role.Value).Allow(Permissions.AccessChannels)).ToList();
+            overwrites.Add(new DiscordOverwriteBuilder(guild.EveryoneRole).Deny(Permissions.AccessChannels));
+            overwrites.Add(new DiscordOverwriteBuilder(owner).Allow(Permissions.AccessChannels));
 
             string topic = $"Support ticket opened by user {owner.GetFullUsername()} at {DateTime.Now}";
 
@@ -367,10 +364,10 @@ namespace Lisbeth.Bot.Application.Discord.Services
             {
                 openedCat = await _discord.Client.GetChannelAsync(guildCfg.TicketingConfig.OpenedCategoryId);
             }
-            catch
+            catch (Exception ex)
             {
-                throw new ArgumentException(
-                    $"Closed category channel with Id {guildCfg.TicketingConfig.OpenedCategoryId} doesn't exist");
+                throw new DiscordNotFoundException(
+                    $"Closed category channel with Id {guildCfg.TicketingConfig.OpenedCategoryId} doesn't exist", ex);
             }
 
             try
@@ -448,10 +445,10 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 {
                     target = await _discord.Client.GetChannelAsync(req.ChannelId.Value);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    throw new ArgumentException(
-                        $"User with Id: {req.ChannelId} doesn't exist or isn't this guild's target.");
+                    throw new DiscordNotFoundException(
+                            $"User with Id: {req.ChannelId} doesn't exist or isn't this guild's member.", ex);
                 }
             }
 
@@ -463,10 +460,10 @@ namespace Lisbeth.Bot.Application.Discord.Services
             {
                 requestingMember = await guild.GetMemberAsync(req.RequestedById);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw new ArgumentException(
-                    $"User with Id: {req.RequestedById} doesn't exist or isn't this guild's target.");
+                throw new DiscordNotFoundException(
+                $"User with Id: {req.RequestedById} doesn't exist or isn't this guild's target.", ex);
             }
 
             return await ReopenTicketAsync(guild, target, requestingMember, req);
@@ -516,12 +513,12 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     $"Ticket with Id: {ticket.GuildSpecificId}, TargetUserId: {ticket.UserId}, GuildId: {ticket.GuildId}, ChannelId: {ticket.ChannelId} is not closed.");
 
             if (!requestingMember.Permissions.HasPermission(Permissions.BanMembers))
-                throw new ArgumentException($"Unauthorized.");
+                throw new DiscordNotAuthorizedException("Requesting member doesn't have moderator rights.");
 
             var embed = new DiscordEmbedBuilder();
 
             embed.WithColor(new DiscordColor(0x18315C));
-            embed.WithAuthor($"Ticket reopened");
+            embed.WithAuthor("Ticket reopened");
             embed.AddField("Requested by", requestingMember.Mention);
             embed.WithFooter($"Ticket Id: {ticket.GuildSpecificId}");
 
@@ -555,16 +552,16 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             await target.ModifyAsync(x =>
                 x.Name = $"{guildCfg.TicketingConfig.OpenedNamePrefix}-{ticket.GuildSpecificId}");
-
+            
             DiscordChannel openedCat;
             try
             {
                 openedCat = await _discord.Client.GetChannelAsync(guildCfg.TicketingConfig.ClosedCategoryId);
             }
-            catch
+            catch (Exception ex)
             {
-                throw new ArgumentException(
-                    $"Closed category channel with Id {guildCfg.TicketingConfig.ClosedCategoryId} doesn't exist");
+                throw new DiscordNotFoundException(
+                $"Closed category channel with Id {guildCfg.TicketingConfig.ClosedCategoryId} doesn't exist", ex);
             }
 
             await target.ModifyAsync(x => x.Parent = openedCat);
@@ -581,7 +578,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             DiscordMember targetMember = null;
             DiscordRole targetRole = null;
-            DiscordMember requestingMemeber;
+            DiscordMember requestingMember;
             DiscordChannel targetTicketChannel = null;
             Ticket ticket;
 
@@ -630,10 +627,10 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 {
                     targetTicketChannel = await _discord.Client.GetChannelAsync(req.ChannelId.Value);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    throw new ArgumentException(
-                        $"User with Id: {req.ChannelId} doesn't exist or isn't this guild's target.");
+                    throw new DiscordNotFoundException(
+                        $"User with Id: {req.ChannelId} doesn't exist or isn't this guild's member.", ex);
                 }
             }
 
@@ -643,12 +640,12 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             try
             {
-                requestingMemeber = await guild.GetMemberAsync(req.RequestedById);
+                requestingMember = await guild.GetMemberAsync(req.RequestedById);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw new ArgumentException(
-                    $"User with Id: {req.RequestedById} doesn't exist or isn't this guild's target.");
+                throw new DiscordNotFoundException(
+                $"User with Id: {req.RequestedById} doesn't exist or isn't this guild's member.", ex);
             }
 
             try
@@ -662,16 +659,16 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 {
                     targetRole = guild.GetRole(req.SnowflakeId);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    throw new ArgumentException(
-                        $"Role or member with Id: {req.SnowflakeId} doesn't exist or isn't in this guild.");
+                    throw new DiscordNotFoundException(
+                        $"Role or member with Id: {req.SnowflakeId} doesn't exist or isn't in this guild.", ex);
                 }
             }
 
             return targetRole is null
-                ? await AddToTicketAsync(guild, requestingMemeber, targetTicketChannel, targetMember, null, req)
-                : await AddToTicketAsync(guild, requestingMemeber, targetTicketChannel, null, targetRole, req);
+                ? await AddToTicketAsync(guild, requestingMember, targetTicketChannel, targetMember, null, req)
+                : await AddToTicketAsync(guild, requestingMember, targetTicketChannel, null, targetRole, req);
         }
 
         public async Task<DiscordEmbed> AddToTicketAsync(InteractionContext ctx)
@@ -714,7 +711,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (ticket is null) throw new ArgumentException($"Ticket with channel Id: {targetTicketChannel.Id} doesn't exist.");
 
             if (!requestingMember.Permissions.HasPermission(Permissions.BanMembers))
-                throw new ArgumentException($"Unauthorized.");
+                throw new DiscordNotAuthorizedException("Requesting member doesn't have moderator rights.");
 
             if (targetRole is null)
                 await targetTicketChannel.AddOverwriteAsync(targetMember, Permissions.AccessChannels);
@@ -738,7 +735,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             DiscordMember targetMember = null;
             DiscordRole targetRole = null;
-            DiscordMember requestingMemeber;
+            DiscordMember requestingMember;
             DiscordChannel targetTicketChannel = null;
             Ticket ticket;
 
@@ -787,10 +784,10 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 {
                     targetTicketChannel = await _discord.Client.GetChannelAsync(req.ChannelId.Value);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    throw new ArgumentException(
-                        $"User with Id: {req.ChannelId} doesn't exist or isn't this guild's target.");
+                    throw new DiscordNotFoundException(
+                        $"User with Id: {req.ChannelId} doesn't exist or isn't this guild's member.", ex);
                 }
             }
 
@@ -800,12 +797,12 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             try
             {
-                requestingMemeber = await guild.GetMemberAsync(req.RequestedById);
+                requestingMember = await guild.GetMemberAsync(req.RequestedById);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw new ArgumentException(
-                    $"User with Id: {req.RequestedById} doesn't exist or isn't this guild's target.");
+                throw new DiscordNotFoundException(
+                $"User with Id: {req.RequestedById} doesn't exist or isn't this guild's member.", ex);
             }
 
             try
@@ -819,16 +816,16 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 {
                     targetRole = guild.GetRole(req.SnowflakeId);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    throw new ArgumentException(
-                        $"Role or member with Id: {req.SnowflakeId} doesn't exist or isn't in this guild.");
+                    throw new DiscordNotFoundException(
+                        $"Role or member with Id: {req.SnowflakeId} doesn't exist or isn't in this guild.", ex);
                 }
             }
 
             return targetRole is null
-                ? await RemoveFromTicketAsync(guild, requestingMemeber, targetTicketChannel, targetMember, null, req)
-                : await RemoveFromTicketAsync(guild, requestingMemeber, targetTicketChannel, null, targetRole, req);
+                ? await RemoveFromTicketAsync(guild, requestingMember, targetTicketChannel, targetMember, null, req)
+                : await RemoveFromTicketAsync(guild, requestingMember, targetTicketChannel, null, targetRole, req);
         }
 
         public async Task<DiscordEmbed> RemoveFromTicketAsync(InteractionContext ctx)
@@ -871,7 +868,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (ticket is null) throw new ArgumentException($"Ticket with channel Id: {targetTicketChannel.Id} doesn't exist.");
 
             if (!requestingMember.Permissions.HasPermission(Permissions.BanMembers))
-                throw new ArgumentException($"Unauthorized.");
+                throw new DiscordNotAuthorizedException("Requesting member doesn't have moderator rights.");
 
             if (targetRole is null)
                 await targetTicketChannel.AddOverwriteAsync(targetMember, deny: Permissions.AccessChannels);

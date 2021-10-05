@@ -15,11 +15,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
+using Lisbeth.Bot.Application.Services.Interfaces;
 using Lisbeth.Bot.DataAccessLayer.Specifications.BanSpecifications;
+using Lisbeth.Bot.DataAccessLayer.Specifications.GuildSpecifications;
 using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Discord.Interfaces;
@@ -27,10 +30,7 @@ using System;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using DSharpPlus;
-using Lisbeth.Bot.Application.Services.Interfaces;
-using Lisbeth.Bot.DataAccessLayer.Specifications.GuildSpecifications;
-using MikyM.Common.DataAccessLayer.Specifications;
+using Lisbeth.Bot.Application.Discord.Exceptions;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {
@@ -59,27 +59,27 @@ namespace Lisbeth.Bot.Application.Discord.Services
             {
                 guild = await _discord.Client.GetGuildAsync(req.GuildId);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw new ArgumentException($"Guild with Id: {req.GuildId} doesn't exist.");
+                throw new DiscordNotFoundException($"Guild with Id: {req.GuildId} doesn't exist.", ex);
             }
 
             try
             {
                 target = await guild.GetMemberAsync(req.TargetUserId);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw new ArgumentException($"User with Id: {req.TargetUserId} doesn't exist or isn't this guild's target.");
+                throw new DiscordNotFoundException($"User with Id: {req.TargetUserId} doesn't exist or isn't this guild's member.", ex);
             }
 
             try
             {
                 moderator = await guild.GetMemberAsync(req.RequestedOnBehalfOfId);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw new ArgumentException($"User with Id: {req.RequestedOnBehalfOfId} doesn't exist or isn't this guild's target.");
+                throw new DiscordNotFoundException($"User with Id: {req.RequestedOnBehalfOfId} doesn't exist or isn't this guild's member.", ex);
             }
 
             return await BanAsync(guild, target, moderator, req.AppliedUntil, req.Reason, req);
@@ -101,8 +101,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (moderator.Guild.Id != guild.Id) throw new ArgumentException(nameof(moderator));
             if (target.Guild.Id != guild.Id) throw new ArgumentException(nameof(target));
 
-            if (!moderator.Permissions.HasPermission(Permissions.BanMembers)) throw new ArgumentException(nameof(moderator));
-            if (target.Permissions.HasPermission(Permissions.BanMembers)) throw new ArgumentException(nameof(target));
+            if (!moderator.Permissions.HasPermission(Permissions.BanMembers)) throw new DiscordNotAuthorizedException($"User with Id: {moderator.Id} doesn't have moderator rights");
+            if (target.Permissions.HasPermission(Permissions.BanMembers)) throw new DiscordNotAuthorizedException($"User with Id: {moderator.Id} doesn't have rights to ban another moderator");
 
             DiscordBan ban;
             DiscordChannel channel = null;
@@ -121,9 +121,9 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 {
                     channel = await _discord.Client.GetChannelAsync(guildCfg.LogChannelId.Value);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    throw new ArgumentException($"Log channel with Id: {guildCfg.LogChannelId} doesn't exist.");
+                    throw new DiscordNotFoundException($"Log channel with Id: {guildCfg.LogChannelId} doesn't exist.", ex);
                 }
             }
 
@@ -220,14 +220,13 @@ namespace Lisbeth.Bot.Application.Discord.Services
             DiscordMember target;
             DiscordMember moderator;
             DiscordGuild guild;
-            Ban ban;
 
             if (req.Id is null && (req.GuildId is null || req.TargetUserId is null))
                 throw new ArgumentException("You must supply either ban Id or guild Id and user Id");
 
             if (req.Id is not null)
             {
-                ban = await _banService.GetAsync<Ban>(req.Id.Value);
+                var ban = await _banService.GetAsync<Ban>(req.Id.Value);
                 if (ban is null) throw new ArgumentException("Ban not found");
                 req.GuildId = ban.GuildId;
                 req.TargetUserId = ban.UserId;
@@ -237,27 +236,27 @@ namespace Lisbeth.Bot.Application.Discord.Services
             {
                 guild = await _discord.Client.GetGuildAsync(req.GuildId.Value);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw new ArgumentException($"Guild with Id: {req.GuildId} doesn't exist.");
+                throw new DiscordNotFoundException($"Guild with Id: {req.GuildId} doesn't exist.", ex);
             }
 
             try
             {
                 target = await guild.GetMemberAsync(req.TargetUserId.Value);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw new ArgumentException($"User with Id: {req.TargetUserId} doesn't exist or isn't this guild's target.");
+                throw new DiscordNotFoundException($"User with Id: {req.TargetUserId} doesn't exist or isn't this guild's member.", ex);
             }
 
             try
             {
                 moderator = await guild.GetMemberAsync(req.RequestedOnBehalfOfId);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw new ArgumentException($"User with Id: {req.RequestedOnBehalfOfId} doesn't exist or isn't this guild's target.");
+                throw new DiscordNotFoundException($"User with Id: {req.RequestedOnBehalfOfId} doesn't exist or isn't this guild's member.", ex);
             }
 
             return await UnbanAsync(guild, target, moderator);
@@ -293,9 +292,9 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 {
                     channel = await _discord.Client.GetChannelAsync(guildCfg.LogChannelId.Value);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    throw new ArgumentException($"Log channel with Id: {guildCfg.LogChannelId} doesn't exist.");
+                    throw new DiscordNotFoundException($"Log channel with Id: {guildCfg.LogChannelId} doesn't exist.", ex);
                 }
             }
 
@@ -384,27 +383,27 @@ namespace Lisbeth.Bot.Application.Discord.Services
             {
                 guild = await _discord.Client.GetGuildAsync(req.GuildId.Value);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw new ArgumentException($"Guild with Id: {req.GuildId} doesn't exist.");
+                throw new DiscordNotFoundException($"Guild with Id: {req.GuildId} doesn't exist.", ex);
             }
 
             try
             {
                 target = await guild.GetMemberAsync(req.TargetUserId.Value);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw new ArgumentException($"User with Id: {req.TargetUserId} doesn't exist or isn't this guild's target.");
+                throw new DiscordNotFoundException($"User with Id: {req.TargetUserId} doesn't exist or isn't this guild's member.", ex);
             }
 
             try
             {
                 moderator = await guild.GetMemberAsync(req.RequestedOnBehalfOfId);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw new ArgumentException($"User with Id: {req.RequestedOnBehalfOfId} doesn't exist or isn't this guild's target.");
+                throw new DiscordNotFoundException($"User with Id: {req.RequestedOnBehalfOfId} doesn't exist or isn't this guild's member.", ex);
             }
 
             return await GetAsync(guild, target, moderator);
@@ -440,9 +439,9 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 {
                     channel = await _discord.Client.GetChannelAsync(guildCfg.LogChannelId.Value);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    throw new ArgumentException($"Log channel with Id: {guildCfg.LogChannelId} doesn't exist.");
+                    throw new DiscordNotFoundException($"Log channel with Id: {guildCfg.LogChannelId} doesn't exist.", ex);
                 }
             }
 
