@@ -43,16 +43,14 @@ namespace MikyM.Common.Application.Services
             if (entry is TEntity rootEntity)
             {
                 entity = rootEntity;
-                await _unitOfWork.GetRepository<Repository<TEntity>>().AddAsync(entity);
+                _unitOfWork.GetRepository<Repository<TEntity>>().Add(entity);
             }
             else
             {
                 entity = _mapper.Map<TEntity>(entry);
-                await _unitOfWork.GetRepository<Repository<TEntity>>().AddAsync(entity);
+                _unitOfWork.GetRepository<Repository<TEntity>>().Add(entity);
             }
-
-
-
+            
             if (!shouldSave) return 0;
             await CommitAsync();
             return entity.Id;
@@ -67,12 +65,12 @@ namespace MikyM.Common.Application.Services
             if (entries is IEnumerable<TEntity> rootEntities)
             {
                 entities = rootEntities;
-                await _unitOfWork.GetRepository<Repository<TEntity>>().AddRangeAsync(entities);
+                _unitOfWork.GetRepository<Repository<TEntity>>().AddRange(entities);
             }
             else
             {
                 entities = _mapper.Map<IEnumerable<TEntity>>(entries);
-                await _unitOfWork.GetRepository<Repository<TEntity>>().AddRangeAsync(entities);
+                _unitOfWork.GetRepository<Repository<TEntity>>().AddRange(entities);
             }
             
             if (!shouldSave) return new List<long>();

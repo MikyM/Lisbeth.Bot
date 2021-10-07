@@ -28,6 +28,7 @@ namespace MikyM.Common.Application.Services
     {
         protected readonly IMapper _mapper;
         protected readonly IUnitOfWork<TContext> _unitOfWork;
+        private bool _disposed;
 
         protected ServiceBase(IMapper mapper, IUnitOfWork<TContext> uof)
         {
@@ -50,18 +51,21 @@ namespace MikyM.Common.Application.Services
             await _unitOfWork.UseTransaction();
         }
 
-        public virtual void Dispose()
+        // Public implementation of Dispose pattern callable by consumers.
+        public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
 
+        // Protected implementation of Dispose pattern.
         protected virtual void Dispose(bool disposing)
         {
-            if (disposing)
-            {
-                _unitOfWork.Dispose();
-            }
+            if (_disposed) return;
+
+            if (disposing) _unitOfWork?.Dispose();
+
+            _disposed = true;
         }
     }
 }

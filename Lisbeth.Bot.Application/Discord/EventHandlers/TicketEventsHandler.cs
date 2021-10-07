@@ -17,42 +17,45 @@
 
 using DSharpPlus;
 using DSharpPlus.EventArgs;
-using MikyM.Discord.Events;
-using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
-using Lisbeth.Bot.Domain.DTOs.Request;
+using Lisbeth.Bot.Application.Helpers;
+using MikyM.Discord.Events;
+using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.EventHandlers
 {
     [UsedImplicitly]
-    public class TicketEvents : IDiscordMiscEventsSubscriber
+    public class TicketEventsHandler : IDiscordMiscEventsSubscriber
     {
-        private readonly IDiscordTicketService _discordTicketService;
+        private readonly IBackgroundAsyncRunner _backgroundAsyncRunner;
 
-        public TicketEvents(IDiscordTicketService discordTicketService)
+        public TicketEventsHandler(IBackgroundAsyncRunner backgroundAsyncRunner)
         {
-            _discordTicketService = discordTicketService;
+            _backgroundAsyncRunner = backgroundAsyncRunner;
         }
 
         public async Task DiscordOnComponentInteractionCreated(DiscordClient sender, ComponentInteractionCreateEventArgs args)
         {
-            if (!args.Channel.Name.StartsWith("ticket-"))
-                return;
-            await args.Interaction.CreateResponseAsync(InteractionResponseType.Pong);
-            if (args.Id == "close-ticket-btn")
+            if (args.Id == "ticket_close_btn")
             {
-                _ = Task.Run(async () =>
-                {
-                    var req = new TicketCloseReqDto(null, null, args.Interaction.GuildId, args.Interaction.ChannelId, args.Interaction.User.Id);
-                    return await _discordTicketService.CloseTicketAsync(args.Interaction);
-                });
+                //_ = Task.ExecuteAsync(async () => await _discordTicketService.CloseTicketAsync(args.Interaction));
             }
-
-            await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+            if (args.Id == "ticket_open_btn")
+            {
+                await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+                _ = _backgroundAsyncRunner.ExecuteAsync<IDiscordTicketService>(async x => await x.OpenTicketAsync(args.Interaction));
+            }
+            if (args.Id == "ticket_reopen_btn")
+            {
+                //_ = Task.ExecuteAsync(async () => await _discordTicketService.ReopenTicketAsync(args.Interaction));
+            }
+            if (args.Id == "ticket_save_trans_btn")
+            {
+                //_ = Task.ExecuteAsync(async () => await _discordChatExportService.ExportToHtmlAsync(args.Interaction));
+            }
         }
-
-
+        
         public Task DiscordOnClientErrored(DiscordClient sender, ClientErrorEventArgs args)
         {
             return Task.CompletedTask;

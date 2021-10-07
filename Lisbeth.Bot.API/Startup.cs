@@ -47,7 +47,7 @@ namespace Lisbeth.Bot.API
         {
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 
-            //services.AddDbContext<LisbethBotDbContext>(options =>
+           // services.AddDbContext<LisbethBotDbContext>(options =>
             //options.UseNpgsql(Configuration.GetConnectionString("LisbethBotDb")));
             services.AddDbContext<LisbethBotDbContext>(options => options.UseInMemoryDatabase("testDb"));
             services.AddControllers(options =>

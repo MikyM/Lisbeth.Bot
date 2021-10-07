@@ -15,9 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using AutoMapper;
 using Lisbeth.Bot.Application.Services.Interfaces;
 using Lisbeth.Bot.DataAccessLayer;
@@ -26,9 +23,14 @@ using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.Application.Services;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using JetBrains.Annotations;
 
 namespace Lisbeth.Bot.Application.Services
 {
+    [UsedImplicitly]
     public class TicketService : CrudService<Ticket, LisbethBotDbContext>, ITicketService
     {
         public TicketService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
@@ -67,25 +69,18 @@ namespace Lisbeth.Bot.Application.Services
             return ticket;
         }
 
-        public async Task<(Ticket Ticket, long Id)> OpenAsync(TicketOpenReqDto req, Guild guildCfg)
+        public async Task<Ticket> OpenAsync(TicketOpenReqDto req)
         {
             if (req is null) throw new ArgumentNullException(nameof(req));
 
             var res = await GetBySpecificationsAsync<Ticket>(new TicketBaseGetSpecifications(null, req.OwnerId, req.GuildId));
 
             var ticket = res.FirstOrDefault();
-            if (ticket is not null) return (null, 0);
+            if (ticket is not null) return null;
 
-            var id = await AddAsync(req);
+            var id = await AddAsync(req, true);
 
-            BeginUpdate(guildCfg);
-            guildCfg.TicketingConfig.LastTicketId++;
-
-            await CommitAsync();
-
-            var created = await GetAsync<Ticket>(id);
-
-            return (created, guildCfg.TicketingConfig.LastTicketId);
+            return await GetAsync<Ticket>(id);
         }
 
         public async Task<Ticket> ReopenAsync(TicketReopenReqDto req, Ticket ticket)

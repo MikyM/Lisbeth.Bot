@@ -15,22 +15,24 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
+using MikyM.Common.DataAccessLayer.Helpers;
+using MikyM.Common.DataAccessLayer.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore.Storage;
-using MikyM.Common.DataAccessLayer.Helpers;
-using MikyM.Common.DataAccessLayer.Repositories;
-using MikyM.Common.Domain.Entities;
 
 namespace MikyM.Common.DataAccessLayer.UnitOfWork
 {
-    public class UnitOfWork<TContext> : IUnitOfWork<TContext> where TContext : Microsoft.EntityFrameworkCore.DbContext
+    public class UnitOfWork<TContext> : IUnitOfWork<TContext> where TContext : DbContext
     {
         public TContext Context { get; }
         protected Dictionary<string, IBaseRepository> _repositories;
         private IDbContextTransaction _transaction;
+        // To detect redundant calls
+        private bool _disposed;
 
         public UnitOfWork(TContext context)
         {
@@ -85,18 +87,27 @@ namespace MikyM.Common.DataAccessLayer.UnitOfWork
             return result;
         }
 
-        public virtual void Dispose()
+        // Public implementation of Dispose pattern callable by consumers.
+        public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
 
-        private void Dispose(bool disposing)
+        // Protected implementation of Dispose pattern.
+        protected virtual void Dispose(bool disposing)
         {
+            if (_disposed) return;
+
             if (disposing)
             {
-                Context.Dispose();
+                Context?.Dispose();
+                _transaction?.Dispose();
             }
+
+            _repositories = null;
+
+            _disposed = true;
         }
     }
 }

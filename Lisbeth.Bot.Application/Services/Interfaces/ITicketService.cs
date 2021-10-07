@@ -27,7 +27,7 @@ namespace Lisbeth.Bot.Application.Services.Interfaces
     {
         Task<Ticket> CloseAsync(TicketCloseReqDto req);
         Task<Ticket> CloseAsync(TicketCloseReqDto req, Ticket ticket);
-        Task<(Ticket Ticket, long Id)> OpenAsync(TicketOpenReqDto req, Guild guildCfg);
+        Task<Ticket> OpenAsync(TicketOpenReqDto req);
         Task<Ticket> ReopenAsync(TicketReopenReqDto req, Ticket ticket);
         Task<Ticket> ReopenAsync(TicketReopenReqDto req);
     }

@@ -26,10 +26,18 @@ using Serilog;
 namespace Lisbeth.Bot.Application.Discord.EventHandlers
 {
     [UsedImplicitly]
-    public class SlashCommandEvents : IDiscordSlashCommandsEventsSubscriber
+    public class SlashCommandEventsHandler : IDiscordSlashCommandsEventsSubscriber
     {
         public Task SlashCommandsOnContextMenuErrored(SlashCommandsExtension sender, ContextMenuErrorEventArgs args)
         {
+            Log.Logger.Error(args.Exception.ToString());
+            var noEntryEmoji = DiscordEmoji.FromName(sender.Client, ":x:");
+            var embed = new DiscordEmbedBuilder();
+            embed.WithColor(new DiscordColor(170, 1, 20));
+            embed.WithAuthor($"{noEntryEmoji} Context menu errored");
+            embed.AddField("Type", args.Exception.GetType().ToString());
+            embed.AddField("Message", args.Exception.Message);
+            args.Context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
             return Task.CompletedTask;
         }
 

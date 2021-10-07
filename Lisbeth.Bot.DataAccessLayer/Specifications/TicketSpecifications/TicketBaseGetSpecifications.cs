@@ -22,7 +22,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Specifications.TicketSpecifications
 {
     public class TicketBaseGetSpecifications : Specifications<Ticket>
     {
-        public TicketBaseGetSpecifications(long? id = null, ulong? userId = null, ulong? guildId = null, ulong? channelId = null, ulong? guildSpecificId = null, bool isDisabled = false, int limit = 0)
+        public TicketBaseGetSpecifications(long? id = null, ulong? userId = null, ulong? guildId = null, ulong? channelId = null, long? guildSpecificId = null, bool isDisabled = false, int limit = 0)
         {
             if (id is not null)
                 ApplyFilterCondition(x => x.Id == id);

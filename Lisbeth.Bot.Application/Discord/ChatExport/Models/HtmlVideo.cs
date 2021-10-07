@@ -30,8 +30,9 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Models
 
             var client = new VimeoClient(Environment.GetEnvironmentVariable("VIMEO_KEY"));
             IUploadRequest request;
+            var httpClientFactory = ContainerProvider.Container.Resolve<IHttpClientFactory>();
 
-            using (HttpClient httpClient = ContainerProvider.Container.Resolve<IHttpClientFactory>().CreateClient())
+            using (HttpClient httpClient = httpClientFactory.CreateClient())
             {
                 using HttpRequestMessage req = new HttpRequestMessage(HttpMethod.Get, DiscordLink);
                 using HttpResponseMessage response = await httpClient.SendAsync(req).ConfigureAwait(false);

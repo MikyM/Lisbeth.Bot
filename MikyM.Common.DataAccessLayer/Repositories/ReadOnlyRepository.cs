@@ -28,25 +28,23 @@ namespace MikyM.Common.DataAccessLayer.Repositories
 {
     public class ReadOnlyRepository<TEntity> : IReadOnlyRepository<TEntity> where TEntity : AggregateRootEntity
     {
-        public DbContext _context;
-        public readonly DbSet<TEntity> _set;
+        public readonly DbContext _context;
 
         public ReadOnlyRepository(DbContext context)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
-            _set = _context.Set<TEntity>();
         }
 
         public virtual async ValueTask<TEntity> GetAsync(params object[] keyValues)
         {
-            return await _set.FindAsync(keyValues);
+            return await _context.Set<TEntity>().FindAsync(keyValues);
         }
 
         public virtual async Task<IReadOnlyList<TEntity>> GetBySpecificationsAsync(
             ISpecifications<TEntity> baseSpecifications = null)
         {
             return await SpecificationEvaluator<TEntity>
-                .GetQuery(_set.AsQueryable(), baseSpecifications)
+                .GetQuery(_context.Set<TEntity>().AsQueryable(), baseSpecifications)
                 .AsNoTracking()
                 .ToListAsync();
         }
@@ -55,7 +53,7 @@ namespace MikyM.Common.DataAccessLayer.Repositories
             ISpecifications<TEntity> baseSpecifications = null)
         {
             return await SpecificationEvaluator<TEntity>
-                .GetQuery(_set.AsQueryable(), baseSpecifications)
+                .GetQuery(_context.Set<TEntity>().AsQueryable(), baseSpecifications)
                 .Skip((filter.PageNumber - 1) * filter.PageSize)
                 .Take(filter.PageSize)
                 .AsNoTracking()
@@ -64,7 +62,7 @@ namespace MikyM.Common.DataAccessLayer.Repositories
 
         public virtual async Task<long> LongCountAsync(ISpecifications<TEntity> specifications = null)
         {
-            return await SpecificationEvaluator<TEntity>.GetQuery(_set.AsQueryable(), specifications)
+            return await SpecificationEvaluator<TEntity>.GetQuery(_context.Set<TEntity>().AsQueryable(), specifications)
                 .AsNoTracking()
                 .LongCountAsync();
         }

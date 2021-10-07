@@ -53,6 +53,11 @@ namespace Lisbeth.Bot.Application.Discord.Services
             _guildService = guildService;
         }
 
+        public async Task Test()
+        {
+            await Task.Delay(5000);
+        }
+
         public async Task<DiscordMessageBuilder> CloseTicketAsync(TicketCloseReqDto req)
         {
             if (req is null) throw new ArgumentNullException(nameof(req));
@@ -149,7 +154,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             var guildRes =
                 await _guildService.GetBySpecificationsAsync<Guild>(
-                    new ActiveGuildByDiscordIdWithTicketingSpecifications(guild.Id));
+                    new ActiveGuildByDiscordIdWithIncludeSpecifications(guild.Id));
             var guildCfg = guildRes.FirstOrDefault();
 
             if (guildCfg is null)
@@ -182,21 +187,14 @@ namespace Lisbeth.Bot.Application.Discord.Services
             embed.AddField("Moderator", requestingMember.Mention);
             embed.WithFooter($"Ticket Id: {ticket.GuildSpecificId}");
 
-            var reopenOpt = new DiscordSelectComponentOption("Reopen", "Reopen", "Reopen this ticket", true,
-                new DiscordComponentEmoji(DiscordEmoji.FromName(_discord.Client, ":unlock:")));
-            var saveTransOpt = new DiscordSelectComponentOption("Save transcript", "Save transcript",
-                "Saves the transcript of this ticket", false,
-                new DiscordComponentEmoji(DiscordEmoji.FromName(_discord.Client, ":bookmark_tabs:")));
-            var options = new List<DiscordSelectComponentOption> {reopenOpt, saveTransOpt};
-
-            var selectComponent = new DiscordSelectComponent("options_closed_ticket", "Choose action", options);
-
-            var btn = new DiscordButtonComponent(ButtonStyle.Primary, "closed_ticket_msg_confirm_btn",
-                "Confirm action");
+            var reopenBtn = new DiscordButtonComponent(ButtonStyle.Primary, "ticket_reopen_btn",
+                "Reopen this ticket");
+            var saveTransBtn = new DiscordButtonComponent(ButtonStyle.Primary, "ticket_save_trans_btn",
+                "Generate transcript");
 
             var msgBuilder = new DiscordMessageBuilder();
             msgBuilder.AddEmbed(embed.Build());
-            msgBuilder.AddComponents(new List<DiscordComponent> {selectComponent, btn});
+            msgBuilder.AddComponents(new List<DiscordComponent> { reopenBtn, saveTransBtn });
 
             DiscordMessage closeMsg;
             try
@@ -208,9 +206,10 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 throw new ArgumentException($"Couldn't send ticket close message in channel with Id: {target.Id}");
             }
 
+            DiscordMember owner;
             try
             {
-                DiscordMember owner = requestingMember.Id == ticket.UserId
+                owner = requestingMember.Id == ticket.UserId
                     ? requestingMember // means requested by owner so we don't need to grab the owner again
                     : await guild.GetMemberAsync(ticket.UserId);
 
@@ -218,7 +217,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
             }
             catch
             {
-                // to do
+                owner = null;
+                // ignored
             }
 
             await Task.Delay(500);
@@ -255,15 +255,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 $"Channel with Id: {guildCfg.TicketingConfig.LogChannelId} doesn't exist. Couldn't send the log", ex);
             }
 
-            var exportReq = new TicketExportReqDto
-            {
-                GuildId = ticket.GuildId,
-                OwnerId = ticket.UserId,
-                ChannelId = ticket.ChannelId,
-                TicketId = ticket.Id
-            };
-
-            var logEmbed = await _chatExportService.ExportToHtmlAsync(exportReq, requestingMember);
+            var logEmbed = await _chatExportService.ExportToHtmlAsync(guild, target, requestingMember, owner ?? await _discord.Client.GetUserAsync(ticket.UserId), ticket);
 
             try
             {
@@ -309,11 +301,11 @@ namespace Lisbeth.Bot.Application.Discord.Services
         {
             if (intr is null) throw new ArgumentNullException(nameof(intr));
 
-            return await OpenTicketAsync(intr.Guild, (DiscordMember) intr.User);
+            return await OpenTicketAsync(intr.Guild, (DiscordMember) intr.User, null, intr);
         }
 
         private async Task<DiscordMessageBuilder> OpenTicketAsync(DiscordGuild guild, DiscordMember owner,
-            TicketOpenReqDto req = null)
+            TicketOpenReqDto req = null, DiscordInteraction intr = null)
         {
             if (guild is null) throw new ArgumentNullException(nameof(guild));
             if (owner is null) throw new ArgumentNullException(nameof(owner));
@@ -322,7 +314,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             var guildRes =
                 await _guildService.GetBySpecificationsAsync<Guild>(
-                    new ActiveGuildByDiscordIdWithTicketingSpecifications(guild.Id));
+                    new ActiveGuildByDiscordIdWithIncludeSpecifications(guild.Id));
             var guildCfg = guildRes.FirstOrDefault();
 
             if (guildCfg is null)
@@ -332,16 +324,25 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 throw new ArgumentException($"Guild with Id:{guild.Id} doesn't have ticketing enabled.");
 
             req ??= new TicketOpenReqDto() {GuildId = guild.Id, OwnerId = owner.Id};
+            req.GuildSpecificId = guildCfg.TicketingConfig.LastTicketId + 1;
 
-            var (ticket, id) = await _ticketService.OpenAsync(req, guildCfg);
+            var ticket = await _ticketService.OpenAsync(req);
 
-            if (id == 0) throw new ArgumentException("Member already has an opened ticket in this guild.");
+            if (ticket is null)
+            {
+                var failEmbed = new DiscordEmbedBuilder();
+                failEmbed.WithColor(new DiscordColor(0x18315C));
+                failEmbed.WithDescription($"You already have an opened ticket in this guild.");
+                await intr.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(failEmbed.Build())
+                    .AsEphemeral(true));
+                throw new ArgumentException("Member already has an opened ticket in this guild.");
+            }
 
             var embed = new DiscordEmbedBuilder();
 
             embed.WithColor(new DiscordColor(0x18315C));
             embed.WithDescription(guildCfg.TicketingConfig.WelcomeMessage.Replace("@ownerMention@", owner.Mention));
-            embed.WithFooter($"Ticket Id: {guildCfg.TicketingConfig.LastTicketId}");
+            embed.WithFooter($"Ticket Id: {req.GuildSpecificId}");
 
             var btn = new DiscordButtonComponent(ButtonStyle.Primary, "close_ticket_btn", "Close this ticket");
 
@@ -370,24 +371,45 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     $"Closed category channel with Id {guildCfg.TicketingConfig.OpenedCategoryId} doesn't exist", ex);
             }
 
+            DiscordChannel newTicketChannel;
             try
             {
-                DiscordChannel newTicketChannel = await guild.CreateChannelAsync(
-                    $"{guildCfg.TicketingConfig.OpenedNamePrefix}-{id:D4}", ChannelType.Text, openedCat, topic, null,
-                    null, overwrites);
-                await Task.Delay(500);
+                newTicketChannel = await guild.CreateChannelAsync(
+                    $"{guildCfg.TicketingConfig.OpenedNamePrefix}-{req.GuildSpecificId:D4}", ChannelType.Text,
+                    openedCat, topic, null, null, overwrites);
+                //await Task.Delay(500);
                 DiscordMessage msg = await newTicketChannel.SendMessageAsync(msgBuilder);
                 //Program.cachedMsgs.Add(msg.Id, msg);
 
                 _ticketService.BeginUpdate(ticket);
                 ticket.ChannelId = newTicketChannel.Id;
                 ticket.MessageOpenId = msg.Id;
+
+                _guildService.BeginUpdate(guildCfg);
+                guildCfg.TicketingConfig.LastTicketId++;
+
+                await _guildService.CommitAsync();
                 await _ticketService.CommitAsync();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                //
+                if (intr is null) return msgBuilder;
+
+                var failEmbed = new DiscordEmbedBuilder();
+                failEmbed.WithColor(new DiscordColor(0x18315C));
+                failEmbed.WithDescription($"Ticket wasn't created. Please message a moderator. {ex.ToString()}");
+                await intr.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(failEmbed.Build())
+                    .AsEphemeral(true));
+                return msgBuilder;
             }
+
+            if (intr is null) return msgBuilder;
+
+            var succEmbed = new DiscordEmbedBuilder();
+            succEmbed.WithColor(new DiscordColor(0x18315C));
+            succEmbed.WithDescription($"Ticket created successfully! Channel: {newTicketChannel?.Mention}");
+            await intr.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(succEmbed.Build())
+                .AsEphemeral(true));
 
             return msgBuilder;
         }
@@ -489,7 +511,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             var guildRes =
                 await _guildService.GetBySpecificationsAsync<Guild>(
-                    new ActiveGuildByDiscordIdWithTicketingSpecifications(guild.Id));
+                    new ActiveGuildByDiscordIdWithIncludeSpecifications(guild.Id));
             var guildCfg = guildRes.FirstOrDefault();
 
             if (guildCfg is null)
@@ -692,7 +714,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             var guildRes =
                 await _guildService.GetBySpecificationsAsync<Guild>(
-                    new ActiveGuildByDiscordIdWithTicketingSpecifications(guild.Id));
+                    new ActiveGuildByDiscordIdWithIncludeSpecifications(guild.Id));
             var guildCfg = guildRes.FirstOrDefault();
 
             if (guildCfg is null)
@@ -849,7 +871,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             var guildRes =
                 await _guildService.GetBySpecificationsAsync<Guild>(
-                    new ActiveGuildByDiscordIdWithTicketingSpecifications(guild.Id));
+                    new ActiveGuildByDiscordIdWithIncludeSpecifications(guild.Id));
             var guildCfg = guildRes.FirstOrDefault();
 
             if (guildCfg is null)

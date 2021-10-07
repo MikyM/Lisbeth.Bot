@@ -23,8 +23,8 @@ namespace MikyM.Common.DataAccessLayer.Repositories
 {
     public interface IRepository<TEntity> : IReadOnlyRepository<TEntity> where TEntity : AggregateRootEntity
     {
-        Task AddAsync(TEntity entity);
-        Task AddRangeAsync(IEnumerable<TEntity> entities);
+        void Add(TEntity entity);
+        void AddRange(IEnumerable<TEntity> entities);
         void AddOrUpdate(TEntity entity);
         void AddOrUpdateRange(IEnumerable<TEntity> entities);
         void BeginUpdate(TEntity entity);

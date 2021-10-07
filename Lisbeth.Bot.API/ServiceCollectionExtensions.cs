@@ -23,13 +23,11 @@ using Lisbeth.Bot.Application.Discord.SlashCommands;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MikyM.Discord;
-using MikyM.Discord.Extensions.CommandsNext;
 using MikyM.Discord.Extensions.Interactivity;
 using MikyM.Discord.Extensions.SlashCommands;
 using OpenTracing;
 using OpenTracing.Mock;
 using System;
-using System.Collections.Generic;
 
 namespace Lisbeth.Bot.API
 {
@@ -53,6 +51,7 @@ namespace Lisbeth.Bot.API
                 extension.RegisterCommands<TicketSlashCommands>(790631933758799912);
                 extension.RegisterCommands<AdminUtilSlashCommands>(790631933758799912);
                 extension.RegisterCommands<PruneApplicationCommands>(790631933758799912);
+                extension.RegisterCommands<ModerationUtilSlashCommands>(790631933758799912);
             });
             services.AddDiscordInteractivity(options =>
             {
@@ -61,24 +60,16 @@ namespace Lisbeth.Bot.API
                 options.AckPaginationButtons = true;
                 options.Timeout = TimeSpan.FromMinutes(2);
             });
-            services.AddDiscordCommandsNext(options =>
-            {
-                options.StringPrefixes = new List<string>() { "!" };
-                options.CaseSensitive = false;
-                options.DmHelp = false;
-                options.EnableDms = false;
-                options.EnableMentionPrefix = true;
-                options.IgnoreExtraArguments = true;
-                options.EnableDefaultHelp = false;
-            });
-
             #endregion
 
 
 
             #region events
 
-            services.AddDiscordSlashCommandsEventsSubscriber<SlashCommandEvents>();
+            services.AddDiscordSlashCommandsEventsSubscriber<SlashCommandEventsHandler>();
+            services.AddDiscordGuildMemberEventsSubscriber<ModerationEventsHandler>();
+            services.AddDiscordMessageEventsSubscriber<ModerationEventsHandler>();
+            services.AddDiscordMiscEventsSubscriber<TicketEventsHandler>();
 
             #endregion
         }

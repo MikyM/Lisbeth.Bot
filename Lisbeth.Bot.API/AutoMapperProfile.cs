@@ -30,6 +30,11 @@ namespace Lisbeth.Bot.API
             CreateMap<PruneReqDto, Prune>();
             CreateMap<GuildGetReq, Guild>();
             CreateMap<TicketExportReqDto, Ticket>();
+            CreateMap<TicketOpenReqDto, Ticket>().ForMember(dest => dest.UserId, source => source.MapFrom(x => x.OwnerId));
+            CreateMap<Guild, Guild>();
+            CreateMap<Ticket, Ticket>();
+            CreateMap<TicketingConfig, TicketingConfig>();
+            CreateMap<ModerationConfig, ModerationConfig>();
         }
     }
 }

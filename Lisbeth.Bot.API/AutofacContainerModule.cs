@@ -18,10 +18,13 @@
 using Autofac;
 using AutoMapper.Contrib.Autofac.DependencyInjection;
 using AutoMapper.Extensions.ExpressionMapping;
+using Lisbeth.Bot.Application.Helpers;
 using Lisbeth.Bot.Application.Services;
 using Lisbeth.Bot.Application.Services.Interfaces;
+using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.DataAccessLayer.Repositories;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using MikyM.Common.Application.Interfaces;
 using MikyM.Common.Application.Services;
 using MikyM.Common.DataAccessLayer.Repositories;
@@ -71,6 +74,21 @@ namespace Lisbeth.Bot.API
                 return new UriService(uri);
             }).As<IUriService>().SingleInstance();
 
+            builder.RegisterType<BackgroundAsyncRunner>().As<IBackgroundAsyncRunner>().SingleInstance();
+
+            // Register Entity Framework
+/*            builder.Register(x =>
+            {
+                var optionsBuilder = new DbContextOptionsBuilder<LisbethBotDbContext>();
+                optionsBuilder.UseInMemoryDatabase("testdb");
+                //optionsBuilder.EnableSensitiveDataLogging();
+                return new LisbethBotDbContext(optionsBuilder.Options);
+            }).AsSelf().InstancePerLifetimeScope();*/
+/*            var dbContextOptionsBuilder = new DbContextOptionsBuilder<LisbethBotDbContext>().UseInMemoryDatabase("testdb");
+
+            builder.RegisterType<LisbethBotDbContext>()
+                .WithParameter("options", dbContextOptionsBuilder.Options)
+                .InstancePerLifetimeScope();*/
         }
     }
 }

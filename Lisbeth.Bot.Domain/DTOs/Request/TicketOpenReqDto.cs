@@ -21,5 +21,6 @@ namespace Lisbeth.Bot.Domain.DTOs.Request
     {
         public ulong GuildId { get; set; }
         public ulong OwnerId { get; set; }
+        public long? GuildSpecificId { get; set; }
     }
 }

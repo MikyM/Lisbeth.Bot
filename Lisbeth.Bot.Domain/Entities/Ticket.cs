@@ -23,7 +23,7 @@ namespace Lisbeth.Bot.Domain.Entities
     public class Ticket : DiscordAggregateRootEntity
     {
         public ulong ChannelId { get; set; }
-        public ulong GuildSpecificId { get; set; }
+        public long GuildSpecificId { get; set; }
         public DateTime? ReopenedOn { get; set; }
         public DateTime? ClosedOn { get; set; }
         public ulong? ClosedBy { get; set; }

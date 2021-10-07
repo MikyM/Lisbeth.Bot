@@ -6,7 +6,7 @@
         public ulong? OwnerId { get; set; }
         public ulong? GuildId { get; set; }
         public ulong? ChannelId { get; set; }
-        public ulong? GuildSpecificId { get; set; }
+        public long? GuildSpecificId { get; set; }
         public ulong RequestedById { get; set; }
         public ulong SnowflakeId { get; set; }
 

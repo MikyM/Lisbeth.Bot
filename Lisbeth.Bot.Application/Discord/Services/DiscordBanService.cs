@@ -108,22 +108,22 @@ namespace Lisbeth.Bot.Application.Discord.Services
             DiscordChannel channel = null;
 
             var guildRes =
-                await _guildService.GetBySpecificationsAsync<Guild>(new ActiveGuildByDiscordIdWithModerationSpecifications(guild.Id));
+                await _guildService.GetBySpecificationsAsync<Guild>(new ActiveGuildByDiscordIdWithIncludeSpecifications(guild.Id));
             var guildCfg = guildRes.FirstOrDefault();
 
             if (guildCfg is null) throw new ArgumentException($"Guild with Id: {guild.Id} doesn't exist in the database.");
 
             if (guildCfg.ModerationConfig is null) throw new ArgumentException($"Guild with Id: {guild.Id} doesn't have moderation module enabled.");
 
-            if (guildCfg.LogChannelId is not null)
+            if (guildCfg.ModerationConfig.MemberEventsLogChannelId is not null)
             {
                 try
                 {
-                    channel = await _discord.Client.GetChannelAsync(guildCfg.LogChannelId.Value);
+                    channel = await _discord.Client.GetChannelAsync(guildCfg.ModerationConfig.MemberEventsLogChannelId.Value);
                 }
                 catch (Exception ex)
                 {
-                    throw new DiscordNotFoundException($"Log channel with Id: {guildCfg.LogChannelId} doesn't exist.", ex);
+                    throw new DiscordNotFoundException($"Log channel with Id: {guildCfg.ModerationConfig.MemberEventsLogChannelId} doesn't exist.", ex);
                 }
             }
 
@@ -279,22 +279,22 @@ namespace Lisbeth.Bot.Application.Discord.Services
             DiscordBan ban;
 
             var guildRes =
-                await _guildService.GetBySpecificationsAsync<Guild>(new ActiveGuildByDiscordIdWithModerationSpecifications(guild.Id));
+                await _guildService.GetBySpecificationsAsync<Guild>(new ActiveGuildByDiscordIdWithIncludeSpecifications(guild.Id));
             var guildCfg = guildRes.FirstOrDefault();
 
             if (guildCfg is null) throw new ArgumentException($"Guild with Id: {guild.Id} doesn't exist in the database.");
 
             if (guildCfg.ModerationConfig is null) throw new ArgumentException($"Guild with Id: {guild.Id} doesn't have moderation module enabled.");
 
-            if (guildCfg.LogChannelId is not null)
+            if (guildCfg.ModerationConfig.MemberEventsLogChannelId is not null)
             {
                 try
                 {
-                    channel = await _discord.Client.GetChannelAsync(guildCfg.LogChannelId.Value);
+                    channel = await _discord.Client.GetChannelAsync(guildCfg.ModerationConfig.MemberEventsLogChannelId.Value);
                 }
                 catch (Exception ex)
                 {
-                    throw new DiscordNotFoundException($"Log channel with Id: {guildCfg.LogChannelId} doesn't exist.", ex);
+                    throw new DiscordNotFoundException($"Log channel with Id: {guildCfg.ModerationConfig.MemberEventsLogChannelId} doesn't exist.", ex);
                 }
             }
 
@@ -423,7 +423,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (moderator is null) throw new ArgumentNullException(nameof(moderator));
 
             var guildRes =
-                await _guildService.GetBySpecificationsAsync<Guild>(new ActiveGuildByDiscordIdWithModerationSpecifications(guild.Id));
+                await _guildService.GetBySpecificationsAsync<Guild>(new ActiveGuildByDiscordIdWithIncludeSpecifications(guild.Id));
             var guildCfg = guildRes.FirstOrDefault();
 
             if (guildCfg is null) throw new ArgumentException($"Guild with Id: {guild.Id} doesn't exist in the database.");
@@ -433,15 +433,15 @@ namespace Lisbeth.Bot.Application.Discord.Services
             DiscordChannel channel = null;
             DiscordBan discordBan;
 
-            if (guildCfg.LogChannelId is not null)
+            if (guildCfg.ModerationConfig.MemberEventsLogChannelId is not null)
             {
                 try
                 {
-                    channel = await _discord.Client.GetChannelAsync(guildCfg.LogChannelId.Value);
+                    channel = await _discord.Client.GetChannelAsync(guildCfg.ModerationConfig.MemberEventsLogChannelId.Value);
                 }
                 catch (Exception ex)
                 {
-                    throw new DiscordNotFoundException($"Log channel with Id: {guildCfg.LogChannelId} doesn't exist.", ex);
+                    throw new DiscordNotFoundException($"Log channel with Id: {guildCfg.ModerationConfig.MemberEventsLogChannelId} doesn't exist.", ex);
                 }
             }
 

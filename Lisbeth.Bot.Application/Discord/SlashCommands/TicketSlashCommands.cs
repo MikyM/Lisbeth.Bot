@@ -23,6 +23,7 @@ using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using System;
 using System.Threading.Tasks;
+// ReSharper disable InconsistentNaming
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands
 {
@@ -31,7 +32,6 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
     [UsedImplicitly]
     public class TicketSlashCommands : ApplicationCommandModule
     {
-        // ReSharper disable once InconsistentNaming
         public IDiscordTicketService _discordTicketService { private get; set; }
 
         [UsedImplicitly]

@@ -32,19 +32,29 @@ namespace Lisbeth.Bot.DataAccessLayer
         {
         }
 
+        public DbSet<Guild> Guilds { get; set; }
         public DbSet<Mute> Mutes { get; set; }
         public DbSet<Ticket> Tickets { get; set; }
         public DbSet<Ban> Bans { get; set; }
         public DbSet<ServerBooster> ServerBoosters { get; set; }
         public DbSet<Audit> AuditLogs { get; set; }
         public DbSet<Prune> Prunes { get; set; }
+        public DbSet<TicketingConfig> TicketingConfigs { get; set; }
+        public DbSet<ModerationConfig> ModerationConfigs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // fluent api to do
+            modelBuilder.Entity<Guild>()
+                .HasOne<TicketingConfig>(x => x.TicketingConfig)
+                .WithOne(x => x.Guild)
+                .HasForeignKey<TicketingConfig>(x => x.GuildId);
+            modelBuilder.Entity<Guild>()
+                .HasOne<ModerationConfig>(x => x.ModerationConfig)
+                .WithOne(x => x.Guild)
+                .HasForeignKey<ModerationConfig>(x => x.GuildId);
             base.OnModelCreating(modelBuilder);
         }
-        
+
         public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess,
             CancellationToken cancellationToken = default)
         {
