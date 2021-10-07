@@ -89,13 +89,7 @@ namespace Lisbeth.Bot.API
                 options.UseMemoryStorage(new MemoryStorageOptions{JobExpirationCheckInterval = TimeSpan.FromMinutes(1)});
             });
 
-            services.AddHangfireServer(options =>
-            {
-                options.Queues = new[] {"Critical", "TimedModeration", "Reminder"};
-                options.Activator = new AutofacJobActivator(ContainerProvider.Container);
-            });
-
-
+            services.AddHangfireServer(options => options.Queues = new[] {"critical", "moderation", "reminder"});
         }
     }
 }

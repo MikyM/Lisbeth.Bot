@@ -62,8 +62,6 @@ namespace Lisbeth.Bot.API
             services.AddHttpClient();
             services.ConfigureDiscord();
             services.ConfigureHangfire();
-            
-            RecurringJobHelper.ScheduleAllDefined();
         }
 
         /// <summary>
@@ -74,12 +72,18 @@ namespace Lisbeth.Bot.API
         public void ConfigureContainer(ContainerBuilder builder)
         {
             builder.RegisterModule(new AutofacContainerModule());
+
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             ContainerProvider.Container = app.ApplicationServices.GetAutofacRoot();
+            GlobalConfiguration.Configuration.UseAutofacActivator(app.ApplicationServices.GetAutofacRoot());
+#pragma warning disable 4014
+            RecurringJobHelper.ScheduleAllDefinedDelayed();
+#pragma warning restore 4014
 
             if (env.IsDevelopment())
             {

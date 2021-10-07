@@ -15,11 +15,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using Lisbeth.Bot.API.Models;
+using Lisbeth.Bot.Application.Services.Interfaces;
 using MikyM.Common.DataAccessLayer.Filters;
 using System;
 using System.Collections.Generic;
-using Lisbeth.Bot.API.Models;
-using Lisbeth.Bot.Application.Services.Interfaces;
 
 namespace Lisbeth.Bot.API.Helpers
 {
@@ -28,21 +28,21 @@ namespace Lisbeth.Bot.API.Helpers
         public static PagedResponse<List<T>> CreatePagedResponse<T>(List<T> pagedData, PaginationFilter validFilter,
             long totalRecords, IUriService uriService, string route)
         {
-            var respose = new PagedResponse<List<T>>(pagedData, validFilter.PageNumber, validFilter.PageSize);
+            var response = new PagedResponse<List<T>>(pagedData, validFilter.PageNumber, validFilter.PageSize);
             var totalPages = ((double)totalRecords / (double)validFilter.PageSize);
             int roundedTotalPages = Convert.ToInt32(Math.Ceiling(totalPages));
-            respose.NextPage = validFilter.PageNumber >= 1 && validFilter.PageNumber < roundedTotalPages
+            response.NextPage = validFilter.PageNumber >= 1 && validFilter.PageNumber < roundedTotalPages
                 ? uriService.GetPageUri(new PaginationFilter(validFilter.PageNumber + 1, validFilter.PageSize), route)
                 : null;
-            respose.PreviousPage = validFilter.PageNumber - 1 >= 1 && validFilter.PageNumber <= roundedTotalPages
+            response.PreviousPage = validFilter.PageNumber - 1 >= 1 && validFilter.PageNumber <= roundedTotalPages
                 ? uriService.GetPageUri(new PaginationFilter(validFilter.PageNumber - 1, validFilter.PageSize), route)
                 : null;
-            respose.FirstPage = uriService.GetPageUri(new PaginationFilter(1, validFilter.PageSize), route);
-            respose.LastPage =
+            response.FirstPage = uriService.GetPageUri(new PaginationFilter(1, validFilter.PageSize), route);
+            response.LastPage =
                 uriService.GetPageUri(new PaginationFilter(roundedTotalPages, validFilter.PageSize), route);
-            respose.TotalPages = roundedTotalPages;
-            respose.TotalRecords = totalRecords;
-            return respose;
+            response.TotalPages = roundedTotalPages;
+            response.TotalRecords = totalRecords;
+            return response;
         }
     }
 }

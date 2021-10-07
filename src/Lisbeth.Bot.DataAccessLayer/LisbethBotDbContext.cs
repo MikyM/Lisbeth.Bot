@@ -45,26 +45,35 @@ namespace Lisbeth.Bot.DataAccessLayer
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             #region relationships
+
             modelBuilder.Entity<Guild>()
                 .HasOne<TicketingConfig>(x => x.TicketingConfig)
                 .WithOne(x => x.Guild)
                 .HasForeignKey<TicketingConfig>(x => x.GuildId);
+
             modelBuilder.Entity<Guild>()
                 .HasOne<ModerationConfig>(x => x.ModerationConfig)
                 .WithOne(x => x.Guild)
                 .HasForeignKey<ModerationConfig>(x => x.GuildId);
+
             modelBuilder.Entity<Guild>()
                 .HasMany<Mute>(x => x.Mutes)
                 .WithOne(x => x.Guild)
-                .HasForeignKey(x => x.GuildId);
+                .HasForeignKey(x => x.GuildId)
+                .HasPrincipalKey(x => x.GuildId);
+
             modelBuilder.Entity<Guild>()
                 .HasMany<Ban>(x => x.Bans)
                 .WithOne(x => x.Guild)
-                .HasForeignKey(x => x.GuildId);
+                .HasForeignKey(x => x.GuildId)
+                .HasPrincipalKey(x => x.GuildId);
+
             modelBuilder.Entity<Guild>()
                 .HasMany<Prune>(x => x.Prunes)
                 .WithOne(x => x.Guild)
-                .HasForeignKey(x => x.GuildId);
+                .HasForeignKey(x => x.GuildId)
+                .HasPrincipalKey(x => x.GuildId);
+
             #endregion
 
 

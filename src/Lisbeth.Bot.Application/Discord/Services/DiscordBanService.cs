@@ -30,6 +30,7 @@ using System;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using Hangfire;
 using Lisbeth.Bot.Application.Discord.Exceptions;
 
 namespace Lisbeth.Bot.Application.Discord.Services
@@ -533,6 +534,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             return embed;
         }
 
+        [Queue("moderation")]
         public async Task UnbanCheckAsync()
         {
             var res = await _banService.GetBySpecificationsAsync<Mute>(new ActiveExpiredBansInActiveGuildsSpecifications());
