@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Generic;
 using Lisbeth.Bot.Domain.Entities.Base;
 
 namespace Lisbeth.Bot.Domain.Entities
@@ -22,8 +23,10 @@ namespace Lisbeth.Bot.Domain.Entities
     public class Guild : DiscordAggregateRootEntity
     {
         public ulong InviterId { get; set; }
-
         public TicketingConfig TicketingConfig { get; set; }
         public ModerationConfig ModerationConfig { get; set; }
+        public List<Mute> Mutes { get; set; }
+        public List<Ban> Bans { get; set; }
+        public List<Prune> Prunes { get; set; }
     }
 }

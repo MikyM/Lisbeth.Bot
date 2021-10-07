@@ -30,6 +30,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using System.Globalization;
+using Hangfire;
 
 namespace Lisbeth.Bot.API
 {
@@ -59,7 +60,10 @@ namespace Lisbeth.Bot.API
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Lisbeth.Bot", Version = "v1" });
             });
             services.AddHttpClient();
-            services.ConfigureDiscord(Configuration);
+            services.ConfigureDiscord();
+            services.ConfigureHangfire();
+            
+            RecurringJobHelper.ScheduleAllDefined();
         }
 
         /// <summary>
@@ -85,6 +89,8 @@ namespace Lisbeth.Bot.API
             }
 
             app.UseHttpsRedirection();
+
+            app.UseHangfireDashboard();
 
             app.UseRouting();
 

@@ -25,17 +25,17 @@ namespace Lisbeth.Bot.DataAccessLayer.Specifications.TicketSpecifications
         public TicketBaseGetSpecifications(long? id = null, ulong? userId = null, ulong? guildId = null, ulong? channelId = null, long? guildSpecificId = null, bool isDisabled = false, int limit = 0)
         {
             if (id is not null)
-                ApplyFilterCondition(x => x.Id == id);
+                AddFilterCondition(x => x.Id == id);
             if (userId is not null)
-                ApplyFilterCondition(x => x.UserId == userId);
+                AddFilterCondition(x => x.UserId == userId);
             if (guildId is not null)
-                ApplyFilterCondition(x => x.GuildId == guildId);
+                AddFilterCondition(x => x.GuildId == guildId);
             if (channelId is not null)
-                ApplyFilterCondition((x => x.ChannelId == channelId));
+                AddFilterCondition((x => x.ChannelId == channelId));
             if (guildSpecificId is not null)
-                ApplyFilterCondition((x => x.GuildSpecificId == guildSpecificId));
+                AddFilterCondition((x => x.GuildSpecificId == guildSpecificId));
 
-            ApplyFilterCondition(x => x.IsDisabled == isDisabled);
+            AddFilterCondition(x => x.IsDisabled == isDisabled);
 
             ApplyOrderByDescending(x => x.CreatedAt);
 

@@ -26,21 +26,21 @@ namespace Lisbeth.Bot.DataAccessLayer.Specifications.BanSpecifications
         public BanBaseGetSpecifications(long? id = null, ulong? userId = null, ulong? guildId = null, ulong? appliedById = null, DateTime? liftedOn = null, DateTime? appliedOn = null, ulong? liftedById = null, int limit = 0)
         {
             if(id != null)
-                ApplyFilterCondition(x => x.Id == id);
+                AddFilterCondition(x => x.Id == id);
             if (userId != null)
-                ApplyFilterCondition(x => x.UserId == userId);
+                AddFilterCondition(x => x.UserId == userId);
             if (guildId != null)
-                ApplyFilterCondition(x => x.GuildId == guildId);
+                AddFilterCondition(x => x.GuildId == guildId);
             if (appliedById != null)
-                ApplyFilterCondition(x => x.AppliedById == appliedById);
+                AddFilterCondition(x => x.AppliedById == appliedById);
             if (liftedById != null)
-                ApplyFilterCondition(x => x.LiftedById == liftedById);
+                AddFilterCondition(x => x.LiftedById == liftedById);
             if (liftedOn != null)
-                ApplyFilterCondition(x => x.LiftedOn == liftedOn);
+                AddFilterCondition(x => x.LiftedOn == liftedOn);
             if (appliedOn != null)
-                ApplyFilterCondition(x => x.AppliedOn == appliedOn);
+                AddFilterCondition(x => x.AppliedOn == appliedOn);
             if (liftedById != null)
-                ApplyFilterCondition(x => x.LiftedById == liftedById);
+                AddFilterCondition(x => x.LiftedById == liftedById);
 
             ApplyOrderByDescending(x => x.AppliedOn);
 

@@ -28,12 +28,17 @@ using MikyM.Discord.Extensions.SlashCommands;
 using OpenTracing;
 using OpenTracing.Mock;
 using System;
+using Hangfire;
+using Hangfire.MemoryStorage;
+using Hangfire.PostgreSql;
+using Lisbeth.Bot.API.Helpers;
+using Lisbeth.Bot.Application.Helpers;
 
 namespace Lisbeth.Bot.API
 {
     public static class ServiceCollectionExtensions
     {
-        public static void ConfigureDiscord(this IServiceCollection services, IConfiguration configuration)
+        public static void ConfigureDiscord(this IServiceCollection services)
         {
             services.AddSingleton<ITracer>(_ => new MockTracer());
             services.AddDiscord(options =>
@@ -72,6 +77,25 @@ namespace Lisbeth.Bot.API
             services.AddDiscordMiscEventsSubscriber<TicketEventsHandler>();
 
             #endregion
+        }
+
+        public static void ConfigureHangfire(this IServiceCollection services)
+        {
+            services.AddHangfire(options =>
+            {
+                options.UseRecommendedSerializerSettings();
+/*                options.UsePostgreSqlStorage(Environment.GetEnvironmentVariable("HangfireTstConnection"),
+                    new PostgreSqlStorageOptions {QueuePollInterval = TimeSpan.FromSeconds(15)});*/
+                options.UseMemoryStorage(new MemoryStorageOptions{JobExpirationCheckInterval = TimeSpan.FromMinutes(1)});
+            });
+
+            services.AddHangfireServer(options =>
+            {
+                options.Queues = new[] {"Critical", "TimedModeration", "Reminder"};
+                options.Activator = new AutofacJobActivator(ContainerProvider.Container);
+            });
+
+
         }
     }
 }

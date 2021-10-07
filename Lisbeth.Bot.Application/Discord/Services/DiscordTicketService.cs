@@ -154,7 +154,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             var guildRes =
                 await _guildService.GetBySpecificationsAsync<Guild>(
-                    new ActiveGuildByDiscordIdWithIncludeSpecifications(guild.Id));
+                    new ActiveGuildByDiscordIdWithTicketingSpecifications(guild.Id));
             var guildCfg = guildRes.FirstOrDefault();
 
             if (guildCfg is null)
@@ -314,7 +314,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             var guildRes =
                 await _guildService.GetBySpecificationsAsync<Guild>(
-                    new ActiveGuildByDiscordIdWithIncludeSpecifications(guild.Id));
+                    new ActiveGuildByDiscordIdWithTicketingSpecifications(guild.Id));
             var guildCfg = guildRes.FirstOrDefault();
 
             if (guildCfg is null)
@@ -511,7 +511,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             var guildRes =
                 await _guildService.GetBySpecificationsAsync<Guild>(
-                    new ActiveGuildByDiscordIdWithIncludeSpecifications(guild.Id));
+                    new ActiveGuildByDiscordIdWithTicketingSpecifications(guild.Id));
             var guildCfg = guildRes.FirstOrDefault();
 
             if (guildCfg is null)
@@ -714,7 +714,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             var guildRes =
                 await _guildService.GetBySpecificationsAsync<Guild>(
-                    new ActiveGuildByDiscordIdWithIncludeSpecifications(guild.Id));
+                    new ActiveGuildByDiscordIdWithTicketingSpecifications(guild.Id));
             var guildCfg = guildRes.FirstOrDefault();
 
             if (guildCfg is null)
@@ -871,7 +871,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             var guildRes =
                 await _guildService.GetBySpecificationsAsync<Guild>(
-                    new ActiveGuildByDiscordIdWithIncludeSpecifications(guild.Id));
+                    new ActiveGuildByDiscordIdWithTicketingSpecifications(guild.Id));
             var guildCfg = guildRes.FirstOrDefault();
 
             if (guildCfg is null)

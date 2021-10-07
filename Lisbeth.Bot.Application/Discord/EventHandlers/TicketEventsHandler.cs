@@ -22,6 +22,7 @@ using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Application.Helpers;
 using MikyM.Discord.Events;
 using System.Threading.Tasks;
+using Lisbeth.Bot.Application.Discord.ChatExport;
 
 namespace Lisbeth.Bot.Application.Discord.EventHandlers
 {
@@ -39,7 +40,8 @@ namespace Lisbeth.Bot.Application.Discord.EventHandlers
         {
             if (args.Id == "ticket_close_btn")
             {
-                //_ = Task.ExecuteAsync(async () => await _discordTicketService.CloseTicketAsync(args.Interaction));
+                await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+                _ = _backgroundAsyncRunner.ExecuteAsync<IDiscordTicketService>(async x => await x.CloseTicketAsync(args.Interaction));
             }
             if (args.Id == "ticket_open_btn")
             {
@@ -48,11 +50,13 @@ namespace Lisbeth.Bot.Application.Discord.EventHandlers
             }
             if (args.Id == "ticket_reopen_btn")
             {
-                //_ = Task.ExecuteAsync(async () => await _discordTicketService.ReopenTicketAsync(args.Interaction));
+                await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+                _ = _backgroundAsyncRunner.ExecuteAsync<IDiscordTicketService>(async x => await x.ReopenTicketAsync(args.Interaction));
             }
             if (args.Id == "ticket_save_trans_btn")
             {
-                //_ = Task.ExecuteAsync(async () => await _discordChatExportService.ExportToHtmlAsync(args.Interaction));
+                await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+                _ = _backgroundAsyncRunner.ExecuteAsync<IDiscordChatExportService>(async x => await x.ExportToHtmlAsync(args.Interaction));
             }
         }
         

@@ -25,7 +25,7 @@ namespace Lisbeth.Bot.API.Helpers
 {
     public static class PaginationHelper
     {
-        public static PagedResponse<List<T>> CreatePagedReponse<T>(List<T> pagedData, PaginationFilter validFilter,
+        public static PagedResponse<List<T>> CreatePagedResponse<T>(List<T> pagedData, PaginationFilter validFilter,
             long totalRecords, IUriService uriService, string route)
         {
             var respose = new PagedResponse<List<T>>(pagedData, validFilter.PageNumber, validFilter.PageSize);

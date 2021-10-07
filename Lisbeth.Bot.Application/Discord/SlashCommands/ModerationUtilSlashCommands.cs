@@ -50,7 +50,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
-            var res = await _guildService.GetBySpecificationsAsync<Guild>(new ActiveGuildByDiscordIdWithIncludeSpecifications(ctx.Guild.Id));
+            var res = await _guildService.GetBySpecificationsAsync<Guild>(new ActiveGuildByDiscordIdWithTicketingSpecifications(ctx.Guild.Id));
             var guild = res.FirstOrDefault();
 
             if (guild is null) throw new ArgumentException("Guild not found in database");
@@ -88,7 +88,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             if (closedCat is null) throw new ArgumentNullException(nameof(closedCat));
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
-            var res = await _guildService.GetBySpecificationsAsync<Guild>(new ActiveGuildByDiscordIdWithIncludeSpecifications(ctx.Guild.Id));
+            var res = await _guildService.GetBySpecificationsAsync<Guild>(new ActiveGuildByDiscordIdWithTicketingSpecifications(ctx.Guild.Id));
             var guild = res.FirstOrDefault();
 
             if (guild is null) throw new ArgumentException("Guild not found in database");

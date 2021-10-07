@@ -31,5 +31,6 @@ namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
         Task<DiscordEmbed> UnbanAsync(InteractionContext ctx);
         Task<DiscordEmbed> GetSpecificUserGuildBanAsync(BanGetReqDto req);
         Task<DiscordEmbed> GetAsync(InteractionContext ctx);
+        Task UnbanCheckAsync();
     }
 }

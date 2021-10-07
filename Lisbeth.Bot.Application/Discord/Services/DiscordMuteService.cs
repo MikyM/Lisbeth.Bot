@@ -557,5 +557,18 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             return embed;
         }
+
+        public async Task UnmuteCheckAsync()
+        {
+            var res = await _muteService.GetBySpecificationsAsync<Mute>(new ActiveExpiredMutesInActiveGuildsSpecifications());
+
+            if (res is null || res.Count == 0) return;
+
+            foreach (var mute in res)
+            {
+                var req = new MuteDisableReqDto(mute.UserId, mute.GuildId, _discord.Client.CurrentUser.Id);
+                await UnmuteAsync(req);
+            }
+        }
     }
 }

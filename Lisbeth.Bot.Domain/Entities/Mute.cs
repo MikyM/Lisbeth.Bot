@@ -29,6 +29,8 @@ namespace Lisbeth.Bot.Domain.Entities
         public ulong LiftedById { get; set; }
         public string Reason { get; set; } = "";
 
+        public Guild Guild { get; set; }
+
         public Mute()
         {
         }

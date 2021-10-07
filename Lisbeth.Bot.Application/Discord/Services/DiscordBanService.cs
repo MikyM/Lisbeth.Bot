@@ -108,7 +108,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             DiscordChannel channel = null;
 
             var guildRes =
-                await _guildService.GetBySpecificationsAsync<Guild>(new ActiveGuildByDiscordIdWithIncludeSpecifications(guild.Id));
+                await _guildService.GetBySpecificationsAsync<Guild>(new ActiveGuildByDiscordIdWithModerationSpecifications(guild.Id));
             var guildCfg = guildRes.FirstOrDefault();
 
             if (guildCfg is null) throw new ArgumentException($"Guild with Id: {guild.Id} doesn't exist in the database.");
@@ -279,7 +279,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             DiscordBan ban;
 
             var guildRes =
-                await _guildService.GetBySpecificationsAsync<Guild>(new ActiveGuildByDiscordIdWithIncludeSpecifications(guild.Id));
+                await _guildService.GetBySpecificationsAsync<Guild>(new ActiveGuildByDiscordIdWithModerationSpecifications(guild.Id));
             var guildCfg = guildRes.FirstOrDefault();
 
             if (guildCfg is null) throw new ArgumentException($"Guild with Id: {guild.Id} doesn't exist in the database.");
@@ -423,7 +423,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (moderator is null) throw new ArgumentNullException(nameof(moderator));
 
             var guildRes =
-                await _guildService.GetBySpecificationsAsync<Guild>(new ActiveGuildByDiscordIdWithIncludeSpecifications(guild.Id));
+                await _guildService.GetBySpecificationsAsync<Guild>(new ActiveGuildByDiscordIdWithModerationSpecifications(guild.Id));
             var guildCfg = guildRes.FirstOrDefault();
 
             if (guildCfg is null) throw new ArgumentException($"Guild with Id: {guild.Id} doesn't exist in the database.");
@@ -531,6 +531,19 @@ namespace Lisbeth.Bot.Application.Discord.Services
             }
 
             return embed;
+        }
+
+        public async Task UnbanCheckAsync()
+        {
+            var res = await _banService.GetBySpecificationsAsync<Mute>(new ActiveExpiredBansInActiveGuildsSpecifications());
+
+            if (res is null || res.Count == 0) return;
+
+            foreach (var mute in res)
+            {
+                var req = new BanDisableReqDto(mute.UserId, mute.GuildId, _discord.Client.CurrentUser.Id);
+                await UnbanAsync(req);
+            }
         }
     }
 }

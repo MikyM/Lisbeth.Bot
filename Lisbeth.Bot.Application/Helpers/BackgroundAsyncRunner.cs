@@ -24,7 +24,7 @@ namespace Lisbeth.Bot.Application.Helpers
 {
     public interface IBackgroundAsyncRunner
     {
-        public Task ExecuteAsync<T>(Func<T, Task> action);
+        public Task ExecuteAsync<T>(Func<T, Task> func);
     }
 
     public class BackgroundAsyncRunner : IBackgroundAsyncRunner
@@ -36,15 +36,14 @@ namespace Lisbeth.Bot.Application.Helpers
             _lifetimeScope = lifetimeScope;
         }
 
-        public Task ExecuteAsync<T>(Func<T, Task> action)
+        public Task ExecuteAsync<T>(Func<T, Task> func)
         {
-            var task = Task.Run(async () =>
+            return Task.Run(async () =>
             {
                 using var scope = _lifetimeScope.BeginLifetimeScope();
                 var service = scope.Resolve<T>();
-                await action(service);
+                await func(service);
             });
-            return task;
         }
     }
 }

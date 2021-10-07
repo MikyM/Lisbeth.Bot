@@ -60,7 +60,7 @@ namespace MikyM.Common.DataAccessLayer.Specifications
         {
             OrderByDescending = orderByDescendingExpression;
         }
-        protected void ApplyFilterCondition(Expression<Func<T, bool>> filterExpression)
+        protected void AddFilterCondition(Expression<Func<T, bool>> filterExpression)
         {
             FilterConditions.Add(filterExpression);
         }
