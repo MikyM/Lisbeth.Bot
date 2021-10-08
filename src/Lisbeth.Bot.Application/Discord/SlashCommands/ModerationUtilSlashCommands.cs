@@ -23,10 +23,16 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
         [SlashCommand("identity", "A command that allows checking information about a member.")]
         [UsedImplicitly]
         public async Task IdentityCommand(InteractionContext ctx,
-            [Option("user", "User to mute")] DiscordUser user)
+            [Option("user", "User to identify")] DiscordUser user)
         {
             if (user is null) throw new ArgumentNullException(nameof(user));
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+
+            var res = await _guildService.GetBySpecificationsAsync<Guild>(new ActiveGuildByDiscordIdWithTicketingSpecifications(ctx.Guild.Id));
+            var guild = res.FirstOrDefault();
+
+            if (guild is null) throw new ArgumentException("Guild not found in database");
+
             var member = (DiscordMember) user;
 
             var embed = new DiscordEmbedBuilder();

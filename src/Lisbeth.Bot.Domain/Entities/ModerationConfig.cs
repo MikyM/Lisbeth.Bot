@@ -1,7 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace Lisbeth.Bot.Domain.Entities
+﻿namespace Lisbeth.Bot.Domain.Entities
 {
     public class ModerationConfig
     {

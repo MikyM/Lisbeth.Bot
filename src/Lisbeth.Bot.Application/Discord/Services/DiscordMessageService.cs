@@ -30,9 +30,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {
+    [UsedImplicitly]
     public class DiscordMessageService : IDiscordMessageService
     {
         private readonly IDiscordService _discord;
@@ -427,7 +429,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 embed.WithThumbnail(msg.Author.AvatarUrl);
                 embed.AddField("Author", $"{msg.Author.Username}#{msg.Author.Discriminator}", true);
                 embed.AddField("Author mention", $"{msg.Author.Mention}", true);
-                embed.AddField("Channel", $"{e.Channel.Mention}", true);
+                embed.AddField("Channel", $"{args.Channel.Mention}", true);
 
                 if (filtered.Count() != 0)
                 {

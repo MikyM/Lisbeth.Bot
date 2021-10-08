@@ -198,7 +198,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 }
             }
 
-            if (!guildCfg.ModerationConfig.ShouldLogMemberEvents) return embed; // means we're not sending to log channel
+            if (guildCfg.ModerationConfig.MemberEventsLogChannelId is null) return embed; // means we're not sending to log channel
 
             // means we're logging to log channel and returning an embed for interaction or other purposes
 
@@ -342,7 +342,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 embed.WithFooter($"Case ID: {res.Id} | Member ID: {target.Id}");
             }
 
-            if (!guildCfg.ModerationConfig.ShouldLogMemberEvents) return embed; // means we're not sending to log channel
+            if (guildCfg.ModerationConfig.MemberEventsLogChannelId is null) return embed; // means we're not sending to log channel
 
             // means we're logging to log channel and returning an embed for interaction or other purposes
 
@@ -518,7 +518,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 }
             }
 
-            if (!guildCfg.ModerationConfig.ShouldLogMemberEvents) return embed; // means we're not sending to log channel
+            if (guildCfg.ModerationConfig.MemberEventsLogChannelId is null) return embed; // means we're not sending to log channel
 
             // means we're logging to log channel and returning an embed for interaction or other purposes
 
