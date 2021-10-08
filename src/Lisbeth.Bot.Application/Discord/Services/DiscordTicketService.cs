@@ -182,7 +182,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             var embed = new DiscordEmbedBuilder();
 
-            embed.WithColor(new DiscordColor(0x18315C));
+            embed.WithColor(new DiscordColor(guildCfg.EmbedHexColor));
             embed.WithAuthor("Ticket closed");
             embed.AddField("Moderator", requestingMember.Mention);
             embed.WithFooter($"Ticket Id: {ticket.GuildSpecificId}");
@@ -331,7 +331,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (ticket is null)
             {
                 var failEmbed = new DiscordEmbedBuilder();
-                failEmbed.WithColor(new DiscordColor(0x18315C));
+                failEmbed.WithColor(new DiscordColor(guildCfg.EmbedHexColor));
                 failEmbed.WithDescription($"You already have an opened ticket in this guild.");
                 await intr.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(failEmbed.Build())
                     .AsEphemeral(true));
@@ -340,7 +340,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             var embed = new DiscordEmbedBuilder();
 
-            embed.WithColor(new DiscordColor(0x18315C));
+            embed.WithColor(new DiscordColor(guildCfg.EmbedHexColor));
             embed.WithDescription(guildCfg.TicketingConfig.WelcomeMessage.Replace("@ownerMention@", owner.Mention));
             embed.WithFooter($"Ticket Id: {req.GuildSpecificId}");
 
@@ -396,7 +396,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 if (intr is null) return msgBuilder;
 
                 var failEmbed = new DiscordEmbedBuilder();
-                failEmbed.WithColor(new DiscordColor(0x18315C));
+                failEmbed.WithColor(new DiscordColor(guildCfg.EmbedHexColor));
                 failEmbed.WithDescription($"Ticket wasn't created. Please message a moderator. {ex.ToString()}");
                 await intr.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(failEmbed.Build())
                     .AsEphemeral(true));
@@ -406,7 +406,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (intr is null) return msgBuilder;
 
             var succEmbed = new DiscordEmbedBuilder();
-            succEmbed.WithColor(new DiscordColor(0x18315C));
+            succEmbed.WithColor(new DiscordColor(guildCfg.EmbedHexColor));
             succEmbed.WithDescription($"Ticket created successfully! Channel: {newTicketChannel?.Mention}");
             await intr.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(succEmbed.Build())
                 .AsEphemeral(true));
@@ -539,7 +539,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             var embed = new DiscordEmbedBuilder();
 
-            embed.WithColor(new DiscordColor(0x18315C));
+            embed.WithColor(new DiscordColor(guildCfg.EmbedHexColor));
             embed.WithAuthor("Ticket reopened");
             embed.AddField("Requested by", requestingMember.Mention);
             embed.WithFooter($"Ticket Id: {ticket.GuildSpecificId}");
@@ -742,7 +742,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             var embed = new DiscordEmbedBuilder();
 
-            embed.WithColor(new DiscordColor(0x18315C));
+            embed.WithColor(new DiscordColor(guildCfg.EmbedHexColor));
             embed.WithAuthor($"Ticket moderation | Add {(targetRole is null ? "member" : "role")} action log");
             embed.AddField("Moderator", requestingMember.Mention);
             embed.AddField("Added", $"{targetRole?.Mention ?? targetMember?.Mention}");
@@ -899,7 +899,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             var embed = new DiscordEmbedBuilder();
 
-            embed.WithColor(new DiscordColor(0x18315C));
+            embed.WithColor(new DiscordColor(guildCfg.EmbedHexColor));
             embed.WithAuthor($"Ticket moderation | Add {(targetRole is null ? "member" : "role")} action log");
             embed.AddField("Moderator", requestingMember.Mention);
             embed.AddField("Added", $"{targetRole?.Mention ?? targetMember?.Mention}");

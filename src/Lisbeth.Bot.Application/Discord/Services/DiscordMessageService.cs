@@ -17,16 +17,19 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using DSharpPlus.Entities;
+using DSharpPlus.EventArgs;
 using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
+using Lisbeth.Bot.Application.Services.Interfaces;
+using Lisbeth.Bot.DataAccessLayer.Specifications.GuildSpecifications;
 using Lisbeth.Bot.Domain.DTOs.Request;
+using Lisbeth.Bot.Domain.Entities;
 using MikyM.Discord.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Lisbeth.Bot.Application.Services.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {
@@ -34,11 +37,13 @@ namespace Lisbeth.Bot.Application.Discord.Services
     {
         private readonly IDiscordService _discord;
         private readonly IPruneService _pruneService;
+        private readonly IGuildService _guildService;
 
-        public DiscordMessageService(IDiscordService discord, IPruneService pruneService)
+        public DiscordMessageService(IDiscordService discord, IPruneService pruneService, IGuildService guildService)
         {
             _pruneService = pruneService;
             _discord = discord;
+            _guildService = guildService;
         }
 
 
@@ -234,9 +239,229 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 embed.WithAuthor($"Prune result | {author.GetFullUsername()}", null, author != null ? author.AvatarUrl : null);
             }
 
-            var res = await _pruneService.AddAsync(req, true);
+            _ = await _pruneService.AddAsync(req, true);
 
             return embed;
+        }
+
+        public async Task LogMessageUpdatedEventAsync(MessageUpdateEventArgs args)
+        {
+            if (args is null) throw new ArgumentNullException(nameof(args));
+
+            if (args.Message.Author.IsBot) return;
+
+            var res = await _guildService.GetBySpecificationsAsync<Guild>(
+                new ActiveGuildByDiscordIdWithModerationSpecifications(args.Guild.Id));
+
+            var guild = res.FirstOrDefault();
+
+            if (guild?.ModerationConfig?.MessageUpdatedEventsLogChannelId is null) return;
+
+            DiscordChannel logChannel = args.Guild.Channels
+                .FirstOrDefault(x => x.Key == guild.ModerationConfig.MessageUpdatedEventsLogChannelId.Value)
+                .Value;
+
+            if (logChannel is null) return;
+
+            string oldContent = args.MessageBefore.Content;
+            string newContent = args.Message.Content;
+            string oldAttachmentsString = "No attachments";
+            string newAttachmentsString = "No attachments";
+
+            var oldAttachments = args.MessageBefore.Attachments;
+            var newAttachments = args.Message.Attachments;
+
+            List<string> oldAttachmentUrls = oldAttachments.Select(attachment => attachment.ProxyUrl).ToList();
+            List<string> newAttachmentUrls = newAttachments.Select(attachment => attachment.ProxyUrl).ToList();
+
+            if (oldAttachmentUrls.Count != 0) oldAttachmentsString = string.Join(System.Environment.NewLine, oldAttachmentUrls);
+            if (newAttachmentUrls.Count != 0) newAttachmentsString = String.Join(System.Environment.NewLine, newAttachmentUrls);
+
+            if (oldContent == "") oldContent = "No content";
+            if (newContent == "") newContent = "No content";
+
+            var embed = new DiscordEmbedBuilder();
+            embed.WithTitle("Message has been edited");
+            embed.WithThumbnail(args.Author.AvatarUrl);
+            embed.AddField("Author", $"{args.Author.GetFullUsername()}", true);
+            embed.AddField("Author mention", $"{args.Message.Author.Mention}", true);
+            embed.AddField("Channel", $"{args.Channel.Mention}", true);
+            embed.AddField("Date sent", $"{args.Message.Timestamp}");
+            embed.AddField("Old content", oldContent);
+            embed.AddField("Old attachments", oldAttachmentsString);
+            embed.AddField("New content", newContent);
+            embed.AddField("New attachments", newAttachmentsString);
+            embed.WithFooter($"Message Id: {args.Message.Id} || Author Id: {args.Message.Author.Id}");
+            embed.WithColor(new DiscordColor(guild.EmbedHexColor));
+
+            try
+            {
+                await _discord.Client.SendMessageAsync(logChannel, embed.Build());
+            }
+            catch (Exception ex)
+            {
+                //log something
+            }
+        }
+
+        public async Task LogMessageDeletedEventAsync(MessageDeleteEventArgs args)
+        {
+            if (args is null) throw new ArgumentNullException(nameof(args));
+
+            if (args.Message.Author.IsBot) return;
+
+            var res = await _guildService.GetBySpecificationsAsync<Guild>(
+                new ActiveGuildByDiscordIdWithModerationSpecifications(args.Guild.Id));
+
+            var guild = res.FirstOrDefault();
+
+            if (guild?.ModerationConfig?.MessageDeletedEventsLogChannelId is null) return;
+
+            DiscordChannel logChannel = args.Guild.Channels
+                .FirstOrDefault(x => x.Key == guild.ModerationConfig.MessageDeletedEventsLogChannelId.Value)
+                .Value;
+
+            if (logChannel is null) return;
+
+            string content = args.Message.Content;
+            string attachmentsString = "No attachments";
+            var attachments = args.Message.Attachments;
+            DiscordUser deletedBy = args.Message.Author;
+
+            await Task.Delay(500);
+
+            var auditLogs = await args.Guild.GetAuditLogsAsync(1, null, AuditLogActionType.MessageDelete);
+            var auditLogsBans = await args.Guild.GetAuditLogsAsync(1, null, AuditLogActionType.Ban);
+            var filtered = auditLogs.Where(m => m.CreationTimestamp.LocalDateTime > DateTime.Now.Subtract(new TimeSpan(0, 0, 4))).ToList();
+            var filteredBans = auditLogsBans.Where(m => m.CreationTimestamp.LocalDateTime > DateTime.Now.Subtract(new TimeSpan(0, 0, 4))).ToList();
+
+            if (filtered.Count() != 0)
+            {
+                var deletedLog = (DiscordAuditLogMessageEntry)filtered[0];
+                if (deletedLog.Channel == args.Channel && args.Message.Author.Id == deletedLog.Target.Id) deletedBy = deletedLog.UserResponsible;
+            }
+
+            var attachmentUrls = attachments.Select(attachment => attachment.ProxyUrl).ToList();
+
+            if (content == "") content = "No content";
+            if (attachmentUrls.Count != 0) attachmentsString = string.Join(Environment.NewLine, attachmentUrls);
+
+            var embed = new DiscordEmbedBuilder();
+
+            embed.WithThumbnail(args.Message.Author.AvatarUrl);
+            embed.AddField("Author", $"{args.Message.Author.GetFullUsername()}", true);
+            embed.AddField("Author mention", $"{args.Message.Author.Mention}", true);
+            embed.AddField("Channel", $"{args.Channel.Mention}", true);
+            if (filteredBans.Count() != 0)
+            {
+                embed.WithTitle("Message has been deleted due to ban prune");
+                embed.AddField("Deleted by", $"{filteredBans[0].UserResponsible.Mention}");
+            }
+            else
+            {
+                embed.WithTitle("Message has been deleted");
+                embed.AddField("Deleted by", $"{deletedBy.Mention}");
+            }
+            embed.AddField("Date sent", $"{args.Message.Timestamp}");
+            embed.AddField("Content", content);
+            embed.AddField("Attachments", attachmentsString);
+            embed.WithFooter($"Message Id: {args.Message.Id} || Author Id: {args.Message.Author.Id}");
+            embed.WithColor(new DiscordColor(guild.EmbedHexColor));
+
+            try
+            {
+                await _discord.Client.SendMessageAsync(logChannel, embed.Build());
+            }
+            catch (Exception ex)
+            {
+                //log something
+            }
+        }
+
+        public async Task LogMessageBulkDeletedEventAsync(MessageBulkDeleteEventArgs args)
+        {
+            if (args is null) throw new ArgumentNullException(nameof(args));
+
+            var res = await _guildService.GetBySpecificationsAsync<Guild>(
+                new ActiveGuildByDiscordIdWithModerationSpecifications(args.Guild.Id));
+
+            var guild = res.FirstOrDefault();
+
+            if (guild?.ModerationConfig?.MessageDeletedEventsLogChannelId is null) return;
+
+            DiscordChannel logChannel = args.Guild.Channels
+                .FirstOrDefault(x => x.Key == guild.ModerationConfig.MessageDeletedEventsLogChannelId.Value)
+                .Value;
+
+            if (logChannel is null) return;
+
+            await Task.Delay(500);
+
+            var auditLogs = await args.Guild.GetAuditLogsAsync(1, null, AuditLogActionType.Ban);
+            var auditBulkLogs = await args.Guild.GetAuditLogsAsync(1, null, AuditLogActionType.MessageBulkDelete);
+            var filtered = auditLogs
+                .Where(m => m.CreationTimestamp.LocalDateTime > DateTime.Now.Subtract(new TimeSpan(0, 0, 4)))
+                .ToList();
+            var filteredBulk = auditBulkLogs
+                .Where(m => m.CreationTimestamp.LocalDateTime > DateTime.Now.Subtract(new TimeSpan(0, 0, 4)))
+                .ToList();
+
+            foreach (var msg in args.Messages)
+            {
+                if (msg?.Author is null || msg.Author.IsBot) continue;
+
+                var embed = new DiscordEmbedBuilder();
+                var attachments = msg.Attachments;
+                var attachmentsString = "No attachments";
+
+                var attachmentUrls = attachments.Select(attachment => attachment.ProxyUrl).ToList();
+
+                if (attachmentUrls.Count != 0)
+                {
+                    attachmentsString = string.Join(Environment.NewLine, attachmentUrls);
+                }
+
+                var content = msg.Content;
+                if (content == "") content = "No content";
+
+                embed.WithThumbnail(msg.Author.AvatarUrl);
+                embed.AddField("Author", $"{msg.Author.Username}#{msg.Author.Discriminator}", true);
+                embed.AddField("Author mention", $"{msg.Author.Mention}", true);
+                embed.AddField("Channel", $"{e.Channel.Mention}", true);
+
+                if (filtered.Count() != 0)
+                {
+                    embed.WithTitle("Message has been deleted due to ban prune");
+                    embed.AddField("Pruned by", $"{filtered[0].UserResponsible.Mention}");
+                }
+                else if (filteredBulk.Count() != 0)
+                {
+                    embed.WithTitle("Message has been deleted via prune command");
+                    embed.AddField("Pruned by", $"{filteredBulk[0].UserResponsible.Mention}");
+                }
+                else
+                {
+                    embed.WithTitle("Message has been deleted in a bulk deletion action");
+                    embed.AddField("Pruned by", $"Unknown");
+                }
+
+                embed.AddField("Date sent", $"{msg.Timestamp}");
+                embed.AddField("Content", content);
+                embed.AddField("Attachments", attachmentsString);
+                embed.WithFooter($"Message ID: {msg.Id} || Author ID: {msg.Author.Id}");
+                embed.WithColor(new DiscordColor(guild.EmbedHexColor));
+
+                try
+                {
+                    await _discord.Client.SendMessageAsync(logChannel, embed.Build());
+                }
+                catch (Exception ex)
+                {
+                    //log something
+                }
+
+                await Task.Delay(800);
+            }
         }
     }
 }

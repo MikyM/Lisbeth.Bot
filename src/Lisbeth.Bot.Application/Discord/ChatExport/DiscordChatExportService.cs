@@ -284,7 +284,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
             embedBuilder.AddField("Ticket Name", $"ticket-{Regex.Replace(target.Name, @"[^\d]", "")}", true);
             embedBuilder.AddField("Channel", target.Mention, true);
             embedBuilder.AddField("Users in transcript", usersString);
-            embedBuilder.WithColor(new DiscordColor(0x18315C));
+            embedBuilder.WithColor(new DiscordColor(guildCfg.EmbedHexColor));
 
             MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(html));
             DiscordMessageBuilder messageBuilder = new DiscordMessageBuilder();

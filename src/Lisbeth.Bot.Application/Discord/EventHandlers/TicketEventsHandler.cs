@@ -29,11 +29,11 @@ namespace Lisbeth.Bot.Application.Discord.EventHandlers
     [UsedImplicitly]
     public class TicketEventsHandler : IDiscordMiscEventsSubscriber
     {
-        private readonly IBackgroundAsyncRunner _backgroundAsyncRunner;
+        private readonly IAsyncExecutor _asyncExecutor;
 
-        public TicketEventsHandler(IBackgroundAsyncRunner backgroundAsyncRunner)
+        public TicketEventsHandler(IAsyncExecutor asyncExecutor)
         {
-            _backgroundAsyncRunner = backgroundAsyncRunner;
+            _asyncExecutor = asyncExecutor;
         }
 
         public async Task DiscordOnComponentInteractionCreated(DiscordClient sender, ComponentInteractionCreateEventArgs args)
@@ -41,22 +41,22 @@ namespace Lisbeth.Bot.Application.Discord.EventHandlers
             if (args.Id == "ticket_close_btn")
             {
                 await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
-                _ = _backgroundAsyncRunner.ExecuteAsync<IDiscordTicketService>(async x => await x.CloseTicketAsync(args.Interaction));
+                _ = _asyncExecutor.ExecuteAsync<IDiscordTicketService>(async x => await x.CloseTicketAsync(args.Interaction));
             }
             if (args.Id == "ticket_open_btn")
             {
                 await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
-                _ = _backgroundAsyncRunner.ExecuteAsync<IDiscordTicketService>(async x => await x.OpenTicketAsync(args.Interaction));
+                _ = _asyncExecutor.ExecuteAsync<IDiscordTicketService>(async x => await x.OpenTicketAsync(args.Interaction));
             }
             if (args.Id == "ticket_reopen_btn")
             {
                 await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
-                _ = _backgroundAsyncRunner.ExecuteAsync<IDiscordTicketService>(async x => await x.ReopenTicketAsync(args.Interaction));
+                _ = _asyncExecutor.ExecuteAsync<IDiscordTicketService>(async x => await x.ReopenTicketAsync(args.Interaction));
             }
             if (args.Id == "ticket_save_trans_btn")
             {
                 await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
-                _ = _backgroundAsyncRunner.ExecuteAsync<IDiscordChatExportService>(async x => await x.ExportToHtmlAsync(args.Interaction));
+                _ = _asyncExecutor.ExecuteAsync<IDiscordChatExportService>(async x => await x.ExportToHtmlAsync(args.Interaction));
             }
         }
         

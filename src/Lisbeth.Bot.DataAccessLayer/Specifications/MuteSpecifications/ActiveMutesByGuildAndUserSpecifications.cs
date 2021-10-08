@@ -16,18 +16,22 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+using System;
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.DataAccessLayer.Specifications;
 
-namespace Lisbeth.Bot.DataAccessLayer.Specifications.GuildSpecifications
+namespace Lisbeth.Bot.DataAccessLayer.Specifications.MuteSpecifications
 {
-    public class ActiveGuildByDiscordIdWithTicketingSpecifications : Specifications<Guild>
+    public class ActiveMutesByGuildAndUserSpecifications : Specifications<Mute>
     {
-        public ActiveGuildByDiscordIdWithTicketingSpecifications(ulong discordGuildId)
+        public ActiveMutesByGuildAndUserSpecifications(ulong guildId, ulong userId)
         {
             AddFilterCondition(x => !x.IsDisabled);
-            AddFilterCondition(x => x.GuildId == discordGuildId);
-            AddInclude(x => x.TicketingConfig);
+            AddFilterCondition(x => !x.Guild.IsDisabled);
+            AddFilterCondition(x => x.Guild.GuildId == guildId);
+            AddFilterCondition(x => x.AppliedUntil > DateTime.UtcNow);
+            AddFilterCondition(x => x.UserId == userId);
+            AddInclude(x => x.Guild);
         }
     }
 }

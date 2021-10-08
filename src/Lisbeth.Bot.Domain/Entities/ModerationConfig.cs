@@ -7,15 +7,14 @@ namespace Lisbeth.Bot.Domain.Entities
     {
         public long Id { get; set; }
         public ulong? MemberEventsLogChannelId { get; set; }
-        public ulong? MessageEventsLogChannelId { get; set; }
+        public ulong? MessageDeletedEventsLogChannelId { get; set; }
+        public ulong? MessageUpdatedEventsLogChannelId { get; set; }
+        public ulong MuteRoleId { get; set; }
+        public string MemberWelcomeMessage { get; set; }
+        public string MemberWelcomeMessageTitle { get; set; }
 
 
         public long GuildId { get; set; }
         public Guild Guild { get; set; }
-
-        [NotMapped]
-        public bool ShouldLogMemberEvents => MemberEventsLogChannelId.HasValue;
-        [NotMapped]
-        public bool ShouldLogMessageEvents => MessageEventsLogChannelId.HasValue;
     }
 }

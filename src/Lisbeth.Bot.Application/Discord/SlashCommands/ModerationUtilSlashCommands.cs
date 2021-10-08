@@ -35,7 +35,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             embed.AddField("Member's identity", $"{user.GetFullUsername()}", true);
             embed.AddField("Joined guild", $"{member.JoinedAt}");
             embed.AddField("Account created", $"{member.CreationTimestamp}");
-            embed.WithColor(new DiscordColor(0x18315C));
+            embed.WithColor(new DiscordColor(guild.EmbedHexColor));
             embed.WithFooter($"Member Id: {member.Id}");
 
             await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(embed.Build())
@@ -63,7 +63,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             embed.AddField("When to use this support system", guild.TicketingConfig.WhenToUseCenterMessage);
             embed.AddField("Additional information", guild.TicketingConfig.AdditionalInformationCenterMessage);
             embed.WithFooter("Click on the button below to create a ticket");
-            embed.WithColor(new DiscordColor(0x18315C));
+            embed.WithColor(new DiscordColor(guild.EmbedHexColor));
 
             var btn = new DiscordButtonComponent(ButtonStyle.Primary, "ticket_open_btn", "Open a ticket", false,
                 new DiscordComponentEmoji(envelopeEmoji));

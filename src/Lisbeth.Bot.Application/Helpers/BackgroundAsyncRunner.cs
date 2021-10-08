@@ -22,16 +22,17 @@ using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Helpers
 {
-    public interface IBackgroundAsyncRunner
+    public interface IAsyncExecutor
     {
         public Task ExecuteAsync<T>(Func<T, Task> func);
+        public Task ExecuteAsync(Func<Task> func);
     }
 
-    public class BackgroundAsyncRunner : IBackgroundAsyncRunner
+    public class AsyncExecutor : IAsyncExecutor
     {
         private readonly ILifetimeScope _lifetimeScope;
 
-        public BackgroundAsyncRunner(ILifetimeScope lifetimeScope)
+        public AsyncExecutor(ILifetimeScope lifetimeScope)
         {
             _lifetimeScope = lifetimeScope;
         }
@@ -43,6 +44,15 @@ namespace Lisbeth.Bot.Application.Helpers
                 using var scope = _lifetimeScope.BeginLifetimeScope();
                 var service = scope.Resolve<T>();
                 await func(service);
+            });
+        }
+
+        public Task ExecuteAsync(Func<Task> func)
+        {
+            return Task.Run(async () =>
+            {
+                using var scope = _lifetimeScope.BeginLifetimeScope();
+                await func.Invoke();
             });
         }
     }

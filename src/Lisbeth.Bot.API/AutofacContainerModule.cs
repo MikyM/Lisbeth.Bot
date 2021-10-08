@@ -74,7 +74,7 @@ namespace Lisbeth.Bot.API
                 return new UriService(uri);
             }).As<IUriService>().SingleInstance();
 
-            builder.RegisterType<BackgroundAsyncRunner>().As<IBackgroundAsyncRunner>().SingleInstance();
+            builder.RegisterType<AsyncExecutor>().As<IAsyncExecutor>().SingleInstance();
 
             // Register Entity Framework
 /*            builder.Register(x =>

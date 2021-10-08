@@ -9,25 +9,21 @@
 // 
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSargs.  See the
 // GNU Affero General Public License for more details.
 // 
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using DSharpPlus.EventArgs;
+using System.Threading.Tasks;
 
-using Lisbeth.Bot.Domain.Entities;
-using MikyM.Common.DataAccessLayer.Specifications;
-
-namespace Lisbeth.Bot.DataAccessLayer.Specifications.GuildSpecifications
+namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
 {
-    public class ActiveGuildByDiscordIdWithTicketingSpecifications : Specifications<Guild>
+    public interface IDiscordMemberService
     {
-        public ActiveGuildByDiscordIdWithTicketingSpecifications(ulong discordGuildId)
-        {
-            AddFilterCondition(x => !x.IsDisabled);
-            AddFilterCondition(x => x.GuildId == discordGuildId);
-            AddInclude(x => x.TicketingConfig);
-        }
+        Task LogMemberRemovedEventAsync(GuildMemberRemoveEventArgs args);
+        Task SendWelcomeMessageAsync(GuildMemberAddEventArgs args);
+        Task MemberMuteCheckAsync(GuildMemberAddEventArgs args);
     }
 }

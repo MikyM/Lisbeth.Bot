@@ -16,6 +16,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 using Lisbeth.Bot.Domain.Entities.Base;
 
 namespace Lisbeth.Bot.Domain.Entities
@@ -25,6 +27,7 @@ namespace Lisbeth.Bot.Domain.Entities
         public ulong InviterId { get; set; }
         public TicketingConfig TicketingConfig { get; set; }
         public ModerationConfig ModerationConfig { get; set; }
+        public string EmbedHexColor { get; set; } = "#26296e";
         public List<Mute> Mutes { get; set; }
         public List<Ban> Bans { get; set; }
         public List<Prune> Prunes { get; set; }

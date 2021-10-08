@@ -9,7 +9,7 @@
 // 
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSargs.  See the
 // GNU Affero General Public License for more details.
 // 
 // You should have received a copy of the GNU Affero General Public License
@@ -18,6 +18,8 @@
 using DSharpPlus;
 using DSharpPlus.EventArgs;
 using JetBrains.Annotations;
+using Lisbeth.Bot.Application.Discord.Services.Interfaces;
+using Lisbeth.Bot.Application.Helpers;
 using MikyM.Discord.Events;
 using System.Threading.Tasks;
 
@@ -26,6 +28,13 @@ namespace Lisbeth.Bot.Application.Discord.EventHandlers
     [UsedImplicitly]
     public class ModerationEventsHandler : IDiscordMessageEventsSubscriber, IDiscordGuildMemberEventsSubscriber
     {
+        private readonly IAsyncExecutor _asyncExecutor;
+
+        public ModerationEventsHandler(IAsyncExecutor asyncExecutor)
+        {
+            _asyncExecutor = asyncExecutor;
+        }
+
         public Task DiscordOnMessageCreated(DiscordClient sender, MessageCreateEventArgs args)
         {
             return Task.CompletedTask;
@@ -38,26 +47,32 @@ namespace Lisbeth.Bot.Application.Discord.EventHandlers
 
         public Task DiscordOnMessageUpdated(DiscordClient sender, MessageUpdateEventArgs args)
         {
+            _ = _asyncExecutor.ExecuteAsync<IDiscordMessageService>(async x => await x.LogMessageUpdatedEventAsync(args));
             return Task.CompletedTask;
         }
 
         public Task DiscordOnMessageDeleted(DiscordClient sender, MessageDeleteEventArgs args)
         {
+            _ = _asyncExecutor.ExecuteAsync<IDiscordMessageService>(async x => await x.LogMessageDeletedEventAsync(args));
             return Task.CompletedTask;
         }
 
         public Task DiscordOnMessagesBulkDeleted(DiscordClient sender, MessageBulkDeleteEventArgs args)
         {
+            _ = _asyncExecutor.ExecuteAsync<IDiscordMessageService>(async x => await x.LogMessageBulkDeletedEventAsync(args));
             return Task.CompletedTask;
         }
 
         public Task DiscordOnGuildMemberAdded(DiscordClient sender, GuildMemberAddEventArgs args)
         {
+            _ = _asyncExecutor.ExecuteAsync<IDiscordMemberService>(async x => await x.SendWelcomeMessageAsync(args));
+            _ = _asyncExecutor.ExecuteAsync<IDiscordMemberService>(async x => await x.MemberMuteCheckAsync(args));
             return Task.CompletedTask;
         }
 
         public Task DiscordOnGuildMemberRemoved(DiscordClient sender, GuildMemberRemoveEventArgs args)
         {
+            _ = _asyncExecutor.ExecuteAsync<IDiscordMemberService>(async x=> await x.LogMemberRemovedEventAsync(args));
             return Task.CompletedTask;
         }
 

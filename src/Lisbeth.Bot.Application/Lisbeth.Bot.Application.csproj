@@ -19,7 +19,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Discord\EventHandlers\TimedEventHandlers\" />
     <Folder Include="Discord\RegularCommands\" />
     <Folder Include="Util\" />
   </ItemGroup>
