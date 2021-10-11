@@ -50,7 +50,6 @@ namespace Lisbeth.Bot.Application.Services
 
             base.BeginUpdate(entity);
             entity.AppliedById = req.RequestedOnBehalfOfId;
-            entity.AppliedOn = DateTime.UtcNow;
             entity.AppliedUntil = req.AppliedUntil;
             entity.Reason = req.Reason;
 

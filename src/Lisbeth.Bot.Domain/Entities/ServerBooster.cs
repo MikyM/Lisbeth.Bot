@@ -16,12 +16,15 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using IdGen;
 using Lisbeth.Bot.Domain.Entities.Base;
 
 namespace Lisbeth.Bot.Domain.Entities
 {
-    public class ServerBooster : DiscordAggregateRootEntity
+    public sealed class ServerBooster : SnowflakeEntity
     {
+        public ulong GuildId { get; set; }
+        public ulong UserId { get; set; }
         public DateTime BoostingSince { get; set; } = DateTime.Now;
         public int BoostCount { get; set; } = 1;
     }

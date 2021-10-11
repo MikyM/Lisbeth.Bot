@@ -15,13 +15,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using Lisbeth.Bot.Domain.Entities.Base;
 using System;
-using MikyM.Common.Domain.Entities;
 
 namespace Lisbeth.Bot.Domain.Entities
 {
-    public class Prune : AggregateRootEntity
+    public sealed class Prune : SnowflakeEntity
     {
+        public ulong UserId { get; set; }
         public ulong ModeratorId { get; set; }
         public ulong TargetAuthorId { get; set; }
         public ulong ChannelId { get; set; }

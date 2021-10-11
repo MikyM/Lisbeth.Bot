@@ -17,11 +17,14 @@
 
 using Lisbeth.Bot.Domain.Entities.Base;
 using System;
+using IdGen;
 
 namespace Lisbeth.Bot.Domain.Entities
 {
-    public class Mute : DiscordAggregateRootEntity
+    public sealed class Mute : SnowflakeEntity
     {
+        public ulong GuildId { get; set; }
+        public ulong UserId { get; set; }
         public DateTime? LiftedOn { get; set; }
         public DateTime? AppliedUntil { get; set; }
         public DateTime? AppliedOn { get; set; } = DateTime.UtcNow;
@@ -31,9 +34,7 @@ namespace Lisbeth.Bot.Domain.Entities
 
         public Guild Guild { get; set; }
 
-        public Mute()
-        {
-        }
+
 
         public Mute ShallowCopy()
         {

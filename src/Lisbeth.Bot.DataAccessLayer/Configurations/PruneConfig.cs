@@ -15,14 +15,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.ComponentModel.DataAnnotations.Schema;
-using MikyM.Common.Domain.Entities;
-
-namespace Lisbeth.Bot.Domain.Entities.Base
+namespace Lisbeth.Bot.DataAccessLayer.Configurations
 {
-    public class DiscordAggregateRootEntity : AggregateRootEntity
+    public class PruneConfig
     {
-        public ulong UserId { get; set; }
-        public ulong GuildId { get; set; }
+        
     }
 }

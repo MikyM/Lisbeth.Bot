@@ -15,10 +15,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using IdGen;
+
 namespace MikyM.Common.Domain.Entities
 {
     public class EnvironmentSpecificEntity : AggregateRootEntity
     {
-        
     }
 }

@@ -15,27 +15,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Lisbeth.Bot.Domain.Entities.Base;
-using System;
+using Autofac;
 using IdGen;
+using MikyM.Common.Domain.Entities;
 
-namespace Lisbeth.Bot.Domain.Entities
+namespace Lisbeth.Bot.Domain.Entities.Base
 {
-    public sealed class Ban : SnowflakeEntity
+    public class SnowflakeEntity : AggregateRootEntity
     {
-        public ulong GuildId { get; set; }
-        public ulong UserId { get; set; }
-        public DateTime? LiftedOn { get; set; }
-        public DateTime? AppliedUntil { get; set; }
-        public ulong AppliedById { get; set; }
-        public ulong LiftedById { get; set; }
-        public string Reason { get; set; } = "";
-
-        public Guild Guild { get; set; }
-
-        public Ban ShallowCopy()
-        {
-            return (Ban)MemberwiseClone();
-        }
+        public override long Id { get; protected set; } = ContainerProvider.Container.Resolve<IdGenerator>().CreateId();
     }
 }

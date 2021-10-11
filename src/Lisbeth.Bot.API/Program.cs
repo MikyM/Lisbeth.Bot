@@ -32,7 +32,7 @@ namespace Lisbeth.Bot.API
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
                 .Enrich.FromLogContext()
                 .WriteTo.Console()
-                .CreateLogger();
+                .CreateBootstrapLogger();
 
             try
             {
@@ -56,6 +56,10 @@ namespace Lisbeth.Bot.API
                 {
                     webBuilder.UseStartup<Startup>();
                 })
-                .UseSerilog();
+                .UseSerilog((context, services, configuration) => configuration
+                    .ReadFrom.Configuration(context.Configuration)
+                    .ReadFrom.Services(services)
+                    .Enrich.FromLogContext()
+                    .WriteTo.Console());
     }
 }

@@ -9,6 +9,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Autofac;
 using Lisbeth.Bot.Application.Helpers;
+using Lisbeth.Bot.Domain;
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport.Models
 {

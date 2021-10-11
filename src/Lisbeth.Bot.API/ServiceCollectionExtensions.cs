@@ -17,10 +17,11 @@
 
 using DSharpPlus;
 using DSharpPlus.Interactivity.Enums;
+using Hangfire;
+using Hangfire.MemoryStorage;
 using Lisbeth.Bot.Application.Discord.ApplicationCommands;
 using Lisbeth.Bot.Application.Discord.EventHandlers;
 using Lisbeth.Bot.Application.Discord.SlashCommands;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MikyM.Discord;
 using MikyM.Discord.Extensions.Interactivity;
@@ -28,11 +29,18 @@ using MikyM.Discord.Extensions.SlashCommands;
 using OpenTracing;
 using OpenTracing.Mock;
 using System;
-using Hangfire;
-using Hangfire.MemoryStorage;
-using Hangfire.PostgreSql;
-using Lisbeth.Bot.API.Helpers;
-using Lisbeth.Bot.Application.Helpers;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using AspNetCore.Authentication.ApiKey;
+using AspNetCoreRateLimit;
+using EasyCaching.InMemory;
+using EFCoreSecondLevelCacheInterceptor;
+using Lisbeth.Bot.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
+using Microsoft.OpenApi.Models;
 
 namespace Lisbeth.Bot.API
 {
@@ -90,6 +98,106 @@ namespace Lisbeth.Bot.API
             });
 
             services.AddHangfireServer(options => options.Queues = new[] {"critical", "moderation", "reminder"});
+        }
+
+        public static void ConfigureApiKey(this IServiceCollection services, IConfiguration configuration)
+        {
+            var key = configuration.GetValue<string>("ApiKey");
+            services.AddAuthentication(ApiKeyDefaults.AuthenticationScheme)
+                .AddApiKeyInAuthorizationHeader(options =>
+                {
+                    options.Realm = "Lisbeth.Bot";
+                    options.KeyName = ApiKeyDefaults.AuthenticationScheme;
+                    options.Events.OnValidateKey =
+                        context =>
+                        {
+                            var isValid = key.Equals(context.ApiKey, StringComparison.OrdinalIgnoreCase);
+                            if (isValid)
+                            {
+                                context.Principal = new ClaimsPrincipal(new[]
+                                {
+                                    new ClaimsIdentity(new[]
+                                    {
+                                        new Claim(ClaimTypes.SerialNumber, context.ApiKey),
+                                        new Claim(ClaimTypes.Role, "Api")
+                                    }, ApiKeyDefaults.AuthenticationScheme)
+                                });
+                                context.Success();
+                            }
+                            else
+                            {
+                                context.ValidationFailed();
+                            }
+                            return Task.CompletedTask;
+                        };
+                });
+        }
+
+        public static void ConfigureEfCache(this IServiceCollection services)
+        {
+            services.AddEFSecondLevelCache(options =>
+            {
+                options.UseEasyCachingCoreProvider("InMemoryCache").DisableLogging(true).UseCacheKeyPrefix("EF_");
+                options.CacheQueriesContainingTypes(
+                    CacheExpirationMode.Sliding, TimeSpan.FromMinutes(30),
+                    typeof(Guild)
+                );
+            });
+            services.AddEasyCaching(options =>
+            {
+                options.UseInMemory(config =>
+                {
+                    config.DBConfig = new InMemoryCachingOptions
+                    {
+                        SizeLimit = 100,
+                    };
+                }, "InMemoryCache");
+            });
+        }
+
+        public static void ConfigureRateLimiting(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddMemoryCache();
+            //load general configuration from appsettings.json
+            services.Configure<IpRateLimitOptions>(configuration.GetSection("IpRateLimiting"));
+
+            //load ip rules from appsettings.json
+            services.Configure<IpRateLimitPolicies>(configuration.GetSection("IpRateLimitPolicies"));
+
+            // inject counter and rules stores
+            services.AddInMemoryRateLimiting();
+
+            services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
+        }
+
+        public static void ConfigureSwagger(this IServiceCollection services)
+        {
+            services.AddSwaggerGen(options =>
+            {
+                options.SwaggerDoc("v1", new OpenApiInfo { Title = "EclipseBot", Version = "v1" });
+                var securityScheme = new OpenApiSecurityScheme
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = ApiKeyDefaults.AuthenticationScheme,
+                    },
+                    In = ParameterLocation.Header,
+                    Description = $"Please enter your api key in the field, prefixed with '{ApiKeyDefaults.AuthenticationScheme} '",
+                    Name = "Authorization"
+                };
+                options.AddSecurityDefinition(ApiKeyDefaults.AuthenticationScheme, securityScheme);
+                options.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {securityScheme, Array.Empty<string>()}
+                });
+            });
+        }
+
+        public static void ConfigureBotSettings(this IServiceCollection services, IConfiguration configuration)
+        {
+            var sp = services.BuildServiceProvider();
+            //services.AddOptions<BotSettings>().BindConfiguration(sp.GetRequiredService<IWebHostEnvironment>().IsDevelopment() ? "BotSettings:Dev" : "BotSettings:Prod", options => options.BindNonPublicProperties = true);
         }
     }
 }

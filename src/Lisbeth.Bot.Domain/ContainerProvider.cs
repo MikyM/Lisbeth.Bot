@@ -17,7 +17,7 @@
 
 using Autofac;
 
-namespace Lisbeth.Bot.Application.Helpers
+namespace Lisbeth.Bot.Domain
 {
     /// <summary>
     /// Autofac container provider for use ONLY with HTML builders.

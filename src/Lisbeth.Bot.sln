@@ -31,7 +31,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MikyM.Discord", "MikyM.Disc
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lisbeth.Bot.DataAccessLayer", "Lisbeth.Bot.DataAccessLayer\Lisbeth.Bot.DataAccessLayer.csproj", "{A803112D-98E9-4782-94E8-898C0E555D3C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lisbeth.Bot.Domain", "Lisbeth.Bot.Domain\Lisbeth.Bot.Domain.csproj", "{A81099ED-C60C-480E-8324-9E3F4E9397E7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lisbeth.Bot.Domain", "Lisbeth.Bot.Domain\Lisbeth.Bot.Domain.csproj", "{A81099ED-C60C-480E-8324-9E3F4E9397E7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

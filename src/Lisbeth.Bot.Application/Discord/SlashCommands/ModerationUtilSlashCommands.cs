@@ -106,7 +106,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             if (closeAfter != "" && TimeSpan.TryParse(closeAfter, out var closeAfterTimeSpan)) ticketConfig.CloseAfter = closeAfterTimeSpan;
 
             _guildService.BeginUpdate(guild);
-            guild.TicketingConfig = ticketConfig;
+            guild.SetTicketingConfig(ticketConfig);
             await _guildService.CommitAsync();
 
             await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("Done"));
@@ -119,7 +119,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
-            var guild = new Guild() {GuildId = ctx.Guild.Id, InviterId = ctx.User.Id, IsDisabled = false};
+            var guild = new Guild() {GuildId = ctx.Guild.Id, UserId = ctx.User.Id, IsDisabled = false};
 
             await _guildService.AddAsync(guild, true);
 

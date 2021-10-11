@@ -17,17 +17,20 @@
 
 using Lisbeth.Bot.Domain.Entities.Base;
 using System;
+using IdGen;
 
 namespace Lisbeth.Bot.Domain.Entities
 {
-    public class Ticket : DiscordAggregateRootEntity
+    public sealed class Ticket : SnowflakeEntity
     {
+        public ulong GuildId { get; set; }
+        public ulong UserId { get; set; }
         public ulong ChannelId { get; set; }
         public long GuildSpecificId { get; set; }
         public DateTime? ReopenedOn { get; set; }
         public DateTime? ClosedOn { get; set; }
-        public ulong? ClosedBy { get; set; }
-        public ulong? ReopenedBy { get; set; }
+        public ulong? ClosedById { get; set; }
+        public ulong? ReopenedById { get; set; }
         public ulong MessageOpenId { get; set; }
         public ulong? MessageCloseId { get; set; }
         public ulong? MessageReopenId { get; set; }

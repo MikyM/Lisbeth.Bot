@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Lisbeth.Bot.Domain.Entities.Base;
+using System;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Lisbeth.Bot.Domain.Entities
 {
-    public class TicketingConfig
+    public sealed class TicketingConfig : SnowflakeEntity
     {
-        public long Id { get; set; }
         public ulong? LogChannelId { get; set; }
         public long LastTicketId { get; set; }
         public ulong ClosedCategoryId { get; set; }

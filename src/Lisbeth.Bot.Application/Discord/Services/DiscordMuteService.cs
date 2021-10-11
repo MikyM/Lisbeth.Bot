@@ -418,7 +418,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 req.TargetUserId = mute.UserId;
                 req.AppliedById = mute.AppliedById;
                 req.LiftedById = mute.LiftedById;
-                req.AppliedOn = mute.AppliedOn;
+                req.AppliedOn = mute.CreatedAt;
             }
 
             try

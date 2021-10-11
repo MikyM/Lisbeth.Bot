@@ -17,9 +17,9 @@
 
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using Hangfire;
 using Lisbeth.Bot.API.Helpers;
-using Lisbeth.Bot.Application.Helpers;
-using Lisbeth.Bot.DataAccessLayer;
+using Lisbeth.Bot.Domain;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
@@ -30,7 +30,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using System.Globalization;
-using Hangfire;
+using Lisbeth.Bot.API.ExceptionMiddleware;
 
 namespace Lisbeth.Bot.API
 {
@@ -48,20 +48,22 @@ namespace Lisbeth.Bot.API
         {
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 
-           // services.AddDbContext<LisbethBotDbContext>(options =>
-            //options.UseNpgsql(Configuration.GetConnectionString("LisbethBotDb")));
-            services.AddDbContext<LisbethBotDbContext>(options => options.UseInMemoryDatabase("testDb"));
             services.AddControllers(options =>
             {
                 options.Conventions.Add(new RouteTokenTransformerConvention(new SlugifyParameterTransformer()));
             });
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Lisbeth.Bot", Version = "v1" });
-            });
+            services.ConfigureSwagger();
             services.AddHttpClient();
             services.ConfigureDiscord();
             services.ConfigureHangfire();
+            services.ConfigureApiKey(Configuration);
+            services.ConfigureRateLimiting(Configuration);
+            services.ConfigureEfCache();
+/*            services.AddDbContextPool<LisbethBotDbContext>((serviceProvider, optionsBuilder) =>
+            {
+                optionsBuilder.UseInMemoryDatabase("test")
+                    .AddInterceptors(serviceProvider.GetRequiredService<SecondLevelCacheInterceptor>());
+            });*/
         }
 
         /// <summary>
@@ -72,8 +74,6 @@ namespace Lisbeth.Bot.API
         public void ConfigureContainer(ContainerBuilder builder)
         {
             builder.RegisterModule(new AutofacContainerModule());
-
-
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -92,20 +92,14 @@ namespace Lisbeth.Bot.API
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Lisbeth.Bot v1"));
             }
 
+            app.UseMiddleware<CustomExceptionMiddleware>();
             app.UseHttpsRedirection();
-
-            app.UseHangfireDashboard();
-
             app.UseRouting();
-
+            app.UseAuthentication();
             app.UseAuthorization();
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
-
             app.UseSerilogRequestLogging();
+            app.UseHangfireDashboard();
+            app.UseEndpoints(endpoints => endpoints.MapControllers());
         }
     }
 }

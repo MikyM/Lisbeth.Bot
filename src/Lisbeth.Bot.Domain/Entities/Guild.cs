@@ -15,21 +15,54 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
+using System;
+using IdGen;
 using Lisbeth.Bot.Domain.Entities.Base;
+using System.Collections.Generic;
 
 namespace Lisbeth.Bot.Domain.Entities
 {
-    public class Guild : DiscordAggregateRootEntity
+    public sealed class Guild : SnowflakeEntity
     {
-        public ulong InviterId { get; set; }
-        public TicketingConfig TicketingConfig { get; set; }
-        public ModerationConfig ModerationConfig { get; set; }
+        private readonly HashSet<Mute> mutes;
+        private readonly HashSet<Ban> bans;
+        private readonly HashSet<Prune> prunes;
+
+        public ulong GuildId { get; set; }
+        public ulong UserId { get; set; }
+        public TicketingConfig TicketingConfig { get; private set; }
+        public ModerationConfig ModerationConfig { get; private set; }
         public string EmbedHexColor { get; set; } = "#26296e";
-        public List<Mute> Mutes { get; set; }
-        public List<Ban> Bans { get; set; }
-        public List<Prune> Prunes { get; set; }
+        public IReadOnlyCollection<Mute> Mutes => mutes;
+        public IReadOnlyCollection<Ban> Bans => bans;
+        public IReadOnlyCollection<Prune> Prunes => prunes;
+
+        public void AddMute(Mute mute)
+        {
+            if (mute is null) throw new ArgumentNullException(nameof(mute));
+            mutes.Add(mute);
+        }
+
+        public void AddPrune(Prune prune)
+        {
+            if (prune is null) throw new ArgumentNullException(nameof(prune));
+            prunes.Add(prune);
+        }
+
+        public void AddBan(Ban ban)
+        {
+            if (ban is null) throw new ArgumentNullException(nameof(ban));
+            bans.Add(ban);
+        }
+
+        public void SetTicketingConfig(TicketingConfig config)
+        {
+            TicketingConfig = config ?? throw new ArgumentNullException(nameof(config));
+        }
+
+        public void SetModerationConfig(ModerationConfig config)
+        {
+            ModerationConfig = config ?? throw new ArgumentNullException(nameof(config));
+        }
     }
 }

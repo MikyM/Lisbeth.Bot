@@ -182,8 +182,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 }
                 else
                 {
-                    if (ban is null)
-                        await guild.BanMemberAsync(req.TargetUserId);
+                    if (ban is null) await guild.BanMemberAsync(req.TargetUserId);
 
                     embed.WithAuthor($"Extend BanAsync | {target.GetFullUsername()}", null, target.AvatarUrl);
                     embed.AddField("Previous ban until", foundEntity.AppliedUntil.ToString(), true);
@@ -377,7 +376,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 req.TargetUserId = ban.UserId;
                 req.AppliedById = ban.AppliedById;
                 req.LiftedById = ban.LiftedById;
-                req.AppliedOn = ban.AppliedOn;
+                req.AppliedOn = ban.CreatedAt;
             }
 
             try

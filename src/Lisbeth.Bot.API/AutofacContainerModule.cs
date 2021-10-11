@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using Autofac;
 using AutoMapper.Contrib.Autofac.DependencyInjection;
 using AutoMapper.Extensions.ExpressionMapping;
@@ -30,6 +31,8 @@ using MikyM.Common.Application.Services;
 using MikyM.Common.DataAccessLayer.Repositories;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
 using System.Reflection;
+using EFCoreSecondLevelCacheInterceptor;
+using IdGen;
 using Module = Autofac.Module;
 
 namespace Lisbeth.Bot.API
@@ -60,10 +63,6 @@ namespace Lisbeth.Bot.API
             builder.RegisterAssemblyTypes(typeof(MuteRepository).Assembly).Where(t => t.Name.EndsWith("Repository"))
                 .AsImplementedInterfaces().InstancePerLifetimeScope();
 
-            /*// register chat builders
-            builder.RegisterAssemblyTypes(typeof(HtmlChatBuilder).Assembly).Where(t => t.Name.EndsWith("ChatBuilder"))
-                .AsImplementedInterfaces().InstancePerLifetimeScope();*/
-
             // pagination stuff
             builder.RegisterType<HttpContextAccessor>().As<IHttpContextAccessor>().SingleInstance();
             builder.Register(x =>
@@ -77,18 +76,23 @@ namespace Lisbeth.Bot.API
             builder.RegisterType<AsyncExecutor>().As<IAsyncExecutor>().SingleInstance();
 
             // Register Entity Framework
-/*            builder.Register(x =>
+            builder.Register(x =>
             {
                 var optionsBuilder = new DbContextOptionsBuilder<LisbethBotDbContext>();
                 optionsBuilder.UseInMemoryDatabase("testdb");
+                optionsBuilder.AddInterceptors(x.Resolve<SecondLevelCacheInterceptor>());
                 //optionsBuilder.EnableSensitiveDataLogging();
                 return new LisbethBotDbContext(optionsBuilder.Options);
-            }).AsSelf().InstancePerLifetimeScope();*/
-/*            var dbContextOptionsBuilder = new DbContextOptionsBuilder<LisbethBotDbContext>().UseInMemoryDatabase("testdb");
+            }).AsSelf().InstancePerLifetimeScope();
 
-            builder.RegisterType<LisbethBotDbContext>()
-                .WithParameter("options", dbContextOptionsBuilder.Options)
-                .InstancePerLifetimeScope();*/
+            builder.Register(x =>
+            {
+                var epoch = new DateTime(2021, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+                var structure = new IdStructure(45, 2, 16);
+                var options = new IdGeneratorOptions(structure, new DefaultTimeSource(epoch),
+                    SequenceOverflowStrategy.SpinWait);
+                return new IdGenerator(0, options);
+            }).AsSelf().SingleInstance();
         }
     }
 }

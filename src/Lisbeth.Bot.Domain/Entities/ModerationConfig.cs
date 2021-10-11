@@ -1,8 +1,9 @@
-﻿namespace Lisbeth.Bot.Domain.Entities
+﻿using Lisbeth.Bot.Domain.Entities.Base;
+
+namespace Lisbeth.Bot.Domain.Entities
 {
-    public class ModerationConfig
+    public sealed class ModerationConfig : SnowflakeEntity
     {
-        public long Id { get; set; }
         public ulong? MemberEventsLogChannelId { get; set; }
         public ulong? MessageDeletedEventsLogChannelId { get; set; }
         public ulong? MessageUpdatedEventsLogChannelId { get; set; }

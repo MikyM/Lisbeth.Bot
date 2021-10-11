@@ -38,11 +38,11 @@ namespace Lisbeth.Bot.DataAccessLayer.Specifications.BanSpecifications
             if (liftedOn != null)
                 AddFilterCondition(x => x.LiftedOn == liftedOn);
             if (appliedOn != null)
-                AddFilterCondition(x => x.AppliedOn == appliedOn);
+                AddFilterCondition(x => x.CreatedAt == appliedOn);
             if (liftedById != null)
                 AddFilterCondition(x => x.LiftedById == liftedById);
 
-            ApplyOrderByDescending(x => x.AppliedOn);
+            ApplyOrderByDescending(x => x.CreatedAt);
 
             ApplyLimit(limit);
         }

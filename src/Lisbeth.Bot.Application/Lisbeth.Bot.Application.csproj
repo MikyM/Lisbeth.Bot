@@ -5,6 +5,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Discord\RegularCommands\**" />
+    <EmbeddedResource Remove="Discord\RegularCommands\**" />
+    <None Remove="Discord\RegularCommands\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Hangfire.Core" Version="1.7.25" />
     <PackageReference Include="Imgur.API" Version="5.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
@@ -19,7 +25,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Discord\RegularCommands\" />
     <Folder Include="Util\" />
   </ItemGroup>
 
