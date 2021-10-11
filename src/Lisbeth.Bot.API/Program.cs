@@ -18,6 +18,7 @@
 using System;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Events;
@@ -55,6 +56,14 @@ namespace Lisbeth.Bot.API
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
+                })
+                .ConfigureAppConfiguration((hostingContext, config) =>
+                {
+                    config.SetBasePath(AppDomain.CurrentDomain.BaseDirectory);
+                    config.AddJsonFile("appsettings.json", false, true);
+                    //config.AddJsonFile("appsettings.Development.json", false, true);
+                    config.AddEnvironmentVariables();
+                    config.Build();
                 })
                 .UseSerilog((context, services, configuration) => configuration
                     .ReadFrom.Configuration(context.Configuration)
