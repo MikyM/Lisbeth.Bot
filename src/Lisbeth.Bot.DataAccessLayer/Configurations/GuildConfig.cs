@@ -25,16 +25,6 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
     {
         public void Configure(EntityTypeBuilder<Guild> builder)
         {
-/*            builder
-                .HasOne<TicketingConfig>(x => x.TicketingConfig)
-                .WithOne(x => x.Guild)
-                .HasForeignKey<TicketingConfig>(x => x.GuildId);
-
-            builder
-                .HasOne<ModerationConfig>(x => x.ModerationConfig)
-                .WithOne(x => x.Guild)
-                .HasForeignKey<ModerationConfig>(x => x.GuildId);*/
-
             builder
                 .HasMany(x => x.Mutes)
                 .WithOne(x => x.Guild)
@@ -67,42 +57,52 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
             builder.Property(x => x.GuildId).HasColumnName("guild_id").HasColumnType("bigint").ValueGeneratedOnAdd().IsRequired();
             builder.Property(x => x.UserId).HasColumnName("inviter_id").HasColumnType("bigint");
 
-            builder.OwnsOne<TicketingConfig>(nameof(Guild.TicketingConfig), options =>
+            builder.OwnsOne<TicketingConfig>(nameof(Guild.TicketingConfig), ownedNavigationBuilder =>
             {
-                options.ToTable("guild_ticketing_config");
+                ownedNavigationBuilder.ToTable("guild_ticketing_config");
 
-                options.Property(x => x.Id).HasColumnName("id").HasColumnType("bigint").ValueGeneratedOnAdd().IsRequired();
-                options.Property(x => x.IsDisabled).HasColumnName("is_disabled").HasColumnType("boolean").IsRequired();
-                options.Property(x => x.CreatedAt).HasColumnName("created_at").HasColumnType("timestamp").ValueGeneratedOnAdd().IsRequired();
-                options.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamp").IsRequired();
+                ownedNavigationBuilder.Property(x => x.Id).HasColumnName("id").HasColumnType("bigint").ValueGeneratedOnAdd().IsRequired();
+                ownedNavigationBuilder.Property(x => x.IsDisabled).HasColumnName("is_disabled").HasColumnType("boolean").IsRequired();
+                ownedNavigationBuilder.Property(x => x.CreatedAt).HasColumnName("created_at").HasColumnType("timestamp").ValueGeneratedOnAdd().IsRequired();
+                ownedNavigationBuilder.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamp").IsRequired();
 
-                options.Property(x => x.GuildId).HasColumnName("guild_id").HasColumnType("bigint").ValueGeneratedOnAdd().IsRequired();
-                options.Property(x => x.ClosedCategoryId).HasColumnName("closed_category_id").HasColumnType("bigint");
-                options.Property(x => x.OpenedCategoryId).HasColumnName("opened_category_id").HasColumnType("bigint");
-                options.Property(x => x.LogChannelId).HasColumnName("log_channel_id").HasColumnType("bigint");
-                options.Property(x => x.LastTicketId).HasColumnName("last_ticket_id").HasColumnType("bigint");
-                options.Property(x => x.OpenedNamePrefix).HasColumnName("opened_name_prefix").HasColumnType("varchar(100)").HasMaxLength(100);
+                ownedNavigationBuilder.Property(x => x.GuildId).HasColumnName("guild_id").HasColumnType("bigint").ValueGeneratedOnAdd().IsRequired();
+                ownedNavigationBuilder.Property(x => x.ClosedCategoryId).HasColumnName("closed_category_id").HasColumnType("bigint");
+                ownedNavigationBuilder.Property(x => x.OpenedCategoryId).HasColumnName("opened_category_id").HasColumnType("bigint");
+                ownedNavigationBuilder.Property(x => x.LogChannelId).HasColumnName("log_channel_id").HasColumnType("bigint");
+                ownedNavigationBuilder.Property(x => x.LastTicketId).HasColumnName("last_ticket_id").HasColumnType("bigint");
+                ownedNavigationBuilder.Property(x => x.OpenedNamePrefix).HasColumnName("opened_name_prefix").HasColumnType("varchar(100)").HasMaxLength(100);
                 //options.Property(x => x.AdditionalInformationCenterMessage).HasColumnName("member_welcome_message").HasColumnType("varchar(5096)").HasMaxLength(5096); to do
-                options.Property(x => x.CleanAfter).HasColumnName("clean_after").HasColumnType("time");
-                options.Property(x => x.CloseAfter).HasColumnName("close_after").HasColumnType("time");
+                ownedNavigationBuilder.Property(x => x.CleanAfter).HasColumnName("clean_after").HasColumnType("time");
+                ownedNavigationBuilder.Property(x => x.CloseAfter).HasColumnName("close_after").HasColumnType("time");
+
+                ownedNavigationBuilder
+                    .WithOwner(x => x.Guild)
+                    .HasForeignKey(x => x.GuildId)
+                    .HasPrincipalKey(x => x.Id);
             });
 
-            builder.OwnsOne<ModerationConfig>(nameof(Guild.ModerationConfig), options =>
+            builder.OwnsOne<ModerationConfig>(nameof(Guild.ModerationConfig), ownedNavigationBuilder =>
             {
-                options.ToTable("guild_moderation_config");
+                ownedNavigationBuilder.ToTable("guild_moderation_config");
 
-                options.Property(x => x.Id).HasColumnName("id").HasColumnType("bigint").ValueGeneratedOnAdd().IsRequired();
-                options.Property(x => x.IsDisabled).HasColumnName("is_disabled").HasColumnType("boolean").IsRequired();
-                options.Property(x => x.CreatedAt).HasColumnName("created_at").HasColumnType("timestamp").ValueGeneratedOnAdd().IsRequired();
-                options.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamp").IsRequired();
+                ownedNavigationBuilder.Property(x => x.Id).HasColumnName("id").HasColumnType("bigint").ValueGeneratedOnAdd().IsRequired();
+                ownedNavigationBuilder.Property(x => x.IsDisabled).HasColumnName("is_disabled").HasColumnType("boolean").IsRequired();
+                ownedNavigationBuilder.Property(x => x.CreatedAt).HasColumnName("created_at").HasColumnType("timestamp").ValueGeneratedOnAdd().IsRequired();
+                ownedNavigationBuilder.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamp").IsRequired();
 
-                options.Property(x => x.GuildId).HasColumnName("guild_id").HasColumnType("bigint").ValueGeneratedOnAdd().IsRequired();
-                options.Property(x => x.MemberEventsLogChannelId).HasColumnName("member_events_log_channel_id").HasColumnType("bigint");
-                options.Property(x => x.MessageDeletedEventsLogChannelId).HasColumnName("message_deleted_events_log_channel_id").HasColumnType("bigint");
-                options.Property(x => x.MessageUpdatedEventsLogChannelId).HasColumnName("message_updated_events_log_channel_id").HasColumnType("bigint");
-                options.Property(x => x.MuteRoleId).HasColumnName("mute_role_id").HasColumnType("bigint");
-                options.Property(x => x.MemberWelcomeMessage).HasColumnName("member_welcome_message").HasColumnType("varchar(5096)").HasMaxLength(5096);
-                options.Property(x => x.MemberWelcomeMessageTitle).HasColumnName("member_welcome_message_title").HasColumnType("varchar(256)").HasMaxLength(256);
+                ownedNavigationBuilder.Property(x => x.GuildId).HasColumnName("guild_id").HasColumnType("bigint").ValueGeneratedOnAdd().IsRequired();
+                ownedNavigationBuilder.Property(x => x.MemberEventsLogChannelId).HasColumnName("member_events_log_channel_id").HasColumnType("bigint");
+                ownedNavigationBuilder.Property(x => x.MessageDeletedEventsLogChannelId).HasColumnName("message_deleted_events_log_channel_id").HasColumnType("bigint");
+                ownedNavigationBuilder.Property(x => x.MessageUpdatedEventsLogChannelId).HasColumnName("message_updated_events_log_channel_id").HasColumnType("bigint");
+                ownedNavigationBuilder.Property(x => x.MuteRoleId).HasColumnName("mute_role_id").HasColumnType("bigint");
+                ownedNavigationBuilder.Property(x => x.MemberWelcomeMessage).HasColumnName("member_welcome_message").HasColumnType("varchar(5096)").HasMaxLength(5096);
+                ownedNavigationBuilder.Property(x => x.MemberWelcomeMessageTitle).HasColumnName("member_welcome_message_title").HasColumnType("varchar(256)").HasMaxLength(256);
+
+                ownedNavigationBuilder
+                    .WithOwner(x => x.Guild)
+                    .HasForeignKey(x => x.GuildId)
+                    .HasPrincipalKey(x => x.Id);
             });
         }
     }
