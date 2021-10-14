@@ -15,10 +15,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using Autofac;
 using AutoMapper.Contrib.Autofac.DependencyInjection;
 using AutoMapper.Extensions.ExpressionMapping;
+using EFCoreSecondLevelCacheInterceptor;
+using IdGen;
 using Lisbeth.Bot.Application.Helpers;
 using Lisbeth.Bot.Application.Services;
 using Lisbeth.Bot.Application.Services.Interfaces;
@@ -30,9 +31,8 @@ using MikyM.Common.Application.Interfaces;
 using MikyM.Common.Application.Services;
 using MikyM.Common.DataAccessLayer.Repositories;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
+using System;
 using System.Reflection;
-using EFCoreSecondLevelCacheInterceptor;
-using IdGen;
 using Module = Autofac.Module;
 
 namespace Lisbeth.Bot.API

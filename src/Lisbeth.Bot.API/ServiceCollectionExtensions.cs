@@ -15,14 +15,21 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using AspNetCore.Authentication.ApiKey;
+using AspNetCoreRateLimit;
 using DSharpPlus;
 using DSharpPlus.Interactivity.Enums;
+using EasyCaching.InMemory;
+using EFCoreSecondLevelCacheInterceptor;
 using Hangfire;
 using Hangfire.MemoryStorage;
 using Lisbeth.Bot.Application.Discord.ApplicationCommands;
 using Lisbeth.Bot.Application.Discord.EventHandlers;
 using Lisbeth.Bot.Application.Discord.SlashCommands;
+using Lisbeth.Bot.Domain.Entities;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OpenApi.Models;
 using MikyM.Discord;
 using MikyM.Discord.Extensions.Interactivity;
 using MikyM.Discord.Extensions.SlashCommands;
@@ -31,16 +38,6 @@ using OpenTracing.Mock;
 using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using AspNetCore.Authentication.ApiKey;
-using AspNetCoreRateLimit;
-using EasyCaching.InMemory;
-using EFCoreSecondLevelCacheInterceptor;
-using Lisbeth.Bot.Domain.Entities;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-using Microsoft.OpenApi.Models;
 
 namespace Lisbeth.Bot.API
 {
@@ -106,7 +103,7 @@ namespace Lisbeth.Bot.API
             services.AddAuthentication(ApiKeyDefaults.AuthenticationScheme)
                 .AddApiKeyInAuthorizationHeader(options =>
                 {
-                    options.Realm = "Lisbeth.Bot";
+                    options.Realm = "EclipseBot";
                     options.KeyName = ApiKeyDefaults.AuthenticationScheme;
                     options.Events.OnValidateKey =
                         context =>
@@ -158,15 +155,9 @@ namespace Lisbeth.Bot.API
         public static void ConfigureRateLimiting(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddMemoryCache();
-            //load general configuration from appsettings.json
             services.Configure<IpRateLimitOptions>(configuration.GetSection("IpRateLimiting"));
-
-            //load ip rules from appsettings.json
             services.Configure<IpRateLimitPolicies>(configuration.GetSection("IpRateLimitPolicies"));
-
-            // inject counter and rules stores
             services.AddInMemoryRateLimiting();
-
             services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
         }
 

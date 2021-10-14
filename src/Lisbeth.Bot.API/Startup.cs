@@ -18,6 +18,7 @@
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Hangfire;
+using Lisbeth.Bot.API.ExceptionMiddleware;
 using Lisbeth.Bot.API.Helpers;
 using Lisbeth.Bot.Domain;
 using Microsoft.AspNetCore.Builder;
@@ -27,10 +28,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.OpenApi.Models;
 using Serilog;
 using System.Globalization;
-using Lisbeth.Bot.API.ExceptionMiddleware;
 
 namespace Lisbeth.Bot.API
 {
@@ -59,11 +58,6 @@ namespace Lisbeth.Bot.API
             services.ConfigureApiKey(Configuration);
             services.ConfigureRateLimiting(Configuration);
             services.ConfigureEfCache();
-/*            services.AddDbContextPool<LisbethBotDbContext>((serviceProvider, optionsBuilder) =>
-            {
-                optionsBuilder.UseInMemoryDatabase("test")
-                    .AddInterceptors(serviceProvider.GetRequiredService<SecondLevelCacheInterceptor>());
-            });*/
         }
 
         /// <summary>
@@ -81,9 +75,9 @@ namespace Lisbeth.Bot.API
         {
             ContainerProvider.Container = app.ApplicationServices.GetAutofacRoot();
             GlobalConfiguration.Configuration.UseAutofacActivator(app.ApplicationServices.GetAutofacRoot());
-#pragma warning disable 4014
+            #pragma warning disable 4014
             RecurringJobHelper.ScheduleAllDefinedDelayed();
-#pragma warning restore 4014
+            #pragma warning restore 4014
 
             if (env.IsDevelopment())
             {

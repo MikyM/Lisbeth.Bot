@@ -61,7 +61,7 @@ namespace Lisbeth.Bot.API
                 {
                     config.SetBasePath(AppDomain.CurrentDomain.BaseDirectory);
                     config.AddJsonFile("appsettings.json", false, true);
-                    //config.AddJsonFile("appsettings.Development.json", false, true);
+                    config.AddJsonFile("appsettings.Development.json", true, true);
                     config.AddEnvironmentVariables();
                     config.Build();
                 })
