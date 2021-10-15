@@ -15,10 +15,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus.Entities;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using DSharpPlus.Entities;
+
 // ReSharper disable MemberCanBePrivate.Global
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders
@@ -31,47 +32,10 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders
         public string Js { get; private set; }
         public string Css { get; private set; }
 
-        public HtmlChatBuilder WithUsers(List<DiscordUser> users)
-        {
-            Users ??= users ?? throw new ArgumentNullException(nameof(users));
-
-            return this;
-        }
-
-        public HtmlChatBuilder WithMessages(List<DiscordMessage> messages)
-        {
-            Messages ??= messages ?? throw new ArgumentNullException(nameof(messages));
-
-            return this;
-        }
-
-        public HtmlChatBuilder WithChannel(DiscordChannel channel)
-        {
-            Channel ??= channel ?? throw new ArgumentNullException(nameof(channel));
-
-            return this;
-        }
-
-        public HtmlChatBuilder WithJs(string  js)
-        {
-            Js ??= js ?? throw new ArgumentNullException(nameof(js));
-
-            return this;
-        }
-
-        public HtmlChatBuilder WithCss(string css)
-        {
-            Css ??= css ?? throw new ArgumentNullException(nameof(css));
-
-            return this;
-        }
-
         public async Task<string> BuildAsync()
         {
             if (Users is null || Messages is null || Channel is null || Js is null || Css is null)
-            {
                 throw new ArgumentException("You must provide all required parameters before building.");
-            }
 
             MessagesHtmlBuilder messagesBuilder = new MessagesHtmlBuilder(Messages);
             MembersHtmlBuilder membersBuilder = new MembersHtmlBuilder(Users);
@@ -97,6 +61,41 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders
                    "<script src=\"https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js\" integrity=\"sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0\" crossorigin=\"anonymous\"></script>" +
                    "</body>" +
                    "</html>";
+        }
+
+        public HtmlChatBuilder WithUsers(List<DiscordUser> users)
+        {
+            Users ??= users ?? throw new ArgumentNullException(nameof(users));
+
+            return this;
+        }
+
+        public HtmlChatBuilder WithMessages(List<DiscordMessage> messages)
+        {
+            Messages ??= messages ?? throw new ArgumentNullException(nameof(messages));
+
+            return this;
+        }
+
+        public HtmlChatBuilder WithChannel(DiscordChannel channel)
+        {
+            Channel ??= channel ?? throw new ArgumentNullException(nameof(channel));
+
+            return this;
+        }
+
+        public HtmlChatBuilder WithJs(string js)
+        {
+            Js ??= js ?? throw new ArgumentNullException(nameof(js));
+
+            return this;
+        }
+
+        public HtmlChatBuilder WithCss(string css)
+        {
+            Css ??= css ?? throw new ArgumentNullException(nameof(css));
+
+            return this;
         }
     }
 }

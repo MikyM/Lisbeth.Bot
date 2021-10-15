@@ -20,14 +20,14 @@ using Autofac;
 namespace Lisbeth.Bot.Domain
 {
     /// <summary>
-    /// Autofac container provider for use ONLY with HTML builders.
-    /// For everything else use normal DI.
+    ///     Autofac container provider for use ONLY with HTML builders.
+    ///     For everything else use normal DI.
     /// </summary>
     public static class ContainerProvider
     {
         /// <summary>
-        /// Autofac container for use ONLY with HTML builders.
-        /// For everything else use normal DI.
+        ///     Autofac container for use ONLY with HTML builders.
+        ///     For everything else use normal DI.
         /// </summary>
         public static ILifetimeScope Container { get; set; }
     }

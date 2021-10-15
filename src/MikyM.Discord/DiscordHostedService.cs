@@ -50,7 +50,7 @@ namespace MikyM.Discord
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-            ((DiscordService)_discordClient).Initialize();
+            ((DiscordService) _discordClient).Initialize();
 
             using (_tracer.BuildSpan(nameof(_discordClient.Client.ConnectAsync)).StartActive(true))
             {

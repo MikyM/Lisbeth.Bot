@@ -5,7 +5,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Autofac;
-using Lisbeth.Bot.Application.Helpers;
 using Lisbeth.Bot.Domain;
 using VimeoDotNet;
 using VimeoDotNet.Net;
@@ -14,20 +13,17 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Models
 {
     public class HtmlVideo
     {
-        private string DiscordLink { get; set; }
-        public static List<string> SupportedTypes { get; } = new List<string> { "mp4", "mov", "wmv", "avi", "flv" };
-
         public HtmlVideo(string discordLink)
         {
             DiscordLink ??= discordLink ?? throw new ArgumentNullException(nameof(discordLink));
         }
 
+        private string DiscordLink { get; }
+        public static List<string> SupportedTypes { get; } = new() {"mp4", "mov", "wmv", "avi", "flv"};
+
         public async Task<string> GetVimeoLink()
         {
-            if (SupportedTypes.All(x => x != DiscordLink.Split('.').Last()))
-            {
-                return "";
-            }
+            if (SupportedTypes.All(x => x != DiscordLink.Split('.').Last())) return "";
 
             var client = new VimeoClient(Environment.GetEnvironmentVariable("VIMEO_KEY"));
             IUploadRequest request;

@@ -19,6 +19,5 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
 {
     public class PruneConfig
     {
-        
     }
 }

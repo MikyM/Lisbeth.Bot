@@ -21,12 +21,6 @@ namespace Lisbeth.Bot.Domain.DTOs.Request
 {
     public class MuteDisableReqDto
     {
-        public long? Id { get; set; }
-        public ulong? TargetUserId { get; set; }
-        public ulong? GuildId { get; set; }
-        public DateTime LiftedOn { get; set; } = DateTime.UtcNow;
-        public ulong RequestedOnBehalfOfIdId { get; set; }
-
         public MuteDisableReqDto()
         {
         }
@@ -37,5 +31,11 @@ namespace Lisbeth.Bot.Domain.DTOs.Request
             GuildId = guildId;
             RequestedOnBehalfOfIdId = requestedOnBehalfOfId;
         }
+
+        public long? Id { get; set; }
+        public ulong? TargetUserId { get; set; }
+        public ulong? GuildId { get; set; }
+        public DateTime LiftedOn { get; set; } = DateTime.UtcNow;
+        public ulong RequestedOnBehalfOfIdId { get; set; }
     }
 }

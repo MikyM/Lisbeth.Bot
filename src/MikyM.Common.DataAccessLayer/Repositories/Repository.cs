@@ -15,13 +15,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Microsoft.EntityFrameworkCore;
-using MikyM.Common.DataAccessLayer.Helpers;
-using MikyM.Common.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using MikyM.Common.DataAccessLayer.Helpers;
+using MikyM.Common.Domain.Entities;
 
 namespace MikyM.Common.DataAccessLayer.Repositories
 {
@@ -114,10 +114,7 @@ namespace MikyM.Common.DataAccessLayer.Repositories
         {
             var aggregateRootEntities = entities.ToList();
             BeginUpdateRange(aggregateRootEntities);
-            foreach (var entity in aggregateRootEntities)
-            {
-                entity.IsDisabled = true;
-            }
+            foreach (var entity in aggregateRootEntities) entity.IsDisabled = true;
         }
 
         public virtual async Task DisableRangeAsync(IEnumerable<long> ids)

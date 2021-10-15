@@ -15,9 +15,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Lisbeth.Bot.Domain.Entities.Base;
 using System;
-using IdGen;
+using Lisbeth.Bot.Domain.Entities.Base;
 
 namespace Lisbeth.Bot.Domain.Entities
 {
@@ -35,7 +34,7 @@ namespace Lisbeth.Bot.Domain.Entities
 
         public Ban ShallowCopy()
         {
-            return (Ban)MemberwiseClone();
+            return (Ban) MemberwiseClone();
         }
     }
 }

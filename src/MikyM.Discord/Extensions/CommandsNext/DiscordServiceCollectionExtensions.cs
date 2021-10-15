@@ -22,9 +22,9 @@ using Microsoft.Extensions.DependencyInjection;
 using MikyM.Discord.Extensions.CommandsNext.Attributes;
 using MikyM.Discord.Extensions.CommandsNext.Events;
 using MikyM.Discord.Extensions.CommandsNext.Util;
-using OpenTracing;
 using MikyM.Discord.Interfaces;
 using MikyM.Discord.Util;
+using OpenTracing;
 
 namespace MikyM.Discord.Extensions.CommandsNext
 {
@@ -98,7 +98,7 @@ namespace MikyM.Discord.Extensions.CommandsNext
                 //
                 // This is intentional; we don't need this "service", just the execution flow ;)
                 // 
-                return  new DiscordExtensionsConfiguration();
+                return new DiscordExtensionsConfiguration();
             });
 
             if (!autoRegisterSubscribers)
@@ -119,7 +119,8 @@ namespace MikyM.Discord.Extensions.CommandsNext
             return services.AddDiscordCommandsNextEventsSubscriber(typeof(T));
         }
 
-        public static IServiceCollection AddDiscordCommandsNextEventsSubscriber(this IServiceCollection services, Type t)
+        public static IServiceCollection AddDiscordCommandsNextEventsSubscriber(this IServiceCollection services,
+            Type t)
         {
             return services.AddScoped(typeof(IDiscordCommandsNextEventsSubscriber), t);
         }

@@ -15,14 +15,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
-using System;
-using System.Threading.Tasks;
+
 // ReSharper disable InconsistentNaming
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands
@@ -38,8 +39,10 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
         [SlashRequireUserPermissions(Permissions.BanMembers)]
         [SlashCommand("ticket", "A command that allows managing tickets")]
         public async Task TicketHandlerCommand(InteractionContext ctx,
-            [Option("action", "Type of action to perform")] TicketActionType action,
-            [Option("target", "A user or a role to add")] SnowflakeObject target)
+            [Option("action", "Type of action to perform")]
+            TicketActionType action,
+            [Option("target", "A user or a role to add")]
+            SnowflakeObject target)
         {
             if (target is null) throw new ArgumentNullException(nameof(target));
 

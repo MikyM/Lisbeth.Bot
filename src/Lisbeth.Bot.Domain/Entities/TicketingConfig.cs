@@ -1,6 +1,6 @@
-﻿using Lisbeth.Bot.Domain.Entities.Base;
-using System;
+﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
+using Lisbeth.Bot.Domain.Entities.Base;
 
 namespace Lisbeth.Bot.Domain.Entities
 {
@@ -14,8 +14,12 @@ namespace Lisbeth.Bot.Domain.Entities
         public TimeSpan? CloseAfter { get; set; }
         public string OpenedNamePrefix { get; set; } = "ticket";
         public string ClosedNamePrefix { get; set; } = "closed";
-        public string WelcomeMessage { get; set; } = "@ownerMention@ please be patient, support will be with you shortly!";
-        public string TicketCenterMessage { get; set; } = "\n\nClick on the button below to create a private ticket between the staff members and you. Explain your issue, and a staff member will be here to help you shortly after. Please note it may take up to 48 hours for an answer.";
+
+        public string WelcomeMessage { get; set; } =
+            "@ownerMention@ please be patient, support will be with you shortly!";
+
+        public string TicketCenterMessage { get; set; } =
+            "\n\nClick on the button below to create a private ticket between the staff members and you. Explain your issue, and a staff member will be here to help you shortly after. Please note it may take up to 48 hours for an answer.";
 
         public string WhenToUseCenterMessage { get; set; } =
             "This is only in the case you need private help.\nFor normal questions please refer to <#869598053139628062>.\nFor reporting bugs please refer to <#875033712918671411>." +
@@ -30,9 +34,8 @@ namespace Lisbeth.Bot.Domain.Entities
         public long GuildId { get; set; }
         public Guild Guild { get; set; }
 
-        [NotMapped]
-        public bool ShouldAutoClean => CleanAfter.HasValue;
-        [NotMapped]
-        public bool ShouldAutoClose => CloseAfter.HasValue;
+        [NotMapped] public bool ShouldAutoClean => CleanAfter.HasValue;
+
+        [NotMapped] public bool ShouldAutoClose => CloseAfter.HasValue;
     }
 }

@@ -15,10 +15,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Globalization;
+using System.Linq;
+using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using Hangfire;
+using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.Exceptions;
 using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
@@ -28,19 +33,14 @@ using Lisbeth.Bot.DataAccessLayer.Specifications.GuildSpecifications;
 using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Discord.Interfaces;
-using System;
-using System.Globalization;
-using System.Linq;
-using System.Threading.Tasks;
-using JetBrains.Annotations;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {
     [UsedImplicitly]
     public class DiscordBanService : IDiscordBanService
     {
-        private readonly IDiscordService _discord;
         private readonly IBanService _banService;
+        private readonly IDiscordService _discord;
         private readonly IGuildService _guildService;
 
         public DiscordBanService(IDiscordService discord, IBanService banService, IGuildService guildService)
@@ -73,7 +73,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
             }
             catch (Exception ex)
             {
-                throw new DiscordNotFoundException($"User with Id: {req.TargetUserId} doesn't exist or isn't this guild's member.", ex);
+                throw new DiscordNotFoundException(
+                    $"User with Id: {req.TargetUserId} doesn't exist or isn't this guild's member.", ex);
             }
 
             try
@@ -82,7 +83,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
             }
             catch (Exception ex)
             {
-                throw new DiscordNotFoundException($"User with Id: {req.RequestedOnBehalfOfId} doesn't exist or isn't this guild's member.", ex);
+                throw new DiscordNotFoundException(
+                    $"User with Id: {req.RequestedOnBehalfOfId} doesn't exist or isn't this guild's member.", ex);
             }
 
             return await BanAsync(guild, target, moderator, req.AppliedUntil, req.Reason, req);
@@ -92,127 +94,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
         {
             if (ctx is null) throw new ArgumentNullException(nameof(ctx));
 
-            return await BanAsync(ctx.Guild, (DiscordMember)ctx.ResolvedUserMentions[0], ctx.Member, appliedUntil, reason);
-        }
-
-        private async Task<DiscordEmbed> BanAsync(DiscordGuild guild, DiscordMember target, DiscordMember moderator, DateTime appliedUntil, string reason = "", BanReqDto req = null)
-        {
-            if (guild is null) throw new ArgumentNullException(nameof(guild));
-            if (target is null) throw new ArgumentNullException(nameof(target));
-            if (moderator is null) throw new ArgumentNullException(nameof(moderator));
-
-            if (moderator.Guild.Id != guild.Id) throw new ArgumentException(nameof(moderator));
-            if (target.Guild.Id != guild.Id) throw new ArgumentException(nameof(target));
-
-            if (!moderator.Permissions.HasPermission(Permissions.BanMembers)) throw new DiscordNotAuthorizedException($"User with Id: {moderator.Id} doesn't have moderator rights");
-            if (target.Permissions.HasPermission(Permissions.BanMembers)) throw new DiscordNotAuthorizedException($"User with Id: {moderator.Id} doesn't have rights to ban another moderator");
-
-            DiscordBan ban;
-            DiscordChannel channel = null;
-
-            var guildRes =
-                await _guildService.GetBySpecificationsAsync<Guild>(new ActiveGuildByDiscordIdWithModerationSpecifications(guild.Id));
-            var guildCfg = guildRes.FirstOrDefault();
-
-            if (guildCfg is null) throw new ArgumentException($"Guild with Id: {guild.Id} doesn't exist in the database.");
-
-            if (guildCfg.ModerationConfig is null) throw new ArgumentException($"Guild with Id: {guild.Id} doesn't have moderation module enabled.");
-
-            if (guildCfg.ModerationConfig.MemberEventsLogChannelId is not null)
-            {
-                try
-                {
-                    channel = await _discord.Client.GetChannelAsync(guildCfg.ModerationConfig.MemberEventsLogChannelId.Value);
-                }
-                catch (Exception ex)
-                {
-                    throw new DiscordNotFoundException($"Log channel with Id: {guildCfg.ModerationConfig.MemberEventsLogChannelId} doesn't exist.", ex);
-                }
-            }
-
-            if (appliedUntil < DateTime.UtcNow) throw new ArgumentException("Mute until date must be in the future.");
-
-            try
-            {
-                ban = await guild.GetBanAsync(target.Id);
-            }
-            catch (Exception)
-            {
-                ban = null;
-            }
-
-            req ??= new BanReqDto(target.Id, guild.Id, moderator.Id, appliedUntil, reason);
-
-            var (id, foundEntity) = await _banService.AddOrExtendAsync(req, true);
-
-            var embed = new DiscordEmbedBuilder();
-            embed.WithColor(0x18315C);
-            embed.WithAuthor($"Ban | {target.GetFullUsername()}", null, target.AvatarUrl);
-
-            TimeSpan tmspDuration = appliedUntil.Subtract(DateTime.UtcNow);
-            
-            string lengthString = appliedUntil == DateTime.MaxValue ? "Permanent" : $"{tmspDuration.Days} days, {tmspDuration.Hours} hrs, {tmspDuration.Minutes} mins";
-
-            if (foundEntity is null)
-            {
-                if(ban is null)
-                    await guild.BanMemberAsync(target.Id);
-
-                embed.AddField("User mention", target.Mention, true);
-                embed.AddField("Moderator", moderator.Mention, true);
-                embed.AddField("Length", lengthString, true);
-                embed.AddField("Banned until", appliedUntil.ToString(CultureInfo.InvariantCulture), true);
-                embed.AddField("Reason", reason);
-                embed.WithFooter($"Case ID: {id} | User ID: {target.Id}");
-            }
-            else
-            {
-                DiscordUser previousMod;
-                try
-                {
-                    previousMod = await _discord.Client.GetUserAsync(foundEntity.AppliedById);
-                }
-                catch (Exception)
-                {
-                    previousMod = null;
-                }
-
-                if (foundEntity.AppliedUntil > req.AppliedUntil)
-                {
-                    embed.WithDescription($"This user has already been banned until {foundEntity.AppliedUntil} by {(previousMod is not null ? previousMod.Mention : "a deleted user")}");
-                    embed.WithFooter($"Case ID: {id} | User ID: {target.Id}");
-                }
-                else
-                {
-                    if (ban is null) await guild.BanMemberAsync(req.TargetUserId);
-
-                    embed.WithAuthor($"Extend BanAsync | {target.GetFullUsername()}", null, target.AvatarUrl);
-                    embed.AddField("Previous ban until", foundEntity.AppliedUntil.ToString(), true);
-                    embed.AddField("Previous moderator", $"{(previousMod is not null ? previousMod.Mention : "Deleted user")}", true);
-                    embed.AddField("Previous reason", foundEntity.Reason, true);
-                    embed.AddField("User mention", target.Mention, true);
-                    embed.AddField("Moderator", moderator.Mention, true);
-                    embed.AddField("Length", lengthString, true);
-                    embed.AddField("Banned until", appliedUntil.ToString(CultureInfo.InvariantCulture), true);
-                    embed.AddField("Reason", reason);
-                    embed.WithFooter($"Case ID: {id} | User ID: {target.Id}");
-                }
-            }
-
-            if (guildCfg.ModerationConfig.MemberEventsLogChannelId is null) return embed; // means we're not sending to log channel
-
-            // means we're logging to log channel and returning an embed for interaction or other purposes
-
-            try
-            {
-                if (channel is not null) await channel.SendMessageAsync(embed.Build());
-            }
-            catch (Exception)
-            {
-                throw new ArgumentException($"Can't send messages in channel with Id: {guildCfg.ModerationConfig.MemberEventsLogChannelId}.");
-            }
-
-            return embed;
+            return await BanAsync(ctx.Guild, (DiscordMember) ctx.ResolvedUserMentions[0], ctx.Member, appliedUntil,
+                reason);
         }
 
         public async Task<DiscordEmbed> UnbanAsync(BanDisableReqDto req)
@@ -249,7 +132,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
             }
             catch (Exception ex)
             {
-                throw new DiscordNotFoundException($"User with Id: {req.TargetUserId} doesn't exist or isn't this guild's member.", ex);
+                throw new DiscordNotFoundException(
+                    $"User with Id: {req.TargetUserId} doesn't exist or isn't this guild's member.", ex);
             }
 
             try
@@ -258,7 +142,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
             }
             catch (Exception ex)
             {
-                throw new DiscordNotFoundException($"User with Id: {req.RequestedOnBehalfOfId} doesn't exist or isn't this guild's member.", ex);
+                throw new DiscordNotFoundException(
+                    $"User with Id: {req.RequestedOnBehalfOfId} doesn't exist or isn't this guild's member.", ex);
             }
 
             return await UnbanAsync(guild, target, moderator);
@@ -269,94 +154,6 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (ctx is null) throw new ArgumentNullException(nameof(ctx));
 
             return await UnbanAsync(ctx.Guild, ctx.ResolvedUserMentions[0], ctx.Member);
-        }
-
-        private async Task<DiscordEmbed> UnbanAsync(DiscordGuild guild, DiscordUser target, DiscordMember moderator, BanDisableReqDto req = null)
-        {
-            if (guild is null) throw new ArgumentNullException(nameof(guild));
-            if (target is null) throw new ArgumentNullException(nameof(target));
-            if (moderator is null) throw new ArgumentNullException(nameof(moderator));
-
-            DiscordChannel channel = null;
-            DiscordBan ban;
-
-            var guildRes =
-                await _guildService.GetBySpecificationsAsync<Guild>(new ActiveGuildByDiscordIdWithModerationSpecifications(guild.Id));
-            var guildCfg = guildRes.FirstOrDefault();
-
-            if (guildCfg is null) throw new ArgumentException($"Guild with Id: {guild.Id} doesn't exist in the database.");
-
-            if (guildCfg.ModerationConfig is null) throw new ArgumentException($"Guild with Id: {guild.Id} doesn't have moderation module enabled.");
-
-            if (guildCfg.ModerationConfig.MemberEventsLogChannelId is not null)
-            {
-                try
-                {
-                    channel = await _discord.Client.GetChannelAsync(guildCfg.ModerationConfig.MemberEventsLogChannelId.Value);
-                }
-                catch (Exception ex)
-                {
-                    throw new DiscordNotFoundException($"Log channel with Id: {guildCfg.ModerationConfig.MemberEventsLogChannelId} doesn't exist.", ex);
-                }
-            }
-
-            try
-            {
-                ban = await guild.GetBanAsync(target.Id);
-            }
-            catch (Exception)
-            {
-                ban = null;
-            }
-
-            var embed = new DiscordEmbedBuilder();
-            embed.WithColor(0x18315C);
-            embed.WithAuthor($"Unban | {target.GetFullUsername()}", null, target.AvatarUrl);
-
-            var res = await _banService.DisableAsync(req);
-
-            if (ban is null)
-            {
-                embed.WithFooter($"Case ID: unknown  | Member ID: {target.Id}");
-
-                if (res is not null)
-                {
-                    embed.WithFooter($"Case ID: {res.Id}  | Member ID: {target.Id}");
-                    await _banService.CommitAsync();
-                }
-                else
-                {
-                    embed.WithAuthor($"Unban failed | {target.GetFullUsername()}", null, target.AvatarUrl);
-                    embed.WithDescription($"This user isn't currently banned.");
-                }
-            }
-            else
-            {
-                // ReSharper disable once PossibleNullReferenceException
-                await target.UnbanAsync(guild);
-                await _banService.CommitAsync();
-
-                embed.WithAuthor($"UnbanAsync | {target.GetFullUsername()}", null, target.AvatarUrl);
-                embed.AddField("Moderator", moderator.Mention, true);
-                embed.AddField("User mention", target.Mention, true);
-                embed.WithDescription($"Successfully unbanned");
-                embed.WithFooter($"Case ID: {res.Id} | Member ID: {target.Id}");
-            }
-
-            if (guildCfg.ModerationConfig.MemberEventsLogChannelId is null) return embed; // means we're not sending to log channel
-
-            // means we're logging to log channel and returning an embed for interaction or other purposes
-
-            try
-            {
-                await channel.SendMessageAsync(embed.Build());
-            }
-            catch (Exception)
-            {
-                throw new ArgumentException($"Can't send messages in channel with Id: {guildCfg.ModerationConfig.MemberEventsLogChannelId}.");
-            }
-
-            return embed;
         }
 
         public async Task<DiscordEmbed> GetSpecificUserGuildBanAsync(BanGetReqDto req)
@@ -396,7 +193,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
             }
             catch (Exception ex)
             {
-                throw new DiscordNotFoundException($"User with Id: {req.TargetUserId} doesn't exist or isn't this guild's member.", ex);
+                throw new DiscordNotFoundException(
+                    $"User with Id: {req.TargetUserId} doesn't exist or isn't this guild's member.", ex);
             }
 
             try
@@ -405,7 +203,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
             }
             catch (Exception ex)
             {
-                throw new DiscordNotFoundException($"User with Id: {req.RequestedOnBehalfOfId} doesn't exist or isn't this guild's member.", ex);
+                throw new DiscordNotFoundException(
+                    $"User with Id: {req.RequestedOnBehalfOfId} doesn't exist or isn't this guild's member.", ex);
             }
 
             return await GetAsync(guild, target, moderator);
@@ -418,34 +217,283 @@ namespace Lisbeth.Bot.Application.Discord.Services
             return await GetAsync(ctx.Guild, ctx.ResolvedUserMentions[0], ctx.Member);
         }
 
-        private async Task<DiscordEmbed> GetAsync(DiscordGuild guild, DiscordUser target, DiscordMember moderator, BanGetReqDto req = null)
+        [Queue("moderation")]
+        public async Task UnbanCheckAsync()
+        {
+            var res = await _banService.GetBySpecificationsAsync<Mute>(
+                new ActiveExpiredBansInActiveGuildsSpecifications());
+
+            if (res is null || res.Count == 0) return;
+
+            foreach (var mute in res)
+            {
+                var req = new BanDisableReqDto(mute.UserId, mute.GuildId, _discord.Client.CurrentUser.Id);
+                await UnbanAsync(req);
+            }
+        }
+
+        private async Task<DiscordEmbed> BanAsync(DiscordGuild guild, DiscordMember target, DiscordMember moderator,
+            DateTime appliedUntil, string reason = "", BanReqDto req = null)
+        {
+            if (guild is null) throw new ArgumentNullException(nameof(guild));
+            if (target is null) throw new ArgumentNullException(nameof(target));
+            if (moderator is null) throw new ArgumentNullException(nameof(moderator));
+
+            if (moderator.Guild.Id != guild.Id) throw new ArgumentException(nameof(moderator));
+            if (target.Guild.Id != guild.Id) throw new ArgumentException(nameof(target));
+
+            if (!moderator.Permissions.HasPermission(Permissions.BanMembers))
+                throw new DiscordNotAuthorizedException($"User with Id: {moderator.Id} doesn't have moderator rights");
+            if (target.Permissions.HasPermission(Permissions.BanMembers))
+                throw new DiscordNotAuthorizedException(
+                    $"User with Id: {moderator.Id} doesn't have rights to ban another moderator");
+
+            DiscordBan ban;
+            DiscordChannel channel = null;
+
+            var guildRes =
+                await _guildService.GetBySpecificationsAsync<Guild>(
+                    new ActiveGuildByDiscordIdWithModerationSpecifications(guild.Id));
+            var guildCfg = guildRes.FirstOrDefault();
+
+            if (guildCfg is null)
+                throw new ArgumentException($"Guild with Id: {guild.Id} doesn't exist in the database.");
+
+            if (guildCfg.ModerationConfig is null)
+                throw new ArgumentException($"Guild with Id: {guild.Id} doesn't have moderation module enabled.");
+
+            if (guildCfg.ModerationConfig.MemberEventsLogChannelId is not null)
+                try
+                {
+                    channel = await _discord.Client.GetChannelAsync(guildCfg.ModerationConfig.MemberEventsLogChannelId
+                        .Value);
+                }
+                catch (Exception ex)
+                {
+                    throw new DiscordNotFoundException(
+                        $"Log channel with Id: {guildCfg.ModerationConfig.MemberEventsLogChannelId} doesn't exist.",
+                        ex);
+                }
+
+            if (appliedUntil < DateTime.UtcNow) throw new ArgumentException("Mute until date must be in the future.");
+
+            try
+            {
+                ban = await guild.GetBanAsync(target.Id);
+            }
+            catch (Exception)
+            {
+                ban = null;
+            }
+
+            req ??= new BanReqDto(target.Id, guild.Id, moderator.Id, appliedUntil, reason);
+
+            var (id, foundEntity) = await _banService.AddOrExtendAsync(req, true);
+
+            var embed = new DiscordEmbedBuilder();
+            embed.WithColor(0x18315C);
+            embed.WithAuthor($"Ban | {target.GetFullUsername()}", null, target.AvatarUrl);
+
+            TimeSpan tmspDuration = appliedUntil.Subtract(DateTime.UtcNow);
+
+            string lengthString = appliedUntil == DateTime.MaxValue
+                ? "Permanent"
+                : $"{tmspDuration.Days} days, {tmspDuration.Hours} hrs, {tmspDuration.Minutes} mins";
+
+            if (foundEntity is null)
+            {
+                if (ban is null)
+                    await guild.BanMemberAsync(target.Id);
+
+                embed.AddField("User mention", target.Mention, true);
+                embed.AddField("Moderator", moderator.Mention, true);
+                embed.AddField("Length", lengthString, true);
+                embed.AddField("Banned until", appliedUntil.ToString(CultureInfo.InvariantCulture), true);
+                embed.AddField("Reason", reason);
+                embed.WithFooter($"Case ID: {id} | User ID: {target.Id}");
+            }
+            else
+            {
+                DiscordUser previousMod;
+                try
+                {
+                    previousMod = await _discord.Client.GetUserAsync(foundEntity.AppliedById);
+                }
+                catch (Exception)
+                {
+                    previousMod = null;
+                }
+
+                if (foundEntity.AppliedUntil > req.AppliedUntil)
+                {
+                    embed.WithDescription(
+                        $"This user has already been banned until {foundEntity.AppliedUntil} by {(previousMod is not null ? previousMod.Mention : "a deleted user")}");
+                    embed.WithFooter($"Case ID: {id} | User ID: {target.Id}");
+                }
+                else
+                {
+                    if (ban is null) await guild.BanMemberAsync(req.TargetUserId);
+
+                    embed.WithAuthor($"Extend BanAsync | {target.GetFullUsername()}", null, target.AvatarUrl);
+                    embed.AddField("Previous ban until", foundEntity.AppliedUntil.ToString(), true);
+                    embed.AddField("Previous moderator",
+                        $"{(previousMod is not null ? previousMod.Mention : "Deleted user")}", true);
+                    embed.AddField("Previous reason", foundEntity.Reason, true);
+                    embed.AddField("User mention", target.Mention, true);
+                    embed.AddField("Moderator", moderator.Mention, true);
+                    embed.AddField("Length", lengthString, true);
+                    embed.AddField("Banned until", appliedUntil.ToString(CultureInfo.InvariantCulture), true);
+                    embed.AddField("Reason", reason);
+                    embed.WithFooter($"Case ID: {id} | User ID: {target.Id}");
+                }
+            }
+
+            if (guildCfg.ModerationConfig.MemberEventsLogChannelId is null)
+                return embed; // means we're not sending to log channel
+
+            // means we're logging to log channel and returning an embed for interaction or other purposes
+
+            try
+            {
+                if (channel is not null) await channel.SendMessageAsync(embed.Build());
+            }
+            catch (Exception)
+            {
+                throw new ArgumentException(
+                    $"Can't send messages in channel with Id: {guildCfg.ModerationConfig.MemberEventsLogChannelId}.");
+            }
+
+            return embed;
+        }
+
+        private async Task<DiscordEmbed> UnbanAsync(DiscordGuild guild, DiscordUser target, DiscordMember moderator,
+            BanDisableReqDto req = null)
+        {
+            if (guild is null) throw new ArgumentNullException(nameof(guild));
+            if (target is null) throw new ArgumentNullException(nameof(target));
+            if (moderator is null) throw new ArgumentNullException(nameof(moderator));
+
+            DiscordChannel channel = null;
+            DiscordBan ban;
+
+            var guildRes =
+                await _guildService.GetBySpecificationsAsync<Guild>(
+                    new ActiveGuildByDiscordIdWithModerationSpecifications(guild.Id));
+            var guildCfg = guildRes.FirstOrDefault();
+
+            if (guildCfg is null)
+                throw new ArgumentException($"Guild with Id: {guild.Id} doesn't exist in the database.");
+
+            if (guildCfg.ModerationConfig is null)
+                throw new ArgumentException($"Guild with Id: {guild.Id} doesn't have moderation module enabled.");
+
+            if (guildCfg.ModerationConfig.MemberEventsLogChannelId is not null)
+                try
+                {
+                    channel = await _discord.Client.GetChannelAsync(guildCfg.ModerationConfig.MemberEventsLogChannelId
+                        .Value);
+                }
+                catch (Exception ex)
+                {
+                    throw new DiscordNotFoundException(
+                        $"Log channel with Id: {guildCfg.ModerationConfig.MemberEventsLogChannelId} doesn't exist.",
+                        ex);
+                }
+
+            try
+            {
+                ban = await guild.GetBanAsync(target.Id);
+            }
+            catch (Exception)
+            {
+                ban = null;
+            }
+
+            var embed = new DiscordEmbedBuilder();
+            embed.WithColor(0x18315C);
+            embed.WithAuthor($"Unban | {target.GetFullUsername()}", null, target.AvatarUrl);
+
+            var res = await _banService.DisableAsync(req);
+
+            if (ban is null)
+            {
+                embed.WithFooter($"Case ID: unknown  | Member ID: {target.Id}");
+
+                if (res is not null)
+                {
+                    embed.WithFooter($"Case ID: {res.Id}  | Member ID: {target.Id}");
+                    await _banService.CommitAsync();
+                }
+                else
+                {
+                    embed.WithAuthor($"Unban failed | {target.GetFullUsername()}", null, target.AvatarUrl);
+                    embed.WithDescription("This user isn't currently banned.");
+                }
+            }
+            else
+            {
+                // ReSharper disable once PossibleNullReferenceException
+                await target.UnbanAsync(guild);
+                await _banService.CommitAsync();
+
+                embed.WithAuthor($"UnbanAsync | {target.GetFullUsername()}", null, target.AvatarUrl);
+                embed.AddField("Moderator", moderator.Mention, true);
+                embed.AddField("User mention", target.Mention, true);
+                embed.WithDescription("Successfully unbanned");
+                embed.WithFooter($"Case ID: {res.Id} | Member ID: {target.Id}");
+            }
+
+            if (guildCfg.ModerationConfig.MemberEventsLogChannelId is null)
+                return embed; // means we're not sending to log channel
+
+            // means we're logging to log channel and returning an embed for interaction or other purposes
+
+            try
+            {
+                await channel.SendMessageAsync(embed.Build());
+            }
+            catch (Exception)
+            {
+                throw new ArgumentException(
+                    $"Can't send messages in channel with Id: {guildCfg.ModerationConfig.MemberEventsLogChannelId}.");
+            }
+
+            return embed;
+        }
+
+        private async Task<DiscordEmbed> GetAsync(DiscordGuild guild, DiscordUser target, DiscordMember moderator,
+            BanGetReqDto req = null)
         {
             if (guild is null) throw new ArgumentNullException(nameof(guild));
             if (target is null) throw new ArgumentNullException(nameof(target));
             if (moderator is null) throw new ArgumentNullException(nameof(moderator));
 
             var guildRes =
-                await _guildService.GetBySpecificationsAsync<Guild>(new ActiveGuildByDiscordIdWithModerationSpecifications(guild.Id));
+                await _guildService.GetBySpecificationsAsync<Guild>(
+                    new ActiveGuildByDiscordIdWithModerationSpecifications(guild.Id));
             var guildCfg = guildRes.FirstOrDefault();
 
-            if (guildCfg is null) throw new ArgumentException($"Guild with Id: {guild.Id} doesn't exist in the database.");
+            if (guildCfg is null)
+                throw new ArgumentException($"Guild with Id: {guild.Id} doesn't exist in the database.");
 
-            if (guildCfg.ModerationConfig is null) throw new ArgumentException($"Guild with Id: {guild.Id} doesn't have moderation module enabled.");
+            if (guildCfg.ModerationConfig is null)
+                throw new ArgumentException($"Guild with Id: {guild.Id} doesn't have moderation module enabled.");
 
             DiscordChannel channel = null;
             DiscordBan discordBan;
 
             if (guildCfg.ModerationConfig.MemberEventsLogChannelId is not null)
-            {
                 try
                 {
-                    channel = await _discord.Client.GetChannelAsync(guildCfg.ModerationConfig.MemberEventsLogChannelId.Value);
+                    channel = await _discord.Client.GetChannelAsync(guildCfg.ModerationConfig.MemberEventsLogChannelId
+                        .Value);
                 }
                 catch (Exception ex)
                 {
-                    throw new DiscordNotFoundException($"Log channel with Id: {guildCfg.ModerationConfig.MemberEventsLogChannelId} doesn't exist.", ex);
+                    throw new DiscordNotFoundException(
+                        $"Log channel with Id: {guildCfg.ModerationConfig.MemberEventsLogChannelId} doesn't exist.",
+                        ex);
                 }
-            }
 
             try
             {
@@ -460,7 +508,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
             req ??= new BanGetReqDto(moderator.Id, null, target.Id, guild.Id);
 
             var res = await _banService.GetBySpecificationsAsync<Ban>(
-                new BanBaseGetSpecifications(req.Id, req.TargetUserId, req.GuildId, req.AppliedById, req.LiftedOn, req.AppliedOn, req.LiftedById, 0));
+                new BanBaseGetSpecifications(req.Id, req.TargetUserId, req.GuildId, req.AppliedById, req.LiftedOn,
+                    req.AppliedOn, req.LiftedById));
 
             var ban = res.FirstOrDefault();
 
@@ -495,9 +544,11 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     {
                         // ignore
                     }
- 
-                    embed.AddField("Was lifted by", $"{(liftingMod is not null ? liftingMod.Mention : "Deleted user")}");
+
+                    embed.AddField("Was lifted by",
+                        $"{(liftingMod is not null ? liftingMod.Mention : "Deleted user")}");
                 }
+
                 embed.WithFooter($"Case ID: {ban.Id} | User ID: {target.Id}");
             }
             else
@@ -519,7 +570,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 }
             }
 
-            if (guildCfg.ModerationConfig.MemberEventsLogChannelId is null) return embed; // means we're not sending to log channel
+            if (guildCfg.ModerationConfig.MemberEventsLogChannelId is null)
+                return embed; // means we're not sending to log channel
 
             // means we're logging to log channel and returning an embed for interaction or other purposes
 
@@ -529,24 +581,11 @@ namespace Lisbeth.Bot.Application.Discord.Services
             }
             catch (Exception)
             {
-                throw new ArgumentException($"Can't send messages in channel with Id: {guildCfg.ModerationConfig.MemberEventsLogChannelId}.");
+                throw new ArgumentException(
+                    $"Can't send messages in channel with Id: {guildCfg.ModerationConfig.MemberEventsLogChannelId}.");
             }
 
             return embed;
-        }
-
-        [Queue("moderation")]
-        public async Task UnbanCheckAsync()
-        {
-            var res = await _banService.GetBySpecificationsAsync<Mute>(new ActiveExpiredBansInActiveGuildsSpecifications());
-
-            if (res is null || res.Count == 0) return;
-
-            foreach (var mute in res)
-            {
-                var req = new BanDisableReqDto(mute.UserId, mute.GuildId, _discord.Client.CurrentUser.Id);
-                await UnbanAsync(req);
-            }
         }
     }
 }

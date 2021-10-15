@@ -15,11 +15,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Collections.Generic;
 using Lisbeth.Bot.API.Models;
 using Lisbeth.Bot.Application.Services.Interfaces;
 using MikyM.Common.DataAccessLayer.Filters;
-using System;
-using System.Collections.Generic;
 
 namespace Lisbeth.Bot.API.Helpers
 {
@@ -29,7 +29,7 @@ namespace Lisbeth.Bot.API.Helpers
             long totalRecords, IUriService uriService, string route)
         {
             var response = new PagedResponse<List<T>>(pagedData, validFilter.PageNumber, validFilter.PageSize);
-            var totalPages = ((double)totalRecords / (double)validFilter.PageSize);
+            var totalPages = totalRecords / (double) validFilter.PageSize;
             int roundedTotalPages = Convert.ToInt32(Math.Ceiling(totalPages));
             response.NextPage = validFilter.PageNumber >= 1 && validFilter.PageNumber < roundedTotalPages
                 ? uriService.GetPageUri(new PaginationFilter(validFilter.PageNumber + 1, validFilter.PageSize), route)

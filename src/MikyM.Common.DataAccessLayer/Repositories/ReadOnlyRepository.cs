@@ -16,12 +16,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using Microsoft.EntityFrameworkCore;
-using MikyM.Common.DataAccessLayer.Filters;
-using MikyM.Common.DataAccessLayer.Specifications;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using MikyM.Common.DataAccessLayer.Filters;
+using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Common.Domain.Entities;
 
 namespace MikyM.Common.DataAccessLayer.Repositories

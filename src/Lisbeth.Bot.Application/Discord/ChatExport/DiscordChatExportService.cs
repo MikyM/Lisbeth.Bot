@@ -15,6 +15,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.ChatExport.Builders;
@@ -24,17 +31,10 @@ using Lisbeth.Bot.Application.Services.Interfaces;
 using Lisbeth.Bot.DataAccessLayer.Specifications.TicketSpecifications;
 using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.Entities;
+using Microsoft.Extensions.Logging;
 using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Discord.Interfaces;
 using Serilog;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport
 {
@@ -43,8 +43,8 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
     {
         private readonly IDiscordService _discord;
         private readonly IGuildService _guildService;
-        private readonly ITicketService _ticketService;
         private readonly ILogger<DiscordChatExportService> _logger;
+        private readonly ITicketService _ticketService;
 
         public DiscordChatExportService(IDiscordService discord, IGuildService guildService,
             ITicketService ticketService, ILogger<DiscordChatExportService> logger)
@@ -73,7 +73,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
             {
                 ticket = await _ticketService.GetAsync<Ticket>(req.Id.Value);
                 if (ticket is null)
-                    throw new ArgumentException($"Opened ticket with given params doesn't exist in the database.");
+                    throw new ArgumentException("Opened ticket with given params doesn't exist in the database.");
 
                 req.ChannelId = ticket.ChannelId;
                 req.GuildId = ticket.GuildId;
@@ -85,7 +85,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
                     new TicketBaseGetSpecifications(null, req.OwnerId, req.GuildId, null, null, false, 1));
                 ticket = res.FirstOrDefault();
                 if (ticket is null)
-                    throw new ArgumentException($"Opened ticket with given params doesn't exist in the database.");
+                    throw new ArgumentException("Opened ticket with given params doesn't exist in the database.");
 
                 req.ChannelId = ticket.ChannelId;
                 req.GuildId = ticket.GuildId;
@@ -98,7 +98,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
                         1));
                 ticket = res.FirstOrDefault();
                 if (ticket is null)
-                    throw new ArgumentException($"Opened ticket with given params doesn't exist in the database.");
+                    throw new ArgumentException("Opened ticket with given params doesn't exist in the database.");
 
                 req.ChannelId = ticket.ChannelId;
                 req.GuildId = ticket.GuildId;
@@ -110,7 +110,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
                     new TicketBaseGetSpecifications(null, null, null, req.ChannelId, null, false, 1));
                 ticket = res.FirstOrDefault();
                 if (ticket is null)
-                    throw new ArgumentException($"Opened ticket with given params doesn't exist in the database.");
+                    throw new ArgumentException("Opened ticket with given params doesn't exist in the database.");
                 req.OwnerId = ticket.UserId;
                 try
                 {
@@ -175,10 +175,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
 
                 var guildCfg = resGuild.FirstOrDefault();
 
-                if (guildCfg is null)
-                {
-                    throw new ArgumentException("Guild doesn't exist in database.");
-                }
+                if (guildCfg is null) throw new ArgumentException("Guild doesn't exist in database.");
 
                 if (ticket is null)
                 {
@@ -189,23 +186,20 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
 
                 DiscordChannel ticketLogChannel;
 
-                if (ticket is null)
-                {
-                    throw new ArgumentException("Ticket doesn't exist in database.");
-                }
+                if (ticket is null) throw new ArgumentException("Ticket doesn't exist in database.");
 
                 if (guildCfg.TicketingConfig.LogChannelId is null)
-                {
                     throw new ArgumentException("Guild doesn't have ticketing log channel set.");
-                }
 
                 try
                 {
-                    ticketLogChannel = await _discord.Client.GetChannelAsync(guildCfg.TicketingConfig.LogChannelId.Value);
+                    ticketLogChannel =
+                        await _discord.Client.GetChannelAsync(guildCfg.TicketingConfig.LogChannelId.Value);
                 }
                 catch (Exception)
                 {
-                    throw new ArgumentException($"Channel with Id: {guildCfg.TicketingConfig.LogChannelId} doesn't exist.");
+                    throw new ArgumentException(
+                        $"Channel with Id: {guildCfg.TicketingConfig.LogChannelId} doesn't exist.");
                 }
 
                 try
@@ -235,20 +229,14 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
                 {
                     await Task.Delay(1000);
                     var newMessages = await target.GetMessagesBeforeAsync(messages.Last().Id);
-                    if (newMessages.Count == 0)
-                    {
-                        break;
-                    }
+                    if (newMessages.Count == 0) break;
 
                     messages.AddRange(newMessages);
                 }
 
                 messages.Reverse();
 
-                foreach (var msg in messages.Where(msg => !users.Contains(msg.Author)))
-                {
-                    users.Add(msg.Author);
-                }
+                foreach (var msg in messages.Where(msg => !users.Contains(msg.Author))) users.Add(msg.Author);
 
                 string path = Path.Combine(Directory.GetCurrentDirectory(), "ChatExport", "ChatExport.css");
                 string css;

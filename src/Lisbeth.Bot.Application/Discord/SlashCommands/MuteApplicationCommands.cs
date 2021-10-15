@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
@@ -23,10 +25,6 @@ using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Application.Discord.SlashCommands;
 using Lisbeth.Bot.Application.Extensions;
-using Lisbeth.Bot.Domain.DTOs.Request;
-using System;
-using System.Threading.Tasks;
-using Lisbeth.Bot.Application.Services.Interfaces;
 
 // ReSharper disable once CheckNamespace
 namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
@@ -42,9 +40,11 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
         [SlashRequireUserPermissions(Permissions.BanMembers)]
         [SlashCommand("mute", "A command that allows mute actions.")]
         [UsedImplicitly]
-        public async Task MuteCommand(InteractionContext ctx, [Option("action", "Action type")] MuteActionType actionType,
+        public async Task MuteCommand(InteractionContext ctx,
+            [Option("action", "Action type")] MuteActionType actionType,
             [Option("user", "User to mute")] DiscordUser user,
-            [Option("length", "For how long should the user be muted")] string length = "",
+            [Option("length", "For how long should the user be muted")]
+            string length = "",
             [Option("reason", "Reason for mute")] string reason = "No reason provided")
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);

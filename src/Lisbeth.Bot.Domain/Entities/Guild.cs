@@ -16,16 +16,15 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using IdGen;
-using Lisbeth.Bot.Domain.Entities.Base;
 using System.Collections.Generic;
+using Lisbeth.Bot.Domain.Entities.Base;
 
 namespace Lisbeth.Bot.Domain.Entities
 {
     public sealed class Guild : SnowflakeEntity
     {
-        private readonly HashSet<Mute> mutes;
         private readonly HashSet<Ban> bans;
+        private readonly HashSet<Mute> mutes;
         private readonly HashSet<Prune> prunes;
         private readonly HashSet<Ticket> tickets;
 

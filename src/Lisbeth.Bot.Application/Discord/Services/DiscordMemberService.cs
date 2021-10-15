@@ -15,29 +15,29 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus.Entities;
-using DSharpPlus.EventArgs;
-using Lisbeth.Bot.Application.Discord.Extensions;
-using Lisbeth.Bot.Application.Discord.Services.Interfaces;
-using Lisbeth.Bot.Application.Services.Interfaces;
-using Lisbeth.Bot.Domain.Entities;
-using MikyM.Common.DataAccessLayer.Specifications;
-using MikyM.Discord.Interfaces;
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using DSharpPlus.Entities;
+using DSharpPlus.EventArgs;
 using JetBrains.Annotations;
+using Lisbeth.Bot.Application.Discord.Extensions;
+using Lisbeth.Bot.Application.Discord.Services.Interfaces;
+using Lisbeth.Bot.Application.Services.Interfaces;
 using Lisbeth.Bot.DataAccessLayer.Specifications.MuteSpecifications;
+using Lisbeth.Bot.Domain.Entities;
+using MikyM.Common.DataAccessLayer.Specifications;
+using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {
     [UsedImplicitly]
     public class DiscordMemberService : IDiscordMemberService
     {
+        private readonly IDiscordService _discord;
         private readonly IGuildService _guildService;
         private readonly IMuteService _muteService;
-        private readonly IDiscordService _discord;
 
         public DiscordMemberService(IDiscordService discord, IGuildService guildService, IMuteService muteService)
         {
@@ -58,7 +58,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (guild?.ModerationConfig?.MemberEventsLogChannelId is null) return;
 
             DiscordChannel logChannel =
-                args.Guild.Channels.FirstOrDefault(x => x.Key == guild.ModerationConfig.MemberEventsLogChannelId.Value).Value;
+                args.Guild.Channels.FirstOrDefault(x => x.Key == guild.ModerationConfig.MemberEventsLogChannelId.Value)
+                    .Value;
 
             if (logChannel is null) return;
 
@@ -67,7 +68,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
             var auditLogsBans = await args.Guild.GetAuditLogsAsync(1, null, AuditLogActionType.Ban);
             await Task.Delay(500);
             var auditLogsKicks = await args.Guild.GetAuditLogsAsync(1, null, AuditLogActionType.Kick);
-            var filtered = auditLogsBans.Concat(auditLogsKicks).Where(m => m.CreationTimestamp.LocalDateTime > DateTime.Now.Subtract(new TimeSpan(0, 0, 4))).ToList();
+            var filtered = auditLogsBans.Concat(auditLogsKicks).Where(m =>
+                m.CreationTimestamp.LocalDateTime > DateTime.Now.Subtract(new TimeSpan(0, 0, 4))).ToList();
 
             var embed = new DiscordEmbedBuilder();
 
@@ -95,10 +97,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             embed.WithColor(new DiscordColor(guild.EmbedHexColor));
             embed.WithFooter($"Member ID: {args.Member.Id}");
 
-            if (reasonLeft != "No reason found")
-            {
-                embed.AddField("Reason for leaving", reasonLeft);
-            }
+            if (reasonLeft != "No reason found") embed.AddField("Reason for leaving", reasonLeft);
 
             try
             {
@@ -107,7 +106,6 @@ namespace Lisbeth.Bot.Application.Discord.Services
             catch (Exception ex)
             {
                 // probably should tell idiots to fix channel id in config but idk how so return for now, mebe msg members with admin privs
-                return;
             }
         }
 
@@ -124,7 +122,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             var embed = new DiscordEmbedBuilder();
             embed.WithColor(new DiscordColor(guild.EmbedHexColor));
-            if (guild.ModerationConfig.MemberWelcomeMessageTitle is not null) embed.WithTitle(guild.ModerationConfig.MemberWelcomeMessageTitle);
+            if (guild.ModerationConfig.MemberWelcomeMessageTitle is not null)
+                embed.WithTitle(guild.ModerationConfig.MemberWelcomeMessageTitle);
 
             var matches = Regex.Matches(guild.ModerationConfig.MemberWelcomeMessage, @"@field@(.+?)@endField@");
             int count = matches.Count > 25 ? 25 : matches.Count;
@@ -143,7 +142,6 @@ namespace Lisbeth.Bot.Application.Discord.Services
             catch (Exception ex)
             {
                 // probably should tell idiots to fix channel id in config but idk how so return for now, mebe msg members with admin privs
-                return;
             }
         }
 
@@ -151,7 +149,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
         {
             if (args is null) throw new ArgumentNullException(nameof(args));
 
-            var res = await _muteService.GetBySpecificationsAsync<Mute>(new ActiveMutesByGuildAndUserSpecifications(args.Guild.Id, args.Member.Id));
+            var res = await _muteService.GetBySpecificationsAsync<Mute>(
+                new ActiveMutesByGuildAndUserSpecifications(args.Guild.Id, args.Member.Id));
 
             var mute = res.FirstOrDefault();
 

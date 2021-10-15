@@ -22,10 +22,13 @@ using MikyM.Common.Domain.Entities;
 
 namespace MikyM.Common.Application.Interfaces
 {
-    public interface ICrudService<TEntity, TContext> : IReadOnlyService<TEntity, TContext> where TEntity : AggregateRootEntity where TContext : DbContext
+    public interface ICrudService<TEntity, TContext> : IReadOnlyService<TEntity, TContext>
+        where TEntity : AggregateRootEntity where TContext : DbContext
     {
         Task<long> AddAsync<TPost>(TPost entry, bool shouldSave = false) where TPost : class;
-        Task<IEnumerable<long>> AddRangeAsync<TPost>(IEnumerable<TPost> entries, bool shouldSave = false) where TPost : class;
+
+        Task<IEnumerable<long>> AddRangeAsync<TPost>(IEnumerable<TPost> entries, bool shouldSave = false)
+            where TPost : class;
 
         void BeginUpdate<TPatch>(TPatch entry) where TPatch : class;
 

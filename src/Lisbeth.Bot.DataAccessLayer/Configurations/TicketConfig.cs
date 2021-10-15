@@ -25,16 +25,18 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
     {
         public void Configure(EntityTypeBuilder<Ticket> builder)
         {
-
             builder.ToTable("ticket");
 
             builder.Property(x => x.Id).HasColumnName("id").HasColumnType("bigint").ValueGeneratedOnAdd().IsRequired();
             builder.Property(x => x.IsDisabled).HasColumnName("is_disabled").HasColumnType("boolean").IsRequired();
-            builder.Property(x => x.CreatedAt).HasColumnName("created_at").HasColumnType("timestamp").ValueGeneratedOnAdd().IsRequired();
+            builder.Property(x => x.CreatedAt).HasColumnName("created_at").HasColumnType("timestamp")
+                .ValueGeneratedOnAdd().IsRequired();
             builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamp").IsRequired();
 
-            builder.Property(x => x.GuildId).HasColumnName("guild_id").HasColumnType("bigint").ValueGeneratedOnAdd().IsRequired();
-            builder.Property(x => x.UserId).HasColumnName("user_id").HasColumnType("bigint").ValueGeneratedOnAdd().IsRequired();
+            builder.Property(x => x.GuildId).HasColumnName("guild_id").HasColumnType("bigint").ValueGeneratedOnAdd()
+                .IsRequired();
+            builder.Property(x => x.UserId).HasColumnName("user_id").HasColumnType("bigint").ValueGeneratedOnAdd()
+                .IsRequired();
             builder.Property(x => x.ChannelId).HasColumnName("channel_id").HasColumnType("bigint");
             builder.Property(x => x.GuildSpecificId).HasColumnName("guild_specific_id").HasColumnType("bigint");
             builder.Property(x => x.MessageOpenId).HasColumnName("message_open_id").HasColumnType("bigint");

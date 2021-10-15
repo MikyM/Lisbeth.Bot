@@ -19,7 +19,6 @@ using System;
 using System.Linq;
 using System.Reflection;
 using DSharpPlus;
-using DSharpPlus.EventArgs;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -31,16 +30,15 @@ using OpenTracing;
 namespace MikyM.Discord.Services
 {
     /// <summary>
-    ///     An implementation of <see cref="IDiscordService"/>.
+    ///     An implementation of <see cref="IDiscordService" />.
     /// </summary>
     [UsedImplicitly]
     public class DiscordService : IDiscordService
     {
+        protected readonly IOptions<DiscordConfiguration> DiscordOptions;
         protected readonly ILoggerFactory LogFactory;
 
         protected readonly ILogger<DiscordService> Logger;
-
-        protected readonly IOptions<DiscordConfiguration> DiscordOptions;
 
         protected readonly IServiceProvider ServiceProvider;
 

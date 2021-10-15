@@ -15,14 +15,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.EventArgs;
 using JetBrains.Annotations;
+using Lisbeth.Bot.Application.Extensions;
 using Microsoft.Extensions.Logging;
 using MikyM.Discord.Extensions.SlashCommands.Events;
-using System.Threading.Tasks;
-using Lisbeth.Bot.Application.Extensions;
 
 namespace Lisbeth.Bot.Application.Discord.EventHandlers
 {
@@ -67,7 +67,8 @@ namespace Lisbeth.Bot.Application.Discord.EventHandlers
             return Task.CompletedTask;
         }
 
-        public Task SlashCommandsOnSlashCommandExecuted(SlashCommandsExtension sender, SlashCommandExecutedEventArgs args)
+        public Task SlashCommandsOnSlashCommandExecuted(SlashCommandsExtension sender,
+            SlashCommandExecutedEventArgs args)
         {
             return Task.CompletedTask;
         }

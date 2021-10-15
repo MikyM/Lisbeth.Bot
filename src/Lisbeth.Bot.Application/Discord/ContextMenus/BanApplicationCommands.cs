@@ -21,7 +21,7 @@ namespace Lisbeth.Bot.Application.Discord.ContextMenus
 {
     // Menus for bans
     [UsedImplicitly]
-    public partial class BanApplicationCommands
+    public class BanApplicationCommands
     {
         //For user commands
 

@@ -15,14 +15,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
 using JetBrains.Annotations;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 
 // ReSharper disable once CheckNamespace
 namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
@@ -39,7 +39,8 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
-            var embed = await _discordMuteService.MuteAsync(ctx, DateTime.MaxValue, "No reason provided - muted via user context menu");
+            var embed = await _discordMuteService.MuteAsync(ctx, DateTime.MaxValue,
+                "No reason provided - muted via user context menu");
 
             await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(embed)
                 .AsEphemeral(true));
@@ -51,7 +52,7 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
         public async Task UnmuteUserMenu(ContextMenuContext ctx)
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
-            
+
             var embed = await _discordMuteService.UnmuteAsync(ctx);
 
             await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(embed)
@@ -82,7 +83,8 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
-            var embed = await _discordMuteService.MuteAsync(ctx, DateTime.MaxValue,"No reason provided - muted via message context menu");
+            var embed = await _discordMuteService.MuteAsync(ctx, DateTime.MaxValue,
+                "No reason provided - muted via message context menu");
 
             await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(embed)
                 .AsEphemeral(true));
@@ -95,13 +97,15 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
-            var embed = await _discordMuteService.MuteAsync(ctx, DateTime.MaxValue, "No reason provided - muted via message context menu");
+            var embed = await _discordMuteService.MuteAsync(ctx, DateTime.MaxValue,
+                "No reason provided - muted via message context menu");
 
             //await _discordMessageService.PruneAsync()
 
             var msgs = await ctx.Channel.GetMessagesAsync();
 
-            var msgsToDel = msgs.Where(x => x.Author.Id == ctx.TargetMessage.Author.Id).OrderByDescending(x => x.Timestamp).Take(10);
+            var msgsToDel = msgs.Where(x => x.Author.Id == ctx.TargetMessage.Author.Id)
+                .OrderByDescending(x => x.Timestamp).Take(10);
 
             await ctx.Channel.DeleteMessagesAsync(msgsToDel);
 

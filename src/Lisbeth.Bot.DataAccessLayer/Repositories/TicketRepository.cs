@@ -25,7 +25,6 @@ namespace Lisbeth.Bot.DataAccessLayer.Repositories
     {
         public TicketRepository(LisbethBotDbContext ctx) : base(ctx)
         {
-            
         }
     }
 }

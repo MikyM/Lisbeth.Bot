@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Reflection;
 using Autofac;
 using AutoMapper.Contrib.Autofac.DependencyInjection;
 using AutoMapper.Extensions.ExpressionMapping;
@@ -31,8 +33,6 @@ using MikyM.Common.Application.Interfaces;
 using MikyM.Common.Application.Services;
 using MikyM.Common.DataAccessLayer.Repositories;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
-using System;
-using System.Reflection;
 using Module = Autofac.Module;
 
 namespace Lisbeth.Bot.API

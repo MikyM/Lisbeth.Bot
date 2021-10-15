@@ -28,7 +28,6 @@ namespace Lisbeth.Bot.Application.Services
     {
         public GuildService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> ctx) : base(mapper, ctx)
         {
-            
         }
     }
 }

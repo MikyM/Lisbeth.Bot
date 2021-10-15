@@ -22,6 +22,7 @@ namespace Lisbeth.Bot.API.Models
         public Response()
         {
         }
+
         public Response(T data)
         {
             Succeeded = true;
@@ -29,6 +30,7 @@ namespace Lisbeth.Bot.API.Models
             Errors = null;
             Data = data;
         }
+
         public T Data { get; set; }
         public bool Succeeded { get; set; }
         public string[] Errors { get; set; }

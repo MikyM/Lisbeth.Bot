@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using DSharpPlus.SlashCommands;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,7 +25,6 @@ using MikyM.Discord.Extensions.SlashCommands.Util;
 using MikyM.Discord.Interfaces;
 using MikyM.Discord.Util;
 using OpenTracing;
-using System;
 
 namespace MikyM.Discord.Extensions.SlashCommands
 {

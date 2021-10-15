@@ -2,15 +2,8 @@
 {
     public class TicketRemoveReqDto
     {
-        public long? Id { get; set; }
-        public ulong? OwnerId { get; set; }
-        public ulong? GuildId { get; set; }
-        public ulong? ChannelId { get; set; }
-        public long? GuildSpecificId { get; set; }
-        public ulong RequestedById { get; set; }
-        public ulong SnowflakeId { get; set; }
-
-        public TicketRemoveReqDto(long? id, ulong? ownerId, ulong? guildId, ulong? channelId, ulong requestedById, ulong snowflakeId)
+        public TicketRemoveReqDto(long? id, ulong? ownerId, ulong? guildId, ulong? channelId, ulong requestedById,
+            ulong snowflakeId)
         {
             Id = id;
             OwnerId = ownerId;
@@ -19,5 +12,13 @@
             RequestedById = requestedById;
             SnowflakeId = snowflakeId;
         }
+
+        public long? Id { get; set; }
+        public ulong? OwnerId { get; set; }
+        public ulong? GuildId { get; set; }
+        public ulong? ChannelId { get; set; }
+        public long? GuildSpecificId { get; set; }
+        public ulong RequestedById { get; set; }
+        public ulong SnowflakeId { get; set; }
     }
 }

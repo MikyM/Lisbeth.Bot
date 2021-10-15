@@ -23,6 +23,5 @@ namespace Lisbeth.Bot.Application.Services.Interfaces
 {
     public interface IPruneService : ICrudService<Prune, LisbethBotDbContext>
     {
-        
     }
 }

@@ -27,12 +27,9 @@ namespace Lisbeth.Bot.Application.Extensions
             TimeSpan tmsp = new TimeSpan();
             DateTime? result;
 
-            if (Int32.TryParse(input, out int inputInMinutes))
+            if (int.TryParse(input, out int inputInMinutes))
             {
-                if (inputInMinutes > 44640)
-                {
-                    inputInMinutes = 44640;
-                }
+                if (inputInMinutes > 44640) inputInMinutes = 44640;
                 tmsp = TimeSpan.FromMinutes(inputInMinutes);
                 result = DateTime.Now.Add(tmsp);
             }
@@ -45,67 +42,46 @@ namespace Lisbeth.Bot.Application.Extensions
                 int parsedInput = 0;
                 char inputType = 'x';
 
-                if (!Char.IsDigit(input.First()))
-                {
-                    return (null, tmsp);
-                }
+                if (!char.IsDigit(input.First())) return (null, tmsp);
 
                 foreach (char c in input)
-                {
-                    if (!Char.IsDigit(c))
+                    if (!char.IsDigit(c))
                     {
-                        inputType = Char.ToLower(c);
-                        if (inputType == 'm' || inputType == 'd' || inputType == 'w' || inputType == 'y' || inputType == 'h')
+                        inputType = char.ToLower(c);
+                        if (inputType == 'm' || inputType == 'd' || inputType == 'w' || inputType == 'y' ||
+                            inputType == 'h')
                         {
-                            parsedInput = Int32.Parse(input.Substring(0, input.IndexOf(c)));
+                            parsedInput = int.Parse(input.Substring(0, input.IndexOf(c)));
                             break;
                         }
-                        else
-                        {
-                            return (null, tmsp);
-                        }
+
+                        return (null, tmsp);
                     }
-                }
 
                 switch (inputType)
                 {
                     case 'h':
-                        if (parsedInput > 8784)
-                        {
-                            return (null, tmsp);
-                        }
+                        if (parsedInput > 8784) return (null, tmsp);
                         tmsp = TimeSpan.FromHours(parsedInput);
                         break;
 
                     case 'd':
-                        if (parsedInput > 366)
-                        {
-                            return (null, tmsp);
-                        }
+                        if (parsedInput > 366) return (null, tmsp);
                         tmsp = TimeSpan.FromDays(parsedInput);
                         break;
 
                     case 'w':
-                        if (parsedInput > 53)
-                        {
-                            return (null, tmsp);
-                        }
+                        if (parsedInput > 53) return (null, tmsp);
                         tmsp = TimeSpan.FromDays(parsedInput * 7);
                         break;
 
                     case 'm':
-                        if (parsedInput > 12)
-                        {
-                            return (null, tmsp);
-                        }
+                        if (parsedInput > 12) return (null, tmsp);
                         tmsp = TimeSpan.FromDays(parsedInput * 31);
                         break;
 
                     case 'y':
-                        if (parsedInput > 1)
-                        {
-                            return (null, tmsp);
-                        }
+                        if (parsedInput > 1) return (null, tmsp);
                         tmsp = TimeSpan.FromDays(parsedInput * 365);
                         break;
 

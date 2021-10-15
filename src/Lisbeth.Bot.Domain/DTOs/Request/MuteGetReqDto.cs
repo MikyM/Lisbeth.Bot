@@ -21,16 +21,9 @@ namespace Lisbeth.Bot.Domain.DTOs.Request
 {
     public class MuteGetReqDto
     {
-        public long? Id { get; set; }
-        public ulong? TargetUserId { get; set; }
-        public ulong? GuildId { get; set; }
-        public ulong? AppliedById { get; set; }
-        public DateTime? LiftedOn { get; set; }
-        public DateTime? AppliedOn { get; set; }
-        public ulong? LiftedById { get; set; }
-        public ulong RequestedOnBehalfOfId { get; set; }
-
-        public MuteGetReqDto(ulong requestedOnBehalfId, long? id = null, ulong? targetUserId = null, ulong? guildId = null, ulong? appliedById = null, DateTime? liftedOn = null, DateTime? appliedOn = null, ulong? liftedById = null)
+        public MuteGetReqDto(ulong requestedOnBehalfId, long? id = null, ulong? targetUserId = null,
+            ulong? guildId = null, ulong? appliedById = null, DateTime? liftedOn = null, DateTime? appliedOn = null,
+            ulong? liftedById = null)
         {
             Id = id;
             TargetUserId = targetUserId;
@@ -41,5 +34,14 @@ namespace Lisbeth.Bot.Domain.DTOs.Request
             LiftedById = liftedById;
             RequestedOnBehalfOfId = requestedOnBehalfId;
         }
+
+        public long? Id { get; set; }
+        public ulong? TargetUserId { get; set; }
+        public ulong? GuildId { get; set; }
+        public ulong? AppliedById { get; set; }
+        public DateTime? LiftedOn { get; set; }
+        public DateTime? AppliedOn { get; set; }
+        public ulong? LiftedById { get; set; }
+        public ulong RequestedOnBehalfOfId { get; set; }
     }
 }

@@ -1,4 +1,7 @@
-﻿using DSharpPlus;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
+using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
@@ -7,9 +10,6 @@ using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Services.Interfaces;
 using Lisbeth.Bot.DataAccessLayer.Specifications.GuildSpecifications;
 using Lisbeth.Bot.Domain.Entities;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands
 {
@@ -28,7 +28,8 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             if (user is null) throw new ArgumentNullException(nameof(user));
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
-            var res = await _guildService.GetBySpecificationsAsync<Guild>(new ActiveGuildByDiscordIdWithTicketingSpecifications(ctx.Guild.Id));
+            var res = await _guildService.GetBySpecificationsAsync<Guild>(
+                new ActiveGuildByDiscordIdWithTicketingSpecifications(ctx.Guild.Id));
             var guild = res.FirstOrDefault();
 
             if (guild is null) throw new ArgumentException("Guild not found in database");
@@ -56,7 +57,8 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
-            var res = await _guildService.GetBySpecificationsAsync<Guild>(new ActiveGuildByDiscordIdWithTicketingSpecifications(ctx.Guild.Id));
+            var res = await _guildService.GetBySpecificationsAsync<Guild>(
+                new ActiveGuildByDiscordIdWithTicketingSpecifications(ctx.Guild.Id));
             var guild = res.FirstOrDefault();
 
             if (guild is null) throw new ArgumentException("Guild not found in database");
@@ -84,26 +86,36 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
         [SlashRequireUserPermissions(Permissions.Administrator)]
         [SlashCommand("ticket-config", "A command that allows setting ticketing module up")]
         public async Task TicketConfigCommand(InteractionContext ctx,
-            [Option("Active", "Category for opened (active) tickets")] string openedCat,
-            [Option("Inactive", "Category for closed (inactive) tickets")] string closedCat,
-            [Option("Log", "Channel for ticket logs and transcripts")] DiscordChannel logChannel = null,
-            [Option("Clean", "Should Lisbeth clean closed tickets after X hours")] string cleanAfter = "",
-            [Option("Close", "Should Lisbeth close open tickets after X hours")] string closeAfter = "")
+            [Option("Active", "Category for opened (active) tickets")]
+            string openedCat,
+            [Option("Inactive", "Category for closed (inactive) tickets")]
+            string closedCat,
+            [Option("Log", "Channel for ticket logs and transcripts")]
+            DiscordChannel logChannel = null,
+            [Option("Clean", "Should Lisbeth clean closed tickets after X hours")]
+            string cleanAfter = "",
+            [Option("Close", "Should Lisbeth close open tickets after X hours")]
+            string closeAfter = "")
         {
             if (openedCat is null) throw new ArgumentNullException(nameof(openedCat));
             if (closedCat is null) throw new ArgumentNullException(nameof(closedCat));
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
-            var res = await _guildService.GetBySpecificationsAsync<Guild>(new ActiveGuildByDiscordIdWithTicketingSpecifications(ctx.Guild.Id));
+            var res = await _guildService.GetBySpecificationsAsync<Guild>(
+                new ActiveGuildByDiscordIdWithTicketingSpecifications(ctx.Guild.Id));
             var guild = res.FirstOrDefault();
 
             if (guild is null) throw new ArgumentException("Guild not found in database");
-            if (guild.TicketingConfig is not null) throw new ArgumentException("Guild already has a ticketing configuration");
+            if (guild.TicketingConfig is not null)
+                throw new ArgumentException("Guild already has a ticketing configuration");
 
-            var ticketConfig = new TicketingConfig {OpenedCategoryId = ulong.Parse(openedCat), ClosedCategoryId = ulong.Parse(closedCat)};
+            var ticketConfig = new TicketingConfig
+                {OpenedCategoryId = ulong.Parse(openedCat), ClosedCategoryId = ulong.Parse(closedCat)};
             if (logChannel is not null) ticketConfig.LogChannelId = logChannel.Id;
-            if (cleanAfter != "" && TimeSpan.TryParse(cleanAfter, out var cleanAfterTimeSpan)) ticketConfig.CloseAfter = cleanAfterTimeSpan;
-            if (closeAfter != "" && TimeSpan.TryParse(closeAfter, out var closeAfterTimeSpan)) ticketConfig.CloseAfter = closeAfterTimeSpan;
+            if (cleanAfter != "" && TimeSpan.TryParse(cleanAfter, out var cleanAfterTimeSpan))
+                ticketConfig.CloseAfter = cleanAfterTimeSpan;
+            if (closeAfter != "" && TimeSpan.TryParse(closeAfter, out var closeAfterTimeSpan))
+                ticketConfig.CloseAfter = closeAfterTimeSpan;
 
             _guildService.BeginUpdate(guild);
             guild.SetTicketingConfig(ticketConfig);
@@ -119,7 +131,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
-            var guild = new Guild() {GuildId = ctx.Guild.Id, UserId = ctx.User.Id, IsDisabled = false};
+            var guild = new Guild {GuildId = ctx.Guild.Id, UserId = ctx.User.Id, IsDisabled = false};
 
             await _guildService.AddAsync(guild, true);
 

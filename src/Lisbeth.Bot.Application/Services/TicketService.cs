@@ -15,7 +15,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using AutoMapper;
+using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Services.Interfaces;
 using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.DataAccessLayer.Specifications.TicketSpecifications;
@@ -23,10 +27,6 @@ using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.Application.Services;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-using JetBrains.Annotations;
 
 namespace Lisbeth.Bot.Application.Services
 {
@@ -40,8 +40,9 @@ namespace Lisbeth.Bot.Application.Services
         public async Task<Ticket> CloseAsync(TicketCloseReqDto req)
         {
             if (req is null) throw new ArgumentNullException(nameof(req));
-            
-            var res = await GetBySpecificationsAsync<Ticket>(new TicketBaseGetSpecifications(req.Id, req.OwnerId, req.GuildId, req.ChannelId, req.GuildSpecificId));
+
+            var res = await GetBySpecificationsAsync<Ticket>(new TicketBaseGetSpecifications(req.Id, req.OwnerId,
+                req.GuildId, req.ChannelId, req.GuildSpecificId));
 
             var ticket = res.FirstOrDefault();
             if (ticket is null) return null;
@@ -73,7 +74,8 @@ namespace Lisbeth.Bot.Application.Services
         {
             if (req is null) throw new ArgumentNullException(nameof(req));
 
-            var res = await GetBySpecificationsAsync<Ticket>(new TicketBaseGetSpecifications(null, req.OwnerId, req.GuildId));
+            var res = await GetBySpecificationsAsync<Ticket>(
+                new TicketBaseGetSpecifications(null, req.OwnerId, req.GuildId));
 
             var ticket = res.FirstOrDefault();
             if (ticket is not null) return null;
@@ -103,7 +105,8 @@ namespace Lisbeth.Bot.Application.Services
         {
             if (req is null) throw new ArgumentNullException(nameof(req));
 
-            var res = await GetBySpecificationsAsync<Ticket>(new TicketBaseGetSpecifications(req.Id, req.OwnerId, req.GuildId, req.ChannelId, req.GuildSpecificId, true));
+            var res = await GetBySpecificationsAsync<Ticket>(new TicketBaseGetSpecifications(req.Id, req.OwnerId,
+                req.GuildId, req.ChannelId, req.GuildSpecificId, true));
             var ticket = res.FirstOrDefault();
 
             if (ticket is null) return null;

@@ -15,39 +15,34 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus.Entities;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.ChatExport.Models;
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders
 {
     public class MessagesHtmlBuilder : IAsyncHtmlBuilder
     {
-        public List<DiscordMessage> Messages { get;private set; }
-
         public MessagesHtmlBuilder(List<DiscordMessage> messages)
         {
             Messages ??= messages ?? throw new ArgumentNullException(nameof(messages));
         }
 
+        public List<DiscordMessage> Messages { get; }
+
         public async Task<string> BuildAsync()
         {
-            if (Messages.Count == 0 || Messages == null)
-            {
-                return "";
-            }
+            if (Messages.Count == 0 || Messages == null) return "";
             string messagesHtml = "";
             foreach (var msg in Messages)
             {
-                if (msg.Author.IsBot)
-                {
-                    continue;
-                }
+                if (msg.Author.IsBot) continue;
                 HtmlMessage message = new HtmlMessage(msg);
                 messagesHtml += await message.Build();
             }
+
             return $"<div id=\"messages-wrapper\">{messagesHtml}</div>";
         }
     }

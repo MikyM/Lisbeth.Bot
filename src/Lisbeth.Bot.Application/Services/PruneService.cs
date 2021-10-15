@@ -28,7 +28,6 @@ namespace Lisbeth.Bot.Application.Services
     {
         public PruneService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
         {
-            
         }
     }
 }

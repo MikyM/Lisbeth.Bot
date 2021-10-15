@@ -1,5 +1,4 @@
-﻿
-// This file is part of Lisbeth.Bot project
+﻿// This file is part of Lisbeth.Bot project
 //
 // Copyright (C) 2021 MikyM
 // 
@@ -16,9 +15,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.SlashCommands;
+using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Application.Services.Interfaces;
@@ -26,11 +30,6 @@ using Lisbeth.Bot.DataAccessLayer.Specifications.GuildSpecifications;
 using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Discord.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using JetBrains.Annotations;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {
@@ -38,8 +37,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
     public class DiscordMessageService : IDiscordMessageService
     {
         private readonly IDiscordService _discord;
-        private readonly IPruneService _pruneService;
         private readonly IGuildService _guildService;
+        private readonly IPruneService _pruneService;
 
         public DiscordMessageService(IDiscordService discord, IPruneService pruneService, IGuildService guildService)
         {
@@ -49,39 +48,43 @@ namespace Lisbeth.Bot.Application.Discord.Services
         }
 
 
-        public async Task<DiscordEmbed> PruneAsync(PruneReqDto req, ulong logChannelId = 0, InteractionContext ctx = null, bool isSingleMessageDelete = false)
+        public async Task<DiscordEmbed> PruneAsync(PruneReqDto req, ulong logChannelId = 0,
+            InteractionContext ctx = null, bool isSingleMessageDelete = false)
         {
             if (req is null) throw new ArgumentNullException(nameof(req));
 
             if (ctx is null) return await PruneAsync(req, logChannelId, null, null);
 
-            return await PruneAsync(req, logChannelId, ctx.Channel, ctx.Guild, ctx.Member, ctx.ResolvedUserMentions?[0], null, isSingleMessageDelete, ctx.InteractionId);
+            return await PruneAsync(req, logChannelId, ctx.Channel, ctx.Guild, ctx.Member, ctx.ResolvedUserMentions?[0],
+                null, isSingleMessageDelete, ctx.InteractionId);
         }
 
-        public async Task<DiscordEmbed> PruneAsync(PruneReqDto req, ulong logChannelId = 0, ContextMenuContext ctx = null, bool isSingleMessageDelete = false)
+        public async Task<DiscordEmbed> PruneAsync(PruneReqDto req, ulong logChannelId = 0,
+            ContextMenuContext ctx = null, bool isSingleMessageDelete = false)
         {
             if (req is null) throw new ArgumentNullException(nameof(req));
 
             if (ctx is null) return await PruneAsync(req, logChannelId, null, null);
 
-            return await PruneAsync(req, logChannelId, ctx.Channel, ctx.Guild, ctx.Member, 
-                ctx.TargetMessage.Author != null 
+            return await PruneAsync(req, logChannelId, ctx.Channel, ctx.Guild, ctx.Member,
+                ctx.TargetMessage.Author != null
                     ? ctx.TargetMessage.Author
-                    : ctx.TargetUser != null 
-                        ? ctx.TargetUser 
+                    : ctx.TargetUser != null
+                        ? ctx.TargetUser
                         : null,
-                ctx.TargetMessage != null 
-                    ? ctx.TargetMessage 
+                ctx.TargetMessage != null
+                    ? ctx.TargetMessage
                     : null, isSingleMessageDelete, ctx.InteractionId);
         }
 
-        public async Task<DiscordEmbed> PruneAsync(PruneReqDto req, ulong logChannelId = 0, DiscordChannel channel = null, DiscordGuild guild = null,
-            DiscordUser moderator = null, DiscordUser author = null, DiscordMessage message = null, bool isSingleMessageDelete = false, ulong idToSkip = 0)
+        public async Task<DiscordEmbed> PruneAsync(PruneReqDto req, ulong logChannelId = 0,
+            DiscordChannel channel = null, DiscordGuild guild = null,
+            DiscordUser moderator = null, DiscordUser author = null, DiscordMessage message = null,
+            bool isSingleMessageDelete = false, ulong idToSkip = 0)
         {
             if (req is null) throw new ArgumentNullException(nameof(req));
 
             if (guild is null)
-            {
                 try
                 {
                     if (req.GuildId != null) guild = await _discord.Client.GetGuildAsync(req.GuildId.Value);
@@ -90,22 +93,19 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 {
                     throw new ArgumentException($"Guild with Id: {req.GuildId} doesn't exist.");
                 }
-            }
 
             if (author is null)
-            {
                 try
                 {
-                    if (req.TargetAuthorId != null && guild is not null) author = await guild.GetMemberAsync(req.TargetAuthorId.Value);
+                    if (req.TargetAuthorId != null && guild is not null)
+                        author = await guild.GetMemberAsync(req.TargetAuthorId.Value);
                 }
                 catch (Exception)
                 {
                     throw new ArgumentException($"User with Id: {req.TargetAuthorId} isn't the guilds member.");
                 }
-            }
 
             if (moderator is null)
-            {
                 try
                 {
                     if (req.ModeratorId != null)
@@ -115,10 +115,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 {
                     throw new ArgumentException($"User with Id: {req.ModeratorId} doesn't exist.");
                 }
-            }
 
             if (channel is null)
-            {
                 try
                 {
                     if (req.ChannelId != null) channel = await _discord.Client.GetChannelAsync(req.ChannelId.Value);
@@ -127,22 +125,19 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 {
                     throw new ArgumentException($"Channel with Id: {req.ChannelId} doesn't exist.");
                 }
-            }
-            
+
             if (message is null)
-            {
                 try
                 {
-                    if (req.MessageId != null && channel is not null) await channel.GetMessageAsync(req.MessageId.Value);
+                    if (req.MessageId != null && channel is not null)
+                        await channel.GetMessageAsync(req.MessageId.Value);
                 }
                 catch (Exception)
                 {
                     throw new ArgumentException($"Message with Id: {req.MessageId} doesn't exist.");
                 }
-            }
 
             if (logChannelId != 0)
-            {
                 try
                 {
                     channel = await _discord.Client.GetChannelAsync(logChannelId);
@@ -151,11 +146,11 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 {
                     throw new ArgumentException($"Channel with Id: {logChannelId} doesn't exist.");
                 }
-            }
 
             var embed = new DiscordEmbedBuilder();
             embed.WithColor(0x18315C);
-            embed.WithAuthor($"Prune result | {moderator.GetFullUsername()}", null, moderator != null ? moderator.AvatarUrl : null);
+            embed.WithAuthor($"Prune result | {moderator.GetFullUsername()}", null,
+                moderator != null ? moderator.AvatarUrl : null);
 
             int deletedMessagesCount = 0;
 
@@ -172,7 +167,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 if (req.MessageId is null && channel is not null && req.TargetAuthorId is not null)
                 {
                     var messages = await channel.GetMessagesAsync();
-                    messagesToDelete.AddRange(messages.Where(x => x.Author.Id == author.Id).OrderByDescending(x => x.Timestamp).Take(req.Count));
+                    messagesToDelete.AddRange(messages.Where(x => x.Author.Id == author.Id)
+                        .OrderByDescending(x => x.Timestamp).Take(req.Count));
                     deletedMessagesCount = messagesToDelete.Count;
                     await channel.DeleteMessagesAsync(messagesToDelete);
                 }
@@ -181,7 +177,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 {
                     var messages = await channel.GetMessagesAsync(req.Count);
                     messagesToDelete.AddRange(messages);
-                    if(idToSkip != 0)
+                    if (idToSkip != 0)
                         messagesToDelete.RemoveAll(x => x.Interaction is not null && x.Interaction.Id == idToSkip);
                     deletedMessagesCount = messagesToDelete.Count;
                     await channel.DeleteMessagesAsync(messagesToDelete);
@@ -230,6 +226,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     deletedMessagesCount++;
                 }
             }
+
             embed.AddField("Moderator", moderator != null ? moderator.Mention : null, true);
             embed.AddField("Delete count", deletedMessagesCount.ToString(), true);
             embed.AddField("Channel", channel != null ? channel.Mention : null, true);
@@ -238,7 +235,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (req.TargetAuthorId is not null)
             {
                 embed.AddField("Target author", author.Mention, true);
-                embed.WithAuthor($"Prune result | {author.GetFullUsername()}", null, author != null ? author.AvatarUrl : null);
+                embed.WithAuthor($"Prune result | {author.GetFullUsername()}", null,
+                    author != null ? author.AvatarUrl : null);
             }
 
             _ = await _pruneService.AddAsync(req, true);
@@ -276,8 +274,10 @@ namespace Lisbeth.Bot.Application.Discord.Services
             List<string> oldAttachmentUrls = oldAttachments.Select(attachment => attachment.ProxyUrl).ToList();
             List<string> newAttachmentUrls = newAttachments.Select(attachment => attachment.ProxyUrl).ToList();
 
-            if (oldAttachmentUrls.Count != 0) oldAttachmentsString = string.Join(System.Environment.NewLine, oldAttachmentUrls);
-            if (newAttachmentUrls.Count != 0) newAttachmentsString = String.Join(System.Environment.NewLine, newAttachmentUrls);
+            if (oldAttachmentUrls.Count != 0)
+                oldAttachmentsString = string.Join(Environment.NewLine, oldAttachmentUrls);
+            if (newAttachmentUrls.Count != 0)
+                newAttachmentsString = string.Join(Environment.NewLine, newAttachmentUrls);
 
             if (oldContent == "") oldContent = "No content";
             if (newContent == "") newContent = "No content";
@@ -334,13 +334,16 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             var auditLogs = await args.Guild.GetAuditLogsAsync(1, null, AuditLogActionType.MessageDelete);
             var auditLogsBans = await args.Guild.GetAuditLogsAsync(1, null, AuditLogActionType.Ban);
-            var filtered = auditLogs.Where(m => m.CreationTimestamp.LocalDateTime > DateTime.Now.Subtract(new TimeSpan(0, 0, 4))).ToList();
-            var filteredBans = auditLogsBans.Where(m => m.CreationTimestamp.LocalDateTime > DateTime.Now.Subtract(new TimeSpan(0, 0, 4))).ToList();
+            var filtered = auditLogs
+                .Where(m => m.CreationTimestamp.LocalDateTime > DateTime.Now.Subtract(new TimeSpan(0, 0, 4))).ToList();
+            var filteredBans = auditLogsBans
+                .Where(m => m.CreationTimestamp.LocalDateTime > DateTime.Now.Subtract(new TimeSpan(0, 0, 4))).ToList();
 
             if (filtered.Count() != 0)
             {
-                var deletedLog = (DiscordAuditLogMessageEntry)filtered[0];
-                if (deletedLog.Channel == args.Channel && args.Message.Author.Id == deletedLog.Target.Id) deletedBy = deletedLog.UserResponsible;
+                var deletedLog = (DiscordAuditLogMessageEntry) filtered[0];
+                if (deletedLog.Channel == args.Channel && args.Message.Author.Id == deletedLog.Target.Id)
+                    deletedBy = deletedLog.UserResponsible;
             }
 
             var attachmentUrls = attachments.Select(attachment => attachment.ProxyUrl).ToList();
@@ -364,6 +367,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 embed.WithTitle("Message has been deleted");
                 embed.AddField("Deleted by", $"{deletedBy.Mention}");
             }
+
             embed.AddField("Date sent", $"{args.Message.Timestamp}");
             embed.AddField("Content", content);
             embed.AddField("Attachments", attachmentsString);
@@ -418,10 +422,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
                 var attachmentUrls = attachments.Select(attachment => attachment.ProxyUrl).ToList();
 
-                if (attachmentUrls.Count != 0)
-                {
-                    attachmentsString = string.Join(Environment.NewLine, attachmentUrls);
-                }
+                if (attachmentUrls.Count != 0) attachmentsString = string.Join(Environment.NewLine, attachmentUrls);
 
                 var content = msg.Content;
                 if (content == "") content = "No content";
@@ -444,7 +445,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 else
                 {
                     embed.WithTitle("Message has been deleted in a bulk deletion action");
-                    embed.AddField("Pruned by", $"Unknown");
+                    embed.AddField("Pruned by", "Unknown");
                 }
 
                 embed.AddField("Date sent", $"{msg.Timestamp}");

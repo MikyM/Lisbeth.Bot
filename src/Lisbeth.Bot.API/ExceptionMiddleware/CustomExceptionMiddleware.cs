@@ -1,16 +1,16 @@
-﻿using Lisbeth.Bot.Application.Extensions;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using System.Net;
 using System.Threading.Tasks;
+using Lisbeth.Bot.Application.Extensions;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 
 namespace Lisbeth.Bot.API.ExceptionMiddleware
 {
     public class CustomExceptionMiddleware
     {
-        private readonly RequestDelegate _next;
         private readonly ILogger<CustomExceptionMiddleware> _logger;
+        private readonly RequestDelegate _next;
 
         public CustomExceptionMiddleware(RequestDelegate next, ILogger<CustomExceptionMiddleware> logger)
         {
@@ -35,8 +35,8 @@ namespace Lisbeth.Bot.API.ExceptionMiddleware
             _logger.LogError(exception, exception.GetFullMessage());
 
             context.Response.ContentType = "application/json";
-            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-            return context.Response.WriteAsync(new ErrorDetails()
+            context.Response.StatusCode = (int) HttpStatusCode.InternalServerError;
+            return context.Response.WriteAsync(new ErrorDetails
             {
                 StatusCode = context.Response.StatusCode,
                 Message = "Internal Server Error"

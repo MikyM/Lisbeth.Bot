@@ -15,6 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using AspNetCore.Authentication.ApiKey;
 using AspNetCoreRateLimit;
 using DSharpPlus;
@@ -28,6 +31,7 @@ using Lisbeth.Bot.Application.Discord.EventHandlers;
 using Lisbeth.Bot.Application.Discord.SlashCommands;
 using Lisbeth.Bot.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
@@ -36,10 +40,6 @@ using MikyM.Discord.Extensions.Interactivity;
 using MikyM.Discord.Extensions.SlashCommands;
 using OpenTracing;
 using OpenTracing.Mock;
-using System;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Lisbeth.Bot.API
 {
@@ -56,6 +56,7 @@ namespace Lisbeth.Bot.API
             services.AddDiscordHostedService();
 
             #region commands
+
             services.AddDiscordSlashCommands(_ => { }, extension =>
             {
                 extension.RegisterCommands<MuteApplicationCommands>(790631933758799912);
@@ -72,8 +73,8 @@ namespace Lisbeth.Bot.API
                 options.AckPaginationButtons = true;
                 options.Timeout = TimeSpan.FromMinutes(2);
             });
-            #endregion
 
+            #endregion
 
 
             #region events
@@ -93,10 +94,12 @@ namespace Lisbeth.Bot.API
                 options.UseRecommendedSerializerSettings();
 /*                options.UsePostgreSqlStorage(Environment.GetEnvironmentVariable("HangfireTstConnection"),
                     new PostgreSqlStorageOptions {QueuePollInterval = TimeSpan.FromSeconds(15)});*/
-                options.UseMemoryStorage(new MemoryStorageOptions{JobExpirationCheckInterval = TimeSpan.FromMinutes(1)});
+                options.UseMemoryStorage(
+                    new MemoryStorageOptions {JobExpirationCheckInterval = TimeSpan.FromMinutes(1)});
             });
 
-            services.AddHangfireServer(options => options.Queues = new[] { "critical", "moderation", "reminder", "default" });
+            services.AddHangfireServer(options =>
+                options.Queues = new[] {"critical", "moderation", "reminder", "default"});
         }
 
         public static void ConfigureApiVersioning(this IServiceCollection services)
@@ -108,6 +111,7 @@ namespace Lisbeth.Bot.API
                 options.DefaultApiVersion = ApiVersion.Default;
             });
         }
+
         public static void ConfigureApiKey(this IServiceCollection services, IConfiguration configuration)
         {
             var key = configuration.GetValue<string>("ApiKey");
@@ -136,6 +140,7 @@ namespace Lisbeth.Bot.API
                             {
                                 context.ValidationFailed();
                             }
+
                             return Task.CompletedTask;
                         };
                 });
@@ -143,14 +148,13 @@ namespace Lisbeth.Bot.API
             {
                 options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
             });
-
         }
 
         public static void ConfigureEfCache(this IServiceCollection services)
         {
             services.AddEFSecondLevelCache(options =>
             {
-                options.UseEasyCachingCoreProvider("InMemoryCache").DisableLogging(false).UseCacheKeyPrefix("EF_");
+                options.UseEasyCachingCoreProvider("InMemoryCache").DisableLogging().UseCacheKeyPrefix("EF_");
                 options.CacheQueriesContainingTypes(
                     CacheExpirationMode.Sliding, TimeSpan.FromMinutes(30),
                     typeof(Guild)
@@ -162,7 +166,7 @@ namespace Lisbeth.Bot.API
                 {
                     config.DBConfig = new InMemoryCachingOptions
                     {
-                        SizeLimit = 100,
+                        SizeLimit = 100
                     };
                 }, "InMemoryCache");
             });
@@ -181,16 +185,17 @@ namespace Lisbeth.Bot.API
         {
             services.AddSwaggerGen(options =>
             {
-                options.SwaggerDoc("v1", new OpenApiInfo { Title = "EclipseBot", Version = "v1" });
+                options.SwaggerDoc("v1", new OpenApiInfo {Title = "EclipseBot", Version = "v1"});
                 var securityScheme = new OpenApiSecurityScheme
                 {
                     Reference = new OpenApiReference
                     {
                         Type = ReferenceType.SecurityScheme,
-                        Id = ApiKeyDefaults.AuthenticationScheme,
+                        Id = ApiKeyDefaults.AuthenticationScheme
                     },
                     In = ParameterLocation.Header,
-                    Description = $"Please enter your api key in the field, prefixed with '{ApiKeyDefaults.AuthenticationScheme} '",
+                    Description =
+                        $"Please enter your api key in the field, prefixed with '{ApiKeyDefaults.AuthenticationScheme} '",
                     Name = "Authorization"
                 };
                 options.AddSecurityDefinition(ApiKeyDefaults.AuthenticationScheme, securityScheme);

@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Globalization;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Hangfire;
@@ -24,12 +25,10 @@ using Lisbeth.Bot.Domain;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
-using System.Globalization;
 
 namespace Lisbeth.Bot.API
 {
@@ -62,8 +61,8 @@ namespace Lisbeth.Bot.API
         }
 
         /// <summary>
-        /// Configure Container using Autofac: Register DI.
-        /// This is called AFTER ConfigureServices.So things you register here OVERRIDE things registered in ConfigureServices.
+        ///     Configure Container using Autofac: Register DI.
+        ///     This is called AFTER ConfigureServices.So things you register here OVERRIDE things registered in ConfigureServices.
         /// </summary>
         /// <param name="builder">Container builder.</param>
         public void ConfigureContainer(ContainerBuilder builder)
@@ -76,9 +75,9 @@ namespace Lisbeth.Bot.API
         {
             ContainerProvider.Container = app.ApplicationServices.GetAutofacRoot();
             GlobalConfiguration.Configuration.UseAutofacActivator(app.ApplicationServices.GetAutofacRoot());
-            #pragma warning disable 4014
+#pragma warning disable 4014
             RecurringJobHelper.ScheduleAllDefinedDelayed();
-            #pragma warning restore 4014
+#pragma warning restore 4014
 
             if (env.IsDevelopment())
             {

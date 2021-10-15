@@ -15,29 +15,22 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus.Entities;
-using Lisbeth.Bot.Application.Discord.ChatExport.Models;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using DSharpPlus.Entities;
+using Lisbeth.Bot.Application.Discord.ChatExport.Models;
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders
 {
     public class ReactionsHtmlBuilder : IAsyncHtmlBuilder
     {
-        public List<DiscordReaction> Reactions { get; private set; }
-
         public ReactionsHtmlBuilder(List<DiscordReaction> reactions)
         {
             Reactions ??= reactions ?? throw new ArgumentNullException(nameof(reactions));
         }
 
-        public ReactionsHtmlBuilder WithReactions(List<DiscordReaction> reactions)
-        {
-            Reactions ??= reactions ?? throw new ArgumentNullException(nameof(reactions));
-
-            return this;
-        }
+        public List<DiscordReaction> Reactions { get; private set; }
 
         public Task<string> BuildAsync()
         {
@@ -51,6 +44,13 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders
             }
 
             return Task.FromResult($"<div class=\"message-reactions\">{html}</div>");
+        }
+
+        public ReactionsHtmlBuilder WithReactions(List<DiscordReaction> reactions)
+        {
+            Reactions ??= reactions ?? throw new ArgumentNullException(nameof(reactions));
+
+            return this;
         }
     }
 }

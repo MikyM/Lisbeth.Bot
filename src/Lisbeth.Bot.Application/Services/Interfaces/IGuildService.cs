@@ -23,6 +23,5 @@ namespace Lisbeth.Bot.Application.Services.Interfaces
 {
     public interface IGuildService : ICrudService<Guild, LisbethBotDbContext>
     {
-        
     }
 }

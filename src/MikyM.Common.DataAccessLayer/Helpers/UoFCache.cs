@@ -15,17 +15,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using MikyM.Common.DataAccessLayer.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using MikyM.Common.DataAccessLayer.Repositories;
 
 namespace MikyM.Common.DataAccessLayer.Helpers
 {
     public static class UoFCache
     {
-        public static IEnumerable<Type> CachedTypes { get; }
-
         static UoFCache()
         {
             CachedTypes ??= AppDomain.CurrentDomain.GetAssemblies()
@@ -33,5 +31,7 @@ namespace MikyM.Common.DataAccessLayer.Helpers
                     .Where(t => t.GetInterface(nameof(IBaseRepository)) is not null))
                 .ToList();
         }
+
+        public static IEnumerable<Type> CachedTypes { get; }
     }
 }

@@ -15,16 +15,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using MikyM.Common.DataAccessLayer.Filters;
-using MikyM.Common.DataAccessLayer.Specifications;
-using MikyM.Common.Domain.Entities;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using MikyM.Common.DataAccessLayer.Filters;
+using MikyM.Common.DataAccessLayer.Specifications;
+using MikyM.Common.Domain.Entities;
 
 namespace MikyM.Common.Application.Interfaces
 {
-    public interface IReadOnlyService<TEntity, TContext> : IServiceBase<TContext> where TEntity : AggregateRootEntity where TContext : DbContext
+    public interface IReadOnlyService<TEntity, TContext> : IServiceBase<TContext>
+        where TEntity : AggregateRootEntity where TContext : DbContext
     {
         Task<TGetResult> GetAsync<TGetResult>(long id) where TGetResult : class;
 

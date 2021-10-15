@@ -39,12 +39,12 @@ namespace MikyM.Common.DataAccessLayer.Specifications
             Limit = limit;
         }
 
-        public List<Expression<Func<T, bool>>> FilterConditions { get; private set; } = new();
+        public List<Expression<Func<T, bool>>> FilterConditions { get; } = new();
         public Expression<Func<T, object>> OrderBy { get; private set; }
         public Expression<Func<T, object>> OrderByDescending { get; private set; }
         public List<Expression<Func<T, object>>> Includes { get; } = new();
         public Expression<Func<T, object>> GroupBy { get; private set; }
-        public int Limit { get; private set; } = 0;
+        public int Limit { get; private set; }
 
         protected void AddInclude(Expression<Func<T, object>> includeExpression)
         {
@@ -60,6 +60,7 @@ namespace MikyM.Common.DataAccessLayer.Specifications
         {
             OrderByDescending = orderByDescendingExpression;
         }
+
         protected void AddFilterCondition(Expression<Func<T, bool>> filterExpression)
         {
             FilterConditions.Add(filterExpression);

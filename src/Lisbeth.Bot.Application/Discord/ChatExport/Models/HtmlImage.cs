@@ -1,6 +1,3 @@
-using Imgur.API.Authentication;
-using Imgur.API.Endpoints;
-using Imgur.API.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,27 +5,27 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Autofac;
-using Lisbeth.Bot.Application.Helpers;
+using Imgur.API;
+using Imgur.API.Authentication;
+using Imgur.API.Endpoints;
+using Imgur.API.Models;
 using Lisbeth.Bot.Domain;
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport.Models
 {
     public class HtmlImage
     {
-        public string DiscordLink { get; private set; }
-        public static List<string> SupportedTypes { get; } = new() { "png", "bmp", "jpg", "jpeg", "gif", "tif" };
-
         public HtmlImage(string discordLink)
         {
             DiscordLink ??= discordLink ?? throw new ArgumentNullException(nameof(discordLink));
         }
 
+        public string DiscordLink { get; }
+        public static List<string> SupportedTypes { get; } = new() {"png", "bmp", "jpg", "jpeg", "gif", "tif"};
+
         public async Task<string> GetImgurLink()
         {
-            if (SupportedTypes.All(x => x != DiscordLink.Split('.').Last().Split('?').First()))
-            {
-                return "";
-            }
+            if (SupportedTypes.All(x => x != DiscordLink.Split('.').Last().Split('?').First())) return "";
 
             var httpClientFactory = ContainerProvider.Container.Resolve<IHttpClientFactory>();
 
@@ -44,7 +41,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Models
                 ImageEndpoint imageEndpoint = new ImageEndpoint(apiClient, imgurHttpClient);
                 imageUpload = await imageEndpoint.UploadImageAsync(stream);
             }
-            catch (Imgur.API.ImgurException)
+            catch (ImgurException)
             {
                 return "";
             }

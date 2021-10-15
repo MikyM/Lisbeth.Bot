@@ -15,14 +15,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Lisbeth.Bot.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
-using MikyM.Common.DataAccessLayer;
-using MikyM.Common.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Lisbeth.Bot.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
+using MikyM.Common.DataAccessLayer;
+using MikyM.Common.Domain.Entities;
 
 namespace Lisbeth.Bot.DataAccessLayer
 {
@@ -68,8 +68,7 @@ namespace Lisbeth.Bot.DataAccessLayer
 
                 auditEntries.Add(auditEntry);
 
-                if(entry.Entity is Entity entity)
-                {
+                if (entry.Entity is Entity entity)
                     switch (entry.State)
                     {
                         case EntityState.Added:
@@ -82,7 +81,6 @@ namespace Lisbeth.Bot.DataAccessLayer
                             entry.Property("CreatedAt").IsModified = false;
                             break;
                     }
-                }
 
                 foreach (var property in entry.Properties)
                 {
@@ -108,22 +106,19 @@ namespace Lisbeth.Bot.DataAccessLayer
                             {
                                 auditEntry.ChangedColumns.Add(propertyName);
                                 auditEntry.AuditType = AuditType.Update;
-                                if (entry.Entity is Entity && propertyName == "IsDisabled" && property.IsModified && !(bool)property.OriginalValue && (bool)property.CurrentValue)
-                                {
-                                    auditEntry.AuditType = AuditType.Disable;
-                                }
+                                if (entry.Entity is Entity && propertyName == "IsDisabled" && property.IsModified &&
+                                    !(bool) property.OriginalValue &&
+                                    (bool) property.CurrentValue) auditEntry.AuditType = AuditType.Disable;
                                 auditEntry.OldValues[propertyName] = property.OriginalValue;
                                 auditEntry.NewValues[propertyName] = property.CurrentValue;
                             }
+
                             break;
                     }
                 }
             }
 
-            foreach (var auditEntry in auditEntries)
-            {
-                AuditLogs.Add(auditEntry.ToAudit());
-            }
+            foreach (var auditEntry in auditEntries) AuditLogs.Add(auditEntry.ToAudit());
         }
     }
 }

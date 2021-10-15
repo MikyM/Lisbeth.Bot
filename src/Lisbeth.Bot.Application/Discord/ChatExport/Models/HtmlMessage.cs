@@ -8,12 +8,12 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Models
 {
     public class HtmlMessage
     {
-        public DiscordMessage Msg { get; private set; }
-
         public HtmlMessage(DiscordMessage message)
         {
             Msg ??= message ?? throw new ArgumentNullException(nameof(message));
         }
+
+        public DiscordMessage Msg { get; }
 
         public async Task<string> Build()
         {
@@ -21,14 +21,13 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Models
             string attachmentsHtml = "";
             string reactionsHtml = "";
 
-            var messageTop = $"<span class=\"nickname\">{Msg.Author.Username}</span> <span class=\"message-info-details\">{Msg.Timestamp} Message ID: {Msg.Id}</span>";
+            var messageTop =
+                $"<span class=\"nickname\">{Msg.Author.Username}</span> <span class=\"message-info-details\">{Msg.Timestamp} Message ID: {Msg.Id}</span>";
 
             messageTop = $"<div class=\"message-info\">{messageTop}</div>";
 
             if (Msg.Content != "" && Msg.Content is not null)
-            {
                 messageBot = $"<div class=\"message-content\">{messageBot}</div>";
-            }
 
             if (Msg.Attachments.Count != 0)
             {

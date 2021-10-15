@@ -19,14 +19,8 @@ namespace Lisbeth.Bot.Domain.DTOs.Request
 {
     public class TicketExportReqDto
     {
-        public long? Id { get; set; }
-        public ulong? GuildId { get; set; }
-        public ulong? OwnerId { get; set; }
-        public ulong? ChannelId { get; set; }
-        public long? GuildSpecificId { get; set; }
-        public ulong RequestedOnBehalfOfId { get; set; }
-
-        public TicketExportReqDto(long? id, ulong? guildId, ulong? ownerId, ulong? channelId, long? guildSpecificId, ulong requestedOnBehalfOfId)
+        public TicketExportReqDto(long? id, ulong? guildId, ulong? ownerId, ulong? channelId, long? guildSpecificId,
+            ulong requestedOnBehalfOfId)
         {
             Id = id;
             GuildId = guildId;
@@ -35,5 +29,12 @@ namespace Lisbeth.Bot.Domain.DTOs.Request
             GuildSpecificId = guildSpecificId;
             RequestedOnBehalfOfId = requestedOnBehalfOfId;
         }
+
+        public long? Id { get; set; }
+        public ulong? GuildId { get; set; }
+        public ulong? OwnerId { get; set; }
+        public ulong? ChannelId { get; set; }
+        public long? GuildSpecificId { get; set; }
+        public ulong RequestedOnBehalfOfId { get; set; }
     }
 }

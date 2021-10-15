@@ -23,9 +23,11 @@ namespace Lisbeth.Bot.DataAccessLayer.Specifications.BanSpecifications
 {
     public class BanBaseGetSpecifications : Specifications<Ban>
     {
-        public BanBaseGetSpecifications(long? id = null, ulong? userId = null, ulong? guildId = null, ulong? appliedById = null, DateTime? liftedOn = null, DateTime? appliedOn = null, ulong? liftedById = null, int limit = 0)
+        public BanBaseGetSpecifications(long? id = null, ulong? userId = null, ulong? guildId = null,
+            ulong? appliedById = null, DateTime? liftedOn = null, DateTime? appliedOn = null, ulong? liftedById = null,
+            int limit = 0)
         {
-            if(id != null)
+            if (id != null)
                 AddFilterCondition(x => x.Id == id);
             if (userId != null)
                 AddFilterCondition(x => x.UserId == userId);

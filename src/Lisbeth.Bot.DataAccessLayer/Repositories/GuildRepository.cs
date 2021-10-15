@@ -25,7 +25,6 @@ namespace Lisbeth.Bot.DataAccessLayer.Repositories
     {
         public GuildRepository(LisbethBotDbContext ctx) : base(ctx)
         {
-            
         }
     }
 }

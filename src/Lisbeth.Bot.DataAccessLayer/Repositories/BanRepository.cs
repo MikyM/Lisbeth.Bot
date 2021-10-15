@@ -23,6 +23,8 @@ namespace Lisbeth.Bot.DataAccessLayer.Repositories
 {
     public class BanRepository : Repository<Ban>, IBanRepository
     {
-        public BanRepository(LisbethBotDbContext ctx) : base(ctx) { }
+        public BanRepository(LisbethBotDbContext ctx) : base(ctx)
+        {
         }
+    }
 }

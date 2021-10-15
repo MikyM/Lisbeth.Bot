@@ -26,6 +26,7 @@ namespace MikyM.Common.DataAccessLayer.Repositories
     public interface IReadOnlyRepository<TEntity> : IBaseRepository where TEntity : AggregateRootEntity
     {
         ValueTask<TEntity> GetAsync(params object[] keyValues);
+
         Task<IReadOnlyList<TEntity>> GetBySpecificationsAsync(PaginationFilter filter,
             ISpecifications<TEntity> specifications = null);
 

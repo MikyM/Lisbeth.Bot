@@ -28,12 +28,12 @@ namespace MikyM.Discord.Extensions.Interactivity
     public static class DiscordServiceCollectionExtensions
     {
         /// <summary>
-        ///     Adds Interactivity extension to <see cref="IDiscordService"/>.
+        ///     Adds Interactivity extension to <see cref="IDiscordService" />.
         /// </summary>
-        /// <param name="services">The <see cref="IServiceCollection"/>.</param>
-        /// <param name="configuration">The <see cref="InteractivityConfiguration"/>.</param>
-        /// <param name="extension">The <see cref="InteractivityExtension"/></param>
-        /// <returns>The <see cref="IServiceCollection"/>.</returns>
+        /// <param name="services">The <see cref="IServiceCollection" />.</param>
+        /// <param name="configuration">The <see cref="InteractivityConfiguration" />.</param>
+        /// <param name="extension">The <see cref="InteractivityExtension" /></param>
+        /// <returns>The <see cref="IServiceCollection" />.</returns>
         [UsedImplicitly]
         public static IServiceCollection AddDiscordInteractivity(
             this IServiceCollection services,

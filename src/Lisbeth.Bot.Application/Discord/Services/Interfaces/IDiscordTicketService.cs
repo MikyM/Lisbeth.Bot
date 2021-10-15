@@ -15,10 +15,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Domain.DTOs.Request;
-using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
 {
@@ -26,19 +26,29 @@ namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
     {
         Task Test();
         Task<DiscordMessageBuilder> CloseTicketAsync(TicketCloseReqDto req);
+
         Task<DiscordMessageBuilder> CloseTicketAsync(DiscordInteraction intr);
+
         //Task<DiscordMessageBuilder> CloseTicketAsync(DiscordChannel target, DiscordMember moderator, DiscordGuild guild, TicketCloseReqDto req = null);
         Task<DiscordMessageBuilder> OpenTicketAsync(TicketOpenReqDto req);
+
         Task<DiscordMessageBuilder> OpenTicketAsync(DiscordInteraction intr);
+
         //Task<DiscordMessageBuilder> OpenTicketAsync(DiscordChannel target, DiscordMember moderator, DiscordGuild guild, TicketCloseReqDto req = null);
         Task<DiscordMessageBuilder> ReopenTicketAsync(TicketReopenReqDto req);
+
         Task<DiscordMessageBuilder> ReopenTicketAsync(DiscordInteraction intr);
+
         //Task<DiscordMessageBuilder> ReopenTicketAsync(DiscordChannel target, DiscordMember moderator, DiscordGuild guild, TicketCloseReqDto req = null);
         Task<DiscordEmbed> AddToTicketAsync(TicketAddReqDto req);
+
         Task<DiscordEmbed> AddToTicketAsync(InteractionContext intr);
+
         //Task<DiscordMessageBuilder> ReopenTicketAsync(DiscordChannel target, DiscordMember moderator, DiscordGuild guild, TicketCloseReqDto req = null);
         Task<DiscordEmbed> RemoveFromTicketAsync(TicketRemoveReqDto req);
+
         Task<DiscordEmbed> RemoveFromTicketAsync(InteractionContext intr);
+
         //Task<DiscordMessageBuilder> ReopenTicketAsync(DiscordChannel target, DiscordMember moderator, DiscordGuild guild, TicketCloseReqDto req = null);
         Task CleanClosedTicketsAsync();
         Task CloseInactiveTicketsAsync();

@@ -15,13 +15,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
-using Lisbeth.Bot.Domain.DTOs.Request;
-using System.Threading.Tasks;
 using JetBrains.Annotations;
+using Lisbeth.Bot.Domain.DTOs.Request;
 
 // ReSharper disable once CheckNamespace
 namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
@@ -49,6 +49,7 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
         #endregion
 
         #region message
+
         [UsedImplicitly]
         [SlashRequireUserPermissions(Permissions.ManageMessages)]
         [ContextMenu(ApplicationCommandType.MessageContextMenu, "Prune last 10")]
@@ -86,7 +87,8 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
-            var req = new PruneReqDto(0, ctx.TargetMessage.Id, ctx.TargetMessage.Author.Id, ctx.Channel.Id, ctx.Guild.Id, ctx.Member.Id);
+            var req = new PruneReqDto(0, ctx.TargetMessage.Id, ctx.TargetMessage.Author.Id, ctx.Channel.Id,
+                ctx.Guild.Id, ctx.Member.Id);
 
             var embed = await _discordMessageService.PruneAsync(req, 0, ctx);
 

@@ -20,17 +20,11 @@ body {
     margin: auto;
 }
 
-a {
-    color: #0096cf;
-}
+a { color: #0096cf; }
 
-h1 {
-    padding: 5px;
-}
+h1 { padding: 5px; }
 
-h2 {
-    padding: 5px;
-}
+h2 { padding: 5px; }
 
 hr {
     border: 1px #bbb solid;
@@ -38,16 +32,16 @@ hr {
 }
 
 .avatar {
+    border-radius: 50%;
+    height: 40px;
     margin: 5px;
     width: 40px;
-    height: 40px;
-    border-radius: 50%;
 }
 
 .image {
-    max-width: 400px;
-    height: auto;
     cursor: pointer;
+    height: auto;
+    max-width: 400px;
 }
 
 .emoji {
@@ -56,63 +50,55 @@ hr {
 }
 
 .reaction {
-    width: 20px;
     height: 20px;
     margin-right: 0.5rem;
+    width: 20px;
 }
 
 .user-mention, .channel-mention, .role-mention, .mention {
+    background-color: rgba(114, 137, 218, .1);
     color: #7289da;
-    background-color: rgba(114,137,218,.1);
 }
 
-.user-info {
-    font-weight: 500;
-}
+.user-info { font-weight: 500; }
 
-.message {
-    width: 100%;
-}
+.message { width: 100%; }
 
 .message-content {
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.375rem;
     overflow-wrap: break-word;
     white-space: break-spaces;
     width: 100%;
-    font-size: 1rem;
-    line-height: 1.375rem;
-    font-weight: 400;
 }
 
 .nickname {
-    line-height: 1.375rem;
-    font-weight: 500;
     font-size: 1rem;
+    font-weight: 500;
+    line-height: 1.375rem;
 }
 
 .message-info-details {
-    font-size: 0.75rem;
-    line-height: 1.375rem;
     color: #72767d;
+    font-size: 0.75rem;
     font-weight: 500;
+    line-height: 1.375rem;
 }
 
-.message-reactions {
-    padding-top: 0.8rem;
-}
+.message-reactions { padding-top: 0.8rem; }
 
 .reaction-wrapper {
-    margin-right: 0.25rem;
-    width: 50px;
-    text-align: center;
-    background-color: hsla(0,0%,100%,0.06);
+    background-color: hsla(0, 0%, 100%, 0.06);
     border-radius: 0.3rem;
+    margin-right: 0.25rem;
+    text-align: center;
+    width: 50px;
 }
 
-#messages-wrapper {
-    width: 100%;
-}
+#messages-wrapper { width: 100%; }
 
 #container {
-    width: 60vh;
     margin: auto;
+    width: 60vh;
 }
