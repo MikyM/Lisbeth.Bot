@@ -21,14 +21,10 @@ namespace Lisbeth.Bot.API.Models
 {
     public class PagedResponse<T> : Response<T>
     {
-        public PagedResponse(T data, int pageNumber, int pageSize)
+        public PagedResponse(T data, int pageNumber, int pageSize, bool isSuccess = true) : base(data, isSuccess)
         {
             PageNumber = pageNumber;
             PageSize = pageSize;
-            Data = data;
-            Message = null;
-            Succeeded = true;
-            Errors = null;
         }
 
         public int PageNumber { get; set; }

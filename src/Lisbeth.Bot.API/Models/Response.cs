@@ -17,23 +17,27 @@
 
 namespace Lisbeth.Bot.API.Models
 {
-    public class Response<T>
+    public class Response
     {
-        public Response()
+        public Response(bool isSuccess = true)
         {
-        }
-
-        public Response(T data)
-        {
-            Succeeded = true;
+            Succeeded = isSuccess;
             Message = string.Empty;
             Errors = null;
+        }
+
+        public bool Succeeded { get; set; }
+        public string[] Errors { get; set; }
+        public string Message { get; set; }
+    }
+
+    public class Response<T> : Response
+    {
+        public Response(T data, bool isSuccess = true) : base(isSuccess)
+        {
             Data = data;
         }
 
         public T Data { get; set; }
-        public bool Succeeded { get; set; }
-        public string[] Errors { get; set; }
-        public string Message { get; set; }
     }
 }
