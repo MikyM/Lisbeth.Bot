@@ -15,22 +15,21 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using Lisbeth.Bot.Domain.DTOs.Request;
-using System;
-using System.Threading.Tasks;
 
-namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
+using System.Linq;
+using Lisbeth.Bot.Domain.Entities;
+using MikyM.Common.DataAccessLayer.Specifications;
+
+namespace Lisbeth.Bot.DataAccessLayer.Specifications.GuildSpecifications
 {
-    public interface IDiscordBanService
+    public class ActiveGuildByDiscordIdWithTicketingAndTicketsSpecifications : Specifications<Guild>
     {
-        Task<DiscordEmbed> BanAsync(BanReqDto req);
-        Task<DiscordEmbed> BanAsync(InteractionContext ctx, DateTime appliedUntil, string reason = "");
-        Task<DiscordEmbed> UnbanAsync(BanDisableReqDto req);
-        Task<DiscordEmbed> UnbanAsync(InteractionContext ctx);
-        Task<DiscordEmbed> GetSpecificUserGuildBanAsync(BanGetReqDto req);
-        Task<DiscordEmbed> GetAsync(InteractionContext ctx);
-        Task UnbanCheckAsync();
+        public ActiveGuildByDiscordIdWithTicketingAndTicketsSpecifications(ulong discordGuildId)
+        {
+            AddFilterCondition(x => !x.IsDisabled);
+            AddFilterCondition(x => x.GuildId == discordGuildId);
+            AddInclude(x => x.TicketingConfig);
+            AddInclude(x => x.Tickets.Where(y => !y.IsDisabled));
+        }
     }
 }

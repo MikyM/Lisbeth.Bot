@@ -25,7 +25,8 @@ using System.Threading.Tasks;
 
 namespace MikyM.Common.DataAccessLayer.Repositories
 {
-    public class Repository<TEntity> : ReadOnlyRepository<TEntity>, IRepository<TEntity> where TEntity : AggregateRootEntity
+    public class Repository<TEntity> : ReadOnlyRepository<TEntity>, IRepository<TEntity>
+        where TEntity : AggregateRootEntity
     {
         public Repository(DbContext context) : base(context)
         {
@@ -53,23 +54,18 @@ namespace MikyM.Common.DataAccessLayer.Repositories
 
         public virtual void BeginUpdate(TEntity entity)
         {
-            var local = _context.Set<TEntity>()
-                .Local
-                .FirstOrDefault(entry => entry.Id.Equals(entity.Id));
+            var local = _context.Set<TEntity>().Local.FirstOrDefault(entry => entry.Id.Equals(entity.Id));
 
             if (local != null) _context.Entry(local).State = EntityState.Detached;
 
             _context.Attach(entity);
         }
 
-
         public virtual void BeginUpdateRange(IEnumerable<TEntity> entities)
         {
             foreach (var entity in entities)
             {
-                var local = _context.Set<TEntity>()
-                    .Local
-                    .FirstOrDefault(entry => entry.Id.Equals(entity.Id));
+                var local = _context.Set<TEntity>().Local.FirstOrDefault(entry => entry.Id.Equals(entity.Id));
 
                 if (local != null) _context.Entry(local).State = EntityState.Detached;
 
@@ -95,39 +91,42 @@ namespace MikyM.Common.DataAccessLayer.Repositories
 
         public virtual void DeleteRange(IEnumerable<long> ids)
         {
-            var entities = ids.Select(id => _context.FindTracked<TEntity>(id) ?? (TEntity) Activator.CreateInstance(typeof(TEntity), id)).ToList();
+            var entities = ids.Select(id =>
+                    _context.FindTracked<TEntity>(id) ?? (TEntity) Activator.CreateInstance(typeof(TEntity), id))
+                .ToList();
             _context.Set<TEntity>().RemoveRange(entities);
         }
 
         public virtual void Disable(TEntity entity)
         {
-
-/*            entity.IsDisabled = true;
-            Update(entity);*/
+            BeginUpdate(entity);
+            entity.IsDisabled = true;
         }
 
         public virtual async Task DisableAsync(long id)
         {
-/*            var entity = await GetAsync(id);
+            var entity = await GetAsync(id);
+            BeginUpdate(entity);
             entity.IsDisabled = true;
-            Update(entity);*/
         }
 
         public virtual void DisableRange(IEnumerable<TEntity> entities)
         {
-/*            var aggregateRootEntities = entities.ToList();
+            var aggregateRootEntities = entities.ToList();
+            BeginUpdateRange(aggregateRootEntities);
             foreach (var entity in aggregateRootEntities)
             {
                 entity.IsDisabled = true;
             }
-            UpdateRange(aggregateRootEntities);*/
         }
 
         public virtual async Task DisableRangeAsync(IEnumerable<long> ids)
         {
-/*            var entities = await _context.Set<TEntity>().Join(ids, ent => ent.Id, id => id, (ent, id) => ent).ToListAsync();
+            var entities = await _context.Set<TEntity>()
+                .Join(ids, ent => ent.Id, id => id, (ent, id) => ent)
+                .ToListAsync();
+            BeginUpdateRange(entities);
             entities.ForEach(ent => ent.IsDisabled = true);
-            UpdateRange(entities);*/
         }
     }
 }

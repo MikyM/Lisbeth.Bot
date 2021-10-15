@@ -40,5 +40,7 @@ namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
         Task<DiscordEmbed> RemoveFromTicketAsync(TicketRemoveReqDto req);
         Task<DiscordEmbed> RemoveFromTicketAsync(InteractionContext intr);
         //Task<DiscordMessageBuilder> ReopenTicketAsync(DiscordChannel target, DiscordMember moderator, DiscordGuild guild, TicketCloseReqDto req = null);
+        Task CleanClosedTicketsAsync();
+        Task CloseInactiveTicketsAsync();
     }
 }

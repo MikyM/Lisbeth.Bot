@@ -25,6 +25,7 @@ namespace Lisbeth.Bot.API.ExceptionMiddleware
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex.ToString());
                 await HandleExceptionAsync(httpContext, ex);
             }
         }

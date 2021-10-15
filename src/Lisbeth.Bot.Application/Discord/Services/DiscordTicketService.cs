@@ -28,11 +28,13 @@ using Lisbeth.Bot.DataAccessLayer.Specifications.GuildSpecifications;
 using Lisbeth.Bot.DataAccessLayer.Specifications.TicketSpecifications;
 using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.Entities;
+using Microsoft.Extensions.Logging;
 using MikyM.Discord.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Exception = System.Exception;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {
@@ -43,14 +45,16 @@ namespace Lisbeth.Bot.Application.Discord.Services
         private readonly ITicketService _ticketService;
         private readonly IDiscordChatExportService _chatExportService;
         private readonly IGuildService _guildService;
+        private readonly ILogger<DiscordTicketService> _logger;
 
         public DiscordTicketService(IDiscordService discord, ITicketService ticketService, IGuildService guildService,
-            IDiscordChatExportService chatExportService)
+            IDiscordChatExportService chatExportService, ILogger<DiscordTicketService> logger)
         {
             _discord = discord;
             _ticketService = ticketService;
             _chatExportService = chatExportService;
             _guildService = guildService;
+            _logger = logger;
         }
 
         public async Task Test()
@@ -256,6 +260,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
             }
 
             var logEmbed = await _chatExportService.ExportToHtmlAsync(guild, target, requestingMember, owner ?? await _discord.Client.GetUserAsync(ticket.UserId), ticket);
+
+            if (embed is null) throw new DiscordChatExportException("Exporting to HTML failed");
 
             try
             {
@@ -795,7 +801,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 ticket = res.FirstOrDefault();
                 if (ticket is null)
                     throw new ArgumentException(
-                        $"Opened ticket in guild with Id: {req.GuildId} and owner with Id: {req.OwnerId} doesn't exist in the database.");
+                        $"Opened ticket in guild with Id: {req.GuildId} and guild specific Id: {req.GuildSpecificId} doesn't exist in the database.");
 
                 req.ChannelId = ticket.ChannelId;
                 req.GuildId = ticket.GuildId;
@@ -906,6 +912,110 @@ namespace Lisbeth.Bot.Application.Discord.Services
             embed.WithFooter($"Ticket Id: {ticket.GuildSpecificId}");
 
             return embed.Build();
+        }
+
+        public async Task CleanClosedTicketsAsync()
+        {
+            try
+            {
+                foreach (var (guildId, _) in _discord.Client.Guilds)
+                {
+                    var res = await _guildService.GetBySpecificationsAsync<Guild>(
+                        new ActiveGuildByDiscordIdWithTicketingAndInactiveTicketsSpecifications(guildId));
+                    var guildCfg = res.FirstOrDefault();
+
+                    if (guildCfg?.TicketingConfig?.CleanAfter is null) continue;
+                    if (guildCfg.Tickets.Count == 0) continue;
+
+                    DiscordChannel closedCat;
+                    try
+                    {
+                        closedCat = await _discord.Client.GetChannelAsync(guildCfg.TicketingConfig.ClosedCategoryId);
+                    }
+                    catch (Exception)
+                    {
+                        _logger.LogInformation(
+                            $"Guild with Id: {guildId} has non-existing closed ticket category set with Id: {guildCfg.TicketingConfig.ClosedCategoryId}.");
+                        continue;
+                    }
+
+                    foreach (var closedTicketChannel in closedCat.Children)
+                    {
+                        if (guildCfg.Tickets.All(x => x.ChannelId != closedTicketChannel.Id)) continue;
+
+                        var lastMessage = await closedTicketChannel.GetMessagesAsync(1);
+                        if (lastMessage is null || lastMessage.Count == 0) continue;
+
+                        var timeDifference = DateTime.Now.Subtract(lastMessage[0].Timestamp.LocalDateTime);
+                        if (timeDifference.TotalHours >= guildCfg.TicketingConfig.CleanAfter.Value.Hours)
+                        {
+                            await closedTicketChannel.DeleteAsync();
+                        }
+
+                        await Task.Delay(500);
+                    }
+
+                    await Task.Delay(500);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Something went wrong with cleaning closed tickets: {ex}");
+            }
+        }
+
+        public async Task CloseInactiveTicketsAsync()
+        {
+            try
+            {
+                foreach (var (guildId, guild) in _discord.Client.Guilds)
+                {
+                    var res = await _guildService.GetBySpecificationsAsync<Guild>(
+                        new ActiveGuildByDiscordIdWithTicketingAndTicketsSpecifications(guildId));
+                    var guildCfg = res.FirstOrDefault();
+
+                    if (guildCfg?.TicketingConfig?.CloseAfter is null) continue;
+                    if (guildCfg.Tickets.Count == 0) continue;
+
+                    DiscordChannel openedCat;
+                    try
+                    {
+                        openedCat = await _discord.Client.GetChannelAsync(guildCfg.TicketingConfig.OpenedCategoryId);
+                    }
+                    catch (Exception)
+                    {
+                        _logger.LogInformation(
+                            $"Guild with Id: {guildId} has non-existing opened ticket category set with Id: {guildCfg.TicketingConfig.OpenedCategoryId}.");
+                        continue;
+                    }
+
+                    foreach (var openedTicketChannel in openedCat.Children)
+                    {
+                        if (guildCfg.Tickets.All(x => x.ChannelId != openedTicketChannel.Id)) continue;
+
+                        var lastMessage = await openedTicketChannel.GetMessagesAsync(1);
+                        var msg = lastMessage?.FirstOrDefault();
+                        if (msg is null) continue;
+
+                        if (!((DiscordMember) msg.Author).Permissions.HasPermission(Permissions.BanMembers)) continue;
+
+                        var timeDifference = DateTime.Now.Subtract(msg.Timestamp.LocalDateTime);
+                        if (timeDifference.TotalHours >= guildCfg.TicketingConfig.CloseAfter.Value.Hours)
+                        {
+                            await CloseTicketAsync(guild, openedTicketChannel,
+                                (DiscordMember) _discord.Client.CurrentUser);
+                        }
+
+                        await Task.Delay(500);
+                    }
+
+                    await Task.Delay(500);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Something went wrong with closing inactive tickets: {ex}");
+            }
         }
     }
 }

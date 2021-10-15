@@ -27,6 +27,7 @@ namespace Lisbeth.Bot.Domain.Entities
         private readonly HashSet<Mute> mutes;
         private readonly HashSet<Ban> bans;
         private readonly HashSet<Prune> prunes;
+        private readonly HashSet<Ticket> tickets;
 
         public ulong GuildId { get; set; }
         public ulong UserId { get; set; }
@@ -36,6 +37,7 @@ namespace Lisbeth.Bot.Domain.Entities
         public IReadOnlyCollection<Mute> Mutes => mutes;
         public IReadOnlyCollection<Ban> Bans => bans;
         public IReadOnlyCollection<Prune> Prunes => prunes;
+        public IReadOnlyCollection<Ticket> Tickets => tickets;
 
         public void AddMute(Mute mute)
         {

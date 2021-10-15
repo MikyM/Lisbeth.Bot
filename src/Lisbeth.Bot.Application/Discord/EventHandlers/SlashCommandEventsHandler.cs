@@ -15,22 +15,29 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.EventArgs;
 using JetBrains.Annotations;
+using Microsoft.Extensions.Logging;
 using MikyM.Discord.Extensions.SlashCommands.Events;
-using Serilog;
+using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.EventHandlers
 {
     [UsedImplicitly]
     public class SlashCommandEventsHandler : IDiscordSlashCommandsEventsSubscriber
     {
+        private readonly ILogger<SlashCommandEventsHandler> _logger;
+
+        public SlashCommandEventsHandler(ILogger<SlashCommandEventsHandler> logger)
+        {
+            _logger = logger;
+        }
+
         public Task SlashCommandsOnContextMenuErrored(SlashCommandsExtension sender, ContextMenuErrorEventArgs args)
         {
-            Log.Logger.Error(args.Exception.ToString());
+            _logger.LogError(args.Exception.ToString());
             var noEntryEmoji = DiscordEmoji.FromName(sender.Client, ":x:");
             var embed = new DiscordEmbedBuilder();
             embed.WithColor(new DiscordColor(170, 1, 20));
@@ -48,7 +55,7 @@ namespace Lisbeth.Bot.Application.Discord.EventHandlers
 
         public Task SlashCommandsOnSlashCommandErrored(SlashCommandsExtension sender, SlashCommandErrorEventArgs args)
         {
-            Log.Logger.Error(args.Exception.ToString());
+            _logger.LogError(args.Exception.ToString());
             var noEntryEmoji = DiscordEmoji.FromName(sender.Client, ":x:");
             var embed = new DiscordEmbedBuilder();
             embed.WithColor(new DiscordColor(170, 1, 20));

@@ -18,6 +18,8 @@
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
+using Hangfire;
+using Lisbeth.Bot.Application.Discord.Exceptions;
 using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Application.Services.Interfaces;
@@ -30,11 +32,11 @@ using System;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using Hangfire;
-using Lisbeth.Bot.Application.Discord.Exceptions;
+using JetBrains.Annotations;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {
+    [UsedImplicitly]
     public class DiscordBanService : IDiscordBanService
     {
         private readonly IDiscordService _discord;

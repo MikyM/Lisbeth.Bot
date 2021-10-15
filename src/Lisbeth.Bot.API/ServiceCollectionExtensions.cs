@@ -27,6 +27,7 @@ using Lisbeth.Bot.Application.Discord.ApplicationCommands;
 using Lisbeth.Bot.Application.Discord.EventHandlers;
 using Lisbeth.Bot.Application.Discord.SlashCommands;
 using Lisbeth.Bot.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
@@ -103,7 +104,7 @@ namespace Lisbeth.Bot.API
             services.AddAuthentication(ApiKeyDefaults.AuthenticationScheme)
                 .AddApiKeyInAuthorizationHeader(options =>
                 {
-                    options.Realm = "EclipseBot";
+                    options.Realm = "Lisbeth.Bot";
                     options.KeyName = ApiKeyDefaults.AuthenticationScheme;
                     options.Events.OnValidateKey =
                         context =>
@@ -128,13 +129,18 @@ namespace Lisbeth.Bot.API
                             return Task.CompletedTask;
                         };
                 });
+            services.AddAuthorization(options =>
+            {
+                options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+            });
+
         }
 
         public static void ConfigureEfCache(this IServiceCollection services)
         {
             services.AddEFSecondLevelCache(options =>
             {
-                options.UseEasyCachingCoreProvider("InMemoryCache").DisableLogging(true).UseCacheKeyPrefix("EF_");
+                options.UseEasyCachingCoreProvider("InMemoryCache").DisableLogging(false).UseCacheKeyPrefix("EF_");
                 options.CacheQueriesContainingTypes(
                     CacheExpirationMode.Sliding, TimeSpan.FromMinutes(30),
                     typeof(Guild)

@@ -24,7 +24,7 @@ namespace MikyM.Common.DataAccessLayer.Specifications
     {
         public static IQueryable<TEntity> GetQuery(IQueryable<TEntity> query, ISpecifications<TEntity> specifications)
         {
-            if (specifications == null)
+            if (specifications is null)
             {
                 return query;
             }
@@ -33,16 +33,16 @@ namespace MikyM.Common.DataAccessLayer.Specifications
 
             query = specifications.Includes.Aggregate(query, (current, include) => current.Include(include));
 
-            if (specifications.OrderBy != null)
+            if (specifications.OrderBy is not null)
             {
                 query = query.OrderBy(specifications.OrderBy);
             }
-            else if (specifications.OrderByDescending != null)
+            else if (specifications.OrderByDescending is not null)
             {
                 query = query.OrderByDescending(specifications.OrderByDescending);
             }
 
-            if (specifications.GroupBy != null)
+            if (specifications.GroupBy is not null)
             {
                 query = query.GroupBy(specifications.GroupBy).SelectMany(x => x);
             }

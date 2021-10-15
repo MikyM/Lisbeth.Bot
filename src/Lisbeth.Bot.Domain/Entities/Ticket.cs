@@ -23,7 +23,6 @@ namespace Lisbeth.Bot.Domain.Entities
 {
     public sealed class Ticket : SnowflakeEntity
     {
-        public ulong GuildId { get; set; }
         public ulong UserId { get; set; }
         public ulong ChannelId { get; set; }
         public long GuildSpecificId { get; set; }
@@ -35,5 +34,8 @@ namespace Lisbeth.Bot.Domain.Entities
         public ulong? MessageCloseId { get; set; }
         public ulong? MessageReopenId { get; set; }
         public bool IsPrivate { get; set; } = false;
+
+        public Guild Guild { get; set; }
+        public ulong GuildId { get; set; }
     }
 }
