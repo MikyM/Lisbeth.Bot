@@ -1,8 +1,9 @@
-﻿using System;
-using System.Net;
-using System.Threading.Tasks;
+﻿using Lisbeth.Bot.Application.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Net;
+using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.API.ExceptionMiddleware
 {
@@ -25,13 +26,14 @@ namespace Lisbeth.Bot.API.ExceptionMiddleware
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.ToString());
                 await HandleExceptionAsync(httpContext, ex);
             }
         }
 
         private Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
+            _logger.LogError(exception, exception.GetFullMessage());
+
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
             return context.Response.WriteAsync(new ErrorDetails()

@@ -39,6 +39,7 @@ using OpenTracing.Mock;
 using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Lisbeth.Bot.API
 {
@@ -95,9 +96,18 @@ namespace Lisbeth.Bot.API
                 options.UseMemoryStorage(new MemoryStorageOptions{JobExpirationCheckInterval = TimeSpan.FromMinutes(1)});
             });
 
-            services.AddHangfireServer(options => options.Queues = new[] {"critical", "moderation", "reminder"});
+            services.AddHangfireServer(options => options.Queues = new[] { "critical", "moderation", "reminder", "default" });
         }
 
+        public static void ConfigureApiVersioning(this IServiceCollection services)
+        {
+            services.AddApiVersioning(options =>
+            {
+                options.ReportApiVersions = true;
+                options.AssumeDefaultVersionWhenUnspecified = true;
+                options.DefaultApiVersion = ApiVersion.Default;
+            });
+        }
         public static void ConfigureApiKey(this IServiceCollection services, IConfiguration configuration)
         {
             var key = configuration.GetValue<string>("ApiKey");

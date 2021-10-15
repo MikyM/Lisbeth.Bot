@@ -22,6 +22,7 @@ using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using MikyM.Discord.Extensions.SlashCommands.Events;
 using System.Threading.Tasks;
+using Lisbeth.Bot.Application.Extensions;
 
 namespace Lisbeth.Bot.Application.Discord.EventHandlers
 {
@@ -37,7 +38,7 @@ namespace Lisbeth.Bot.Application.Discord.EventHandlers
 
         public Task SlashCommandsOnContextMenuErrored(SlashCommandsExtension sender, ContextMenuErrorEventArgs args)
         {
-            _logger.LogError(args.Exception.ToString());
+            _logger.LogError(args.Exception, args.Exception.GetFullMessage());
             var noEntryEmoji = DiscordEmoji.FromName(sender.Client, ":x:");
             var embed = new DiscordEmbedBuilder();
             embed.WithColor(new DiscordColor(170, 1, 20));
@@ -55,7 +56,7 @@ namespace Lisbeth.Bot.Application.Discord.EventHandlers
 
         public Task SlashCommandsOnSlashCommandErrored(SlashCommandsExtension sender, SlashCommandErrorEventArgs args)
         {
-            _logger.LogError(args.Exception.ToString());
+            _logger.LogError(args.Exception, args.Exception.GetFullMessage());
             var noEntryEmoji = DiscordEmoji.FromName(sender.Client, ":x:");
             var embed = new DiscordEmbedBuilder();
             embed.WithColor(new DiscordColor(170, 1, 20));

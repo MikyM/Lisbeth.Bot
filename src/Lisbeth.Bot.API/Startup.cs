@@ -58,6 +58,7 @@ namespace Lisbeth.Bot.API
             services.ConfigureApiKey(Configuration);
             services.ConfigureRateLimiting(Configuration);
             services.ConfigureEfCache();
+            services.ConfigureApiVersioning();
         }
 
         /// <summary>
