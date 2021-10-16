@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
@@ -67,9 +69,17 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             var envelopeEmoji = DiscordEmoji.FromName(ctx.Client, ":envelope:");
             var embed = new DiscordEmbedBuilder();
             embed.WithTitle($"__{ctx.Guild.Name}'s Support Ticket Center__");
-            embed.WithDescription(guild.TicketingConfig.TicketCenterMessage);
-            embed.AddField("When to use this support system", guild.TicketingConfig.WhenToUseCenterMessage);
-            embed.AddField("Additional information", guild.TicketingConfig.AdditionalInformationCenterMessage);
+            embed.WithDescription(guild.TicketingConfig.TicketCenterMessageDescription);
+
+            var fields = JsonSerializer.Deserialize<Dictionary<string, string>>(guild.TicketingConfig.TicketCenterMessageFields);
+            if (fields != null && fields.Count != 0)
+            {
+                foreach (var (fieldName, fieldValue) in fields)
+                {
+                    embed.AddField(fieldName, fieldValue);
+                }
+            }
+
             embed.WithFooter("Click on the button below to create a ticket");
             embed.WithColor(new DiscordColor(guild.EmbedHexColor));
 

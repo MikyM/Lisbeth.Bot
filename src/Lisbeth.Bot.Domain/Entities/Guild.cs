@@ -27,6 +27,7 @@ namespace Lisbeth.Bot.Domain.Entities
         private readonly HashSet<Mute> mutes;
         private readonly HashSet<Prune> prunes;
         private readonly HashSet<Ticket> tickets;
+        private readonly HashSet<GuildServerBooster> guildServerBoosters;
 
         public ulong GuildId { get; set; }
         public ulong UserId { get; set; }
@@ -37,6 +38,7 @@ namespace Lisbeth.Bot.Domain.Entities
         public IReadOnlyCollection<Ban> Bans => bans;
         public IReadOnlyCollection<Prune> Prunes => prunes;
         public IReadOnlyCollection<Ticket> Tickets => tickets;
+        public IReadOnlyCollection<GuildServerBooster> GuildServerBoosters => guildServerBoosters;
 
         public void AddMute(Mute mute)
         {
@@ -54,6 +56,12 @@ namespace Lisbeth.Bot.Domain.Entities
         {
             if (ban is null) throw new ArgumentNullException(nameof(ban));
             bans.Add(ban);
+        }
+
+        public void AddServerBooster(GuildServerBooster guildServerBooster)
+        {
+            if (guildServerBooster is null) throw new ArgumentNullException(nameof(guildServerBooster));
+            guildServerBoosters.Add(guildServerBooster);
         }
 
         public void SetTicketingConfig(TicketingConfig config)

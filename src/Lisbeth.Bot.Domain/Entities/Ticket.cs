@@ -32,7 +32,9 @@ namespace Lisbeth.Bot.Domain.Entities
         public ulong MessageOpenId { get; set; }
         public ulong? MessageCloseId { get; set; }
         public ulong? MessageReopenId { get; set; }
-        public bool IsPrivate { get; set; } = false;
+        public string AddedUsers { get; set; }
+        public string AddedRoles { get; set; }
+        public bool IsPrivate { get; set; }
 
         public Guild Guild { get; set; }
         public ulong GuildId { get; set; }

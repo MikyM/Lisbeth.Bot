@@ -39,13 +39,12 @@ namespace MikyM.Common.DataAccessLayer
         public AuditType AuditType { get; set; }
         public List<string> ChangedColumns { get; } = new();
 
-        public Audit ToAudit()
+        public AuditLog ToAudit()
         {
-            var audit = new Audit();
+            var audit = new AuditLog();
             audit.UserId = UserId;
             audit.Type = AuditType.ToString();
             audit.TableName = TableName;
-            audit.DateTime = DateTime.Now;
             audit.PrimaryKey = JsonSerializer.Serialize(KeyValues);
             audit.OldValues = OldValues.Count == 0 ? null : JsonSerializer.Serialize(OldValues);
             audit.NewValues = NewValues.Count == 0 ? null : JsonSerializer.Serialize(NewValues);

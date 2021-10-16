@@ -39,14 +39,14 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
     {
         [UsedImplicitly] public LisbethBotDbContext _ctx { private get; set; }
 
-        [UsedImplicitly] public IReadOnlyService<Audit, LisbethBotDbContext> _service { private get; set; }
+        [UsedImplicitly] public IReadOnlyService<AuditLog, LisbethBotDbContext> _service { private get; set; }
 
         [SlashRequireOwner]
         [SlashCommand("audit", "Gets last 10 audit logs.")]
         public async Task AuditCommand(InteractionContext ctx)
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
-            var res = await _service.GetBySpecificationsAsync<Audit>();
+            var res = await _service.GetBySpecificationsAsync<AuditLog>();
             string botRes = res.Aggregate("",
                 (current, resp) =>
                     current +

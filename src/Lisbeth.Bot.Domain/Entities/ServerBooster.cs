@@ -16,15 +16,19 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Collections.Generic;
 using Lisbeth.Bot.Domain.Entities.Base;
 
 namespace Lisbeth.Bot.Domain.Entities
 {
     public sealed class ServerBooster : SnowflakeEntity
     {
+        private readonly HashSet<GuildServerBooster> guildServerBoosters;
+
         public ulong GuildId { get; set; }
         public ulong UserId { get; set; }
-        public DateTime BoostingSince { get; set; } = DateTime.Now;
+        public DateTime BoostingSince { get; set; } = DateTime.UtcNow;
         public int BoostCount { get; set; } = 1;
+        public IReadOnlyCollection<GuildServerBooster> GuildServerBoosters => guildServerBoosters;
     }
 }

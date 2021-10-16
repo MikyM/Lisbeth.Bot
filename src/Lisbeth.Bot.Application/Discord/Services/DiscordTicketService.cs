@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
@@ -740,15 +741,27 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 var failEmbed = new DiscordEmbedBuilder();
                 failEmbed.WithColor(new DiscordColor(guildCfg.EmbedHexColor));
                 failEmbed.WithDescription("You already have an opened ticket in this guild.");
-                await intr.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(failEmbed.Build())
-                    .AsEphemeral(true));
+                if (intr != null)
+                    await intr.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                        .AddEmbed(failEmbed.Build())
+                        .AsEphemeral(true));
                 throw new ArgumentException("Member already has an opened ticket in this guild.");
             }
 
             var embed = new DiscordEmbedBuilder();
 
             embed.WithColor(new DiscordColor(guildCfg.EmbedHexColor));
-            embed.WithDescription(guildCfg.TicketingConfig.WelcomeMessage.Replace("@ownerMention@", owner.Mention));
+            embed.WithDescription(guildCfg.TicketingConfig.TicketWelcomeMessageDescription.Replace("@ownerMention@", owner.Mention));
+
+            var fields = JsonSerializer.Deserialize<Dictionary<string, string>>(guildCfg.TicketingConfig.TicketWelcomeMessageFields);
+            if (fields != null && fields.Count != 0)
+            {
+                foreach (var (fieldName, fieldValue) in fields)
+                {
+                    embed.AddField(fieldName, fieldValue);
+                }
+            }
+
             embed.WithFooter($"Ticket Id: {req.GuildSpecificId}");
 
             var btn = new DiscordButtonComponent(ButtonStyle.Primary, "close_ticket_btn", "Close this ticket");
@@ -784,13 +797,37 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 newTicketChannel = await guild.CreateChannelAsync(
                     $"{guildCfg.TicketingConfig.OpenedNamePrefix}-{req.GuildSpecificId:D4}", ChannelType.Text,
                     openedCat, topic, null, null, overwrites);
-                //await Task.Delay(500);
                 DiscordMessage msg = await newTicketChannel.SendMessageAsync(msgBuilder);
                 //Program.cachedMsgs.Add(msg.Id, msg);
 
                 _ticketService.BeginUpdate(ticket);
                 ticket.ChannelId = newTicketChannel.Id;
                 ticket.MessageOpenId = msg.Id;
+                await _ticketService.SetAddedUsersAsync(ticket, newTicketChannel.Users.Select(x => x.Id));
+
+                List<ulong> roleIds = new();
+                foreach (var overwrite in newTicketChannel.PermissionOverwrites)
+                {
+                    if(overwrite.CheckPermission(Permissions.AccessChannels) != PermissionLevel.Allowed) continue;
+
+                    DiscordRole role;
+                    try
+                    {
+                        role = await overwrite.GetRoleAsync();
+                    }
+                    catch (Exception)
+                    {
+                        continue;
+                    }
+
+                    if (role is null) continue;
+
+                    roleIds.Add(role.Id);
+
+                    await Task.Delay(500);
+                }
+
+                await _ticketService.SetAddedRolesAsync(ticket, roleIds);
 
                 _guildService.BeginUpdate(guildCfg);
                 guildCfg.TicketingConfig.LastTicketId++;
@@ -956,9 +993,40 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 throw new DiscordNotAuthorizedException("Requesting member doesn't have moderator rights.");
 
             if (targetRole is null)
+            {
                 await targetTicketChannel.AddOverwriteAsync(targetMember, Permissions.AccessChannels);
+                await _ticketService.SetAddedUsersAsync(ticket, targetTicketChannel.Users.Select(x => x.Id));
+                await _ticketService.CheckAndSetPrivacyAsync(ticket, guild);
+
+            }
             else
+            {
                 await targetTicketChannel.AddOverwriteAsync(targetRole, Permissions.AccessChannels);
+                List<ulong> roleIds = new();
+                foreach (var overwrite in targetTicketChannel.PermissionOverwrites)
+                {
+                    if (overwrite.CheckPermission(Permissions.AccessChannels) != PermissionLevel.Allowed) continue;
+
+                    DiscordRole role;
+                    try
+                    {
+                        role = await overwrite.GetRoleAsync();
+                    }
+                    catch (Exception)
+                    {
+                        continue;
+                    }
+
+                    if (role is null) continue;
+
+                    roleIds.Add(role.Id);
+
+                    await Task.Delay(500);
+                }
+
+                await _ticketService.SetAddedRolesAsync(ticket, roleIds);
+                await _ticketService.CheckAndSetPrivacyAsync(ticket, guild);
+            }
 
             var embed = new DiscordEmbedBuilder();
 
@@ -1010,9 +1078,40 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 throw new DiscordNotAuthorizedException("Requesting member doesn't have moderator rights.");
 
             if (targetRole is null)
+            {
                 await targetTicketChannel.AddOverwriteAsync(targetMember, deny: Permissions.AccessChannels);
+                await _ticketService.SetAddedUsersAsync(ticket, targetTicketChannel.Users.Select(x => x.Id));
+                await _ticketService.CheckAndSetPrivacyAsync(ticket, guild);
+            }
             else
+            {
                 await targetTicketChannel.AddOverwriteAsync(targetRole, deny: Permissions.AccessChannels);
+
+                List<ulong> roleIds = new();
+                foreach (var overwrite in targetTicketChannel.PermissionOverwrites)
+                {
+                    if (overwrite.CheckPermission(Permissions.AccessChannels) != PermissionLevel.Allowed) continue;
+
+                    DiscordRole role;
+                    try
+                    {
+                        role = await overwrite.GetRoleAsync();
+                    }
+                    catch (Exception)
+                    {
+                        continue;
+                    }
+
+                    if (role is null) continue;
+
+                    roleIds.Add(role.Id);
+
+                    await Task.Delay(500);
+                }
+
+                await _ticketService.SetAddedRolesAsync(ticket, roleIds);
+                await _ticketService.CheckAndSetPrivacyAsync(ticket, guild);
+            }
 
             var embed = new DiscordEmbedBuilder();
 

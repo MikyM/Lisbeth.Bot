@@ -37,7 +37,7 @@ namespace Lisbeth.Bot.DataAccessLayer
         public DbSet<Ticket> Tickets { get; set; }
         public DbSet<Ban> Bans { get; set; }
         public DbSet<ServerBooster> ServerBoosters { get; set; }
-        public DbSet<Audit> AuditLogs { get; set; }
+        public DbSet<AuditLog> AuditLogs { get; set; }
         public DbSet<Prune> Prunes { get; set; }
         public DbSet<TicketingConfig> TicketingConfigs { get; set; }
         public DbSet<ModerationConfig> ModerationConfigs { get; set; }
@@ -61,7 +61,7 @@ namespace Lisbeth.Bot.DataAccessLayer
             var auditEntries = new List<AuditEntry>();
             foreach (var entry in ChangeTracker.Entries())
             {
-                if (entry.Entity is Audit || entry.State is EntityState.Detached or EntityState.Unchanged)
+                if (entry.Entity is AuditLog || entry.State is EntityState.Detached or EntityState.Unchanged)
                     continue;
 
                 var auditEntry = new AuditEntry(entry) {TableName = entry.Entity.GetType().Name, UserId = userId};

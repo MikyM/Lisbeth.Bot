@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Generic;
 using Lisbeth.Bot.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -52,6 +53,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
             builder.Metadata.FindNavigation(nameof(Guild.Bans)).SetPropertyAccessMode(PropertyAccessMode.Field);
             builder.Metadata.FindNavigation(nameof(Guild.Mutes)).SetPropertyAccessMode(PropertyAccessMode.Field);
             builder.Metadata.FindNavigation(nameof(Guild.Prunes)).SetPropertyAccessMode(PropertyAccessMode.Field);
+            builder.Metadata.FindNavigation(nameof(Guild.GuildServerBoosters)).SetPropertyAccessMode(PropertyAccessMode.Field);
 
             builder.ToTable("guild");
 
@@ -64,6 +66,8 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
             builder.Property(x => x.GuildId).HasColumnName("guild_id").HasColumnType("bigint").ValueGeneratedOnAdd()
                 .IsRequired();
             builder.Property(x => x.UserId).HasColumnName("inviter_id").HasColumnType("bigint");
+            builder.Property(x => x.EmbedHexColor).HasColumnName("embed_hex_color").HasColumnType("varchar(40)")
+                .HasMaxLength(40).IsRequired();
 
             builder.OwnsOne<TicketingConfig>(nameof(Guild.TicketingConfig), ownedNavigationBuilder =>
             {
@@ -90,9 +94,18 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
                     .HasColumnType("bigint");
                 ownedNavigationBuilder.Property(x => x.OpenedNamePrefix).HasColumnName("opened_name_prefix")
                     .HasColumnType("varchar(100)").HasMaxLength(100);
-                //options.Property(x => x.AdditionalInformationCenterMessage).HasColumnName("member_welcome_message").HasColumnType("varchar(5096)").HasMaxLength(5096); to do
+                ownedNavigationBuilder.Property(x => x.ClosedNamePrefix).HasColumnName("closed_name_prefix")
+                    .HasColumnType("varchar(100)").HasMaxLength(100);
                 ownedNavigationBuilder.Property(x => x.CleanAfter).HasColumnName("clean_after").HasColumnType("time");
                 ownedNavigationBuilder.Property(x => x.CloseAfter).HasColumnName("close_after").HasColumnType("time");
+                ownedNavigationBuilder.Property(x => x.TicketCenterMessageDescription).HasColumnName("ticket_center_message_description")
+                    .HasColumnType("text");
+                ownedNavigationBuilder.Property(x => x.TicketWelcomeMessageDescription).HasColumnName("ticket_welcome_message_description")
+                    .HasColumnType("text");
+                ownedNavigationBuilder.Property(x => x.TicketCenterMessageFields).HasColumnName("ticket_center_message_fields")
+                    .HasColumnType("text");
+                ownedNavigationBuilder.Property(x => x.TicketWelcomeMessageFields).HasColumnName("ticket_welcome_message_fields")
+                    .HasColumnType("text");
 
                 ownedNavigationBuilder
                     .WithOwner(x => x.Guild)
@@ -124,7 +137,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
                 ownedNavigationBuilder.Property(x => x.MuteRoleId).HasColumnName("mute_role_id")
                     .HasColumnType("bigint");
                 ownedNavigationBuilder.Property(x => x.MemberWelcomeMessage).HasColumnName("member_welcome_message")
-                    .HasColumnType("varchar(5096)").HasMaxLength(5096);
+                    .HasColumnType("text");
                 ownedNavigationBuilder.Property(x => x.MemberWelcomeMessageTitle)
                     .HasColumnName("member_welcome_message_title").HasColumnType("varchar(256)").HasMaxLength(256);
 
