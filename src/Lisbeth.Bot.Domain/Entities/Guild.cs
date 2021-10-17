@@ -28,9 +28,12 @@ namespace Lisbeth.Bot.Domain.Entities
         private readonly HashSet<Prune> prunes;
         private readonly HashSet<Ticket> tickets;
         private readonly HashSet<GuildServerBooster> guildServerBoosters;
+        private readonly HashSet<Reminder> reminders;
+        private readonly HashSet<RecurringReminder> recurringReminders;
 
         public ulong GuildId { get; set; }
         public ulong UserId { get; set; }
+        public ulong? ReminderChannelId { get; set; }
         public TicketingConfig TicketingConfig { get; private set; }
         public ModerationConfig ModerationConfig { get; private set; }
         public string EmbedHexColor { get; set; } = "#26296e";
@@ -39,6 +42,8 @@ namespace Lisbeth.Bot.Domain.Entities
         public IReadOnlyCollection<Prune> Prunes => prunes;
         public IReadOnlyCollection<Ticket> Tickets => tickets;
         public IReadOnlyCollection<GuildServerBooster> GuildServerBoosters => guildServerBoosters;
+        public IReadOnlyCollection<Reminder> Reminders => reminders;
+        public IReadOnlyCollection<RecurringReminder> RecurringReminders => recurringReminders;
 
         public void AddMute(Mute mute)
         {

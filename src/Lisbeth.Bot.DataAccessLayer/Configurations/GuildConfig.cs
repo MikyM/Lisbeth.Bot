@@ -50,10 +50,26 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
                 .HasForeignKey(x => x.GuildId)
                 .HasPrincipalKey(x => x.GuildId);
 
+            builder
+                .HasMany(x => x.RecurringReminders)
+                .WithOne(x => x.Guild)
+                .HasForeignKey(x => x.GuildId)
+                .HasPrincipalKey(x => x.GuildId)
+                .IsRequired(false);
+
+            builder
+                .HasMany(x => x.Reminders)
+                .WithOne(x => x.Guild)
+                .HasForeignKey(x => x.GuildId)
+                .HasPrincipalKey(x => x.GuildId)
+                .IsRequired(false);
+
             builder.Metadata.FindNavigation(nameof(Guild.Bans)).SetPropertyAccessMode(PropertyAccessMode.Field);
             builder.Metadata.FindNavigation(nameof(Guild.Mutes)).SetPropertyAccessMode(PropertyAccessMode.Field);
             builder.Metadata.FindNavigation(nameof(Guild.Prunes)).SetPropertyAccessMode(PropertyAccessMode.Field);
             builder.Metadata.FindNavigation(nameof(Guild.GuildServerBoosters)).SetPropertyAccessMode(PropertyAccessMode.Field);
+            builder.Metadata.FindNavigation(nameof(Guild.Reminders)).SetPropertyAccessMode(PropertyAccessMode.Field);
+            builder.Metadata.FindNavigation(nameof(Guild.RecurringReminders)).SetPropertyAccessMode(PropertyAccessMode.Field);
 
             builder.ToTable("guild");
 

@@ -58,6 +58,7 @@ namespace Lisbeth.Bot.API
             services.ConfigureRateLimiting(Configuration);
             services.ConfigureEfCache();
             services.ConfigureApiVersioning();
+            services.ConfigureHealthChecks();
         }
 
         /// <summary>
@@ -93,7 +94,11 @@ namespace Lisbeth.Bot.API
             app.UseAuthorization();
             app.UseSerilogRequestLogging();
             app.UseHangfireDashboard();
-            app.UseEndpoints(endpoints => endpoints.MapControllers());
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapHealthChecks("/health").RequireAuthorization();
+                endpoints.MapControllers();
+            });
         }
     }
 }

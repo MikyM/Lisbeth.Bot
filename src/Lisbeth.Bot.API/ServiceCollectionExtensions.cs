@@ -26,6 +26,7 @@ using EasyCaching.InMemory;
 using EFCoreSecondLevelCacheInterceptor;
 using Hangfire;
 using Hangfire.MemoryStorage;
+using Lisbeth.Bot.API.HealthChecks;
 using Lisbeth.Bot.Application.Discord.ApplicationCommands;
 using Lisbeth.Bot.Application.Discord.EventHandlers;
 using Lisbeth.Bot.Application.Discord.SlashCommands;
@@ -210,6 +211,21 @@ namespace Lisbeth.Bot.API
         {
             var sp = services.BuildServiceProvider();
             //services.AddOptions<BotSettings>().BindConfiguration(sp.GetRequiredService<IWebHostEnvironment>().IsDevelopment() ? "BotSettings:Dev" : "BotSettings:Prod", options => options.BindNonPublicProperties = true);
+        }
+
+        public static void ConfigureHealthChecks(this IServiceCollection services)
+        {
+            services.AddHealthChecks()
+                .AddNpgSql(
+                    "User ID=lisbethbot;Password=lisbethbot;Host=localhost;Port=5438;Database=lisbeth_bot_test;")
+                .AddNpgSql(
+                    "User ID=hangfire;Password=hangfire;Host=localhost;Port=5438;Database=lisbeth_bot_hangfire_test;")
+                .AddHangfire(options =>
+                {
+                    options.MinimumAvailableServers = 1;
+                    options.MaximumJobsFailed = 0;
+                })
+                .AddCheck<DiscordHealthCheck>("Discord health check");
         }
     }
 }
