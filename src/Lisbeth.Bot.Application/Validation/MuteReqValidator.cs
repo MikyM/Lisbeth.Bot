@@ -6,9 +6,9 @@ using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Validation
 {
-    public class MuteReqDtoValidator : AbstractValidator<MuteReqDto>
+    public class MuteReqValidator : AbstractValidator<MuteReqDto>
     {
-        public MuteReqDtoValidator(IDiscordService discord)
+        public MuteReqValidator(IDiscordService discord)
         {
             CascadeMode = CascadeMode.Stop;
 

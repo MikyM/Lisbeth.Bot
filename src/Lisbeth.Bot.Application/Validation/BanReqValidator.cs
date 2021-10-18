@@ -6,9 +6,9 @@ using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Validation
 {
-    public class BanReqDtoValidator : AbstractValidator<BanReqDto>
+    public class BanReqValidator : AbstractValidator<BanReqDto>
     {
-        public BanReqDtoValidator(IDiscordService discord)
+        public BanReqValidator(IDiscordService discord)
         {
             CascadeMode = CascadeMode.Stop;
 

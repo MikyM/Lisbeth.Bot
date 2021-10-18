@@ -38,16 +38,16 @@ namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
             _discord = discord;
             _suppressMemberCheck = suppressMemberCheck;
         }
-        
+
         public async Task<bool> IsValidAsync(ValidationContext<T> context, ulong value, CancellationToken cancellation)
         {
-           var data = context.InstanceToValidate.ToDictionary();
+            var data = context.InstanceToValidate.ToDictionary();
             if (!_suppressMemberCheck && data.TryGetValue("GuildId", out _guildId))
             {
                 DiscordGuild guild;
                 try
                 {
-                    guild = await _discord.Client.GetGuildAsync((ulong)_guildId);
+                    guild = await _discord.Client.GetGuildAsync((ulong) _guildId);
                     if (guild is null)
                     {
                         _doesGuildExist = false;
