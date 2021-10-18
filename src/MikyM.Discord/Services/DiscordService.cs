@@ -601,7 +601,7 @@ namespace MikyM.Discord.Services
                 using var workScope = Tracer.BuildSpan(nameof(Client.MessageCreated))
                     .IgnoreActiveSpan()
                     .StartActive(true);
-                if (args.Guild != null) workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
+                if (args.Guild is not null) workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
                 workScope.Span.SetTag("Channel.Id", args.Channel.Id.ToString());
                 workScope.Span.SetTag("Author.Id", args.Author.Id.ToString());
                 workScope.Span.SetTag("Message.Id", args.Message.Id.ToString());
@@ -631,7 +631,7 @@ namespace MikyM.Discord.Services
                 using var workScope = Tracer.BuildSpan(nameof(Client.MessageUpdated))
                     .IgnoreActiveSpan()
                     .StartActive(true);
-                if (args.Guild != null) workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
+                if (args.Guild is not null) workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
                 workScope.Span.SetTag("Channel.Id", args.Channel.Id.ToString());
                 workScope.Span.SetTag("Author.Id", args.Author.Id.ToString());
                 workScope.Span.SetTag("Message.Id", args.Message.Id.ToString());
@@ -647,7 +647,7 @@ namespace MikyM.Discord.Services
                 using var workScope = Tracer.BuildSpan(nameof(Client.MessageDeleted))
                     .IgnoreActiveSpan()
                     .StartActive(true);
-                if (args.Guild != null) workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
+                if (args.Guild is not null) workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
                 workScope.Span.SetTag("Channel.Id", args.Channel.Id.ToString());
                 workScope.Span.SetTag("Message.Id", args.Message.Id.ToString());
 
@@ -662,7 +662,7 @@ namespace MikyM.Discord.Services
                 using var workScope = Tracer.BuildSpan(nameof(Client.MessagesBulkDeleted))
                     .IgnoreActiveSpan()
                     .StartActive(true);
-                if (args.Guild != null) workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
+                if (args.Guild is not null) workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
                 workScope.Span.SetTag("Channel.Id", args.Channel.Id.ToString());
 
                 using var scope = ServiceProvider.CreateScope();
@@ -790,7 +790,7 @@ namespace MikyM.Discord.Services
                     .IgnoreActiveSpan()
                     .StartActive(true);
                 workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
-                if (args.Channel != null) workScope.Span.SetTag("Channel.Id", args.Channel.Id.ToString());
+                if (args.Channel is not null) workScope.Span.SetTag("Channel.Id", args.Channel.Id.ToString());
                 workScope.Span.SetTag("User.Id", args.User.Id.ToString());
 
                 using var scope = ServiceProvider.CreateScope();

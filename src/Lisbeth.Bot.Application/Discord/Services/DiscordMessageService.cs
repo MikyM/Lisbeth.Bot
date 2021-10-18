@@ -67,12 +67,12 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (ctx is null) return await PruneAsync(req, logChannelId, null, null);
 
             return await PruneAsync(req, logChannelId, ctx.Channel, ctx.Guild, ctx.Member,
-                ctx.TargetMessage.Author != null
+                ctx.TargetMessage.Author is not null
                     ? ctx.TargetMessage.Author
-                    : ctx.TargetUser != null
+                    : ctx.TargetUser is not null
                         ? ctx.TargetUser
                         : null,
-                ctx.TargetMessage != null
+                ctx.TargetMessage is not null
                     ? ctx.TargetMessage
                     : null, isSingleMessageDelete, ctx.InteractionId);
         }
@@ -87,7 +87,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (guild is null)
                 try
                 {
-                    if (req.GuildId != null) guild = await _discord.Client.GetGuildAsync(req.GuildId.Value);
+                    if (req.GuildId is not null) guild = await _discord.Client.GetGuildAsync(req.GuildId.Value);
                 }
                 catch (Exception)
                 {
@@ -97,7 +97,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (author is null)
                 try
                 {
-                    if (req.TargetAuthorId != null && guild is not null)
+                    if (req.TargetAuthorId is not null && guild is not null)
                         author = await guild.GetMemberAsync(req.TargetAuthorId.Value);
                 }
                 catch (Exception)
@@ -108,7 +108,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (moderator is null)
                 try
                 {
-                    if (req.ModeratorId != null)
+                    if (req.ModeratorId is not null)
                         moderator = await _discord.Client.GetUserAsync(req.ModeratorId.Value);
                 }
                 catch (Exception)
@@ -119,7 +119,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (channel is null)
                 try
                 {
-                    if (req.ChannelId != null) channel = await _discord.Client.GetChannelAsync(req.ChannelId.Value);
+                    if (req.ChannelId is not null) channel = await _discord.Client.GetChannelAsync(req.ChannelId.Value);
                 }
                 catch (Exception)
                 {
@@ -129,7 +129,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (message is null)
                 try
                 {
-                    if (req.MessageId != null && channel is not null)
+                    if (req.MessageId is not null && channel is not null)
                         await channel.GetMessageAsync(req.MessageId.Value);
                 }
                 catch (Exception)
@@ -150,7 +150,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             var embed = new DiscordEmbedBuilder();
             embed.WithColor(0x18315C);
             embed.WithAuthor($"Prune result | {moderator.GetFullUsername()}", null,
-                moderator != null ? moderator.AvatarUrl : null);
+                moderator is not null ? moderator.AvatarUrl : null);
 
             int deletedMessagesCount = 0;
 
@@ -227,16 +227,16 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 }
             }
 
-            embed.AddField("Moderator", moderator != null ? moderator.Mention : null, true);
+            embed.AddField("Moderator", moderator is not null ? moderator.Mention : null, true);
             embed.AddField("Delete count", deletedMessagesCount.ToString(), true);
-            embed.AddField("Channel", channel != null ? channel.Mention : null, true);
+            embed.AddField("Channel", channel is not null ? channel.Mention : null, true);
 
 
             if (req.TargetAuthorId is not null)
             {
                 embed.AddField("Target author", author.Mention, true);
                 embed.WithAuthor($"Prune result | {author.GetFullUsername()}", null,
-                    author != null ? author.AvatarUrl : null);
+                    author is not null ? author.AvatarUrl : null);
             }
 
             _ = await _pruneService.AddAsync(req, true);

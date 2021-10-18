@@ -21,6 +21,7 @@ using Autofac.Extensions.DependencyInjection;
 using Hangfire;
 using Lisbeth.Bot.API.ExceptionMiddleware;
 using Lisbeth.Bot.API.Helpers;
+using Lisbeth.Bot.Application.Helpers;
 using Lisbeth.Bot.Domain;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -46,10 +47,7 @@ namespace Lisbeth.Bot.API
         {
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 
-            services.AddControllers(options =>
-            {
-                options.Conventions.Add(new RouteTokenTransformerConvention(new SlugifyParameterTransformer()));
-            });
+            services.AddControllers(options => options.Conventions.Add(new RouteTokenTransformerConvention(new SlugifyParameterTransformer())));
             services.ConfigureSwagger();
             services.AddHttpClient();
             services.ConfigureDiscord();
@@ -59,6 +57,7 @@ namespace Lisbeth.Bot.API
             services.ConfigureEfCache();
             services.ConfigureApiVersioning();
             services.ConfigureHealthChecks();
+            services.ConfigureFluentValidation();
         }
 
         /// <summary>
@@ -76,9 +75,9 @@ namespace Lisbeth.Bot.API
         {
             ContainerProvider.Container = app.ApplicationServices.GetAutofacRoot();
             GlobalConfiguration.Configuration.UseAutofacActivator(app.ApplicationServices.GetAutofacRoot());
-#pragma warning disable 4014
-            RecurringJobHelper.ScheduleAllDefinedDelayed();
-#pragma warning restore 4014
+            _ = ContainerProvider.Container
+                .Resolve<IAsyncExecutor>()
+                .ExecuteAsync(async () => await RecurringJobHelper.ScheduleAllDefinedAfterDelayAsync());
 
             if (env.IsDevelopment())
             {

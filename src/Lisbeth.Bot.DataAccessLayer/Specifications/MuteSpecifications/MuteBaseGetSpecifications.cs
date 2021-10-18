@@ -27,21 +27,21 @@ namespace Lisbeth.Bot.DataAccessLayer.Specifications.MuteSpecifications
             ulong? appliedById = null, DateTime? liftedOn = null, DateTime? appliedOn = null, ulong? liftedById = null,
             int limit = 0)
         {
-            if (id != null)
+            if (id is not null)
                 AddFilterCondition(x => x.Id == id);
-            if (userId != null)
+            if (userId is not null)
                 AddFilterCondition(x => x.UserId == userId);
-            if (guildId != null)
+            if (guildId is not null)
                 AddFilterCondition(x => x.GuildId == guildId);
-            if (appliedById != null)
+            if (appliedById is not null)
                 AddFilterCondition(x => x.AppliedById == appliedById);
-            if (liftedById != null)
+            if (liftedById is not null)
                 AddFilterCondition(x => x.LiftedById == liftedById);
-            if (liftedOn != null)
+            if (liftedOn is not null)
                 AddFilterCondition(x => x.LiftedOn == liftedOn);
-            if (appliedOn != null)
+            if (appliedOn is not null)
                 AddFilterCondition(x => x.AppliedOn == appliedOn);
-            if (liftedById != null)
+            if (liftedById is not null)
                 AddFilterCondition(x => x.LiftedById == liftedById);
 
             ApplyOrderByDescending(x => x.AppliedOn);

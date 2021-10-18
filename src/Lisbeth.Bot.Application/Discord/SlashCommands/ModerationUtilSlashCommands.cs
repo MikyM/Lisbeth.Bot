@@ -72,11 +72,14 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             embed.WithDescription(guild.TicketingConfig.TicketCenterMessageDescription);
 
             var fields = JsonSerializer.Deserialize<Dictionary<string, string>>(guild.TicketingConfig.TicketCenterMessageFields);
-            if (fields != null && fields.Count != 0)
+            if (fields is not null && fields.Count != 0)
             {
+                int i = 1;
                 foreach (var (fieldName, fieldValue) in fields)
                 {
+                    if (i >= 25) break;
                     embed.AddField(fieldName, fieldValue);
+                    i++;
                 }
             }
 

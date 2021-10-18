@@ -56,7 +56,7 @@ namespace MikyM.Common.DataAccessLayer.Repositories
         {
             var local = _context.Set<TEntity>().Local.FirstOrDefault(entry => entry.Id.Equals(entity.Id));
 
-            if (local != null) _context.Entry(local).State = EntityState.Detached;
+            if (local is not null) _context.Entry(local).State = EntityState.Detached;
 
             _context.Attach(entity);
         }
@@ -67,7 +67,7 @@ namespace MikyM.Common.DataAccessLayer.Repositories
             {
                 var local = _context.Set<TEntity>().Local.FirstOrDefault(entry => entry.Id.Equals(entity.Id));
 
-                if (local != null) _context.Entry(local).State = EntityState.Detached;
+                if (local is not null) _context.Entry(local).State = EntityState.Detached;
 
                 _context.Attach(entity);
             }

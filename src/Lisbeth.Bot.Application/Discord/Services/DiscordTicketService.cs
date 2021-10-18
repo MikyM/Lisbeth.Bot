@@ -741,7 +741,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 var failEmbed = new DiscordEmbedBuilder();
                 failEmbed.WithColor(new DiscordColor(guildCfg.EmbedHexColor));
                 failEmbed.WithDescription("You already have an opened ticket in this guild.");
-                if (intr != null)
+                if (intr is not null)
                     await intr.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
                         .AddEmbed(failEmbed.Build())
                         .AsEphemeral(true));
@@ -749,16 +749,18 @@ namespace Lisbeth.Bot.Application.Discord.Services
             }
 
             var embed = new DiscordEmbedBuilder();
-
             embed.WithColor(new DiscordColor(guildCfg.EmbedHexColor));
             embed.WithDescription(guildCfg.TicketingConfig.TicketWelcomeMessageDescription.Replace("@ownerMention@", owner.Mention));
 
             var fields = JsonSerializer.Deserialize<Dictionary<string, string>>(guildCfg.TicketingConfig.TicketWelcomeMessageFields);
-            if (fields != null && fields.Count != 0)
+            if (fields is not null && fields.Count != 0)
             {
+                int i = 1;
                 foreach (var (fieldName, fieldValue) in fields)
                 {
+                    if (i >= 25) break;
                     embed.AddField(fieldName, fieldValue);
+                    i++;
                 }
             }
 

@@ -204,7 +204,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
 
             sw2.Stop();
 
-            if (rex != null)
+            if (rex is not null)
             {
                 embed = new DiscordEmbedBuilder
                 {
@@ -221,11 +221,11 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             // execution succeeded
             embed = new DiscordEmbedBuilder {Title = "Evaluation successful", Color = new DiscordColor(0xD091B2)};
 
-            embed.AddField("Result", css.ReturnValue != null ? css.ReturnValue.ToString() : "No value returned")
+            embed.AddField("Result", css.ReturnValue is not null ? css.ReturnValue.ToString() : "No value returned")
                 .AddField("Compilation time", string.Concat(sw1.ElapsedMilliseconds.ToString("#,##0"), "ms"), true)
                 .AddField("Execution time", string.Concat(sw2.ElapsedMilliseconds.ToString("#,##0"), "ms"), true);
 
-            if (css.ReturnValue != null) embed.AddField("Return type", css.ReturnValue.GetType().ToString(), true);
+            if (css.ReturnValue is not null) embed.AddField("Return type", css.ReturnValue.GetType().ToString(), true);
 
             await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
         }

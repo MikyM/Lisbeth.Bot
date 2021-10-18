@@ -37,7 +37,7 @@ namespace Lisbeth.Bot.Application.Services
         {
             var endpointUri = string.Concat(_baseUri, route);
 
-            if (queryParams != null)
+            if (queryParams is not null)
             {
                 var query = queryParams.Where(x => x.Key.ToLower() != "pagesize" && x.Key.ToLower() != "pagenumber");
 

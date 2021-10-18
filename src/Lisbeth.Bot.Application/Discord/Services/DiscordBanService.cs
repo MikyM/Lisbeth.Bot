@@ -488,7 +488,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     DiscordUser liftingMod = null;
                     try
                     {
-                        if (req.LiftedById != null) liftingMod = await _discord.Client.GetUserAsync(ban.LiftedById);
+                        if (req.LiftedById is not null) liftingMod = await _discord.Client.GetUserAsync(ban.LiftedById);
                     }
                     catch (Exception)
                     {

@@ -34,7 +34,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders
 
         public async Task<string> BuildAsync()
         {
-            if (Videos.Count == 0 || Videos == null) return "";
+            if (Videos.Count == 0 || Videos is null) return "";
             string videosHtml = "";
             foreach (var attachment in Videos)
             {
