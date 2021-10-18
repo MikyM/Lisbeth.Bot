@@ -15,8 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-
-using System;
 using FluentValidation;
 using Lisbeth.Bot.Application.Validation.ReusablePropertyValidation;
 using Lisbeth.Bot.Domain.DTOs.Request;
@@ -24,20 +22,27 @@ using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Validation
 {
-    public class MuteReqValidator : AbstractValidator<MuteReqDto>
+    public class PruneReqValidator : AbstractValidator<PruneReqDto>
     {
-        public MuteReqValidator(IDiscordService discord)
+        public PruneReqValidator(IDiscordService discord)
         {
             CascadeMode = CascadeMode.Stop;
 
-            RuleFor(x => x.GuildId).NotEmpty();
-            RuleFor(x => x.TargetUserId)
+            RuleFor(x => x.GuildId)
                 .NotEmpty()
-                .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<MuteReqDto>(discord)));
+                .DependentRules(x => x.SetAsyncValidator(new DiscordGuildIdValidator<PruneReqDto>(discord)));
+            RuleFor(x => x.ChannelId)
+                .NotEmpty()
+                .DependentRules(x => x.SetAsyncValidator(new DiscordChannelIdValidator<PruneReqDto>(discord)));
+            RuleFor(x => x.TargetAuthorId)
+                .SetAsyncValidator(new DiscordUserIdValidator<PruneReqDto>(discord));
+            RuleFor(x => x.MessageId)
+                .SetAsyncValidator(new DiscordUserIdValidator<PruneReqDto>(discord));
             RuleFor(x => x.RequestedOnBehalfOfId)
                 .NotEmpty()
-                .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<MuteReqDto>(discord)));
-            RuleFor(x => x.AppliedUntil).NotEmpty().Must(x => x.ToUniversalTime() > DateTime.UtcNow);
-        }
+                .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<PruneReqDto>(discord)));
+            RuleFor(x => x.Count)
+                .InclusiveBetween(1, 99);
+        } 
     }
 }

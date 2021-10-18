@@ -28,7 +28,7 @@ namespace Lisbeth.Bot.API
             CreateMap<MuteReqDto, Mute>();
             CreateMap<MuteDisableReqDto, Mute>();
             CreateMap<PruneReqDto, Prune>();
-            CreateMap<GuildGetReq, Guild>();
+            CreateMap<GuildGetReqDto, Guild>();
             CreateMap<TicketExportReqDto, Ticket>();
             CreateMap<TicketOpenReqDto, Ticket>()
                 .ForMember(dest => dest.UserId, source => source.MapFrom(x => x.OwnerId));

@@ -20,14 +20,14 @@ namespace Lisbeth.Bot.Domain.DTOs.Request
     public class PruneReqDto
     {
         public PruneReqDto(int count, ulong? messageId = null, ulong? targetAuthorId = null, ulong? channelId = null,
-            ulong? guildId = null, ulong? moderatorId = null)
+            ulong? guildId = null, ulong? requestedOnBehalfOfId = null)
         {
             Count = count;
             MessageId = messageId;
             TargetAuthorId = targetAuthorId;
             ChannelId = channelId;
             GuildId = guildId;
-            ModeratorId = moderatorId;
+            RequestedOnBehalfOfId = requestedOnBehalfOfId;
         }
 
         public int Count { get; set; } = 100;
@@ -35,6 +35,6 @@ namespace Lisbeth.Bot.Domain.DTOs.Request
         public ulong? MessageId { get; set; }
         public ulong? ChannelId { get; set; }
         public ulong? GuildId { get; set; }
-        public ulong? ModeratorId { get; set; }
+        public ulong? RequestedOnBehalfOfId { get; set; }
     }
 }

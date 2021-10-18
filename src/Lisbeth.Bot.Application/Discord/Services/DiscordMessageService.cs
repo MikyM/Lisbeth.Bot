@@ -108,12 +108,12 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (moderator is null)
                 try
                 {
-                    if (req.ModeratorId is not null)
-                        moderator = await _discord.Client.GetUserAsync(req.ModeratorId.Value);
+                    if (req.RequestedOnBehalfOfId is not null)
+                        moderator = await _discord.Client.GetUserAsync(req.RequestedOnBehalfOfId.Value);
                 }
                 catch (Exception)
                 {
-                    throw new ArgumentException($"User with Id: {req.ModeratorId} doesn't exist.");
+                    throw new ArgumentException($"User with Id: {req.RequestedOnBehalfOfId} doesn't exist.");
                 }
 
             if (channel is null)

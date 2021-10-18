@@ -17,9 +17,9 @@
 
 namespace Lisbeth.Bot.Domain.DTOs.Request
 {
-    public class GuildGetReq
+    public class GuildGetReqDto
     {
-        public GuildGetReq(ulong? guildId, ulong? inviterId)
+        public GuildGetReqDto(ulong? guildId, ulong? inviterId)
         {
             GuildId = guildId;
             InviterId = inviterId;
