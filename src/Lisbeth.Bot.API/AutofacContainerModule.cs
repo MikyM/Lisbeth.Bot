@@ -87,7 +87,7 @@ namespace Lisbeth.Bot.API
                 return new LisbethBotDbContext(optionsBuilder.Options);
             }).AsSelf().InstancePerLifetimeScope();
 
-            builder.Register(x =>
+            builder.Register(_ =>
             {
                 var epoch = new DateTime(2021, 1, 1, 0, 0, 0, DateTimeKind.Utc);
                 var structure = new IdStructure(45, 2, 16);

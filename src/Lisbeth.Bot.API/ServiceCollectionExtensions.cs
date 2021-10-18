@@ -26,6 +26,7 @@ using EasyCaching.InMemory;
 using EFCoreSecondLevelCacheInterceptor;
 using Hangfire;
 using Hangfire.MemoryStorage;
+using Hangfire.PostgreSql;
 using Lisbeth.Bot.API.HealthChecks;
 using Lisbeth.Bot.Application.Discord.ApplicationCommands;
 using Lisbeth.Bot.Application.Discord.EventHandlers;
@@ -77,7 +78,6 @@ namespace Lisbeth.Bot.API
 
             #endregion
 
-
             #region events
 
             services.AddDiscordSlashCommandsEventsSubscriber<SlashCommandEventsHandler>();
@@ -93,10 +93,11 @@ namespace Lisbeth.Bot.API
             services.AddHangfire(options =>
             {
                 options.UseRecommendedSerializerSettings();
-/*                options.UsePostgreSqlStorage(Environment.GetEnvironmentVariable("HangfireTstConnection"),
-                    new PostgreSqlStorageOptions {QueuePollInterval = TimeSpan.FromSeconds(15)});*/
-                options.UseMemoryStorage(
-                    new MemoryStorageOptions {JobExpirationCheckInterval = TimeSpan.FromMinutes(1)});
+                options.UsePostgreSqlStorage(
+                    "User ID=lisbethbot;Password=lisbethbot;Host=localhost;Port=5438;Database=lisbeth_bot_test;",
+                    new PostgreSqlStorageOptions {QueuePollInterval = TimeSpan.FromSeconds(15)});
+/*                options.UseMemoryStorage(
+                    new MemoryStorageOptions {JobExpirationCheckInterval = TimeSpan.FromMinutes(1)});*/
             });
 
             services.AddHangfireServer(options =>
