@@ -145,12 +145,12 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             try
             {
-                moderator = await guild.GetMemberAsync(req.RequestedOnBehalfOfIdId);
+                moderator = await guild.GetMemberAsync(req.RequestedOnBehalfOfId);
             }
             catch (Exception)
             {
                 throw new ArgumentException(
-                    $"User with Id: {req.RequestedOnBehalfOfIdId} doesn't exist or isn't this guild's target.");
+                    $"User with Id: {req.RequestedOnBehalfOfId} doesn't exist or isn't this guild's target.");
             }
 
             return await UnmuteAsync(guild, target, moderator, req);

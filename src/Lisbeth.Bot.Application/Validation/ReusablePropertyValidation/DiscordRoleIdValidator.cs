@@ -16,6 +16,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using DSharpPlus.Entities;
+using Emzi0767.Utilities;
 using FluentValidation;
 using FluentValidation.Validators;
 using MikyM.Discord.Interfaces;
@@ -29,21 +30,23 @@ namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
     public sealed class DiscordRoleIdValidator<T> : IAsyncPropertyValidator<T, ulong>
     {
         private readonly IDiscordService _discord;
-        private readonly ulong _guildId;
+        private object _guildId;
         private bool _doesGuildExist = true;
 
-        public DiscordRoleIdValidator(IDiscordService discord, ulong guildId)
+        public DiscordRoleIdValidator(IDiscordService discord)
         {
             _discord = discord;
-            _guildId = guildId;
         }
 
         public async Task<bool> IsValidAsync(ValidationContext<T> context, ulong value, CancellationToken cancellation)
         {
+            var data = context.InstanceToValidate.ToDictionary();
+            if (!data.TryGetValue("GuildId", out _guildId)) return false;
+
             DiscordGuild guild;
             try
             {
-                guild = await _discord.Client.GetGuildAsync(_guildId);
+                guild = await _discord.Client.GetGuildAsync((ulong)_guildId);
                 if (guild is null)
                 {
                     _doesGuildExist = false;

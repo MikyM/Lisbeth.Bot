@@ -76,7 +76,7 @@ namespace Lisbeth.Bot.Application.Services
             base.BeginUpdate(entity);
             entity.IsDisabled = true;
             entity.LiftedOn = DateTime.UtcNow;
-            entity.LiftedById = entry.RequestedOnBehalfOfIdId;
+            entity.LiftedById = entry.RequestedOnBehalfOfId;
 
             if (shouldSave) await base.CommitAsync();
 

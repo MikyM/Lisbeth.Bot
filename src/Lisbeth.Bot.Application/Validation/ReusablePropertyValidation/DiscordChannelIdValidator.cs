@@ -23,29 +23,30 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Emzi0767.Utilities;
 
 namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
 {
     public sealed class DiscordChannelIdValidator<T> : IAsyncPropertyValidator<T, ulong>
     {
         private readonly IDiscordService _discord;
-        private readonly ulong? _guildId;
+        private object _guildId;
         private bool _doesGuildExist = true;
 
-        public DiscordChannelIdValidator(IDiscordService discord, ulong? guildId = null)
+        public DiscordChannelIdValidator(IDiscordService discord)
         {
             _discord = discord;
-            _guildId = guildId;
         }
         
         public async Task<bool> IsValidAsync(ValidationContext<T> context, ulong value, CancellationToken cancellation)
         {
-            if (_guildId is not null)
+            var data = context.InstanceToValidate.ToDictionary();
+            if (data.TryGetValue("GuildId", out _guildId))
             {
                 DiscordGuild guild;
                 try
                 {
-                    guild = await _discord.Client.GetGuildAsync(_guildId.v);
+                    guild = await _discord.Client.GetGuildAsync((ulong)_guildId);
                     if (guild is null)
                     {
                         _doesGuildExist = false;
