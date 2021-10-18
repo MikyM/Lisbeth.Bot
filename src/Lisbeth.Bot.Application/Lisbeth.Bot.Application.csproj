@@ -27,7 +27,6 @@
 
   <ItemGroup>
     <Folder Include="Util\" />
-    <Folder Include="Validation\ReusablePropertyValidation\" />
   </ItemGroup>
 
 </Project>
