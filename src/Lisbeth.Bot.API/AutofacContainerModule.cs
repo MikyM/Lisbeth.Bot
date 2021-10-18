@@ -15,11 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Reflection;
 using Autofac;
-using AutoMapper.Contrib.Autofac.DependencyInjection;
-using AutoMapper.Extensions.ExpressionMapping;
 using EFCoreSecondLevelCacheInterceptor;
 using IdGen;
 using Lisbeth.Bot.Application.Helpers;
@@ -29,10 +25,9 @@ using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.DataAccessLayer.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using MikyM.Common.Application.Interfaces;
-using MikyM.Common.Application.Services;
-using MikyM.Common.DataAccessLayer.Repositories;
-using MikyM.Common.DataAccessLayer.UnitOfWork;
+using MikyM.Common.Application;
+using MikyM.Common.DataAccessLayer;
+using System;
 using Module = Autofac.Module;
 
 namespace Lisbeth.Bot.API
@@ -43,19 +38,10 @@ namespace Lisbeth.Bot.API
         {
             base.Load(builder);
             // automapper
-            builder.RegisterAutoMapper(opt => opt.AddExpressionMapping(), Assembly.GetExecutingAssembly());
-            // unitofwork
-            builder.RegisterGeneric(typeof(UnitOfWork<>)).As(typeof(IUnitOfWork<>)).InstancePerLifetimeScope();
-            // generic services
-            builder.RegisterGeneric(typeof(ReadOnlyService<,>)).As(typeof(IReadOnlyService<,>))
-                .InstancePerLifetimeScope();
-            builder.RegisterGeneric(typeof(CrudService<,>)).As(typeof(ICrudService<,>))
-                .InstancePerLifetimeScope();
-            // generic repositories
-            builder.RegisterGeneric(typeof(ReadOnlyRepository<>)).As(typeof(IReadOnlyRepository<>))
-                .InstancePerLifetimeScope();
-            builder.RegisterGeneric(typeof(Repository<>)).As(typeof(IRepository<>))
-                .InstancePerLifetimeScope();
+
+            builder.AddDataAccessLayer();
+            builder.AddApplicationLayer();
+
             // bulk register custom services - follow naming convention
             builder.RegisterAssemblyTypes(typeof(MuteService).Assembly).Where(t => t.Name.EndsWith("Service"))
                 .AsImplementedInterfaces().InstancePerLifetimeScope();
