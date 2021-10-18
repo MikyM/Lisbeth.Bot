@@ -27,6 +27,7 @@ using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.Exceptions;
 using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
+using Lisbeth.Bot.Application.Discord.Validation;
 using Lisbeth.Bot.Application.Services.Interfaces;
 using Lisbeth.Bot.DataAccessLayer.Specifications.BanSpecifications;
 using Lisbeth.Bot.DataAccessLayer.Specifications.GuildSpecifications;
@@ -58,34 +59,17 @@ namespace Lisbeth.Bot.Application.Discord.Services
             DiscordMember moderator;
             DiscordGuild guild;
 
-            try
-            {
-                guild = await _discord.Client.GetGuildAsync(req.GuildId);
-            }
-            catch (Exception ex)
-            {
-                throw new DiscordNotFoundException($"Guild with Id: {req.GuildId} doesn't exist.", ex);
-            }
+            var guildValidator = new DiscordValidator<DiscordGuild>(_discord.Client, req.GuildId);
+            if (await guildValidator.IsValidAsync()) guild = guildValidator.RetrievedObject;
+            else throw new DiscordNotFoundException($"Guild with Id: {req.GuildId} doesn't exist.", guildValidator.Exception);
 
-            try
-            {
-                target = await guild.GetMemberAsync(req.TargetUserId);
-            }
-            catch (Exception ex)
-            {
-                throw new DiscordNotFoundException(
-                    $"User with Id: {req.TargetUserId} doesn't exist or isn't this guild's member.", ex);
-            }
+            var moderatorValidator = new DiscordGuildValidator<DiscordMember>(guild, req.RequestedOnBehalfOfId);
+            if (await moderatorValidator.IsValidAsync()) moderator = moderatorValidator.RetrievedObject;
+            else throw new DiscordNotFoundException($"User with Id: {req.RequestedOnBehalfOfId} doesn't exist or isn't this guild's member.", moderatorValidator.Exception);
 
-            try
-            {
-                moderator = await guild.GetMemberAsync(req.RequestedOnBehalfOfId);
-            }
-            catch (Exception ex)
-            {
-                throw new DiscordNotFoundException(
-                    $"User with Id: {req.RequestedOnBehalfOfId} doesn't exist or isn't this guild's member.", ex);
-            }
+            var targetValidator = new DiscordGuildValidator<DiscordMember>(guild, req.TargetUserId);
+            if (await targetValidator.IsValidAsync()) target = targetValidator.RetrievedObject;
+            else throw new DiscordNotFoundException($"User with Id: {req.TargetUserId} doesn't exist or isn't this guild's member.", targetValidator.Exception);
 
             return await BanAsync(guild, target, moderator, req.AppliedUntil, req.Reason, req);
         }
@@ -117,34 +101,17 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 req.TargetUserId = ban.UserId;
             }
 
-            try
-            {
-                guild = await _discord.Client.GetGuildAsync(req.GuildId.Value);
-            }
-            catch (Exception ex)
-            {
-                throw new DiscordNotFoundException($"Guild with Id: {req.GuildId} doesn't exist.", ex);
-            }
+            var guildValidator = new DiscordValidator<DiscordGuild>(_discord.Client, req.GuildId.Value);
+            if (await guildValidator.IsValidAsync()) guild = guildValidator.RetrievedObject;
+            else throw new DiscordNotFoundException($"Guild with Id: {req.GuildId} doesn't exist.", guildValidator.Exception);
 
-            try
-            {
-                target = await guild.GetMemberAsync(req.TargetUserId.Value);
-            }
-            catch (Exception ex)
-            {
-                throw new DiscordNotFoundException(
-                    $"User with Id: {req.TargetUserId} doesn't exist or isn't this guild's member.", ex);
-            }
+            var moderatorValidator = new DiscordGuildValidator<DiscordMember>(guild, req.RequestedOnBehalfOfId);
+            if (await moderatorValidator.IsValidAsync()) moderator = moderatorValidator.RetrievedObject;
+            else throw new DiscordNotFoundException($"User with Id: {req.RequestedOnBehalfOfId} doesn't exist or isn't this guild's member.", moderatorValidator.Exception);
 
-            try
-            {
-                moderator = await guild.GetMemberAsync(req.RequestedOnBehalfOfId);
-            }
-            catch (Exception ex)
-            {
-                throw new DiscordNotFoundException(
-                    $"User with Id: {req.RequestedOnBehalfOfId} doesn't exist or isn't this guild's member.", ex);
-            }
+            var targetValidator = new DiscordGuildValidator<DiscordMember>(guild, req.TargetUserId.Value);
+            if (await targetValidator.IsValidAsync()) target = targetValidator.RetrievedObject;
+            else throw new DiscordNotFoundException($"User with Id: {req.TargetUserId} doesn't exist or isn't this guild's member.", targetValidator.Exception);
 
             return await UnbanAsync(guild, target, moderator);
         }
@@ -178,34 +145,17 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 req.AppliedOn = ban.CreatedAt;
             }
 
-            try
-            {
-                guild = await _discord.Client.GetGuildAsync(req.GuildId.Value);
-            }
-            catch (Exception ex)
-            {
-                throw new DiscordNotFoundException($"Guild with Id: {req.GuildId} doesn't exist.", ex);
-            }
+            var guildValidator = new DiscordValidator<DiscordGuild>(_discord.Client, req.GuildId.Value);
+            if (await guildValidator.IsValidAsync()) guild = guildValidator.RetrievedObject;
+            else throw new DiscordNotFoundException($"Guild with Id: {req.GuildId} doesn't exist.", guildValidator.Exception);
 
-            try
-            {
-                target = await guild.GetMemberAsync(req.TargetUserId.Value);
-            }
-            catch (Exception ex)
-            {
-                throw new DiscordNotFoundException(
-                    $"User with Id: {req.TargetUserId} doesn't exist or isn't this guild's member.", ex);
-            }
+            var moderatorValidator = new DiscordGuildValidator<DiscordMember>(guild, req.RequestedOnBehalfOfId);
+            if (await moderatorValidator.IsValidAsync()) moderator = moderatorValidator.RetrievedObject;
+            else throw new DiscordNotFoundException($"User with Id: {req.RequestedOnBehalfOfId} doesn't exist or isn't this guild's member.", moderatorValidator.Exception);
 
-            try
-            {
-                moderator = await guild.GetMemberAsync(req.RequestedOnBehalfOfId);
-            }
-            catch (Exception ex)
-            {
-                throw new DiscordNotFoundException(
-                    $"User with Id: {req.RequestedOnBehalfOfId} doesn't exist or isn't this guild's member.", ex);
-            }
+            var targetValidator = new DiscordGuildValidator<DiscordMember>(guild, req.TargetUserId.Value);
+            if (await targetValidator.IsValidAsync()) target = targetValidator.RetrievedObject;
+            else throw new DiscordNotFoundException($"User with Id: {req.TargetUserId} doesn't exist or isn't this guild's member.", targetValidator.Exception);
 
             return await GetAsync(guild, target, moderator);
         }

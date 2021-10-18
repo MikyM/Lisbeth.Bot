@@ -41,6 +41,7 @@ using OpenTracing.Mock;
 using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using FluentValidation.AspNetCore;
 
 namespace Lisbeth.Bot.API
 {
@@ -226,6 +227,17 @@ namespace Lisbeth.Bot.API
                     options.MaximumJobsFailed = 0;
                 })
                 .AddCheck<DiscordHealthCheck>("Discord health check");
+        }
+
+        public static void ConfigureFluentValidation(this IServiceCollection services)
+        {
+            services.AddFluentValidation(options =>
+            {
+                //options.RegisterValidatorsFromAssemblyContaining<PersonValidator>();
+                options.DisableDataAnnotationsValidation = true;
+                options.AutomaticValidationEnabled = false;
+                options.ImplicitlyValidateChildProperties = true;
+            });
         }
     }
 }

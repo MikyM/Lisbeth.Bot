@@ -1,12 +1,14 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using DSharpPlus.Net;
+﻿using DSharpPlus.Net;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using MikyM.Discord.Interfaces;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.API.HealthChecks
 {
+    [UsedImplicitly]
     public class DiscordHealthCheck : IHealthCheck
     {
         private readonly IDiscordService _discord;
