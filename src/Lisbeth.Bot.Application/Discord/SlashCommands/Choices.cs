@@ -45,4 +45,17 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
         [ChoiceName("add")] Add,
         [ChoiceName("remove")] Remove
     }
+
+    public enum ReminderActionType
+    {
+        [ChoiceName("add")] Add,
+        [ChoiceName("reschedule")] Reschedule,
+        [ChoiceName("remove")] Remove
+    }
+
+    public enum ReminderType
+    {
+        Single,
+        Recurring
+    }
 }
