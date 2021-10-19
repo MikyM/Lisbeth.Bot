@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using DSharpPlus.SlashCommands;
 using JetBrains.Annotations;
+using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands
 {
@@ -29,7 +30,8 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             [Option("authorUrl", "Url for author image for the embed")] string authorUrl,
             [Option("footerUrl", "Url for footer image for the embed")] string footerUrl,
             [Option("fields", "Fields to parse for the embed")] string fields,
-            [Option("imageUrl", "Base image url for the embed")] string imageUrl)
+            [Option("imageUrl", "Base image url for the embed")] string imageUrl,
+            [Option("id","Id of a created reminder")] string id = "")
         {
         }
     }
