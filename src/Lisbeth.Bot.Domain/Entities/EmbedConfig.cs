@@ -15,27 +15,25 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Lisbeth.Bot.Domain.DTOs.Request
-{
-    public class TicketAddReqDto
-    {
-        public TicketAddReqDto(long? id, ulong? ownerId, ulong? guildId, ulong? channelId, ulong requestedById,
-            ulong snowflakeId)
-        {
-            Id = id;
-            OwnerId = ownerId;
-            GuildId = guildId;
-            ChannelId = channelId;
-            RequestedById = requestedById;
-            SnowflakeId = snowflakeId;
-        }
+using Lisbeth.Bot.Domain.Entities.Base;
 
-        public long? Id { get; set; }
-        public ulong? OwnerId { get; set; }
-        public ulong? GuildId { get; set; }
-        public ulong? ChannelId { get; set; }
-        public long? GuildSpecificId { get; set; }
-        public ulong RequestedById { get; set; }
-        public ulong SnowflakeId { get; set; }
+namespace Lisbeth.Bot.Domain.Entities
+{
+    public class EmbedConfig : SnowflakeEntity
+    {
+        public string Fields { get; set; }
+        public string Title { get; set; }
+        public string Footer { get; set; }
+        public string ImageUrl { get; set; }
+        public string FooterImageUrl { get; set; }
+        public string TitleImageUrl { get; set; }
+        public string Description { get; set; }
+
+        public long? ReminderId { get; set; }
+        public long? RecurringReminderId { get; set; }
+        public long? TagId { get; set; }
+        public Reminder Reminder { get; set; }
+        public RecurringReminder RecurringReminder { get; set; }
+        public Tag Tag { get; set;
     }
 }

@@ -17,15 +17,16 @@
 
 using Lisbeth.Bot.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Lisbeth.Bot.DataAccessLayer.Configurations
 {
-    public class ReminderConfig : IEntityTypeConfiguration<Reminder>
+    public class TagConfig : IEntityTypeConfiguration<Tag>
     {
-        public void Configure(EntityTypeBuilder<Reminder> builder)
+        public void Configure(EntityTypeBuilder<Tag> builder)
         {
-            builder.ToTable("reminder");
+            builder.ToTable("tag");
 
             builder.Property(x => x.Id).HasColumnName("id").HasColumnType("bigint").ValueGeneratedOnAdd().IsRequired();
             builder.Property(x => x.IsDisabled).HasColumnName("is_disabled").HasColumnType("boolean").IsRequired();
@@ -33,13 +34,15 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
                 .ValueGeneratedOnAdd().IsRequired();
             builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamp").IsRequired();
 
-            builder.Property(x => x.Mentions).HasColumnName("tags").HasColumnType("text");
-            builder.Property(x => x.GuildId).HasColumnName("guild_id").HasColumnType("bigint");
-            builder.Property(x => x.UserId).HasColumnName("user_id").HasColumnType("bigint").IsRequired();
-            builder.Property(x => x.Text).HasColumnName("text").HasColumnType("text");
-            builder.Property(x => x.SetForDate).HasColumnName("set_for_date").HasColumnType("timestamptz").IsRequired();
+            builder.Property(x => x.Name).HasColumnName("name").HasColumnType("varchar(100)").HasMaxLength(100).IsRequired().ValueGeneratedOnAdd();
+            builder.Property(x => x.GuildId).HasColumnName("guild_id").HasColumnType("bigint").ValueGeneratedOnAdd()
+                .IsRequired();
+            builder.Property(x => x.UserId).HasColumnName("user_id").HasColumnType("bigint").ValueGeneratedOnAdd()
+                .IsRequired();
 
-            builder.OwnsOne<EmbedConfig>(nameof(Reminder.EmbedConfig), ownedNavigationBuilder =>
+            builder.HasIndex(x => x.Name).IsUnique();
+
+            builder.OwnsOne<EmbedConfig>(nameof(Tag.EmbedConfig), ownedNavigationBuilder =>
             {
                 ownedNavigationBuilder.ToTable("embed_config");
 
@@ -66,8 +69,8 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
                     .HasColumnName("varchar(1000)").HasMaxLength(1000);
 
                 ownedNavigationBuilder
-                    .WithOwner(x => x.Reminder)
-                    .HasForeignKey(x => x.ReminderId)
+                    .WithOwner(x => x.Tag)
+                    .HasForeignKey(x => x.TagId)
                     .HasPrincipalKey(x => x.Id);
             });
         }

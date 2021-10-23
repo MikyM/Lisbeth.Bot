@@ -17,25 +17,11 @@
 
 namespace Lisbeth.Bot.Domain.DTOs.Request
 {
-    public class TicketAddReqDto
+    public class TagDisableReqDto
     {
-        public TicketAddReqDto(long? id, ulong? ownerId, ulong? guildId, ulong? channelId, ulong requestedById,
-            ulong snowflakeId)
-        {
-            Id = id;
-            OwnerId = ownerId;
-            GuildId = guildId;
-            ChannelId = channelId;
-            RequestedById = requestedById;
-            SnowflakeId = snowflakeId;
-        }
-
         public long? Id { get; set; }
-        public ulong? OwnerId { get; set; }
-        public ulong? GuildId { get; set; }
-        public ulong? ChannelId { get; set; }
-        public long? GuildSpecificId { get; set; }
-        public ulong RequestedById { get; set; }
-        public ulong SnowflakeId { get; set; }
+        public string Name { get; set; }
+        public ulong GuildId { get; set; }
+        public ulong RequestedOnBehalfOfId { get; set; }
     }
 }

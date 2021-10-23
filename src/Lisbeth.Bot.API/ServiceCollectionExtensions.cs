@@ -67,6 +67,8 @@ namespace Lisbeth.Bot.API
                 extension.RegisterCommands<AdminUtilSlashCommands>(790631933758799912);
                 extension.RegisterCommands<PruneApplicationCommands>(790631933758799912);
                 extension.RegisterCommands<ModerationUtilSlashCommands>(790631933758799912);
+                extension.RegisterCommands<TagSlashCommands>(790631933758799912);
+                extension.RegisterCommands<ReminderSlashCommands>(790631933758799912);
             });
             services.AddDiscordInteractivity(options =>
             {

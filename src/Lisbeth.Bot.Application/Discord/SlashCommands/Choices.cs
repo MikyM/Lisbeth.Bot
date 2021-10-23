@@ -58,4 +58,12 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
         Single,
         Recurring
     }
+
+    public enum TagActionType
+    {
+        [ChoiceName("get")] Get,
+        [ChoiceName("add")] Add,
+        [ChoiceName("edit")] Edit,
+        [ChoiceName("remove")] Remove
+    }
 }

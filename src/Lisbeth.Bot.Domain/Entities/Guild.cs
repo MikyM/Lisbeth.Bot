@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Lisbeth.Bot.Domain.Entities.Base;
 
 namespace Lisbeth.Bot.Domain.Entities
@@ -30,6 +31,7 @@ namespace Lisbeth.Bot.Domain.Entities
         private readonly HashSet<RecurringReminder> recurringReminders;
         private readonly HashSet<Reminder> reminders;
         private readonly HashSet<Ticket> tickets;
+        private readonly HashSet<Tag> tags;
 
         public ulong GuildId { get; set; }
         public ulong UserId { get; set; }
@@ -44,6 +46,7 @@ namespace Lisbeth.Bot.Domain.Entities
         public IReadOnlyCollection<GuildServerBooster> GuildServerBoosters => guildServerBoosters;
         public IReadOnlyCollection<Reminder> Reminders => reminders;
         public IReadOnlyCollection<RecurringReminder> RecurringReminders => recurringReminders;
+        public IReadOnlyCollection<Tag> Tags => tags;
 
         public void AddMute(Mute mute)
         {
@@ -67,6 +70,26 @@ namespace Lisbeth.Bot.Domain.Entities
         {
             if (guildServerBooster is null) throw new ArgumentNullException(nameof(guildServerBooster));
             guildServerBoosters.Add(guildServerBooster);
+        }
+
+        public bool AddTag(Tag tag)
+        {
+            if (tag is null) throw new ArgumentNullException(nameof(tag));
+            return tags.Add(tag);
+        }
+
+        public bool RemoveTag(string name)
+        {
+            if (name is "") throw new ArgumentException("Name can't be empty", nameof(name));
+            var res = tags.RemoveWhere(x => x.Name == name);
+            return res > 0;
+        }
+
+        public bool EditTag(Tag tag)
+        {
+            if (tag is null) throw new ArgumentNullException(nameof(tag));
+            var res = tags.RemoveWhere(x => x.Name == tag.Name);
+            return res != 0 && tags.Add(tag);
         }
 
         public void SetTicketingConfig(TicketingConfig config)

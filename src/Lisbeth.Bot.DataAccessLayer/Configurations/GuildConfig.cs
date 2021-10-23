@@ -63,6 +63,14 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
                 .HasPrincipalKey(x => x.GuildId)
                 .IsRequired(false);
 
+            builder
+                .HasMany(x => x.Tags)
+                .WithOne(x => x.Guild)
+                .HasForeignKey(x => x.GuildId)
+                .HasPrincipalKey(x => x.GuildId)
+                .IsRequired(false);
+
+            builder.Metadata.FindNavigation(nameof(Guild.Tags)).SetPropertyAccessMode(PropertyAccessMode.Field);
             builder.Metadata.FindNavigation(nameof(Guild.Bans)).SetPropertyAccessMode(PropertyAccessMode.Field);
             builder.Metadata.FindNavigation(nameof(Guild.Mutes)).SetPropertyAccessMode(PropertyAccessMode.Field);
             builder.Metadata.FindNavigation(nameof(Guild.Prunes)).SetPropertyAccessMode(PropertyAccessMode.Field);

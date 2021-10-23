@@ -587,8 +587,12 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             var embed = new DiscordEmbedBuilder();
             embed.WithColor(new DiscordColor(guildCfg.EmbedHexColor));
-            embed.WithDescription(
-                guildCfg.TicketingConfig.TicketWelcomeMessageDescription.Replace("@ownerMention@", owner.Mention));
+            if (guildCfg.TicketingConfig.TicketWelcomeMessageDescription is not null &&
+                guildCfg.TicketingConfig.TicketWelcomeMessageDescription != "")
+            {
+                embed.WithDescription(
+                    guildCfg.TicketingConfig.TicketWelcomeMessageDescription.Replace("@ownerMention@", owner.Mention));
+            }
 
             var fields =
                 JsonSerializer.Deserialize<Dictionary<string, string>>(guildCfg.TicketingConfig
@@ -599,7 +603,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 foreach (var (fieldName, fieldValue) in fields)
                 {
                     if (i >= 25) break;
-                    embed.AddField(fieldName, fieldValue);
+                    embed.AddField(fieldName, fieldValue.Replace("@ownerMention@", owner.Mention));
                     i++;
                 }
             }

@@ -15,27 +15,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Lisbeth.Bot.Domain.DTOs.Request
-{
-    public class TicketAddReqDto
-    {
-        public TicketAddReqDto(long? id, ulong? ownerId, ulong? guildId, ulong? channelId, ulong requestedById,
-            ulong snowflakeId)
-        {
-            Id = id;
-            OwnerId = ownerId;
-            GuildId = guildId;
-            ChannelId = channelId;
-            RequestedById = requestedById;
-            SnowflakeId = snowflakeId;
-        }
+using Lisbeth.Bot.DataAccessLayer;
+using Lisbeth.Bot.Domain.DTOs.Request;
+using Lisbeth.Bot.Domain.Entities;
+using MikyM.Common.Application.Interfaces;
+using System.Threading.Tasks;
 
-        public long? Id { get; set; }
-        public ulong? OwnerId { get; set; }
-        public ulong? GuildId { get; set; }
-        public ulong? ChannelId { get; set; }
-        public long? GuildSpecificId { get; set; }
-        public ulong RequestedById { get; set; }
-        public ulong SnowflakeId { get; set; }
+namespace Lisbeth.Bot.Application.Services.Interfaces
+{
+    public interface ITagService : ICrudService<Tag, LisbethBotDbContext>
+    {
+        Task UpdateTagEmbedConfigAsync(TagEditReqDto req, bool shouldSave = false);
+        Task DisableAsync(TagDisableReqDto req, bool shouldSave = false);
     }
 }

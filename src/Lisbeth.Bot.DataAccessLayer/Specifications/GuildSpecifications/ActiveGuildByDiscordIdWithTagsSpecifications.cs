@@ -15,27 +15,19 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Lisbeth.Bot.Domain.DTOs.Request
-{
-    public class TicketAddReqDto
-    {
-        public TicketAddReqDto(long? id, ulong? ownerId, ulong? guildId, ulong? channelId, ulong requestedById,
-            ulong snowflakeId)
-        {
-            Id = id;
-            OwnerId = ownerId;
-            GuildId = guildId;
-            ChannelId = channelId;
-            RequestedById = requestedById;
-            SnowflakeId = snowflakeId;
-        }
 
-        public long? Id { get; set; }
-        public ulong? OwnerId { get; set; }
-        public ulong? GuildId { get; set; }
-        public ulong? ChannelId { get; set; }
-        public long? GuildSpecificId { get; set; }
-        public ulong RequestedById { get; set; }
-        public ulong SnowflakeId { get; set; }
+using Lisbeth.Bot.Domain.Entities;
+using MikyM.Common.DataAccessLayer.Specifications;
+
+namespace Lisbeth.Bot.DataAccessLayer.Specifications.GuildSpecifications
+{
+    public class ActiveGuildByDiscordIdWithTagsSpecifications : Specifications<Guild>
+    {
+        public ActiveGuildByDiscordIdWithTagsSpecifications(ulong discordGuildId)
+        {
+            AddFilterCondition(x => !x.IsDisabled);
+            AddFilterCondition(x => x.GuildId == discordGuildId);
+            AddInclude(x => x.Tags);
+        }
     }
 }
