@@ -34,6 +34,6 @@ namespace Lisbeth.Bot.Domain.Entities
         public long? TagId { get; set; }
         public Reminder Reminder { get; set; }
         public RecurringReminder RecurringReminder { get; set; }
-        public Tag Tag { get; set;
+        public Tag Tag { get; set; }
     }
 }

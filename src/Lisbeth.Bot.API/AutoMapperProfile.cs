@@ -16,6 +16,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using AutoMapper;
+using Lisbeth.Bot.Domain.DTOs;
 using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.Entities;
 
@@ -36,6 +37,9 @@ namespace Lisbeth.Bot.API
             CreateMap<Ticket, Ticket>();
             CreateMap<TicketingConfig, TicketingConfig>();
             CreateMap<ModerationConfig, ModerationConfig>();
+            CreateMap<TagAddReqDto, Tag>();
+            CreateMap<EmbedConfigDto, EmbedConfig>();
+            CreateMap<TagGetReqDto, Tag>();
         }
     }
 }
