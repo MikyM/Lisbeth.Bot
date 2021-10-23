@@ -140,7 +140,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
 
         [UsedImplicitly]
         [SlashRequireUserPermissions(Permissions.Administrator)]
-        [SlashCommand("guildadd", "A command that allows setting ticketing module up")]
+        [SlashCommand("guild-add", "A command that adds current guild to bot's database.")]
         public async Task TestGuild(InteractionContext ctx)
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);

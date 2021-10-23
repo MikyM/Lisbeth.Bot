@@ -39,40 +39,10 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
                 .IsRequired();
             builder.Property(x => x.UserId).HasColumnName("user_id").HasColumnType("bigint").ValueGeneratedOnAdd()
                 .IsRequired();
+            builder.Property(x => x.Text).HasColumnName("text").HasColumnType("text");
+            builder.Property(x => x.EmbedConfigId).HasColumnName("embed_config_id").HasColumnType("bigint");
 
             builder.HasIndex(x => x.Name).IsUnique();
-
-            builder.OwnsOne<EmbedConfig>(nameof(Tag.EmbedConfig), ownedNavigationBuilder =>
-            {
-                ownedNavigationBuilder.ToTable("embed_config");
-
-                ownedNavigationBuilder.Property(x => x.Id).HasColumnName("id").HasColumnType("bigint")
-                    .ValueGeneratedOnAdd().IsRequired();
-                ownedNavigationBuilder.Property(x => x.IsDisabled).HasColumnName("is_disabled").HasColumnType("boolean")
-                    .IsRequired();
-                ownedNavigationBuilder.Property(x => x.CreatedAt).HasColumnName("created_at").HasColumnType("timestamp")
-                    .ValueGeneratedOnAdd().IsRequired();
-                ownedNavigationBuilder.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamp")
-                    .IsRequired();
-
-                ownedNavigationBuilder.Property(x => x.Description).HasColumnName("description").HasColumnName("text");
-                ownedNavigationBuilder.Property(x => x.Fields).HasColumnName("fields").HasColumnName("text");
-                ownedNavigationBuilder.Property(x => x.Title).HasColumnName("title").HasColumnName("varchar(200)")
-                    .HasMaxLength(200);
-                ownedNavigationBuilder.Property(x => x.Footer).HasColumnName("footer").HasColumnName("varchar(200)")
-                    .HasMaxLength(200);
-                ownedNavigationBuilder.Property(x => x.FooterImageUrl).HasColumnName("footer_image_url")
-                    .HasColumnName("varchar(1000)").HasMaxLength(1000);
-                ownedNavigationBuilder.Property(x => x.TitleImageUrl).HasColumnName("title_image_url")
-                    .HasColumnName("varchar(1000)").HasMaxLength(1000);
-                ownedNavigationBuilder.Property(x => x.ImageUrl).HasColumnName("image_url")
-                    .HasColumnName("varchar(1000)").HasMaxLength(1000);
-
-                ownedNavigationBuilder
-                    .WithOwner(x => x.Tag)
-                    .HasForeignKey(x => x.TagId)
-                    .HasPrincipalKey(x => x.Id);
-            });
         }
     }
 }

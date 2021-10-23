@@ -26,7 +26,6 @@ namespace Lisbeth.Bot.Domain.Entities
         public ulong UserId { get; set; }
         public DateTime? LiftedOn { get; set; }
         public DateTime? AppliedUntil { get; set; }
-        public DateTime? AppliedOn { get; set; } = DateTime.UtcNow;
         public ulong AppliedById { get; set; }
         public ulong LiftedById { get; set; }
         public string Reason { get; set; } = "";

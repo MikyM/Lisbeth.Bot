@@ -15,18 +15,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Lisbeth.Bot.Domain.Entities.Base;
 
-namespace Lisbeth.Bot.Domain.Entities
+using Hangfire.Dashboard;
+
+namespace Lisbeth.Bot.API.Helpers
 {
-    public class Tag : SnowflakeEntity
+    public class HangfireAuthFilter : IDashboardAuthorizationFilter
     {
-        public string Name { get; set; }
-        public ulong UserId { get; set; }
-        public ulong GuildId { get; set; }
-        public string Text { get; set; }
-        public long? EmbedConfigId { get; set; }
-        public EmbedConfig EmbedConfig { get; set; }
-        public Guild Guild { get; set; }
+        public bool Authorize(DashboardContext context)
+        {
+            var httpContext = context.GetHttpContext();
+            return httpContext.User.Identity is { IsAuthenticated: true };
+        }
     }
 }

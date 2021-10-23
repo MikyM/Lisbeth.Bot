@@ -25,6 +25,7 @@ namespace Lisbeth.Bot.Domain.Entities
         public string CronExpression { get; set; }
         public ulong? UserId { get; set; }
         public ulong? GuildId { get; set; }
+        public long? EmbedConfigId { get; set; }
         public string Text { get; set; }
         public string Mentions { get; set; }
 

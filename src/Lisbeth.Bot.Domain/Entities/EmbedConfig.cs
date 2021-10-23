@@ -22,16 +22,13 @@ namespace Lisbeth.Bot.Domain.Entities
     public class EmbedConfig : SnowflakeEntity
     {
         public string Fields { get; set; }
-        public string Title { get; set; }
+        public string Author { get; set; }
         public string Footer { get; set; }
         public string ImageUrl { get; set; }
         public string FooterImageUrl { get; set; }
-        public string TitleImageUrl { get; set; }
+        public string AuthorImageUrl { get; set; }
         public string Description { get; set; }
 
-        public long? ReminderId { get; set; }
-        public long? RecurringReminderId { get; set; }
-        public long? TagId { get; set; }
         public Reminder Reminder { get; set; }
         public RecurringReminder RecurringReminder { get; set; }
         public Tag Tag { get; set; }

@@ -40,11 +40,11 @@ namespace Lisbeth.Bot.DataAccessLayer.Specifications.MuteSpecifications
             if (liftedOn is not null)
                 AddFilterCondition(x => x.LiftedOn == liftedOn);
             if (appliedOn is not null)
-                AddFilterCondition(x => x.AppliedOn == appliedOn);
+                AddFilterCondition(x => x.CreatedAt == appliedOn);
             if (liftedById is not null)
                 AddFilterCondition(x => x.LiftedById == liftedById);
 
-            ApplyOrderByDescending(x => x.AppliedOn);
+            ApplyOrderByDescending(x => x.CreatedAt);
 
             ApplyLimit(limit);
         }

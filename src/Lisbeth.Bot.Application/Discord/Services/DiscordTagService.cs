@@ -173,7 +173,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             var embed = new DiscordEmbedBuilder();
             embed.WithColor(new DiscordColor(guildCfg.EmbedHexColor));
             if (tag.EmbedConfig.Description is not null && tag.EmbedConfig.Description != "") embed.WithDescription(tag.EmbedConfig.Description);
-            if (tag.EmbedConfig.Title is not null && tag.EmbedConfig.Title != "") embed.WithAuthor(tag.EmbedConfig.Title, null, tag.EmbedConfig.TitleImageUrl);
+            if (tag.EmbedConfig.Author is not null && tag.EmbedConfig.Author != "") embed.WithAuthor(tag.EmbedConfig.Author, null, tag.EmbedConfig.AuthorImageUrl);
             if (tag.EmbedConfig.Footer is not null && tag.EmbedConfig.Footer != "") embed.WithFooter(tag.EmbedConfig.Footer, tag.EmbedConfig.FooterImageUrl);
             if (tag.EmbedConfig.ImageUrl is not null && tag.EmbedConfig.ImageUrl != "") embed.WithImageUrl(tag.EmbedConfig.ImageUrl);
 

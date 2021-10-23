@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Globalization;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Hangfire;
@@ -30,6 +29,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
+using System.Globalization;
 
 namespace Lisbeth.Bot.API
 {
@@ -90,10 +90,14 @@ namespace Lisbeth.Bot.API
             app.UseMiddleware<CustomExceptionMiddleware>();
             app.UseHttpsRedirection();
             app.UseRouting();
+            app.UseSentryTracing();
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseSerilogRequestLogging();
-            app.UseHangfireDashboard();
+
+            if (env.IsDevelopment()) app.UseHangfireDashboard();
+            else app.UseHangfireDashboard("/hangfire", new DashboardOptions {AppPath = "kek", Authorization = new[] {new HangfireAuthFilter()}});
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapHealthChecks("/health").RequireAuthorization();

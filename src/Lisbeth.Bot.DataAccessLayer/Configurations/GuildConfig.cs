@@ -93,6 +93,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
             builder.Property(x => x.UserId).HasColumnName("inviter_id").HasColumnType("bigint");
             builder.Property(x => x.EmbedHexColor).HasColumnName("embed_hex_color").HasColumnType("varchar(40)")
                 .HasMaxLength(40).IsRequired();
+            builder.Property(x => x.ReminderChannelId).HasColumnName("reminder_channel_id").HasColumnType("bigint");
 
             builder.OwnsOne<TicketingConfig>(nameof(Guild.TicketingConfig), ownedNavigationBuilder =>
             {
