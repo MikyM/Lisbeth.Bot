@@ -16,6 +16,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+using DSharpPlus;
 using FluentValidation;
 using Lisbeth.Bot.Application.Validation.ReusablePropertyValidation;
 using Lisbeth.Bot.Domain.DTOs.Request;
@@ -25,7 +26,8 @@ namespace Lisbeth.Bot.Application.Validation
 {
     public class TicketExportReqValidator : AbstractValidator<TicketExportReqDto>
     {
-        public TicketExportReqValidator(IDiscordService discord)
+        public TicketExportReqValidator(IDiscordService discordService) : this(discordService.Client) { }
+        public TicketExportReqValidator(DiscordClient discord)
         {
             CascadeMode = CascadeMode.Stop;
 
