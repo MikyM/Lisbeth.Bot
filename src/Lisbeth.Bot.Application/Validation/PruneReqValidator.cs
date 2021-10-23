@@ -43,6 +43,6 @@ namespace Lisbeth.Bot.Application.Validation
                 .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<PruneReqDto>(discord)));
             RuleFor(x => x.Count)
                 .InclusiveBetween(1, 99);
-        } 
+        }
     }
 }

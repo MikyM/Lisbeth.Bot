@@ -22,6 +22,7 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
+using FluentValidation;
 using Hangfire;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.Exceptions;
@@ -29,6 +30,7 @@ using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Application.Discord.Validation;
 using Lisbeth.Bot.Application.Services.Interfaces;
+using Lisbeth.Bot.Application.Validation;
 using Lisbeth.Bot.DataAccessLayer.Specifications.BanSpecifications;
 using Lisbeth.Bot.DataAccessLayer.Specifications.GuildSpecifications;
 using Lisbeth.Bot.Domain.DTOs.Request;
@@ -51,122 +53,6 @@ namespace Lisbeth.Bot.Application.Discord.Services
             _guildService = guildService;
         }
 
-        public async Task<DiscordEmbed> BanAsync(BanReqDto req)
-        {
-            if (req is null) throw new ArgumentNullException(nameof(req));
-
-            DiscordMember target;
-            DiscordMember moderator;
-            DiscordGuild guild;
-
-            var guildValidator = new DiscordValidator<DiscordGuild>(_discord.Client, req.GuildId);
-            if (await guildValidator.IsValidAsync()) guild = guildValidator.RetrievedObject;
-            else throw new DiscordNotFoundException($"Guild with Id: {req.GuildId} doesn't exist.", guildValidator.Exception);
-
-            var moderatorValidator = new DiscordGuildValidator<DiscordMember>(guild, req.RequestedOnBehalfOfId);
-            if (await moderatorValidator.IsValidAsync()) moderator = moderatorValidator.RetrievedObject;
-            else throw new DiscordNotFoundException($"User with Id: {req.RequestedOnBehalfOfId} doesn't exist or isn't this guild's member.", moderatorValidator.Exception);
-
-            var targetValidator = new DiscordGuildValidator<DiscordMember>(guild, req.TargetUserId);
-            if (await targetValidator.IsValidAsync()) target = targetValidator.RetrievedObject;
-            else throw new DiscordNotFoundException($"User with Id: {req.TargetUserId} doesn't exist or isn't this guild's member.", targetValidator.Exception);
-
-            return await BanAsync(guild, target, moderator, req.AppliedUntil, req.Reason, req);
-        }
-
-        public async Task<DiscordEmbed> BanAsync(InteractionContext ctx, DateTime appliedUntil, string reason = "")
-        {
-            if (ctx is null) throw new ArgumentNullException(nameof(ctx));
-
-            return await BanAsync(ctx.Guild, (DiscordMember) ctx.ResolvedUserMentions[0], ctx.Member, appliedUntil,
-                reason);
-        }
-
-        public async Task<DiscordEmbed> UnbanAsync(BanDisableReqDto req)
-        {
-            if (req is null) throw new ArgumentNullException(nameof(req));
-
-            DiscordMember target;
-            DiscordMember moderator;
-            DiscordGuild guild;
-
-            if (req.Id is null && (req.GuildId is null || req.TargetUserId is null))
-                throw new ArgumentException("You must supply either ban Id or guild Id and user Id");
-
-            if (req.Id is not null)
-            {
-                var ban = await _banService.GetAsync<Ban>(req.Id.Value);
-                if (ban is null) throw new ArgumentException("Ban not found");
-                req.GuildId = ban.GuildId;
-                req.TargetUserId = ban.UserId;
-            }
-
-            var guildValidator = new DiscordValidator<DiscordGuild>(_discord.Client, req.GuildId.Value);
-            if (await guildValidator.IsValidAsync()) guild = guildValidator.RetrievedObject;
-            else throw new DiscordNotFoundException($"Guild with Id: {req.GuildId} doesn't exist.", guildValidator.Exception);
-
-            var moderatorValidator = new DiscordGuildValidator<DiscordMember>(guild, req.RequestedOnBehalfOfId);
-            if (await moderatorValidator.IsValidAsync()) moderator = moderatorValidator.RetrievedObject;
-            else throw new DiscordNotFoundException($"User with Id: {req.RequestedOnBehalfOfId} doesn't exist or isn't this guild's member.", moderatorValidator.Exception);
-
-            var targetValidator = new DiscordGuildValidator<DiscordMember>(guild, req.TargetUserId.Value);
-            if (await targetValidator.IsValidAsync()) target = targetValidator.RetrievedObject;
-            else throw new DiscordNotFoundException($"User with Id: {req.TargetUserId} doesn't exist or isn't this guild's member.", targetValidator.Exception);
-
-            return await UnbanAsync(guild, target, moderator);
-        }
-
-        public async Task<DiscordEmbed> UnbanAsync(InteractionContext ctx)
-        {
-            if (ctx is null) throw new ArgumentNullException(nameof(ctx));
-
-            return await UnbanAsync(ctx.Guild, ctx.ResolvedUserMentions[0], ctx.Member);
-        }
-
-        public async Task<DiscordEmbed> GetSpecificUserGuildBanAsync(BanGetReqDto req)
-        {
-            if (req is null) throw new ArgumentNullException(nameof(req));
-
-            DiscordMember target;
-            DiscordMember moderator;
-            DiscordGuild guild;
-
-            if (req.Id is null && (req.GuildId is null || req.TargetUserId is null))
-                throw new ArgumentException("You must supply either ban Id or guild Id and user Id");
-
-            if (req.Id is not null)
-            {
-                var ban = await _banService.GetAsync<Ban>(req.Id.Value);
-                if (ban is null) throw new ArgumentException("Ban not found");
-                req.GuildId = ban.GuildId;
-                req.TargetUserId = ban.UserId;
-                req.AppliedById = ban.AppliedById;
-                req.LiftedById = ban.LiftedById;
-                req.AppliedOn = ban.CreatedAt;
-            }
-
-            var guildValidator = new DiscordValidator<DiscordGuild>(_discord.Client, req.GuildId.Value);
-            if (await guildValidator.IsValidAsync()) guild = guildValidator.RetrievedObject;
-            else throw new DiscordNotFoundException($"Guild with Id: {req.GuildId} doesn't exist.", guildValidator.Exception);
-
-            var moderatorValidator = new DiscordGuildValidator<DiscordMember>(guild, req.RequestedOnBehalfOfId);
-            if (await moderatorValidator.IsValidAsync()) moderator = moderatorValidator.RetrievedObject;
-            else throw new DiscordNotFoundException($"User with Id: {req.RequestedOnBehalfOfId} doesn't exist or isn't this guild's member.", moderatorValidator.Exception);
-
-            var targetValidator = new DiscordGuildValidator<DiscordMember>(guild, req.TargetUserId.Value);
-            if (await targetValidator.IsValidAsync()) target = targetValidator.RetrievedObject;
-            else throw new DiscordNotFoundException($"User with Id: {req.TargetUserId} doesn't exist or isn't this guild's member.", targetValidator.Exception);
-
-            return await GetAsync(guild, target, moderator);
-        }
-
-        public async Task<DiscordEmbed> GetAsync(InteractionContext ctx)
-        {
-            if (ctx is null) throw new ArgumentNullException(nameof(ctx));
-
-            return await GetAsync(ctx.Guild, ctx.ResolvedUserMentions[0], ctx.Member);
-        }
-
         [Queue("moderation")]
         public async Task UnbanCheckAsync()
         {
@@ -182,12 +68,31 @@ namespace Lisbeth.Bot.Application.Discord.Services
             }
         }
 
-        private async Task<DiscordEmbed> BanAsync(DiscordGuild guild, DiscordMember target, DiscordMember moderator,
-            DateTime appliedUntil, string reason = "", BanReqDto req = null)
+        public async Task<DiscordEmbed> BanAsync(BanReqDto req)
+        {
+            if (req is null) throw new ArgumentNullException(nameof(req));
+
+            DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
+            DiscordMember target = await guild.GetMemberAsync(req.TargetUserId);
+            DiscordMember moderator = await guild.GetMemberAsync(req.RequestedOnBehalfOfId);
+
+            return await BanAsync(guild, target, moderator, req);
+        }
+
+        public async Task<DiscordEmbed> BanAsync(InteractionContext ctx, BanReqDto req)
+        {
+            if (ctx is null) throw new ArgumentNullException(nameof(ctx));
+            if (req is null) throw new ArgumentNullException(nameof(req));
+
+            return await BanAsync(ctx.Guild, (DiscordMember)ctx.ResolvedUserMentions[0], ctx.Member, req);
+        }
+
+        private async Task<DiscordEmbed> BanAsync(DiscordGuild guild, DiscordMember target, DiscordMember moderator, BanReqDto req)
         {
             if (guild is null) throw new ArgumentNullException(nameof(guild));
             if (target is null) throw new ArgumentNullException(nameof(target));
             if (moderator is null) throw new ArgumentNullException(nameof(moderator));
+            if (req is null) throw new ArgumentNullException(nameof(req));
 
             if (moderator.Guild.Id != guild.Id) throw new ArgumentException(nameof(moderator));
             if (target.Guild.Id != guild.Id) throw new ArgumentException(nameof(target));
@@ -225,8 +130,6 @@ namespace Lisbeth.Bot.Application.Discord.Services
                         ex);
                 }
 
-            if (appliedUntil < DateTime.UtcNow) throw new ArgumentException("Mute until date must be in the future.");
-
             try
             {
                 ban = await guild.GetBanAsync(target.Id);
@@ -236,17 +139,15 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 ban = null;
             }
 
-            req ??= new BanReqDto(target.Id, guild.Id, moderator.Id, appliedUntil, reason);
-
             var (id, foundEntity) = await _banService.AddOrExtendAsync(req, true);
 
             var embed = new DiscordEmbedBuilder();
             embed.WithColor(0x18315C);
             embed.WithAuthor($"Ban | {target.GetFullUsername()}", null, target.AvatarUrl);
 
-            TimeSpan tmspDuration = appliedUntil.Subtract(DateTime.UtcNow);
+            TimeSpan tmspDuration = req.AppliedUntil.Subtract(DateTime.UtcNow);
 
-            string lengthString = appliedUntil == DateTime.MaxValue
+            string lengthString = req.AppliedUntil == DateTime.MaxValue
                 ? "Permanent"
                 : $"{tmspDuration.Days} days, {tmspDuration.Hours} hrs, {tmspDuration.Minutes} mins";
 
@@ -258,8 +159,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 embed.AddField("User mention", target.Mention, true);
                 embed.AddField("Moderator", moderator.Mention, true);
                 embed.AddField("Length", lengthString, true);
-                embed.AddField("Banned until", appliedUntil.ToString(CultureInfo.InvariantCulture), true);
-                embed.AddField("Reason", reason);
+                embed.AddField("Banned until", req.AppliedUntil.ToString(CultureInfo.InvariantCulture), true);
+                embed.AddField("Reason", req.Reason);
                 embed.WithFooter($"Case ID: {id} | User ID: {target.Id}");
             }
             else
@@ -292,8 +193,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     embed.AddField("User mention", target.Mention, true);
                     embed.AddField("Moderator", moderator.Mention, true);
                     embed.AddField("Length", lengthString, true);
-                    embed.AddField("Banned until", appliedUntil.ToString(CultureInfo.InvariantCulture), true);
-                    embed.AddField("Reason", reason);
+                    embed.AddField("Banned until", req.AppliedUntil.ToString(CultureInfo.InvariantCulture), true);
+                    embed.AddField("Reason", req.Reason);
                     embed.WithFooter($"Case ID: {id} | User ID: {target.Id}");
                 }
             }
@@ -316,12 +217,50 @@ namespace Lisbeth.Bot.Application.Discord.Services
             return embed;
         }
 
-        private async Task<DiscordEmbed> UnbanAsync(DiscordGuild guild, DiscordUser target, DiscordMember moderator,
-            BanDisableReqDto req = null)
+        public async Task<DiscordEmbed> UnbanAsync(BanDisableReqDto req)
+        {
+            if (req is null) throw new ArgumentNullException(nameof(req));
+
+            DiscordGuild guild;
+            DiscordMember target;
+
+            if (req.Id.HasValue)
+            {
+                var ban = await _banService.GetAsync<Ban>(req.Id.Value);
+                if (ban is null) throw new ArgumentException("Ban not found");
+                req.GuildId = ban.GuildId;
+                req.TargetUserId = ban.UserId;
+            }
+
+            if (req.TargetUserId.HasValue && req.GuildId.HasValue)
+            {
+                 guild = await _discord.Client.GetGuildAsync(req.GuildId.Value);
+                 target = await guild.GetMemberAsync(req.TargetUserId.Value);
+            }
+            else
+            {
+                throw new InvalidOperationException();
+            }
+
+            DiscordMember moderator = await guild.GetMemberAsync(req.RequestedOnBehalfOfId);
+
+            return await UnbanAsync(guild, target, moderator, req);
+        }
+
+        public async Task<DiscordEmbed> UnbanAsync(InteractionContext ctx, BanDisableReqDto req)
+        {
+            if (ctx is null) throw new ArgumentNullException(nameof(ctx));
+            if (req is null) throw new ArgumentNullException(nameof(req));
+
+            return await UnbanAsync(ctx.Guild, ctx.ResolvedUserMentions[0], ctx.Member, req);
+        }
+
+        private async Task<DiscordEmbed> UnbanAsync(DiscordGuild guild, DiscordUser target, DiscordMember moderator, BanDisableReqDto req)
         {
             if (guild is null) throw new ArgumentNullException(nameof(guild));
             if (target is null) throw new ArgumentNullException(nameof(target));
             if (moderator is null) throw new ArgumentNullException(nameof(moderator));
+            if (req is null) throw new ArgumentNullException(nameof(req));
 
             DiscordChannel channel = null;
             DiscordBan ban;
@@ -338,6 +277,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 throw new ArgumentException($"Guild with Id: {guild.Id} doesn't have moderation module enabled.");
 
             if (guildCfg.ModerationConfig.MemberEventsLogChannelId is not null)
+            {
                 try
                 {
                     channel = await _discord.Client.GetChannelAsync(guildCfg.ModerationConfig.MemberEventsLogChannelId
@@ -349,6 +289,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                         $"Log channel with Id: {guildCfg.ModerationConfig.MemberEventsLogChannelId} doesn't exist.",
                         ex);
                 }
+            }
 
             try
             {
@@ -393,8 +334,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 embed.WithFooter($"Case ID: {res.Id} | Member ID: {target.Id}");
             }
 
-            if (guildCfg.ModerationConfig.MemberEventsLogChannelId is null)
-                return embed; // means we're not sending to log channel
+            if (guildCfg.ModerationConfig.MemberEventsLogChannelId is null) return embed; // means we're not sending to log channel
 
             // means we're logging to log channel and returning an embed for interaction or other purposes
 
@@ -411,12 +351,53 @@ namespace Lisbeth.Bot.Application.Discord.Services
             return embed;
         }
 
-        private async Task<DiscordEmbed> GetAsync(DiscordGuild guild, DiscordUser target, DiscordMember moderator,
-            BanGetReqDto req = null)
+        public async Task<DiscordEmbed> GetSpecificUserGuildBanAsync(BanGetReqDto req)
+        {
+            if (req is null) throw new ArgumentNullException(nameof(req));
+            if (req is null) throw new ArgumentNullException(nameof(req));
+
+            DiscordMember target;
+            DiscordGuild guild;
+
+            if (req.Id.HasValue)
+            {
+                var ban = await _banService.GetAsync<Ban>(req.Id.Value);
+                if (ban is null) throw new ArgumentException("Ban not found");
+                req.GuildId = ban.GuildId;
+                req.TargetUserId = ban.UserId;
+                req.AppliedById = ban.AppliedById;
+                req.LiftedById = ban.LiftedById;
+                req.AppliedOn = ban.CreatedAt;
+            }
+            if (req.TargetUserId.HasValue && req.GuildId.HasValue)
+            {
+                guild = await _discord.Client.GetGuildAsync(req.GuildId.Value);
+                target = await guild.GetMemberAsync(req.TargetUserId.Value);
+            }
+            else
+            {
+                throw new InvalidOperationException();
+            }
+
+            DiscordMember moderator = await guild.GetMemberAsync(req.RequestedOnBehalfOfId);
+
+            return await GetAsync(guild, target, moderator, req);
+        }
+
+        public async Task<DiscordEmbed> GetSpecificUserGuildBanAsync(InteractionContext ctx, BanGetReqDto req)
+        {
+            if (ctx is null) throw new ArgumentNullException(nameof(ctx));
+            if (req is null) throw new ArgumentNullException(nameof(req));
+
+            return await GetAsync(ctx.Guild, ctx.ResolvedUserMentions[0], ctx.Member, req);
+        }
+
+        private async Task<DiscordEmbed> GetAsync(DiscordGuild guild, DiscordUser target, DiscordMember moderator, BanGetReqDto req)
         {
             if (guild is null) throw new ArgumentNullException(nameof(guild));
             if (target is null) throw new ArgumentNullException(nameof(target));
             if (moderator is null) throw new ArgumentNullException(nameof(moderator));
+            if (req is null) throw new ArgumentNullException(nameof(req));
 
             var guildRes =
                 await _guildService.GetBySpecificationsAsync<Guild>(

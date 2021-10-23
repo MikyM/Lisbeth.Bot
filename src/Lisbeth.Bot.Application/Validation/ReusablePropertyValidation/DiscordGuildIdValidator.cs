@@ -15,9 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using DSharpPlus;
 using FluentValidation;
 using FluentValidation.Validators;
-using MikyM.Discord.Interfaces;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -26,9 +26,9 @@ namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
 {
     public sealed class DiscordGuildIdValidator<T> : IAsyncPropertyValidator<T, ulong>
     {
-        private readonly IDiscordService _discord;
+        private readonly DiscordClient _discord;
 
-        public DiscordGuildIdValidator(IDiscordService discord)
+        public DiscordGuildIdValidator(DiscordClient discord)
         {
             _discord = discord;
         }
@@ -37,7 +37,7 @@ namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
         {
             try
             {
-                var result = await _discord.Client.GetGuildAsync(value);
+                var result = await _discord.GetGuildAsync(value);
                 if (result is null) return false;
             }
             catch (Exception)

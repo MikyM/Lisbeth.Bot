@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using DSharpPlus;
 using DSharpPlus.Entities;
 using Emzi0767.Utilities;
 using FluentValidation;
@@ -29,11 +30,11 @@ namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
 {
     public sealed class DiscordRoleIdValidator<T> : IAsyncPropertyValidator<T, ulong>
     {
-        private readonly IDiscordService _discord;
+        private readonly DiscordClient _discord;
         private object _guildId;
         private bool _doesGuildExist = true;
 
-        public DiscordRoleIdValidator(IDiscordService discord)
+        public DiscordRoleIdValidator(DiscordClient discord)
         {
             _discord = discord;
         }
@@ -46,7 +47,7 @@ namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
             DiscordGuild guild;
             try
             {
-                guild = await _discord.Client.GetGuildAsync((ulong)_guildId);
+                guild = await _discord.GetGuildAsync((ulong)_guildId);
                 if (guild is null)
                 {
                     _doesGuildExist = false;

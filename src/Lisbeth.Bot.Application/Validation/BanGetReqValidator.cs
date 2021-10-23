@@ -17,6 +17,7 @@
 
 
 using System;
+using DSharpPlus;
 using FluentValidation;
 using Lisbeth.Bot.Application.Validation.ReusablePropertyValidation;
 using Lisbeth.Bot.Domain.DTOs.Request;
@@ -26,7 +27,8 @@ namespace Lisbeth.Bot.Application.Validation
 {
     public class BanGetReqValidator : AbstractValidator<BanGetReqDto>
     {
-        public BanGetReqValidator(IDiscordService discord)
+        public BanGetReqValidator(IDiscordService discordService) : this(discordService.Client){ }
+        public BanGetReqValidator(DiscordClient discord)
         {
             CascadeMode = CascadeMode.Stop;
 

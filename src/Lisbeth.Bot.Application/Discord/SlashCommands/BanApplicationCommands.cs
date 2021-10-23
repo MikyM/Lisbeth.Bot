@@ -15,15 +15,18 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
+using FluentValidation;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Application.Extensions;
+using Lisbeth.Bot.Application.Validation;
+using Lisbeth.Bot.Domain.DTOs.Request;
+using System;
+using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands
 {
@@ -48,30 +51,38 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
             DiscordEmbed embed;
+            ulong validId = user?.Id ?? (ulong)id;
 
             switch (actionType)
             {
                 case BanActionType.Add:
-                    if (user is null && id == 0)
-                        throw new ArgumentException("You must supply either a user or an Id.");
 
                     DateTime? liftsOn = length.ToDateTimeDuration().FinalDateFromToday;
+
                     if (liftsOn is null)
                         throw new ArgumentException($"Parameter {nameof(length)} can't be parsed to a known duration.");
 
-                    ulong validId = user?.Id ?? (ulong) id;
+                    var banReq = new BanReqDto(validId, ctx.Guild.Id, ctx.User.Id, liftsOn.Value, reason);
+                    var banReqValidator = new BanReqValidator(ctx.Client);
+                    await banReqValidator.ValidateAndThrowAsync(banReq);
 
-                    embed = await _discordBanService.BanAsync(ctx, liftsOn.Value, reason);
+                    embed = await _discordBanService.BanAsync(ctx, banReq);
                     break;
                 case BanActionType.Remove:
                     if (id == 0)
                         throw new ArgumentException("You must supply an Id of the user to unban.");
-                    embed = await _discordBanService.UnbanAsync(ctx);
+
+                    var banDisableReq = new BanDisableReqDto(validId, ctx.Guild.Id, ctx.User.Id);
+                    var banDisableReqValidator = new BanDisableReqValidator(ctx.Client);
+                    await banDisableReqValidator.ValidateAndThrowAsync(banDisableReq);
+
+                    embed = await _discordBanService.UnbanAsync(ctx, banDisableReq);
                     break;
                 case BanActionType.Get:
-                    if (id == 0)
-                        throw new ArgumentException("You must supply an Id of the user to unban.");
-                    embed = await _discordBanService.GetAsync(ctx);
+                    var banGetReq = new BanGetReqDto(ctx.User.Id, null, validId, ctx.Guild.Id);
+                    var banGetReqValidator = new BanGetReqValidator(ctx.Client);
+                    await banGetReqValidator.ValidateAndThrowAsync(banGetReq);
+                    embed = await _discordBanService.GetSpecificUserGuildBanAsync(ctx, banGetReq);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(actionType), actionType, null);

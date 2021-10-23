@@ -15,11 +15,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using DSharpPlus;
 using DSharpPlus.Entities;
 using Emzi0767.Utilities;
 using FluentValidation;
 using FluentValidation.Validators;
-using MikyM.Discord.Interfaces;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -28,12 +28,12 @@ namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
 {
     public sealed class DiscordUserIdValidator<T> : IAsyncPropertyValidator<T, ulong>
     {
-        private readonly IDiscordService _discord;
+        private readonly DiscordClient _discord;
         private bool _doesGuildExist = true;
         private object _guildId;
         private readonly bool _suppressMemberCheck;
 
-        public DiscordUserIdValidator(IDiscordService discord, bool suppressMemberCheck = false)
+        public DiscordUserIdValidator(DiscordClient discord, bool suppressMemberCheck = false)
         {
             _discord = discord;
             _suppressMemberCheck = suppressMemberCheck;
@@ -47,7 +47,7 @@ namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
                 DiscordGuild guild;
                 try
                 {
-                    guild = await _discord.Client.GetGuildAsync((ulong) _guildId);
+                    guild = await _discord.GetGuildAsync((ulong) _guildId);
                     if (guild is null)
                     {
                         _doesGuildExist = false;
@@ -75,7 +75,7 @@ namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
 
             try
             {
-                var user = await _discord.Client.GetUserAsync(value);
+                var user = await _discord.GetUserAsync(value);
                 if (user is null) return false;
             }
             catch (Exception)

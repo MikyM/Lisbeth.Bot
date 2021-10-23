@@ -16,11 +16,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+using DSharpPlus;
 using DSharpPlus.Entities;
 using Emzi0767.Utilities;
 using FluentValidation;
 using FluentValidation.Validators;
-using MikyM.Discord.Interfaces;
 using System;
 using System.Linq;
 using System.Threading;
@@ -30,13 +30,13 @@ namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
 {
     public class DiscordSnowflakeIdValidator<T> : IAsyncPropertyValidator<T, ulong>
     {
-        private readonly IDiscordService _discord;
+        private readonly DiscordClient _discord;
         private object _guildId;
         private bool _roleExists = true;
         private bool _memberExists = true;
         private bool _guildExists = true;
 
-        public DiscordSnowflakeIdValidator(IDiscordService discord)
+        public DiscordSnowflakeIdValidator(DiscordClient discord)
         {
             _discord = discord;
         }
@@ -50,7 +50,7 @@ namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
             DiscordGuild guild;
             try
             {
-                guild = await _discord.Client.GetGuildAsync((ulong)_guildId);
+                guild = await _discord.GetGuildAsync((ulong)_guildId);
                 if (guild is null)
                 {
                     _guildExists = false;
