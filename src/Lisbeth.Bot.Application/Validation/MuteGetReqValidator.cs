@@ -17,6 +17,7 @@
 
 
 using System;
+using DSharpPlus;
 using FluentValidation;
 using Lisbeth.Bot.Application.Validation.ReusablePropertyValidation;
 using Lisbeth.Bot.Domain.DTOs.Request;
@@ -26,7 +27,8 @@ namespace Lisbeth.Bot.Application.Validation
 {
     public class MuteGetReqValidator : AbstractValidator<MuteGetReqDto>
     {
-        public MuteGetReqValidator(IDiscordService discord)
+        public MuteGetReqValidator(IDiscordService discordService) : this(discordService.Client){}
+        public MuteGetReqValidator(DiscordClient discord)
         {
             CascadeMode = CascadeMode.Stop;
 

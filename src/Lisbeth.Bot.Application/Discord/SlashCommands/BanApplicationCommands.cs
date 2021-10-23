@@ -44,8 +44,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             [Option("action", "Action type")] BanActionType actionType,
             [Option("user", "User to ban")] DiscordUser user = null,
             [Option("id", "User Id to ban")] long id = 0,
-            [Option("length", "For how long should the user be banned")]
-            string length = "perm",
+            [Option("length", "For how long should the user be banned")] string length = "perm",
             [Option("reason", "Reason for ban")] string reason = "No reason provided")
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);

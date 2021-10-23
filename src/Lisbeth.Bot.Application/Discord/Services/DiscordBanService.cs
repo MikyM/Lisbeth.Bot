@@ -15,27 +15,24 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Globalization;
-using System.Linq;
-using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
-using FluentValidation;
 using Hangfire;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.Exceptions;
 using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
-using Lisbeth.Bot.Application.Discord.Validation;
 using Lisbeth.Bot.Application.Services.Interfaces;
-using Lisbeth.Bot.Application.Validation;
 using Lisbeth.Bot.DataAccessLayer.Specifications.BanSpecifications;
 using Lisbeth.Bot.DataAccessLayer.Specifications.GuildSpecifications;
 using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Discord.Interfaces;
+using System;
+using System.Globalization;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {
@@ -434,10 +431,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             {
                 discordBan = null;
             }
-
-
-            req ??= new BanGetReqDto(moderator.Id, null, target.Id, guild.Id);
-
+            
             var res = await _banService.GetBySpecificationsAsync<Ban>(
                 new BanBaseGetSpecifications(req.Id, req.TargetUserId, req.GuildId, req.AppliedById, req.LiftedOn,
                     req.AppliedOn, req.LiftedById));

@@ -21,10 +21,13 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
+using FluentValidation;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Application.Discord.SlashCommands;
 using Lisbeth.Bot.Application.Extensions;
+using Lisbeth.Bot.Application.Validation;
+using Lisbeth.Bot.Domain.DTOs.Request;
 
 // ReSharper disable once CheckNamespace
 namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
@@ -58,13 +61,26 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
                     if (liftsOn is null)
                         throw new ArgumentException($"Parameter {nameof(length)} can't be parsed to a known duration.");
                     if (length is "") throw new ArgumentException($"Parameter {nameof(length)} can't be empty.");
-                    embed = await _discordMuteService.MuteAsync(ctx, liftsOn.Value, reason);
+
+                    var muteReq = new MuteReqDto(user.Id, ctx.Guild.Id, ctx.User.Id, liftsOn.Value, reason);
+                    var muteReqValidator = new MuteReqValidator(ctx.Client);
+                    await muteReqValidator.ValidateAndThrowAsync(muteReq);
+
+                    embed = await _discordMuteService.MuteAsync(ctx, muteReq);
                     break;
                 case MuteActionType.Remove:
-                    embed = await _discordMuteService.UnmuteAsync(ctx);
+                    var muteDisableReq = new MuteDisableReqDto(user.Id, ctx.Guild.Id, ctx.User.Id);
+                    var muteDisableReqValidator = new MuteDisableReqValidator(ctx.Client);
+                    await muteDisableReqValidator.ValidateAndThrowAsync(muteDisableReq);
+
+                    embed = await _discordMuteService.UnmuteAsync(ctx, muteDisableReq);
                     break;
                 case MuteActionType.Get:
-                    embed = await _discordMuteService.GetAsync(ctx);
+                    var muteGetReq = new MuteGetReqDto(ctx.User.Id, null, user.Id, ctx.Guild.Id);
+                    var muteGetReqValidator = new MuteGetReqValidator(ctx.Client);
+                    await muteGetReqValidator.ValidateAndThrowAsync(muteGetReq);
+
+                    embed = await _discordMuteService.GetSpecificUserGuildMuteAsync(ctx, muteGetReq);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(actionType), actionType, null);
