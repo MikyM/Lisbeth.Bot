@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using Autofac;
 using EFCoreSecondLevelCacheInterceptor;
 using IdGen;
@@ -27,8 +28,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using MikyM.Common.Application;
 using MikyM.Common.DataAccessLayer;
-using System;
-using Module = Autofac.Module;
 
 namespace Lisbeth.Bot.API
 {

@@ -21,13 +21,15 @@ using FluentValidation;
 using Lisbeth.Bot.Application.Validation.ReusablePropertyValidation;
 using Lisbeth.Bot.Domain.DTOs.Request;
 using MikyM.Discord.Interfaces;
-using MikyM.Discord.Services;
 
 namespace Lisbeth.Bot.Application.Validation
 {
     public class TicketOpenReqValidator : AbstractValidator<TicketOpenReqDto>
     {
-        public TicketOpenReqValidator(IDiscordService discordService) : this(discordService.Client) { }
+        public TicketOpenReqValidator(IDiscordService discordService) : this(discordService.Client)
+        {
+        }
+
         public TicketOpenReqValidator(DiscordClient discord)
         {
             CascadeMode = CascadeMode.Stop;

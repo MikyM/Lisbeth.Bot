@@ -20,7 +20,8 @@ using Autofac;
 namespace Lisbeth.Bot.Domain
 {
     /// <summary>
-    ///     Autofac container provider for use ONLY under special circumstances when you must use the service locator anti-pattern.
+    ///     Autofac container provider for use ONLY under special circumstances when you must use the service locator
+    ///     anti-pattern.
     ///     For everything else use normal DI.
     /// </summary>
     public static class ContainerProvider

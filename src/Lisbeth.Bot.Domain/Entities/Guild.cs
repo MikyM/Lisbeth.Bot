@@ -24,12 +24,12 @@ namespace Lisbeth.Bot.Domain.Entities
     public sealed class Guild : SnowflakeEntity
     {
         private readonly HashSet<Ban> bans;
+        private readonly HashSet<GuildServerBooster> guildServerBoosters;
         private readonly HashSet<Mute> mutes;
         private readonly HashSet<Prune> prunes;
-        private readonly HashSet<Ticket> tickets;
-        private readonly HashSet<GuildServerBooster> guildServerBoosters;
-        private readonly HashSet<Reminder> reminders;
         private readonly HashSet<RecurringReminder> recurringReminders;
+        private readonly HashSet<Reminder> reminders;
+        private readonly HashSet<Ticket> tickets;
 
         public ulong GuildId { get; set; }
         public ulong UserId { get; set; }

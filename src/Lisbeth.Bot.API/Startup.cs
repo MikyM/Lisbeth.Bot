@@ -47,7 +47,8 @@ namespace Lisbeth.Bot.API
         {
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 
-            services.AddControllers(options => options.Conventions.Add(new RouteTokenTransformerConvention(new SlugifyParameterTransformer())));
+            services.AddControllers(options =>
+                options.Conventions.Add(new RouteTokenTransformerConvention(new SlugifyParameterTransformer())));
             services.ConfigureSwagger();
             services.AddHttpClient();
             services.ConfigureDiscord();

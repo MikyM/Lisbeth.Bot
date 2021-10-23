@@ -24,10 +24,6 @@ namespace Lisbeth.Bot.Application.Discord.Validation
 {
     public class DiscordGuildValidator<TDiscordType> : IDiscordGuildValidator<TDiscordType> where TDiscordType : class
     {
-        public ulong ObjectId { get; }
-        public TDiscordType RetrievedObject { get; private set; }
-        public Exception Exception { get; private set; }
-
         private readonly DiscordGuild _guild;
 
         public DiscordGuildValidator(DiscordGuild guild, ulong objectId)
@@ -35,6 +31,10 @@ namespace Lisbeth.Bot.Application.Discord.Validation
             _guild = guild;
             ObjectId = objectId;
         }
+
+        public ulong ObjectId { get; }
+        public TDiscordType RetrievedObject { get; private set; }
+        public Exception Exception { get; private set; }
 
         public async Task<bool> IsValidAsync()
         {

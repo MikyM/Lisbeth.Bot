@@ -27,10 +27,12 @@ using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.Exceptions;
 using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
+using Lisbeth.Bot.Application.Extensions;
 using Lisbeth.Bot.Application.Services.Interfaces;
 using Lisbeth.Bot.DataAccessLayer.Specifications.MuteSpecifications;
 using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.Entities;
+using Microsoft.Extensions.Logging;
 using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Discord.Interfaces;
 
@@ -42,12 +44,15 @@ namespace Lisbeth.Bot.Application.Discord.Services
         private readonly IDiscordService _discord;
         private readonly IGuildService _guildService;
         private readonly IMuteService _muteService;
+        private readonly ILogger<DiscordMuteService> _logger;
 
-        public DiscordMuteService(IDiscordService discord, IMuteService muteService, IGuildService guildService)
+        public DiscordMuteService(IDiscordService discord, IGuildService guildService, IMuteService muteService,
+            ILogger<DiscordMuteService> logger)
         {
-            _muteService = muteService;
             _discord = discord;
             _guildService = guildService;
+            _muteService = muteService;
+            _logger = logger;
         }
 
         public async Task<DiscordEmbed> MuteAsync(MuteReqDto req)
@@ -55,7 +60,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (req is null) throw new ArgumentNullException(nameof(req));
 
             DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
-            DiscordMember target = await guild.GetMemberAsync(req.TargetUserId); ;
+            DiscordMember target = await guild.GetMemberAsync(req.TargetUserId);
             DiscordMember moderator = await guild.GetMemberAsync(req.RequestedOnBehalfOfId);
 
             return await MuteAsync(guild, target, moderator, req);
@@ -77,7 +82,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
             return await MuteAsync(ctx.Guild, ctx.TargetMember, ctx.Member, req);
         }
 
-        private async Task<DiscordEmbed> MuteAsync(DiscordGuild guild, DiscordMember target, DiscordMember moderator, MuteReqDto req)
+        private async Task<DiscordEmbed> MuteAsync(DiscordGuild guild, DiscordMember target, DiscordMember moderator,
+            MuteReqDto req)
         {
             if (guild is null) throw new ArgumentNullException(nameof(guild));
             if (target is null) throw new ArgumentNullException(nameof(target));
@@ -110,7 +116,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
                         ex);
                 }
 
-            if (req.AppliedUntil < DateTime.UtcNow) throw new ArgumentException("Mute until date must be in the future.");
+            if (req.AppliedUntil < DateTime.UtcNow)
+                throw new ArgumentException("Mute until date must be in the future.");
 
             TimeSpan tmspDuration = req.AppliedUntil.Subtract(DateTime.UtcNow);
 
@@ -209,7 +216,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 }
             }
 
-            if (guildCfg.ModerationConfig.MemberEventsLogChannelId is null)
+            if (!guildCfg.ModerationConfig.MemberEventsLogChannelId.HasValue)
                 return embed; // means we're not sending to log channel
 
             // means we're logging to log channel and returning an embed for interaction or other purposes
@@ -262,7 +269,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (ctx is null) throw new ArgumentNullException(nameof(ctx));
             if (req is null) throw new ArgumentNullException(nameof(req));
 
-            return await UnmuteAsync(ctx.Guild, (DiscordMember) ctx.ResolvedUserMentions[0], ctx.Member, req);
+            return await UnmuteAsync(ctx.Guild, (DiscordMember)ctx.ResolvedUserMentions[0], ctx.Member, req);
         }
 
         public async Task<DiscordEmbed> UnmuteAsync(ContextMenuContext ctx, MuteDisableReqDto req)
@@ -273,7 +280,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
             return await UnmuteAsync(ctx.Guild, ctx.TargetMember, ctx.Member, req);
         }
 
-        private async Task<DiscordEmbed> UnmuteAsync(DiscordGuild guild, DiscordMember target, DiscordMember moderator, MuteDisableReqDto req)
+        private async Task<DiscordEmbed> UnmuteAsync(DiscordGuild guild, DiscordMember target, DiscordMember moderator,
+            MuteDisableReqDto req)
         {
             if (guild is null) throw new ArgumentNullException(nameof(guild));
             if (target is null) throw new ArgumentNullException(nameof(target));
@@ -354,7 +362,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 embed.WithFooter($"Case ID: {res.Id} | Member ID: {target.Id}");
             }
 
-            if (guildCfg.ModerationConfig.MemberEventsLogChannelId is null)
+            if (!guildCfg.ModerationConfig.MemberEventsLogChannelId.HasValue)
                 return embed; // means we're not sending to log channel
 
             // means we're logging to log channel and returning an embed for interaction or other purposes
@@ -389,6 +397,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 req.LiftedById = mute.LiftedById;
                 req.AppliedOn = mute.CreatedAt;
             }
+
             if (req.TargetUserId.HasValue && req.GuildId.HasValue)
             {
                 guild = await _discord.Client.GetGuildAsync(req.GuildId.Value);
@@ -409,7 +418,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (ctx is null) throw new ArgumentNullException(nameof(ctx));
             if (req is null) throw new ArgumentNullException(nameof(req));
 
-            return await GetSpecificUserGuildMuteAsync(ctx.Guild, (DiscordMember) ctx.ResolvedUserMentions[0], ctx.Member, req);
+            return await GetSpecificUserGuildMuteAsync(ctx.Guild, (DiscordMember)ctx.ResolvedUserMentions[0],
+                ctx.Member, req);
         }
 
         public async Task<DiscordEmbed> GetSpecificUserGuildMuteAsync(ContextMenuContext ctx, MuteGetReqDto req)
@@ -420,7 +430,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
             return await GetSpecificUserGuildMuteAsync(ctx.Guild, ctx.TargetMember, ctx.Member, req);
         }
 
-        private async Task<DiscordEmbed> GetSpecificUserGuildMuteAsync(DiscordGuild guild, DiscordMember target, DiscordMember moderator, MuteGetReqDto req)
+        private async Task<DiscordEmbed> GetSpecificUserGuildMuteAsync(DiscordGuild guild, DiscordMember target,
+            DiscordMember moderator, MuteGetReqDto req)
         {
             if (guild is null) throw new ArgumentNullException(nameof(guild));
             if (target is null) throw new ArgumentNullException(nameof(target));
@@ -441,7 +452,6 @@ namespace Lisbeth.Bot.Application.Discord.Services
             DiscordChannel channel = null;
 
             if (guildCfg.ModerationConfig.MemberEventsLogChannelId is not null)
-            {
                 try
                 {
                     channel = await _discord.Client.GetChannelAsync(guildCfg.ModerationConfig.MemberEventsLogChannelId
@@ -453,7 +463,6 @@ namespace Lisbeth.Bot.Application.Discord.Services
                         $"Log channel with Id: {guildCfg.ModerationConfig.MemberEventsLogChannelId} doesn't exist.",
                         ex);
                 }
-            }
 
             var res = await _muteService.GetBySpecificationsAsync<Mute>(
                 new MuteBaseGetSpecifications(req.Id, req.TargetUserId, req.GuildId, req.AppliedById, req.LiftedOn,
@@ -505,7 +514,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 embed.WithFooter($"Case ID: unknown | User ID: {target.Id}");
             }
 
-            if (guildCfg.ModerationConfig.MemberEventsLogChannelId is null)
+            if (!guildCfg.ModerationConfig.MemberEventsLogChannelId.HasValue)
                 return embed; // means we're not sending to log channel
 
             // means we're logging to log channel and returning an embed for interaction or other purposes
@@ -526,15 +535,22 @@ namespace Lisbeth.Bot.Application.Discord.Services
         [Queue("moderation")]
         public async Task UnmuteCheckAsync()
         {
-            var res = await _muteService.GetBySpecificationsAsync<Mute>(
-                new ActiveExpiredMutesInActiveGuildsSpecifications());
-
-            if (res is null || res.Count == 0) return;
-
-            foreach (var mute in res)
+            try
             {
-                var req = new MuteDisableReqDto(mute.UserId, mute.GuildId, _discord.Client.CurrentUser.Id);
-                await UnmuteAsync(req);
+                var res = await _muteService.GetBySpecificationsAsync<Mute>(
+                    new ActiveExpiredMutesInActiveGuildsSpecifications());
+
+                if (res is null || res.Count == 0) return;
+
+                foreach (var mute in res)
+                {
+                    var req = new MuteDisableReqDto(mute.UserId, mute.GuildId, _discord.Client.CurrentUser.Id);
+                    await UnmuteAsync(req);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Automatic unban failed with: {ex.GetFullMessage()}");
             }
         }
     }

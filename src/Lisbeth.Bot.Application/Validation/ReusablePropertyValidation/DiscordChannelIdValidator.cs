@@ -15,29 +15,29 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using Emzi0767.Utilities;
 using FluentValidation;
 using FluentValidation.Validators;
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
 {
     public sealed class DiscordChannelIdValidator<T> : IAsyncPropertyValidator<T, ulong>
     {
         private readonly DiscordClient _discord;
-        private object _guildId;
         private bool _doesGuildExist = true;
+        private object _guildId;
 
         public DiscordChannelIdValidator(DiscordClient discord)
         {
             _discord = discord;
         }
-        
+
         public async Task<bool> IsValidAsync(ValidationContext<T> context, ulong value, CancellationToken cancellation)
         {
             var data = context.InstanceToValidate.ToDictionary();
@@ -87,7 +87,9 @@ namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
 
         public string GetDefaultMessageTemplate(string errorCode)
         {
-            return _doesGuildExist ? "'{PropertyName}' is not a valid Discord Id or a discord channel with given Id doesn't exist." : "'{PropertyName}' is not a valid Discord Id or a discord guild with given Id doesn't exist.";
+            return _doesGuildExist
+                ? "'{PropertyName}' is not a valid Discord Id or a discord channel with given Id doesn't exist."
+                : "'{PropertyName}' is not a valid Discord Id or a discord guild with given Id doesn't exist.";
         }
 
         public string Name => "DiscordChannelIdValidator";

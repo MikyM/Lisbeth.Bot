@@ -31,10 +31,10 @@ namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
     public class DiscordSnowflakeIdValidator<T> : IAsyncPropertyValidator<T, ulong>
     {
         private readonly DiscordClient _discord;
-        private object _guildId;
-        private bool _roleExists = true;
-        private bool _memberExists = true;
         private bool _guildExists = true;
+        private object _guildId;
+        private bool _memberExists = true;
+        private bool _roleExists = true;
 
         public DiscordSnowflakeIdValidator(DiscordClient discord)
         {
@@ -50,7 +50,7 @@ namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
             DiscordGuild guild;
             try
             {
-                guild = await _discord.GetGuildAsync((ulong)_guildId);
+                guild = await _discord.GetGuildAsync((ulong) _guildId);
                 if (guild is null)
                 {
                     _guildExists = false;
@@ -84,12 +84,14 @@ namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
             }
 
             return _roleExists || _memberExists;
-
         }
 
         public string GetDefaultMessageTemplate(string errorCode)
         {
-            return "'{PropertyName}' is not a valid Discord Id or a discord member or a role with given Id doesn't exist / isn't guilds part.";
+            return _guildExists
+                ? "'{PropertyName}' is not a valid Discord Id or a discord member or a role with given Id doesn't exist / isn't guilds part."
+                : "'{PropertyName}' is not a valid Discord Id or a discord guild does not exist.";
+
         }
 
 

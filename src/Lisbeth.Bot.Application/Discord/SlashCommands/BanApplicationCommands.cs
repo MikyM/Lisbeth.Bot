@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
@@ -25,8 +27,6 @@ using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Application.Extensions;
 using Lisbeth.Bot.Application.Validation;
 using Lisbeth.Bot.Domain.DTOs.Request;
-using System;
-using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands
 {
@@ -44,13 +44,14 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             [Option("action", "Action type")] BanActionType actionType,
             [Option("user", "User to ban")] DiscordUser user = null,
             [Option("id", "User Id to ban")] long id = 0,
-            [Option("length", "For how long should the user be banned")] string length = "perm",
+            [Option("length", "For how long should the user be banned")]
+            string length = "perm",
             [Option("reason", "Reason for ban")] string reason = "No reason provided")
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
             DiscordEmbed embed;
-            ulong validId = user?.Id ?? (ulong)id;
+            ulong validId = user?.Id ?? (ulong) id;
 
             switch (actionType)
             {

@@ -12,7 +12,8 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
 
             builder.Property(x => x.GuildId).HasColumnName("guild_id").HasColumnType("bigint").ValueGeneratedOnAdd()
                 .IsRequired();
-            builder.Property(x => x.ServerBoosterId).HasColumnName("user_id").HasColumnType("bigint").ValueGeneratedOnAdd()
+            builder.Property(x => x.ServerBoosterId).HasColumnName("user_id").HasColumnType("bigint")
+                .ValueGeneratedOnAdd()
                 .IsRequired();
 
             builder.HasKey(x => new {x.GuildId, x.ServerBoosterId});

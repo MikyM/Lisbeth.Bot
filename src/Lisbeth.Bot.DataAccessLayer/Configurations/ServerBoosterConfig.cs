@@ -38,9 +38,11 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
             builder.Property(x => x.UserId).HasColumnName("user_id").HasColumnType("bigint").ValueGeneratedOnAdd()
                 .IsRequired();
             builder.Property(x => x.BoostCount).HasColumnName("boost_count").HasColumnType("int").IsRequired();
-            builder.Property(x => x.BoostingSince).HasColumnName("boosting_since").HasColumnType("timestamp").IsRequired();
+            builder.Property(x => x.BoostingSince).HasColumnName("boosting_since").HasColumnType("timestamp")
+                .IsRequired();
 
-            builder.Metadata.FindNavigation(nameof(ServerBooster.GuildServerBoosters)).SetPropertyAccessMode(PropertyAccessMode.Field);
+            builder.Metadata.FindNavigation(nameof(ServerBooster.GuildServerBoosters))
+                .SetPropertyAccessMode(PropertyAccessMode.Field);
         }
     }
 }

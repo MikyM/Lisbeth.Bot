@@ -15,19 +15,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus;
 using System;
 using System.Threading.Tasks;
+using DSharpPlus;
 using DSharpPlus.Entities;
 
 namespace Lisbeth.Bot.Application.Discord.Validation
 {
     public class DiscordValidator<TDiscordType> : IDiscordValidator<TDiscordType> where TDiscordType : class
     {
-        public ulong ObjectId { get; }
-        public TDiscordType RetrievedObject { get; private set; }
-        public Exception Exception { get; private set; }
-
         private readonly DiscordClient _client;
 
         public DiscordValidator(DiscordClient client, ulong objectId)
@@ -35,6 +31,10 @@ namespace Lisbeth.Bot.Application.Discord.Validation
             ObjectId = objectId;
             _client = client;
         }
+
+        public ulong ObjectId { get; }
+        public TDiscordType RetrievedObject { get; private set; }
+        public Exception Exception { get; private set; }
 
         public async Task<bool> IsValidAsync()
         {

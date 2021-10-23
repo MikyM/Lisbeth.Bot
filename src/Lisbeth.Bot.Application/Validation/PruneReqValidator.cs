@@ -25,7 +25,10 @@ namespace Lisbeth.Bot.Application.Validation
 {
     public class PruneReqValidator : AbstractValidator<PruneReqDto>
     {
-        public PruneReqValidator(IDiscordService discordService) : this(discordService.Client){}
+        public PruneReqValidator(IDiscordService discordService) : this(discordService.Client)
+        {
+        }
+
         public PruneReqValidator(DiscordClient discord)
         {
             CascadeMode = CascadeMode.Stop;

@@ -26,11 +26,14 @@ namespace Lisbeth.Bot.Application.Validation
 {
     public class MuteDisableReqValidator : AbstractValidator<MuteDisableReqDto>
     {
-        public MuteDisableReqValidator(IDiscordService discordService) : this(discordService.Client){}
+        public MuteDisableReqValidator(IDiscordService discordService) : this(discordService.Client)
+        {
+        }
+
         public MuteDisableReqValidator(DiscordClient discord)
         {
             CascadeMode = CascadeMode.Stop;
-            
+
             RuleFor(x => x.Id).NotEmpty().When(x => !x.GuildId.HasValue || !x.TargetUserId.HasValue);
 
             RuleFor(x => x.GuildId)

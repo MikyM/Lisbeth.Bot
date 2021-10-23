@@ -26,7 +26,10 @@ namespace Lisbeth.Bot.Application.Validation
 {
     public class TicketExportReqValidator : AbstractValidator<TicketExportReqDto>
     {
-        public TicketExportReqValidator(IDiscordService discordService) : this(discordService.Client) { }
+        public TicketExportReqValidator(IDiscordService discordService) : this(discordService.Client)
+        {
+        }
+
         public TicketExportReqValidator(DiscordClient discord)
         {
             CascadeMode = CascadeMode.Stop;

@@ -15,6 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
@@ -23,9 +26,6 @@ using FluentValidation;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Validation;
 using Lisbeth.Bot.Domain.DTOs.Request;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 
 // ReSharper disable once CheckNamespace
 namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
@@ -41,7 +41,7 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
         public async Task MuteUserMenu(ContextMenuContext ctx)
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
-            
+
             var muteReq = new MuteReqDto(ctx.TargetUser.Id, ctx.Guild.Id, ctx.User.Id, DateTime.MaxValue,
                 "No reason provided - muted via user context menu");
             var muteReqValidator = new MuteReqValidator(ctx.Client);

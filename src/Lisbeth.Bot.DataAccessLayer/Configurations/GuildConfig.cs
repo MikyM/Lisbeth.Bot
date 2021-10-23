@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
 using Lisbeth.Bot.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -67,9 +66,11 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
             builder.Metadata.FindNavigation(nameof(Guild.Bans)).SetPropertyAccessMode(PropertyAccessMode.Field);
             builder.Metadata.FindNavigation(nameof(Guild.Mutes)).SetPropertyAccessMode(PropertyAccessMode.Field);
             builder.Metadata.FindNavigation(nameof(Guild.Prunes)).SetPropertyAccessMode(PropertyAccessMode.Field);
-            builder.Metadata.FindNavigation(nameof(Guild.GuildServerBoosters)).SetPropertyAccessMode(PropertyAccessMode.Field);
+            builder.Metadata.FindNavigation(nameof(Guild.GuildServerBoosters))
+                .SetPropertyAccessMode(PropertyAccessMode.Field);
             builder.Metadata.FindNavigation(nameof(Guild.Reminders)).SetPropertyAccessMode(PropertyAccessMode.Field);
-            builder.Metadata.FindNavigation(nameof(Guild.RecurringReminders)).SetPropertyAccessMode(PropertyAccessMode.Field);
+            builder.Metadata.FindNavigation(nameof(Guild.RecurringReminders))
+                .SetPropertyAccessMode(PropertyAccessMode.Field);
 
             builder.ToTable("guild");
 
@@ -114,13 +115,17 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
                     .HasColumnType("varchar(100)").HasMaxLength(100);
                 ownedNavigationBuilder.Property(x => x.CleanAfter).HasColumnName("clean_after").HasColumnType("time");
                 ownedNavigationBuilder.Property(x => x.CloseAfter).HasColumnName("close_after").HasColumnType("time");
-                ownedNavigationBuilder.Property(x => x.TicketCenterMessageDescription).HasColumnName("ticket_center_message_description")
+                ownedNavigationBuilder.Property(x => x.TicketCenterMessageDescription)
+                    .HasColumnName("ticket_center_message_description")
                     .HasColumnType("text");
-                ownedNavigationBuilder.Property(x => x.TicketWelcomeMessageDescription).HasColumnName("ticket_welcome_message_description")
+                ownedNavigationBuilder.Property(x => x.TicketWelcomeMessageDescription)
+                    .HasColumnName("ticket_welcome_message_description")
                     .HasColumnType("text");
-                ownedNavigationBuilder.Property(x => x.TicketCenterMessageFields).HasColumnName("ticket_center_message_fields")
+                ownedNavigationBuilder.Property(x => x.TicketCenterMessageFields)
+                    .HasColumnName("ticket_center_message_fields")
                     .HasColumnType("text");
-                ownedNavigationBuilder.Property(x => x.TicketWelcomeMessageFields).HasColumnName("ticket_welcome_message_fields")
+                ownedNavigationBuilder.Property(x => x.TicketWelcomeMessageFields)
+                    .HasColumnName("ticket_welcome_message_fields")
                     .HasColumnType("text");
 
                 ownedNavigationBuilder

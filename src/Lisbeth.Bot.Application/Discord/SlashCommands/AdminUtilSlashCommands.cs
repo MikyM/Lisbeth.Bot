@@ -16,19 +16,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus;
-using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
-using JetBrains.Annotations;
-using Lisbeth.Bot.DataAccessLayer;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Scripting;
-using Microsoft.CodeAnalysis.Scripting;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using MikyM.Common.Application.Interfaces;
-using MikyM.Common.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -37,7 +24,19 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Autofac;
+using DSharpPlus;
+using DSharpPlus.Entities;
+using DSharpPlus.SlashCommands;
+using DSharpPlus.SlashCommands.Attributes;
+using JetBrains.Annotations;
+using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.Domain;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Scripting;
+using Microsoft.CodeAnalysis.Scripting;
+using Microsoft.EntityFrameworkCore;
+using MikyM.Common.Application.Interfaces;
+using MikyM.Common.Domain.Entities;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands
 {
@@ -164,7 +163,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             if (csc.Any(xd => xd.Severity == DiagnosticSeverity.Error))
             {
                 embed = new DiscordEmbedBuilder
-                {   
+                {
                     Title = "Compilation failed",
                     Description =
                         string.Concat("Compilation failed after ", sw1.ElapsedMilliseconds.ToString("#,##0"),
@@ -180,10 +179,8 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                 }
 
                 if (csc.Length > 3)
-                {
                     embed.AddField("Some errors ommitted",
                         string.Concat((csc.Length - 3).ToString("#,##0"), " more errors not displayed"));
-                }
 
                 await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
                 return;
@@ -212,7 +209,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     Description =
                         string.Concat("Execution failed after ", sw2.ElapsedMilliseconds.ToString("#,##0"),
                             "ms with `", rex.GetType(), ": ", rex.Message, "`."),
-                    Color = new DiscordColor(0xD091B2),
+                    Color = new DiscordColor(0xD091B2)
                 };
                 await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
                 return;
@@ -233,6 +230,11 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
 
     public sealed class EvaluationEnvironment
     {
+        public EvaluationEnvironment(InteractionContext ctx)
+        {
+            Context = ctx;
+        }
+
         public InteractionContext Context { get; }
 
         public DiscordInteraction Interaction => Context.Interaction;
@@ -242,10 +244,5 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
         public DiscordMember Member => Context.Member;
         public DiscordClient Client => Context.Client;
         public HttpClient Http => ContainerProvider.Container.Resolve<IHttpClientFactory>().CreateClient();
-
-        public EvaluationEnvironment(InteractionContext ctx)
-        {
-            Context = ctx;
-        }
     }
 }

@@ -9,7 +9,7 @@ namespace Lisbeth.Bot.API.Helpers
 {
     public static class RecurringJobHelper
     {
-        public static List<string> JobIds { get; private set; } = new();
+        public static List<string> JobIds { get; } = new();
 
         public static void ScheduleAutomaticUnmute()
         {

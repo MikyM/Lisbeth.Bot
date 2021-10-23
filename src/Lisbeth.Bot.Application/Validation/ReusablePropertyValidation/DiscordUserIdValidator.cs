@@ -15,23 +15,23 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using Emzi0767.Utilities;
 using FluentValidation;
 using FluentValidation.Validators;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
 {
     public sealed class DiscordUserIdValidator<T> : IAsyncPropertyValidator<T, ulong>
     {
         private readonly DiscordClient _discord;
+        private readonly bool _suppressMemberCheck;
         private bool _doesGuildExist = true;
         private object _guildId;
-        private readonly bool _suppressMemberCheck;
 
         public DiscordUserIdValidator(DiscordClient discord, bool suppressMemberCheck = false)
         {
@@ -89,11 +89,11 @@ namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
         public string GetDefaultMessageTemplate(string errorCode)
         {
             if (!_doesGuildExist)
-            {
                 return "'{PropertyName}' is not a valid Discord Id or a discord guild with given Id doesn't exist.";
-            }
 
-            return _guildId is not null ? "'{PropertyName}' is not a valid Discord Id or a discord member with given Id doesn't exist / isn't guilds member." : "'{PropertyName}' is not a valid Discord Id or a discord user with given Id doesn't exist.";
+            return _guildId is not null
+                ? "'{PropertyName}' is not a valid Discord Id or a discord member with given Id doesn't exist / isn't guilds member."
+                : "'{PropertyName}' is not a valid Discord Id or a discord user with given Id doesn't exist.";
         }
 
 

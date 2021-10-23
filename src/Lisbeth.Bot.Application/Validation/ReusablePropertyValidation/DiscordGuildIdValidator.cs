@@ -15,12 +15,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus;
-using FluentValidation;
-using FluentValidation.Validators;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using DSharpPlus;
+using FluentValidation;
+using FluentValidation.Validators;
 
 namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
 {
@@ -32,7 +32,7 @@ namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
         {
             _discord = discord;
         }
-        
+
         public async Task<bool> IsValidAsync(ValidationContext<T> context, ulong value, CancellationToken cancellation)
         {
             try
@@ -49,7 +49,9 @@ namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
         }
 
         public string GetDefaultMessageTemplate(string errorCode)
-            => "'{PropertyName}' is not a valid Discord Id or a discord guild with given Id doesn't exist.";
+        {
+            return "'{PropertyName}' is not a valid Discord Id or a discord guild with given Id doesn't exist.";
+        }
 
         public string Name => "DiscordGuildIdValidator";
     }

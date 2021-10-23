@@ -27,7 +27,10 @@ namespace Lisbeth.Bot.Application.Validation
 {
     public class MuteReqValidator : AbstractValidator<MuteReqDto>
     {
-        public MuteReqValidator(IDiscordService discordService) : this(discordService.Client){}
+        public MuteReqValidator(IDiscordService discordService) : this(discordService.Client)
+        {
+        }
+
         public MuteReqValidator(DiscordClient discord)
         {
             CascadeMode = CascadeMode.Stop;

@@ -23,9 +23,5 @@ namespace Lisbeth.Bot.Application.Validation
 {
     public class GuildGetReqValidator : AbstractValidator<GuildGetReqDto>
     {
-        public GuildGetReqValidator()
-        {
-            
-        }
     }
 }

@@ -21,8 +21,11 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
+using FluentValidation;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
+using Lisbeth.Bot.Application.Validation;
+using Lisbeth.Bot.Domain.DTOs.Request;
 
 // ReSharper disable InconsistentNaming
 
@@ -52,10 +55,16 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             switch (action)
             {
                 case TicketActionType.Add:
-                    embed = await _discordTicketService.AddToTicketAsync(ctx);
+                    var addReq = new TicketAddReqDto(null, null, ctx.Guild.Id, ctx.Channel.Id, ctx.User.Id, target.Id);
+                    var addReqValidator = new TicketAddReqValidator(ctx.Client);
+                    await addReqValidator.ValidateAndThrowAsync(addReq);
+                    embed = await _discordTicketService.AddToTicketAsync(ctx, addReq);
                     break;
                 case TicketActionType.Remove:
-                    embed = await _discordTicketService.RemoveFromTicketAsync(ctx);
+                    var removeReq = new TicketRemoveReqDto(null, null, ctx.Guild.Id, ctx.Channel.Id, ctx.User.Id, target.Id);
+                    var removeReqValidator = new TicketRemoveReqValidator(ctx.Client);
+                    await removeReqValidator.ValidateAndThrowAsync(removeReq);
+                    embed = await _discordTicketService.RemoveFromTicketAsync(ctx, removeReq);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(action), action, null);

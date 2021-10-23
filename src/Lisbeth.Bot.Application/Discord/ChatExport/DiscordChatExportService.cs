@@ -64,12 +64,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
             DiscordUser owner;
             Ticket ticket;
 
-            if (req.Id is null && req.ChannelId is null && (req.OwnerId is null || req.GuildId is null) &&
-                (req.GuildSpecificId is null || req.GuildId is null))
-                throw new ArgumentException(
-                    "You must supply either a ticket Id or a channel Id or a user Id and a guild Id or a guild specific ticket Id and guild Id.");
-
-            if (req.Id is not null)
+            if (req.Id.HasValue)
             {
                 ticket = await _ticketService.GetAsync<Ticket>(req.Id.Value);
                 if (ticket is null)
@@ -79,7 +74,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
                 req.GuildId = ticket.GuildId;
                 req.OwnerId = ticket.UserId;
             }
-            else if (req.OwnerId is not null && req.GuildId is not null)
+            else if (req.OwnerId.HasValue && req.GuildId.HasValue)
             {
                 var res = await _ticketService.GetBySpecificationsAsync<Ticket>(
                     new TicketBaseGetSpecifications(null, req.OwnerId, req.GuildId, null, null, false, 1));
@@ -91,7 +86,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
                 req.GuildId = ticket.GuildId;
                 req.OwnerId = ticket.UserId;
             }
-            else if (req.GuildSpecificId is not null && req.GuildId is not null)
+            else if (req.GuildSpecificId.HasValue && req.GuildId.HasValue)
             {
                 var res = await _ticketService.GetBySpecificationsAsync<Ticket>(
                     new TicketBaseGetSpecifications(null, null, req.GuildId, null, req.GuildSpecificId.Value, false,

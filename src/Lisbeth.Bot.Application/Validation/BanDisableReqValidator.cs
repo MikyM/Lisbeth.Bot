@@ -26,11 +26,14 @@ namespace Lisbeth.Bot.Application.Validation
 {
     public class BanDisableReqValidator : AbstractValidator<BanDisableReqDto>
     {
-        public BanDisableReqValidator(IDiscordService discordService) : this(discordService.Client){ }
+        public BanDisableReqValidator(IDiscordService discordService) : this(discordService.Client)
+        {
+        }
+
         public BanDisableReqValidator(DiscordClient discord)
         {
             CascadeMode = CascadeMode.Stop;
-            
+
             RuleFor(x => x.Id).NotEmpty().When(x => !x.GuildId.HasValue || !x.TargetUserId.HasValue);
 
             RuleFor(x => x.GuildId)

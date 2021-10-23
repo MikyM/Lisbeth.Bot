@@ -1,10 +1,10 @@
-﻿using DSharpPlus.Net;
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
+using DSharpPlus.Net;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using MikyM.Discord.Interfaces;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.API.HealthChecks
 {
@@ -18,7 +18,8 @@ namespace Lisbeth.Bot.API.HealthChecks
             _discord = discord;
         }
 
-        public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context,
+            CancellationToken cancellationToken = new())
         {
             GatewayInfo info;
 

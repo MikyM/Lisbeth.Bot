@@ -1,5 +1,5 @@
-﻿using Lisbeth.Bot.Domain.Entities.Base;
-using System;
+﻿using System;
+using Lisbeth.Bot.Domain.Entities.Base;
 
 namespace Lisbeth.Bot.Domain.Entities
 {

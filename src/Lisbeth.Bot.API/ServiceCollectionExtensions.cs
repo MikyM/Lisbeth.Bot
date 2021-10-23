@@ -15,12 +15,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using AspNetCore.Authentication.ApiKey;
 using AspNetCoreRateLimit;
 using DSharpPlus;
 using DSharpPlus.Interactivity.Enums;
 using EasyCaching.InMemory;
 using EFCoreSecondLevelCacheInterceptor;
+using FluentValidation.AspNetCore;
 using Hangfire;
 using Hangfire.PostgreSql;
 using Lisbeth.Bot.API.HealthChecks;
@@ -38,10 +42,6 @@ using MikyM.Discord.Extensions.Interactivity;
 using MikyM.Discord.Extensions.SlashCommands;
 using OpenTracing;
 using OpenTracing.Mock;
-using System;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using FluentValidation.AspNetCore;
 
 namespace Lisbeth.Bot.API
 {

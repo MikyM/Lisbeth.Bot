@@ -71,7 +71,8 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             embed.WithTitle($"__{ctx.Guild.Name}'s Support Ticket Center__");
             embed.WithDescription(guild.TicketingConfig.TicketCenterMessageDescription);
 
-            var fields = JsonSerializer.Deserialize<Dictionary<string, string>>(guild.TicketingConfig.TicketCenterMessageFields);
+            var fields =
+                JsonSerializer.Deserialize<Dictionary<string, string>>(guild.TicketingConfig.TicketCenterMessageFields);
             if (fields is not null && fields.Count != 0)
             {
                 int i = 1;

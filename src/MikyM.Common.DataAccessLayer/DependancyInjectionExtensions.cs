@@ -30,7 +30,7 @@ namespace MikyM.Common.DataAccessLayer
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             services.AddScoped(typeof(IUnitOfWork<>), typeof(UnitOfWork<>));
         }
-        
+
         public static void AddDataAccessLayer(this ContainerBuilder builder)
         {
             builder.RegisterGeneric(typeof(ReadOnlyRepository<>)).As(typeof(IReadOnlyRepository<>))

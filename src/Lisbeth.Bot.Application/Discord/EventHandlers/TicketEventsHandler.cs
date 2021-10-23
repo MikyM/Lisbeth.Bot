@@ -22,6 +22,7 @@ using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.ChatExport;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Application.Helpers;
+using Lisbeth.Bot.Domain.DTOs.Request;
 using MikyM.Discord.Events;
 
 namespace Lisbeth.Bot.Application.Discord.EventHandlers
@@ -42,22 +43,28 @@ namespace Lisbeth.Bot.Application.Discord.EventHandlers
             if (args.Id == "ticket_close_btn")
             {
                 await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+                var req = new TicketCloseReqDto(null, null, args.Guild.Id, args.Channel.Id, args.User.Id);
                 _ = _asyncExecutor.ExecuteAsync<IDiscordTicketService>(async x =>
-                    await x.CloseTicketAsync(args.Interaction));
+                    await x.CloseTicketAsync(args.Interaction, req));
             }
 
             if (args.Id == "ticket_open_btn")
             {
                 await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+                var req = new TicketOpenReqDto {GuildId = args.Guild.Id, OwnerId = args.User.Id};
                 _ = _asyncExecutor.ExecuteAsync<IDiscordTicketService>(async x =>
-                    await x.OpenTicketAsync(args.Interaction));
+                    await x.OpenTicketAsync(args.Interaction, req));
             }
 
             if (args.Id == "ticket_reopen_btn")
             {
                 await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+                var req = new TicketReopenReqDto
+                {
+                    GuildId = args.Guild.Id, ChannelId = args.Channel.Id, RequestedById = args.User.Id
+                };
                 _ = _asyncExecutor.ExecuteAsync<IDiscordTicketService>(async x =>
-                    await x.ReopenTicketAsync(args.Interaction));
+                    await x.ReopenTicketAsync(args.Interaction, req));
             }
 
             if (args.Id == "ticket_save_trans_btn")

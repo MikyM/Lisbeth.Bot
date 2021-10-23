@@ -27,7 +27,10 @@ namespace Lisbeth.Bot.Application.Validation
 {
     public class BanGetReqValidator : AbstractValidator<BanGetReqDto>
     {
-        public BanGetReqValidator(IDiscordService discordService) : this(discordService.Client){ }
+        public BanGetReqValidator(IDiscordService discordService) : this(discordService.Client)
+        {
+        }
+
         public BanGetReqValidator(DiscordClient discord)
         {
             CascadeMode = CascadeMode.Stop;
