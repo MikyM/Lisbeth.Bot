@@ -1073,5 +1073,19 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             return embed.Build();
         }
+
+        public async Task CheckForDeletedTicketChannelAsync(DiscordChannel channel)
+        {
+            var res = await _ticketService.GetBySpecificationsAsync<Ticket>(
+                new TicketBaseGetSpecifications(null, null, channel.GuildId, channel.Id, null, false, 1));
+
+            var ticket = res.FirstOrDefault();
+
+            if (ticket is null) return;
+
+            var req = new TicketCloseReqDto(ticket.Id, ticket.UserId, ticket.GuildId, ticket.ChannelId,
+                _discord.Client.CurrentUser.Id);
+            await _ticketService.CloseAsync(req, ticket);
+        }
     }
 }

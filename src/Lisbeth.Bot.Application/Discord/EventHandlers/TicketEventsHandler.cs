@@ -32,7 +32,7 @@ using MikyM.Discord.Events;
 namespace Lisbeth.Bot.Application.Discord.EventHandlers
 {
     [UsedImplicitly]
-    public class TicketEventsHandler : IDiscordMiscEventsSubscriber
+    public class TicketEventsHandler : IDiscordMiscEventsSubscriber, IDiscordChannelEventsSubscriber
     {
         private readonly IAsyncExecutor _asyncExecutor;
         private readonly ILogger<TicketEventsHandler> _logger;
@@ -46,54 +46,72 @@ namespace Lisbeth.Bot.Application.Discord.EventHandlers
         public async Task DiscordOnComponentInteractionCreated(DiscordClient sender,
             ComponentInteractionCreateEventArgs args)
         {
-            try
+            if (args.Id == "ticket_close_btn")
             {
-                if (args.Id == "ticket_close_btn")
-                {
-                    await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
-                    var req = new TicketCloseReqDto(null, null, args.Guild.Id, args.Channel.Id, args.User.Id);
-                    _ = _asyncExecutor.ExecuteAsync<IDiscordTicketService>(async x =>
-                        await x.CloseTicketAsync(args.Interaction, req));
-                }
-
-                if (args.Id == "ticket_open_btn")
-                {
-                    await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
-                        new DiscordInteractionResponseBuilder().AsEphemeral(true));
-                    var req = new TicketOpenReqDto {GuildId = args.Guild.Id, OwnerId = args.User.Id};
-                    _ = _asyncExecutor.ExecuteAsync<IDiscordTicketService>(async x =>
-                        await x.OpenTicketAsync(args.Interaction, req));
-                }
-
-                if (args.Id == "ticket_reopen_btn")
-                {
-                    await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
-                    var req = new TicketReopenReqDto
-                    {
-                        GuildId = args.Guild.Id,
-                        ChannelId = args.Channel.Id,
-                        RequestedById = args.User.Id
-                    };
-                    _ = _asyncExecutor.ExecuteAsync<IDiscordTicketService>(async x =>
-                        await x.ReopenTicketAsync(args.Interaction, req));
-                }
-
-                if (args.Id == "ticket_save_trans_btn")
-                {
-                    await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
-                    _ = _asyncExecutor.ExecuteAsync<IDiscordChatExportService>(async x =>
-                        await x.ExportToHtmlAsync(args.Interaction));
-                }
+                await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+                var req = new TicketCloseReqDto(null, null, args.Guild.Id, args.Channel.Id, args.User.Id);
+                _ = _asyncExecutor.ExecuteAsync<IDiscordTicketService>(async x =>
+                    await x.CloseTicketAsync(args.Interaction, req));
             }
-            catch (Exception ex)
+
+            if (args.Id == "ticket_open_btn")
             {
-                _logger.LogError($"Ticket interactions failed with: {ex.GetFullMessage()}");
+                await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
+                    new DiscordInteractionResponseBuilder().AsEphemeral(true));
+                var req = new TicketOpenReqDto {GuildId = args.Guild.Id, OwnerId = args.User.Id};
+                _ = _asyncExecutor.ExecuteAsync<IDiscordTicketService>(async x =>
+                    await x.OpenTicketAsync(args.Interaction, req));
+            }
+
+            if (args.Id == "ticket_reopen_btn")
+            {
+                await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+                var req = new TicketReopenReqDto
+                {
+                    GuildId = args.Guild.Id, ChannelId = args.Channel.Id, RequestedById = args.User.Id
+                };
+                _ = _asyncExecutor.ExecuteAsync<IDiscordTicketService>(async x =>
+                    await x.ReopenTicketAsync(args.Interaction, req));
+            }
+
+            if (args.Id == "ticket_save_trans_btn")
+            {
+                await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+                _ = _asyncExecutor.ExecuteAsync<IDiscordChatExportService>(async x =>
+                    await x.ExportToHtmlAsync(args.Interaction));
             }
         }
 
         public Task DiscordOnClientErrored(DiscordClient sender, ClientErrorEventArgs args)
         {
             //_logger.LogError(args.Exception.GetFullMessage());
+            return Task.CompletedTask;
+        }
+
+        public Task DiscordOnChannelCreated(DiscordClient sender, ChannelCreateEventArgs args)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task DiscordOnChannelUpdated(DiscordClient sender, ChannelUpdateEventArgs args)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task DiscordOnChannelDeleted(DiscordClient sender, ChannelDeleteEventArgs args)
+        {
+            _ = _asyncExecutor.ExecuteAsync<IDiscordTicketService>(async x =>
+                await x.CheckForDeletedTicketChannelAsync(args.Channel));
+            return Task.CompletedTask;
+        }
+
+        public Task DiscordOnDmChannelDeleted(DiscordClient sender, DmChannelDeleteEventArgs args)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task DiscordOnChannelPinsUpdated(DiscordClient sender, ChannelPinsUpdateEventArgs args)
+        {
             return Task.CompletedTask;
         }
     }
