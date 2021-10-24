@@ -71,7 +71,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (ctx is null) throw new ArgumentNullException(nameof(ctx));
             if (req is null) throw new ArgumentNullException(nameof(req));
 
-            return await MuteAsync(ctx.Guild, (DiscordMember) ctx.ResolvedUserMentions[0], ctx.Member, req);
+            return await MuteAsync(ctx.Guild, await ctx.Guild.GetMemberAsync(ctx.ResolvedUserMentions[0].Id), ctx.Member, req);
         }
 
         public async Task<DiscordEmbed> MuteAsync(ContextMenuContext ctx, MuteReqDto req)
@@ -269,7 +269,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (ctx is null) throw new ArgumentNullException(nameof(ctx));
             if (req is null) throw new ArgumentNullException(nameof(req));
 
-            return await UnmuteAsync(ctx.Guild, (DiscordMember)ctx.ResolvedUserMentions[0], ctx.Member, req);
+            return await UnmuteAsync(ctx.Guild, await ctx.Guild.GetMemberAsync(ctx.ResolvedUserMentions[0].Id), ctx.Member, req);
         }
 
         public async Task<DiscordEmbed> UnmuteAsync(ContextMenuContext ctx, MuteDisableReqDto req)
@@ -418,7 +418,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (ctx is null) throw new ArgumentNullException(nameof(ctx));
             if (req is null) throw new ArgumentNullException(nameof(req));
 
-            return await GetSpecificUserGuildMuteAsync(ctx.Guild, (DiscordMember)ctx.ResolvedUserMentions[0],
+            return await GetSpecificUserGuildMuteAsync(ctx.Guild, await ctx.Guild.GetMemberAsync(ctx.ResolvedUserMentions[0].Id),
                 ctx.Member, req);
         }
 

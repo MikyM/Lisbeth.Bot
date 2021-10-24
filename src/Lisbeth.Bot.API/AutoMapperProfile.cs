@@ -26,14 +26,25 @@ namespace Lisbeth.Bot.API
     {
         public AutoMapperProfile()
         {
-            CreateMap<MuteReqDto, Mute>();
-            CreateMap<MuteDisableReqDto, Mute>();
-            CreateMap<PruneReqDto, Prune>();
+            CreateMap<MuteReqDto, Mute>()
+                .ForMember(dest => dest.UserId, source => source.MapFrom(x => x.TargetUserId))
+                .ForMember(dest => dest.AppliedById, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
+            CreateMap<MuteDisableReqDto, Mute>()
+                .ForMember(dest => dest.UserId, source => source.MapFrom(x => x.TargetUserId))
+                .ForMember(dest => dest.AppliedById, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
+            CreateMap<BanReqDto, Ban>()
+                .ForMember(dest => dest.UserId, source => source.MapFrom(x => x.TargetUserId))
+                .ForMember(dest => dest.AppliedById, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
+            CreateMap<BanDisableReqDto, Ban>()
+                .ForMember(dest => dest.UserId, source => source.MapFrom(x => x.TargetUserId))
+                .ForMember(dest => dest.AppliedById, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
+            CreateMap<PruneReqDto, Prune>()
+                .ForMember(dest => dest.UserId, source => source.MapFrom(x => x.TargetAuthorId))
+                .ForMember(dest => dest.ModeratorId, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
             CreateMap<GuildGetReqDto, Guild>();
             CreateMap<TicketExportReqDto, Ticket>();
             CreateMap<TicketOpenReqDto, Ticket>()
                 .ForMember(dest => dest.UserId, source => source.MapFrom(x => x.OwnerId));
-            CreateMap<Ticket, Ticket>();
             CreateMap<TicketingConfig, TicketingConfig>();
             CreateMap<ModerationConfig, ModerationConfig>();
             CreateMap<TagAddReqDto, Tag>();
