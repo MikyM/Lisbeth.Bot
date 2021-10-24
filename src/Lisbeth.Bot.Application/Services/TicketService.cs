@@ -135,7 +135,7 @@ namespace Lisbeth.Bot.Application.Services
             if (!discordMembers.Any()) return;
 
             BeginUpdate(ticket);
-            ticket.AddedUsers = JsonSerializer.Serialize(discordMembers);
+            ticket.AddedUserIds = discordMembers;
 
             if (shouldSave) await CommitAsync();
         }
@@ -148,7 +148,7 @@ namespace Lisbeth.Bot.Application.Services
             if (!discordRoles.Any()) return;
 
             BeginUpdate(ticket);
-            ticket.AddedRoles = JsonSerializer.Serialize(discordRoles);
+            ticket.AddedRoleIds = discordRoles;
 
             if (shouldSave) await CommitAsync();
         }
@@ -173,11 +173,9 @@ namespace Lisbeth.Bot.Application.Services
             if (ticket is null) throw new ArgumentNullException(nameof(ticket));
             if (guild is null) throw new ArgumentNullException(nameof(guild));
 
-            var userList = JsonSerializer.Deserialize<List<ulong>>(ticket.AddedUsers);
+            if (ticket.AddedUserIds is null || ticket.AddedUserIds.Count == 0) return false;
 
-            if (userList is null || userList.Count == 0) return false;
-
-            foreach (var id in userList)
+            foreach (var id in ticket.AddedUserIds)
             {
                 try
                 {

@@ -10,8 +10,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Lisbeth.Bot.DataAccessLayer.Migrations
 {
     [DbContext(typeof(LisbethBotDbContext))]
-    [Migration("20211023184332_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20211024113846_Dates")]
+    partial class Dates
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -400,9 +400,6 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
 
                     b.HasIndex("GuildId");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
-
                     b.ToTable("recurring_reminder");
                 });
 
@@ -461,6 +458,69 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     b.HasIndex("GuildId");
 
                     b.ToTable("reminder");
+                });
+
+            modelBuilder.Entity("Lisbeth.Bot.Domain.Entities.RoleMenu", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp")
+                        .HasColumnName("created_at");
+
+                    b.Property<long>("EmbedConfigId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("embed_config_id");
+
+                    b.Property<long>("GuildId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("guild_id");
+
+                    b.Property<bool>("IsDisabled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_disabled");
+
+                    b.Property<long>("MessageId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("message_id");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("RoleEmojiMapping")
+                        .HasColumnType("text")
+                        .HasColumnName("role_emoji_mapping");
+
+                    b.Property<string>("Text")
+                        .HasColumnType("text")
+                        .HasColumnName("text");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .IsRequired()
+                        .HasColumnType("timestamp")
+                        .HasColumnName("updated_at");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmbedConfigId")
+                        .IsUnique();
+
+                    b.HasIndex("GuildId");
+
+                    b.ToTable("role_menu");
                 });
 
             modelBuilder.Entity("Lisbeth.Bot.Domain.Entities.ServerBooster", b =>
@@ -985,6 +1045,24 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     b.Navigation("Guild");
                 });
 
+            modelBuilder.Entity("Lisbeth.Bot.Domain.Entities.RoleMenu", b =>
+                {
+                    b.HasOne("Lisbeth.Bot.Domain.Entities.EmbedConfig", "EmbedConfig")
+                        .WithOne("RoleMenu")
+                        .HasForeignKey("Lisbeth.Bot.Domain.Entities.RoleMenu", "EmbedConfigId");
+
+                    b.HasOne("Lisbeth.Bot.Domain.Entities.Guild", "Guild")
+                        .WithMany("RoleMenus")
+                        .HasForeignKey("GuildId")
+                        .HasPrincipalKey("GuildId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("EmbedConfig");
+
+                    b.Navigation("Guild");
+                });
+
             modelBuilder.Entity("Lisbeth.Bot.Domain.Entities.Tag", b =>
                 {
                     b.HasOne("Lisbeth.Bot.Domain.Entities.EmbedConfig", "EmbedConfig")
@@ -1019,6 +1097,8 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
 
                     b.Navigation("Reminder");
 
+                    b.Navigation("RoleMenu");
+
                     b.Navigation("Tag");
                 });
 
@@ -1035,6 +1115,8 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     b.Navigation("RecurringReminders");
 
                     b.Navigation("Reminders");
+
+                    b.Navigation("RoleMenus");
 
                     b.Navigation("Tags");
 

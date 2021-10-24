@@ -642,11 +642,11 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                         .HasColumnName("id")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<string>("AddedRoles")
+                    b.Property<string>("AddedRoleIds")
                         .HasColumnType("text")
                         .HasColumnName("added_roles");
 
-                    b.Property<string>("AddedUsers")
+                    b.Property<string>("AddedUserIds")
                         .HasColumnType("text")
                         .HasColumnName("added_users");
 

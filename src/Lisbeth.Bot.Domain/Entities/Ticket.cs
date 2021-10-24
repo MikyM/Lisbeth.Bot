@@ -16,6 +16,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Collections.Generic;
 using Lisbeth.Bot.Domain.Entities.Base;
 
 namespace Lisbeth.Bot.Domain.Entities
@@ -32,8 +33,8 @@ namespace Lisbeth.Bot.Domain.Entities
         public ulong MessageOpenId { get; set; }
         public ulong? MessageCloseId { get; set; }
         public ulong? MessageReopenId { get; set; }
-        public string AddedUsers { get; set; }
-        public string AddedRoles { get; set; }
+        public List<ulong> AddedUserIds { get; set; }
+        public List<ulong> AddedRoleIds { get; set; }
         public bool IsPrivate { get; set; }
 
         public Guild Guild { get; set; }

@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Generic;
+using System.Text.Json;
 using Lisbeth.Bot.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -46,8 +48,18 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
             builder.Property(x => x.ClosedOn).HasColumnName("closed_on").HasColumnType("timestamp");
             builder.Property(x => x.ReopenedById).HasColumnName("reopened_by_id").HasColumnType("bigint");
             builder.Property(x => x.ReopenedOn).HasColumnName("reopened_on").HasColumnType("timestamp");
-            builder.Property(x => x.AddedRoles).HasColumnName("added_roles").HasColumnType("text");
-            builder.Property(x => x.AddedUsers).HasColumnName("added_users").HasColumnType("text");
+            builder.Property(x => x.AddedRoleIds)
+                .HasColumnName("added_roles")
+                .HasColumnType("text")
+                .HasConversion(x => JsonSerializer.Serialize(x, new JsonSerializerOptions {IgnoreNullValues = true}),
+                    x => JsonSerializer.Deserialize<List<ulong>>(x,
+                        new JsonSerializerOptions {IgnoreNullValues = true}));
+            builder.Property(x => x.AddedUserIds)
+                .HasColumnName("added_users")
+                .HasColumnType("text")
+                .HasConversion(x => JsonSerializer.Serialize(x, new JsonSerializerOptions {IgnoreNullValues = true}),
+                    x => JsonSerializer.Deserialize<List<ulong>>(x,
+                        new JsonSerializerOptions {IgnoreNullValues = true}));
             builder.Property(x => x.IsPrivate).HasColumnName("is_private").HasColumnType("boolean").IsRequired();
         }
     }
