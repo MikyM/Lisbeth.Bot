@@ -29,9 +29,9 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
 
             builder.Property(x => x.Id).HasColumnName("id").HasColumnType("bigint").ValueGeneratedOnAdd().IsRequired();
             builder.Property(x => x.IsDisabled).HasColumnName("is_disabled").HasColumnType("boolean").IsRequired();
-            builder.Property(x => x.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz")
+            builder.Property(x => x.CreatedAt).HasColumnName("created_at").HasColumnType("timestamp")
                 .ValueGeneratedOnAdd().IsRequired();
-            builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz").IsRequired();
+            builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamp").IsRequired();
 
             builder.Property(x => x.GuildId).HasColumnName("guild_id").HasColumnType("bigint").ValueGeneratedOnAdd()
                 .IsRequired();
@@ -43,9 +43,9 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
             builder.Property(x => x.MessageCloseId).HasColumnName("message_close_id").HasColumnType("bigint");
             builder.Property(x => x.MessageReopenId).HasColumnName("message_reopen_id").HasColumnType("bigint");
             builder.Property(x => x.ClosedById).HasColumnName("closed_by_id").HasColumnType("bigint");
-            builder.Property(x => x.ClosedOn).HasColumnName("closed_on").HasColumnType("timestamptz");
+            builder.Property(x => x.ClosedOn).HasColumnName("closed_on").HasColumnType("timestamp");
             builder.Property(x => x.ReopenedById).HasColumnName("reopened_by_id").HasColumnType("bigint");
-            builder.Property(x => x.ReopenedOn).HasColumnName("reopened_on").HasColumnType("timestamptz");
+            builder.Property(x => x.ReopenedOn).HasColumnName("reopened_on").HasColumnType("timestamp");
             builder.Property(x => x.AddedRoles).HasColumnName("added_roles").HasColumnType("text");
             builder.Property(x => x.AddedUsers).HasColumnName("added_users").HasColumnType("text");
             builder.Property(x => x.IsPrivate).HasColumnName("is_private").HasColumnType("boolean").IsRequired();

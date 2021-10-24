@@ -433,8 +433,8 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                         .HasColumnType("text")
                         .HasColumnName("tags");
 
-                    b.Property<DateTimeOffset>("SetForDate")
-                        .HasColumnType("timestamptz")
+                    b.Property<DateTime>("SetForDate")
+                        .HasColumnType("timestamp")
                         .HasColumnName("set_for_date");
 
                     b.Property<string>("Text")

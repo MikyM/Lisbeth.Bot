@@ -42,7 +42,7 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
-            var muteReq = new MuteReqDto(ctx.TargetUser.Id, ctx.Guild.Id, ctx.User.Id, DateTimeOffset.MaxValue,
+            var muteReq = new MuteReqDto(ctx.TargetUser.Id, ctx.Guild.Id, ctx.User.Id, DateTime.MaxValue,
                 "No reason provided - muted via user context menu");
             var muteReqValidator = new MuteReqValidator(ctx.Client);
             await muteReqValidator.ValidateAndThrowAsync(muteReq);
@@ -98,7 +98,7 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
-            var muteReq = new MuteReqDto(ctx.TargetMessage.Author.Id, ctx.Guild.Id, ctx.User.Id, DateTimeOffset.MaxValue,
+            var muteReq = new MuteReqDto(ctx.TargetMessage.Author.Id, ctx.Guild.Id, ctx.User.Id, DateTime.MaxValue,
                 "No reason provided - muted via user context menu");
             var muteReqValidator = new MuteReqValidator(ctx.Client);
             await muteReqValidator.ValidateAndThrowAsync(muteReq);
@@ -116,7 +116,7 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
-            var muteReq = new MuteReqDto(ctx.TargetMessage.Author.Id, ctx.Guild.Id, ctx.User.Id, DateTimeOffset.MaxValue,
+            var muteReq = new MuteReqDto(ctx.TargetMessage.Author.Id, ctx.Guild.Id, ctx.User.Id, DateTime.MaxValue,
                 "No reason provided - muted via user context menu");
             var muteReqValidator = new MuteReqValidator(ctx.Client);
             await muteReqValidator.ValidateAndThrowAsync(muteReq);

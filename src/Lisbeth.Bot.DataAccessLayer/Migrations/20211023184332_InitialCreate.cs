@@ -277,7 +277,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    set_for_date = table.Column<DateTimeOffset>(type: "timestamptz", nullable: false),
+                    set_for_date = table.Column<DateTime>(type: "timestamp", nullable: false),
                     user_id = table.Column<long>(type: "bigint", nullable: false),
                     guild_id = table.Column<long>(type: "bigint", nullable: true),
                     embed_config_id = table.Column<long>(type: "bigint", nullable: true),

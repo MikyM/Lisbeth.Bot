@@ -155,9 +155,9 @@ namespace Lisbeth.Bot.Application.Discord.Services
             embed.WithColor(0x18315C);
             embed.WithAuthor($"Ban | {target.GetFullUsername()}", null, target.AvatarUrl);
 
-            TimeSpan tmspDuration = req.AppliedUntil.Subtract(DateTimeOffset.UtcNow);
+            TimeSpan tmspDuration = req.AppliedUntil.Subtract(DateTime.UtcNow);
 
-            string lengthString = req.AppliedUntil == DateTimeOffset.MaxValue
+            string lengthString = req.AppliedUntil == DateTime.MaxValue
                 ? "Permanent"
                 : $"{tmspDuration.Days} days, {tmspDuration.Hours} hrs, {tmspDuration.Minutes} mins";
 

@@ -22,23 +22,23 @@ namespace Lisbeth.Bot.Application.Extensions
 {
     public static class StringExtensions
     {
-        public static (DateTimeOffset? FinalDateFromToday, TimeSpan Duration) ToDateTimeOffsetDuration(this string input)
+        public static (DateTime? FinalDateFromToday, TimeSpan Duration) ToDateTimeOffsetDuration(this string input)
         {
 
             if (input is null) throw new ArgumentNullException(nameof(input));
 
             TimeSpan tmsp = new TimeSpan();
-            DateTimeOffset? result;
+            DateTime? result;
 
             if (int.TryParse(input, out int inputInMinutes))
             {
                 if (inputInMinutes > 44640) inputInMinutes = 44640;
                 tmsp = TimeSpan.FromMinutes(inputInMinutes);
-                result = DateTimeOffset.UtcNow.Add(tmsp);
+                result = DateTime.UtcNow.Add(tmsp);
             }
             else if (input.Contains("perm", StringComparison.InvariantCultureIgnoreCase))
             {
-                result = DateTimeOffset.MaxValue;
+                result = DateTime.MaxValue;
             }
             else
             {
@@ -86,7 +86,7 @@ namespace Lisbeth.Bot.Application.Extensions
                         return (null, tmsp);
                 }
 
-                result = DateTimeOffset.UtcNow.Add(tmsp);
+                result = DateTime.UtcNow.Add(tmsp);
             }
 
             return (result, tmsp);

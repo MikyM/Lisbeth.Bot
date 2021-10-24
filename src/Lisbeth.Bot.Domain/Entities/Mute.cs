@@ -24,8 +24,8 @@ namespace Lisbeth.Bot.Domain.Entities
     {
         public ulong GuildId { get; set; }
         public ulong UserId { get; set; }
-        public DateTimeOffset? LiftedOn { get; set; }
-        public DateTimeOffset? AppliedUntil { get; set; }
+        public DateTime? LiftedOn { get; set; }
+        public DateTime? AppliedUntil { get; set; }
         public ulong AppliedById { get; set; }
         public ulong LiftedById { get; set; }
         public string Reason { get; set; } = "";

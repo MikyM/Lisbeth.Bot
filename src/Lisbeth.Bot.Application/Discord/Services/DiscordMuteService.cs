@@ -116,12 +116,12 @@ namespace Lisbeth.Bot.Application.Discord.Services
                         ex);
                 }
 
-            if (req.AppliedUntil < DateTimeOffset.UtcNow)
+            if (req.AppliedUntil < DateTime.UtcNow)
                 throw new ArgumentException("Mute until date must be in the future.");
 
-            TimeSpan tmspDuration = req.AppliedUntil.Subtract(DateTimeOffset.UtcNow);
+            TimeSpan tmspDuration = req.AppliedUntil.Subtract(DateTime.UtcNow);
 
-            string lengthString = req.AppliedUntil == DateTimeOffset.MaxValue
+            string lengthString = req.AppliedUntil == DateTime.MaxValue
                 ? "Permanent"
                 : $"{tmspDuration.Days} days, {tmspDuration.Hours} hrs, {tmspDuration.Minutes} mins";
 

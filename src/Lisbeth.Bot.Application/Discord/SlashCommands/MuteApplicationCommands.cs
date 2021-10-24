@@ -57,7 +57,7 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
             switch (actionType)
             {
                 case MuteActionType.Add:
-                    DateTimeOffset? liftsOn = length.ToDateTimeOffsetDuration().FinalDateFromToday;
+                    DateTime? liftsOn = length.ToDateTimeOffsetDuration().FinalDateFromToday;
                     if (liftsOn is null)
                         throw new ArgumentException($"Parameter {nameof(length)} can't be parsed to a known duration.");
                     if (length is "") throw new ArgumentException($"Parameter {nameof(length)} can't be empty.");

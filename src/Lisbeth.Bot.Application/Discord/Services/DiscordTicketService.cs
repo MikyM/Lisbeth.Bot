@@ -622,7 +622,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             overwrites.Add(new DiscordOverwriteBuilder(guild.EveryoneRole).Deny(Permissions.AccessChannels));
             overwrites.Add(new DiscordOverwriteBuilder(owner).Allow(Permissions.AccessChannels));
 
-            string topic = $"Support ticket opened by user {owner.GetFullUsername()} at {DateTimeOffset.UtcNow}";
+            string topic = $"Support ticket opened by user {owner.GetFullUsername()} at {DateTime.UtcNow}";
 
             DiscordChannel openedCat;
             try

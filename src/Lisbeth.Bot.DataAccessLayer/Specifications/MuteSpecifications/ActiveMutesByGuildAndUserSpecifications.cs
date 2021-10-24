@@ -29,7 +29,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Specifications.MuteSpecifications
             AddFilterCondition(x => !x.IsDisabled);
             AddFilterCondition(x => !x.Guild.IsDisabled);
             AddFilterCondition(x => x.Guild.GuildId == guildId);
-            AddFilterCondition(x => x.AppliedUntil > DateTimeOffset.UtcNow);
+            AddFilterCondition(x => x.AppliedUntil > DateTime.UtcNow);
             AddFilterCondition(x => x.UserId == userId);
             AddInclude(x => x.Guild);
         }

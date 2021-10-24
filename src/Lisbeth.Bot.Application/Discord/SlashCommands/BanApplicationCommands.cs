@@ -57,7 +57,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             {
                 case BanActionType.Add:
 
-                    DateTimeOffset? liftsOn = length.ToDateTimeOffsetDuration().FinalDateFromToday;
+                    DateTime? liftsOn = length.ToDateTimeOffsetDuration().FinalDateFromToday;
 
                     if (liftsOn is null)
                         throw new ArgumentException($"Parameter {nameof(length)} can't be parsed to a known duration.");

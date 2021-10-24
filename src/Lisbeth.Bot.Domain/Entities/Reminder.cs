@@ -22,7 +22,7 @@ namespace Lisbeth.Bot.Domain.Entities
 {
     public class Reminder : SnowflakeEntity
     {
-        public DateTimeOffset SetForDate { get; set; }
+        public DateTime SetForDate { get; set; }
         public ulong? UserId { get; set; }
         public ulong? GuildId { get; set; }
         public long? EmbedConfigId { get; set; }
