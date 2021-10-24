@@ -28,7 +28,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Specifications.BanSpecifications
         {
             AddFilterCondition(x => !x.IsDisabled);
             AddFilterCondition(x => !x.Guild.IsDisabled);
-            AddFilterCondition(x => x.AppliedUntil <= DateTime.UtcNow);
+            AddFilterCondition(x => x.AppliedUntil <= DateTimeOffset.UtcNow);
             AddInclude(x => x.Guild);
             ApplyOrderBy(x => x.Guild.Id);
         }
