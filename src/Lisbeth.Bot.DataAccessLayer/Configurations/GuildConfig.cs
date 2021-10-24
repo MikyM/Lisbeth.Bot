@@ -82,6 +82,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
             builder.Metadata.FindNavigation(nameof(Guild.Bans)).SetPropertyAccessMode(PropertyAccessMode.Field);
             builder.Metadata.FindNavigation(nameof(Guild.Mutes)).SetPropertyAccessMode(PropertyAccessMode.Field);
             builder.Metadata.FindNavigation(nameof(Guild.Prunes)).SetPropertyAccessMode(PropertyAccessMode.Field);
+            builder.Metadata.FindNavigation(nameof(Guild.RoleMenus)).SetPropertyAccessMode(PropertyAccessMode.Field);
             builder.Metadata.FindNavigation(nameof(Guild.GuildServerBoosters))
                 .SetPropertyAccessMode(PropertyAccessMode.Field);
             builder.Metadata.FindNavigation(nameof(Guild.Reminders)).SetPropertyAccessMode(PropertyAccessMode.Field);
