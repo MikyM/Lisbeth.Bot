@@ -335,9 +335,9 @@ namespace Lisbeth.Bot.Application.Discord.Services
             var auditLogs = await args.Guild.GetAuditLogsAsync(1, null, AuditLogActionType.MessageDelete);
             var auditLogsBans = await args.Guild.GetAuditLogsAsync(1, null, AuditLogActionType.Ban);
             var filtered = auditLogs
-                .Where(m => m.CreationTimestamp.LocalDateTime > DateTime.Now.Subtract(new TimeSpan(0, 0, 4))).ToList();
+                .Where(m => m.CreationTimestamp.UtcDateTime > DateTime.UtcNow.Subtract(new TimeSpan(0, 0, 4))).ToList();
             var filteredBans = auditLogsBans
-                .Where(m => m.CreationTimestamp.LocalDateTime > DateTime.Now.Subtract(new TimeSpan(0, 0, 4))).ToList();
+                .Where(m => m.CreationTimestamp.UtcDateTime > DateTime.UtcNow.Subtract(new TimeSpan(0, 0, 4))).ToList();
 
             if (filtered.Count() != 0)
             {
@@ -406,10 +406,10 @@ namespace Lisbeth.Bot.Application.Discord.Services
             var auditLogs = await args.Guild.GetAuditLogsAsync(1, null, AuditLogActionType.Ban);
             var auditBulkLogs = await args.Guild.GetAuditLogsAsync(1, null, AuditLogActionType.MessageBulkDelete);
             var filtered = auditLogs
-                .Where(m => m.CreationTimestamp.LocalDateTime > DateTime.Now.Subtract(new TimeSpan(0, 0, 4)))
+                .Where(m => m.CreationTimestamp.LocalDateTime > DateTime.UtcNow.Subtract(new TimeSpan(0, 0, 4)))
                 .ToList();
             var filteredBulk = auditBulkLogs
-                .Where(m => m.CreationTimestamp.LocalDateTime > DateTime.Now.Subtract(new TimeSpan(0, 0, 4)))
+                .Where(m => m.CreationTimestamp.LocalDateTime > DateTime.UtcNow.Subtract(new TimeSpan(0, 0, 4)))
                 .ToList();
 
             foreach (var msg in args.Messages)

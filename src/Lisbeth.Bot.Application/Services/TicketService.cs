@@ -53,7 +53,7 @@ namespace Lisbeth.Bot.Application.Services
 
             BeginUpdate(ticket);
             ticket.ClosedById = req.RequestedById;
-            ticket.ClosedOn = DateTime.UtcNow;
+            ticket.ClosedOn = DateTimeOffset.UtcNow;
             ticket.IsDisabled = true;
 
             return ticket;
@@ -65,7 +65,7 @@ namespace Lisbeth.Bot.Application.Services
 
             BeginUpdate(ticket);
             ticket.ClosedById = req.RequestedById;
-            ticket.ClosedOn = DateTime.UtcNow;
+            ticket.ClosedOn = DateTimeOffset.UtcNow;
             ticket.IsDisabled = true;
             ticket.MessageCloseId = req.ClosedMessageId;
 
@@ -95,7 +95,7 @@ namespace Lisbeth.Bot.Application.Services
 
             BeginUpdate(ticket);
             ticket.ReopenedById = req.RequestedById;
-            ticket.ReopenedOn = DateTime.UtcNow;
+            ticket.ReopenedOn = DateTimeOffset.UtcNow;
             ticket.IsDisabled = false;
             ticket.MessageCloseId = null;
             ticket.MessageReopenId = req.ReopenMessageId;
@@ -117,7 +117,7 @@ namespace Lisbeth.Bot.Application.Services
 
             BeginUpdate(ticket);
             ticket.ReopenedById = req.RequestedById;
-            ticket.ReopenedOn = DateTime.UtcNow;
+            ticket.ReopenedOn = DateTimeOffset.UtcNow;
             ticket.IsDisabled = false;
             ticket.MessageCloseId = null;
             ticket.MessageReopenId = req.ReopenMessageId;

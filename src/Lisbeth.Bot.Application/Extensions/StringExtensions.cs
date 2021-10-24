@@ -22,20 +22,23 @@ namespace Lisbeth.Bot.Application.Extensions
 {
     public static class StringExtensions
     {
-        public static (DateTime? FinalDateFromToday, TimeSpan Duration) ToDateTimeDuration(this string input)
+        public static (DateTimeOffset? FinalDateFromToday, TimeSpan Duration) ToDateTimeOffsetDuration(this string input)
         {
+
+            if (input is null) throw new ArgumentNullException(nameof(input));
+
             TimeSpan tmsp = new TimeSpan();
-            DateTime? result;
+            DateTimeOffset? result;
 
             if (int.TryParse(input, out int inputInMinutes))
             {
                 if (inputInMinutes > 44640) inputInMinutes = 44640;
                 tmsp = TimeSpan.FromMinutes(inputInMinutes);
-                result = DateTime.Now.Add(tmsp);
+                result = DateTimeOffset.UtcNow.Add(tmsp);
             }
-            else if (input.ToLower().Contains("perm"))
+            else if (input.Contains("perm", StringComparison.InvariantCultureIgnoreCase))
             {
-                result = DateTime.MaxValue.Date;
+                result = DateTimeOffset.MaxValue;
             }
             else
             {
@@ -44,19 +47,13 @@ namespace Lisbeth.Bot.Application.Extensions
 
                 if (!char.IsDigit(input.First())) return (null, tmsp);
 
-                foreach (char c in input)
-                    if (!char.IsDigit(c))
-                    {
-                        inputType = char.ToLower(c);
-                        if (inputType == 'm' || inputType == 'd' || inputType == 'w' || inputType == 'y' ||
-                            inputType == 'h')
-                        {
-                            parsedInput = int.Parse(input.Substring(0, input.IndexOf(c)));
-                            break;
-                        }
-
-                        return (null, tmsp);
-                    }
+                foreach (var c in input.Where(c => !char.IsDigit(c)))
+                {
+                    inputType = char.ToLower(c);
+                    if (inputType is not ('m' or 'd' or 'w' or 'y' or 'h')) return (null, tmsp);
+                    parsedInput = int.Parse(input[..input.IndexOf(c)]);
+                    break;
+                }
 
                 switch (inputType)
                 {
@@ -89,7 +86,7 @@ namespace Lisbeth.Bot.Application.Extensions
                         return (null, tmsp);
                 }
 
-                result = DateTime.Now.Add(tmsp);
+                result = DateTimeOffset.UtcNow.Add(tmsp);
             }
 
             return (result, tmsp);

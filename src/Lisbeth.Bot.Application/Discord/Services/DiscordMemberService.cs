@@ -69,7 +69,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             await Task.Delay(500);
             var auditLogsKicks = await args.Guild.GetAuditLogsAsync(1, null, AuditLogActionType.Kick);
             var filtered = auditLogsBans.Concat(auditLogsKicks).Where(m =>
-                m.CreationTimestamp.LocalDateTime > DateTime.Now.Subtract(new TimeSpan(0, 0, 4))).ToList();
+                m.CreationTimestamp.UtcDateTime > DateTime.UtcNow.Subtract(new TimeSpan(0, 0, 4))).ToList();
 
             var embed = new DiscordEmbedBuilder();
 

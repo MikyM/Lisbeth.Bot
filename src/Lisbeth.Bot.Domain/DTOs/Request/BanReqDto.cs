@@ -16,6 +16,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Reflection.Metadata.Ecma335;
 
 namespace Lisbeth.Bot.Domain.DTOs.Request
 {
@@ -25,7 +26,7 @@ namespace Lisbeth.Bot.Domain.DTOs.Request
         {
         }
 
-        public BanReqDto(ulong targetUserId, ulong guildId, ulong requestedOnBehalfOfId, DateTime appliedUntil) : this(
+        public BanReqDto(ulong targetUserId, ulong guildId, ulong requestedOnBehalfOfId, DateTimeOffset appliedUntil) : this(
             targetUserId, guildId, requestedOnBehalfOfId, appliedUntil, null)
         {
             TargetUserId = targetUserId;
@@ -34,7 +35,7 @@ namespace Lisbeth.Bot.Domain.DTOs.Request
             RequestedOnBehalfOfId = requestedOnBehalfOfId;
         }
 
-        public BanReqDto(ulong targetUserId, ulong guildId, ulong requestedOnBehalfOfId, DateTime appliedUntil,
+        public BanReqDto(ulong targetUserId, ulong guildId, ulong requestedOnBehalfOfId, DateTimeOffset appliedUntil,
             string reason)
         {
             TargetUserId = targetUserId;
@@ -46,7 +47,8 @@ namespace Lisbeth.Bot.Domain.DTOs.Request
 
         public ulong TargetUserId { get; set; }
         public ulong GuildId { get; set; }
-        public DateTime AppliedUntil { get; set; }
+
+        public DateTimeOffset AppliedUntil { get; set; }
         public ulong RequestedOnBehalfOfId { get; set; }
         public string Reason { get; set; }
     }

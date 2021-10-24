@@ -72,11 +72,11 @@ namespace Lisbeth.Bot.DataAccessLayer
                     switch (entry.State)
                     {
                         case EntityState.Added:
-                            entity.CreatedAt = DateTime.UtcNow;
+                            entity.CreatedAt = DateTimeOffset.UtcNow;
                             entry.Property("CreatedAt").IsModified = true;
                             break;
                         case EntityState.Modified:
-                            entity.UpdatedAt = DateTime.UtcNow;
+                            entity.UpdatedAt = DateTimeOffset.UtcNow;
                             entry.Property("UpdatedAt").IsModified = true;
                             entry.Property("CreatedAt").IsModified = false;
                             break;

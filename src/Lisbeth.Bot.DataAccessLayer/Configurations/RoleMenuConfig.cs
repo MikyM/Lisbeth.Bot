@@ -37,7 +37,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
                 .HasColumnType("timestamp")
                 .ValueGeneratedOnAdd()
                 .IsRequired();
-            builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamp").IsRequired();
+            builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz").IsRequired();
 
             builder.Property(x => x.Name).HasColumnName("name").HasColumnType("varchar(100)").HasMaxLength(100).IsRequired();
             builder.Property(x => x.GuildId).HasColumnName("guild_id").HasColumnType("bigint").IsRequired();

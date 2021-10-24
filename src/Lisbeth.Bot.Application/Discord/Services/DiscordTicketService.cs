@@ -474,7 +474,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                         var lastMessage = await closedTicketChannel.GetMessagesAsync(1);
                         if (lastMessage is null || lastMessage.Count == 0) continue;
 
-                        var timeDifference = DateTime.Now.Subtract(lastMessage[0].Timestamp.LocalDateTime);
+                        var timeDifference = DateTime.UtcNow.Subtract(lastMessage[0].Timestamp.UtcDateTime);
                         if (timeDifference.TotalHours >= guildCfg.TicketingConfig.CleanAfter.Value.Hours)
                             await closedTicketChannel.DeleteAsync();
 
@@ -525,7 +525,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
                         if (!((DiscordMember) msg.Author).Permissions.HasPermission(Permissions.BanMembers)) continue;
 
-                        var timeDifference = DateTime.Now.Subtract(msg.Timestamp.LocalDateTime);
+                        var timeDifference = DateTime.UtcNow.Subtract(msg.Timestamp.UtcDateTime);
 
                         var req = new TicketCloseReqDto(null, null, guildId, openedTicketChannel.Id,
                             _discord.Client.CurrentUser.Id);
@@ -622,7 +622,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             overwrites.Add(new DiscordOverwriteBuilder(guild.EveryoneRole).Deny(Permissions.AccessChannels));
             overwrites.Add(new DiscordOverwriteBuilder(owner).Allow(Permissions.AccessChannels));
 
-            string topic = $"Support ticket opened by user {owner.GetFullUsername()} at {DateTime.Now}";
+            string topic = $"Support ticket opened by user {owner.GetFullUsername()} at {DateTimeOffset.UtcNow}";
 
             DiscordChannel openedCat;
             try

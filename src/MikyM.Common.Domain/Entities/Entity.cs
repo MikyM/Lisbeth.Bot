@@ -35,20 +35,20 @@ namespace MikyM.Common.Domain.Entities
     {
         protected Entity()
         {
-            CreatedAt ??= DateTime.UtcNow;
+            CreatedAt ??= DateTimeOffset.UtcNow;
             UpdatedAt ??= CreatedAt;
         }
 
         protected Entity(TId id)
         {
-            CreatedAt ??= DateTime.UtcNow;
+            CreatedAt ??= DateTimeOffset.UtcNow;
             UpdatedAt ??= CreatedAt;
             Id = id;
         }
 
         public virtual TId Id { get; protected set; }
-        public virtual DateTime? CreatedAt { get; set; }
-        public virtual DateTime? UpdatedAt { get; set; }
+        public virtual DateTimeOffset? CreatedAt { get; set; }
+        public virtual DateTimeOffset? UpdatedAt { get; set; }
         public virtual bool IsDisabled { get; set; }
 
         public override string ToString()

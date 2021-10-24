@@ -25,8 +25,8 @@ namespace Lisbeth.Bot.Domain.Entities
         public ulong UserId { get; set; }
         public ulong ChannelId { get; set; }
         public long GuildSpecificId { get; set; }
-        public DateTime? ReopenedOn { get; set; }
-        public DateTime? ClosedOn { get; set; }
+        public DateTimeOffset? ReopenedOn { get; set; }
+        public DateTimeOffset? ClosedOn { get; set; }
         public ulong? ClosedById { get; set; }
         public ulong? ReopenedById { get; set; }
         public ulong MessageOpenId { get; set; }
