@@ -177,15 +177,12 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (tag.EmbedConfig.Footer is not null && tag.EmbedConfig.Footer != "") embed.WithFooter(tag.EmbedConfig.Footer, tag.EmbedConfig.FooterImageUrl);
             if (tag.EmbedConfig.ImageUrl is not null && tag.EmbedConfig.ImageUrl != "") embed.WithImageUrl(tag.EmbedConfig.ImageUrl);
 
-            var fields = JsonSerializer.Deserialize<Dictionary<string, string>>(tag.EmbedConfig.Fields);
-
-            if (fields is null || fields.Count == 0) return embed.Build();
+            if (tag.EmbedConfig.Fields is null || tag.EmbedConfig.Fields.Count == 0) return embed.Build();
             
             int i = 1;
-            foreach (var (title, field) in fields)
+            foreach (var field in tag.EmbedConfig.Fields.TakeWhile(_ => i < 25))
             {
-                if (i >= 25) break;
-                embed.AddField(title, field);
+                embed.AddField(field.Title, field.Text);
                 i++;
             }
 

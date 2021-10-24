@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using Lisbeth.Bot.Domain.Entities.Base;
 
@@ -18,12 +19,12 @@ namespace Lisbeth.Bot.Domain.Entities
         public string TicketWelcomeMessageDescription { get; set; } =
             "@ownerMention@ please be patient, support will be with you shortly!";
 
-        public string TicketWelcomeMessageFields { get; set; }
+        public List<DiscordField> TicketWelcomeMessageFields { get; set; }
 
         public string TicketCenterMessageDescription { get; set; } =
             "\n\nClick on the button below to create a private ticket between the staff members and you. Explain your issue, and a staff member will be here to help you shortly after. Please note it may take up to 48 hours for an answer.";
 
-        public string TicketCenterMessageFields { get; set; }
+        public List<DiscordField> TicketCenterMessageFields { get; set; }
 
         public long GuildId { get; set; }
         public Guild Guild { get; set; }

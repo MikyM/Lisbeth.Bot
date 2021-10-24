@@ -15,24 +15,23 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
-using Lisbeth.Bot.Domain.Entities.Base;
+using DSharpPlus.Entities;
+using DSharpPlus.SlashCommands;
+using Lisbeth.Bot.Application.Discord.Services.Interfaces;
+using System.Threading.Tasks;
 
-namespace Lisbeth.Bot.Domain.Entities
+namespace Lisbeth.Bot.Application.Discord.Services
 {
-    public class EmbedConfig : SnowflakeEntity
+    public class DiscordEmbedConfigService : IDiscordEmbedConfigService
     {
-        public string Author { get; set; }
-        public string Footer { get; set; }
-        public string ImageUrl { get; set; }
-        public string FooterImageUrl { get; set; }
-        public string AuthorImageUrl { get; set; }
-        public string Description { get; set; }
-        public List<DiscordField> Fields { get; set; }
+        public Task<DiscordEmbed> ConfigureNewEmbedAsync(InteractionContext ctx)
+        {
+            throw new System.NotImplementedException();
+        }
 
-        public Reminder Reminder { get; set; }
-        public RecurringReminder RecurringReminder { get; set; }
-        public Tag Tag { get; set; }
-        public RoleMenu RoleMenu { get; set; }
+        public Task<DiscordEmbed> EditExistingEmbedAsync(InteractionContext ctx)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

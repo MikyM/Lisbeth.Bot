@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Generic;
+using System.Text.Json;
 using Lisbeth.Bot.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -45,6 +47,12 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
 
             builder
                 .HasMany(x => x.Tickets)
+                .WithOne(x => x.Guild)
+                .HasForeignKey(x => x.GuildId)
+                .HasPrincipalKey(x => x.GuildId);
+
+            builder
+                .HasMany(x => x.RoleMenus)
                 .WithOne(x => x.Guild)
                 .HasForeignKey(x => x.GuildId)
                 .HasPrincipalKey(x => x.GuildId);
@@ -132,10 +140,16 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
                     .HasColumnType("text");
                 ownedNavigationBuilder.Property(x => x.TicketCenterMessageFields)
                     .HasColumnName("ticket_center_message_fields")
-                    .HasColumnType("text");
+                    .HasColumnType("text")
+                    .HasConversion(x => JsonSerializer.Serialize(x, new JsonSerializerOptions { IgnoreNullValues = true }),
+                        x => JsonSerializer.Deserialize<List<DiscordField>>(x,
+                            new JsonSerializerOptions { IgnoreNullValues = true }));
                 ownedNavigationBuilder.Property(x => x.TicketWelcomeMessageFields)
                     .HasColumnName("ticket_welcome_message_fields")
-                    .HasColumnType("text");
+                    .HasColumnType("text")
+                    .HasConversion(x => JsonSerializer.Serialize(x, new JsonSerializerOptions { IgnoreNullValues = true }),
+                        x => JsonSerializer.Deserialize<List<DiscordField>>(x,
+                            new JsonSerializerOptions { IgnoreNullValues = true }));
 
                 ownedNavigationBuilder
                     .WithOwner(x => x.Guild)

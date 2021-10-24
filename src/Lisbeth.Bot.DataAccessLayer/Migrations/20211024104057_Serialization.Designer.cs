@@ -3,15 +3,17 @@ using System;
 using Lisbeth.Bot.DataAccessLayer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Lisbeth.Bot.DataAccessLayer.Migrations
 {
     [DbContext(typeof(LisbethBotDbContext))]
-    partial class LisbethBotDbContextModelSnapshot : ModelSnapshot
+    [Migration("20211024104057_Serialization")]
+    partial class Serialization
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

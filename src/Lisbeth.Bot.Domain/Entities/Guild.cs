@@ -32,6 +32,7 @@ namespace Lisbeth.Bot.Domain.Entities
         private readonly HashSet<Reminder> reminders;
         private readonly HashSet<Ticket> tickets;
         private readonly HashSet<Tag> tags;
+        private readonly HashSet<RoleMenu> roleMenus;
 
         public ulong GuildId { get; set; }
         public ulong UserId { get; set; }
@@ -47,6 +48,7 @@ namespace Lisbeth.Bot.Domain.Entities
         public IReadOnlyCollection<Reminder> Reminders => reminders;
         public IReadOnlyCollection<RecurringReminder> RecurringReminders => recurringReminders;
         public IReadOnlyCollection<Tag> Tags => tags;
+        public IReadOnlyCollection<RoleMenu> RoleMenus => roleMenus;
 
         public void AddMute(Mute mute)
         {

@@ -594,16 +594,14 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     guildCfg.TicketingConfig.TicketWelcomeMessageDescription.Replace("@ownerMention@", owner.Mention));
             }
 
-            var fields =
-                JsonSerializer.Deserialize<Dictionary<string, string>>(guildCfg.TicketingConfig
-                    .TicketWelcomeMessageFields);
-            if (fields is not null && fields.Count != 0)
+
+            if (guildCfg.TicketingConfig.TicketWelcomeMessageFields is not null && guildCfg.TicketingConfig.TicketWelcomeMessageFields.Count != 0)
             {
                 int i = 1;
-                foreach (var (fieldName, fieldValue) in fields)
+                foreach (var field in guildCfg.TicketingConfig.TicketWelcomeMessageFields)
                 {
                     if (i >= 25) break;
-                    embed.AddField(fieldName, fieldValue.Replace("@ownerMention@", owner.Mention));
+                    embed.AddField(field.Title, field.Text.Replace("@ownerMention@", owner.Mention));
                     i++;
                 }
             }

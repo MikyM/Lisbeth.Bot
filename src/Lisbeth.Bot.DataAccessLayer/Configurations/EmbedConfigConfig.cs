@@ -15,7 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
+using System.Text.Json;
 using Lisbeth.Bot.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -38,7 +40,12 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
                 .IsRequired();
 
             builder.Property(x => x.Description).HasColumnName("description").HasColumnType("text");
-            builder.Property(x => x.Fields).HasColumnName("fields").HasColumnType("text");
+            builder.Property(x => x.Fields)
+                .HasColumnName("fields")
+                .HasColumnType("text")
+                .HasConversion(x => JsonSerializer.Serialize(x, new JsonSerializerOptions { IgnoreNullValues = true }),
+                    x => JsonSerializer.Deserialize<List<DiscordField>>(x,
+                        new JsonSerializerOptions { IgnoreNullValues = true }));
             builder.Property(x => x.Author).HasColumnName("author").HasColumnType("varchar(200)")
                 .HasMaxLength(200);
             builder.Property(x => x.Footer).HasColumnName("footer").HasColumnType("varchar(200)")
@@ -49,9 +56,6 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
                 .HasColumnType("varchar(1000)").HasMaxLength(1000);
             builder.Property(x => x.ImageUrl).HasColumnName("image_url")
                 .HasColumnType("varchar(1000)").HasMaxLength(1000);
-            /*            builder.Property(x => x.TagId).HasColumnName("tag_id").HasColumnType("bigint");
-                        builder.Property(x => x.RecurringReminderId).HasColumnName("recurring_reminder_id").HasColumnType("bigint");
-                        builder.Property(x => x.ReminderId).HasColumnName("reminder_id").HasColumnType("bigint");*/
 
             builder.HasOne(x => x.Reminder)
                 .WithOne(x => x.EmbedConfig)
@@ -68,6 +72,12 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
             builder.HasOne(x => x.Tag)
                 .WithOne(x => x.EmbedConfig)
                 .HasForeignKey<Tag>(x => x.EmbedConfigId)
+                .HasPrincipalKey<EmbedConfig>(x => x.Id)
+                .IsRequired(false);
+
+            builder.HasOne(x => x.RoleMenu)
+                .WithOne(x => x.EmbedConfig)
+                .HasForeignKey<RoleMenu>(x => x.EmbedConfigId)
                 .HasPrincipalKey<EmbedConfig>(x => x.Id)
                 .IsRequired(false);
         }

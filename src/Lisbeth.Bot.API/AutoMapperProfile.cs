@@ -33,13 +33,15 @@ namespace Lisbeth.Bot.API
             CreateMap<TicketExportReqDto, Ticket>();
             CreateMap<TicketOpenReqDto, Ticket>()
                 .ForMember(dest => dest.UserId, source => source.MapFrom(x => x.OwnerId));
-            CreateMap<Guild, Guild>();
             CreateMap<Ticket, Ticket>();
             CreateMap<TicketingConfig, TicketingConfig>();
             CreateMap<ModerationConfig, ModerationConfig>();
             CreateMap<TagAddReqDto, Tag>();
             CreateMap<EmbedConfigDto, EmbedConfig>();
             CreateMap<TagGetReqDto, Tag>();
+
+            CreateMap<RoleEmojiMappingReqDto, RoleEmojiMapping>();
+            CreateMap<RoleMenuReqDto, RoleMenu>();
         }
     }
 }
