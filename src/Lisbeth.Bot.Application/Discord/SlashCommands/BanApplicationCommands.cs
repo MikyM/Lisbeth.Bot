@@ -43,21 +43,24 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
         public async Task BanCommand(InteractionContext ctx,
             [Option("action", "Action type")] BanActionType actionType,
             [Option("user", "User to ban")] DiscordUser user = null,
-            [Option("id", "User Id to ban")] long id = 0,
+            [Option("id", "User Id to ban")] string id = "",
             [Option("length", "For how long should the user be banned")]
             string length = "perm",
             [Option("reason", "Reason for ban")] string reason = "No reason provided")
         {
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
             DiscordEmbed embed;
-            ulong validId = user?.Id ?? (ulong) id;
+
+            if (user is null && id == "") throw new ArgumentException("You must supply either a user or a user Id");
+
+            var validId = user?.Id ?? ulong.Parse(id);
 
             switch (actionType)
             {
                 case BanActionType.Add:
 
-                    DateTime? liftsOn = length.ToDateTimeOffsetDuration().FinalDateFromToday;
+                    DateTime? liftsOn = length.ToDateTimeDuration().FinalDateFromToday;
 
                     if (liftsOn is null)
                         throw new ArgumentException($"Parameter {nameof(length)} can't be parsed to a known duration.");
@@ -69,7 +72,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     embed = await _discordBanService.BanAsync(ctx, banReq);
                     break;
                 case BanActionType.Remove:
-                    if (id == 0)
+                    if (id == "")
                         throw new ArgumentException("You must supply an Id of the user to unban.");
 
                     var banDisableReq = new BanDisableReqDto(validId, ctx.Guild.Id, ctx.User.Id);

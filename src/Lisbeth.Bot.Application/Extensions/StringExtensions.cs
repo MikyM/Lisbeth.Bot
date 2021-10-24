@@ -22,7 +22,7 @@ namespace Lisbeth.Bot.Application.Extensions
 {
     public static class StringExtensions
     {
-        public static (DateTime? FinalDateFromToday, TimeSpan Duration) ToDateTimeOffsetDuration(this string input)
+        public static (DateTime? FinalDateFromToday, TimeSpan Duration) ToDateTimeDuration(this string input)
         {
 
             if (input is null) throw new ArgumentNullException(nameof(input));

@@ -51,9 +51,11 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
 
         [SlashRequireOwner]
         [SlashCommand("audit", "Gets last 10 audit logs.")]
-        public async Task AuditCommand(InteractionContext ctx)
+        public async Task AuditCommand(InteractionContext ctx, [Option("ephemeral", "Whether response should be eph")]
+            string shouldEph = "true")
         {
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
+                new DiscordInteractionResponseBuilder().AsEphemeral(bool.Parse(shouldEph)));
             var res = await _service.GetBySpecificationsAsync<AuditLog>();
             string botRes = res.Aggregate("",
                 (current, resp) =>
@@ -66,9 +68,11 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
         [SlashRequireOwner]
         [SlashCommand("sql", "A command that runs sql query.")]
         public async Task MuteCommand(InteractionContext ctx, [Option("query", "Sql query to be executed.")]
-            string query)
+            string query, [Option("ephemeral", "Whether response should be eph")]
+            string shouldEph = "true")
         {
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
+                new DiscordInteractionResponseBuilder().AsEphemeral(bool.Parse(shouldEph)));
             var dat = new List<Dictionary<string, string>>();
             int i;
 
@@ -89,11 +93,11 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             if (!dat.Any() || !dat.First().Any())
             {
                 embed = new DiscordEmbedBuilder
-                {
-                    Title = "Given query produced no results.",
-                    Description = string.Concat("Query: ", Formatter.InlineCode(query), "."),
-                    Color = new DiscordColor(0x007FFF)
-                };
+                    {
+                        Title = "Given query produced no results.",
+                        Description = string.Concat("Query: ", Formatter.InlineCode(query), "."),
+                        Color = new DiscordColor(0x007FFF)
+                    };
                 await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
                 return;
             }
@@ -129,9 +133,12 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
 
         [SlashRequireOwner]
         [SlashCommand("eval", "Evaluate a piece of C# code.")]
-        public async Task EvalCommand(InteractionContext ctx, [Option("code", "Code to evaluate.")] string code)
+        public async Task EvalCommand(InteractionContext ctx, [Option("code", "Code to evaluate.")] string code,
+            [Option("ephemeral", "Whether response should be eph")]
+            string shouldEph = "true")
         {
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
+                new DiscordInteractionResponseBuilder().AsEphemeral(bool.Parse(shouldEph)));
 
             var cs1 = code.IndexOf("```", StringComparison.Ordinal) + 3;
             cs1 = code.IndexOf('\n', cs1) + 1;

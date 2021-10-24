@@ -49,7 +49,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
         {
             if (target is null) throw new ArgumentNullException(nameof(target));
 
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
             DiscordEmbed embed;
             switch (action)

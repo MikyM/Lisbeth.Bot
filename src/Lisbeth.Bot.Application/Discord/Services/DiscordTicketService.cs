@@ -29,6 +29,7 @@ using Lisbeth.Bot.Application.Discord.ChatExport;
 using Lisbeth.Bot.Application.Discord.Exceptions;
 using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
+using Lisbeth.Bot.Application.Extensions;
 using Lisbeth.Bot.Application.Helpers;
 using Lisbeth.Bot.Application.Services.Interfaces;
 using Lisbeth.Bot.Application.Validation;
@@ -50,7 +51,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
         private readonly ITicketService _ticketService;
         private readonly IAsyncExecutor _asyncExecutor;
 
-        public DiscordTicketService(IDiscordService discord, ITicketService ticketService, IGuildService guildService, 
+        public DiscordTicketService(IDiscordService discord, ITicketService ticketService, IGuildService guildService,
             ILogger<DiscordTicketService> logger, IAsyncExecutor asyncExecutor)
         {
             _discord = discord;
@@ -596,12 +597,12 @@ namespace Lisbeth.Bot.Application.Discord.Services
             }
 
 
-            if (guildCfg.TicketingConfig.TicketWelcomeMessageFields is not null && guildCfg.TicketingConfig.TicketWelcomeMessageFields.Count != 0)
+            if (guildCfg.TicketingConfig.TicketWelcomeMessageFields is not null &&
+                guildCfg.TicketingConfig.TicketWelcomeMessageFields.Count != 0)
             {
                 int i = 1;
-                foreach (var field in guildCfg.TicketingConfig.TicketWelcomeMessageFields)
+                foreach (var field in guildCfg.TicketingConfig.TicketWelcomeMessageFields.TakeWhile(_ => i < 25))
                 {
-                    if (i >= 25) break;
                     embed.AddField(field.Title, field.Text.Replace("@ownerMention@", owner.Mention));
                     i++;
                 }
@@ -645,6 +646,15 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 DiscordMessage msg = await newTicketChannel.SendMessageAsync(msgBuilder);
                 //Program.cachedMsgs.Add(msg.Id, msg);
 
+                if (intr is not null)
+                {
+                    var succEmbed = new DiscordEmbedBuilder();
+                    succEmbed.WithColor(new DiscordColor(guildCfg.EmbedHexColor));
+                    succEmbed.WithDescription($"Ticket created successfully! Channel: {newTicketChannel.Mention}");
+                    await intr.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(succEmbed.Build())
+                        .AsEphemeral(true));
+                }
+
                 _ticketService.BeginUpdate(ticket);
                 ticket.ChannelId = newTicketChannel.Id;
                 ticket.MessageOpenId = msg.Id;
@@ -682,23 +692,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
             }
             catch (Exception ex)
             {
-                if (intr is null) return msgBuilder;
-
-                var failEmbed = new DiscordEmbedBuilder();
-                failEmbed.WithColor(new DiscordColor(guildCfg.EmbedHexColor));
-                failEmbed.WithDescription($"Ticket wasn't created. Please message a moderator. {ex}");
-                await intr.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(failEmbed.Build())
-                    .AsEphemeral(true));
-                return msgBuilder;
+                _logger.LogError($"Errored while opening new ticket: {ex.GetFullMessage()}");
             }
-
-            if (intr is null) return msgBuilder;
-
-            var succEmbed = new DiscordEmbedBuilder();
-            succEmbed.WithColor(new DiscordColor(guildCfg.EmbedHexColor));
-            succEmbed.WithDescription($"Ticket created successfully! Channel: {newTicketChannel?.Mention}");
-            await intr.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(succEmbed.Build())
-                .AsEphemeral(true));
 
             return msgBuilder;
         }
@@ -805,7 +800,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             if (guildCfg.TicketingConfig.LogChannelId is null || ticket.IsPrivate) return msgBuilder;
 
-            _ = _asyncExecutor.ExecuteAsync<IDiscordChatExportService>(async x => await x.ExportToHtmlAsync(guild, target, requestingMember,
+            _ = _asyncExecutor.ExecuteAsync<IDiscordChatExportService>(async x => await x.ExportToHtmlAsync(guild,
+                target, requestingMember,
                 owner ?? await _discord.Client.GetUserAsync(ticket.UserId), ticket));
 
             return msgBuilder;
@@ -898,7 +894,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             await target.ModifyAsync(x => x.Parent = openedCat);
 
-            if (ticket.MessageCloseId.HasValue) await target.DeleteMessageAsync(await target.GetMessageAsync(ticket.MessageCloseId.Value));
+            if (ticket.MessageCloseId.HasValue)
+                await target.DeleteMessageAsync(await target.GetMessageAsync(ticket.MessageCloseId.Value));
 
             req.ReopenMessageId = reopenMsg.Id;
             await _ticketService.ReopenAsync(req, ticket);

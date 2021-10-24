@@ -28,7 +28,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             [Option("user", "User to identify")] DiscordUser user)
         {
             if (user is null) throw new ArgumentNullException(nameof(user));
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
             var res = await _guildService.GetBySpecificationsAsync<Guild>(
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(ctx.Guild.Id));
@@ -57,7 +57,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
         [SlashCommand("ticket-center", "A command that allows creating a ticket center message")]
         public async Task TicketCenterCommand(InteractionContext ctx)
         {
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
             var res = await _guildService.GetBySpecificationsAsync<Guild>(
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(ctx.Guild.Id));
@@ -86,11 +86,13 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
 
             var btn = new DiscordButtonComponent(ButtonStyle.Primary, "ticket_open_btn", "Open a ticket", false,
                 new DiscordComponentEmoji(envelopeEmoji));
-            var builder = new DiscordFollowupMessageBuilder();
+            var builder = new DiscordMessageBuilder();
             builder.AddEmbed(embed.Build());
             builder.AddComponents(btn);
 
-            await ctx.Interaction.CreateFollowupMessageAsync(builder);
+            await ctx.Channel.SendMessageAsync(builder);
+            await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                .WithContent("Message sent successfully").AsEphemeral(true));
         }
 
         [UsedImplicitly]
@@ -110,7 +112,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
         {
             if (openedCat is null) throw new ArgumentNullException(nameof(openedCat));
             if (closedCat is null) throw new ArgumentNullException(nameof(closedCat));
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
             var res = await _guildService.GetBySpecificationsAsync<Guild>(
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(ctx.Guild.Id));
@@ -144,7 +146,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             DiscordChannel updatedChannel, [Option("mute", "Mute role Id")]
             string muteRoleId)
         {
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
             var res = await _guildService.GetBySpecificationsAsync<Guild>(
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(ctx.Guild.Id));
@@ -167,7 +169,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
         [SlashCommand("guild-add", "A command that adds current guild to bot's database.")]
         public async Task TestGuild(InteractionContext ctx)
         {
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
             var guild = new Guild {GuildId = ctx.Guild.Id, UserId = ctx.User.Id, IsDisabled = false};
 

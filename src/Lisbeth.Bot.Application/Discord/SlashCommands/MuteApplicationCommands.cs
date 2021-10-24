@@ -50,14 +50,14 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
             string length = "",
             [Option("reason", "Reason for mute")] string reason = "No reason provided")
         {
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
             DiscordEmbed embed;
 
             switch (actionType)
             {
                 case MuteActionType.Add:
-                    DateTime? liftsOn = length.ToDateTimeOffsetDuration().FinalDateFromToday;
+                    DateTime? liftsOn = length.ToDateTimeDuration().FinalDateFromToday;
                     if (liftsOn is null)
                         throw new ArgumentException($"Parameter {nameof(length)} can't be parsed to a known duration.");
                     if (length is "") throw new ArgumentException($"Parameter {nameof(length)} can't be empty.");
