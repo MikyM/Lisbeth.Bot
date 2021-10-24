@@ -44,7 +44,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
             builder.Property(x => x.NewValues).HasColumnName("new_values").HasColumnType("text").IsRequired()
                 .ValueGeneratedOnAdd();
             builder.Property(x => x.AffectedColumns).HasColumnName("affected_columns").HasColumnType("varchar(1000)")
-                .HasMaxLength(1000).IsRequired().ValueGeneratedOnAdd();
+                .HasMaxLength(1000).ValueGeneratedOnAdd();
             builder.Property(x => x.PrimaryKey).HasColumnName("primary_key").HasColumnType("varchar(100)")
                 .HasMaxLength(100).IsRequired().ValueGeneratedOnAdd();
         }

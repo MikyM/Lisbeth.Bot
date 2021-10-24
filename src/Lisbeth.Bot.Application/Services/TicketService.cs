@@ -15,11 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.Json;
-using System.Threading.Tasks;
 using AutoMapper;
 using DSharpPlus;
 using DSharpPlus.Entities;
@@ -31,6 +26,10 @@ using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.Application.Services;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Services
 {
@@ -134,7 +133,6 @@ namespace Lisbeth.Bot.Application.Services
             var discordMembers = userIds.ToList();
             if (!discordMembers.Any()) return;
 
-            BeginUpdate(ticket);
             ticket.AddedUserIds = discordMembers;
 
             if (shouldSave) await CommitAsync();
@@ -147,7 +145,6 @@ namespace Lisbeth.Bot.Application.Services
             var discordRoles = roleIds.ToList();
             if (!discordRoles.Any()) return;
 
-            BeginUpdate(ticket);
             ticket.AddedRoleIds = discordRoles;
 
             if (shouldSave) await CommitAsync();
@@ -162,7 +159,6 @@ namespace Lisbeth.Bot.Application.Services
 
             if (isPrivate == ticket.IsPrivate) return;
 
-            BeginUpdate(ticket);
             ticket.IsPrivate = isPrivate;
 
             await CommitAsync();

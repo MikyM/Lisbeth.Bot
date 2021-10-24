@@ -731,7 +731,6 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<string>("AffectedColumns")
-                        .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(1000)
                         .HasColumnType("varchar(1000)")
@@ -880,12 +879,12 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                                 .HasColumnType("bigint")
                                 .HasColumnName("guild_id");
 
-                            b1.Property<TimeSpan?>("CleanAfter")
-                                .HasColumnType("time")
+                            b1.Property<long?>("CleanAfter")
+                                .HasColumnType("bigint")
                                 .HasColumnName("clean_after");
 
-                            b1.Property<TimeSpan?>("CloseAfter")
-                                .HasColumnType("time")
+                            b1.Property<long?>("CloseAfter")
+                                .HasColumnType("bigint")
                                 .HasColumnName("close_after");
 
                             b1.Property<long>("ClosedCategoryId")

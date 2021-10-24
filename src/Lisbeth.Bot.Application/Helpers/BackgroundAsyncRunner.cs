@@ -18,6 +18,8 @@
 using System;
 using System.Threading.Tasks;
 using Autofac;
+using Lisbeth.Bot.Application.Extensions;
+using Microsoft.Extensions.Logging;
 
 // ReSharper disable UseAwaitUsing
 
@@ -32,29 +34,35 @@ namespace Lisbeth.Bot.Application.Helpers
     public class AsyncExecutor : IAsyncExecutor
     {
         private readonly ILifetimeScope _lifetimeScope;
+        private readonly ILogger<AsyncExecutor> _logger;
 
-        public AsyncExecutor(ILifetimeScope lifetimeScope)
+        public AsyncExecutor(ILifetimeScope lifetimeScope, ILogger<AsyncExecutor> logger)
         {
             _lifetimeScope = lifetimeScope;
+            _logger = logger;
         }
 
         public Task ExecuteAsync<T>(Func<T, Task> func)
         {
             return Task.Run(async () =>
-            {
-                using var scope = _lifetimeScope.BeginLifetimeScope();
-                var service = scope.Resolve<T>();
-                await func(service);
-            });
+                {
+                    using var scope = _lifetimeScope.BeginLifetimeScope();
+                    var service = scope.Resolve<T>();
+                    await func(service);
+                })
+                .ContinueWith(x => _logger.LogError(x.Exception.GetFullMessage()),
+                    TaskContinuationOptions.OnlyOnFaulted);
         }
 
         public Task ExecuteAsync(Func<Task> func)
         {
             return Task.Run(async () =>
-            {
-                using var scope = _lifetimeScope.BeginLifetimeScope();
-                await func.Invoke();
-            });
+                {
+                    using var scope = _lifetimeScope.BeginLifetimeScope();
+                    await func.Invoke();
+                })
+                .ContinueWith(x => _logger.LogError(x.Exception.GetFullMessage()),
+                    TaskContinuationOptions.OnlyOnFaulted);
         }
     }
 }

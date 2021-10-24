@@ -4,7 +4,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Lisbeth.Bot.DataAccessLayer.Migrations
 {
-    public partial class InitialCreate : Migration
+    public partial class Init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -19,7 +19,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     table_name = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: false),
                     old_values = table.Column<string>(type: "text", nullable: true),
                     new_values = table.Column<string>(type: "text", nullable: false),
-                    affected_columns = table.Column<string>(type: "varchar(1000)", maxLength: 1000, nullable: false),
+                    affected_columns = table.Column<string>(type: "varchar(1000)", maxLength: 1000, nullable: true),
                     primary_key = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp", nullable: false),
                     updated_at = table.Column<DateTime>(type: "timestamp", nullable: false),
@@ -36,13 +36,13 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    fields = table.Column<string>(type: "text", nullable: true),
                     author = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: true),
                     footer = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: true),
                     image_url = table.Column<string>(type: "varchar(1000)", maxLength: 1000, nullable: true),
                     footer_image_url = table.Column<string>(type: "varchar(1000)", maxLength: 1000, nullable: true),
                     author_image_url = table.Column<string>(type: "varchar(1000)", maxLength: 1000, nullable: true),
                     description = table.Column<string>(type: "text", nullable: true),
+                    fields = table.Column<string>(type: "text", nullable: true),
                     created_at = table.Column<DateTime>(type: "timestamp", nullable: false),
                     updated_at = table.Column<DateTime>(type: "timestamp", nullable: false),
                     is_disabled = table.Column<bool>(type: "boolean", nullable: false)
@@ -157,8 +157,8 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     last_ticket_id = table.Column<long>(type: "bigint", nullable: false),
                     closed_category_id = table.Column<long>(type: "bigint", nullable: false),
                     opened_category_id = table.Column<long>(type: "bigint", nullable: false),
-                    clean_after = table.Column<TimeSpan>(type: "time", nullable: true),
-                    close_after = table.Column<TimeSpan>(type: "time", nullable: true),
+                    clean_after = table.Column<long>(type: "bigint", nullable: true),
+                    close_after = table.Column<long>(type: "bigint", nullable: true),
                     opened_name_prefix = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
                     closed_name_prefix = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
                     ticket_welcome_message_description = table.Column<string>(type: "text", nullable: true),
@@ -305,6 +305,40 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "role_menu",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    name = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
+                    guild_id = table.Column<long>(type: "bigint", nullable: false),
+                    user_id = table.Column<long>(type: "bigint", nullable: false),
+                    message_id = table.Column<long>(type: "bigint", nullable: false),
+                    text = table.Column<string>(type: "text", nullable: true),
+                    embed_config_id = table.Column<long>(type: "bigint", nullable: false),
+                    role_emoji_mapping = table.Column<string>(type: "text", nullable: true),
+                    created_at = table.Column<DateTime>(type: "timestamp", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "timestamp", nullable: false),
+                    is_disabled = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_role_menu", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_role_menu_embed_config_embed_config_id",
+                        column: x => x.embed_config_id,
+                        principalTable: "embed_config",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_role_menu_guild_guild_id",
+                        column: x => x.guild_id,
+                        principalTable: "guild",
+                        principalColumn: "guild_id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "tag",
                 columns: table => new
                 {
@@ -427,12 +461,6 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                 column: "guild_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_recurring_reminder_name",
-                table: "recurring_reminder",
-                column: "name",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_reminder_embed_config_id",
                 table: "reminder",
                 column: "embed_config_id",
@@ -441,6 +469,17 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_reminder_guild_id",
                 table: "reminder",
+                column: "guild_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_role_menu_embed_config_id",
+                table: "role_menu",
+                column: "embed_config_id",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_role_menu_guild_id",
+                table: "role_menu",
                 column: "guild_id");
 
             migrationBuilder.CreateIndex(
@@ -494,6 +533,9 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
 
             migrationBuilder.DropTable(
                 name: "reminder");
+
+            migrationBuilder.DropTable(
+                name: "role_menu");
 
             migrationBuilder.DropTable(
                 name: "tag");

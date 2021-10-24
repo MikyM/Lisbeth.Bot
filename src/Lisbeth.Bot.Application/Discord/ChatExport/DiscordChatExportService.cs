@@ -15,13 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.ChatExport.Builders;
@@ -35,6 +28,13 @@ using Microsoft.Extensions.Logging;
 using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Discord.Interfaces;
 using Serilog;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport
 {
@@ -175,7 +175,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
                 if (ticket is null)
                 {
                     var res = await _ticketService.GetBySpecificationsAsync<Ticket>(
-                        new TicketBaseGetSpecifications(null, null, guild.Id, target.Id));
+                        new TicketBaseGetSpecifications(null, null, guild.Id, target.Id, null, false, 1, true));
                     ticket = res.FirstOrDefault();
                 }
 
@@ -224,7 +224,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
                 {
                     await Task.Delay(1000);
                     var newMessages = await target.GetMessagesBeforeAsync(messages.Last().Id);
-                    if (newMessages.Count == 0) break;
+                    if (newMessages.Count == 0 || newMessages.Any(x=> x.Id == ticket.MessageOpenId)) break;
 
                     messages.AddRange(newMessages);
                 }
@@ -233,24 +233,29 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
 
                 foreach (var msg in messages.Where(msg => !users.Contains(msg.Author))) users.Add(msg.Author);
 
-                string path = Path.Combine(Directory.GetCurrentDirectory(), "ChatExport", "ChatExport.css");
+                string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Discord", "ChatExport",
+                    "ChatExport.css");
                 string css;
                 if (File.Exists(path))
                 {
                     using StreamReader streamReader = new StreamReader(path, Encoding.UTF8);
                     css = await streamReader.ReadToEndAsync();
+                    css = css.Trim().Replace("\r", string.Empty);
+                    css = css.Trim().Replace("\n", string.Empty);
                 }
                 else
                 {
                     throw new Exception($"CSS file was not found at {path}");
                 }
 
-                path = Path.Combine(Directory.GetCurrentDirectory(), "ChatExport", "ChatExport.js");
+                path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Discord", "ChatExport", "ChatExport.js");
                 string js;
                 if (File.Exists(path))
                 {
                     using StreamReader streamReader = new StreamReader(path, Encoding.UTF8);
                     js = await streamReader.ReadToEndAsync();
+                    js = js.Trim().Replace("\r", string.Empty);
+                    js = js.Trim().Replace("\n", string.Empty);
                 }
                 else
                 {

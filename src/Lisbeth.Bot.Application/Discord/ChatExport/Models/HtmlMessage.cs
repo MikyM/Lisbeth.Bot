@@ -26,8 +26,8 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Models
 
             messageTop = $"<div class=\"message-info\">{messageTop}</div>";
 
-            if (Msg.Content != "" && Msg.Content is not null)
-                messageBot = $"<div class=\"message-content\">{messageBot}</div>";
+            if (Msg.Content is not null && Msg.Content != "")
+                messageBot = $"<div class=\"message-content\">{Msg.Content}</div>";
 
             if (Msg.Attachments.Count != 0)
             {

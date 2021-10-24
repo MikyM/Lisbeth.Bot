@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using Lisbeth.Bot.Domain.Entities;
@@ -129,10 +130,18 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
                     .HasColumnType("bigint");
                 ownedNavigationBuilder.Property(x => x.OpenedNamePrefix).HasColumnName("opened_name_prefix")
                     .HasColumnType("varchar(100)").HasMaxLength(100);
-                ownedNavigationBuilder.Property(x => x.ClosedNamePrefix).HasColumnName("closed_name_prefix")
-                    .HasColumnType("varchar(100)").HasMaxLength(100);
-                ownedNavigationBuilder.Property(x => x.CleanAfter).HasColumnName("clean_after").HasColumnType("time");
-                ownedNavigationBuilder.Property(x => x.CloseAfter).HasColumnName("close_after").HasColumnType("time");
+                ownedNavigationBuilder.Property(x => x.ClosedNamePrefix)
+                    .HasColumnName("closed_name_prefix")
+                    .HasColumnType("varchar(100)")
+                    .HasMaxLength(100);
+                ownedNavigationBuilder.Property(x => x.CleanAfter)
+                    .HasColumnName("clean_after")
+                    .HasColumnType("bigint")
+                    .HasConversion(x => x.Value.Ticks, x => TimeSpan.FromTicks(x));
+                ownedNavigationBuilder.Property(x => x.CloseAfter)
+                    .HasColumnName("close_after")
+                    .HasColumnType("bigint")
+                    .HasConversion(x => x.Value.Ticks, x => TimeSpan.FromTicks(x));
                 ownedNavigationBuilder.Property(x => x.TicketCenterMessageDescription)
                     .HasColumnName("ticket_center_message_description")
                     .HasColumnType("text");

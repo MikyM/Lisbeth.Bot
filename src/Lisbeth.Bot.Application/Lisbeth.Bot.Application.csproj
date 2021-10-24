@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
@@ -8,6 +8,15 @@
     <Compile Remove="Discord\RegularCommands\**" />
     <EmbeddedResource Remove="Discord\RegularCommands\**" />
     <None Remove="Discord\RegularCommands\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Discord\ChatExport\ChatExport.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Discord\ChatExport\ChatExport.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
@@ -31,5 +40,4 @@
   <ItemGroup>
     <Folder Include="Util\" />
   </ItemGroup>
-
 </Project>

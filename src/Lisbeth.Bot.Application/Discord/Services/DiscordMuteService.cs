@@ -137,7 +137,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (foundEntity is null)
             {
                 if (!isMuted)
-                    resMute = await target.Mute(guild);
+                    resMute = await target.Mute(guild, guildCfg.ModerationConfig.MuteRoleId);
 
                 if (!resMute)
                 {
@@ -171,7 +171,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 if (foundEntity.AppliedUntil > req.AppliedUntil)
                 {
                     if (!isMuted)
-                        resMute = await target.Mute(guild);
+                        resMute = await target.Mute(guild, guildCfg.ModerationConfig.MuteRoleId);
 
                     if (!resMute)
                     {
@@ -190,7 +190,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 else
                 {
                     if (!isMuted)
-                        resMute = await target.Mute(guild);
+                        resMute = await target.Mute(guild, guildCfg.ModerationConfig.MuteRoleId);
 
                     if (!resMute)
                     {
@@ -334,7 +334,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             {
                 if (isMuted)
                 {
-                    await target.Unmute(guild);
+                    await target.Unmute(guild, guildCfg.ModerationConfig.MuteRoleId);
                     embed.WithAuthor($"Unmute | {target.GetFullUsername()}", null, target.AvatarUrl);
                     embed.AddField("Moderator", moderator.Mention, true);
                     embed.AddField("User mention", target.Mention, true);
@@ -353,7 +353,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 await _muteService.CommitAsync();
 
                 if (isMuted)
-                    await target.Unmute(guild);
+                    await target.Unmute(guild, guildCfg.ModerationConfig.MuteRoleId);
 
                 embed.WithAuthor($"Unmute | {target.GetFullDisplayName()}", null, target.AvatarUrl);
                 embed.AddField("Moderator", moderator.Mention, true);

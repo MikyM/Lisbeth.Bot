@@ -97,7 +97,7 @@ namespace Lisbeth.Bot.API
             {
                 options.UseRecommendedSerializerSettings();
                 options.UsePostgreSqlStorage(
-                    "User ID=lisbethbot;Password=lisbethbot;Host=localhost;Port=5438;Database=lisbeth_bot_test;",
+                    "User ID=lisbethbot;Password=lisbethbot;Host=localhost;Port=5438;Database=lisbeth_bot_hangfire_test;",
                     new PostgreSqlStorageOptions {QueuePollInterval = TimeSpan.FromSeconds(15)});
 /*                options.UseMemoryStorage(
                     new MemoryStorageOptions {JobExpirationCheckInterval = TimeSpan.FromMinutes(1)});*/
@@ -173,6 +173,7 @@ namespace Lisbeth.Bot.API
                     {
                         SizeLimit = 100
                     };
+                    config.EnableLogging = true;
                 }, "InMemoryCache");
             });
         }
@@ -221,13 +222,13 @@ namespace Lisbeth.Bot.API
         {
             services.AddHealthChecks()
                 .AddNpgSql(
-                    "User ID=lisbethbot;Password=lisbethbot;Host=localhost;Port=5438;Database=lisbeth_bot_test;")
+                    "User ID=lisbethbot;Password=lisbethbot;Host=localhost;Port=5438;Database=lisbeth_bot_test;", name: "Base DB")
                 .AddNpgSql(
-                    "User ID=hangfire;Password=hangfire;Host=localhost;Port=5438;Database=lisbeth_bot_hangfire_test;")
+                    "User ID=lisbethbot;Password=lisbethbot;Host=localhost;Port=5438;Database=lisbeth_bot_hangfire_test;", name: "Hangfire DB")
                 .AddHangfire(options =>
                 {
                     options.MinimumAvailableServers = 1;
-                    options.MaximumJobsFailed = 0;
+                    options.MaximumJobsFailed = 10;
                 })
                 .AddCheck<DiscordHealthCheck>("Discord health check");
         }

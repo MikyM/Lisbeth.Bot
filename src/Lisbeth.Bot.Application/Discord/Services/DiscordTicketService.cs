@@ -29,6 +29,7 @@ using Lisbeth.Bot.Application.Discord.ChatExport;
 using Lisbeth.Bot.Application.Discord.Exceptions;
 using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
+using Lisbeth.Bot.Application.Helpers;
 using Lisbeth.Bot.Application.Services.Interfaces;
 using Lisbeth.Bot.Application.Validation;
 using Lisbeth.Bot.DataAccessLayer.Specifications.GuildSpecifications;
@@ -43,20 +44,20 @@ namespace Lisbeth.Bot.Application.Discord.Services
     [UsedImplicitly]
     public class DiscordTicketService : IDiscordTicketService
     {
-        private readonly IDiscordChatExportService _chatExportService;
         private readonly IDiscordService _discord;
         private readonly IGuildService _guildService;
         private readonly ILogger<DiscordTicketService> _logger;
         private readonly ITicketService _ticketService;
+        private readonly IAsyncExecutor _asyncExecutor;
 
-        public DiscordTicketService(IDiscordService discord, ITicketService ticketService, IGuildService guildService,
-            IDiscordChatExportService chatExportService, ILogger<DiscordTicketService> logger)
+        public DiscordTicketService(IDiscordService discord, ITicketService ticketService, IGuildService guildService, 
+            ILogger<DiscordTicketService> logger, IAsyncExecutor asyncExecutor)
         {
             _discord = discord;
             _ticketService = ticketService;
-            _chatExportService = chatExportService;
             _guildService = guildService;
             _logger = logger;
+            _asyncExecutor = asyncExecutor;
         }
 
         public async Task<DiscordMessageBuilder> OpenTicketAsync(TicketOpenReqDto req)
@@ -608,7 +609,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             embed.WithFooter($"Ticket Id: {req.GuildSpecificId}");
 
-            var btn = new DiscordButtonComponent(ButtonStyle.Primary, "close_ticket_btn", "Close this ticket");
+            var btn = new DiscordButtonComponent(ButtonStyle.Primary, "ticket_close_btn", "Close this ticket");
 
             var msgBuilder = new DiscordMessageBuilder();
             msgBuilder.AddEmbed(embed.Build());
@@ -735,7 +736,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 throw new ArgumentException(
                     $"Ticket with Id: {ticket.GuildSpecificId}, TargetUserId: {ticket.UserId}, GuildId: {ticket.GuildId}, ChannelId: {ticket.ChannelId} is already closed.");
 
-            if (ticket.UserId != requestingMember.Id ||
+            if (ticket.UserId != requestingMember.Id &&
                 !requestingMember.Permissions.HasPermission(Permissions.BanMembers))
                 throw new DiscordNotAuthorizedException(
                     "Requesting member doesn't have moderator rights or isn't the ticket's owner.");
@@ -744,7 +745,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             embed.WithColor(new DiscordColor(guildCfg.EmbedHexColor));
             embed.WithAuthor("Ticket closed");
-            embed.AddField("Moderator", requestingMember.Mention);
+            embed.AddField("Requested by", requestingMember.Mention);
             embed.WithFooter($"Ticket Id: {ticket.GuildSpecificId}");
 
             var reopenBtn = new DiscordButtonComponent(ButtonStyle.Primary, "ticket_reopen_btn",
@@ -784,7 +785,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             await Task.Delay(500);
 
             await target.ModifyAsync(x =>
-                x.Name = $"{guildCfg.TicketingConfig.ClosedNamePrefix}-{ticket.GuildSpecificId}");
+                x.Name = $"{guildCfg.TicketingConfig.ClosedNamePrefix}-{ticket.GuildSpecificId:D4}");
 
             DiscordChannel closedCat;
             try
@@ -804,31 +805,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             if (guildCfg.TicketingConfig.LogChannelId is null || ticket.IsPrivate) return msgBuilder;
 
-            DiscordChannel logChannel;
-            try
-            {
-                logChannel = await _discord.Client.GetChannelAsync(guildCfg.TicketingConfig.LogChannelId.Value);
-            }
-            catch (Exception ex)
-            {
-                throw new DiscordNotFoundException(
-                    $"Channel with Id: {guildCfg.TicketingConfig.LogChannelId} doesn't exist. Couldn't send the log",
-                    ex);
-            }
-
-            var logEmbed = await _chatExportService.ExportToHtmlAsync(guild, target, requestingMember,
-                owner ?? await _discord.Client.GetUserAsync(ticket.UserId), ticket);
-
-            if (embed is null) throw new DiscordChatExportException("Exporting to HTML failed");
-
-            try
-            {
-                await logChannel.SendMessageAsync(logEmbed);
-            }
-            catch (Exception)
-            {
-                throw new Exception($"Couldn't send the ticket log in channel with Id: {logChannel.Id}");
-            }
+            _ = _asyncExecutor.ExecuteAsync<IDiscordChatExportService>(async x => await x.ExportToHtmlAsync(guild, target, requestingMember,
+                owner ?? await _discord.Client.GetUserAsync(ticket.UserId), ticket));
 
             return msgBuilder;
         }
@@ -905,20 +883,22 @@ namespace Lisbeth.Bot.Application.Discord.Services
             await Task.Delay(500);
 
             await target.ModifyAsync(x =>
-                x.Name = $"{guildCfg.TicketingConfig.OpenedNamePrefix}-{ticket.GuildSpecificId}");
+                x.Name = $"{guildCfg.TicketingConfig.OpenedNamePrefix}-{ticket.GuildSpecificId:D4}");
 
             DiscordChannel openedCat;
             try
             {
-                openedCat = await _discord.Client.GetChannelAsync(guildCfg.TicketingConfig.ClosedCategoryId);
+                openedCat = await _discord.Client.GetChannelAsync(guildCfg.TicketingConfig.OpenedCategoryId);
             }
             catch (Exception ex)
             {
                 throw new DiscordNotFoundException(
-                    $"Closed category channel with Id {guildCfg.TicketingConfig.ClosedCategoryId} doesn't exist", ex);
+                    $"Closed category channel with Id {guildCfg.TicketingConfig.OpenedCategoryId} doesn't exist", ex);
             }
 
             await target.ModifyAsync(x => x.Parent = openedCat);
+
+            if (ticket.MessageCloseId.HasValue) await target.DeleteMessageAsync(await target.GetMessageAsync(ticket.MessageCloseId.Value));
 
             req.ReopenMessageId = reopenMsg.Id;
             await _ticketService.ReopenAsync(req, ticket);

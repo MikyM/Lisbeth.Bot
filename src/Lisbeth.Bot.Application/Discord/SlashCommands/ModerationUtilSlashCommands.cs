@@ -137,6 +137,33 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
 
         [UsedImplicitly]
         [SlashRequireUserPermissions(Permissions.Administrator)]
+        [SlashCommand("moderation-config", "A command that allows setting moderation module up")]
+        public async Task ModConfigCommand(InteractionContext ctx,
+            [Option("deleted", "Channel for message deletion logs")]
+            DiscordChannel deletedChannel, [Option("updated", "Channel for message update logs")]
+            DiscordChannel updatedChannel, [Option("mute", "Mute role Id")]
+            string muteRoleId)
+        {
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+
+            var res = await _guildService.GetBySpecificationsAsync<Guild>(
+                new ActiveGuildByDiscordIdWithTicketingSpecifications(ctx.Guild.Id));
+            var guild = res.FirstOrDefault();
+
+            if (guild is null) throw new ArgumentException("Guild not found in database");
+
+            var modConfig = new ModerationConfig()
+            { MuteRoleId = ulong.Parse(muteRoleId), MessageDeletedEventsLogChannelId = deletedChannel.Id, MessageUpdatedEventsLogChannelId = updatedChannel.Id };
+
+            _guildService.BeginUpdate(guild);
+            guild.SetModerationConfig(modConfig);
+            await _guildService.CommitAsync();
+
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("Done"));
+        }
+
+        [UsedImplicitly]
+        [SlashRequireUserPermissions(Permissions.Administrator)]
         [SlashCommand("guild-add", "A command that adds current guild to bot's database.")]
         public async Task TestGuild(InteractionContext ctx)
         {

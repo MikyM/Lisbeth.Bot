@@ -87,6 +87,10 @@ namespace Lisbeth.Bot.API
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Lisbeth.Bot v1"));
             }
 
+            app.UseHangfireDashboard("/hangfire",
+                env.IsDevelopment()
+                    ? new DashboardOptions { AppPath = "kek", Authorization = new[] { new HangfireAuthFilterAlwaysAuth() } }
+                    : new DashboardOptions { AppPath = "kek", Authorization = new[] { new HangfireAuthFilter() } });
             app.UseMiddleware<CustomExceptionMiddleware>();
             app.UseHttpsRedirection();
             app.UseRouting();
@@ -95,12 +99,10 @@ namespace Lisbeth.Bot.API
             app.UseAuthorization();
             app.UseSerilogRequestLogging();
 
-            if (env.IsDevelopment()) app.UseHangfireDashboard();
-            else app.UseHangfireDashboard("/hangfire", new DashboardOptions {AppPath = "kek", Authorization = new[] {new HangfireAuthFilter()}});
-
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapHealthChecks("/health").RequireAuthorization();
+                if (env.IsDevelopment()) endpoints.MapHealthChecks("/health").AllowAnonymous();
+                else endpoints.MapHealthChecks("/health");
                 endpoints.MapControllers();
             });
         }
