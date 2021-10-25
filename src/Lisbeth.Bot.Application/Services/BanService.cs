@@ -21,6 +21,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Lisbeth.Bot.Application.Services.Interfaces;
 using Lisbeth.Bot.DataAccessLayer;
+using Lisbeth.Bot.DataAccessLayer.Specifications.BanSpecifications;
 using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.Application.Services;
@@ -36,12 +37,37 @@ namespace Lisbeth.Bot.Application.Services
         {
         }
 
+        public async Task CheckForNonBotBanAsync(ulong targetId, ulong guildId, ulong requestedOnBehalfOfId)
+        {
+            await Task.Delay(1000);
+
+            var res = await GetBySpecificationsAsync<Ban>(new BanBaseGetSpecifications(null, targetId, guildId));
+
+            var ban = res.FirstOrDefault();
+
+            if (ban is not null) return;
+
+            await AddOrExtendAsync(new BanReqDto(targetId, guildId, requestedOnBehalfOfId, DateTime.MaxValue));
+        }
+
+        public async Task CheckForNonBotUnbanAsync(ulong targetId, ulong guildId, ulong requestedOnBehalfOfId)
+        {
+            await Task.Delay(1000);
+
+            var res = await GetBySpecificationsAsync<Ban>(new BanBaseGetSpecifications(null, targetId, guildId));
+
+            var ban = res.FirstOrDefault();
+
+            if (ban is null) return;
+
+            await DisableAsync(new BanDisableReqDto(targetId, guildId, requestedOnBehalfOfId));
+        }
+
         public async Task<(long Id, Ban FoundEntity)> AddOrExtendAsync(BanReqDto req, bool shouldSave = false)
         {
             if (req is null) throw new ArgumentNullException(nameof(req));
 
-            var res = await _unitOfWork.GetRepository<Repository<Ban>>()
-                .GetBySpecificationsAsync(new Specifications<Ban>(x =>
+            var res = await GetBySpecificationsAsync<Ban>(new Specifications<Ban>(x =>
                     x.UserId == req.TargetUserId && x.GuildId == req.GuildId && !x.IsDisabled));
 
             var entity = res.FirstOrDefault();
@@ -51,12 +77,12 @@ namespace Lisbeth.Bot.Application.Services
 
             var shallowCopy = entity.ShallowCopy();
 
-            base.BeginUpdate(entity);
+            BeginUpdate(entity);
             entity.AppliedById = req.RequestedOnBehalfOfId;
             entity.AppliedUntil = req.AppliedUntil;
             entity.Reason = req.Reason;
 
-            if (shouldSave) await base.CommitAsync();
+            if (shouldSave) await CommitAsync();
 
             return (entity.Id, shallowCopy);
         }
@@ -65,19 +91,19 @@ namespace Lisbeth.Bot.Application.Services
         {
             if (entry is null) throw new ArgumentNullException(nameof(entry));
 
-            var res = await base.GetBySpecificationsAsync<Ban>(
+            var res = await GetBySpecificationsAsync<Ban>(
                 new Specifications<Ban>(x =>
                     x.UserId == entry.TargetUserId && x.GuildId == entry.GuildId && !x.IsDisabled));
 
             var entity = res.FirstOrDefault();
             if (entity is null) return null;
 
-            base.BeginUpdate(entity);
+            BeginUpdate(entity);
             entity.IsDisabled = true;
             entity.LiftedOn = DateTime.UtcNow;
             entity.LiftedById = entry.RequestedOnBehalfOfId;
 
-            if (shouldSave) await base.CommitAsync();
+            if (shouldSave) await CommitAsync();
 
             return entity;
         }

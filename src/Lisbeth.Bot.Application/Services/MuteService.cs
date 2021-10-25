@@ -21,6 +21,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Lisbeth.Bot.Application.Services.Interfaces;
 using Lisbeth.Bot.DataAccessLayer;
+using Lisbeth.Bot.DataAccessLayer.Specifications.MuteSpecifications;
 using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.Application.Services;
@@ -80,6 +81,32 @@ namespace Lisbeth.Bot.Application.Services
             if (shouldSave) await base.CommitAsync();
 
             return entity;
+        }
+
+        public async Task CheckForNonBotMuteAsync(ulong targetId, ulong guildId, ulong requestedOnBehalfOfId)
+        {
+            await Task.Delay(1000);
+
+            var res = await GetBySpecificationsAsync<Ban>(new MuteBaseGetSpecifications(null, targetId, guildId));
+
+            var ban = res.FirstOrDefault();
+
+            if (ban is not null) return;
+
+            await AddOrExtendAsync(new MuteReqDto(targetId, guildId, requestedOnBehalfOfId, DateTime.MaxValue));
+        }
+
+        public async Task CheckForNonBotUnmuteAsync(ulong targetId, ulong guildId, ulong requestedOnBehalfOfId)
+        {
+            await Task.Delay(1000);
+
+            var res = await GetBySpecificationsAsync<Ban>(new MuteBaseGetSpecifications(null, targetId, guildId));
+
+            var ban = res.FirstOrDefault();
+
+            if (ban is null) return;
+
+            await DisableAsync(new MuteDisableReqDto(targetId, guildId, requestedOnBehalfOfId));
         }
     }
 }

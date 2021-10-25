@@ -25,7 +25,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Specifications.BanSpecifications
     {
         public BanBaseGetSpecifications(long? id = null, ulong? userId = null, ulong? guildId = null,
             ulong? appliedById = null, DateTime? liftedOn = null, DateTime? appliedOn = null, ulong? liftedById = null,
-            int limit = 0)
+            int limit = 0, bool isDisabled = false)
         {
             if (id is not null)
                 AddFilterCondition(x => x.Id == id);
@@ -43,6 +43,8 @@ namespace Lisbeth.Bot.DataAccessLayer.Specifications.BanSpecifications
                 AddFilterCondition(x => x.CreatedAt == appliedOn);
             if (liftedById is not null)
                 AddFilterCondition(x => x.LiftedById == liftedById);
+            
+            AddFilterCondition(x => x.IsDisabled == isDisabled);
 
             ApplyOrderByDescending(x => x.CreatedAt);
 

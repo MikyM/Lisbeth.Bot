@@ -21,31 +21,41 @@ using DSharpPlus.EventArgs;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Helpers;
 using Lisbeth.Bot.Application.Services.Interfaces;
+using Microsoft.CodeAnalysis.VisualBasic.Syntax;
 using MikyM.Discord.Events;
 
 namespace Lisbeth.Bot.Application.Discord.EventHandlers
 {
     [UsedImplicitly]
-    public class BanEventsHandler : IDiscordGuildBanEventsSubscriber
+    public class MuteEventHandlers : IDiscordGuildMemberEventsSubscriber
     {
         private readonly IAsyncExecutor _asyncExecutor;
 
-        public BanEventsHandler(IAsyncExecutor asyncExecutor)
+        public MuteEventHandlers(IAsyncExecutor asyncExecutor)
         {
             _asyncExecutor = asyncExecutor;
         }
 
-        public Task DiscordOnGuildBanAdded(DiscordClient sender, GuildBanAddEventArgs args)
+        public Task DiscordOnGuildMemberAdded(DiscordClient sender, GuildMemberAddEventArgs args)
         {
-            _ = _asyncExecutor.ExecuteAsync<IBanService>(x =>
-                x.CheckForNonBotBanAsync(args.Member.Id, args.Guild.Id, sender.CurrentUser.Id));
             return Task.CompletedTask;
         }
 
-        public Task DiscordOnGuildBanRemoved(DiscordClient sender, GuildBanRemoveEventArgs args)
+        public Task DiscordOnGuildMemberRemoved(DiscordClient sender, GuildMemberRemoveEventArgs args)
         {
-            _ = _asyncExecutor.ExecuteAsync<IBanService>(x =>
-                x.CheckForNonBotUnbanAsync(args.Member.Id, args.Guild.Id, sender.CurrentUser.Id));
+            return Task.CompletedTask;
+        }
+
+        public Task DiscordOnGuildMemberUpdated(DiscordClient sender, GuildMemberUpdateEventArgs args)
+        {
+            _ = _asyncExecutor.ExecuteAsync<IMuteCheckService>(x =>
+                x.CheckForNonBotMuteActionAsync(args.Member.Id, args.Guild.Id, sender.CurrentUser.Id, args.RolesBefore,
+                    args.RolesAfter));
+            return Task.CompletedTask;
+        }
+
+        public Task DiscordOnGuildMembersChunked(DiscordClient sender, GuildMembersChunkEventArgs args)
+        {
             return Task.CompletedTask;
         }
     }

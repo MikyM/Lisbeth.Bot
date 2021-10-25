@@ -42,6 +42,7 @@ using OpenTracing.Mock;
 using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Lisbeth.Bot.Application.Helpers;
 
 namespace Lisbeth.Bot.API
 {
@@ -87,6 +88,7 @@ namespace Lisbeth.Bot.API
             services.AddDiscordGuildMemberEventsSubscriber<ModerationEventsHandler>();
             services.AddDiscordMessageEventsSubscriber<ModerationEventsHandler>();
             services.AddDiscordMiscEventsSubscriber<TicketEventsHandler>();
+            services.AddDiscordChannelEventsSubscriber<TicketEventsHandler>();
 
             #endregion
         }
@@ -101,10 +103,14 @@ namespace Lisbeth.Bot.API
                     new PostgreSqlStorageOptions {QueuePollInterval = TimeSpan.FromSeconds(15)});
 /*                options.UseMemoryStorage(
                     new MemoryStorageOptions {JobExpirationCheckInterval = TimeSpan.FromMinutes(1)});*/
+                options.UseFilter(new PreserveOriginalQueueAttribute());
+                options.UseFilter(new QueueFilter());
             });
 
             services.AddHangfireServer(options =>
-                options.Queues = new[] {"critical", "moderation", "reminder", "default"});
+            {
+                options.Queues = new[] {"critical", "moderation", "reminder", "default"};
+            });
         }
 
         public static void ConfigureApiVersioning(this IServiceCollection services)

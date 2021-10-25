@@ -36,5 +36,6 @@ namespace Lisbeth.Bot.Application.Services.Interfaces
         Task SetAddedRolesAsync(Ticket ticket, IEnumerable<ulong> roleIds, bool shouldSave = false);
         Task<bool> IsTicketPrivateAsync(Ticket ticket, DiscordGuild guild);
         Task CheckAndSetPrivacyAsync(Ticket ticket, DiscordGuild guild);
+        Task CheckForDeletedTicketChannelAsync(ulong channelId, ulong guildId, ulong requestedOnBehalfOfId);
     }
 }

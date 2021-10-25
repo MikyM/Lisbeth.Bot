@@ -36,7 +36,7 @@ namespace Lisbeth.Bot.Application.Validation
 
             RuleFor(x => x.Id)
                 .NotEmpty()
-                .When(x => !x.GuildId.HasValue || !x.ChannelId.HasValue || !x.GuildSpecificId.HasValue ||
+                .When(x => !x.GuildId.HasValue && !x.ChannelId.HasValue && !x.GuildSpecificId.HasValue &&
                            !x.OwnerId.HasValue);
             RuleFor(x => x.GuildId)
                 .NotEmpty()

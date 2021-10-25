@@ -40,6 +40,20 @@ namespace Lisbeth.Bot.Application.Services
         {
         }
 
+        public async Task CheckForDeletedTicketChannelAsync(ulong channelId, ulong guildId, ulong requestedOnBehalfOfId)
+        {
+            var res = await GetBySpecificationsAsync<Ticket>(
+                new TicketBaseGetSpecifications(null, null, guildId, channelId, null, false, 1));
+
+            var ticket = res.FirstOrDefault();
+
+            if (ticket is null) return;
+
+            var req = new TicketCloseReqDto(ticket.Id, ticket.UserId, ticket.GuildId, ticket.ChannelId,
+                requestedOnBehalfOfId);
+            await CloseAsync(req, ticket);
+        }
+
         public async Task<Ticket> CloseAsync(TicketCloseReqDto req)
         {
             if (req is null) throw new ArgumentNullException(nameof(req));

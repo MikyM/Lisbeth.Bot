@@ -27,5 +27,7 @@ namespace Lisbeth.Bot.Application.Services.Interfaces
     {
         Task<(long Id, Ban FoundEntity)> AddOrExtendAsync(BanReqDto req, bool shouldSave = false);
         Task<Ban> DisableAsync(BanDisableReqDto entry, bool shouldSave = false);
+        Task CheckForNonBotBanAsync(ulong targetId, ulong guildId, ulong requestedOnBehalfOfId);
+        Task CheckForNonBotUnbanAsync(ulong targetId, ulong guildId, ulong requestedOnBehalfOfId);
     }
 }

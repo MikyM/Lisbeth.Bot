@@ -44,7 +44,7 @@ namespace Lisbeth.Bot.Application.Validation
             RuleFor(x => x.TargetUserId)
                 .NotEmpty()
                 .When(x => x.Id.HasValue && x.GuildId.HasValue)
-                .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<BanGetReqDto>(discord)));
+                .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<BanGetReqDto>(discord, true)));
 
             RuleFor(x => x.RequestedOnBehalfOfId)
                 .NotEmpty()

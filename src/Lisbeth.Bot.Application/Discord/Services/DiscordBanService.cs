@@ -33,6 +33,7 @@ using Lisbeth.Bot.DataAccessLayer.Specifications.BanSpecifications;
 using Lisbeth.Bot.DataAccessLayer.Specifications.GuildSpecifications;
 using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.Entities;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.Logging;
 using MikyM.Discord.Interfaces;
 
@@ -93,23 +94,50 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (ctx is null) throw new ArgumentNullException(nameof(ctx));
             if (req is null) throw new ArgumentNullException(nameof(req));
 
-            return await BanAsync(ctx.Guild, (DiscordMember) ctx.ResolvedUserMentions[0], ctx.Member, req);
+            DiscordUser target;
+
+            if (ctx.ResolvedUserMentions is not null)
+            {
+                target = ctx.ResolvedUserMentions[0];
+            }
+            else
+            {
+                try
+                {
+                    target = await _discord.Client.GetUserAsync(req.TargetUserId);
+                }
+                catch (Exception ex)
+                {
+                    throw new DiscordNotFoundException($"User with Id: {req.TargetUserId} doesn't exist.", ex);
+                }
+            }
+
+            return await BanAsync(ctx.Guild, target, ctx.Member, req);
         }
 
-        private async Task<DiscordEmbed> BanAsync(DiscordGuild guild, DiscordMember target, DiscordMember moderator,
+        private async Task<DiscordEmbed> BanAsync(DiscordGuild guild, DiscordUser target, DiscordMember moderator,
             BanReqDto req)
         {
             if (guild is null) throw new ArgumentNullException(nameof(guild));
-            if (target is null) throw new ArgumentNullException(nameof(target));
             if (moderator is null) throw new ArgumentNullException(nameof(moderator));
             if (req is null) throw new ArgumentNullException(nameof(req));
+            if (target is null) throw new ArgumentNullException(nameof(target));
 
             if (moderator.Guild.Id != guild.Id) throw new ArgumentException(nameof(moderator));
-            if (target.Guild.Id != guild.Id) throw new ArgumentException(nameof(target));
+
+            DiscordMember targetMember;
+            try
+            {
+                targetMember = await guild.GetMemberAsync(target.Id);
+            }
+            catch (Exception)
+            {
+                targetMember = null;
+            }
 
             if (!moderator.Permissions.HasPermission(Permissions.BanMembers))
                 throw new DiscordNotAuthorizedException($"User with Id: {moderator.Id} doesn't have moderator rights");
-            if (target.Permissions.HasPermission(Permissions.BanMembers))
+            if (targetMember is not null && targetMember.Permissions.HasPermission(Permissions.BanMembers))
                 throw new DiscordNotAuthorizedException(
                     $"User with Id: {moderator.Id} doesn't have rights to ban another moderator");
 
@@ -262,7 +290,38 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (ctx is null) throw new ArgumentNullException(nameof(ctx));
             if (req is null) throw new ArgumentNullException(nameof(req));
 
-            return await UnbanAsync(ctx.Guild, ctx.ResolvedUserMentions[0], ctx.Member, req);
+            DiscordUser target;
+
+            if (ctx.ResolvedUserMentions is not null)
+            {
+                target = ctx.ResolvedUserMentions[0];
+            }
+            else
+            {
+                try
+                {
+                    if (req.TargetUserId is not null) target = await _discord.Client.GetUserAsync(req.TargetUserId.Value);
+                    else
+                    {
+                        var res = await _banService.GetAsync<Ban>(req.Id.Value);
+
+                        if (res is not null)
+                        {
+                            target = await _discord.Client.GetUserAsync(res.UserId);
+                        }
+                        else
+                        {
+                            throw new ArgumentException(nameof(req.Id));
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new DiscordNotFoundException($"User with Id: {req.TargetUserId} doesn't exist.", ex);
+                }
+            }
+
+            return await UnbanAsync(ctx.Guild, target, ctx.Member, req);
         }
 
         public async Task<DiscordEmbed> GetSpecificUserGuildBanAsync(BanGetReqDto req)
@@ -304,7 +363,38 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (ctx is null) throw new ArgumentNullException(nameof(ctx));
             if (req is null) throw new ArgumentNullException(nameof(req));
 
-            return await GetAsync(ctx.Guild, ctx.ResolvedUserMentions[0], ctx.Member, req);
+            DiscordUser target;
+
+            if (ctx.ResolvedUserMentions is not null)
+            {
+                target = ctx.ResolvedUserMentions[0];
+            }
+            else
+            {
+                try
+                {
+                    if (req.TargetUserId is not null) target = await _discord.Client.GetUserAsync(req.TargetUserId.Value);
+                    else
+                    {
+                        var res = await _banService.GetAsync<Ban>(req.Id.Value);
+
+                        if (res is not null)
+                        {
+                            target = await _discord.Client.GetUserAsync(res.UserId);
+                        }
+                        else
+                        {
+                            throw new ArgumentException(nameof(req.Id));
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new DiscordNotFoundException($"User with Id: {req.TargetUserId} doesn't exist.", ex);
+                }
+            }
+
+            return await GetAsync(ctx.Guild, target, ctx.Member, req);
         }
 
         private async Task<DiscordEmbed> UnbanAsync(DiscordGuild guild, DiscordUser target, DiscordMember moderator,
@@ -486,7 +576,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     }
 
                     embed.AddField("Was lifted by",
-                        $"{(liftingMod is not null ? liftingMod.Mention : "Deleted user")}");
+                        $"{(liftingMod is not null ? liftingMod.Mention : "Deleted or unavailable user")}");
                 }
 
                 embed.WithFooter($"Case ID: {ban.Id} | User ID: {target.Id}");

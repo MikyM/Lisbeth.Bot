@@ -15,19 +15,18 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.ChatExport;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
-using Lisbeth.Bot.Application.Extensions;
 using Lisbeth.Bot.Application.Helpers;
 using Lisbeth.Bot.Domain.DTOs.Request;
 using Microsoft.Extensions.Logging;
 using MikyM.Discord.Events;
+using System.Threading.Tasks;
+using Lisbeth.Bot.Application.Services.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.EventHandlers
 {
@@ -63,23 +62,28 @@ namespace Lisbeth.Bot.Application.Discord.EventHandlers
                     await x.OpenTicketAsync(args.Interaction, req));
             }
 
-            if (args.Id == "ticket_reopen_btn")
+            if (args.Id == "ticket_close_msg_slct")
             {
                 await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
-                var req = new TicketReopenReqDto
+                if (args.Values[0] == "ticket_reopen_value")
                 {
-                    GuildId = args.Guild.Id, ChannelId = args.Channel.Id, RequestedById = args.User.Id
-                };
-                _ = _asyncExecutor.ExecuteAsync<IDiscordTicketService>(async x =>
-                    await x.ReopenTicketAsync(args.Interaction, req));
+                    var req = new TicketReopenReqDto
+                    {
+                        GuildId = args.Guild.Id,
+                        ChannelId = args.Channel.Id,
+                        RequestedById = args.User.Id
+                    };
+                    _ = _asyncExecutor.ExecuteAsync<IDiscordTicketService>(async x =>
+                        await x.ReopenTicketAsync(args.Interaction, req));
+                }
+                if (args.Values[0] == "ticket_transcript_value")
+                {
+                    _ = _asyncExecutor.ExecuteAsync<IDiscordChatExportService>(async x =>
+                        await x.ExportToHtmlAsync(args.Interaction));
+                }
             }
 
-            if (args.Id == "ticket_save_trans_btn")
-            {
-                await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
-                _ = _asyncExecutor.ExecuteAsync<IDiscordChatExportService>(async x =>
-                    await x.ExportToHtmlAsync(args.Interaction));
-            }
+
         }
 
         public Task DiscordOnClientErrored(DiscordClient sender, ClientErrorEventArgs args)
@@ -100,8 +104,8 @@ namespace Lisbeth.Bot.Application.Discord.EventHandlers
 
         public Task DiscordOnChannelDeleted(DiscordClient sender, ChannelDeleteEventArgs args)
         {
-            _ = _asyncExecutor.ExecuteAsync<IDiscordTicketService>(async x =>
-                await x.CheckForDeletedTicketChannelAsync(args.Channel));
+            _ = _asyncExecutor.ExecuteAsync<ITicketService>(async x =>
+                await x.CheckForDeletedTicketChannelAsync(args.Channel.Id, args.Guild.Id, sender.CurrentUser.Id));
             return Task.CompletedTask;
         }
 

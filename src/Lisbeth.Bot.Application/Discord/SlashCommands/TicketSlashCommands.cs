@@ -31,7 +31,6 @@ using Lisbeth.Bot.Domain.DTOs.Request;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands
 {
-    [SlashCommandGroup("ticket", "Ticket commands")]
     [SlashModuleLifespan(SlashModuleLifespan.Transient)]
     [UsedImplicitly]
     public class TicketSlashCommands : ApplicationCommandModule

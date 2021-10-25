@@ -15,11 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.Json;
-using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
@@ -39,6 +34,10 @@ using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.Entities;
 using Microsoft.Extensions.Logging;
 using MikyM.Discord.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {
@@ -338,7 +337,9 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (ctx is null) throw new ArgumentNullException(nameof(ctx));
 
             return await AddToTicketAsync(ctx.Guild, ctx.Member, ctx.Channel, req,
-                (DiscordMember) ctx.ResolvedUserMentions?[0], ctx.ResolvedRoleMentions?[0]);
+                ctx.ResolvedUserMentions is not null
+                    ? await ctx.Guild.GetMemberAsync(ctx.ResolvedUserMentions[0].Id)
+                    : null, ctx.ResolvedRoleMentions?[0]);
         }
 
         public async Task<DiscordEmbed> RemoveFromTicketAsync(InteractionContext ctx, TicketRemoveReqDto req)
@@ -347,7 +348,9 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (req is null) throw new ArgumentNullException(nameof(req));
 
             return await RemoveFromTicketAsync(ctx.Guild, ctx.Member, ctx.Channel, req,
-                (DiscordMember) ctx.ResolvedUserMentions?[0], ctx.ResolvedRoleMentions?[0]);
+                ctx.ResolvedUserMentions is not null
+                    ? await ctx.Guild.GetMemberAsync(ctx.ResolvedUserMentions[0].Id)
+                    : null, ctx.ResolvedRoleMentions?[0]);
         }
 
         public async Task<DiscordEmbed> RemoveFromTicketAsync(TicketRemoveReqDto req)
@@ -572,6 +575,9 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 throw new ArgumentException($"Guild with Id:{guild.Id} doesn't have ticketing enabled.");
 
             req.GuildSpecificId = guildCfg.TicketingConfig.LastTicketId + 1;
+            _guildService.BeginUpdate(guildCfg);
+            guildCfg.TicketingConfig.LastTicketId++;
+            await _guildService.CommitAsync();
 
             var ticket = await _ticketService.OpenAsync(req);
 
@@ -610,7 +616,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             embed.WithFooter($"Ticket Id: {req.GuildSpecificId}");
 
-            var btn = new DiscordButtonComponent(ButtonStyle.Primary, "ticket_close_btn", "Close this ticket");
+            var btn = new DiscordButtonComponent(ButtonStyle.Primary, "ticket_close_btn", "Close this ticket", false,
+                new DiscordComponentEmoji(DiscordEmoji.FromName(_discord.Client, ":lock:")));
 
             var msgBuilder = new DiscordMessageBuilder();
             msgBuilder.AddEmbed(embed.Build());
@@ -683,11 +690,6 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 }
 
                 await _ticketService.SetAddedRolesAsync(ticket, roleIds);
-
-                _guildService.BeginUpdate(guildCfg);
-                guildCfg.TicketingConfig.LastTicketId++;
-
-                await _guildService.CommitAsync();
                 await _ticketService.CommitAsync();
             }
             catch (Exception ex)
@@ -743,23 +745,27 @@ namespace Lisbeth.Bot.Application.Discord.Services
             embed.AddField("Requested by", requestingMember.Mention);
             embed.WithFooter($"Ticket Id: {ticket.GuildSpecificId}");
 
-            var reopenBtn = new DiscordButtonComponent(ButtonStyle.Primary, "ticket_reopen_btn",
-                "Reopen this ticket");
-            var saveTransBtn = new DiscordButtonComponent(ButtonStyle.Primary, "ticket_save_trans_btn",
-                "Generate transcript");
+            var options = new List<DiscordSelectComponentOption>()
+            {
+                new ("Reopen", "ticket_reopen_value", "Reopens this ticket",
+                false, new DiscordComponentEmoji(DiscordEmoji.FromName(_discord.Client, ":unlock:"))),
+                new ("Transcript", "ticket_transcript_value", "Generates HTML transcript for this ticket",
+                false, new DiscordComponentEmoji(DiscordEmoji.FromName(_discord.Client, ":blue_book:")))
+            };
+            var selectDropdown = new DiscordSelectComponent("ticket_close_msg_slct", "Choose an action", options);
 
             var msgBuilder = new DiscordMessageBuilder();
             msgBuilder.AddEmbed(embed.Build());
-            msgBuilder.AddComponents(new List<DiscordComponent> {reopenBtn, saveTransBtn});
+            msgBuilder.AddComponents(selectDropdown);
 
             DiscordMessage closeMsg;
             try
             {
                 closeMsg = await target.SendMessageAsync(msgBuilder);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw new ArgumentException($"Couldn't send ticket close message in channel with Id: {target.Id}");
+                throw new ArgumentException($"Couldn't send ticket close message in channel with Id: {target.Id}", ex);
             }
 
             DiscordMember owner;
@@ -928,9 +934,6 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (guildCfg.TicketingConfig is null)
                 throw new ArgumentException($"Guild with Id:{guild.Id} doesn't have ticketing enabled.");
 
-            req ??= new TicketAddReqDto(null, null, guild.Id, targetTicketChannel.Id, requestingMember.Id,
-                targetRole?.Id ?? targetMember.Id);
-
             var res = await _ticketService.GetBySpecificationsAsync<Ticket>(
                 new TicketBaseGetSpecifications(req.Id, req.OwnerId, req.GuildId, req.ChannelId, req.GuildSpecificId));
 
@@ -1063,26 +1066,12 @@ namespace Lisbeth.Bot.Application.Discord.Services
             var embed = new DiscordEmbedBuilder();
 
             embed.WithColor(new DiscordColor(guildCfg.EmbedHexColor));
-            embed.WithAuthor($"Ticket moderation | Add {(targetRole is null ? "member" : "role")} action log");
+            embed.WithAuthor($"Ticket moderation | Remove {(targetRole is null ? "member" : "role")} action log");
             embed.AddField("Moderator", requestingMember.Mention);
-            embed.AddField("Added", $"{targetRole?.Mention ?? targetMember?.Mention}");
+            embed.AddField("Removed", $"{targetRole?.Mention ?? targetMember?.Mention}");
             embed.WithFooter($"Ticket Id: {ticket.GuildSpecificId}");
 
             return embed.Build();
-        }
-
-        public async Task CheckForDeletedTicketChannelAsync(DiscordChannel channel)
-        {
-            var res = await _ticketService.GetBySpecificationsAsync<Ticket>(
-                new TicketBaseGetSpecifications(null, null, channel.GuildId, channel.Id, null, false, 1));
-
-            var ticket = res.FirstOrDefault();
-
-            if (ticket is null) return;
-
-            var req = new TicketCloseReqDto(ticket.Id, ticket.UserId, ticket.GuildId, ticket.ChannelId,
-                _discord.Client.CurrentUser.Id);
-            await _ticketService.CloseAsync(req, ticket);
         }
     }
 }

@@ -15,19 +15,22 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Threading.Tasks;
-using Lisbeth.Bot.DataAccessLayer;
-using Lisbeth.Bot.Domain.DTOs.Request;
-using Lisbeth.Bot.Domain.Entities;
-using MikyM.Common.Application.Interfaces;
+using System;
+using Hangfire.States;
 
-namespace Lisbeth.Bot.Application.Services.Interfaces
+namespace Lisbeth.Bot.Application.Helpers
 {
-    public interface IMuteService : ICrudService<Mute, LisbethBotDbContext>
+    public sealed class ScheduledEnqueuedState : ScheduledState
     {
-        Task<(long Id, Mute FoundEntity)> AddOrExtendAsync(MuteReqDto req, bool shouldSave = false);
-        Task<Mute> DisableAsync(MuteDisableReqDto entry, bool shouldSave = false);
-        Task CheckForNonBotMuteAsync(ulong targetId, ulong guildId, ulong requestedOnBehalfOfId);
-        Task CheckForNonBotUnmuteAsync(ulong targetId, ulong guildId, ulong requestedOnBehalfOfId);
+        public string Queue { get; }
+
+        public ScheduledEnqueuedState(TimeSpan enqueueIn) : this(DateTime.UtcNow.Add(enqueueIn))
+        {
+        }
+
+        public ScheduledEnqueuedState(DateTime enqueuedAt, string queue = null) : base(enqueuedAt.ToUniversalTime())
+        {
+            this.Queue = queue?.Trim();
+        }
     }
 }

@@ -15,19 +15,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using Lisbeth.Bot.DataAccessLayer;
-using Lisbeth.Bot.Domain.DTOs.Request;
-using Lisbeth.Bot.Domain.Entities;
-using MikyM.Common.Application.Interfaces;
+using DSharpPlus.Entities;
 
 namespace Lisbeth.Bot.Application.Services.Interfaces
 {
-    public interface IMuteService : ICrudService<Mute, LisbethBotDbContext>
+    public interface IMuteCheckService
     {
-        Task<(long Id, Mute FoundEntity)> AddOrExtendAsync(MuteReqDto req, bool shouldSave = false);
-        Task<Mute> DisableAsync(MuteDisableReqDto entry, bool shouldSave = false);
-        Task CheckForNonBotMuteAsync(ulong targetId, ulong guildId, ulong requestedOnBehalfOfId);
-        Task CheckForNonBotUnmuteAsync(ulong targetId, ulong guildId, ulong requestedOnBehalfOfId);
+        Task CheckForNonBotMuteActionAsync(ulong targetId, ulong guildId, ulong requestedOnBehalfOfId,
+            IReadOnlyList<DiscordRole> rolesBefore, IReadOnlyList<DiscordRole> rolesAfter);
     }
 }
