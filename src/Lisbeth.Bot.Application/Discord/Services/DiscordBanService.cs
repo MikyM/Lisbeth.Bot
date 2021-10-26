@@ -29,6 +29,7 @@ using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Application.Extensions;
 using Lisbeth.Bot.Application.Services.Interfaces;
+using Lisbeth.Bot.Application.Services.Interfaces.Database;
 using Lisbeth.Bot.DataAccessLayer.Specifications.BanSpecifications;
 using Lisbeth.Bot.DataAccessLayer.Specifications.GuildSpecifications;
 using Lisbeth.Bot.Domain.DTOs.Request;

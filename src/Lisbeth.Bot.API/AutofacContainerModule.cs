@@ -21,6 +21,7 @@ using EFCoreSecondLevelCacheInterceptor;
 using IdGen;
 using Lisbeth.Bot.Application.Helpers;
 using Lisbeth.Bot.Application.Services;
+using Lisbeth.Bot.Application.Services.Database;
 using Lisbeth.Bot.Application.Services.Interfaces;
 using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.DataAccessLayer.Repositories;

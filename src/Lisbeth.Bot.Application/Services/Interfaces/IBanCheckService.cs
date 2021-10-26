@@ -15,19 +15,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using AutoMapper;
-using Lisbeth.Bot.Application.Services.Interfaces;
-using Lisbeth.Bot.DataAccessLayer;
-using Lisbeth.Bot.Domain.Entities;
-using MikyM.Common.Application.Services;
-using MikyM.Common.DataAccessLayer.UnitOfWork;
+using System.Threading.Tasks;
 
-namespace Lisbeth.Bot.Application.Services
+namespace Lisbeth.Bot.Application.Services.Interfaces
 {
-    public class PruneService : CrudService<Prune, LisbethBotDbContext>, IPruneService
+    public interface IBanCheckService
     {
-        public PruneService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
-        {
-        }
+        Task CheckForNonBotBanAsync(ulong targetId, ulong guildId, ulong requestedOnBehalfOfId);
+        Task CheckForNonBotUnbanAsync(ulong targetId, ulong guildId, ulong requestedOnBehalfOfId);
     }
 }

@@ -15,19 +15,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using AutoMapper;
-using Lisbeth.Bot.Application.Services.Interfaces;
+using System.Threading.Tasks;
 using Lisbeth.Bot.DataAccessLayer;
+using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.Entities;
-using MikyM.Common.Application.Services;
-using MikyM.Common.DataAccessLayer.UnitOfWork;
+using MikyM.Common.Application.Interfaces;
 
-namespace Lisbeth.Bot.Application.Services
+namespace Lisbeth.Bot.Application.Services.Interfaces.Database
 {
-    public class EmbedConfigService : CrudService<EmbedConfig, LisbethBotDbContext>, IEmbedConfigService
+    public interface IBanService : ICrudService<Ban, LisbethBotDbContext>
     {
-        public EmbedConfigService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
-        {
-        }
+        Task<(long Id, Ban FoundEntity)> AddOrExtendAsync(BanReqDto req, bool shouldSave = false);
+        Task<Ban> DisableAsync(BanDisableReqDto entry, bool shouldSave = false);
     }
 }

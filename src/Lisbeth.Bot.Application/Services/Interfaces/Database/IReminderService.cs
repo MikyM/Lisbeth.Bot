@@ -15,19 +15,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using AutoMapper;
-using Lisbeth.Bot.Application.Services.Interfaces;
 using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.Domain.Entities;
-using MikyM.Common.Application.Services;
-using MikyM.Common.DataAccessLayer.UnitOfWork;
+using MikyM.Common.Application.Interfaces;
 
-namespace Lisbeth.Bot.Application.Services
+namespace Lisbeth.Bot.Application.Services.Interfaces.Database
 {
-    public class RecurringReminderService : CrudService<RecurringReminder, LisbethBotDbContext>, IRecurringReminderService
+    public interface IReminderService : ICrudService<Reminder, LisbethBotDbContext>
     {
-        public RecurringReminderService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
-        {
-        }
+        
     }
 }

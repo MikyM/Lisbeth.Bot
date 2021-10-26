@@ -25,6 +25,7 @@ using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Application.Services.Interfaces;
+using Lisbeth.Bot.Application.Services.Interfaces.Database;
 using Lisbeth.Bot.DataAccessLayer.Specifications.MuteSpecifications;
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.DataAccessLayer.Specifications;

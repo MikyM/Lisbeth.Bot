@@ -35,6 +35,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Lisbeth.Bot.Application.Services.Interfaces.Database;
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport
 {

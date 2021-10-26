@@ -15,17 +15,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Threading.Tasks;
 using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.Application.Interfaces;
-using System.Threading.Tasks;
 
-namespace Lisbeth.Bot.Application.Services.Interfaces
+namespace Lisbeth.Bot.Application.Services.Interfaces.Database
 {
-    public interface ITagService : ICrudService<Tag, LisbethBotDbContext>
+    public interface IMuteService : ICrudService<Mute, LisbethBotDbContext>
     {
-        Task UpdateTagEmbedConfigAsync(TagEditReqDto req, bool shouldSave = false);
-        Task DisableAsync(TagDisableReqDto req, bool shouldSave = false);
+        Task<(long Id, Mute FoundEntity)> AddOrExtendAsync(MuteReqDto req, bool shouldSave = false);
+        Task<Mute> DisableAsync(MuteDisableReqDto entry, bool shouldSave = false);
     }
 }

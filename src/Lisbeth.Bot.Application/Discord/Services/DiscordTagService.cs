@@ -31,6 +31,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Lisbeth.Bot.Application.Services.Interfaces.Database;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {

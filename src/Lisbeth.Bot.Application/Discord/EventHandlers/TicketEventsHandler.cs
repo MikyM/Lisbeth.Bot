@@ -27,6 +27,7 @@ using Microsoft.Extensions.Logging;
 using MikyM.Discord.Events;
 using System.Threading.Tasks;
 using Lisbeth.Bot.Application.Services.Interfaces;
+using Lisbeth.Bot.Application.Services.Interfaces.Database;
 
 namespace Lisbeth.Bot.Application.Discord.EventHandlers
 {

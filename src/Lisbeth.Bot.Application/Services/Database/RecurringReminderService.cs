@@ -16,17 +16,17 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using AutoMapper;
-using Lisbeth.Bot.Application.Services.Interfaces;
+using Lisbeth.Bot.Application.Services.Interfaces.Database;
 using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.Application.Services;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
 
-namespace Lisbeth.Bot.Application.Services
+namespace Lisbeth.Bot.Application.Services.Database
 {
-    public class GuildService : CrudService<Guild, LisbethBotDbContext>, IGuildService
+    public class RecurringReminderService : CrudService<RecurringReminder, LisbethBotDbContext>, IRecurringReminderService
     {
-        public GuildService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> ctx) : base(mapper, ctx)
+        public RecurringReminderService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
         {
         }
     }

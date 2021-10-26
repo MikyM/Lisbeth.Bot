@@ -15,59 +15,33 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using AutoMapper;
-using Lisbeth.Bot.Application.Services.Interfaces;
+using Lisbeth.Bot.Application.Services.Interfaces.Database;
 using Lisbeth.Bot.DataAccessLayer;
-using Lisbeth.Bot.DataAccessLayer.Specifications.BanSpecifications;
 using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.Application.Services;
 using MikyM.Common.DataAccessLayer.Repositories;
 using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace Lisbeth.Bot.Application.Services
+namespace Lisbeth.Bot.Application.Services.Database
 {
-    public class BanService : CrudService<Ban, LisbethBotDbContext>, IBanService
+    public class MuteService : CrudService<Mute, LisbethBotDbContext>, IMuteService
     {
-        public BanService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
+        public MuteService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
         {
         }
 
-        public async Task CheckForNonBotBanAsync(ulong targetId, ulong guildId, ulong requestedOnBehalfOfId)
-        {
-            await Task.Delay(1000);
-
-            var res = await GetBySpecificationsAsync<Ban>(new BanBaseGetSpecifications(null, targetId, guildId));
-
-            var ban = res.FirstOrDefault();
-
-            if (ban is not null) return;
-
-            await AddOrExtendAsync(new BanReqDto(targetId, guildId, requestedOnBehalfOfId, DateTime.MaxValue));
-        }
-
-        public async Task CheckForNonBotUnbanAsync(ulong targetId, ulong guildId, ulong requestedOnBehalfOfId)
-        {
-            await Task.Delay(1000);
-
-            var res = await GetBySpecificationsAsync<Ban>(new BanBaseGetSpecifications(null, targetId, guildId));
-
-            var ban = res.FirstOrDefault();
-
-            if (ban is null) return;
-
-            await DisableAsync(new BanDisableReqDto(targetId, guildId, requestedOnBehalfOfId));
-        }
-
-        public async Task<(long Id, Ban FoundEntity)> AddOrExtendAsync(BanReqDto req, bool shouldSave = false)
+        public async Task<(long Id, Mute FoundEntity)> AddOrExtendAsync(MuteReqDto req, bool shouldSave = false)
         {
             if (req is null) throw new ArgumentNullException(nameof(req));
 
-            var res = await GetBySpecificationsAsync<Ban>(new Specifications<Ban>(x =>
+            var res = await _unitOfWork.GetRepository<Repository<Mute>>()
+                .GetBySpecificationsAsync(new Specifications<Mute>(x =>
                     x.UserId == req.TargetUserId && x.GuildId == req.GuildId && !x.IsDisabled));
 
             var entity = res.FirstOrDefault();
@@ -77,33 +51,33 @@ namespace Lisbeth.Bot.Application.Services
 
             var shallowCopy = entity.ShallowCopy();
 
-            BeginUpdate(entity);
+            base.BeginUpdate(entity);
             entity.AppliedById = req.RequestedOnBehalfOfId;
             entity.AppliedUntil = req.AppliedUntil;
             entity.Reason = req.Reason;
 
-            if (shouldSave) await CommitAsync();
+            if (shouldSave) await base.CommitAsync();
 
             return (entity.Id, shallowCopy);
         }
 
-        public async Task<Ban> DisableAsync(BanDisableReqDto entry, bool shouldSave = false)
+        public async Task<Mute> DisableAsync(MuteDisableReqDto entry, bool shouldSave = false)
         {
             if (entry is null) throw new ArgumentNullException(nameof(entry));
 
-            var res = await GetBySpecificationsAsync<Ban>(
-                new Specifications<Ban>(x =>
+            var res = await base.GetBySpecificationsAsync<Mute>(
+                new Specifications<Mute>(x =>
                     x.UserId == entry.TargetUserId && x.GuildId == entry.GuildId && !x.IsDisabled));
 
             var entity = res.FirstOrDefault();
             if (entity is null) return null;
 
-            BeginUpdate(entity);
+            base.BeginUpdate(entity);
             entity.IsDisabled = true;
             entity.LiftedOn = DateTime.UtcNow;
             entity.LiftedById = entry.RequestedOnBehalfOfId;
 
-            if (shouldSave) await CommitAsync();
+            if (shouldSave) await base.CommitAsync();
 
             return entity;
         }
