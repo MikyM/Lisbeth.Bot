@@ -22,7 +22,6 @@ namespace Lisbeth.Bot.Domain.Entities
 {
     public class RoleMenu : EmbedConfigEntity
     {
-        public string Name { get; set; }
         public ulong MessageId { get; set; }
         public string Text { get; set; }
         public List<RoleEmojiMapping> RoleEmojiMapping { get; set; }

@@ -22,7 +22,6 @@ namespace Lisbeth.Bot.Domain.Entities
 {
     public class RecurringReminder : EmbedConfigEntity
     {
-        public string Name { get; set; }
         public string CronExpression { get; set; }
         public string Text { get; set; }
         public List<string> Mentions { get; set; }

@@ -20,18 +20,18 @@ using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Application.Discord.Exceptions;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
-using Lisbeth.Bot.Application.Services.Interfaces;
+using Lisbeth.Bot.Application.Services.Interfaces.Database;
 using Lisbeth.Bot.DataAccessLayer.Specifications.GuildSpecifications;
 using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Discord.Interfaces;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
-using Lisbeth.Bot.Application.Services.Interfaces.Database;
+using Lisbeth.Bot.Application.Discord.Helpers;
+using Lisbeth.Bot.DataAccessLayer.Specifications.EmbedConfigEntitySpecifications;
+using Microsoft.VisualBasic;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {
@@ -40,12 +40,14 @@ namespace Lisbeth.Bot.Application.Discord.Services
         private readonly IDiscordService _discord;
         private readonly IGuildService _guildService;
         private readonly ITagService _tagService;
+        private readonly IDiscordEmbedProvider _embedProvider;
 
-        public DiscordTagService(IDiscordService discord, IGuildService guildService, ITagService tagService)
+        public DiscordTagService(IDiscordService discord, IGuildService guildService, ITagService tagService, IDiscordEmbedProvider embedProvider)
         {
             _discord = discord;
             _guildService = guildService;
             _tagService = tagService;
+            _embedProvider = embedProvider;
         }
 
         public async Task<DiscordEmbed> AddAsync(TagAddReqDto req)
@@ -53,7 +55,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (req is null) throw new ArgumentNullException(nameof(req));
 
             DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
-            DiscordMember creator = await guild.GetMemberAsync(req.UserId);
+            DiscordMember creator = await guild.GetMemberAsync(req.RequestedOnBehalfOfId);
 
             return await AddAsync(guild, creator, req);
         }
@@ -95,7 +97,15 @@ namespace Lisbeth.Bot.Application.Discord.Services
         {
             if (req is null) throw new ArgumentNullException(nameof(req));
 
-            DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
+            DiscordGuild guild = null;
+            if (req.GuildId.HasValue) guild = await _discord.Client.GetGuildAsync(req.GuildId.Value);
+            else if (req.Id.HasValue)
+            {
+                var tag = await _tagService.GetAsync<Tag>(req.Id.Value);
+                if (tag is null) throw new ArgumentException("Tag with given Id was not found");
+                guild = await _discord.Client.GetGuildAsync(tag.GuildId);
+            }
+
             DiscordMember requestingUser = await guild.GetMemberAsync(req.RequestedOnBehalfOfId);
 
             return await EditAsync(guild, requestingUser, req);
@@ -133,17 +143,25 @@ namespace Lisbeth.Bot.Application.Discord.Services
             return embed.Build();
         }
 
-        public async Task<DiscordEmbed> GetAsync(TagGetReqDto req)
+        public async Task<(DiscordEmbed Embed, string Text)> GetAsync(TagGetReqDto req)
         {
             if (req is null) throw new ArgumentNullException(nameof(req));
 
-            DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
+            DiscordGuild guild = null;
+            if (req.GuildId.HasValue) guild = await _discord.Client.GetGuildAsync(req.GuildId.Value);
+            else if (req.Id.HasValue)
+            {
+                var tag = await _tagService.GetAsync<Tag>(req.Id.Value);
+                if (tag is null) throw new ArgumentException("Tag with given Id was not found");
+                guild = await _discord.Client.GetGuildAsync(tag.GuildId);
+            }
+
             DiscordMember requestingUser = await guild.GetMemberAsync(req.RequestedOnBehalfOfId);
 
             return await GetAsync(guild, requestingUser, req);
         }
 
-        public async Task<DiscordEmbed> GetAsync(InteractionContext ctx, TagGetReqDto req)
+        public async Task<(DiscordEmbed Embed, string Text)> GetAsync(InteractionContext ctx, TagGetReqDto req)
         {
             if (ctx is null) throw new ArgumentNullException(nameof(ctx));
             if (req is null) throw new ArgumentNullException(nameof(req));
@@ -151,7 +169,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             return await GetAsync(ctx.Guild, ctx.Member, req);
         }
 
-        private async Task<DiscordEmbed> GetAsync(DiscordGuild guild, DiscordMember requestingUser, TagGetReqDto req)
+        private async Task<(DiscordEmbed Embed, string Text)> GetAsync(DiscordGuild guild, DiscordMember requestingUser, TagGetReqDto req)
         {
             if (guild is null) throw new ArgumentNullException(nameof(guild));
             if (requestingUser is null) throw new ArgumentNullException(nameof(requestingUser));
@@ -169,32 +187,22 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             if (tag is null) throw new ArgumentException("Tag not found");
             if (tag.IsDisabled) throw new ArgumentException("Found tag is disabled");
-            if (tag.EmbedConfig is null) throw new ArgumentNullException(nameof(tag.EmbedConfig));
-
-            var embed = new DiscordEmbedBuilder();
-            embed.WithColor(new DiscordColor(guildCfg.EmbedHexColor));
-            if (tag.EmbedConfig.Description is not null && tag.EmbedConfig.Description != "") embed.WithDescription(tag.EmbedConfig.Description);
-            if (tag.EmbedConfig.Author is not null && tag.EmbedConfig.Author != "") embed.WithAuthor(tag.EmbedConfig.Author, null, tag.EmbedConfig.AuthorImageUrl);
-            if (tag.EmbedConfig.Footer is not null && tag.EmbedConfig.Footer != "") embed.WithFooter(tag.EmbedConfig.Footer, tag.EmbedConfig.FooterImageUrl);
-            if (tag.EmbedConfig.ImageUrl is not null && tag.EmbedConfig.ImageUrl != "") embed.WithImageUrl(tag.EmbedConfig.ImageUrl);
-
-            if (tag.EmbedConfig.Fields is null || tag.EmbedConfig.Fields.Count == 0) return embed.Build();
-            
-            int i = 1;
-            foreach (var field in tag.EmbedConfig.Fields.TakeWhile(_ => i < 25))
-            {
-                embed.AddField(field.Title, field.Text);
-                i++;
-            }
-
-            return embed.Build();
+            return tag.EmbedConfig is null ? (null, tag.Text) : (_embedProvider.ConfigureEmbed(tag.EmbedConfig).Build(), tag.Text);
         }
 
         public async Task<DiscordEmbed> DisableAsync(TagDisableReqDto req)
         {
             if (req is null) throw new ArgumentNullException(nameof(req));
 
-            DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
+            DiscordGuild guild = null;
+            if (req.GuildId.HasValue) guild = await _discord.Client.GetGuildAsync(req.GuildId.Value);
+            else if (req.Id.HasValue)
+            {
+                var tag = await _tagService.GetAsync<Tag>(req.Id.Value);
+                if (tag is null) throw new ArgumentException("Tag with given Id was not found");
+                guild = await _discord.Client.GetGuildAsync(tag.GuildId);
+            }
+
             DiscordMember requestingUser = await guild.GetMemberAsync(req.RequestedOnBehalfOfId);
 
             return await DisableAsync(guild, requestingUser, req);

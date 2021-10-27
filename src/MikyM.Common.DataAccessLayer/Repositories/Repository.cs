@@ -44,12 +44,24 @@ namespace MikyM.Common.DataAccessLayer.Repositories
 
         public virtual void AddOrUpdate(TEntity entity)
         {
+            var local = _context.Set<TEntity>().Local.FirstOrDefault(entry => entry.Id.Equals(entity.Id));
+
+            if (local is not null) _context.Entry(local).State = EntityState.Detached;
+
             _context.Set<TEntity>().Update(entity);
         }
 
         public virtual void AddOrUpdateRange(IEnumerable<TEntity> entities)
         {
-            _context.Set<TEntity>().UpdateRange(entities);
+            var aggregateRootEntities = entities.ToList();
+            foreach (var entity in aggregateRootEntities)
+            {
+                var local = _context.Set<TEntity>().Local.FirstOrDefault(entry => entry.Id.Equals(entity.Id));
+
+                if (local is not null) _context.Entry(local).State = EntityState.Detached;
+            }
+
+            _context.Set<TEntity>().UpdateRange(aggregateRootEntities);
         }
 
         public virtual void BeginUpdate(TEntity entity)

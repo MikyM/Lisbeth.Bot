@@ -20,11 +20,19 @@ using MikyM.Common.DataAccessLayer.Specifications;
 
 namespace Lisbeth.Bot.DataAccessLayer.Specifications.EmbedConfigEntitySpecifications
 {
-    public class IncludeEmbedConfigSpecifications<T> : Specifications<T> where T : EmbedConfigEntity
+    public class ActiveWithEmbedCfgByIdOrNameSpecifications<T> : Specifications<T> where T : EmbedConfigEntity
     {
-        public IncludeEmbedConfigSpecifications()
+        public ActiveWithEmbedCfgByIdOrNameSpecifications(long? id, string name, ulong? guildId = null)
         {
             AddInclude(x => x.EmbedConfig);
+
+            if (id.HasValue) AddFilterCondition(x => x.Id == id);
+            else
+            {
+                AddFilterCondition(x => x.Name == name);
+                AddFilterCondition(x => x.GuildId == guildId);
+            }
+
         }
     }
 }

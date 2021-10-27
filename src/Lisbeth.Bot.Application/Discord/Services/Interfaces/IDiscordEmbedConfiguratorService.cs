@@ -24,6 +24,6 @@ namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
 {
     public interface IDiscordEmbedConfiguratorService<T> where T : EmbedConfigEntity
     {
-        Task<(DiscordEmbed Embed, bool IsSuccess)> ConfigureAsync(InteractionContext ctx, long targetId);
+        Task<(DiscordEmbed Embed, bool IsSuccess)> ConfigureAsync(InteractionContext ctx, string idOrName);
     }
 }

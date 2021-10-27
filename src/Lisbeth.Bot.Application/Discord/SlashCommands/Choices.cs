@@ -64,6 +64,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
         [ChoiceName("get")] Get,
         [ChoiceName("add")] Add,
         [ChoiceName("edit")] Edit,
+        [ChoiceName("configure-embed")] ConfigureEmbed,
         [ChoiceName("remove")] Remove
     }
 }

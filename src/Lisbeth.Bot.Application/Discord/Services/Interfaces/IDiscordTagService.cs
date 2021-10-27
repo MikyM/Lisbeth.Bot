@@ -28,8 +28,8 @@ namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
         Task<DiscordEmbed> AddAsync(InteractionContext ctx, TagAddReqDto req);
         Task<DiscordEmbed> EditAsync(TagEditReqDto req);
         Task<DiscordEmbed> EditAsync(InteractionContext ctx, TagEditReqDto req);
-        Task<DiscordEmbed> GetAsync(TagGetReqDto req);
-        Task<DiscordEmbed> GetAsync(InteractionContext ctx, TagGetReqDto req);
+        Task<(DiscordEmbed Embed, string Text)> GetAsync(TagGetReqDto req);
+        Task<(DiscordEmbed Embed, string Text)> GetAsync(InteractionContext ctx, TagGetReqDto req);
         Task<DiscordEmbed> DisableAsync(TagDisableReqDto req);
         Task<DiscordEmbed> DisableAsync(InteractionContext ctx, TagDisableReqDto req);
     }

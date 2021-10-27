@@ -39,7 +39,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
 
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
-            var result = await _embedConfigService.ConfigureAsync(ctx, parsedId);
+            var result = await _embedConfigService.ConfigureAsync(ctx, parsedId.ToString());
 
             await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(result.Embed));
         }

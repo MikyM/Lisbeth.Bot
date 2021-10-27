@@ -43,37 +43,50 @@ namespace MikyM.Common.DataAccessLayer.Specifications
         public Expression<Func<T, object>> OrderBy { get; private set; }
         public Expression<Func<T, object>> OrderByDescending { get; private set; }
         public List<Expression<Func<T, object>>> Includes { get; } = new();
+        public List<string> StringIncludes { get; } = new();
         public Expression<Func<T, object>> GroupBy { get; private set; }
         public int Limit { get; private set; }
 
-        protected void AddInclude(Expression<Func<T, object>> includeExpression)
+        protected Specifications<T> AddInclude(Expression<Func<T, object>> includeExpression)
         {
             Includes.Add(includeExpression);
+            return this;
         }
 
-        protected void ApplyOrderBy(Expression<Func<T, object>> orderByExpression)
+        protected Specifications<T> AddInclude(string include)
+        {
+            StringIncludes.Add(include);
+            return this;
+        }
+
+        protected Specifications<T> ApplyOrderBy(Expression<Func<T, object>> orderByExpression)
         {
             OrderBy = orderByExpression;
+            return this;
         }
 
-        protected void ApplyOrderByDescending(Expression<Func<T, object>> orderByDescendingExpression)
+        protected Specifications<T> ApplyOrderByDescending(Expression<Func<T, object>> orderByDescendingExpression)
         {
             OrderByDescending = orderByDescendingExpression;
+            return this;
         }
 
-        protected void AddFilterCondition(Expression<Func<T, bool>> filterExpression)
+        protected Specifications<T> AddFilterCondition(Expression<Func<T, bool>> filterExpression)
         {
             FilterConditions.Add(filterExpression);
+            return this;
         }
 
-        protected void ApplyGroupBy(Expression<Func<T, object>> groupByExpression)
+        protected Specifications<T> ApplyGroupBy(Expression<Func<T, object>> groupByExpression)
         {
             GroupBy = groupByExpression;
+            return this;
         }
 
-        protected void ApplyLimit(int limit)
+        protected Specifications<T> ApplyLimit(int limit)
         {
             Limit = limit;
+            return this;
         }
     }
 }

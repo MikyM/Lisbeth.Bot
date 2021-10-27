@@ -20,8 +20,9 @@ namespace Lisbeth.Bot.Domain.DTOs.Request
     public class TagAddReqDto
     {
         public string Name { get; set; }
-        public ulong UserId { get; set; }
+        public ulong RequestedOnBehalfOfId { get; set; }
         public ulong GuildId { get; set; }
         public EmbedConfigDto EmbedConfig { get; set; }
+        public string Text { get; set; }
     }
 }

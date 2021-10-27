@@ -23,5 +23,6 @@ namespace Lisbeth.Bot.Domain.Entities.Base
         public EmbedConfig EmbedConfig { get; set; }
         public ulong UserId { get; set; }
         public ulong GuildId { get; set; }
+        public string Name { get; set; }
     }
 }

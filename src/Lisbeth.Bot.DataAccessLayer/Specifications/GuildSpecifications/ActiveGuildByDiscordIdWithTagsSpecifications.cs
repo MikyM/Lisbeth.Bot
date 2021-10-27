@@ -27,7 +27,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Specifications.GuildSpecifications
         {
             AddFilterCondition(x => !x.IsDisabled);
             AddFilterCondition(x => x.GuildId == discordGuildId);
-            AddInclude(x => x.Tags);
+            AddInclude($"{nameof(Tag)}.{nameof(EmbedConfig)}");
         }
     }
 }

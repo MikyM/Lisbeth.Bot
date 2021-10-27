@@ -62,11 +62,13 @@ namespace Lisbeth.Bot.Application.Discord.Services
             _embedConfigService = embedConfigService;
         }
 
-        public async Task<(DiscordEmbed Embed, bool IsSuccess)> ConfigureAsync(InteractionContext ctx, long targetId)
+        public async Task<(DiscordEmbed Embed, bool IsSuccess)> ConfigureAsync(InteractionContext ctx, string idOrName)
         {
             if (ctx is null) throw new ArgumentNullException(nameof(ctx));
 
-            var res = await _service.GetBySpecificationsAsync<T>(new IncludeEmbedConfigSpecifications<T>());
+            bool isValidId = long.TryParse(idOrName, out long id);
+            
+            var res = await _service.GetBySpecificationsAsync<T>(new ActiveWithEmbedCfgByIdOrNameSpecifications<T>(isValidId ? id : null, idOrName, ctx.Guild.Id));
             var entity = res.FirstOrDefault();
 
             if (entity is null) throw new ArgumentException("Target object not found.");
@@ -82,9 +84,9 @@ namespace Lisbeth.Bot.Application.Discord.Services
             int loopCount = 0;
 
             var mainMenu = new DiscordEmbedBuilder();
-            mainMenu.WithAuthor($"Embed configurator menu for Id: {targetId}");
+            mainMenu.WithAuthor($"Embed configurator menu for Id: {idOrName}");
             mainMenu.WithDescription("Please select an option below to edit your embed!");
-            mainMenu.WithFooter($"Parent Id: {targetId}");
+            mainMenu.WithFooter($"Parent Id: {idOrName}");
             mainMenu.WithColor(new DiscordColor("#26296e"));
 
             var resultEmbed = new DiscordEmbedBuilder();
@@ -135,7 +137,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             if (waitResult.TimedOut)
             {
-                await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(GetTimedOutEmbed(targetId, true)));
+                await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(GetTimedOutEmbed(idOrName, true)));
                 return (null, false);
             }
 
@@ -296,7 +298,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             if (waitResult.TimedOut)
             {
-                await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(GetTimedOutEmbed(foundEntity.Id)));
+                await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(GetTimedOutEmbed(foundEntity.Id.ToString())));
                 return (currentResult, false);
             }
 
@@ -464,7 +466,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             if (btnWaitResult.TimedOut)
             {
-                await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(GetTimedOutEmbed(foundEntity.Id)));
+                await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(GetTimedOutEmbed(foundEntity.Id.ToString())));
                 return (null, false);
             }
 
@@ -517,13 +519,13 @@ namespace Lisbeth.Bot.Application.Discord.Services
             return (null, false);
         }
 
-        private DiscordEmbed GetTimedOutEmbed(long targetId, bool isFirst = false)
+        private DiscordEmbed GetTimedOutEmbed(string idOrName, bool isFirst = false)
         {
             var timedOut = new DiscordEmbedBuilder();
-            timedOut.WithAuthor($"Embed configurator menu for Id: {targetId}");
+            timedOut.WithAuthor($"Embed configurator menu for Id: {idOrName}");
             timedOut.WithDescription(
                 $"Your interaction timed out, please {(!isFirst ? "decide whether you want to save current version or abort and " : "")} try again!");
-            timedOut.WithFooter($"Parent Id: {targetId}");
+            timedOut.WithFooter($"Parent Id: {idOrName}");
             timedOut.WithColor(new DiscordColor("#26296e"));
 
             return timedOut.Build();
