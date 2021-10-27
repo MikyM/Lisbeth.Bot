@@ -35,6 +35,7 @@ using System;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using Lisbeth.Bot.Application.Exceptions;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {
@@ -134,9 +135,9 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 targetMember = null;
             }
 
-            if (!moderator.Permissions.HasPermission(Permissions.BanMembers))
+            if (!moderator.IsModerator())
                 throw new DiscordNotAuthorizedException($"User with Id: {moderator.Id} doesn't have moderator rights");
-            if (targetMember is not null && targetMember.Permissions.HasPermission(Permissions.BanMembers))
+            if (targetMember is not null && targetMember.IsModerator())
                 throw new DiscordNotAuthorizedException(
                     $"User with Id: {moderator.Id} doesn't have rights to ban another moderator");
 
@@ -149,10 +150,10 @@ namespace Lisbeth.Bot.Application.Discord.Services
             var guildCfg = guildRes.FirstOrDefault();
 
             if (guildCfg is null)
-                throw new ArgumentException($"Guild with Id: {guild.Id} doesn't exist in the database.");
+                throw new NotFoundException($"Guild with Id: {guild.Id} doesn't exist in the database.");
 
             if (guildCfg.ModerationConfig is null)
-                throw new ArgumentException($"Guild with Id: {guild.Id} doesn't have moderation module enabled.");
+                throw new DisabledEntityException($"Guild with Id: {guild.Id} doesn't have moderation module enabled.");
 
             if (guildCfg.ModerationConfig.MemberEventsLogChannelId is not null)
                 try
@@ -264,7 +265,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (req.Id.HasValue)
             {
                 var ban = await _banService.GetAsync<Ban>(req.Id.Value);
-                if (ban is null) throw new ArgumentException("Ban not found");
+                if (ban is null) throw new NotFoundException("Ban not found");
                 req.GuildId = ban.GuildId;
                 req.TargetUserId = ban.UserId;
             }
@@ -310,7 +311,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                         }
                         else
                         {
-                            throw new ArgumentException(nameof(req.Id));
+                            throw new NotFoundException(nameof(req.Id));
                         }
                     }
                 }
@@ -334,7 +335,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (req.Id.HasValue)
             {
                 var ban = await _banService.GetAsync<Ban>(req.Id.Value);
-                if (ban is null) throw new ArgumentException("Ban not found");
+                if (ban is null) throw new NotFoundException("Ban not found");
                 req.GuildId = ban.GuildId;
                 req.TargetUserId = ban.UserId;
                 req.AppliedById = ban.AppliedById;
@@ -383,7 +384,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                         }
                         else
                         {
-                            throw new ArgumentException(nameof(req.Id));
+                            throw new NotFoundException(nameof(req.Id));
                         }
                     }
                 }
@@ -413,10 +414,10 @@ namespace Lisbeth.Bot.Application.Discord.Services
             var guildCfg = guildRes.FirstOrDefault();
 
             if (guildCfg is null)
-                throw new ArgumentException($"Guild with Id: {guild.Id} doesn't exist in the database.");
+                throw new NotFoundException($"Guild with Id: {guild.Id} doesn't exist in the database.");
 
             if (guildCfg.ModerationConfig is null)
-                throw new ArgumentException($"Guild with Id: {guild.Id} doesn't have moderation module enabled.");
+                throw new DisabledEntityException($"Guild with Id: {guild.Id} doesn't have moderation module enabled.");
 
             if (guildCfg.ModerationConfig.MemberEventsLogChannelId is not null)
                 try
@@ -430,6 +431,9 @@ namespace Lisbeth.Bot.Application.Discord.Services
                         $"Log channel with Id: {guildCfg.ModerationConfig.MemberEventsLogChannelId} doesn't exist.",
                         ex);
                 }
+
+            if (!moderator.IsModerator())
+                throw new DiscordNotAuthorizedException(nameof(moderator));
 
             try
             {
@@ -506,10 +510,13 @@ namespace Lisbeth.Bot.Application.Discord.Services
             var guildCfg = guildRes.FirstOrDefault();
 
             if (guildCfg is null)
-                throw new ArgumentException($"Guild with Id: {guild.Id} doesn't exist in the database.");
+                throw new NotFoundException($"Guild with Id: {guild.Id} doesn't exist in the database.");
 
             if (guildCfg.ModerationConfig is null)
-                throw new ArgumentException($"Guild with Id: {guild.Id} doesn't have moderation module enabled.");
+                throw new DisabledEntityException($"Guild with Id: {guild.Id} doesn't have moderation module enabled.");
+
+            if (!moderator.IsModerator())
+                throw new DiscordNotAuthorizedException(nameof(moderator));
 
             DiscordChannel channel = null;
             DiscordBan discordBan;

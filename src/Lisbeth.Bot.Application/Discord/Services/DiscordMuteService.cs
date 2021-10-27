@@ -15,10 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Globalization;
-using System.Linq;
-using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
@@ -28,7 +24,6 @@ using Lisbeth.Bot.Application.Discord.Exceptions;
 using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Application.Extensions;
-using Lisbeth.Bot.Application.Services.Interfaces;
 using Lisbeth.Bot.Application.Services.Interfaces.Database;
 using Lisbeth.Bot.DataAccessLayer.Specifications.MuteSpecifications;
 using Lisbeth.Bot.Domain.DTOs.Request;
@@ -36,6 +31,11 @@ using Lisbeth.Bot.Domain.Entities;
 using Microsoft.Extensions.Logging;
 using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Discord.Interfaces;
+using System;
+using System.Globalization;
+using System.Linq;
+using System.Threading.Tasks;
+using Lisbeth.Bot.Application.Exceptions;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {
@@ -99,10 +99,10 @@ namespace Lisbeth.Bot.Application.Discord.Services
             var guildCfg = guildRes.FirstOrDefault();
 
             if (guildCfg is null)
-                throw new ArgumentException($"Guild with Id: {guild.Id} doesn't exist in the database.");
+                throw new NotFoundException($"Guild with Id: {guild.Id} doesn't exist in the database.");
 
             if (guildCfg.ModerationConfig is null)
-                throw new ArgumentException($"Guild with Id: {guild.Id} doesn't have moderation module enabled.");
+                throw new DisabledEntityException($"Guild with Id: {guild.Id} doesn't have moderation module enabled.");
 
             if (guildCfg.ModerationConfig.MemberEventsLogChannelId is not null)
                 try
@@ -119,6 +119,10 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             if (req.AppliedUntil < DateTime.UtcNow)
                 throw new ArgumentException("Mute until date must be in the future.");
+
+            if (!moderator.IsModerator())
+                throw new DiscordNotAuthorizedException(nameof(moderator));
+            if (target.IsModerator()) throw new DiscordNotAuthorizedException(nameof(target));
 
             TimeSpan tmspDuration = req.AppliedUntil.Subtract(DateTime.UtcNow);
 
@@ -245,7 +249,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (req.Id.HasValue)
             {
                 var ban = await _muteService.GetAsync<Mute>(req.Id.Value);
-                if (ban is null) throw new ArgumentException("Mute not found");
+                if (ban is null) throw new NotFoundException("Mute not found");
                 req.GuildId = ban.GuildId;
                 req.TargetUserId = ban.UserId;
             }
@@ -292,9 +296,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (moderator.Guild.Id != guild.Id) throw new ArgumentException(nameof(moderator));
             if (target.Guild.Id != guild.Id) throw new ArgumentException(nameof(target));
 
-            if (!moderator.Permissions.HasPermission(Permissions.BanMembers))
-                throw new ArgumentException(nameof(moderator));
-            if (target.Permissions.HasPermission(Permissions.BanMembers)) throw new ArgumentException(nameof(target));
+            if (!moderator.IsModerator())
+                throw new DiscordNotAuthorizedException(nameof(moderator));
 
             DiscordChannel channel = null;
 
@@ -304,10 +307,10 @@ namespace Lisbeth.Bot.Application.Discord.Services
             var guildCfg = guildRes.FirstOrDefault();
 
             if (guildCfg is null)
-                throw new ArgumentException($"Guild with Id: {guild.Id} doesn't exist in the database.");
+                throw new NotFoundException($"Guild with Id: {guild.Id} doesn't exist in the database.");
 
             if (guildCfg.ModerationConfig is null)
-                throw new ArgumentException($"Guild with Id: {guild.Id} doesn't have moderation module enabled.");
+                throw new DisabledEntityException($"Guild with Id: {guild.Id} doesn't have moderation module enabled.");
 
             if (guildCfg.ModerationConfig.MemberEventsLogChannelId is not null)
                 try
@@ -326,9 +329,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             embed.WithColor(0x18315C);
 
             bool isMuted = target.Roles.FirstOrDefault(r => r.Name == "Muted") is not null;
-
-            req ??= new MuteDisableReqDto(target.Id, guild.Id, moderator.Id);
-
+            
             var res = await _muteService.DisableAsync(req);
 
             if (res is null)
@@ -391,7 +392,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (req.Id.HasValue)
             {
                 var mute = await _muteService.GetAsync<Mute>(req.Id.Value);
-                if (mute is null) throw new ArgumentException("Mute not found");
+                if (mute is null) throw new NotFoundException("Mute not found");
                 req.GuildId = mute.GuildId;
                 req.TargetUserId = mute.UserId;
                 req.AppliedById = mute.AppliedById;
@@ -445,10 +446,10 @@ namespace Lisbeth.Bot.Application.Discord.Services
             var guildCfg = guildRes.FirstOrDefault();
 
             if (guildCfg is null)
-                throw new ArgumentException($"Guild with Id: {guild.Id} doesn't exist in the database.");
+                throw new NotFoundException($"Guild with Id: {guild.Id} doesn't exist in the database.");
 
             if (guildCfg.ModerationConfig is null)
-                throw new ArgumentException($"Guild with Id: {guild.Id} doesn't have moderation module enabled.");
+                throw new DisabledEntityException($"Guild with Id: {guild.Id} doesn't have moderation module enabled.");
 
             DiscordChannel channel = null;
 
@@ -464,6 +465,9 @@ namespace Lisbeth.Bot.Application.Discord.Services
                         $"Log channel with Id: {guildCfg.ModerationConfig.MemberEventsLogChannelId} doesn't exist.",
                         ex);
                 }
+
+            if (!moderator.IsModerator())
+                throw new DiscordNotAuthorizedException(nameof(moderator));
 
             var res = await _muteService.GetBySpecificationsAsync<Mute>(
                 new MuteBaseGetSpecifications(req.Id, req.TargetUserId, req.GuildId, req.AppliedById, req.LiftedOn,
