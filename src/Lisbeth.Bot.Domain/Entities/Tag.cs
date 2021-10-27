@@ -19,14 +19,10 @@ using Lisbeth.Bot.Domain.Entities.Base;
 
 namespace Lisbeth.Bot.Domain.Entities
 {
-    public class Tag : SnowflakeEntity
+    public class Tag : EmbedConfigEntity
     {
         public string Name { get; set; }
-        public ulong UserId { get; set; }
-        public ulong GuildId { get; set; }
         public string Text { get; set; }
-        public long? EmbedConfigId { get; set; }
-        public EmbedConfig EmbedConfig { get; set; }
         public Guild Guild { get; set; }
     }
 }

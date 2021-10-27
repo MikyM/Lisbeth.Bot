@@ -15,7 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Linq;
 using AutoMapper;
+using DSharpPlus.Entities;
 using Lisbeth.Bot.Domain.DTOs;
 using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.Entities;
@@ -53,6 +55,32 @@ namespace Lisbeth.Bot.API
 
             CreateMap<RoleEmojiMappingReqDto, RoleEmojiMapping>();
             CreateMap<RoleMenuReqDto, RoleMenu>();
+            CreateMap<DiscordFieldDto, DiscordField>();
+            CreateMap<EmbedConfigDto, EmbedConfig>();
+
+            CreateMap<DiscordEmbed, EmbedConfig>()
+                .ForMember(dest => dest.Author, source => source.MapFrom(x => x.Author.Name))
+                .ForMember(dest => dest.AuthorImageUrl, source => source.MapFrom(x => x.Author.IconUrl))
+                .ForMember(dest => dest.AuthorUrl, source => source.MapFrom(x => x.Author.Url))
+                .ForMember(dest => dest.Footer, source => source.MapFrom(x => x.Footer.Text))
+                .ForMember(dest => dest.FooterImageUrl, source => source.MapFrom(x => x.Footer.IconUrl))
+                .ForMember(dest => dest.Description, source => source.MapFrom(x => x.Description))
+                .ForMember(dest => dest.ImageUrl, source => source.MapFrom(x => x.Image.Url))
+                .ForMember(dest => dest.Fields,
+                    source => source.MapFrom(x =>
+                        x.Fields.Select(y => new DiscordField {Text = y.Value, Title = y.Name})))
+                .ForMember(dest => dest.Title, source => source.MapFrom(x => x.Title))
+                .ForMember(dest => dest.Timestamp, source => source.PreCondition(x => x.Timestamp.HasValue))
+                .ForMember(dest => dest.Timestamp, source => source.MapFrom(x => x.Timestamp.Value.DateTime))
+                .ForMember(dest => dest.HexColor, source => source.PreCondition(x => x.Color.HasValue))
+                .ForMember(dest => dest.HexColor, source => source.MapFrom(x => x.Color.Value.ToString()))
+                .ForMember(dest => dest.Thumbnail, source => source.PreCondition(x => x.Thumbnail is not null))
+                .ForMember(dest => dest.Thumbnail, source => source.MapFrom(x => x.Thumbnail.Url.ToString()))
+                .ForMember(dest => dest.ThumbnailHeight, source => source.PreCondition(x => x.Thumbnail is not null))
+                .ForMember(dest => dest.ThumbnailHeight, source => source.MapFrom(x => x.Thumbnail.Height))
+                .ForMember(dest => dest.ThumbnailWidth, source => source.PreCondition(x => x.Thumbnail is not null))
+                .ForMember(dest => dest.ThumbnailWidth, source => source.MapFrom(x => x.Thumbnail.Width))
+                .ForMember(dest => dest.Id, source => source.Ignore());
         }
     }
 }

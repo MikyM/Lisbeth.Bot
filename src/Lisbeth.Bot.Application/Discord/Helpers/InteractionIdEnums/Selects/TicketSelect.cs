@@ -15,23 +15,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using Lisbeth.Bot.Application.Discord.Services.Interfaces;
-using System.Threading.Tasks;
-
-namespace Lisbeth.Bot.Application.Discord.Services
+namespace Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Selects
 {
-    public class DiscordEmbedConfigService : IDiscordEmbedConfigService
+    public enum TicketSelect
     {
-        public Task<DiscordEmbed> ConfigureNewEmbedAsync(InteractionContext ctx)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public Task<DiscordEmbed> EditExistingEmbedAsync(InteractionContext ctx)
-        {
-            throw new System.NotImplementedException();
-        }
+        TicketCloseMessageSelect
     }
 }

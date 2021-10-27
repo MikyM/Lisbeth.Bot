@@ -76,7 +76,6 @@ namespace Lisbeth.Bot.API
             {
                 options.PaginationBehaviour = PaginationBehaviour.WrapAround;
                 options.ResponseBehavior = InteractionResponseBehavior.Ack;
-                options.AckPaginationButtons = true;
                 options.Timeout = TimeSpan.FromMinutes(2);
             });
 
@@ -89,6 +88,7 @@ namespace Lisbeth.Bot.API
             services.AddDiscordMessageEventsSubscriber<ModerationEventsHandler>();
             services.AddDiscordMiscEventsSubscriber<TicketEventsHandler>();
             services.AddDiscordChannelEventsSubscriber<TicketEventsHandler>();
+            services.AddDiscordMiscEventsSubscriber<EmbedConfigEventHandler>();
 
             #endregion
         }

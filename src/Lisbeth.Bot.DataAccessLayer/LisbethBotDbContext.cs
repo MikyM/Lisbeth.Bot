@@ -45,6 +45,7 @@ namespace Lisbeth.Bot.DataAccessLayer
         public DbSet<RecurringReminder> RecurringReminders { get; set; }
         public DbSet<Reminder> Reminders { get; set; }
         public DbSet<RoleMenu> RoleMenus { get; set; }
+        public DbSet<EmbedConfig> EmbedConfigs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

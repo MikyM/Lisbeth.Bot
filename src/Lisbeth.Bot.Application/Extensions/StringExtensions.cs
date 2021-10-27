@@ -91,5 +91,29 @@ namespace Lisbeth.Bot.Application.Extensions
 
             return (result, tmsp);
         }
+
+        /// <summary>
+        /// takes a substring between two anchor strings (or the end of the string if that anchor is null)
+        /// </summary>
+        /// <param name="value">a string</param>
+        /// <param name="from">an optional string to search after</param>
+        /// <param name="until">an optional string to search before</param>
+        /// <param name="comparison">an optional comparison for the search</param>
+        /// <returns>a substring based on the search</returns>
+        public static string GetStringBetween(this string value, string from = null, string until = null, StringComparison comparison = StringComparison.InvariantCulture)
+        {
+            var fromLength = (from ?? string.Empty).Length;
+            var startIndex = !string.IsNullOrEmpty(from)
+                ? value.IndexOf(from, comparison) + fromLength
+                : 0;
+
+            if (startIndex < fromLength) return "";//{ throw new ArgumentException("from: Failed to find an instance of the first anchor"); }
+
+            var endIndex = !string.IsNullOrEmpty(until)
+                ? value.IndexOf(until, startIndex, comparison)
+                : value.Length;
+
+            return endIndex < 0 ? "" : value.Substring(startIndex, endIndex - startIndex);
+        }
     }
 }

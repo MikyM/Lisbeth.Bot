@@ -15,19 +15,19 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
-using Lisbeth.Bot.Domain.Entities.Base;
-
-namespace Lisbeth.Bot.Domain.Entities
+namespace Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.SelectValues
 {
-    public class RecurringReminder : EmbedConfigEntity
+    public enum EmbedConfigSelectValue
     {
-        public string Name { get; set; }
-        public string CronExpression { get; set; }
-        public string Text { get; set; }
-        public List<string> Mentions { get; set; }
-        public bool IsGuildReminder { get; set; }
-
-        public Guild Guild { get; set; }
+        EmbedConfigSetAuthorValue,
+        EmbedConfigSetFooterValue,
+        EmbedConfigSetDescValue,
+        EmbedConfigSetFieldValue,
+        EmbedConfigDeleteFieldValue,
+        EmbedConfigSetImageValue,
+        EmbedConfigSetColorValue,
+        EmbedConfigSetTitleValue,
+        EmbedConfigSetTimestampValue,
+        EmbedConfigSetThumbnailValue
     }
 }

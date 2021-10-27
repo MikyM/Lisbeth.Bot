@@ -3,15 +3,17 @@ using System;
 using Lisbeth.Bot.DataAccessLayer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Lisbeth.Bot.DataAccessLayer.Migrations
 {
     [DbContext(typeof(LisbethBotDbContext))]
-    partial class LisbethBotDbContextModelSnapshot : ModelSnapshot
+    [Migration("20211027095004_Fiixy")]
+    partial class Fiixy
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -93,7 +95,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
 
                     b.Property<string>("Author")
                         .HasMaxLength(200)
-                        .HasColumnType("varchar(256)")
+                        .HasColumnType("varchar(200)")
                         .HasColumnName("author");
 
                     b.Property<string>("AuthorImageUrl")
@@ -103,7 +105,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
 
                     b.Property<string>("AuthorUrl")
                         .HasMaxLength(200)
-                        .HasColumnType("varchar(1000)")
+                        .HasColumnType("varchar(200)")
                         .HasColumnName("author_url");
 
                     b.Property<DateTime?>("CreatedAt")
@@ -113,7 +115,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                         .HasColumnName("created_at");
 
                     b.Property<string>("Description")
-                        .HasColumnType("varchar(4096)")
+                        .HasColumnType("text")
                         .HasColumnName("description");
 
                     b.Property<string>("Fields")
@@ -122,7 +124,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
 
                     b.Property<string>("Footer")
                         .HasMaxLength(200)
-                        .HasColumnType("varchar(2048)")
+                        .HasColumnType("varchar(200)")
                         .HasColumnName("footer");
 
                     b.Property<string>("FooterImageUrl")
@@ -144,28 +146,6 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     b.Property<bool>("IsDisabled")
                         .HasColumnType("boolean")
                         .HasColumnName("is_disabled");
-
-                    b.Property<string>("Thumbnail")
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)")
-                        .HasColumnName("thumbnail");
-
-                    b.Property<int>("ThumbnailHeight")
-                        .HasColumnType("integer")
-                        .HasColumnName("thumbnail_height");
-
-                    b.Property<int>("ThumbnailWidth")
-                        .HasColumnType("integer")
-                        .HasColumnName("thumbnail_width");
-
-                    b.Property<DateTime?>("Timestamp")
-                        .HasColumnType("timestamp")
-                        .HasColumnName("timestamp");
-
-                    b.Property<string>("Title")
-                        .HasMaxLength(256)
-                        .HasColumnType("varchar(256)")
-                        .HasColumnName("title");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .IsRequired()

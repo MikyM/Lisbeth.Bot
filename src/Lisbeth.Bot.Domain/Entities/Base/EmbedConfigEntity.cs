@@ -15,19 +15,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
-using Lisbeth.Bot.Domain.Entities.Base;
-
-namespace Lisbeth.Bot.Domain.Entities
+namespace Lisbeth.Bot.Domain.Entities.Base
 {
-    public class RecurringReminder : EmbedConfigEntity
+    public class EmbedConfigEntity : SnowflakeEntity
     {
-        public string Name { get; set; }
-        public string CronExpression { get; set; }
-        public string Text { get; set; }
-        public List<string> Mentions { get; set; }
-        public bool IsGuildReminder { get; set; }
-
-        public Guild Guild { get; set; }
+        public long? EmbedConfigId { get; set; }
+        public EmbedConfig EmbedConfig { get; set; }
+        public ulong UserId { get; set; }
+        public ulong GuildId { get; set; }
     }
 }

@@ -19,6 +19,9 @@ using System;
 using Autofac;
 using EFCoreSecondLevelCacheInterceptor;
 using IdGen;
+using Lisbeth.Bot.Application.Discord.Helpers;
+using Lisbeth.Bot.Application.Discord.Services;
+using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Application.Helpers;
 using Lisbeth.Bot.Application.Services;
 using Lisbeth.Bot.Application.Services.Database;
@@ -81,6 +84,10 @@ namespace Lisbeth.Bot.API
                     SequenceOverflowStrategy.SpinWait);
                 return new IdGenerator(0, options);
             }).AsSelf().SingleInstance();
+
+            builder.RegisterType<DiscordEmbedProvider>().As<IDiscordEmbedProvider>().SingleInstance();
+            builder.RegisterGeneric(typeof(DiscordEmbedConfiguratorService<>))
+                .As(typeof(IDiscordEmbedConfiguratorService<>)).InstancePerLifetimeScope();
         }
     }
 }

@@ -26,7 +26,7 @@ using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Application.Extensions;
 using Lisbeth.Bot.Application.Helpers;
-using Lisbeth.Bot.Application.Services.Interfaces;
+using Lisbeth.Bot.Application.Services.Interfaces.Database;
 using Lisbeth.Bot.Application.Validation;
 using Lisbeth.Bot.DataAccessLayer.Specifications.GuildSpecifications;
 using Lisbeth.Bot.DataAccessLayer.Specifications.TicketSpecifications;
@@ -38,7 +38,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Lisbeth.Bot.Application.Services.Interfaces.Database;
+using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Buttons;
+using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Selects;
+using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.SelectValues;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {
@@ -617,7 +619,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             embed.WithFooter($"Ticket Id: {req.GuildSpecificId}");
 
-            var btn = new DiscordButtonComponent(ButtonStyle.Primary, "ticket_close_btn", "Close this ticket", false,
+            var btn = new DiscordButtonComponent(ButtonStyle.Primary, nameof(TicketButton.TicketOpenButton), "Close this ticket", false,
                 new DiscordComponentEmoji(DiscordEmoji.FromName(_discord.Client, ":lock:")));
 
             var msgBuilder = new DiscordMessageBuilder();
@@ -748,12 +750,12 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             var options = new List<DiscordSelectComponentOption>()
             {
-                new ("Reopen", "ticket_reopen_value", "Reopens this ticket",
+                new ("Reopen", nameof(TicketSelectValue.TicketReopenValue), "Reopens this ticket",
                 false, new DiscordComponentEmoji(DiscordEmoji.FromName(_discord.Client, ":unlock:"))),
-                new ("Transcript", "ticket_transcript_value", "Generates HTML transcript for this ticket",
+                new ("Transcript", nameof(TicketSelectValue.TicketTranscriptValue), "Generates HTML transcript for this ticket",
                 false, new DiscordComponentEmoji(DiscordEmoji.FromName(_discord.Client, ":blue_book:")))
             };
-            var selectDropdown = new DiscordSelectComponent("ticket_close_msg_slct", "Choose an action", options);
+            var selectDropdown = new DiscordSelectComponent(nameof(TicketSelect.TicketCloseMessageSelect), "Choose an action", options);
 
             var msgBuilder = new DiscordMessageBuilder();
             msgBuilder.AddEmbed(embed.Build());

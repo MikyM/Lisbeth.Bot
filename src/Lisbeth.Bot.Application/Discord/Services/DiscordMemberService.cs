@@ -15,21 +15,20 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
-using Lisbeth.Bot.Application.Services.Interfaces;
 using Lisbeth.Bot.Application.Services.Interfaces.Database;
 using Lisbeth.Bot.DataAccessLayer.Specifications.MuteSpecifications;
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Discord.Interfaces;
+using System;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {

@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Generic;
 using Lisbeth.Bot.Domain.Entities.Base;
 
@@ -23,11 +24,18 @@ namespace Lisbeth.Bot.Domain.Entities
     public class EmbedConfig : SnowflakeEntity
     {
         public string Author { get; set; }
+        public string AuthorUrl { get; set; }
         public string Footer { get; set; }
         public string ImageUrl { get; set; }
         public string FooterImageUrl { get; set; }
         public string AuthorImageUrl { get; set; }
         public string Description { get; set; }
+        public string Thumbnail { get; set; }
+        public int ThumbnailHeight { get; set; }
+        public int ThumbnailWidth { get; set; }
+        public string Title { get; set; }
+        public DateTime? Timestamp { get; set; }
+        public string HexColor { get; set; } = "#7d7d7d";
         public List<DiscordField> Fields { get; set; }
 
         public Reminder Reminder { get; set; }

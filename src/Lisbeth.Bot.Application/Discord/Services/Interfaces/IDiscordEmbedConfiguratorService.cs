@@ -15,19 +15,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
+using System.Threading.Tasks;
+using DSharpPlus.Entities;
+using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Domain.Entities.Base;
 
-namespace Lisbeth.Bot.Domain.Entities
+namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
 {
-    public class RecurringReminder : EmbedConfigEntity
+    public interface IDiscordEmbedConfiguratorService<T> where T : EmbedConfigEntity
     {
-        public string Name { get; set; }
-        public string CronExpression { get; set; }
-        public string Text { get; set; }
-        public List<string> Mentions { get; set; }
-        public bool IsGuildReminder { get; set; }
-
-        public Guild Guild { get; set; }
+        Task<(DiscordEmbed Embed, bool IsSuccess)> ConfigureAsync(InteractionContext ctx, long targetId);
     }
 }

@@ -15,15 +15,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using System.Threading.Tasks;
+using Lisbeth.Bot.Domain.Entities.Base;
+using MikyM.Common.DataAccessLayer.Specifications;
 
-namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
+namespace Lisbeth.Bot.DataAccessLayer.Specifications.EmbedConfigEntitySpecifications
 {
-    public interface IDiscordEmbedConfigService
+    public class IncludeEmbedConfigSpecifications<T> : Specifications<T> where T : EmbedConfigEntity
     {
-        Task<DiscordEmbed> ConfigureNewEmbedAsync(InteractionContext ctx);
-        Task<DiscordEmbed> EditExistingEmbedAsync(InteractionContext ctx);
+        public IncludeEmbedConfigSpecifications()
+        {
+            AddInclude(x => x.EmbedConfig);
+        }
     }
 }

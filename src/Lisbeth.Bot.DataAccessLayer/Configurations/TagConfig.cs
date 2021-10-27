@@ -17,7 +17,6 @@
 
 using Lisbeth.Bot.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Lisbeth.Bot.DataAccessLayer.Configurations
@@ -41,8 +40,6 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
                 .IsRequired();
             builder.Property(x => x.Text).HasColumnName("text").HasColumnType("text");
             builder.Property(x => x.EmbedConfigId).HasColumnName("embed_config_id").HasColumnType("bigint");
-
-            builder.HasIndex(x => x.Name).IsUnique();
         }
     }
 }

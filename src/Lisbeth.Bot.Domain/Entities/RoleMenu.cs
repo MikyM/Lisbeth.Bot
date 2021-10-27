@@ -20,15 +20,11 @@ using System.Collections.Generic;
 
 namespace Lisbeth.Bot.Domain.Entities
 {
-    public class RoleMenu : SnowflakeEntity
+    public class RoleMenu : EmbedConfigEntity
     {
         public string Name { get; set; }
-        public ulong GuildId { get; set; }
-        public ulong UserId { get; set; }
         public ulong MessageId { get; set; }
-        public EmbedConfig EmbedConfig { get; set; }
         public string Text { get; set; }
-        public long EmbedConfigId { get; set; }
         public List<RoleEmojiMapping> RoleEmojiMapping { get; set; }
 
         public Guild Guild { get; set; }

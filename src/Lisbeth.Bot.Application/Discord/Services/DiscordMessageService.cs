@@ -249,7 +249,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
         {
             if (args is null) throw new ArgumentNullException(nameof(args));
 
-            if (args.Message.Author.IsBot) return;
+            if (args.Author.IsBot || args.MessageBefore.Content == args.Message.Content && args.MessageBefore.Attachments.Count == args.Message.Attachments.Count) return;
 
             var res = await _guildService.GetBySpecificationsAsync<Guild>(
                 new ActiveGuildByDiscordIdWithModerationSpecifications(args.Guild.Id));
