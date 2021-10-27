@@ -41,6 +41,7 @@ using System.Threading.Tasks;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Buttons;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Selects;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.SelectValues;
+using Lisbeth.Bot.Application.Exceptions;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {
@@ -93,7 +94,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             {
                 ticket = await _ticketService.GetAsync<Ticket>(req.Id.Value);
                 if (ticket is null)
-                    throw new ArgumentException(
+                    throw new NotFoundException(
                         $"Ticket with Id: {req.Id} doesn't exist in the database.");
 
                 req.ChannelId = ticket.ChannelId;
@@ -105,7 +106,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     new TicketBaseGetSpecifications(null, req.OwnerId, req.GuildId, null, null, false, 1));
                 ticket = res.FirstOrDefault();
                 if (ticket is null)
-                    throw new ArgumentException(
+                    throw new NotFoundException(
                         $"Opened ticket in guild with Id: {req.GuildId} and owner with Id: {req.OwnerId} doesn't exist in the database.");
 
                 req.ChannelId = ticket.ChannelId;
@@ -117,7 +118,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     new TicketBaseGetSpecifications(null, null, req.GuildId, null, req.GuildSpecificId, false, 1));
                 ticket = res.FirstOrDefault();
                 if (ticket is null)
-                    throw new ArgumentException(
+                    throw new NotFoundException(
                         $"Opened ticket in guild with Id: {req.GuildId} and owner with Id: {req.OwnerId} doesn't exist in the database.");
 
                 req.ChannelId = ticket.ChannelId;
@@ -173,7 +174,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             {
                 ticket = await _ticketService.GetAsync<Ticket>(req.Id.Value);
                 if (ticket is null)
-                    throw new ArgumentException(
+                    throw new NotFoundException(
                         $"Ticket with Id: {req.Id} doesn't exist in the database.");
 
                 req.ChannelId = ticket.ChannelId;
@@ -185,7 +186,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     new TicketBaseGetSpecifications(null, req.OwnerId, req.GuildId, null, null, true, 1));
                 ticket = res.FirstOrDefault();
                 if (ticket is null)
-                    throw new ArgumentException(
+                    throw new NotFoundException(
                         $"Closed ticket in guild with Id: {req.GuildId} and owner with Id: {req.OwnerId} doesn't exist in the database.");
 
                 req.ChannelId = ticket.ChannelId;
@@ -197,7 +198,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     new TicketBaseGetSpecifications(null, null, req.GuildId, null, req.GuildSpecificId, true, 1));
                 ticket = res.FirstOrDefault();
                 if (ticket is null)
-                    throw new ArgumentException(
+                    throw new NotFoundException(
                         $"Closed ticket in guild with Id: {req.GuildId} and owner with Id: {req.OwnerId} doesn't exist in the database.");
 
                 req.ChannelId = ticket.ChannelId;
@@ -255,7 +256,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             {
                 ticket = await _ticketService.GetAsync<Ticket>(req.Id.Value);
                 if (ticket is null)
-                    throw new ArgumentException(
+                    throw new NotFoundException(
                         $"Ticket with Id: {req.Id} doesn't exist in the database.");
 
                 req.ChannelId = ticket.ChannelId;
@@ -267,7 +268,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     new TicketBaseGetSpecifications(null, req.OwnerId, req.GuildId, null, null, false, 1));
                 ticket = res.FirstOrDefault();
                 if (ticket is null)
-                    throw new ArgumentException(
+                    throw new NotFoundException(
                         $"Opened ticket in guild with Id: {req.GuildId} and owner with Id: {req.OwnerId} doesn't exist in the database.");
 
                 req.ChannelId = ticket.ChannelId;
@@ -279,7 +280,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     new TicketBaseGetSpecifications(null, null, req.GuildId, null, req.GuildSpecificId, false, 1));
                 ticket = res.FirstOrDefault();
                 if (ticket is null)
-                    throw new ArgumentException(
+                    throw new NotFoundException(
                         $"Opened ticket in guild with Id: {req.GuildId} and owner with Id: {req.OwnerId} doesn't exist in the database.");
 
                 req.ChannelId = ticket.ChannelId;
@@ -370,7 +371,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             {
                 ticket = await _ticketService.GetAsync<Ticket>(req.Id.Value);
                 if (ticket is null)
-                    throw new ArgumentException(
+                    throw new NotFoundException(
                         $"Ticket with Id: {req.Id} doesn't exist in the database.");
 
                 req.ChannelId = ticket.ChannelId;
@@ -382,7 +383,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     new TicketBaseGetSpecifications(null, req.OwnerId, req.GuildId, null, null, false, 1));
                 ticket = res.FirstOrDefault();
                 if (ticket is null)
-                    throw new ArgumentException(
+                    throw new NotFoundException(
                         $"Opened ticket in guild with Id: {req.GuildId} and owner with Id: {req.OwnerId} doesn't exist in the database.");
 
                 req.ChannelId = ticket.ChannelId;
@@ -394,7 +395,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     new TicketBaseGetSpecifications(null, null, req.GuildId, null, req.GuildSpecificId, false, 1));
                 ticket = res.FirstOrDefault();
                 if (ticket is null)
-                    throw new ArgumentException(
+                    throw new NotFoundException(
                         $"Opened ticket in guild with Id: {req.GuildId} and guild specific Id: {req.GuildSpecificId} doesn't exist in the database.");
 
                 req.ChannelId = ticket.ChannelId;
@@ -572,10 +573,10 @@ namespace Lisbeth.Bot.Application.Discord.Services
             var guildCfg = guildRes.FirstOrDefault();
 
             if (guildCfg is null)
-                throw new ArgumentException($"Guild with Id:{guild.Id} doesn't exist in the database.");
+                throw new NotFoundException($"Guild with Id:{guild.Id} doesn't exist in the database.");
 
             if (guildCfg.TicketingConfig is null)
-                throw new ArgumentException($"Guild with Id:{guild.Id} doesn't have ticketing enabled.");
+                throw new DisabledEntityException($"Guild with Id:{guild.Id} doesn't have ticketing enabled.");
 
             req.GuildSpecificId = guildCfg.TicketingConfig.LastTicketId + 1;
             _guildService.BeginUpdate(guildCfg);
@@ -720,20 +721,20 @@ namespace Lisbeth.Bot.Application.Discord.Services
             var guildCfg = guildRes.FirstOrDefault();
 
             if (guildCfg is null)
-                throw new ArgumentException($"Guild with Id:{guild.Id} doesn't exist in the database.");
+                throw new NotFoundException($"Guild with Id:{guild.Id} doesn't exist in the database.");
 
             if (guildCfg.TicketingConfig is null)
-                throw new ArgumentException($"Guild with Id:{guild.Id} doesn't have ticketing enabled.");
+                throw new DisabledEntityException($"Guild with Id:{guild.Id} doesn't have ticketing enabled.");
 
             var res = await _ticketService.GetBySpecificationsAsync<Ticket>(
                 new TicketBaseGetSpecifications(req.Id, req.OwnerId, req.GuildId, req.ChannelId, req.GuildSpecificId));
 
             var ticket = res.FirstOrDefault();
 
-            if (ticket is null) throw new ArgumentException($"Ticket with channel Id: {target.Id} doesn't exist.");
+            if (ticket is null) throw new NotFoundException($"Ticket with channel Id: {target.Id} doesn't exist.");
 
             if (ticket.IsDisabled)
-                throw new ArgumentException(
+                throw new DisabledEntityException(
                     $"Ticket with Id: {ticket.GuildSpecificId}, TargetUserId: {ticket.UserId}, GuildId: {ticket.GuildId}, ChannelId: {ticket.ChannelId} is already closed.");
 
             if (ticket.UserId != requestingMember.Id &&
@@ -833,17 +834,17 @@ namespace Lisbeth.Bot.Application.Discord.Services
             var guildCfg = guildRes.FirstOrDefault();
 
             if (guildCfg is null)
-                throw new ArgumentException($"Guild with Id:{guild.Id} doesn't exist in the database.");
+                throw new NotFoundException($"Guild with Id:{guild.Id} doesn't exist in the database.");
 
             if (guildCfg.TicketingConfig is null)
-                throw new ArgumentException($"Guild with Id:{guild.Id} doesn't have ticketing enabled.");
+                throw new DisabledEntityException($"Guild with Id:{guild.Id} doesn't have ticketing enabled.");
 
             var res = await _ticketService.GetBySpecificationsAsync<Ticket>(
                 new TicketBaseGetSpecifications(req.Id, req.OwnerId, req.GuildId, req.ChannelId, req.GuildSpecificId,
                     true));
             var ticket = res.FirstOrDefault();
 
-            if (ticket is null) throw new ArgumentException($"Ticket with channel Id: {target.Id} doesn't exist.");
+            if (ticket is null) throw new NotFoundException($"Ticket with channel Id: {target.Id} doesn't exist.");
 
             if (!ticket.IsDisabled)
                 throw new ArgumentException(
@@ -932,10 +933,10 @@ namespace Lisbeth.Bot.Application.Discord.Services
             var guildCfg = guildRes.FirstOrDefault();
 
             if (guildCfg is null)
-                throw new ArgumentException($"Guild with Id:{guild.Id} doesn't exist in the database.");
+                throw new NotFoundException($"Guild with Id:{guild.Id} doesn't exist in the database.");
 
             if (guildCfg.TicketingConfig is null)
-                throw new ArgumentException($"Guild with Id:{guild.Id} doesn't have ticketing enabled.");
+                throw new DisabledEntityException($"Guild with Id:{guild.Id} doesn't have ticketing enabled.");
 
             var res = await _ticketService.GetBySpecificationsAsync<Ticket>(
                 new TicketBaseGetSpecifications(req.Id, req.OwnerId, req.GuildId, req.ChannelId, req.GuildSpecificId));
@@ -943,7 +944,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             var ticket = res.FirstOrDefault();
 
             if (ticket is null)
-                throw new ArgumentException($"Ticket with channel Id: {targetTicketChannel.Id} doesn't exist.");
+                throw new NotFoundException($"Ticket with channel Id: {targetTicketChannel.Id} doesn't exist.");
 
             if (!requestingMember.Permissions.HasPermission(Permissions.BanMembers))
                 throw new DiscordNotAuthorizedException("Requesting member doesn't have moderator rights.");
@@ -1014,10 +1015,10 @@ namespace Lisbeth.Bot.Application.Discord.Services
             var guildCfg = guildRes.FirstOrDefault();
 
             if (guildCfg is null)
-                throw new ArgumentException($"Guild with Id:{guild.Id} doesn't exist in the database.");
+                throw new NotFoundException($"Guild with Id:{guild.Id} doesn't exist in the database.");
 
             if (guildCfg.TicketingConfig is null)
-                throw new ArgumentException($"Guild with Id:{guild.Id} doesn't have ticketing enabled.");
+                throw new DisabledEntityException($"Guild with Id:{guild.Id} doesn't have ticketing enabled.");
 
             var res = await _ticketService.GetBySpecificationsAsync<Ticket>(
                 new TicketBaseGetSpecifications(req.Id, req.OwnerId, req.GuildId, req.ChannelId, req.GuildSpecificId));
@@ -1025,7 +1026,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             var ticket = res.FirstOrDefault();
 
             if (ticket is null)
-                throw new ArgumentException($"Ticket with channel Id: {targetTicketChannel.Id} doesn't exist.");
+                throw new NotFoundException($"Ticket with channel Id: {targetTicketChannel.Id} doesn't exist.");
 
             if (!requestingMember.Permissions.HasPermission(Permissions.BanMembers))
                 throw new DiscordNotAuthorizedException("Requesting member doesn't have moderator rights.");

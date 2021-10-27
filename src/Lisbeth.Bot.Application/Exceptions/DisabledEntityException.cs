@@ -17,20 +17,20 @@
 
 using System;
 
-namespace Lisbeth.Bot.Application.Discord.Exceptions
+namespace Lisbeth.Bot.Application.Exceptions
 {
-    public class DiscordNotAuthorizedException : Exception
+    public class DisabledEntityException : Exception
     {
-        public DiscordNotAuthorizedException()
+        public DisabledEntityException()
         {
         }
 
-        public DiscordNotAuthorizedException(string message)
+        public DisabledEntityException(string message)
             : base(message)
         {
         }
 
-        public DiscordNotAuthorizedException(string message, Exception inner)
+        public DisabledEntityException(string message, Exception inner)
             : base(message, inner)
         {
         }

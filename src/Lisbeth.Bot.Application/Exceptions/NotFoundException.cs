@@ -17,20 +17,20 @@
 
 using System;
 
-namespace Lisbeth.Bot.Application.Discord.Exceptions
+namespace Lisbeth.Bot.Application.Exceptions
 {
-    public class DiscordNotAuthorizedException : Exception
+    public class NotFoundException : Exception
     {
-        public DiscordNotAuthorizedException()
+        public NotFoundException()
         {
         }
 
-        public DiscordNotAuthorizedException(string message)
+        public NotFoundException(string message)
             : base(message)
         {
         }
 
-        public DiscordNotAuthorizedException(string message, Exception inner)
+        public NotFoundException(string message, Exception inner)
             : base(message, inner)
         {
         }

@@ -16,10 +16,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using AutoMapper;
-using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
+using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.Exceptions;
+using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Application.Services.Interfaces.Database;
@@ -30,10 +31,11 @@ using MikyM.Discord.Interfaces;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Lisbeth.Bot.Application.Discord.Extensions;
+using Lisbeth.Bot.Application.Exceptions;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {
+    [UsedImplicitly]
     public class DiscordTagService : IDiscordTagService
     {
         private readonly IDiscordService _discord;
@@ -78,7 +80,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 await _guildService.GetBySpecificationsAsync<Guild>(new ActiveGuildByDiscordIdWithTagsSpecifications(req.GuildId));
             var guildCfg = guildRes.FirstOrDefault();
             if (guildCfg is null)
-                throw new ArgumentException($"Guild with Id: {guild.Id} doesn't exist in the database.");
+                throw new NotFoundException($"Guild with Id: {guild.Id} doesn't exist in the database.");
 
             if (!creator.IsModerator())
                 throw new DiscordNotAuthorizedException("You are not authorized to create tags");
@@ -101,7 +103,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             else if (req.Id.HasValue)
             {
                 var tag = await _tagService.GetAsync<Tag>(req.Id.Value);
-                if (tag is null) throw new ArgumentException("Tag with given Id was not found");
+                if (tag is null) throw new NotFoundException("Tag with given Id was not found");
                 guild = await _discord.Client.GetGuildAsync(tag.GuildId);
             }
 
@@ -128,12 +130,12 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 await _guildService.GetBySpecificationsAsync<Guild>(new ActiveGuildByDiscordIdWithTagsSpecifications(guild.Id));
             var guildCfg = guildRes.FirstOrDefault();
             if (guildCfg is null)
-                throw new ArgumentException($"Guild with Id: {guild.Id} doesn't exist in the database.");
+                throw new NotFoundException($"Guild with Id: {guild.Id} doesn't exist in the database.");
 
             if (!requestingUser.IsModerator())
                 throw new DiscordNotAuthorizedException("You are not authorized to edit tags");
-/*
-            await _tagService.UpdateTagEmbedConfigAsync(req, true);*/
+
+            await _tagService.UpdateTagEmbedConfigAsync(req, true);
 
             var embed = new DiscordEmbedBuilder();
             embed.WithColor(new DiscordColor(guildCfg.EmbedHexColor));
@@ -151,7 +153,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             else if (req.Id.HasValue)
             {
                 var tag = await _tagService.GetAsync<Tag>(req.Id.Value);
-                if (tag is null) throw new ArgumentException("Tag with given Id was not found");
+                if (tag is null) throw new NotFoundException("Tag with given Id was not found");
                 guild = await _discord.Client.GetGuildAsync(tag.GuildId);
             }
 
@@ -178,14 +180,14 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 await _guildService.GetBySpecificationsAsync<Guild>(new ActiveGuildByDiscordIdWithTagsSpecifications(guild.Id));
             var guildCfg = guildRes.FirstOrDefault();
             if (guildCfg is null)
-                throw new ArgumentException($"Guild with Id: {guild.Id} doesn't exist in the database.");
+                throw new NotFoundException($"Guild with Id: {guild.Id} doesn't exist in the database.");
 
             if (requestingUser.Guild.Id != guild.Id) throw new DiscordNotAuthorizedException();
 
             var tag = req.Id.HasValue ? guildCfg.Tags.FirstOrDefault(x => x.Id == req.Id) : guildCfg.Tags.FirstOrDefault(x => x.Name == req.Name);
 
-            if (tag is null) throw new ArgumentException("Tag not found");
-            if (tag.IsDisabled) throw new ArgumentException("Found tag is disabled");
+            if (tag is null) throw new NotFoundException("Tag not found");
+            if (tag.IsDisabled) throw new DisabledEntityException("Found tag is disabled");
             return tag.EmbedConfig is null ? (null, tag.Text) : (_embedProvider.ConfigureEmbed(tag.EmbedConfig).Build(), tag.Text);
         }
 
@@ -198,7 +200,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             else if (req.Id.HasValue)
             {
                 var tag = await _tagService.GetAsync<Tag>(req.Id.Value);
-                if (tag is null) throw new ArgumentException("Tag with given Id was not found");
+                if (tag is null) throw new NotFoundException("Tag with given Id was not found");
                 guild = await _discord.Client.GetGuildAsync(tag.GuildId);
             }
 
@@ -225,7 +227,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 await _guildService.GetBySpecificationsAsync<Guild>(new ActiveGuildByDiscordIdWithTagsSpecifications(guild.Id));
             var guildCfg = guildRes.FirstOrDefault();
             if (guildCfg is null)
-                throw new ArgumentException($"Guild with Id: {guild.Id} doesn't exist in the database.");
+                throw new NotFoundException($"Guild with Id: {guild.Id} doesn't exist in the database.");
 
             if (!requestingUser.IsModerator())
                 throw new DiscordNotAuthorizedException("You are not authorized to edit tags");
