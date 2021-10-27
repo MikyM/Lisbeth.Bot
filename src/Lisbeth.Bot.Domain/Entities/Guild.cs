@@ -50,6 +50,11 @@ namespace Lisbeth.Bot.Domain.Entities
         public IReadOnlyCollection<Tag> Tags => tags;
         public IReadOnlyCollection<RoleMenu> RoleMenus => roleMenus;
 
+/*        public Guild()
+        {
+            tags ??= new HashSet<Tag>();
+        }*/
+
         public void AddMute(Mute mute)
         {
             if (mute is null) throw new ArgumentNullException(nameof(mute));

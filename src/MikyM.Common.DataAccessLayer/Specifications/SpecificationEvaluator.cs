@@ -33,6 +33,8 @@ namespace MikyM.Common.DataAccessLayer.Specifications
 
             query = specifications.StringIncludes.Aggregate(query, (current, include) => current.Include(include));
 
+            query = specifications.NestedIncludes.Aggregate(query, (current, include) => include(current));
+
             if (specifications.OrderBy is not null)
                 query = query.OrderBy(specifications.OrderBy);
             else if (specifications.OrderByDescending is not null)

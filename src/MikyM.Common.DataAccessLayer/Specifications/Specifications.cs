@@ -17,7 +17,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore.Query;
 
 namespace MikyM.Common.DataAccessLayer.Specifications
 {
@@ -42,14 +44,21 @@ namespace MikyM.Common.DataAccessLayer.Specifications
         public List<Expression<Func<T, bool>>> FilterConditions { get; } = new();
         public Expression<Func<T, object>> OrderBy { get; private set; }
         public Expression<Func<T, object>> OrderByDescending { get; private set; }
+        public List<Func<IQueryable<T>, IIncludableQueryable<T, object>>> NestedIncludes { get; } = new();
         public List<Expression<Func<T, object>>> Includes { get; } = new();
         public List<string> StringIncludes { get; } = new();
         public Expression<Func<T, object>> GroupBy { get; private set; }
         public int Limit { get; private set; }
 
-        protected Specifications<T> AddInclude(Expression<Func<T, object>> includeExpression)
+        protected Specifications<T> AddInclude(Func<IQueryable<T>, IIncludableQueryable<T, object>> includeExpression)
         {
-            Includes.Add(includeExpression);
+            NestedIncludes.Add(includeExpression);
+            return this;
+        }
+
+        protected Specifications<T> AddInclude(Expression<Func<T, object>> include)
+        {
+            Includes.Add(include);
             return this;
         }
 

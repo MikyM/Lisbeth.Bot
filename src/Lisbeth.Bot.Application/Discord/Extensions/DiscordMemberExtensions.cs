@@ -56,5 +56,14 @@ namespace Lisbeth.Bot.Application.Discord.Extensions
 
             return true;
         }
+
+        public static bool IsModerator(this DiscordMember member)
+        {
+            return member.Roles.Any(x =>
+                x.Permissions.HasPermission(Permissions.BanMembers)) ||
+                member.Permissions.HasPermission(Permissions.BanMembers) ||
+                member.Permissions.HasPermission(Permissions.All) ||
+                member.IsOwner;
+        }
     }
 }

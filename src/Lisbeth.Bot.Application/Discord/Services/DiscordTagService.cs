@@ -15,23 +15,22 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using AutoMapper;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Application.Discord.Exceptions;
+using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Application.Services.Interfaces.Database;
 using Lisbeth.Bot.DataAccessLayer.Specifications.GuildSpecifications;
 using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.Entities;
-using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Discord.Interfaces;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Lisbeth.Bot.Application.Discord.Helpers;
-using Lisbeth.Bot.DataAccessLayer.Specifications.EmbedConfigEntitySpecifications;
-using Microsoft.VisualBasic;
+using Lisbeth.Bot.Application.Discord.Extensions;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {
@@ -41,6 +40,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
         private readonly IGuildService _guildService;
         private readonly ITagService _tagService;
         private readonly IDiscordEmbedProvider _embedProvider;
+        private readonly IMapper _mapper;
 
         public DiscordTagService(IDiscordService discord, IGuildService guildService, ITagService tagService, IDiscordEmbedProvider embedProvider)
         {
@@ -75,13 +75,12 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (req is null) throw new ArgumentNullException(nameof(req));
 
             var guildRes =
-                await _guildService.GetBySpecificationsAsync<Guild>(
-                    new Specifications<Guild>(x => x.GuildId == guild.Id && !x.IsDisabled));
+                await _guildService.GetBySpecificationsAsync<Guild>(new ActiveGuildByDiscordIdWithTagsSpecifications(req.GuildId));
             var guildCfg = guildRes.FirstOrDefault();
             if (guildCfg is null)
                 throw new ArgumentException($"Guild with Id: {guild.Id} doesn't exist in the database.");
 
-            if (!creator.Roles.Any(x => x.Permissions.HasPermission(Permissions.BanMembers)))
+            if (!creator.IsModerator())
                 throw new DiscordNotAuthorizedException("You are not authorized to create tags");
 
             await _tagService.AddAsync(req, true);
@@ -131,10 +130,10 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (guildCfg is null)
                 throw new ArgumentException($"Guild with Id: {guild.Id} doesn't exist in the database.");
 
-            if (!requestingUser.Roles.Any(x => x.Permissions.HasPermission(Permissions.BanMembers)))
+            if (!requestingUser.IsModerator())
                 throw new DiscordNotAuthorizedException("You are not authorized to edit tags");
-
-            await _tagService.UpdateTagEmbedConfigAsync(req, true);
+/*
+            await _tagService.UpdateTagEmbedConfigAsync(req, true);*/
 
             var embed = new DiscordEmbedBuilder();
             embed.WithColor(new DiscordColor(guildCfg.EmbedHexColor));
@@ -228,11 +227,10 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (guildCfg is null)
                 throw new ArgumentException($"Guild with Id: {guild.Id} doesn't exist in the database.");
 
-            if (!requestingUser.Roles.Any(x => x.Permissions.HasPermission(Permissions.BanMembers)))
+            if (!requestingUser.IsModerator())
                 throw new DiscordNotAuthorizedException("You are not authorized to edit tags");
 
             await _tagService.DisableAsync(req, true);
-
             var embed = new DiscordEmbedBuilder();
             embed.WithColor(new DiscordColor(guildCfg.EmbedHexColor));
             embed.WithDescription("Tag disabled successfully");
