@@ -49,7 +49,7 @@ namespace Lisbeth.Bot.API.HealthChecks
                 return HealthCheckResult.Unhealthy();
             }
 
-            if (info is null) return HealthCheckResult.Unhealthy();
+            if (info  is null) return HealthCheckResult.Unhealthy();
 
             return _discord.Client.Ping > 300 ? HealthCheckResult.Degraded() : HealthCheckResult.Healthy();
         }

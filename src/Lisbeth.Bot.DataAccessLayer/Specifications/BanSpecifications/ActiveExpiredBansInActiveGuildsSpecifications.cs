@@ -22,7 +22,7 @@ using MikyM.Common.DataAccessLayer.Specifications;
 
 namespace Lisbeth.Bot.DataAccessLayer.Specifications.BanSpecifications
 {
-    public class ActiveExpiredBansInActiveGuildsSpecifications : Specifications<Ban>
+    public class ActiveExpiredBansInActiveGuildsSpecifications : Specification<Ban>
     {
         public ActiveExpiredBansInActiveGuildsSpecifications()
         {
@@ -31,6 +31,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Specifications.BanSpecifications
             AddFilterCondition(x => x.AppliedUntil <= DateTime.UtcNow);
             AddInclude(x => x.Guild);
             ApplyOrderBy(x => x.Guild.Id);
+
         }
     }
 }

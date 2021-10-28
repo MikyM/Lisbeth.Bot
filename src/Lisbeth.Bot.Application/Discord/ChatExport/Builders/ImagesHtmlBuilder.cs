@@ -34,7 +34,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders
 
         public async Task<string> BuildAsync()
         {
-            if (Images.Count == 0 || Images is null) return "";
+            if (Images.Count == 0 || Images  is null) return "";
             string imagesHtml = "";
             foreach (var attachment in Images)
             {

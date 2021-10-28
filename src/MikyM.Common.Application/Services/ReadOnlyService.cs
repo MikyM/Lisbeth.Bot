@@ -40,23 +40,30 @@ namespace MikyM.Common.Application.Services
             return _mapper.Map<TGetResult>(await _unitOfWork.GetRepository<ReadOnlyRepository<TEntity>>().GetAsync(id));
         }
 
-        public virtual async Task<IReadOnlyList<TGetResult>> GetBySpecificationsAsync<TGetResult>(
-            ISpecifications<TEntity> specifications = null) where TGetResult : class
+        public virtual async Task<TGetResult> GetSingleBySpecAsync<TSpec, TGetResult>(
+            ISpecification<TEntity> specification = null) where TGetResult : class where TSpec : ISpecification<TEntity>, ISingleResultSpecification
         {
-            return _mapper.Map<IReadOnlyList<TGetResult>>(await _unitOfWork.GetRepository<ReadOnlyRepository<TEntity>>()
-                .GetBySpecificationsAsync(specifications));
+            return _mapper.Map<TGetResult>(await _unitOfWork.GetRepository<ReadOnlyRepository<TEntity>>()
+                .GetSingleBySpecAsync<TSpec>(specification));
         }
 
-        public virtual async Task<IReadOnlyList<TGetResult>> GetBySpecificationsAsync<TGetResult>(
-            PaginationFilterDto filter, ISpecifications<TEntity> specifications = null) where TGetResult : class
+        public virtual async Task<IReadOnlyList<TGetResult>> GetBySpecAsync<TGetResult>(
+            ISpecification<TEntity> specification = null) where TGetResult : class
         {
             return _mapper.Map<IReadOnlyList<TGetResult>>(await _unitOfWork.GetRepository<ReadOnlyRepository<TEntity>>()
-                .GetBySpecificationsAsync(_mapper.Map<PaginationFilter>(filter), specifications));
+                .GetBySpecAsync(specification));
         }
 
-        public virtual async Task<long> LongCountAsync(ISpecifications<TEntity> specifications = null)
+        public virtual async Task<IReadOnlyList<TGetResult>> GetBySpecAsync<TGetResult>(
+            PaginationFilterDto filter, ISpecification<TEntity> specification = null) where TGetResult : class
         {
-            return await _unitOfWork.GetRepository<ReadOnlyRepository<TEntity>>().LongCountAsync(specifications);
+            return _mapper.Map<IReadOnlyList<TGetResult>>(await _unitOfWork.GetRepository<ReadOnlyRepository<TEntity>>()
+                .GetBySpecAsync(_mapper.Map<PaginationFilter>(filter), specification));
+        }
+
+        public virtual async Task<long> LongCountAsync(ISpecification<TEntity> specification = null)
+        {
+            return await _unitOfWork.GetRepository<ReadOnlyRepository<TEntity>>().LongCountAsync(specification);
         }
     }
 }

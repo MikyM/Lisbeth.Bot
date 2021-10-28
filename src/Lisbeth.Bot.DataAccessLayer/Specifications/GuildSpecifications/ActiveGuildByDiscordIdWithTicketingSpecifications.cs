@@ -21,7 +21,7 @@ using MikyM.Common.DataAccessLayer.Specifications;
 
 namespace Lisbeth.Bot.DataAccessLayer.Specifications.GuildSpecifications
 {
-    public class ActiveGuildByDiscordIdWithTicketingSpecifications : Specifications<Guild>
+    public class ActiveGuildByDiscordIdWithTicketingSpecifications : Specification<Guild>
     {
         public ActiveGuildByDiscordIdWithTicketingSpecifications(ulong discordGuildId)
         {

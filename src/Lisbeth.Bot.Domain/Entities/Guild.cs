@@ -57,31 +57,31 @@ namespace Lisbeth.Bot.Domain.Entities
 
         public void AddMute(Mute mute)
         {
-            if (mute is null) throw new ArgumentNullException(nameof(mute));
+            if (mute  is null) throw new ArgumentNullException(nameof(mute));
             mutes.Add(mute);
         }
 
         public void AddPrune(Prune prune)
         {
-            if (prune is null) throw new ArgumentNullException(nameof(prune));
+            if (prune  is null) throw new ArgumentNullException(nameof(prune));
             prunes.Add(prune);
         }
 
         public void AddBan(Ban ban)
         {
-            if (ban is null) throw new ArgumentNullException(nameof(ban));
+            if (ban  is null) throw new ArgumentNullException(nameof(ban));
             bans.Add(ban);
         }
 
         public void AddServerBooster(GuildServerBooster guildServerBooster)
         {
-            if (guildServerBooster is null) throw new ArgumentNullException(nameof(guildServerBooster));
+            if (guildServerBooster  is null) throw new ArgumentNullException(nameof(guildServerBooster));
             guildServerBoosters.Add(guildServerBooster);
         }
 
         public bool AddTag(Tag tag)
         {
-            if (tag is null) throw new ArgumentNullException(nameof(tag));
+            if (tag  is null) throw new ArgumentNullException(nameof(tag));
             return tags.Add(tag);
         }
 
@@ -94,7 +94,7 @@ namespace Lisbeth.Bot.Domain.Entities
 
         public bool EditTag(Tag tag)
         {
-            if (tag is null) throw new ArgumentNullException(nameof(tag));
+            if (tag  is null) throw new ArgumentNullException(nameof(tag));
             var res = tags.RemoveWhere(x => x.Name == tag.Name);
             return res != 0 && tags.Add(tag);
         }

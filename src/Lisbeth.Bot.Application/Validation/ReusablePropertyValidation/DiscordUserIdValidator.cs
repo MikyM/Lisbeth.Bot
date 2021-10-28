@@ -48,7 +48,7 @@ namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
                 try
                 {
                     guild = await _discord.GetGuildAsync((ulong) _guildId);
-                    if (guild is null)
+                    if (guild  is null)
                     {
                         _doesGuildExist = false;
                         return false;
@@ -63,7 +63,7 @@ namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
                 try
                 {
                     var user = await guild.GetMemberAsync(value);
-                    if (user is null) return false;
+                    if (user  is null) return false;
                 }
                 catch (Exception)
                 {
@@ -76,7 +76,7 @@ namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
             try
             {
                 var user = await _discord.GetUserAsync(value);
-                if (user is null) return false;
+                if (user  is null) return false;
             }
             catch (Exception)
             {

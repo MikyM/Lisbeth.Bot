@@ -32,6 +32,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using MikyM.Common.Application;
 using MikyM.Common.DataAccessLayer;
+using MikyM.Common.DataAccessLayer.Specifications;
+using MikyM.Common.DataAccessLayer.Specifications.Evaluators;
 
 namespace Lisbeth.Bot.API
 {
@@ -86,6 +88,7 @@ namespace Lisbeth.Bot.API
             }).AsSelf().SingleInstance();
 
             builder.RegisterType<DiscordEmbedProvider>().As<IDiscordEmbedProvider>().SingleInstance();
+            builder.RegisterType<SpecificationEvaluator>().As<ISpecificationEvaluator>().UsingConstructor().SingleInstance();
             builder.RegisterGeneric(typeof(DiscordEmbedConfiguratorService<>))
                 .As(typeof(IDiscordEmbedConfiguratorService<>)).InstancePerLifetimeScope();
         }

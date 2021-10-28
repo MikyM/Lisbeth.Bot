@@ -30,6 +30,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using System.Globalization;
+using MikyM.Common.Domain;
 
 namespace Lisbeth.Bot.API
 {

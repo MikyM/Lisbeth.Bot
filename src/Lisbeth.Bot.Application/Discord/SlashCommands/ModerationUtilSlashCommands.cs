@@ -28,14 +28,14 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
         public async Task IdentityCommand(InteractionContext ctx,
             [Option("user", "User to identify")] DiscordUser user)
         {
-            if (user is null) throw new ArgumentNullException(nameof(user));
+            if (user  is null) throw new ArgumentNullException(nameof(user));
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
-            var res = await _guildService.GetBySpecificationsAsync<Guild>(
+            var res = await _guildService.GetBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(ctx.Guild.Id));
             var guild = res.FirstOrDefault();
 
-            if (guild is null) throw new ArgumentException("Guild not found in database");
+            if (guild  is null) throw new ArgumentException("Guild not found in database");
 
             var member = (DiscordMember) user;
 
@@ -60,12 +60,12 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
-            var res = await _guildService.GetBySpecificationsAsync<Guild>(
+            var res = await _guildService.GetBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(ctx.Guild.Id));
             var guild = res.FirstOrDefault();
 
-            if (guild is null) throw new ArgumentException("Guild not found in database");
-            if (guild.TicketingConfig is null) throw new ArgumentException("Guild doesn't have ticketing configured");
+            if (guild  is null) throw new ArgumentException("Guild not found in database");
+            if (guild.TicketingConfig  is null) throw new ArgumentException("Guild doesn't have ticketing configured");
 
             var envelopeEmoji = DiscordEmoji.FromName(ctx.Client, ":envelope:");
             var embed = new DiscordEmbedBuilder();
@@ -111,15 +111,15 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             [Option("Close", "Should Lisbeth close open tickets after X hours")]
             string closeAfter = "")
         {
-            if (openedCat is null) throw new ArgumentNullException(nameof(openedCat));
-            if (closedCat is null) throw new ArgumentNullException(nameof(closedCat));
+            if (openedCat  is null) throw new ArgumentNullException(nameof(openedCat));
+            if (closedCat  is null) throw new ArgumentNullException(nameof(closedCat));
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
-            var res = await _guildService.GetBySpecificationsAsync<Guild>(
+            var res = await _guildService.GetBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(ctx.Guild.Id));
             var guild = res.FirstOrDefault();
 
-            if (guild is null) throw new ArgumentException("Guild not found in database");
+            if (guild  is null) throw new ArgumentException("Guild not found in database");
             if (guild.TicketingConfig is not null)
                 throw new ArgumentException("Guild already has a ticketing configuration");
 
@@ -149,11 +149,11 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
-            var res = await _guildService.GetBySpecificationsAsync<Guild>(
+            var res = await _guildService.GetBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(ctx.Guild.Id));
             var guild = res.FirstOrDefault();
 
-            if (guild is null) throw new ArgumentException("Guild not found in database");
+            if (guild  is null) throw new ArgumentException("Guild not found in database");
 
             var modConfig = new ModerationConfig()
             { MuteRoleId = ulong.Parse(muteRoleId), MessageDeletedEventsLogChannelId = deletedChannel.Id, MessageUpdatedEventsLogChannelId = updatedChannel.Id };

@@ -64,7 +64,7 @@ namespace MikyM.Discord.Services
 
         internal void Initialize()
         {
-            if (DiscordOptions.Value is null)
+            if (DiscordOptions.Value  is null)
                 throw new InvalidOperationException($"{nameof(DiscordConfiguration)} option is required");
 
             using var serviceScope = ServiceProvider.CreateScope();

@@ -75,10 +75,10 @@ namespace MikyM.Common.Domain.Entities
 
         public static bool operator ==(Entity<TId> a, Entity<TId> b)
         {
-            if (a is null && b is null)
+            if (a  is null && b  is null)
                 return true;
 
-            if (a is null || b is null)
+            if (a  is null || b  is null)
                 return false;
 
             return a.Equals(b);

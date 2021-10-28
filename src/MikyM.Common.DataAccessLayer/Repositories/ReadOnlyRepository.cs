@@ -22,6 +22,8 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MikyM.Common.DataAccessLayer.Filters;
 using MikyM.Common.DataAccessLayer.Specifications;
+using MikyM.Common.DataAccessLayer.Specifications.Evaluators;
+using MikyM.Common.DataAccessLayer.Specifications.Exceptions;
 using MikyM.Common.Domain.Entities;
 
 namespace MikyM.Common.DataAccessLayer.Repositories
@@ -29,42 +31,105 @@ namespace MikyM.Common.DataAccessLayer.Repositories
     public class ReadOnlyRepository<TEntity> : IReadOnlyRepository<TEntity> where TEntity : AggregateRootEntity
     {
         public readonly DbContext _context;
+        private readonly ISpecificationEvaluator _specificationEvaluator;
 
-        public ReadOnlyRepository(DbContext context)
+        public ReadOnlyRepository(DbContext context, ISpecificationEvaluator specificationEvaluator)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
+            _specificationEvaluator = specificationEvaluator;
         }
 
         public virtual async ValueTask<TEntity> GetAsync(params object[] keyValues)
         {
             return await _context.Set<TEntity>().FindAsync(keyValues);
         }
-
-        public virtual async Task<IReadOnlyList<TEntity>> GetBySpecificationsAsync(
-            ISpecifications<TEntity> baseSpecifications = null)
+        
+        public virtual async Task<TEntity> GetSingleBySpecAsync<TSpec>(
+            ISpecification<TEntity> specification = null) where TSpec : ISpecification<TEntity>, ISingleResultSpecification
         {
-            return await SpecificationEvaluator<TEntity>
-                .GetQuery(_context.Set<TEntity>().AsQueryable(), baseSpecifications)
-                .AsNoTracking()
-                .ToListAsync();
+            return await ApplySpecification(specification)
+                .FirstOrDefaultAsync();
         }
 
-        public virtual async Task<IReadOnlyList<TEntity>> GetBySpecificationsAsync(PaginationFilter filter,
-            ISpecifications<TEntity> baseSpecifications = null)
+        public virtual async Task<TProjectTo> GetSingleBySpecAsync<TSpec, TProjectTo>(
+            ISpecification<TEntity, TProjectTo> specification = null) where TSpec : ISpecification<TEntity, TProjectTo>, ISingleResultSpecification where TProjectTo : class
         {
-            return await SpecificationEvaluator<TEntity>
-                .GetQuery(_context.Set<TEntity>().AsQueryable(), baseSpecifications)
+            return await ApplySpecification(specification)
+                .FirstOrDefaultAsync();
+        }
+
+        public virtual async Task<IReadOnlyList<TEntity>> GetBySpecAsync(ISpecification<TEntity> specification = null)
+        {
+            var result = await ApplySpecification(specification).ToListAsync();
+            return specification?.PostProcessingAction is null
+                ? result
+                : specification.PostProcessingAction(result).ToList();
+        }
+
+        public virtual async Task<IReadOnlyList<TProjectTo>> GetBySpecAsync<TProjectTo>(ISpecification<TEntity, TProjectTo> specification = null) where TProjectTo : class
+        {
+            var result = await ApplySpecification(specification).ToListAsync();
+            return specification?.PostProcessingAction is null
+                ? result
+                : specification.PostProcessingAction(result).ToList();
+        }
+
+        public virtual async Task<IReadOnlyList<TEntity>> GetBySpecAsync(PaginationFilter filter,
+            ISpecification<TEntity> specification = null)
+        {
+            var result = await ApplySpecification(specification)
                 .Skip((filter.PageNumber - 1) * filter.PageSize)
                 .Take(filter.PageSize)
-                .AsNoTracking()
                 .ToListAsync();
+            return specification?.PostProcessingAction is null
+                ? result
+                : specification.PostProcessingAction(result).ToList();
         }
 
-        public virtual async Task<long> LongCountAsync(ISpecifications<TEntity> specifications = null)
+        public virtual async Task<IReadOnlyList<TProjectTo>> GetBySpecAsync<TProjectTo>(PaginationFilter filter,
+            ISpecification<TEntity, TProjectTo> specification = null) where TProjectTo : class
         {
-            return await SpecificationEvaluator<TEntity>.GetQuery(_context.Set<TEntity>().AsQueryable(), specifications)
-                .AsNoTracking()
+            var result = await ApplySpecification(specification)
+                .Skip((filter.PageNumber - 1) * filter.PageSize)
+                .Take(filter.PageSize)
+                .ToListAsync();
+            return specification?.PostProcessingAction is null
+                ? result
+                : specification.PostProcessingAction(result).ToList();
+        }
+
+        public virtual async Task<long> LongCountAsync(ISpecification<TEntity> specification = null)
+        {
+            return await ApplySpecification(specification)
                 .LongCountAsync();
+        }
+
+        /// <summary>
+        /// Filters the entities  of <typeparamref name="TEntity"/>, to those that match the encapsulated query logic of the
+        /// <paramref name="specification"/>.
+        /// </summary>
+        /// <param name="specification">The encapsulated query logic.</param>
+        /// <returns>The filtered entities as an <see cref="IQueryable{T}"/>.</returns>
+        protected virtual IQueryable<TEntity> ApplySpecification(ISpecification<TEntity> specification, bool evaluateCriteriaOnly = false)
+        {
+            return _specificationEvaluator.GetQuery(_context.Set<TEntity>().AsQueryable(), specification, evaluateCriteriaOnly);
+        }
+        /// <summary>
+        /// Filters all entities of <typeparamref name="TEntity" />, that matches the encapsulated query logic of the
+        /// <paramref name="specification"/>, from the database.
+        /// <para>
+        /// Projects each entity into a new form, being <typeparamref name="TResult" />.
+        /// </para>
+        /// </summary>
+        /// <typeparam name="TResult">The type of the value returned by the projection.</typeparam>
+        /// <param name="specification">The encapsulated query logic.</param>
+        /// <returns>The filtered projected entities as an <see cref="IQueryable{T}"/>.</returns>
+        protected virtual IQueryable<TResult> ApplySpecification<TResult>(ISpecification<TEntity, TResult> specification)
+        {
+            if (specification  is null) throw new ArgumentNullException("Specification is required");
+            if (specification.Selector  is null) throw new SelectorNotFoundException();
+
+            return _specificationEvaluator.GetQuery(_context.Set<TEntity>().AsQueryable(), specification);
         }
     }
 }

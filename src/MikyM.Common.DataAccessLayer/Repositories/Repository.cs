@@ -21,6 +21,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MikyM.Common.DataAccessLayer.Helpers;
+using MikyM.Common.DataAccessLayer.Specifications.Evaluators;
 using MikyM.Common.Domain.Entities;
 
 namespace MikyM.Common.DataAccessLayer.Repositories
@@ -28,7 +29,7 @@ namespace MikyM.Common.DataAccessLayer.Repositories
     public class Repository<TEntity> : ReadOnlyRepository<TEntity>, IRepository<TEntity>
         where TEntity : AggregateRootEntity
     {
-        public Repository(DbContext context) : base(context)
+        public Repository(DbContext context, ISpecificationEvaluator specificationEvaluator) : base(context, specificationEvaluator)
         {
         }
 

@@ -17,6 +17,7 @@
 
 using Autofac;
 using IdGen;
+using MikyM.Common.Domain;
 using MikyM.Common.Domain.Entities;
 
 namespace Lisbeth.Bot.Domain.Entities.Base

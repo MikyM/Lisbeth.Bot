@@ -15,23 +15,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using Microsoft.EntityFrameworkCore.Query;
-
-namespace MikyM.Common.DataAccessLayer.Specifications
+namespace MikyM.Common.DataAccessLayer.Specifications.Builders
 {
-    public interface ISpecifications<T>
+    public class OrderedSpecificationBuilder<T> : IOrderedSpecificationBuilder<T> where T : class
     {
-        List<Expression<Func<T, bool>>> FilterConditions { get; }
-        Expression<Func<T, object>> OrderBy { get; }
-        Expression<Func<T, object>> OrderByDescending { get; }
-        List<Expression<Func<T, object>>> Includes { get; }
-        List<Func<IQueryable<T>, IIncludableQueryable<T, object>>> NestedIncludes { get; }
-        List<string> StringIncludes { get; }
-        Expression<Func<T, object>> GroupBy { get; }
-        int Limit { get; }
+        public OrderedSpecificationBuilder(Specification<T> specification)
+        {
+            Specification = specification;
+        }
+
+        public Specification<T> Specification { get; }
     }
 }

@@ -64,14 +64,14 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
         public async Task<(DiscordEmbed Embed, bool IsSuccess)> ConfigureAsync(InteractionContext ctx, string idOrName)
         {
-            if (ctx is null) throw new ArgumentNullException(nameof(ctx));
+            if (ctx  is null) throw new ArgumentNullException(nameof(ctx));
 
             bool isValidId = long.TryParse(idOrName, out long id);
             
-            var res = await _service.GetBySpecificationsAsync<T>(new ActiveWithEmbedCfgByIdOrNameSpecifications<T>(isValidId ? id : null, idOrName, ctx.Guild.Id));
+            var res = await _service.GetBySpecAsync<T>(new ActiveWithEmbedCfgByIdOrNameSpecifications<T>(isValidId ? id : null, idOrName, ctx.Guild.Id));
             var entity = res.FirstOrDefault();
 
-            if (entity is null) throw new ArgumentException("Target object not found.");
+            if (entity  is null) throw new ArgumentException("Target object not found.");
             if (entity.GuildId != ctx.Guild.Id) throw new DiscordNotAuthorizedException();
 
             var member = await ctx.Guild.GetMemberAsync(ctx.User.Id);
@@ -474,7 +474,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             {
                 case nameof(EmbedConfigButton.EmbedConfigConfirmButton):
                     var newEmbed = _mapper.Map<EmbedConfig>(currentResult.Build());
-                    if (foundEntity.EmbedConfig is null)
+                    if (foundEntity.EmbedConfig  is null)
                     {
                         _service.BeginUpdate(foundEntity);
                         foundEntity.EmbedConfig = newEmbed;

@@ -48,20 +48,20 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
         public async Task LogMemberRemovedEventAsync(GuildMemberRemoveEventArgs args)
         {
-            if (args is null) throw new ArgumentNullException(nameof(args));
+            if (args  is null) throw new ArgumentNullException(nameof(args));
 
-            var res = await _guildService.GetBySpecificationsAsync<Guild>(
-                new Specifications<Guild>(x => x.GuildId == args.Guild.Id && !x.IsDisabled));
+            var res = await _guildService.GetBySpecAsync<Guild>(
+                new Specification<Guild>(x => x.GuildId == args.Guild.Id && !x.IsDisabled));
 
             var guild = res.FirstOrDefault();
 
-            if (guild?.ModerationConfig?.MemberEventsLogChannelId is null) return;
+            if (guild?.ModerationConfig?.MemberEventsLogChannelId  is null) return;
 
             DiscordChannel logChannel =
                 args.Guild.Channels.FirstOrDefault(x => x.Key == guild.ModerationConfig.MemberEventsLogChannelId.Value)
                     .Value;
 
-            if (logChannel is null) return;
+            if (logChannel  is null) return;
 
             string reasonLeft = "No reason found";
 
@@ -111,14 +111,14 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
         public async Task SendWelcomeMessageAsync(GuildMemberAddEventArgs args)
         {
-            if (args is null) throw new ArgumentNullException(nameof(args));
+            if (args  is null) throw new ArgumentNullException(nameof(args));
 
-            var res = await _guildService.GetBySpecificationsAsync<Guild>(
-                new Specifications<Guild>(x => x.GuildId == args.Guild.Id && !x.IsDisabled));
+            var res = await _guildService.GetBySpecAsync<Guild>(
+                new Specification<Guild>(x => x.GuildId == args.Guild.Id && !x.IsDisabled));
 
             var guild = res.FirstOrDefault();
 
-            if (guild?.ModerationConfig?.MemberWelcomeMessage is null) return;
+            if (guild?.ModerationConfig?.MemberWelcomeMessage  is null) return;
 
             var embed = new DiscordEmbedBuilder();
             embed.WithColor(new DiscordColor(guild.EmbedHexColor));
@@ -147,18 +147,18 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
         public async Task MemberMuteCheckAsync(GuildMemberAddEventArgs args)
         {
-            if (args is null) throw new ArgumentNullException(nameof(args));
+            if (args  is null) throw new ArgumentNullException(nameof(args));
 
-            var res = await _muteService.GetBySpecificationsAsync<Mute>(
+            var res = await _muteService.GetBySpecAsync<Mute>(
                 new ActiveMutesByGuildAndUserSpecifications(args.Guild.Id, args.Member.Id));
 
             var mute = res.FirstOrDefault();
 
-            if (mute?.Guild.ModerationConfig is null) return; // no mod config enabled so we don't care
+            if (mute?.Guild.ModerationConfig  is null) return; // no mod config enabled so we don't care
 
             var role = args.Guild.Roles.FirstOrDefault(x => x.Key == mute.Guild.ModerationConfig.MuteRoleId).Value;
 
-            if (role is null) return;
+            if (role  is null) return;
 
             await args.Member.GrantRoleAsync(role);
         }

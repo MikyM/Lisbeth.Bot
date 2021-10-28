@@ -15,36 +15,49 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Collections.Generic;
 using System.Linq;
-using Microsoft.EntityFrameworkCore;
+using MikyM.Common.DataAccessLayer.Specifications.Evaluators;
 
 namespace MikyM.Common.DataAccessLayer.Specifications
 {
-    public static class SpecificationEvaluator<TEntity> where TEntity : class
+    /// <inheritdoc cref="ISpecificationEvaluator"/>
+    public class SpecificationEvaluator : ISpecificationEvaluator
     {
-        public static IQueryable<TEntity> GetQuery(IQueryable<TEntity> query, ISpecifications<TEntity> specifications)
+        // Will use singleton for default configuration. Yet, it can be instantiated if necessary, with default or provided evaluators.
+        public static SpecificationEvaluator Default { get; } = new ();
+
+        private readonly List<IEvaluator> _evaluators = new ();
+
+        public SpecificationEvaluator()
         {
-            if (specifications is null) return query;
+            this._evaluators.AddRange(new IEvaluator[]
+            {
+                WhereEvaluator.Instance, SearchEvaluator.Instance, IncludeEvaluator.Instance,
+                OrderEvaluator.Instance, PaginationEvaluator.Instance, AsNoTrackingEvaluator.Instance,
+                AsSplitQueryEvaluator.Instance, AsNoTrackingWithIdentityResolutionEvaluator.Instance, GroupByEvaluator.Instance
+            });
+        }
 
-            query = specifications.FilterConditions.Aggregate(query,
-                (current, filterCondition) => current.Where(filterCondition));
+        public SpecificationEvaluator(IEnumerable<IEvaluator> evaluators)
+        {
+            this._evaluators.AddRange(evaluators);
+        }
 
-            query = specifications.Includes.Aggregate(query, (current, include) => current.Include(include));
+        public virtual IQueryable<TResult> GetQuery<T, TResult>(IQueryable<T> query,
+            ISpecification<T, TResult> specification) where T : class
+        {
+            query = GetQuery(query, (ISpecification<T>) specification);
 
-            query = specifications.StringIncludes.Aggregate(query, (current, include) => current.Include(include));
+            return query.Select(specification.Selector ?? throw new InvalidOperationException());
+        }
 
-            query = specifications.NestedIncludes.Aggregate(query, (current, include) => include(current));
-
-            if (specifications.OrderBy is not null)
-                query = query.OrderBy(specifications.OrderBy);
-            else if (specifications.OrderByDescending is not null)
-                query = query.OrderByDescending(specifications.OrderByDescending);
-
-            if (specifications.GroupBy is not null) query = query.GroupBy(specifications.GroupBy).SelectMany(x => x);
-
-            if (specifications.Limit != 0) query = query.Take(specifications.Limit);
-
-            return query;
+        public virtual IQueryable<T> GetQuery<T>(IQueryable<T> query, ISpecification<T> specification,
+            bool evaluateCriteriaOnly = false) where T : class
+        {
+            return (evaluateCriteriaOnly ? this._evaluators.Where(x => x.IsCriteriaEvaluator) : this._evaluators)
+                .Aggregate(query, (current, evaluator) => evaluator.GetQuery(current, specification));
         }
     }
 }

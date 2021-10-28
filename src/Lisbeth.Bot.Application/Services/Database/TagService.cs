@@ -46,12 +46,12 @@ namespace Lisbeth.Bot.Application.Services.Database
             }
             else if (req.Name is not null && req.Name != "")
             {
-                var res = await GetBySpecificationsAsync<Tag>(new Specifications<Tag>(x => x.Name == req.Name && x.GuildId == req.GuildId));
+                var res = await GetBySpecAsync<Tag>(new Specification<Tag>(x => x.Name == req.Name && x.GuildId == req.GuildId));
                 tag = res.FirstOrDefault();
             }
             else throw new ArgumentException("Invalid tag Id/Name was provided.");
 
-            if (tag is null) throw new ArgumentException("Tag doesn't exist.");
+            if (tag  is null) throw new ArgumentException("Tag doesn't exist.");
             if (tag.IsDisabled) throw new ArgumentException("Can't update embed config for a disabled tag, enable the tag first.");
 
             BeginUpdate(tag);
@@ -69,12 +69,12 @@ namespace Lisbeth.Bot.Application.Services.Database
             }
             else if (req.Name is not null && req.Name != "")
             {
-                var res = await GetBySpecificationsAsync<Tag>(new Specifications<Tag>(x => x.Name == req.Name && x.GuildId == req.GuildId));
+                var res = await GetBySpecAsync<Tag>(new Specification<Tag>(x => x.Name == req.Name && x.GuildId == req.GuildId));
                 tag = res.FirstOrDefault();
             }
             else throw new ArgumentException("Invalid tag Id/Name was provided.");
 
-            if (tag is null) throw new ArgumentException("Tag doesn't exist.");
+            if (tag  is null) throw new ArgumentException("Tag doesn't exist.");
             if (tag.IsDisabled) return;
 
             BeginUpdate(tag);

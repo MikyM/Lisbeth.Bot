@@ -20,7 +20,7 @@ using MikyM.Common.DataAccessLayer.Specifications;
 
 namespace Lisbeth.Bot.DataAccessLayer.Specifications.TicketSpecifications
 {
-    public class TicketBaseGetSpecifications : Specifications<Ticket>
+    public class TicketBaseGetSpecifications : Specification<Ticket>
     {
         public TicketBaseGetSpecifications(long? id = null, ulong? userId = null, ulong? guildId = null,
             ulong? channelId = null, long? guildSpecificId = null, bool isDisabled = false, int limit = 0, bool takeAny = false)
@@ -43,7 +43,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Specifications.TicketSpecifications
 
             ApplyOrderByDescending(x => x.CreatedAt);
 
-            ApplyLimit(limit);
+            ApplyTake(limit);
         }
     }
 }

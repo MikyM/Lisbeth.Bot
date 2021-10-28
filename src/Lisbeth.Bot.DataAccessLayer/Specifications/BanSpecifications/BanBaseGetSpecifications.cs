@@ -21,7 +21,7 @@ using MikyM.Common.DataAccessLayer.Specifications;
 
 namespace Lisbeth.Bot.DataAccessLayer.Specifications.BanSpecifications
 {
-    public class BanBaseGetSpecifications : Specifications<Ban>
+    public class BanBaseGetSpecifications : Specification<Ban>
     {
         public BanBaseGetSpecifications(long? id = null, ulong? userId = null, ulong? guildId = null,
             ulong? appliedById = null, DateTime? liftedOn = null, DateTime? appliedOn = null, ulong? liftedById = null,
@@ -48,7 +48,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Specifications.BanSpecifications
 
             ApplyOrderByDescending(x => x.CreatedAt);
 
-            ApplyLimit(limit);
+            ApplyTake(limit);
         }
     }
 }

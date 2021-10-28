@@ -28,7 +28,7 @@ namespace Lisbeth.Bot.Application.Helpers
         public static string Schedule([Hangfire.Annotations.NotNull] this IBackgroundJobClient client,
             [Hangfire.Annotations.NotNull, Hangfire.Annotations.InstantHandle] Expression<Action> methodCall, DateTime enqueueAt, string queue)
         {
-            if (client is null) throw new ArgumentNullException(nameof(client));
+            if (client  is null) throw new ArgumentNullException(nameof(client));
 
             return client.Create(methodCall, new ScheduledEnqueuedState(enqueueAt, queue));
         }
@@ -36,7 +36,7 @@ namespace Lisbeth.Bot.Application.Helpers
         public static string Schedule<T>([Hangfire.Annotations.NotNull] this IBackgroundJobClient client,
             [Hangfire.Annotations.NotNull, Hangfire.Annotations.InstantHandle] Expression<Action<T>> methodCall, DateTime enqueueAt, string queue)
         {
-            if (client is null) throw new ArgumentNullException(nameof(client));
+            if (client  is null) throw new ArgumentNullException(nameof(client));
 
             return client.Create(methodCall, new ScheduledEnqueuedState(enqueueAt, queue));
         }

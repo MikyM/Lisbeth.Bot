@@ -45,11 +45,11 @@ namespace Lisbeth.Bot.Application.Services
         {
             await Task.Delay(1000);
 
-            var res = await _guildService.GetBySpecificationsAsync<Guild>(
+            var res = await _guildService.GetBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithModerationSpecifications(guildId));
             var guild = res.FirstOrDefault();
 
-            if (guild is null) return;
+            if (guild  is null) return;
 
             bool wasMuted = rolesBefore.Any(x => x.Id == guild.ModerationConfig.MuteRoleId);
             bool isMuted = rolesAfter.Any(x => x.Id == guild.ModerationConfig.MuteRoleId);

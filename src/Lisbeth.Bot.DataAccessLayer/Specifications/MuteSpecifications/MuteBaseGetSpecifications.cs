@@ -21,7 +21,7 @@ using MikyM.Common.DataAccessLayer.Specifications;
 
 namespace Lisbeth.Bot.DataAccessLayer.Specifications.MuteSpecifications
 {
-    public class MuteBaseGetSpecifications : Specifications<Mute>
+    public class MuteBaseGetSpecifications : Specification<Mute>
     {
         public MuteBaseGetSpecifications(long? id = null, ulong? userId = null, ulong? guildId = null,
             ulong? appliedById = null, DateTime? liftedOn = null, DateTime? appliedOn = null, ulong? liftedById = null,
@@ -48,7 +48,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Specifications.MuteSpecifications
 
             ApplyOrderByDescending(x => x.CreatedAt);
 
-            ApplyLimit(limit);
+            ApplyTake(limit);
         }
     }
 }

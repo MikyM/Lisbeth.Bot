@@ -33,7 +33,7 @@ namespace Lisbeth.Bot.Application.Discord.Helpers
     {
         public DiscordEmbedBuilder ConfigureEmbed(EmbedConfig config)
         {
-            if (config is null) throw new ArgumentNullException(nameof(config));
+            if (config  is null) throw new ArgumentNullException(nameof(config));
 
             var builder = new DiscordEmbedBuilder();
 
@@ -56,7 +56,7 @@ namespace Lisbeth.Bot.Application.Discord.Helpers
             if (!string.IsNullOrWhiteSpace(config.Thumbnail))
                 builder.WithThumbnail(config.Thumbnail, config.ThumbnailHeight, config.ThumbnailWidth);
                 
-            if (config.Fields is null || config.Fields.Count == 0) return builder;
+            if (config.Fields  is null || config.Fields.Count == 0) return builder;
 
             foreach (var field in config.Fields.Where(field => !string.IsNullOrWhiteSpace(field.Text) && !string.IsNullOrWhiteSpace(field.Title)))
             {

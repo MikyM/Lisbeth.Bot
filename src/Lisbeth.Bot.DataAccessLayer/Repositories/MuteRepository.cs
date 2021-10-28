@@ -18,12 +18,13 @@
 using Lisbeth.Bot.DataAccessLayer.Repositories.Interfaces;
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.DataAccessLayer.Repositories;
+using MikyM.Common.DataAccessLayer.Specifications.Evaluators;
 
 namespace Lisbeth.Bot.DataAccessLayer.Repositories
 {
     public class MuteRepository : Repository<Mute>, IMuteRepository
     {
-        public MuteRepository(LisbethBotDbContext ctx) : base(ctx)
+        public MuteRepository(LisbethBotDbContext context, ISpecificationEvaluator evaluator) : base(context, evaluator)
         {
         }
     }

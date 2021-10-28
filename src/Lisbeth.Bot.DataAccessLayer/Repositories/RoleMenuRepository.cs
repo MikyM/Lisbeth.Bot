@@ -19,12 +19,13 @@ using Lisbeth.Bot.DataAccessLayer.Repositories.Interfaces;
 using Lisbeth.Bot.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using MikyM.Common.DataAccessLayer.Repositories;
+using MikyM.Common.DataAccessLayer.Specifications.Evaluators;
 
 namespace Lisbeth.Bot.DataAccessLayer.Repositories
 {
     public class RoleMenuRepository : Repository<RoleMenu>, IRoleMenuRepository
     {
-        public RoleMenuRepository(DbContext context) : base(context)
+        public RoleMenuRepository(DbContext context, ISpecificationEvaluator evaluator) : base(context, evaluator)
         {
         }
     }

@@ -58,7 +58,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
 
         public async Task<DiscordEmbed> ExportToHtmlAsync(TicketExportReqDto req)
         {
-            if (req is null) throw new ArgumentNullException(nameof(req));
+            if (req  is null) throw new ArgumentNullException(nameof(req));
 
             DiscordChannel target = null;
             DiscordMember requestingMember;
@@ -68,7 +68,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
             if (req.Id.HasValue)
             {
                 ticket = await _ticketService.GetAsync<Ticket>(req.Id.Value);
-                if (ticket is null)
+                if (ticket  is null)
                     throw new ArgumentException("Opened ticket with given params doesn't exist in the database.");
 
                 req.ChannelId = ticket.ChannelId;
@@ -77,10 +77,10 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
             }
             else if (req.OwnerId.HasValue && req.GuildId.HasValue)
             {
-                var res = await _ticketService.GetBySpecificationsAsync<Ticket>(
+                var res = await _ticketService.GetBySpecAsync<Ticket>(
                     new TicketBaseGetSpecifications(null, req.OwnerId, req.GuildId, null, null, false, 1));
                 ticket = res.FirstOrDefault();
-                if (ticket is null)
+                if (ticket  is null)
                     throw new ArgumentException("Opened ticket with given params doesn't exist in the database.");
 
                 req.ChannelId = ticket.ChannelId;
@@ -89,11 +89,11 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
             }
             else if (req.GuildSpecificId.HasValue && req.GuildId.HasValue)
             {
-                var res = await _ticketService.GetBySpecificationsAsync<Ticket>(
+                var res = await _ticketService.GetBySpecAsync<Ticket>(
                     new TicketBaseGetSpecifications(null, null, req.GuildId, null, req.GuildSpecificId.Value, false,
                         1));
                 ticket = res.FirstOrDefault();
-                if (ticket is null)
+                if (ticket  is null)
                     throw new ArgumentException("Opened ticket with given params doesn't exist in the database.");
 
                 req.ChannelId = ticket.ChannelId;
@@ -102,10 +102,10 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
             }
             else
             {
-                var res = await _ticketService.GetBySpecificationsAsync<Ticket>(
+                var res = await _ticketService.GetBySpecAsync<Ticket>(
                     new TicketBaseGetSpecifications(null, null, null, req.ChannelId, null, false, 1));
                 ticket = res.FirstOrDefault();
-                if (ticket is null)
+                if (ticket  is null)
                     throw new ArgumentException("Opened ticket with given params doesn't exist in the database.");
                 req.OwnerId = ticket.UserId;
                 try
@@ -151,7 +151,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
 
         public async Task<DiscordEmbed> ExportToHtmlAsync(DiscordInteraction intr)
         {
-            if (intr is null) throw new ArgumentNullException(nameof(intr));
+            if (intr  is null) throw new ArgumentNullException(nameof(intr));
 
             return await ExportToHtmlAsync(intr.Guild, intr.Channel, (DiscordMember) intr.User);
         }
@@ -161,30 +161,30 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
         {
             try
             {
-                if (guild is null) throw new ArgumentNullException(nameof(guild));
-                if (target is null) throw new ArgumentNullException(nameof(target));
-                if (requestingMember is null) throw new ArgumentNullException(nameof(requestingMember));
+                if (guild  is null) throw new ArgumentNullException(nameof(guild));
+                if (target  is null) throw new ArgumentNullException(nameof(target));
+                if (requestingMember  is null) throw new ArgumentNullException(nameof(requestingMember));
 
                 var resGuild =
-                    await _guildService.GetBySpecificationsAsync<Guild>(
-                        new Specifications<Guild>(x => x.GuildId == guild.Id && !x.IsDisabled));
+                    await _guildService.GetBySpecAsync<Guild>(
+                        new Specification<Guild>(x => x.GuildId == guild.Id && !x.IsDisabled));
 
                 var guildCfg = resGuild.FirstOrDefault();
 
-                if (guildCfg is null) throw new ArgumentException("Guild doesn't exist in database.");
+                if (guildCfg  is null) throw new ArgumentException("Guild doesn't exist in database.");
 
-                if (ticket is null)
+                if (ticket  is null)
                 {
-                    var res = await _ticketService.GetBySpecificationsAsync<Ticket>(
+                    var res = await _ticketService.GetBySpecAsync<Ticket>(
                         new TicketBaseGetSpecifications(null, null, guild.Id, target.Id, null, false, 1, true));
                     ticket = res.FirstOrDefault();
                 }
 
                 DiscordChannel ticketLogChannel;
 
-                if (ticket is null) throw new ArgumentException("Ticket doesn't exist in database.");
+                if (ticket  is null) throw new ArgumentException("Ticket doesn't exist in database.");
 
-                if (guildCfg.TicketingConfig.LogChannelId is null)
+                if (guildCfg.TicketingConfig.LogChannelId  is null)
                     throw new ArgumentException("Guild doesn't have ticketing log channel set.");
 
                 try
@@ -290,7 +290,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
                 messageBuilder.WithFile($"transcript-{target.Name}.html", ms);
                 messageBuilder.WithEmbed(embedBuilder.Build());
 
-                Log.Logger.Information(requestingMember is null
+                Log.Logger.Information(requestingMember  is null
                     ? $"Automatically saved transcript of {target.Name}"
                     : $"User {requestingMember.Username}#{requestingMember.Discriminator} with ID: {requestingMember.Id} saved transcript of {target.Name}");
 

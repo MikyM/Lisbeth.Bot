@@ -36,6 +36,7 @@ using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.EntityFrameworkCore;
 using MikyM.Common.Application.Interfaces;
+using MikyM.Common.Domain;
 using MikyM.Common.Domain.Entities;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands
@@ -56,7 +57,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder().AsEphemeral(bool.Parse(shouldEph)));
-            var res = await _service.GetBySpecificationsAsync<AuditLog>();
+            var res = await _service.GetBySpecAsync<AuditLog>();
             string botRes = res.Aggregate("",
                 (current, resp) =>
                     current +

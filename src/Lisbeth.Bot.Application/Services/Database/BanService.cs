@@ -37,13 +37,13 @@ namespace Lisbeth.Bot.Application.Services.Database
 
         public async Task<(long Id, Ban FoundEntity)> AddOrExtendAsync(BanReqDto req, bool shouldSave = false)
         {
-            if (req is null) throw new ArgumentNullException(nameof(req));
+            if (req  is null) throw new ArgumentNullException(nameof(req));
 
-            var res = await GetBySpecificationsAsync<Ban>(new Specifications<Ban>(x =>
+            var res = await GetBySpecAsync<Ban>(new Specification<Ban>(x =>
                     x.UserId == req.TargetUserId && x.GuildId == req.GuildId && !x.IsDisabled));
 
             var entity = res.FirstOrDefault();
-            if (entity is null) return (await base.AddAsync(req, shouldSave), null);
+            if (entity  is null) return (await base.AddAsync(req, shouldSave), null);
 
             if (entity.AppliedUntil > req.AppliedUntil) return (entity.Id, entity);
 
@@ -61,14 +61,14 @@ namespace Lisbeth.Bot.Application.Services.Database
 
         public async Task<Ban> DisableAsync(BanDisableReqDto entry, bool shouldSave = false)
         {
-            if (entry is null) throw new ArgumentNullException(nameof(entry));
+            if (entry  is null) throw new ArgumentNullException(nameof(entry));
 
-            var res = await GetBySpecificationsAsync<Ban>(
-                new Specifications<Ban>(x =>
+            var res = await GetBySpecAsync<Ban>(
+                new Specification<Ban>(x =>
                     x.UserId == entry.TargetUserId && x.GuildId == entry.GuildId && !x.IsDisabled));
 
             var entity = res.FirstOrDefault();
-            if (entity is null) return null;
+            if (entity  is null) return null;
 
             BeginUpdate(entity);
             entity.IsDisabled = true;

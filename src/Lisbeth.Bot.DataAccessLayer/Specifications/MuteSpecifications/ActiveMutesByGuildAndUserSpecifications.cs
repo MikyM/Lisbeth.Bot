@@ -22,7 +22,7 @@ using MikyM.Common.DataAccessLayer.Specifications;
 
 namespace Lisbeth.Bot.DataAccessLayer.Specifications.MuteSpecifications
 {
-    public class ActiveMutesByGuildAndUserSpecifications : Specifications<Mute>
+    public class ActiveMutesByGuildAndUserSpecifications : Specification<Mute>
     {
         public ActiveMutesByGuildAndUserSpecifications(ulong guildId, ulong userId)
         {

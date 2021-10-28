@@ -34,7 +34,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders
 
         public async Task<string> BuildAsync()
         {
-            if (Users is null || Messages is null || Channel is null || Js is null || Css is null)
+            if (Users  is null || Messages  is null || Channel  is null || Js  is null || Css  is null)
                 throw new ArgumentException("You must provide all required parameters before building.");
 
             MessagesHtmlBuilder messagesBuilder = new MessagesHtmlBuilder(Messages);

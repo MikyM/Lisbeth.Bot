@@ -19,12 +19,13 @@ using Lisbeth.Bot.DataAccessLayer.Repositories.Interfaces;
 using Lisbeth.Bot.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using MikyM.Common.DataAccessLayer.Repositories;
+using MikyM.Common.DataAccessLayer.Specifications.Evaluators;
 
 namespace Lisbeth.Bot.DataAccessLayer.Repositories
 {
     public class EmbedConfigRepository : Repository<EmbedConfig>, IEmbedConfigRepository
     {
-        public EmbedConfigRepository(DbContext context) : base(context)
+        public EmbedConfigRepository(DbContext context, ISpecificationEvaluator evaluator) : base(context, evaluator)
         {
         }
     }

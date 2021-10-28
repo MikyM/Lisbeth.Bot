@@ -25,7 +25,7 @@ namespace Lisbeth.Bot.Application.Extensions
         public static (DateTime? FinalDateFromToday, TimeSpan Duration) ToDateTimeDuration(this string input)
         {
 
-            if (input is null) throw new ArgumentNullException(nameof(input));
+            if (input  is null) throw new ArgumentNullException(nameof(input));
 
             TimeSpan tmsp = new TimeSpan();
             DateTime? result;
@@ -93,7 +93,7 @@ namespace Lisbeth.Bot.Application.Extensions
         }
 
         /// <summary>
-        /// takes a substring between two anchor strings (or the end of the string if that anchor is null)
+        /// takes a substring between two anchor strings (or the end of the string if that anchor  is null)
         /// </summary>
         /// <param name="value">a string</param>
         /// <param name="from">an optional string to search after</param>

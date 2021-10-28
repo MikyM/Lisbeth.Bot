@@ -15,21 +15,25 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Autofac;
+using System.Linq;
 
-namespace Lisbeth.Bot.Domain
+namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators
 {
-    /// <summary>
-    ///     Autofac container provider for use ONLY under special circumstances when you must use the service locator
-    ///     anti-pattern.
-    ///     For everything else use normal DI.
-    /// </summary>
-    public static class ContainerProvider
+    public class AsSplitQueryEvaluator : IEvaluator
     {
-        /// <summary>
-        ///     Autofac container for use ONLY under special circumstances when you must use the service locator anti-pattern.
-        ///     For everything else use normal DI.
-        /// </summary>
-        public static ILifetimeScope Container { get; set; }
+        private AsSplitQueryEvaluator()
+        {
+        }
+
+        public static AsSplitQueryEvaluator Instance { get; } = new();
+
+        public bool IsCriteriaEvaluator { get; } = true;
+
+        public IQueryable<T> GetQuery<T>(IQueryable<T> query, ISpecification<T> specification) where T : class
+        {
+            //if (specification.AsSplitQuery) query = query.AsSplitQuery();
+
+            return query;
+        }
     }
 }

@@ -20,7 +20,7 @@ using MikyM.Common.DataAccessLayer.Specifications;
 
 namespace Lisbeth.Bot.DataAccessLayer.Specifications.EmbedConfigEntitySpecifications
 {
-    public class ActiveWithEmbedCfgByIdOrNameSpecifications<T> : Specifications<T> where T : EmbedConfigEntity
+    public class ActiveWithEmbedCfgByIdOrNameSpecifications<T> : Specification<T> where T : EmbedConfigEntity
     {
         public ActiveWithEmbedCfgByIdOrNameSpecifications(long? id, string name, ulong? guildId = null)
         {

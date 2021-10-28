@@ -38,14 +38,14 @@ namespace Lisbeth.Bot.Application.Services.Database
 
         public async Task<(long Id, Mute FoundEntity)> AddOrExtendAsync(MuteReqDto req, bool shouldSave = false)
         {
-            if (req is null) throw new ArgumentNullException(nameof(req));
+            if (req  is null) throw new ArgumentNullException(nameof(req));
 
             var res = await _unitOfWork.GetRepository<Repository<Mute>>()
-                .GetBySpecificationsAsync(new Specifications<Mute>(x =>
+                .GetBySpecAsync(new Specification<Mute>(x =>
                     x.UserId == req.TargetUserId && x.GuildId == req.GuildId && !x.IsDisabled));
 
             var entity = res.FirstOrDefault();
-            if (entity is null) return (await base.AddAsync(req, shouldSave), null);
+            if (entity  is null) return (await base.AddAsync(req, shouldSave), null);
 
             if (entity.AppliedUntil > req.AppliedUntil) return (entity.Id, entity);
 
@@ -63,14 +63,14 @@ namespace Lisbeth.Bot.Application.Services.Database
 
         public async Task<Mute> DisableAsync(MuteDisableReqDto entry, bool shouldSave = false)
         {
-            if (entry is null) throw new ArgumentNullException(nameof(entry));
+            if (entry  is null) throw new ArgumentNullException(nameof(entry));
 
-            var res = await base.GetBySpecificationsAsync<Mute>(
-                new Specifications<Mute>(x =>
+            var res = await base.GetBySpecAsync<Mute>(
+                new Specification<Mute>(x =>
                     x.UserId == entry.TargetUserId && x.GuildId == entry.GuildId && !x.IsDisabled));
 
             var entity = res.FirstOrDefault();
-            if (entity is null) return null;
+            if (entity  is null) return null;
 
             base.BeginUpdate(entity);
             entity.IsDisabled = true;

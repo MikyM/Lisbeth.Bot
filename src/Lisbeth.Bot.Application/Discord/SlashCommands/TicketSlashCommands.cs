@@ -47,7 +47,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             [Option("target", "A user or a role to add")]
             SnowflakeObject target)
         {
-            if (target is null) throw new ArgumentNullException(nameof(target));
+            if (target  is null) throw new ArgumentNullException(nameof(target));
 
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
 

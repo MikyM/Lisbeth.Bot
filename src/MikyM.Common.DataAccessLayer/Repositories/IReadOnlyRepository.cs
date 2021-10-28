@@ -27,10 +27,24 @@ namespace MikyM.Common.DataAccessLayer.Repositories
     {
         ValueTask<TEntity> GetAsync(params object[] keyValues);
 
-        Task<IReadOnlyList<TEntity>> GetBySpecificationsAsync(PaginationFilter filter,
-            ISpecifications<TEntity> specifications = null);
+        Task<TEntity> GetSingleBySpecAsync<TSpec>(ISpecification<TEntity> specification = null)
+            where TSpec : ISpecification<TEntity>, ISingleResultSpecification;
 
-        Task<IReadOnlyList<TEntity>> GetBySpecificationsAsync(ISpecifications<TEntity> specifications = null);
-        Task<long> LongCountAsync(ISpecifications<TEntity> specifications = null);
+        Task<TProjectTo>
+            GetSingleBySpecAsync<TSpec, TProjectTo>(ISpecification<TEntity, TProjectTo> specification = null)
+            where TProjectTo : class where TSpec : ISpecification<TEntity, TProjectTo>, ISingleResultSpecification;
+
+        Task<IReadOnlyList<TEntity>> GetBySpecAsync(PaginationFilter filter,
+            ISpecification<TEntity> specification = null);
+
+        Task<IReadOnlyList<TProjectTo>> GetBySpecAsync<TProjectTo>(PaginationFilter filter,
+            ISpecification<TEntity, TProjectTo> specification = null) where TProjectTo : class;
+
+        Task<IReadOnlyList<TEntity>> GetBySpecAsync(ISpecification<TEntity> specification = null);
+
+        Task<IReadOnlyList<TProjectTo>> GetBySpecAsync<TProjectTo>(
+            ISpecification<TEntity, TProjectTo> specification = null) where TProjectTo : class;
+
+        Task<long> LongCountAsync(ISpecification<TEntity> specification = null);
     }
 }

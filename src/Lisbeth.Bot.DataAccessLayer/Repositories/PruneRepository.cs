@@ -18,12 +18,13 @@
 using Lisbeth.Bot.DataAccessLayer.Repositories.Interfaces;
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.DataAccessLayer.Repositories;
+using MikyM.Common.DataAccessLayer.Specifications.Evaluators;
 
 namespace Lisbeth.Bot.DataAccessLayer.Repositories
 {
     public class PruneRepository : Repository<Prune>, IPruneRepository
     {
-        public PruneRepository(LisbethBotDbContext ctx) : base(ctx)
+        public PruneRepository(LisbethBotDbContext context, ISpecificationEvaluator evaluator) : base(context, evaluator)
         {
         }
     }

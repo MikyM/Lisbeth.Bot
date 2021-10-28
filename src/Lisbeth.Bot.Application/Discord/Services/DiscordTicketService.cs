@@ -66,7 +66,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
         public async Task<DiscordMessageBuilder> OpenTicketAsync(TicketOpenReqDto req)
         {
-            if (req is null) throw new ArgumentNullException(nameof(req));
+            if (req  is null) throw new ArgumentNullException(nameof(req));
 
             DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
             DiscordMember owner = await guild.GetMemberAsync(req.OwnerId);
@@ -76,15 +76,15 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
         public async Task<DiscordMessageBuilder> OpenTicketAsync(DiscordInteraction intr, TicketOpenReqDto req)
         {
-            if (intr is null) throw new ArgumentNullException(nameof(intr));
-            if (req is null) throw new ArgumentNullException(nameof(req));
+            if (intr  is null) throw new ArgumentNullException(nameof(intr));
+            if (req  is null) throw new ArgumentNullException(nameof(req));
 
             return await OpenTicketAsync(intr.Guild, (DiscordMember) intr.User, req, intr);
         }
 
         public async Task<DiscordMessageBuilder> CloseTicketAsync(TicketCloseReqDto req)
         {
-            if (req is null) throw new ArgumentNullException(nameof(req));
+            if (req  is null) throw new ArgumentNullException(nameof(req));
 
             DiscordChannel target = null;
             DiscordMember requestingMember;
@@ -93,7 +93,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (req.Id.HasValue)
             {
                 ticket = await _ticketService.GetAsync<Ticket>(req.Id.Value);
-                if (ticket is null)
+                if (ticket  is null)
                     throw new NotFoundException(
                         $"Ticket with Id: {req.Id} doesn't exist in the database.");
 
@@ -102,10 +102,10 @@ namespace Lisbeth.Bot.Application.Discord.Services
             }
             else if (req.OwnerId.HasValue && req.GuildId.HasValue)
             {
-                var res = await _ticketService.GetBySpecificationsAsync<Ticket>(
+                var res = await _ticketService.GetBySpecAsync<Ticket>(
                     new TicketBaseGetSpecifications(null, req.OwnerId, req.GuildId, null, null, false, 1));
                 ticket = res.FirstOrDefault();
-                if (ticket is null)
+                if (ticket  is null)
                     throw new NotFoundException(
                         $"Opened ticket in guild with Id: {req.GuildId} and owner with Id: {req.OwnerId} doesn't exist in the database.");
 
@@ -114,10 +114,10 @@ namespace Lisbeth.Bot.Application.Discord.Services
             }
             else if (req.GuildSpecificId.HasValue && req.GuildId.HasValue)
             {
-                var res = await _ticketService.GetBySpecificationsAsync<Ticket>(
+                var res = await _ticketService.GetBySpecAsync<Ticket>(
                     new TicketBaseGetSpecifications(null, null, req.GuildId, null, req.GuildSpecificId, false, 1));
                 ticket = res.FirstOrDefault();
-                if (ticket is null)
+                if (ticket  is null)
                     throw new NotFoundException(
                         $"Opened ticket in guild with Id: {req.GuildId} and owner with Id: {req.OwnerId} doesn't exist in the database.");
 
@@ -156,15 +156,15 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
         public async Task<DiscordMessageBuilder> CloseTicketAsync(DiscordInteraction intr, TicketCloseReqDto req)
         {
-            if (intr is null) throw new ArgumentNullException(nameof(intr));
-            if (req is null) throw new ArgumentNullException(nameof(req));
+            if (intr  is null) throw new ArgumentNullException(nameof(intr));
+            if (req  is null) throw new ArgumentNullException(nameof(req));
 
             return await CloseTicketAsync(intr.Guild, intr.Channel, (DiscordMember) intr.User, req);
         }
 
         public async Task<DiscordMessageBuilder> ReopenTicketAsync(TicketReopenReqDto req)
         {
-            if (req is null) throw new ArgumentNullException(nameof(req));
+            if (req  is null) throw new ArgumentNullException(nameof(req));
 
             DiscordChannel target = null;
             DiscordMember requestingMember;
@@ -173,7 +173,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (req.Id.HasValue)
             {
                 ticket = await _ticketService.GetAsync<Ticket>(req.Id.Value);
-                if (ticket is null)
+                if (ticket  is null)
                     throw new NotFoundException(
                         $"Ticket with Id: {req.Id} doesn't exist in the database.");
 
@@ -182,10 +182,10 @@ namespace Lisbeth.Bot.Application.Discord.Services
             }
             else if (req.OwnerId.HasValue && req.GuildId.HasValue)
             {
-                var res = await _ticketService.GetBySpecificationsAsync<Ticket>(
+                var res = await _ticketService.GetBySpecAsync<Ticket>(
                     new TicketBaseGetSpecifications(null, req.OwnerId, req.GuildId, null, null, true, 1));
                 ticket = res.FirstOrDefault();
-                if (ticket is null)
+                if (ticket  is null)
                     throw new NotFoundException(
                         $"Closed ticket in guild with Id: {req.GuildId} and owner with Id: {req.OwnerId} doesn't exist in the database.");
 
@@ -194,10 +194,10 @@ namespace Lisbeth.Bot.Application.Discord.Services
             }
             else if (req.GuildSpecificId.HasValue && req.GuildId.HasValue)
             {
-                var res = await _ticketService.GetBySpecificationsAsync<Ticket>(
+                var res = await _ticketService.GetBySpecAsync<Ticket>(
                     new TicketBaseGetSpecifications(null, null, req.GuildId, null, req.GuildSpecificId, true, 1));
                 ticket = res.FirstOrDefault();
-                if (ticket is null)
+                if (ticket  is null)
                     throw new NotFoundException(
                         $"Closed ticket in guild with Id: {req.GuildId} and owner with Id: {req.OwnerId} doesn't exist in the database.");
 
@@ -236,15 +236,15 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
         public async Task<DiscordMessageBuilder> ReopenTicketAsync(DiscordInteraction intr, TicketReopenReqDto req)
         {
-            if (intr is null) throw new ArgumentNullException(nameof(intr));
-            if (req is null) throw new ArgumentNullException(nameof(req));
+            if (intr  is null) throw new ArgumentNullException(nameof(intr));
+            if (req  is null) throw new ArgumentNullException(nameof(req));
 
             return await ReopenTicketAsync(intr.Guild, intr.Channel, (DiscordMember) intr.User, req);
         }
 
         public async Task<DiscordEmbed> AddToTicketAsync(TicketAddReqDto req)
         {
-            if (req is null) throw new ArgumentNullException(nameof(req));
+            if (req  is null) throw new ArgumentNullException(nameof(req));
 
             DiscordMember targetMember = null;
             DiscordRole targetRole = null;
@@ -255,7 +255,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (req.Id.HasValue)
             {
                 ticket = await _ticketService.GetAsync<Ticket>(req.Id.Value);
-                if (ticket is null)
+                if (ticket  is null)
                     throw new NotFoundException(
                         $"Ticket with Id: {req.Id} doesn't exist in the database.");
 
@@ -264,10 +264,10 @@ namespace Lisbeth.Bot.Application.Discord.Services
             }
             else if (req.OwnerId.HasValue && req.GuildId.HasValue)
             {
-                var res = await _ticketService.GetBySpecificationsAsync<Ticket>(
+                var res = await _ticketService.GetBySpecAsync<Ticket>(
                     new TicketBaseGetSpecifications(null, req.OwnerId, req.GuildId, null, null, false, 1));
                 ticket = res.FirstOrDefault();
-                if (ticket is null)
+                if (ticket  is null)
                     throw new NotFoundException(
                         $"Opened ticket in guild with Id: {req.GuildId} and owner with Id: {req.OwnerId} doesn't exist in the database.");
 
@@ -276,10 +276,10 @@ namespace Lisbeth.Bot.Application.Discord.Services
             }
             else if (req.GuildSpecificId.HasValue && req.GuildId.HasValue)
             {
-                var res = await _ticketService.GetBySpecificationsAsync<Ticket>(
+                var res = await _ticketService.GetBySpecAsync<Ticket>(
                     new TicketBaseGetSpecifications(null, null, req.GuildId, null, req.GuildSpecificId, false, 1));
                 ticket = res.FirstOrDefault();
-                if (ticket is null)
+                if (ticket  is null)
                     throw new NotFoundException(
                         $"Opened ticket in guild with Id: {req.GuildId} and owner with Id: {req.OwnerId} doesn't exist in the database.");
 
@@ -331,14 +331,14 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 }
             }
 
-            return targetRole is null
+            return targetRole  is null
                 ? await AddToTicketAsync(guild, requestingMember, targetTicketChannel, req, targetMember)
                 : await AddToTicketAsync(guild, requestingMember, targetTicketChannel, req, null, targetRole);
         }
 
         public async Task<DiscordEmbed> AddToTicketAsync(InteractionContext ctx, TicketAddReqDto req)
         {
-            if (ctx is null) throw new ArgumentNullException(nameof(ctx));
+            if (ctx  is null) throw new ArgumentNullException(nameof(ctx));
 
             return await AddToTicketAsync(ctx.Guild, ctx.Member, ctx.Channel, req,
                 ctx.ResolvedUserMentions is not null
@@ -348,8 +348,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
         public async Task<DiscordEmbed> RemoveFromTicketAsync(InteractionContext ctx, TicketRemoveReqDto req)
         {
-            if (ctx is null) throw new ArgumentNullException(nameof(ctx));
-            if (req is null) throw new ArgumentNullException(nameof(req));
+            if (ctx  is null) throw new ArgumentNullException(nameof(ctx));
+            if (req  is null) throw new ArgumentNullException(nameof(req));
 
             return await RemoveFromTicketAsync(ctx.Guild, ctx.Member, ctx.Channel, req,
                 ctx.ResolvedUserMentions is not null
@@ -359,7 +359,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
         public async Task<DiscordEmbed> RemoveFromTicketAsync(TicketRemoveReqDto req)
         {
-            if (req is null) throw new ArgumentNullException(nameof(req));
+            if (req  is null) throw new ArgumentNullException(nameof(req));
 
             DiscordMember targetMember = null;
             DiscordRole targetRole = null;
@@ -370,7 +370,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (req.Id.HasValue)
             {
                 ticket = await _ticketService.GetAsync<Ticket>(req.Id.Value);
-                if (ticket is null)
+                if (ticket  is null)
                     throw new NotFoundException(
                         $"Ticket with Id: {req.Id} doesn't exist in the database.");
 
@@ -379,10 +379,10 @@ namespace Lisbeth.Bot.Application.Discord.Services
             }
             else if (req.OwnerId.HasValue && req.GuildId.HasValue)
             {
-                var res = await _ticketService.GetBySpecificationsAsync<Ticket>(
+                var res = await _ticketService.GetBySpecAsync<Ticket>(
                     new TicketBaseGetSpecifications(null, req.OwnerId, req.GuildId, null, null, false, 1));
                 ticket = res.FirstOrDefault();
-                if (ticket is null)
+                if (ticket  is null)
                     throw new NotFoundException(
                         $"Opened ticket in guild with Id: {req.GuildId} and owner with Id: {req.OwnerId} doesn't exist in the database.");
 
@@ -391,10 +391,10 @@ namespace Lisbeth.Bot.Application.Discord.Services
             }
             else if (req.GuildSpecificId.HasValue && req.GuildId.HasValue)
             {
-                var res = await _ticketService.GetBySpecificationsAsync<Ticket>(
+                var res = await _ticketService.GetBySpecAsync<Ticket>(
                     new TicketBaseGetSpecifications(null, null, req.GuildId, null, req.GuildSpecificId, false, 1));
                 ticket = res.FirstOrDefault();
-                if (ticket is null)
+                if (ticket  is null)
                     throw new NotFoundException(
                         $"Opened ticket in guild with Id: {req.GuildId} and guild specific Id: {req.GuildSpecificId} doesn't exist in the database.");
 
@@ -446,7 +446,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 }
             }
 
-            return targetRole is null
+            return targetRole  is null
                 ? await RemoveFromTicketAsync(guild, requestingMember, targetTicketChannel, req, targetMember)
                 : await RemoveFromTicketAsync(guild, requestingMember, targetTicketChannel, req, null, targetRole);
         }
@@ -457,11 +457,11 @@ namespace Lisbeth.Bot.Application.Discord.Services
             {
                 foreach (var (guildId, _) in _discord.Client.Guilds)
                 {
-                    var res = await _guildService.GetBySpecificationsAsync<Guild>(
+                    var res = await _guildService.GetBySpecAsync<Guild>(
                         new ActiveGuildByDiscordIdWithTicketingAndInactiveTicketsSpecifications(guildId));
                     var guildCfg = res.FirstOrDefault();
 
-                    if (guildCfg?.TicketingConfig?.CleanAfter is null) continue;
+                    if (guildCfg?.TicketingConfig?.CleanAfter  is null) continue;
                     if (guildCfg.Tickets.Count == 0) continue;
 
                     DiscordChannel closedCat;
@@ -481,7 +481,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                         if (guildCfg.Tickets.All(x => x.ChannelId != closedTicketChannel.Id)) continue;
 
                         var lastMessage = await closedTicketChannel.GetMessagesAsync(1);
-                        if (lastMessage is null || lastMessage.Count == 0) continue;
+                        if (lastMessage  is null || lastMessage.Count == 0) continue;
 
                         var timeDifference = DateTime.UtcNow.Subtract(lastMessage[0].Timestamp.UtcDateTime);
                         if (timeDifference.TotalHours >= guildCfg.TicketingConfig.CleanAfter.Value.Hours)
@@ -505,11 +505,11 @@ namespace Lisbeth.Bot.Application.Discord.Services
             {
                 foreach (var (guildId, guild) in _discord.Client.Guilds)
                 {
-                    var res = await _guildService.GetBySpecificationsAsync<Guild>(
+                    var res = await _guildService.GetBySpecAsync<Guild>(
                         new ActiveGuildByDiscordIdWithTicketingAndTicketsSpecifications(guildId));
                     var guildCfg = res.FirstOrDefault();
 
-                    if (guildCfg?.TicketingConfig?.CloseAfter is null) continue;
+                    if (guildCfg?.TicketingConfig?.CloseAfter  is null) continue;
                     if (guildCfg.Tickets.Count == 0) continue;
 
                     DiscordChannel openedCat;
@@ -530,7 +530,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
                         var lastMessage = await openedTicketChannel.GetMessagesAsync(1);
                         var msg = lastMessage?.FirstOrDefault();
-                        if (msg is null) continue;
+                        if (msg  is null) continue;
 
                         if (!((DiscordMember) msg.Author).Permissions.HasPermission(Permissions.BanMembers)) continue;
 
@@ -561,21 +561,21 @@ namespace Lisbeth.Bot.Application.Discord.Services
         private async Task<DiscordMessageBuilder> OpenTicketAsync(DiscordGuild guild, DiscordMember owner,
             TicketOpenReqDto req, DiscordInteraction intr = null)
         {
-            if (guild is null) throw new ArgumentNullException(nameof(guild));
-            if (owner is null) throw new ArgumentNullException(nameof(owner));
-            if (req is null) throw new ArgumentNullException(nameof(req));
+            if (guild  is null) throw new ArgumentNullException(nameof(guild));
+            if (owner  is null) throw new ArgumentNullException(nameof(owner));
+            if (req  is null) throw new ArgumentNullException(nameof(req));
 
             if (owner.Guild.Id != guild.Id) throw new ArgumentException(nameof(owner));
 
             var guildRes =
-                await _guildService.GetBySpecificationsAsync<Guild>(
+                await _guildService.GetBySpecAsync<Guild>(
                     new ActiveGuildByDiscordIdWithTicketingSpecifications(guild.Id));
             var guildCfg = guildRes.FirstOrDefault();
 
-            if (guildCfg is null)
+            if (guildCfg  is null)
                 throw new NotFoundException($"Guild with Id:{guild.Id} doesn't exist in the database.");
 
-            if (guildCfg.TicketingConfig is null)
+            if (guildCfg.TicketingConfig  is null)
                 throw new DisabledEntityException($"Guild with Id:{guild.Id} doesn't have ticketing enabled.");
 
             req.GuildSpecificId = guildCfg.TicketingConfig.LastTicketId + 1;
@@ -585,7 +585,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             var ticket = await _ticketService.OpenAsync(req);
 
-            if (ticket is null)
+            if (ticket  is null)
             {
                 var failEmbed = new DiscordEmbedBuilder();
                 failEmbed.WithColor(new DiscordColor(guildCfg.EmbedHexColor));
@@ -686,7 +686,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                         continue;
                     }
 
-                    if (role is null) continue;
+                    if (role  is null) continue;
 
                     roleIds.Add(role.Id);
 
@@ -707,31 +707,31 @@ namespace Lisbeth.Bot.Application.Discord.Services
         private async Task<DiscordMessageBuilder> CloseTicketAsync(DiscordGuild guild, DiscordChannel target,
             DiscordMember requestingMember, TicketCloseReqDto req)
         {
-            if (guild is null) throw new ArgumentNullException(nameof(guild));
-            if (target is null) throw new ArgumentNullException(nameof(target));
-            if (requestingMember is null) throw new ArgumentNullException(nameof(requestingMember));
-            if (req is null) throw new ArgumentNullException(nameof(req));
+            if (guild  is null) throw new ArgumentNullException(nameof(guild));
+            if (target  is null) throw new ArgumentNullException(nameof(target));
+            if (requestingMember  is null) throw new ArgumentNullException(nameof(requestingMember));
+            if (req  is null) throw new ArgumentNullException(nameof(req));
 
             if (requestingMember.Guild.Id != guild.Id) throw new ArgumentException(nameof(requestingMember));
             if (target.Guild.Id != guild.Id) throw new ArgumentException(nameof(target));
 
             var guildRes =
-                await _guildService.GetBySpecificationsAsync<Guild>(
+                await _guildService.GetBySpecAsync<Guild>(
                     new ActiveGuildByDiscordIdWithTicketingSpecifications(guild.Id));
             var guildCfg = guildRes.FirstOrDefault();
 
-            if (guildCfg is null)
+            if (guildCfg  is null)
                 throw new NotFoundException($"Guild with Id:{guild.Id} doesn't exist in the database.");
 
-            if (guildCfg.TicketingConfig is null)
+            if (guildCfg.TicketingConfig  is null)
                 throw new DisabledEntityException($"Guild with Id:{guild.Id} doesn't have ticketing enabled.");
 
-            var res = await _ticketService.GetBySpecificationsAsync<Ticket>(
+            var res = await _ticketService.GetBySpecAsync<Ticket>(
                 new TicketBaseGetSpecifications(req.Id, req.OwnerId, req.GuildId, req.ChannelId, req.GuildSpecificId));
 
             var ticket = res.FirstOrDefault();
 
-            if (ticket is null) throw new NotFoundException($"Ticket with channel Id: {target.Id} doesn't exist.");
+            if (ticket  is null) throw new NotFoundException($"Ticket with channel Id: {target.Id} doesn't exist.");
 
             if (ticket.IsDisabled)
                 throw new DisabledEntityException(
@@ -808,7 +808,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             req.ClosedMessageId = closeMsg.Id;
             await _ticketService.CloseAsync(req, ticket);
 
-            if (guildCfg.TicketingConfig.LogChannelId is null || ticket.IsPrivate) return msgBuilder;
+            if (guildCfg.TicketingConfig.LogChannelId  is null || ticket.IsPrivate) return msgBuilder;
 
             _ = _asyncExecutor.ExecuteAsync<IDiscordChatExportService>(async x => await x.ExportToHtmlAsync(guild,
                 target, requestingMember,
@@ -820,31 +820,31 @@ namespace Lisbeth.Bot.Application.Discord.Services
         private async Task<DiscordMessageBuilder> ReopenTicketAsync(DiscordGuild guild, DiscordChannel target,
             DiscordMember requestingMember, TicketReopenReqDto req)
         {
-            if (guild is null) throw new ArgumentNullException(nameof(guild));
-            if (target is null) throw new ArgumentNullException(nameof(target));
-            if (requestingMember is null) throw new ArgumentNullException(nameof(requestingMember));
-            if (req is null) throw new ArgumentNullException(nameof(req));
+            if (guild  is null) throw new ArgumentNullException(nameof(guild));
+            if (target  is null) throw new ArgumentNullException(nameof(target));
+            if (requestingMember  is null) throw new ArgumentNullException(nameof(requestingMember));
+            if (req  is null) throw new ArgumentNullException(nameof(req));
 
             if (requestingMember.Guild.Id != guild.Id) throw new ArgumentException(nameof(requestingMember));
             if (target.Guild.Id != guild.Id) throw new ArgumentException(nameof(target));
 
             var guildRes =
-                await _guildService.GetBySpecificationsAsync<Guild>(
+                await _guildService.GetBySpecAsync<Guild>(
                     new ActiveGuildByDiscordIdWithTicketingSpecifications(guild.Id));
             var guildCfg = guildRes.FirstOrDefault();
 
-            if (guildCfg is null)
+            if (guildCfg  is null)
                 throw new NotFoundException($"Guild with Id:{guild.Id} doesn't exist in the database.");
 
-            if (guildCfg.TicketingConfig is null)
+            if (guildCfg.TicketingConfig  is null)
                 throw new DisabledEntityException($"Guild with Id:{guild.Id} doesn't have ticketing enabled.");
 
-            var res = await _ticketService.GetBySpecificationsAsync<Ticket>(
+            var res = await _ticketService.GetBySpecAsync<Ticket>(
                 new TicketBaseGetSpecifications(req.Id, req.OwnerId, req.GuildId, req.ChannelId, req.GuildSpecificId,
                     true));
             var ticket = res.FirstOrDefault();
 
-            if (ticket is null) throw new NotFoundException($"Ticket with channel Id: {target.Id} doesn't exist.");
+            if (ticket  is null) throw new NotFoundException($"Ticket with channel Id: {target.Id} doesn't exist.");
 
             if (!ticket.IsDisabled)
                 throw new ArgumentException(
@@ -917,39 +917,39 @@ namespace Lisbeth.Bot.Application.Discord.Services
             DiscordChannel targetTicketChannel, TicketAddReqDto req, DiscordMember targetMember = null,
             DiscordRole targetRole = null)
         {
-            if (guild is null) throw new ArgumentNullException(nameof(guild));
-            if (req is null) throw new ArgumentNullException(nameof(req));
-            if (targetTicketChannel is null) throw new ArgumentNullException(nameof(targetTicketChannel));
-            if (requestingMember is null) throw new ArgumentNullException(nameof(requestingMember));
-            if (targetRole is null && targetMember is null)
+            if (guild  is null) throw new ArgumentNullException(nameof(guild));
+            if (req  is null) throw new ArgumentNullException(nameof(req));
+            if (targetTicketChannel  is null) throw new ArgumentNullException(nameof(targetTicketChannel));
+            if (requestingMember  is null) throw new ArgumentNullException(nameof(requestingMember));
+            if (targetRole  is null && targetMember  is null)
                 throw new ArgumentException($"Both {nameof(targetRole)} and {nameof(targetMember)} were null.");
 
             if (requestingMember.Guild.Id != guild.Id) throw new ArgumentException(nameof(requestingMember));
             if (targetTicketChannel.Guild.Id != guild.Id) throw new ArgumentException(nameof(targetTicketChannel));
 
             var guildRes =
-                await _guildService.GetBySpecificationsAsync<Guild>(
+                await _guildService.GetBySpecAsync<Guild>(
                     new ActiveGuildByDiscordIdWithTicketingSpecifications(guild.Id));
             var guildCfg = guildRes.FirstOrDefault();
 
-            if (guildCfg is null)
+            if (guildCfg  is null)
                 throw new NotFoundException($"Guild with Id:{guild.Id} doesn't exist in the database.");
 
-            if (guildCfg.TicketingConfig is null)
+            if (guildCfg.TicketingConfig  is null)
                 throw new DisabledEntityException($"Guild with Id:{guild.Id} doesn't have ticketing enabled.");
 
-            var res = await _ticketService.GetBySpecificationsAsync<Ticket>(
+            var res = await _ticketService.GetBySpecAsync<Ticket>(
                 new TicketBaseGetSpecifications(req.Id, req.OwnerId, req.GuildId, req.ChannelId, req.GuildSpecificId));
 
             var ticket = res.FirstOrDefault();
 
-            if (ticket is null)
+            if (ticket  is null)
                 throw new NotFoundException($"Ticket with channel Id: {targetTicketChannel.Id} doesn't exist.");
 
             if (!requestingMember.Permissions.HasPermission(Permissions.BanMembers))
                 throw new DiscordNotAuthorizedException("Requesting member doesn't have moderator rights.");
 
-            if (targetRole is null)
+            if (targetRole  is null)
             {
                 await targetTicketChannel.AddOverwriteAsync(targetMember, Permissions.AccessChannels);
                 await _ticketService.SetAddedUsersAsync(ticket, targetTicketChannel.Users.Select(x => x.Id));
@@ -973,7 +973,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                         continue;
                     }
 
-                    if (role is null) continue;
+                    if (role  is null) continue;
 
                     roleIds.Add(role.Id);
 
@@ -987,7 +987,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             var embed = new DiscordEmbedBuilder();
 
             embed.WithColor(new DiscordColor(guildCfg.EmbedHexColor));
-            embed.WithAuthor($"Ticket moderation | Add {(targetRole is null ? "member" : "role")} action log");
+            embed.WithAuthor($"Ticket moderation | Add {(targetRole  is null ? "member" : "role")} action log");
             embed.AddField("Moderator", requestingMember.Mention);
             embed.AddField("Added", $"{targetRole?.Mention ?? targetMember?.Mention}");
             embed.WithFooter($"Ticket Id: {ticket.GuildSpecificId}");
@@ -999,39 +999,39 @@ namespace Lisbeth.Bot.Application.Discord.Services
             DiscordChannel targetTicketChannel, TicketRemoveReqDto req, DiscordMember targetMember = null,
             DiscordRole targetRole = null)
         {
-            if (req is null) throw new ArgumentNullException(nameof(req));
-            if (guild is null) throw new ArgumentNullException(nameof(guild));
-            if (targetTicketChannel is null) throw new ArgumentNullException(nameof(targetTicketChannel));
-            if (requestingMember is null) throw new ArgumentNullException(nameof(requestingMember));
-            if (targetRole is null && targetMember is null)
+            if (req  is null) throw new ArgumentNullException(nameof(req));
+            if (guild  is null) throw new ArgumentNullException(nameof(guild));
+            if (targetTicketChannel  is null) throw new ArgumentNullException(nameof(targetTicketChannel));
+            if (requestingMember  is null) throw new ArgumentNullException(nameof(requestingMember));
+            if (targetRole  is null && targetMember  is null)
                 throw new ArgumentException($"Both {nameof(targetRole)} and {nameof(targetMember)} were null.");
 
             if (requestingMember.Guild.Id != guild.Id) throw new ArgumentException(nameof(requestingMember));
             if (targetTicketChannel.Guild.Id != guild.Id) throw new ArgumentException(nameof(targetTicketChannel));
 
             var guildRes =
-                await _guildService.GetBySpecificationsAsync<Guild>(
+                await _guildService.GetBySpecAsync<Guild>(
                     new ActiveGuildByDiscordIdWithTicketingSpecifications(guild.Id));
             var guildCfg = guildRes.FirstOrDefault();
 
-            if (guildCfg is null)
+            if (guildCfg  is null)
                 throw new NotFoundException($"Guild with Id:{guild.Id} doesn't exist in the database.");
 
-            if (guildCfg.TicketingConfig is null)
+            if (guildCfg.TicketingConfig  is null)
                 throw new DisabledEntityException($"Guild with Id:{guild.Id} doesn't have ticketing enabled.");
 
-            var res = await _ticketService.GetBySpecificationsAsync<Ticket>(
+            var res = await _ticketService.GetBySpecAsync<Ticket>(
                 new TicketBaseGetSpecifications(req.Id, req.OwnerId, req.GuildId, req.ChannelId, req.GuildSpecificId));
 
             var ticket = res.FirstOrDefault();
 
-            if (ticket is null)
+            if (ticket  is null)
                 throw new NotFoundException($"Ticket with channel Id: {targetTicketChannel.Id} doesn't exist.");
 
             if (!requestingMember.Permissions.HasPermission(Permissions.BanMembers))
                 throw new DiscordNotAuthorizedException("Requesting member doesn't have moderator rights.");
 
-            if (targetRole is null)
+            if (targetRole  is null)
             {
                 await targetTicketChannel.AddOverwriteAsync(targetMember, deny: Permissions.AccessChannels);
                 await _ticketService.SetAddedUsersAsync(ticket, targetTicketChannel.Users.Select(x => x.Id));
@@ -1056,7 +1056,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                         continue;
                     }
 
-                    if (role is null) continue;
+                    if (role  is null) continue;
 
                     roleIds.Add(role.Id);
 
@@ -1070,7 +1070,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             var embed = new DiscordEmbedBuilder();
 
             embed.WithColor(new DiscordColor(guildCfg.EmbedHexColor));
-            embed.WithAuthor($"Ticket moderation | Remove {(targetRole is null ? "member" : "role")} action log");
+            embed.WithAuthor($"Ticket moderation | Remove {(targetRole  is null ? "member" : "role")} action log");
             embed.AddField("Moderator", requestingMember.Mention);
             embed.AddField("Removed", $"{targetRole?.Mention ?? targetMember?.Mention}");
             embed.WithFooter($"Ticket Id: {ticket.GuildSpecificId}");

@@ -51,7 +51,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
 
             DiscordEmbed embed;
 
-            if (user is null && id == "") throw new ArgumentException("You must supply either a user or a user Id");
+            if (user  is null && id == "") throw new ArgumentException("You must supply either a user or a user Id");
 
             var validId = user?.Id ?? ulong.Parse(id);
 
@@ -61,7 +61,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
 
                     DateTime? liftsOn = length.ToDateTimeDuration().FinalDateFromToday;
 
-                    if (liftsOn is null)
+                    if (liftsOn  is null)
                         throw new ArgumentException($"Parameter {nameof(length)} can't be parsed to a known duration.");
 
                     var banReq = new BanReqDto(validId, ctx.Guild.Id, ctx.User.Id, liftsOn.Value, reason);

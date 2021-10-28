@@ -42,7 +42,7 @@ namespace Lisbeth.Bot.Application.Services
         {
             await Task.Delay(1000);
 
-            var res = await _banService.GetBySpecificationsAsync<Ban>(
+            var res = await _banService.GetBySpecAsync<Ban>(
                 new BanBaseGetSpecifications(null, targetId, guildId));
 
             var ban = res.FirstOrDefault();
@@ -57,12 +57,12 @@ namespace Lisbeth.Bot.Application.Services
         {
             await Task.Delay(1000);
 
-            var res = await _banService.GetBySpecificationsAsync<Ban>(
+            var res = await _banService.GetBySpecAsync<Ban>(
                 new BanBaseGetSpecifications(null, targetId, guildId));
 
             var ban = res.FirstOrDefault();
 
-            if (ban is null) return;
+            if (ban  is null) return;
 
             await _banService.DisableAsync(new BanDisableReqDto(targetId, guildId, requestedOnBehalfOfId));
         }

@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Autofac;
 using Lisbeth.Bot.Domain;
+using MikyM.Common.Domain;
 using VimeoDotNet;
 using VimeoDotNet.Net;
 
