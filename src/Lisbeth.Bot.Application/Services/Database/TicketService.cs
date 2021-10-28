@@ -42,32 +42,31 @@ namespace Lisbeth.Bot.Application.Services.Database
 
         public async Task CheckForDeletedTicketChannelAsync(ulong channelId, ulong guildId, ulong requestedOnBehalfOfId)
         {
-            var res = await GetBySpecAsync<Ticket>(
+            var ticket = await base.GetSingleBySpecAsync<Ticket>(
                 new TicketBaseGetSpecifications(null, null, guildId, channelId, null, false, 1));
-
-            var ticket = res.FirstOrDefault();
-
+            
             if (ticket  is null) return;
 
             var req = new TicketCloseReqDto(ticket.Id, ticket.UserId, ticket.GuildId, ticket.ChannelId,
                 requestedOnBehalfOfId);
-            await CloseAsync(req, ticket);
+            await this.CloseAsync(req, ticket);
         }
 
-        public async Task<Ticket> CloseAsync(TicketCloseReqDto req)
+        public async Task<Ticket> CloseAsync(TicketCloseReqDto req, bool shouldSave = false)
         {
             if (req  is null) throw new ArgumentNullException(nameof(req));
 
-            var res = await GetBySpecAsync<Ticket>(new TicketBaseGetSpecifications(req.Id, req.OwnerId,
+            var ticket = await base.GetSingleBySpecAsync<Ticket>(new TicketBaseGetSpecifications(req.Id, req.OwnerId,
                 req.GuildId, req.ChannelId, req.GuildSpecificId));
 
-            var ticket = res.FirstOrDefault();
             if (ticket  is null) return null;
 
-            BeginUpdate(ticket);
+            base.BeginUpdate(ticket);
             ticket.ClosedById = req.RequestedById;
             ticket.ClosedOn = DateTime.UtcNow;
             ticket.IsDisabled = true;
+
+            if (shouldSave) await base.CommitAsync();
 
             return ticket;
         }
@@ -76,13 +75,13 @@ namespace Lisbeth.Bot.Application.Services.Database
         {
             if (req  is null) throw new ArgumentNullException(nameof(req));
 
-            BeginUpdate(ticket);
+            base.BeginUpdate(ticket);
             ticket.ClosedById = req.RequestedById;
             ticket.ClosedOn = DateTime.UtcNow;
             ticket.IsDisabled = true;
             ticket.MessageCloseId = req.ClosedMessageId;
 
-            await CommitAsync();
+            await base.CommitAsync();
 
             return ticket;
         }
@@ -91,29 +90,27 @@ namespace Lisbeth.Bot.Application.Services.Database
         {
             if (req  is null) throw new ArgumentNullException(nameof(req));
 
-            var res = await GetBySpecAsync<Ticket>(
+            var ticket = await base.GetSingleBySpecAsync<Ticket>(
                 new TicketBaseGetSpecifications(null, req.OwnerId, req.GuildId));
-
-            var ticket = res.FirstOrDefault();
             if (ticket is not null) return null;
 
-            var id = await AddAsync(req, true);
+            var id = await base.AddAsync(req, true);
 
-            return await GetAsync<Ticket>(id);
+            return await base.GetAsync<Ticket>(id);
         }
 
         public async Task<Ticket> ReopenAsync(TicketReopenReqDto req, Ticket ticket)
         {
             if (req  is null) throw new ArgumentNullException(nameof(req));
 
-            BeginUpdate(ticket);
+            base.BeginUpdate(ticket);
             ticket.ReopenedById = req.RequestedById;
             ticket.ReopenedOn = DateTime.UtcNow;
             ticket.IsDisabled = false;
             ticket.MessageCloseId = null;
             ticket.MessageReopenId = req.ReopenMessageId;
 
-            await CommitAsync();
+            await base.CommitAsync();
 
             return ticket;
         }
@@ -122,20 +119,19 @@ namespace Lisbeth.Bot.Application.Services.Database
         {
             if (req  is null) throw new ArgumentNullException(nameof(req));
 
-            var res = await GetBySpecAsync<Ticket>(new TicketBaseGetSpecifications(req.Id, req.OwnerId,
+            var ticket = await base.GetSingleBySpecAsync<Ticket>(new TicketBaseGetSpecifications(req.Id, req.OwnerId,
                 req.GuildId, req.ChannelId, req.GuildSpecificId, true));
-            var ticket = res.FirstOrDefault();
 
             if (ticket  is null) return null;
 
-            BeginUpdate(ticket);
+            base.BeginUpdate(ticket);
             ticket.ReopenedById = req.RequestedById;
             ticket.ReopenedOn = DateTime.UtcNow;
             ticket.IsDisabled = false;
             ticket.MessageCloseId = null;
             ticket.MessageReopenId = req.ReopenMessageId;
 
-            await CommitAsync();
+            await base.CommitAsync();
 
             return ticket;
         }
@@ -149,7 +145,7 @@ namespace Lisbeth.Bot.Application.Services.Database
 
             ticket.AddedUserIds = discordMembers;
 
-            if (shouldSave) await CommitAsync();
+            if (shouldSave) await base.CommitAsync();
         }
 
         public async Task SetAddedRolesAsync(Ticket ticket, IEnumerable<ulong> roleIds, bool shouldSave = false)
@@ -161,7 +157,7 @@ namespace Lisbeth.Bot.Application.Services.Database
 
             ticket.AddedRoleIds = discordRoles;
 
-            if (shouldSave) await CommitAsync();
+            if (shouldSave) await base.CommitAsync();
         }
 
         public async Task CheckAndSetPrivacyAsync(Ticket ticket, DiscordGuild guild)
@@ -169,13 +165,13 @@ namespace Lisbeth.Bot.Application.Services.Database
             if (ticket  is null) throw new ArgumentNullException(nameof(ticket));
             if (guild  is null) throw new ArgumentNullException(nameof(guild));
 
-            var isPrivate = await IsTicketPrivateAsync(ticket, guild);
+            var isPrivate = await this.IsTicketPrivateAsync(ticket, guild);
 
             if (isPrivate == ticket.IsPrivate) return;
 
             ticket.IsPrivate = isPrivate;
 
-            await CommitAsync();
+            await base.CommitAsync();
         }
 
         public async Task<bool> IsTicketPrivateAsync(Ticket ticket, DiscordGuild guild)

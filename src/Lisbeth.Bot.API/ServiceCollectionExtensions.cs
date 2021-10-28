@@ -101,8 +101,6 @@ namespace Lisbeth.Bot.API
                 options.UsePostgreSqlStorage(
                     "User ID=lisbethbot;Password=lisbethbot;Host=localhost;Port=5438;Database=lisbeth_bot_hangfire_test;",
                     new PostgreSqlStorageOptions {QueuePollInterval = TimeSpan.FromSeconds(15)});
-/*                options.UseMemoryStorage(
-                    new MemoryStorageOptions {JobExpirationCheckInterval = TimeSpan.FromMinutes(1)});*/
                 options.UseFilter(new PreserveOriginalQueueAttribute());
                 options.UseFilter(new QueueFilter());
             });
@@ -127,7 +125,7 @@ namespace Lisbeth.Bot.API
         {
             var key = configuration.GetValue<string>("ApiKey");
             services.AddAuthentication(ApiKeyDefaults.AuthenticationScheme)
-                .AddApiKeyInAuthorizationHeader(options =>
+                .AddApiKeyInHeaderOrQueryParams(options =>
                 {
                     options.Realm = "Lisbeth.Bot";
                     options.KeyName = ApiKeyDefaults.AuthenticationScheme;
@@ -243,7 +241,6 @@ namespace Lisbeth.Bot.API
         {
             services.AddFluentValidation(options =>
             {
-                //options.RegisterValidatorsFromAssemblyContaining<PersonValidator>();
                 options.DisableDataAnnotationsValidation = true;
                 options.AutomaticValidationEnabled = false;
                 options.ImplicitlyValidateChildProperties = true;

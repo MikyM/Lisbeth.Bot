@@ -36,7 +36,7 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Builders
 
         public static ISpecificationBuilder<T> GroupBy<T>(
             this ISpecificationBuilder<T> specificationBuilder,
-            Expression<Func<T, bool>> criteria) where T : class
+            Expression<Func<T, object>> criteria) where T : class
         {
             specificationBuilder.Specification.GroupByExpression = criteria;
 

@@ -16,6 +16,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using AutoMapper;
+using Hangfire.Annotations;
 using Lisbeth.Bot.Application.Services.Interfaces.Database;
 using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.Domain.Entities;
@@ -24,6 +25,7 @@ using MikyM.Common.DataAccessLayer.UnitOfWork;
 
 namespace Lisbeth.Bot.Application.Services.Database
 {
+    [UsedImplicitly]
     public class GuildService : CrudService<Guild, LisbethBotDbContext>, IGuildService
     {
         public GuildService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> ctx) : base(mapper, ctx)

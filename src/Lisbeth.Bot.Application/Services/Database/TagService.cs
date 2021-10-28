@@ -42,22 +42,21 @@ namespace Lisbeth.Bot.Application.Services.Database
             Tag tag;
             if (req.Id.HasValue)
             {
-                tag = await GetAsync<Tag>(req.Id.Value);
+                tag = await base.GetAsync<Tag>(req.Id.Value);
             }
             else if (req.Name is not null && req.Name != "")
             {
-                var res = await GetBySpecAsync<Tag>(new Specification<Tag>(x => x.Name == req.Name && x.GuildId == req.GuildId));
-                tag = res.FirstOrDefault();
+                tag = await base.GetSingleBySpecAsync<Tag>(new Specification<Tag>(x => x.Name == req.Name && x.GuildId == req.GuildId));
             }
             else throw new ArgumentException("Invalid tag Id/Name was provided.");
 
             if (tag  is null) throw new ArgumentException("Tag doesn't exist.");
             if (tag.IsDisabled) throw new ArgumentException("Can't update embed config for a disabled tag, enable the tag first.");
 
-            BeginUpdate(tag);
+            base.BeginUpdate(tag);
             tag.EmbedConfig = _mapper.Map<Tag>(req).EmbedConfig;
             
-            if(shouldSave) await CommitAsync();
+            if(shouldSave) await base.CommitAsync();
         }
 
         public async Task DisableAsync(TagDisableReqDto req, bool shouldSave = false)
@@ -65,22 +64,21 @@ namespace Lisbeth.Bot.Application.Services.Database
             Tag tag;
             if (req.Id.HasValue)
             {
-                tag = await GetAsync<Tag>(req.Id.Value);
+                tag = await base.GetAsync<Tag>(req.Id.Value);
             }
             else if (req.Name is not null && req.Name != "")
             {
-                var res = await GetBySpecAsync<Tag>(new Specification<Tag>(x => x.Name == req.Name && x.GuildId == req.GuildId));
-                tag = res.FirstOrDefault();
+                tag = await base.GetSingleBySpecAsync<Tag>(new Specification<Tag>(x => x.Name == req.Name && x.GuildId == req.GuildId));
             }
             else throw new ArgumentException("Invalid tag Id/Name was provided.");
 
             if (tag  is null) throw new ArgumentException("Tag doesn't exist.");
             if (tag.IsDisabled) return;
 
-            BeginUpdate(tag);
+            base.BeginUpdate(tag);
             tag.IsDisabled = true;
 
-            if (shouldSave) await CommitAsync();
+            if (shouldSave) await base.CommitAsync();
         }
 
         // enable to do

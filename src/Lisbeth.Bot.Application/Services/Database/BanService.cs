@@ -26,9 +26,11 @@ using MikyM.Common.DataAccessLayer.UnitOfWork;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 
 namespace Lisbeth.Bot.Application.Services.Database
 {
+    [UsedImplicitly]
     public class BanService : CrudService<Ban, LisbethBotDbContext>, IBanService
     {
         public BanService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
@@ -39,22 +41,21 @@ namespace Lisbeth.Bot.Application.Services.Database
         {
             if (req  is null) throw new ArgumentNullException(nameof(req));
 
-            var res = await GetBySpecAsync<Ban>(new Specification<Ban>(x =>
+            var entity = await base.GetSingleBySpecAsync<Ban>(new Specification<Ban>(x =>
                     x.UserId == req.TargetUserId && x.GuildId == req.GuildId && !x.IsDisabled));
 
-            var entity = res.FirstOrDefault();
             if (entity  is null) return (await base.AddAsync(req, shouldSave), null);
 
             if (entity.AppliedUntil > req.AppliedUntil) return (entity.Id, entity);
 
             var shallowCopy = entity.ShallowCopy();
 
-            BeginUpdate(entity);
+            base.BeginUpdate(entity);
             entity.AppliedById = req.RequestedOnBehalfOfId;
             entity.AppliedUntil = req.AppliedUntil;
             entity.Reason = req.Reason;
 
-            if (shouldSave) await CommitAsync();
+            if (shouldSave) await base.CommitAsync();
 
             return (entity.Id, shallowCopy);
         }
@@ -63,19 +64,17 @@ namespace Lisbeth.Bot.Application.Services.Database
         {
             if (entry  is null) throw new ArgumentNullException(nameof(entry));
 
-            var res = await GetBySpecAsync<Ban>(
+            var entity = await base.GetSingleBySpecAsync<Ban>(
                 new Specification<Ban>(x =>
                     x.UserId == entry.TargetUserId && x.GuildId == entry.GuildId && !x.IsDisabled));
-
-            var entity = res.FirstOrDefault();
             if (entity  is null) return null;
 
-            BeginUpdate(entity);
+            base.BeginUpdate(entity);
             entity.IsDisabled = true;
             entity.LiftedOn = DateTime.UtcNow;
             entity.LiftedById = entry.RequestedOnBehalfOfId;
 
-            if (shouldSave) await CommitAsync();
+            if (shouldSave) await base.CommitAsync();
 
             return entity;
         }

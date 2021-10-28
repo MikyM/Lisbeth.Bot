@@ -50,12 +50,13 @@ namespace Lisbeth.Bot.Application.Helpers
                     var service = scope.Resolve<T>();
                     await func(service);
                 })
-                .ContinueWith(x => _logger.LogError(x.Exception.GetFullMessage()),
+                .ContinueWith(x => _lifetimeScope.Resolve<ILogger<T>>().LogError(x.Exception.GetFullMessage()),
                     TaskContinuationOptions.OnlyOnFaulted);
         }
 
         public Task ExecuteAsync(Func<Task> func)
         {
+            Type t = func.GetType();
             return Task.Run(async () =>
                 {
                     using var scope = _lifetimeScope.BeginLifetimeScope();

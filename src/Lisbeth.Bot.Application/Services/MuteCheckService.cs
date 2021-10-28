@@ -45,9 +45,8 @@ namespace Lisbeth.Bot.Application.Services
         {
             await Task.Delay(1000);
 
-            var res = await _guildService.GetBySpecAsync<Guild>(
+            var guild = await _guildService.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithModerationSpecifications(guildId));
-            var guild = res.FirstOrDefault();
 
             if (guild  is null) return;
 

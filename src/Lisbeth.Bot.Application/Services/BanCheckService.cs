@@ -15,16 +15,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Services.Interfaces;
 using Lisbeth.Bot.Application.Services.Interfaces.Database;
-using Lisbeth.Bot.DataAccessLayer.Specifications.MuteSpecifications;
+using Lisbeth.Bot.DataAccessLayer.Specifications.BanSpecifications;
 using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.Entities;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
-using Lisbeth.Bot.DataAccessLayer.Specifications.BanSpecifications;
 
 namespace Lisbeth.Bot.Application.Services
 {
@@ -42,10 +41,8 @@ namespace Lisbeth.Bot.Application.Services
         {
             await Task.Delay(1000);
 
-            var res = await _banService.GetBySpecAsync<Ban>(
+            var ban = await _banService.GetSingleBySpecAsync<Ban>(
                 new BanBaseGetSpecifications(null, targetId, guildId));
-
-            var ban = res.FirstOrDefault();
 
             if (ban is not null) return;
 
@@ -57,10 +54,8 @@ namespace Lisbeth.Bot.Application.Services
         {
             await Task.Delay(1000);
 
-            var res = await _banService.GetBySpecAsync<Ban>(
+            var ban = await _banService.GetSingleBySpecAsync<Ban>(
                 new BanBaseGetSpecifications(null, targetId, guildId));
-
-            var ban = res.FirstOrDefault();
 
             if (ban  is null) return;
 

@@ -39,11 +39,14 @@ namespace Lisbeth.Bot.Application.Services
 
             if (queryParams is not null)
             {
-                var query = queryParams.Where(x => x.Key.ToLower() != "pagesize" && x.Key.ToLower() != "pagenumber");
+                var query = queryParams.Where(x =>
+                    !string.Equals(x.Key.ToLower(), "pagesize", StringComparison.InvariantCultureIgnoreCase) &&
+                    !string.Equals(x.Key.ToLower(), "pagenumber", StringComparison.InvariantCultureIgnoreCase));
 
-                endpointUri = query.Aggregate(endpointUri, (currentOuter, param) =>
-                    param.Value.Aggregate(currentOuter, (currentInner, multiParam) =>
-                        QueryHelpers.AddQueryString(currentInner, param.Key, multiParam)));
+                endpointUri = query.Aggregate(endpointUri,
+                    (currentOuter, param) => param.Value.Aggregate(currentOuter,
+                        (currentInner, multiParam) =>
+                            QueryHelpers.AddQueryString(currentInner, param.Key, multiParam)));
             }
 
             endpointUri = QueryHelpers.AddQueryString(endpointUri, "pageNumber", filter.PageNumber.ToString());

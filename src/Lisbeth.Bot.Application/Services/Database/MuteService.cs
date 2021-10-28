@@ -26,9 +26,11 @@ using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
 using System;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 
 namespace Lisbeth.Bot.Application.Services.Database
 {
+    [UsedImplicitly]
     public class MuteService : CrudService<Mute, LisbethBotDbContext>, IMuteService
     {
         public MuteService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
@@ -61,7 +63,7 @@ namespace Lisbeth.Bot.Application.Services.Database
         {
             if (entry  is null) throw new ArgumentNullException(nameof(entry));
 
-            var entity = await base.GetSingleBySpecAsync<Mute>(new ActiveExpiredMutePerGuildSpec(entry.GuildId.Value, entry.TargetUserId.Value));
+            var entity = await base.GetSingleBySpecAsync<Mute>(new ActiveExpiredMutePerGuildSpec(entry.TargetUserId.Value, entry.GuildId.Value));
             if (entity  is null) return null;
 
             base.BeginUpdate(entity);
