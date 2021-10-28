@@ -24,7 +24,8 @@ namespace Lisbeth.Bot.DataAccessLayer.Repositories
 {
     public class GuildRepository : Repository<Guild>, IGuildRepository
     {
-        public GuildRepository(LisbethBotDbContext context, ISpecificationEvaluator evaluator) : base(context, evaluator)
+        public GuildRepository(LisbethBotDbContext context, ISpecificationEvaluator evaluator) : base(context,
+            evaluator)
         {
         }
     }

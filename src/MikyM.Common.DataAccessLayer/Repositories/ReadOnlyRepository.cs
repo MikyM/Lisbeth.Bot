@@ -43,16 +43,15 @@ namespace MikyM.Common.DataAccessLayer.Repositories
         {
             return await _context.Set<TEntity>().FindAsync(keyValues);
         }
-        
-        public virtual async Task<TEntity> GetSingleBySpecAsync<TSpec>(
-            ISpecification<TEntity> specification = null) where TSpec : ISpecification<TEntity>, ISingleResultSpecification
+
+        public virtual async Task<TEntity> GetSingleBySpecAsync(ISpecification<TEntity> specification = null)
         {
             return await ApplySpecification(specification)
                 .FirstOrDefaultAsync();
         }
 
-        public virtual async Task<TProjectTo> GetSingleBySpecAsync<TSpec, TProjectTo>(
-            ISpecification<TEntity, TProjectTo> specification = null) where TSpec : ISpecification<TEntity, TProjectTo>, ISingleResultSpecification where TProjectTo : class
+        public virtual async Task<TProjectTo> GetSingleBySpecAsync<TProjectTo>(
+            ISpecification<TEntity, TProjectTo> specification = null) where TProjectTo : class
         {
             return await ApplySpecification(specification)
                 .FirstOrDefaultAsync();
@@ -66,7 +65,8 @@ namespace MikyM.Common.DataAccessLayer.Repositories
                 : specification.PostProcessingAction(result).ToList();
         }
 
-        public virtual async Task<IReadOnlyList<TProjectTo>> GetBySpecAsync<TProjectTo>(ISpecification<TEntity, TProjectTo> specification = null) where TProjectTo : class
+        public virtual async Task<IReadOnlyList<TProjectTo>> GetBySpecAsync<TProjectTo>(
+            ISpecification<TEntity, TProjectTo> specification = null) where TProjectTo : class
         {
             var result = await ApplySpecification(specification).ToListAsync();
             return specification?.PostProcessingAction is null
@@ -105,29 +105,33 @@ namespace MikyM.Common.DataAccessLayer.Repositories
         }
 
         /// <summary>
-        /// Filters the entities  of <typeparamref name="TEntity"/>, to those that match the encapsulated query logic of the
-        /// <paramref name="specification"/>.
+        ///     Filters the entities  of <typeparamref name="TEntity" />, to those that match the encapsulated query logic of the
+        ///     <paramref name="specification" />.
         /// </summary>
         /// <param name="specification">The encapsulated query logic.</param>
-        /// <returns>The filtered entities as an <see cref="IQueryable{T}"/>.</returns>
-        protected virtual IQueryable<TEntity> ApplySpecification(ISpecification<TEntity> specification, bool evaluateCriteriaOnly = false)
+        /// <returns>The filtered entities as an <see cref="IQueryable{T}" />.</returns>
+        protected virtual IQueryable<TEntity> ApplySpecification(ISpecification<TEntity> specification,
+            bool evaluateCriteriaOnly = false)
         {
-            return _specificationEvaluator.GetQuery(_context.Set<TEntity>().AsQueryable(), specification, evaluateCriteriaOnly);
+            return _specificationEvaluator.GetQuery(_context.Set<TEntity>().AsQueryable(), specification,
+                evaluateCriteriaOnly);
         }
+
         /// <summary>
-        /// Filters all entities of <typeparamref name="TEntity" />, that matches the encapsulated query logic of the
-        /// <paramref name="specification"/>, from the database.
-        /// <para>
-        /// Projects each entity into a new form, being <typeparamref name="TResult" />.
-        /// </para>
+        ///     Filters all entities of <typeparamref name="TEntity" />, that matches the encapsulated query logic of the
+        ///     <paramref name="specification" />, from the database.
+        ///     <para>
+        ///         Projects each entity into a new form, being <typeparamref name="TResult" />.
+        ///     </para>
         /// </summary>
         /// <typeparam name="TResult">The type of the value returned by the projection.</typeparam>
         /// <param name="specification">The encapsulated query logic.</param>
-        /// <returns>The filtered projected entities as an <see cref="IQueryable{T}"/>.</returns>
-        protected virtual IQueryable<TResult> ApplySpecification<TResult>(ISpecification<TEntity, TResult> specification)
+        /// <returns>The filtered projected entities as an <see cref="IQueryable{T}" />.</returns>
+        protected virtual IQueryable<TResult> ApplySpecification<TResult>(
+            ISpecification<TEntity, TResult> specification)
         {
-            if (specification  is null) throw new ArgumentNullException("Specification is required");
-            if (specification.Selector  is null) throw new SelectorNotFoundException();
+            if (specification is null) throw new ArgumentNullException("Specification is required");
+            if (specification.Selector is null) throw new SelectorNotFoundException();
 
             return _specificationEvaluator.GetQuery(_context.Set<TEntity>().AsQueryable(), specification);
         }

@@ -23,25 +23,23 @@ namespace Lisbeth.Bot.DataAccessLayer.Specifications.TicketSpecifications
     public class TicketBaseGetSpecifications : Specification<Ticket>
     {
         public TicketBaseGetSpecifications(long? id = null, ulong? userId = null, ulong? guildId = null,
-            ulong? channelId = null, long? guildSpecificId = null, bool isDisabled = false, int limit = 0, bool takeAny = false)
+            ulong? channelId = null, long? guildSpecificId = null, bool isDisabled = false, int limit = 0,
+            bool takeAny = false)
         {
             if (id is not null)
-                AddFilterCondition(x => x.Id == id);
+                Where(x => x.Id == id);
             if (userId is not null)
-                AddFilterCondition(x => x.UserId == userId);
+                Where(x => x.UserId == userId);
             if (guildId is not null)
-                AddFilterCondition(x => x.GuildId == guildId);
+                Where(x => x.GuildId == guildId);
             if (channelId is not null)
-                AddFilterCondition(x => x.ChannelId == channelId);
+                Where(x => x.ChannelId == channelId);
             if (guildSpecificId is not null)
-                AddFilterCondition(x => x.GuildSpecificId == guildSpecificId);
+                Where(x => x.GuildSpecificId == guildSpecificId);
 
-            if (!takeAny)
-            {
-                AddFilterCondition(x => x.IsDisabled == isDisabled);
-            }
+            if (!takeAny) Where(x => x.IsDisabled == isDisabled);
 
-            ApplyOrderByDescending(x => x.CreatedAt);
+            OrderByDescending(x => x.CreatedAt);
 
             ApplyTake(limit);
         }

@@ -30,7 +30,7 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators
         {
         }
 
-        public static OrderEvaluator Instance { get; } = new OrderEvaluator();
+        public static OrderEvaluator Instance { get; } = new();
 
         public bool IsCriteriaEvaluator { get; } = false;
 
@@ -39,13 +39,12 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators
             if (specification.OrderExpressions is null) return query;
             if (specification.OrderExpressions.Count(x =>
                 x.OrderType is OrderTypeEnum.OrderBy or OrderTypeEnum.OrderByDescending) > 1)
-            {
                 throw new DuplicateOrderChainException();
-            }
 
             IOrderedQueryable<T>? orderedQuery =
                 specification.OrderExpressions
-                    .Aggregate<(Expression<Func<T, object>> KeySelector, OrderTypeEnum OrderType), IOrderedQueryable<T>?>(null, (current, orderExpression) => orderExpression.OrderType switch
+                    .Aggregate<(Expression<Func<T, object>> KeySelector, OrderTypeEnum OrderType), IOrderedQueryable<T>
+                        ?>(null, (current, orderExpression) => orderExpression.OrderType switch
                     {
                         OrderTypeEnum.OrderBy => query.OrderBy(orderExpression.KeySelector),
                         OrderTypeEnum.OrderByDescending => query.OrderByDescending(orderExpression.KeySelector),
@@ -54,10 +53,7 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators
                         _ => current
                     });
 
-            if (orderedQuery != null)
-            {
-                query = orderedQuery;
-            }
+            if (orderedQuery != null) query = orderedQuery;
 
             return query;
         }
@@ -67,13 +63,12 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators
             if (specification.OrderExpressions is null) return query;
             if (specification.OrderExpressions.Count(x =>
                 x.OrderType is OrderTypeEnum.OrderBy or OrderTypeEnum.OrderByDescending) > 1)
-            {
                 throw new DuplicateOrderChainException();
-            }
 
             IOrderedEnumerable<T>? orderedQuery =
                 specification.OrderExpressions
-                    .Aggregate<(Expression<Func<T, object>> KeySelector, OrderTypeEnum OrderType), IOrderedEnumerable<T>?>(null, (current, orderExpression) => orderExpression.OrderType switch
+                    .Aggregate<(Expression<Func<T, object>> KeySelector, OrderTypeEnum OrderType), IOrderedEnumerable<T>
+                        ?>(null, (current, orderExpression) => orderExpression.OrderType switch
                     {
                         OrderTypeEnum.OrderBy => query.OrderBy(orderExpression.KeySelector.Compile()),
                         OrderTypeEnum.OrderByDescending => query.OrderByDescending(
@@ -84,10 +79,7 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators
                         _ => current
                     });
 
-            if (orderedQuery != null)
-            {
-                query = orderedQuery;
-            }
+            if (orderedQuery != null) query = orderedQuery;
 
             return query;
         }

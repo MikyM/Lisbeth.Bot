@@ -61,10 +61,10 @@ namespace Lisbeth.Bot.Application.Discord.Services
         {
             try
             {
-                var res = await _banService.GetBySpecAsync<Mute>(
+                var res = await _banService.GetBySpecAsync<Ban>(
                     new ActiveExpiredBansInActiveGuildsSpecifications());
 
-                if (res  is null || res.Count == 0) return;
+                if (res is null || res.Count == 0) return;
 
                 foreach (var ban in res)
                 {

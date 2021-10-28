@@ -33,7 +33,7 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Extensions
             var result = await SpecificationEvaluator.Default.GetQuery(source, specification)
                 .ToListAsync(cancellationToken);
 
-            return specification.PostProcessingAction  is null
+            return specification.PostProcessingAction is null
                 ? result
                 : specification.PostProcessingAction(result).ToList();
         }
@@ -45,7 +45,7 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Extensions
             var result = await SpecificationEvaluator.Default.GetQuery(source, specification)
                 .ToListAsync(cancellationToken);
 
-            return specification.PostProcessingAction  is null
+            return specification.PostProcessingAction is null
                 ? result
                 : specification.PostProcessingAction(result);
         }

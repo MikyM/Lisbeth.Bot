@@ -22,6 +22,5 @@ namespace Lisbeth.Bot.DataAccessLayer.Repositories.Interfaces
 {
     public interface IRoleMenuRepository : IRepository<RoleMenu>
     {
-        
     }
 }

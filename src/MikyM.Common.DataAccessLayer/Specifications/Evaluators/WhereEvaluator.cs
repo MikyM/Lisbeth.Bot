@@ -22,8 +22,11 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators
 {
     public class WhereEvaluator : IEvaluator, IInMemoryEvaluator
     {
-        private WhereEvaluator() { }
-        public static WhereEvaluator Instance { get; } = new WhereEvaluator();
+        private WhereEvaluator()
+        {
+        }
+
+        public static WhereEvaluator Instance { get; } = new();
 
         public bool IsCriteriaEvaluator { get; } = true;
 
@@ -34,7 +37,8 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators
 
         public IEnumerable<T> Evaluate<T>(IEnumerable<T> query, ISpecification<T> specification) where T : class
         {
-            return specification.WhereExpressions.Aggregate(query, (current, criteria) => current.Where(criteria.Compile()));
+            return specification.WhereExpressions.Aggregate(query,
+                (current, criteria) => current.Where(criteria.Compile()));
         }
     }
 }

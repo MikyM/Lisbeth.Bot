@@ -42,15 +42,9 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators
 
         public IEnumerable<T> Evaluate<T>(IEnumerable<T> query, ISpecification<T> specification) where T : class
         {
-            if (specification.Skip != null && specification.Skip != 0)
-            {
-                query = query.Skip(specification.Skip.Value);
-            }
+            if (specification.Skip != null && specification.Skip != 0) query = query.Skip(specification.Skip.Value);
 
-            if (specification.Take != null)
-            {
-                query = query.Take(specification.Take.Value);
-            }
+            if (specification.Take != null) query = query.Take(specification.Take.Value);
 
             return query;
         }

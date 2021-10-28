@@ -24,7 +24,8 @@ namespace Lisbeth.Bot.DataAccessLayer.Repositories
 {
     public class TicketRepository : Repository<Ticket>, ITicketRepository
     {
-        public TicketRepository(LisbethBotDbContext context, ISpecificationEvaluator evaluator) : base(context, evaluator)
+        public TicketRepository(LisbethBotDbContext context, ISpecificationEvaluator evaluator) : base(context,
+            evaluator)
         {
         }
     }

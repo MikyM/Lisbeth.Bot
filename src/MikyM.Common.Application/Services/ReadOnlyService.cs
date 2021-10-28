@@ -40,15 +40,13 @@ namespace MikyM.Common.Application.Services
             return _mapper.Map<TGetResult>(await _unitOfWork.GetRepository<ReadOnlyRepository<TEntity>>().GetAsync(id));
         }
 
-        public virtual async Task<TGetResult> GetSingleBySpecAsync<TSpec, TGetResult>(
-            ISpecification<TEntity> specification = null) where TGetResult : class where TSpec : ISpecification<TEntity>, ISingleResultSpecification
+        public virtual async Task<TGetResult> GetSingleBySpecAsync<TGetResult>(ISpecification<TEntity> specification = null) where TGetResult : class
         {
             return _mapper.Map<TGetResult>(await _unitOfWork.GetRepository<ReadOnlyRepository<TEntity>>()
-                .GetSingleBySpecAsync<TSpec>(specification));
+                .GetSingleBySpecAsync(specification));
         }
 
-        public virtual async Task<IReadOnlyList<TGetResult>> GetBySpecAsync<TGetResult>(
-            ISpecification<TEntity> specification = null) where TGetResult : class
+        public virtual async Task<IReadOnlyList<TGetResult>> GetBySpecAsync<TGetResult>(ISpecification<TEntity> specification = null) where TGetResult : class
         {
             return _mapper.Map<IReadOnlyList<TGetResult>>(await _unitOfWork.GetRepository<ReadOnlyRepository<TEntity>>()
                 .GetBySpecAsync(specification));

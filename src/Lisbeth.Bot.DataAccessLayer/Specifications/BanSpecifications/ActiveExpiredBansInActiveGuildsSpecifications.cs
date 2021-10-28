@@ -26,12 +26,10 @@ namespace Lisbeth.Bot.DataAccessLayer.Specifications.BanSpecifications
     {
         public ActiveExpiredBansInActiveGuildsSpecifications()
         {
-            AddFilterCondition(x => !x.IsDisabled);
-            AddFilterCondition(x => !x.Guild.IsDisabled);
-            AddFilterCondition(x => x.AppliedUntil <= DateTime.UtcNow);
-            AddInclude(x => x.Guild);
-            ApplyOrderBy(x => x.Guild.Id);
-
+            Where(x => !x.IsDisabled);
+            Where(x => !x.Guild.IsDisabled);
+            Where(x => x.AppliedUntil <= DateTime.UtcNow);
+            OrderBy(x => x.Guild.Id);
         }
     }
 }

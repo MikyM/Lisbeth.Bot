@@ -33,7 +33,8 @@ namespace Lisbeth.Bot.API
                 .ForMember(dest => dest.AppliedById, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
             CreateMap<MuteDisableReqDto, Mute>()
                 .ForMember(dest => dest.UserId, source => source.MapFrom(x => x.TargetUserId))
-                .ForMember(dest => dest.AppliedById, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
+                .ForMember(dest => dest.AppliedById, source => source.MapFrom(x => x.RequestedOnBehalfOfId))
+                .ForMember(dest => dest.GuildId, source => source.MapFrom(x => x.GuildId));
             CreateMap<BanReqDto, Ban>()
                 .ForMember(dest => dest.UserId, source => source.MapFrom(x => x.TargetUserId))
                 .ForMember(dest => dest.AppliedById, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
@@ -49,9 +50,15 @@ namespace Lisbeth.Bot.API
                 .ForMember(dest => dest.UserId, source => source.MapFrom(x => x.OwnerId));
             CreateMap<TicketingConfig, TicketingConfig>();
             CreateMap<ModerationConfig, ModerationConfig>();
-            CreateMap<TagAddReqDto, Tag>();
+            CreateMap<TagAddReqDto, Tag>()
+                .ForMember(dest => dest.UserId, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
             CreateMap<EmbedConfigDto, EmbedConfig>();
-            CreateMap<TagGetReqDto, Tag>();
+            CreateMap<TagGetReqDto, Tag>()
+                .ForMember(dest => dest.UserId, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
+            CreateMap<TagEditReqDto, Tag>()
+                .ForMember(dest => dest.UserId, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
+            CreateMap<TagDisableReqDto, Tag>()
+                .ForMember(dest => dest.UserId, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
 
             CreateMap<RoleEmojiMappingReqDto, RoleEmojiMapping>();
             CreateMap<RoleMenuReqDto, RoleMenu>();

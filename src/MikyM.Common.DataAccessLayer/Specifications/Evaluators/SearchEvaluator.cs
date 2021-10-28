@@ -26,7 +26,7 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators
         {
         }
 
-        public static SearchEvaluator Instance { get; } = new SearchEvaluator();
+        public static SearchEvaluator Instance { get; } = new();
 
         public bool IsCriteriaEvaluator { get; } = true;
 

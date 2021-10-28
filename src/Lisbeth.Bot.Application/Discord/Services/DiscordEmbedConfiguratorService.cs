@@ -141,12 +141,14 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 return (null, false);
             }
 
+            string choice = waitResult.Result.Values[0];
+
             while (true)
             {
                 if (loopCount > 30) return (resultEmbed, true);
 
                 (DiscordEmbedBuilder Result, bool IsSuccess) result = new(resultEmbed, false);
-                switch (waitResult.Result.Values[0])
+                switch (choice)
                 {
                     case nameof(EmbedConfigSelectValue.EmbedConfigSetAuthorValue):
                         result = await SetModuleAsync(EmbedConfigModuleType.Author, ctx, intr, resultEmbed, entity);
@@ -191,7 +193,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
                 var waitForFinalButtonTask = intr.WaitForButtonAsync(finalizeMsg, ctx.User, TimeSpan.FromMinutes(1));
 
-                var waitForSelectTask = intr.WaitForSelectAsync(mainMsg, ctx.User,
+                var waitForSelectTask = intr.WaitForSelectAsync(finalizeMsg, ctx.User,
                     nameof(EmbedConfigSelect.EmbedConfigMainSelect), TimeSpan.FromMinutes(1));
 
                 var taskAggregate = await Task.WhenAny(new[] {waitForFinalButtonTask, waitForSelectTask});
@@ -201,6 +203,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     return (resultEmbed, result.IsSuccess);
 
                 loopCount++;
+
+                choice = waitForSelectTask.Result.Result.Values[0];
             }
         }
 

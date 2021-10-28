@@ -151,15 +151,17 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
                 ownedNavigationBuilder.Property(x => x.TicketCenterMessageFields)
                     .HasColumnName("ticket_center_message_fields")
                     .HasColumnType("text")
-                    .HasConversion(x => JsonSerializer.Serialize(x, new JsonSerializerOptions { IgnoreNullValues = true }),
+                    .HasConversion(
+                        x => JsonSerializer.Serialize(x, new JsonSerializerOptions {IgnoreNullValues = true}),
                         x => JsonSerializer.Deserialize<List<DiscordField>>(x,
-                            new JsonSerializerOptions { IgnoreNullValues = true }));
+                            new JsonSerializerOptions {IgnoreNullValues = true}));
                 ownedNavigationBuilder.Property(x => x.TicketWelcomeMessageFields)
                     .HasColumnName("ticket_welcome_message_fields")
                     .HasColumnType("text")
-                    .HasConversion(x => JsonSerializer.Serialize(x, new JsonSerializerOptions { IgnoreNullValues = true }),
+                    .HasConversion(
+                        x => JsonSerializer.Serialize(x, new JsonSerializerOptions {IgnoreNullValues = true}),
                         x => JsonSerializer.Deserialize<List<DiscordField>>(x,
-                            new JsonSerializerOptions { IgnoreNullValues = true }));
+                            new JsonSerializerOptions {IgnoreNullValues = true}));
 
                 ownedNavigationBuilder
                     .WithOwner(x => x.Guild)

@@ -32,6 +32,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Lisbeth.Bot.Application.Exceptions;
+using MikyM.Common.DataAccessLayer.Specifications;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {
@@ -42,7 +43,6 @@ namespace Lisbeth.Bot.Application.Discord.Services
         private readonly IGuildService _guildService;
         private readonly ITagService _tagService;
         private readonly IDiscordEmbedProvider _embedProvider;
-        private readonly IMapper _mapper;
 
         public DiscordTagService(IDiscordService discord, IGuildService guildService, ITagService tagService, IDiscordEmbedProvider embedProvider)
         {
@@ -76,9 +76,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (creator  is null) throw new ArgumentNullException(nameof(creator));
             if (req  is null) throw new ArgumentNullException(nameof(req));
 
-            var guildRes =
-                await _guildService.GetBySpecAsync<Guild>(new ActiveGuildByDiscordIdWithTagsSpecifications(req.GuildId));
-            var guildCfg = guildRes.FirstOrDefault();
+            var guildCfg = await _guildService.GetSingleBySpecAsync<Guild>(new ActiveGuildByDiscordIdWithTagsSpecifications(req.GuildId));
             if (guildCfg  is null)
                 throw new NotFoundException($"Guild with Id: {guild.Id} doesn't exist in the database.");
 
@@ -126,9 +124,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (requestingUser  is null) throw new ArgumentNullException(nameof(requestingUser));
             if (req  is null) throw new ArgumentNullException(nameof(req));
 
-            var guildRes =
-                await _guildService.GetBySpecAsync<Guild>(new ActiveGuildByDiscordIdWithTagsSpecifications(guild.Id));
-            var guildCfg = guildRes.FirstOrDefault();
+            var guildCfg = await _guildService.GetSingleBySpecAsync<Guild>(new ActiveGuildByDiscordIdWithTagsSpecifications(guild.Id));
             if (guildCfg  is null)
                 throw new NotFoundException($"Guild with Id: {guild.Id} doesn't exist in the database.");
 
@@ -176,18 +172,29 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (requestingUser  is null) throw new ArgumentNullException(nameof(requestingUser));
             if (req  is null) throw new ArgumentNullException(nameof(req));
 
-            var guildRes =
-                await _guildService.GetBySpecAsync<Guild>(new ActiveGuildByDiscordIdWithTagsSpecifications(guild.Id));
-            var guildCfg = guildRes.FirstOrDefault();
-            if (guildCfg  is null)
-                throw new NotFoundException($"Guild with Id: {guild.Id} doesn't exist in the database.");
+            Tag tag;
+            if (requestingUser.IsBotOwner(_discord.Client))
+            {
+                tag = req.Id.HasValue
+                    ? await _tagService.GetAsync<Tag>(req.Id.Value)
+                    : await _tagService.GetSingleBySpecAsync<Tag>(new Specification<Tag>(x => x.Name == req.Name));
+            }
+            else
+            {
+                var guildCfg = await _guildService.GetSingleBySpecAsync<Guild>(new ActiveGuildByDiscordIdWithTagsSpecifications(guild.Id));
+                if (guildCfg is null)
+                    throw new NotFoundException($"Guild with Id: {guild.Id} doesn't exist in the database.");
 
-            if (requestingUser.Guild.Id != guild.Id) throw new DiscordNotAuthorizedException();
+                if (requestingUser.Guild.Id != guild.Id) throw new DiscordNotAuthorizedException();
 
-            var tag = req.Id.HasValue ? guildCfg.Tags.FirstOrDefault(x => x.Id == req.Id) : guildCfg.Tags.FirstOrDefault(x => x.Name == req.Name);
+                tag = req.Id.HasValue ? guildCfg.Tags.FirstOrDefault(x => x.Id == req.Id) : guildCfg.Tags.FirstOrDefault(x => x.Name == req.Name);
+
+                if (requestingUser.Guild.Id != guild.Id) throw new DiscordNotAuthorizedException();
+            }
 
             if (tag  is null) throw new NotFoundException("Tag not found");
-            if (tag.IsDisabled) throw new DisabledEntityException("Found tag is disabled");
+            if (tag.IsDisabled && !requestingUser.IsBotOwner(_discord.Client)) throw new DisabledEntityException("Found tag is disabled");
+
             return tag.EmbedConfig  is null ? (null, tag.Text) : (_embedProvider.ConfigureEmbed(tag.EmbedConfig).Build(), tag.Text);
         }
 
@@ -223,9 +230,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (requestingUser  is null) throw new ArgumentNullException(nameof(requestingUser));
             if (req  is null) throw new ArgumentNullException(nameof(req));
 
-            var guildRes =
-                await _guildService.GetBySpecAsync<Guild>(new ActiveGuildByDiscordIdWithTagsSpecifications(guild.Id));
-            var guildCfg = guildRes.FirstOrDefault();
+            var guildCfg = await _guildService.GetSingleBySpecAsync<Guild>(new ActiveGuildByDiscordIdWithTagsSpecifications(guild.Id));
             if (guildCfg  is null)
                 throw new NotFoundException($"Guild with Id: {guild.Id} doesn't exist in the database.");
 

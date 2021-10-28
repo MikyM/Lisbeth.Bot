@@ -65,5 +65,10 @@ namespace Lisbeth.Bot.Application.Discord.Extensions
                 member.Permissions.HasPermission(Permissions.All) ||
                 member.IsOwner;
         }
+
+        public static bool IsBotOwner(this DiscordMember member, DiscordClient client)
+        {
+            return client.CurrentApplication.Owners.Any(x => x.Id == member.Id);
+        }
     }
 }

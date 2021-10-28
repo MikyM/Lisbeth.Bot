@@ -18,7 +18,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using MikyM.Common.DataAccessLayer.Specifications.Builders;
 using MikyM.Common.DataAccessLayer.Specifications.Helpers;
 
 namespace MikyM.Common.DataAccessLayer.Specifications
@@ -59,7 +58,7 @@ namespace MikyM.Common.DataAccessLayer.Specifications
         /// <summary>
         ///     The collection of predicates to group by.
         /// </summary>
-       Expression<Func<T, bool>> GroupByExpression { get; }
+        Expression<Func<T, object>> GroupByExpression { get; }
 
         /// <summary>
         ///     The collections of functions used to determine the sorting (and subsequent sorting),
@@ -109,8 +108,10 @@ namespace MikyM.Common.DataAccessLayer.Specifications
         ///     Return whether or not the results should be cached.
         /// </summary>
         bool CacheEnabled { get; }
+
         string? CacheKey { get; }
         bool IsPagingEnabled { get; }
+
         /// <summary>
         ///     Returns whether or not the change tracker will track any of the entities
         ///     that are returned. When true, if the entity instances are modified, this will not be detected

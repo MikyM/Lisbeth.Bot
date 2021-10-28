@@ -27,12 +27,11 @@ namespace MikyM.Common.DataAccessLayer.Repositories
     {
         ValueTask<TEntity> GetAsync(params object[] keyValues);
 
-        Task<TEntity> GetSingleBySpecAsync<TSpec>(ISpecification<TEntity> specification = null)
-            where TSpec : ISpecification<TEntity>, ISingleResultSpecification;
+        Task<TEntity> GetSingleBySpecAsync(ISpecification<TEntity> specification = null);
 
-        Task<TProjectTo>
-            GetSingleBySpecAsync<TSpec, TProjectTo>(ISpecification<TEntity, TProjectTo> specification = null)
-            where TProjectTo : class where TSpec : ISpecification<TEntity, TProjectTo>, ISingleResultSpecification;
+        Task<TProjectTo> GetSingleBySpecAsync<TProjectTo>(
+            ISpecification<TEntity, TProjectTo> specification = null)
+            where TProjectTo : class;
 
         Task<IReadOnlyList<TEntity>> GetBySpecAsync(PaginationFilter filter,
             ISpecification<TEntity> specification = null);

@@ -24,15 +24,17 @@ namespace Lisbeth.Bot.DataAccessLayer.Specifications.EmbedConfigEntitySpecificat
     {
         public ActiveWithEmbedCfgByIdOrNameSpecifications(long? id, string name, ulong? guildId = null)
         {
-            AddInclude(x => x.EmbedConfig);
+            Include(x => x.EmbedConfig);
 
-            if (id.HasValue) AddFilterCondition(x => x.Id == id);
+            if (id.HasValue)
+            {
+                Where(x => x.Id == id);
+            }
             else
             {
-                AddFilterCondition(x => x.Name == name);
-                AddFilterCondition(x => x.GuildId == guildId);
+                Where(x => x.Name == name);
+                Where(x => x.GuildId == guildId);
             }
-
         }
     }
 }

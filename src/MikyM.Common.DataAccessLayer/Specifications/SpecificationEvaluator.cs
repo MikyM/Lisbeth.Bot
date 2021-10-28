@@ -22,28 +22,29 @@ using MikyM.Common.DataAccessLayer.Specifications.Evaluators;
 
 namespace MikyM.Common.DataAccessLayer.Specifications
 {
-    /// <inheritdoc cref="ISpecificationEvaluator"/>
+    /// <inheritdoc cref="ISpecificationEvaluator" />
     public class SpecificationEvaluator : ISpecificationEvaluator
     {
-        // Will use singleton for default configuration. Yet, it can be instantiated if necessary, with default or provided evaluators.
-        public static SpecificationEvaluator Default { get; } = new ();
-
-        private readonly List<IEvaluator> _evaluators = new ();
+        private readonly List<IEvaluator> _evaluators = new();
 
         public SpecificationEvaluator()
         {
-            this._evaluators.AddRange(new IEvaluator[]
+            _evaluators.AddRange(new IEvaluator[]
             {
                 WhereEvaluator.Instance, SearchEvaluator.Instance, IncludeEvaluator.Instance,
                 OrderEvaluator.Instance, PaginationEvaluator.Instance, AsNoTrackingEvaluator.Instance,
-                AsSplitQueryEvaluator.Instance, AsNoTrackingWithIdentityResolutionEvaluator.Instance, GroupByEvaluator.Instance
+                AsSplitQueryEvaluator.Instance, AsNoTrackingWithIdentityResolutionEvaluator.Instance,
+                GroupByEvaluator.Instance
             });
         }
 
         public SpecificationEvaluator(IEnumerable<IEvaluator> evaluators)
         {
-            this._evaluators.AddRange(evaluators);
+            _evaluators.AddRange(evaluators);
         }
+
+        // Will use singleton for default configuration. Yet, it can be instantiated if necessary, with default or provided evaluators.
+        public static SpecificationEvaluator Default { get; } = new();
 
         public virtual IQueryable<TResult> GetQuery<T, TResult>(IQueryable<T> query,
             ISpecification<T, TResult> specification) where T : class
@@ -56,7 +57,7 @@ namespace MikyM.Common.DataAccessLayer.Specifications
         public virtual IQueryable<T> GetQuery<T>(IQueryable<T> query, ISpecification<T> specification,
             bool evaluateCriteriaOnly = false) where T : class
         {
-            return (evaluateCriteriaOnly ? this._evaluators.Where(x => x.IsCriteriaEvaluator) : this._evaluators)
+            return (evaluateCriteriaOnly ? _evaluators.Where(x => x.IsCriteriaEvaluator) : _evaluators)
                 .Aggregate(query, (current, evaluator) => evaluator.GetQuery(current, specification));
         }
     }

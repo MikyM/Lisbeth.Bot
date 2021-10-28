@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Linq;
+using DSharpPlus;
 using DSharpPlus.Entities;
 
 namespace Lisbeth.Bot.Application.Discord.Extensions
@@ -24,6 +26,11 @@ namespace Lisbeth.Bot.Application.Discord.Extensions
         public static string GetFullUsername(this DiscordUser user)
         {
             return user.Username + "#" + user.Discriminator;
+        }
+
+        public static bool IsBotOwner(this DiscordUser user, DiscordClient client)
+        {
+            return client.CurrentApplication.Owners.Any(x => x.Id == user.Id);
         }
     }
 }

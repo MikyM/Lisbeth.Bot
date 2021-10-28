@@ -26,11 +26,11 @@ namespace Lisbeth.Bot.DataAccessLayer.Specifications.MuteSpecifications
     {
         public ActiveExpiredMutesInActiveGuildsSpecifications()
         {
-            AddFilterCondition(x => !x.IsDisabled);
-            AddFilterCondition(x => !x.Guild.IsDisabled);
-            AddFilterCondition(x => x.AppliedUntil <= DateTime.UtcNow);
-            AddInclude(x => x.Guild);
-            ApplyOrderBy(x => x.Guild.Id);
+            Where(x => !x.IsDisabled);
+            Where(x => !x.Guild.IsDisabled);
+            Where(x => x.AppliedUntil <= DateTime.UtcNow);
+            Include(x => x.Guild);
+            OrderBy(x => x.Guild.Id);
         }
     }
 }

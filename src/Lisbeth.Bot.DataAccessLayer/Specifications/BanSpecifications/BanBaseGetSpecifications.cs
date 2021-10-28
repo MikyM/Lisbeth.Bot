@@ -28,25 +28,25 @@ namespace Lisbeth.Bot.DataAccessLayer.Specifications.BanSpecifications
             int limit = 0, bool isDisabled = false)
         {
             if (id is not null)
-                AddFilterCondition(x => x.Id == id);
+                Where(x => x.Id == id);
             if (userId is not null)
-                AddFilterCondition(x => x.UserId == userId);
+                Where(x => x.UserId == userId);
             if (guildId is not null)
-                AddFilterCondition(x => x.GuildId == guildId);
+                Where(x => x.GuildId == guildId);
             if (appliedById is not null)
-                AddFilterCondition(x => x.AppliedById == appliedById);
+                Where(x => x.AppliedById == appliedById);
             if (liftedById is not null)
-                AddFilterCondition(x => x.LiftedById == liftedById);
+                Where(x => x.LiftedById == liftedById);
             if (liftedOn is not null)
-                AddFilterCondition(x => x.LiftedOn == liftedOn);
+                Where(x => x.LiftedOn == liftedOn);
             if (appliedOn is not null)
-                AddFilterCondition(x => x.CreatedAt == appliedOn);
+                Where(x => x.CreatedAt == appliedOn);
             if (liftedById is not null)
-                AddFilterCondition(x => x.LiftedById == liftedById);
-            
-            AddFilterCondition(x => x.IsDisabled == isDisabled);
+                Where(x => x.LiftedById == liftedById);
 
-            ApplyOrderByDescending(x => x.CreatedAt);
+            Where(x => x.IsDisabled == isDisabled);
+
+            OrderByDescending(x => x.CreatedAt);
 
             ApplyTake(limit);
         }

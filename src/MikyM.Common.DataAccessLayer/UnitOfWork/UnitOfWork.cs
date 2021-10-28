@@ -15,25 +15,26 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using MikyM.Common.DataAccessLayer.Helpers;
 using MikyM.Common.DataAccessLayer.Repositories;
 using MikyM.Common.DataAccessLayer.Specifications.Evaluators;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace MikyM.Common.DataAccessLayer.UnitOfWork
 {
     public class UnitOfWork<TContext> : IUnitOfWork<TContext> where TContext : DbContext
     {
+        private readonly ISpecificationEvaluator _specificationEvaluator;
+
         // To detect redundant calls
         private bool _disposed;
         protected Dictionary<string, IBaseRepository> _repositories;
         private IDbContextTransaction _transaction;
-        private readonly ISpecificationEvaluator _specificationEvaluator;
 
         public UnitOfWork(TContext context, ISpecificationEvaluator specificationEvaluator)
         {
@@ -66,13 +67,15 @@ namespace MikyM.Common.DataAccessLayer.UnitOfWork
 
                 if (_repositories.TryGetValue(concreteName, out var concreteRepo)) return (TRepository) concreteRepo;
 
-                if (_repositories.TryAdd(concreteName, (TRepository) Activator.CreateInstance(concrete, Context, _specificationEvaluator)))
+                if (_repositories.TryAdd(concreteName,
+                    (TRepository) Activator.CreateInstance(concrete, Context, _specificationEvaluator)))
                     return (TRepository) _repositories[concreteName];
                 throw new ArgumentException(
                     $"Concrete repository of type {concreteName} couldn't be added to and/or retrieved from cache.");
             }
 
-            if (_repositories.TryAdd(name, (TRepository) Activator.CreateInstance(type, Context, _specificationEvaluator)))
+            if (_repositories.TryAdd(name,
+                (TRepository) Activator.CreateInstance(type, Context, _specificationEvaluator)))
                 return (TRepository) _repositories[name];
 
             throw new ArgumentException(

@@ -36,6 +36,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Lisbeth.Bot.Application.Exceptions;
+using Lisbeth.Bot.DataAccessLayer.Specifications.GuildSpecifications;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {
@@ -301,11 +302,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             DiscordChannel channel = null;
 
-            var guildRes =
-                await _guildService.GetBySpecAsync<Guild>(
-                    new Specification<Guild>(x => x.GuildId == guild.Id && !x.IsDisabled));
-            var guildCfg = guildRes.FirstOrDefault();
-
+            var guildCfg =
+                await _guildService.GetSingleBySpecAsync<Guild>(new ActiveGuildByDiscordIdWithModerationSpecifications(guild.Id));
             if (guildCfg  is null)
                 throw new NotFoundException($"Guild with Id: {guild.Id} doesn't exist in the database.");
 

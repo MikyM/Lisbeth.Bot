@@ -39,7 +39,8 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
                 .IsRequired();
             builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamp").IsRequired();
 
-            builder.Property(x => x.Name).HasColumnName("name").HasColumnType("varchar(100)").HasMaxLength(100).IsRequired();
+            builder.Property(x => x.Name).HasColumnName("name").HasColumnType("varchar(100)").HasMaxLength(100)
+                .IsRequired();
             builder.Property(x => x.GuildId).HasColumnName("guild_id").HasColumnType("bigint").IsRequired();
             builder.Property(x => x.UserId).HasColumnName("user_id").HasColumnType("bigint").IsRequired();
             builder.Property(x => x.MessageId).HasColumnName("message_id").HasColumnType("bigint");

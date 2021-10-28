@@ -26,10 +26,10 @@ namespace Lisbeth.Bot.DataAccessLayer.Specifications.GuildSpecifications
     {
         public ActiveGuildByDiscordIdWithTicketingAndTicketsSpecifications(ulong discordGuildId)
         {
-            AddFilterCondition(x => !x.IsDisabled);
-            AddFilterCondition(x => x.GuildId == discordGuildId);
-            AddInclude(x => x.TicketingConfig);
-            AddInclude(x => x.Tickets.Where(y => !y.IsDisabled));
+            Where(x => !x.IsDisabled);
+            Where(x => x.GuildId == discordGuildId);
+            Include(x => x.TicketingConfig);
+            Include(x => x.Tickets.Where(y => !y.IsDisabled));
         }
     }
 }

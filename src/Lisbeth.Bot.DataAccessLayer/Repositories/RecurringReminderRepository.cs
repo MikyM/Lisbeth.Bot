@@ -25,7 +25,8 @@ namespace Lisbeth.Bot.DataAccessLayer.Repositories
 {
     public class RecurringReminderRepository : Repository<RecurringReminder>, IRecurringReminderRepository
     {
-        public RecurringReminderRepository(DbContext context, ISpecificationEvaluator evaluator) : base(context, evaluator)
+        public RecurringReminderRepository(DbContext context, ISpecificationEvaluator evaluator) : base(context,
+            evaluator)
         {
         }
     }

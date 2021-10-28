@@ -24,14 +24,11 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators
 {
     public class InMemorySpecificationEvaluator : IInMemorySpecificationEvaluator
     {
-        // Will use singleton for default configuration. Yet, it can be instantiated if necessary, with default or provided evaluators.
-        public static InMemorySpecificationEvaluator Default { get; } = new ();
-
-        private readonly List<IInMemoryEvaluator> _evaluators = new ();
+        private readonly List<IInMemoryEvaluator> _evaluators = new();
 
         public InMemorySpecificationEvaluator()
         {
-            this._evaluators.AddRange(new IInMemoryEvaluator[]
+            _evaluators.AddRange(new IInMemoryEvaluator[]
             {
                 WhereEvaluator.Instance,
                 OrderEvaluator.Instance,
@@ -39,16 +36,21 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators
                 GroupByEvaluator.Instance
             });
         }
+
         public InMemorySpecificationEvaluator(IEnumerable<IInMemoryEvaluator> evaluators)
         {
-            this._evaluators.AddRange(evaluators);
+            _evaluators.AddRange(evaluators);
         }
 
-        public virtual IEnumerable<TResult> Evaluate<T, TResult>(IEnumerable<T> source, ISpecification<T, TResult> specification) where T : class
+        // Will use singleton for default configuration. Yet, it can be instantiated if necessary, with default or provided evaluators.
+        public static InMemorySpecificationEvaluator Default { get; } = new();
+
+        public virtual IEnumerable<TResult> Evaluate<T, TResult>(IEnumerable<T> source,
+            ISpecification<T, TResult> specification) where T : class
         {
             _ = specification.Selector ?? throw new SelectorNotFoundException();
 
-            var baseQuery = Evaluate(source, (ISpecification<T>)specification);
+            var baseQuery = Evaluate(source, (ISpecification<T>) specification);
 
             var resultQuery = baseQuery.Select(specification.Selector.Compile());
 
@@ -57,12 +59,12 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators
                 : specification.PostProcessingAction(resultQuery);
         }
 
-        public virtual IEnumerable<T> Evaluate<T>(IEnumerable<T> source, ISpecification<T> specification) where T : class
+        public virtual IEnumerable<T> Evaluate<T>(IEnumerable<T> source, ISpecification<T> specification)
+            where T : class
         {
             if (specification.SearchCriterias.Any())
-            {
-                throw new NotSupportedException("The specification contains Search expressions and can't be evaluated with in-memory evaluator.");
-            }
+                throw new NotSupportedException(
+                    "The specification contains Search expressions and can't be evaluated with in-memory evaluator.");
 
             source = _evaluators.Aggregate(source, (current, evaluator) => evaluator.Evaluate(current, specification));
 

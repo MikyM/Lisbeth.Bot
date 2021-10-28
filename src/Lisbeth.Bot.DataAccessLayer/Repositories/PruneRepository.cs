@@ -24,7 +24,8 @@ namespace Lisbeth.Bot.DataAccessLayer.Repositories
 {
     public class PruneRepository : Repository<Prune>, IPruneRepository
     {
-        public PruneRepository(LisbethBotDbContext context, ISpecificationEvaluator evaluator) : base(context, evaluator)
+        public PruneRepository(LisbethBotDbContext context, ISpecificationEvaluator evaluator) : base(context,
+            evaluator)
         {
         }
     }

@@ -15,10 +15,21 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using Lisbeth.Bot.Domain.Entities;
+using MikyM.Common.DataAccessLayer.Specifications;
+using System;
 
-namespace MikyM.Common.DataAccessLayer.Specifications
+namespace Lisbeth.Bot.DataAccessLayer.Specifications.MuteSpecifications
 {
-    public interface ISingleResultSpecification<T> : ISpecification<T>, ISingleResultSpecification where T : class
+    public class ActiveExpiredMutePerGuildSpec : Specification<Mute>
     {
+        public ActiveExpiredMutePerGuildSpec(ulong targetUserId, ulong guildId)
+        {
+            Where(x => !x.IsDisabled);
+            Where(x => x.GuildId == guildId);
+            Where(x => x.UserId == targetUserId);
+            Where(x => x.AppliedUntil <= DateTime.UtcNow);
+            Where(x => !x.Guild.IsDisabled);
+        }
     }
 }

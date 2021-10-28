@@ -15,10 +15,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using MikyM.Common.DataAccessLayer.Specifications.Extensions;
 using MikyM.Common.DataAccessLayer.Specifications.Helpers;
-using System.Linq;
 
 namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators
 {
@@ -38,16 +38,9 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators
                 (current, includeString) => current.Include(includeString));
 
             foreach (var includeInfo in specification.IncludeExpressions)
-            {
                 if (includeInfo.Type == IncludeTypeEnum.Include)
-                {
                     query = query.Include(includeInfo);
-                }
-                else if (includeInfo.Type == IncludeTypeEnum.ThenInclude)
-                {
-                    query = query.ThenInclude(includeInfo);
-                }
-            }
+                else if (includeInfo.Type == IncludeTypeEnum.ThenInclude) query = query.ThenInclude(includeInfo);
 
             return query;
         }

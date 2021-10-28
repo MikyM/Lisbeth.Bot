@@ -46,6 +46,8 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
             bool isId = long.TryParse(idOrName, out long id);
+            bool isSuccess = true;
+            bool isEmbedConfig = false;
 
             (DiscordEmbed Embed, string Text) result = new (null, "");
 
@@ -123,15 +125,22 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                 case TagActionType.ConfigureEmbed:
                     var cfgResult = await _discordEmbedTagConfiguratorService.ConfigureAsync(ctx, idOrName);
                     result.Embed = cfgResult.Embed;
+                    isSuccess = cfgResult.IsSuccess;
+                    isEmbedConfig = true;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(action), action, null);
             }
 
             if (result.Embed is not null)
-                await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(result.Embed));
+            {
+                if (isSuccess && isEmbedConfig) await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(result.Embed).WithContent("Final result:"));
+                else await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(result.Embed));
+            }
             else
+            {
                 await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent(result.Text));
+            }
         }
     }
 }

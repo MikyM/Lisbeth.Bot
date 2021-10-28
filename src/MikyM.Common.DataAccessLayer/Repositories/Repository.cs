@@ -29,7 +29,8 @@ namespace MikyM.Common.DataAccessLayer.Repositories
     public class Repository<TEntity> : ReadOnlyRepository<TEntity>, IRepository<TEntity>
         where TEntity : AggregateRootEntity
     {
-        public Repository(DbContext context, ISpecificationEvaluator specificationEvaluator) : base(context, specificationEvaluator)
+        public Repository(DbContext context, ISpecificationEvaluator specificationEvaluator) : base(context,
+            specificationEvaluator)
         {
         }
 

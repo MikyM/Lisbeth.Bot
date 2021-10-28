@@ -27,6 +27,7 @@ using MikyM.Common.DataAccessLayer.UnitOfWork;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Lisbeth.Bot.DataAccessLayer.Specifications.MuteSpecifications;
 
 namespace Lisbeth.Bot.Application.Services.Database
 {
@@ -40,11 +41,8 @@ namespace Lisbeth.Bot.Application.Services.Database
         {
             if (req  is null) throw new ArgumentNullException(nameof(req));
 
-            var res = await _unitOfWork.GetRepository<Repository<Mute>>()
-                .GetBySpecAsync(new Specification<Mute>(x =>
-                    x.UserId == req.TargetUserId && x.GuildId == req.GuildId && !x.IsDisabled));
-
-            var entity = res.FirstOrDefault();
+            var entity = await base.GetSingleBySpecAsync<Mute>(new Specification<Mute>(x =>
+                    x.UserId == req.TargetUserId && x.GuildId == req.GuildId && !x.IsDisabled && !x.Guild.IsDisabled));
             if (entity  is null) return (await base.AddAsync(req, shouldSave), null);
 
             if (entity.AppliedUntil > req.AppliedUntil) return (entity.Id, entity);
@@ -65,11 +63,7 @@ namespace Lisbeth.Bot.Application.Services.Database
         {
             if (entry  is null) throw new ArgumentNullException(nameof(entry));
 
-            var res = await base.GetBySpecAsync<Mute>(
-                new Specification<Mute>(x =>
-                    x.UserId == entry.TargetUserId && x.GuildId == entry.GuildId && !x.IsDisabled));
-
-            var entity = res.FirstOrDefault();
+            var entity = await base.GetSingleBySpecAsync<Mute>(new ActiveExpiredMutePerGuildSpec(entry.GuildId.Value, entry.TargetUserId.Value));
             if (entity  is null) return null;
 
             base.BeginUpdate(entity);

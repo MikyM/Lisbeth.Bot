@@ -29,9 +29,8 @@ namespace MikyM.Common.Application.Interfaces
     {
         Task<TGetResult> GetAsync<TGetResult>(long id) where TGetResult : class;
 
-        Task<TGetResult>
-            GetSingleBySpecAsync<TSpec, TGetResult>(ISpecification<TEntity> specification = null)
-            where TGetResult : class where TSpec : ISpecification<TEntity>, ISingleResultSpecification;
+        Task<TGetResult> GetSingleBySpecAsync<TGetResult>(ISpecification<TEntity> specification = null)
+            where TGetResult : class;
 
         //Task<IReadOnlyList<TGetResult>> GetSingleBySpecAsync<TGetResult>(ISpecification<TEntity> specification = null) where TGetResult : class;
 

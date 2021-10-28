@@ -17,7 +17,8 @@
 
 namespace MikyM.Common.DataAccessLayer.Specifications.Builders
 {
-    public class SpecificationBuilder<T, TResult> : SpecificationBuilder<T>, ISpecificationBuilder<T, TResult> where T : class where TResult : class
+    public class SpecificationBuilder<T, TResult> : SpecificationBuilder<T>, ISpecificationBuilder<T, TResult>
+        where T : class where TResult : class
     {
         public SpecificationBuilder(Specification<T, TResult> specification)
             : base(specification)

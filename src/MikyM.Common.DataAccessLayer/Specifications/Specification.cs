@@ -15,18 +15,19 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Collections.Generic;
+using System.Linq.Expressions;
 using MikyM.Common.DataAccessLayer.Specifications.Builders;
 using MikyM.Common.DataAccessLayer.Specifications.Evaluators;
 using MikyM.Common.DataAccessLayer.Specifications.Helpers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
 
 namespace MikyM.Common.DataAccessLayer.Specifications
 {
     /// <inheritdoc cref="ISpecification{T,TResult}" />
-    public /*abstract*/ class Specification<T, TResult> : Specification<T>, ISpecification<T, TResult> where T : class where TResult : class
+    public /*abstract*/
+        class Specification<T, TResult> : Specification<T>, ISpecification<T, TResult>
+        where T : class where TResult : class
     {
         protected Specification() : this(InMemorySpecificationEvaluator.Default)
         {
@@ -57,16 +58,9 @@ namespace MikyM.Common.DataAccessLayer.Specifications
         {
         }
 
-        public Specification(Expression<Func<T, bool>> criteria, int limit = 0) : this(InMemorySpecificationEvaluator.Default)
+        public Specification(Expression<Func<T, bool>> criteria) : this(InMemorySpecificationEvaluator.Default)
         {
-            AddFilterCondition(criteria);
-            ApplyTake(limit);
-        }
-
-        public Specification(List<Expression<Func<T, bool>>> criteria, int limit = 0) : this(InMemorySpecificationEvaluator.Default)
-        {
-            WhereExpressions = criteria ?? throw new ArgumentNullException(nameof(criteria));
-            ApplyTake(limit);
+            Where(criteria);
         }
 
         protected Specification(IInMemorySpecificationEvaluator inMemorySpecificationEvaluator)
@@ -90,7 +84,7 @@ namespace MikyM.Common.DataAccessLayer.Specifications
 
         public IEnumerable<IncludeExpressionInfo> IncludeExpressions { get; } = new List<IncludeExpressionInfo>();
 
-        public Expression<Func<T, bool>> GroupByExpression { get; internal set; }
+        public Expression<Func<T, object>> GroupByExpression { get; internal set; }
 
         public IEnumerable<string> IncludeStrings { get; } = new List<string>();
 
@@ -99,98 +93,99 @@ namespace MikyM.Common.DataAccessLayer.Specifications
             get;
         } = new List<(Expression<Func<T, string>> Selector, string SearchTerm, int SearchGroup)>();
 
-        public int? Take { get; internal set; } = null;
+        public int? Take { get; internal set; }
 
-        public int? Skip { get; internal set; } = null;
+        public int? Skip { get; internal set; }
 
-        public Func<IEnumerable<T>, IEnumerable<T>>? PostProcessingAction { get; internal set; } = null;
+        public Func<IEnumerable<T>, IEnumerable<T>>? PostProcessingAction { get; internal set; }
         public string? CacheKey { get; internal set; }
-        public bool CacheEnabled { get; internal set; } = false;
-        public bool IsPagingEnabled { get; internal set; } = false;
+        public bool CacheEnabled { get; internal set; }
+        public bool IsPagingEnabled { get; internal set; }
         public bool AsNoTracking { get; internal set; } = true;
-        public bool AsSplitQuery { get; internal set; } = false;
-        public bool AsNoTrackingWithIdentityResolution { get; internal set; } = false;
+        public bool AsSplitQuery { get; internal set; }
+        public bool AsNoTrackingWithIdentityResolution { get; internal set; }
 
-        protected Specification<T> AddInclude<TProperty>(Expression<Func<T, TProperty>> includeExpression)
+        protected Specification<T> Include<TProperty>(Expression<Func<T, TProperty>> includeExpression)
         {
-            this.Query.Include(includeExpression);
+            Query.Include(includeExpression);
             return this;
         }
 
-        protected IIncludableSpecificationBuilder<T, TProperty> AddNestedInclude<TProperty>(Expression<Func<T, TProperty>> includeExpression)
+        protected IIncludableSpecificationBuilder<T, TProperty> IncludeWithChildren<TProperty>(
+            Expression<Func<T, TProperty>> includeExpression)
         {
-            return this.Query.Include(includeExpression);
+            return Query.Include(includeExpression);
         }
 
-        protected Specification<T> AddInclude(string includeExpression)
+        protected Specification<T> Include(string includeExpression)
         {
-            this.Query.Include(includeExpression);
+            Query.Include(includeExpression);
             return this;
         }
 
-        protected Specification<T> ApplyOrderBy(Expression<Func<T, object>> orderByExpression)
+        protected Specification<T> OrderBy(Expression<Func<T, object>> orderByExpression)
         {
-            this.Query.OrderBy(orderByExpression);
+            Query.OrderBy(orderByExpression);
             return this;
         }
 
-        protected Specification<T> ApplyOrderByDescending(Expression<Func<T, object>> orderByDescendingExpression)
+        protected Specification<T> OrderByDescending(Expression<Func<T, object>> orderByDescendingExpression)
         {
-            this.Query.OrderByDescending(orderByDescendingExpression);
+            Query.OrderByDescending(orderByDescendingExpression);
             return this;
         }
 
-        protected Specification<T> AddFilterCondition(Expression<Func<T, bool>> criteria)
+        protected Specification<T> Where(Expression<Func<T, bool>> criteria)
         {
-            this.Query.Where(criteria);
+            Query.Where(criteria);
             return this;
         }
 
-        protected Specification<T> ApplyGroupBy(Expression<Func<T, bool>> criteria)
+        protected Specification<T> GroupBy(Expression<Func<T, object>> criteria)
         {
-            this.Query.GroupBy(criteria);
+            Query.GroupBy(criteria);
             return this;
         }
 
-        protected Specification<T> ApplySearch(Expression<Func<T, string>> selector, string searchTerm, int searchGroup = 1)
+        protected Specification<T> Search(Expression<Func<T, string>> selector, string searchTerm, int searchGroup = 1)
         {
-            this.Query.Search(selector, searchTerm, searchGroup);
+            Query.Search(selector, searchTerm, searchGroup);
             return this;
         }
 
         protected Specification<T> ApplyTake(int limit)
         {
-            this.Take = limit;
+            Take = limit;
             return this;
         }
 
         protected Specification<T> ApplySkip(int skip)
         {
-            this.Skip = skip;
+            Skip = skip;
             return this;
         }
 
         protected Specification<T> DisableCache(int limit)
         {
-            this.CacheEnabled = false;
+            CacheEnabled = false;
             return this;
         }
 
-        protected Specification<T> ApplyTracking()
+        protected Specification<T> WithTracking(bool withTracking = true)
         {
-            this.AsNoTracking = false;
+            AsNoTracking = withTracking;
             return this;
         }
 
-        protected Specification<T> ApplySplitQuery()
+        protected Specification<T> TreatAsSplitQuery(bool asSplitQuery = true)
         {
-            this.AsSplitQuery = true;
+            AsSplitQuery = true;
             return this;
         }
 
-        protected Specification<T> ApplyAsNoTrackingWithIdentityResolution()
+        protected Specification<T> TreatAsNoTrackingWithIdentityResolution()
         {
-            this.AsNoTrackingWithIdentityResolution = true;
+            AsNoTrackingWithIdentityResolution = true;
             return this;
         }
     }

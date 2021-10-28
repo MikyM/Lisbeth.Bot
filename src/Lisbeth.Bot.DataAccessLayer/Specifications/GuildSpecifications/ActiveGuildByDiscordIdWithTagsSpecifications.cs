@@ -17,7 +17,6 @@
 
 
 using Lisbeth.Bot.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
 using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Common.DataAccessLayer.Specifications.Builders;
 
@@ -27,12 +26,9 @@ namespace Lisbeth.Bot.DataAccessLayer.Specifications.GuildSpecifications
     {
         public ActiveGuildByDiscordIdWithTagsSpecifications(ulong discordGuildId)
         {
-            AddFilterCondition(x => !x.IsDisabled);
-            AddFilterCondition(x => x.GuildId == discordGuildId);
-            //AddInclude($"{nameof(Guild.Tags)}.{nameof(EmbedConfig)}");
-            // AddInclude(x => x.Include(y => y.Tags).ThenInclude(z => z.EmbedConfig));
-            //AddNestedInclude(x => x.Tags).ThenInclude(x => x.EmbedConfig);
-            AddNestedInclude(x => x.Tags).ThenInclude(x => x.EmbedConfig);
+            Where(x => !x.IsDisabled);
+            Where(x => x.GuildId == discordGuildId);
+            IncludeWithChildren(x => x.Tags).ThenInclude(x => x.EmbedConfig);
         }
     }
 }
