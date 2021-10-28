@@ -18,16 +18,14 @@
 using AutoMapper;
 using Lisbeth.Bot.Application.Services.Interfaces.Database;
 using Lisbeth.Bot.DataAccessLayer;
+using Lisbeth.Bot.DataAccessLayer.Specifications.MuteSpecifications;
 using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.Application.Services;
-using MikyM.Common.DataAccessLayer.Repositories;
 using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
-using Lisbeth.Bot.DataAccessLayer.Specifications.MuteSpecifications;
 
 namespace Lisbeth.Bot.Application.Services.Database
 {

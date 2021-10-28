@@ -27,10 +27,12 @@ namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
     public sealed class DiscordGuildIdValidator<T> : IAsyncPropertyValidator<T, ulong>
     {
         private readonly DiscordClient _discord;
+        private readonly bool _suppressCacheCheck;
 
-        public DiscordGuildIdValidator(DiscordClient discord)
+        public DiscordGuildIdValidator(DiscordClient discord, bool suppressCacheCheck = false)
         {
             _discord = discord;
+            _suppressCacheCheck = suppressCacheCheck;
         }
 
         public async Task<bool> IsValidAsync(ValidationContext<T> context, ulong value, CancellationToken cancellation)
@@ -39,6 +41,7 @@ namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
             {
                 var result = await _discord.GetGuildAsync(value);
                 if (result  is null) return false;
+                if (!_suppressCacheCheck && !_discord.Guilds.TryGetValue(value, out _)) return false;
             }
             catch (Exception)
             {
