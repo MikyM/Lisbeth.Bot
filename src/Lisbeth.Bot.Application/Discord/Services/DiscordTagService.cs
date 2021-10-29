@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using AutoMapper;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using JetBrains.Annotations;
@@ -23,16 +22,16 @@ using Lisbeth.Bot.Application.Discord.Exceptions;
 using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
+using Lisbeth.Bot.Application.Exceptions;
 using Lisbeth.Bot.Application.Services.Interfaces.Database;
 using Lisbeth.Bot.DataAccessLayer.Specifications.GuildSpecifications;
 using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.Entities;
+using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Discord.Interfaces;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Lisbeth.Bot.Application.Exceptions;
-using MikyM.Common.DataAccessLayer.Specifications;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {
@@ -83,8 +82,10 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (!creator.IsModerator())
                 throw new DiscordNotAuthorizedException("You are not authorized to create tags");
 
-            await _tagService.AddAsync(req, true);
+            var res = await _tagService.AddAsync(req, true);
 
+            if (!res) throw new ArgumentException($"Tag with name {req.Name} already exists.");
+            
             var embed = new DiscordEmbedBuilder();
             embed.WithColor(new DiscordColor(guildCfg.EmbedHexColor));
             embed.WithDescription("Tag added successfully");

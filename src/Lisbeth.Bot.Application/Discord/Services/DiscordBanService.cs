@@ -36,6 +36,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Lisbeth.Bot.Application.Exceptions;
+using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {

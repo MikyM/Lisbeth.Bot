@@ -19,15 +19,16 @@ using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.Extensions;
+using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Application.Services.Interfaces.Database;
+using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.DataAccessLayer.Specifications.MuteSpecifications;
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Discord.Interfaces;
 using System;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.Services
@@ -38,12 +39,14 @@ namespace Lisbeth.Bot.Application.Discord.Services
         private readonly IDiscordService _discord;
         private readonly IGuildService _guildService;
         private readonly IMuteService _muteService;
+        private readonly IDiscordEmbedProvider _embedProvider;
 
-        public DiscordMemberService(IDiscordService discord, IGuildService guildService, IMuteService muteService)
+        public DiscordMemberService(IDiscordService discord, IGuildService guildService, IMuteService muteService, IDiscordEmbedProvider embedProvider)
         {
             _guildService = guildService;
             _muteService = muteService;
             _discord = discord;
+            _embedProvider = embedProvider;
         }
 
         public async Task LogMemberRemovedEventAsync(GuildMemberRemoveEventArgs args)
@@ -113,26 +116,19 @@ namespace Lisbeth.Bot.Application.Discord.Services
         {
             if (args  is null) throw new ArgumentNullException(nameof(args));
 
-            var res = await _guildService.GetBySpecAsync<Guild>(
-                new Specification<Guild>(x => x.GuildId == args.Guild.Id && !x.IsDisabled));
+            var guild = await _guildService.GetSingleBySpecAsync<Guild>(new ActiveGuildByDiscordIdWithModerationSpecifications(args.Guild.Id));
 
-            var guild = res.FirstOrDefault();
-
-            if (guild?.ModerationConfig?.MemberWelcomeMessage  is null) return;
+            if (guild?.ModerationConfig?.BaseMemberWelcomeMessage is null) return;
 
             var embed = new DiscordEmbedBuilder();
-            embed.WithColor(new DiscordColor(guild.EmbedHexColor));
-            if (guild.ModerationConfig.MemberWelcomeMessageTitle is not null)
-                embed.WithTitle(guild.ModerationConfig.MemberWelcomeMessageTitle);
-
-            var matches = Regex.Matches(guild.ModerationConfig.MemberWelcomeMessage, @"@field@(.+?)@endField@");
-            int count = matches.Count > 25 ? 25 : matches.Count;
-
-
-            for (int i = 0; i < count; i++)
+            if (guild.ModerationConfig.MemberWelcomeEmbedConfig is not null)
             {
-                var match = Regex.Match(matches[i].Groups[1].Value, @"@title@(.+?)@endTitle@");
-                embed.AddField(match.Groups[1].Value, matches[i].Groups[1].Value);
+                embed = _embedProvider.ConfigureEmbed(guild.ModerationConfig.MemberWelcomeEmbedConfig);
+            }
+            else
+            {
+                embed.WithColor(new DiscordColor(guild.EmbedHexColor));
+                embed.WithDescription(guild.ModerationConfig.BaseMemberWelcomeMessage);
             }
 
             try

@@ -3,15 +3,17 @@ using System;
 using Lisbeth.Bot.DataAccessLayer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Lisbeth.Bot.DataAccessLayer.Migrations
 {
     [DbContext(typeof(LisbethBotDbContext))]
-    partial class LisbethBotDbContextModelSnapshot : ModelSnapshot
+    [Migration("20211029140533_embedsembedsandmore")]
+    partial class embedsembedsandmore
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -112,10 +114,6 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                         .HasColumnType("timestamp")
                         .HasColumnName("created_at");
 
-                    b.Property<long>("CreatorId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("creator_id");
-
                     b.Property<string>("Description")
                         .HasColumnType("varchar(4096)")
                         .HasColumnName("description");
@@ -148,10 +146,6 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     b.Property<bool>("IsDisabled")
                         .HasColumnType("boolean")
                         .HasColumnName("is_disabled");
-
-                    b.Property<long>("LastEditById")
-                        .HasColumnType("bigint")
-                        .HasColumnName("last_edit_by_id");
 
                     b.Property<string>("Thumbnail")
                         .HasMaxLength(100)
@@ -457,10 +451,6 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                         .HasColumnType("timestamp")
                         .HasColumnName("created_at");
 
-                    b.Property<long>("CreatorId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("creator_id");
-
                     b.Property<string>("CronExpression")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -483,10 +473,6 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_guild_reminder");
 
-                    b.Property<long>("LastEditById")
-                        .HasColumnType("bigint")
-                        .HasColumnName("lasted_edit_by_id");
-
                     b.Property<string>("Mentions")
                         .HasColumnType("text")
                         .HasColumnName("tags");
@@ -506,6 +492,10 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                         .IsRequired()
                         .HasColumnType("timestamp")
                         .HasColumnName("updated_at");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("user_id");
 
                     b.HasKey("Id");
 
@@ -531,10 +521,6 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                         .HasColumnType("timestamp")
                         .HasColumnName("created_at");
 
-                    b.Property<long>("CreatorId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("creator_id");
-
                     b.Property<long?>("EmbedConfigId")
                         .HasColumnType("bigint")
                         .HasColumnName("embed_config_id");
@@ -550,10 +536,6 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     b.Property<bool>("IsGuildReminder")
                         .HasColumnType("boolean")
                         .HasColumnName("is_guild_reminder");
-
-                    b.Property<long>("LastEditById")
-                        .HasColumnType("bigint")
-                        .HasColumnName("lasted_edit_by_id");
 
                     b.Property<string>("Mentions")
                         .HasColumnType("text")
@@ -574,6 +556,10 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                         .IsRequired()
                         .HasColumnType("timestamp")
                         .HasColumnName("updated_at");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("user_id");
 
                     b.HasKey("Id");
 
@@ -599,10 +585,6 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                         .HasColumnType("timestamp")
                         .HasColumnName("created_at");
 
-                    b.Property<long>("CreatorId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("creator_id");
-
                     b.Property<long?>("EmbedConfigId")
                         .HasColumnType("bigint")
                         .HasColumnName("embed_config_id");
@@ -614,10 +596,6 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     b.Property<bool>("IsDisabled")
                         .HasColumnType("boolean")
                         .HasColumnName("is_disabled");
-
-                    b.Property<long>("LastEditById")
-                        .HasColumnType("bigint")
-                        .HasColumnName("lasted_edit_by_id");
 
                     b.Property<long>("MessageId")
                         .HasColumnType("bigint")
@@ -641,6 +619,10 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                         .IsRequired()
                         .HasColumnType("timestamp")
                         .HasColumnName("updated_at");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("user_id");
 
                     b.HasKey("Id");
 
@@ -714,10 +696,6 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                         .HasColumnType("timestamp")
                         .HasColumnName("created_at");
 
-                    b.Property<long>("CreatorId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("creator_id");
-
                     b.Property<long?>("EmbedConfigId")
                         .HasColumnType("bigint")
                         .HasColumnName("embed_config_id");
@@ -731,10 +709,6 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     b.Property<bool>("IsDisabled")
                         .HasColumnType("boolean")
                         .HasColumnName("is_disabled");
-
-                    b.Property<long>("LastEditById")
-                        .HasColumnType("bigint")
-                        .HasColumnName("lasted_edit_by_id");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -751,6 +725,12 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                         .IsRequired()
                         .HasColumnType("timestamp")
                         .HasColumnName("updated_at");
+
+                    b.Property<long>("UserId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("user_id")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.None);
 
                     b.HasKey("Id");
 

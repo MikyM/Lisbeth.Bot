@@ -29,6 +29,7 @@ using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.Exceptions;
+using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Buttons;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Selects;
@@ -68,16 +69,14 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             bool isValidId = long.TryParse(idOrName, out long id);
             
-            var res = await _service.GetBySpecAsync<T>(new ActiveWithEmbedCfgByIdOrNameSpecifications<T>(isValidId ? id : null, idOrName, ctx.Guild.Id));
-            var entity = res.FirstOrDefault();
+            var entity = await _service.GetSingleBySpecAsync<T>(new ActiveWithEmbedCfgByIdOrNameSpecifications<T>(isValidId ? id : null, idOrName, ctx.Guild.Id));
 
-            if (entity  is null) throw new ArgumentException("Target object not found.");
+            if (entity is null) throw new ArgumentException("Target object not found.");
             if (entity.GuildId != ctx.Guild.Id) throw new DiscordNotAuthorizedException();
 
             var member = await ctx.Guild.GetMemberAsync(ctx.User.Id);
 
-            if (entity.UserId != ctx.User.Id &&
-                !member.Roles.Any(x => x.Permissions.HasPermission(Permissions.BanMembers)))
+            if (entity.CreatorId != ctx.User.Id && !member.IsModerator())
                 throw new DiscordNotAuthorizedException();
 
             var intr = ctx.Client.GetInteractivity();

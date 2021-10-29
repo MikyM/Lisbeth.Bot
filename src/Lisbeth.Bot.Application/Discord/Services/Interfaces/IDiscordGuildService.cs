@@ -15,19 +15,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Threading.Tasks;
+using DSharpPlus.EventArgs;
 
-using Lisbeth.Bot.Domain.Entities;
-using MikyM.Common.DataAccessLayer.Specifications;
-
-namespace Lisbeth.Bot.DataAccessLayer.Specifications.GuildSpecifications
+namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
 {
-    public class ActiveGuildByDiscordIdWithTicketingSpecifications : Specification<Guild>
+    public interface IDiscordGuildService
     {
-        public ActiveGuildByDiscordIdWithTicketingSpecifications(ulong discordGuildId)
-        {
-            Where(x => !x.IsDisabled);
-            Where(x => x.GuildId == discordGuildId);
-            Include(x => x.TicketingConfig);
-        }
+        Task HandleGuildCreateAsync(GuildCreateEventArgs args);
+        Task HandleGuildDeleteAsync(GuildDeleteEventArgs args);
     }
 }

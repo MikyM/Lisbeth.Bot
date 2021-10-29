@@ -34,6 +34,8 @@ namespace Lisbeth.Bot.Domain.Entities
         public int ThumbnailHeight { get; set; }
         public int ThumbnailWidth { get; set; }
         public string Title { get; set; }
+        public ulong CreatorId { get; set; }
+        public ulong LastEditById { get; set; }
         public DateTime? Timestamp { get; set; }
         public string HexColor { get; set; } = "#7d7d7d";
         public List<DiscordField> Fields { get; set; }
@@ -42,5 +44,8 @@ namespace Lisbeth.Bot.Domain.Entities
         public RecurringReminder RecurringReminder { get; set; }
         public Tag Tag { get; set; }
         public RoleMenu RoleMenu { get; set; }
+        public TicketingConfig TicketingConfigWithCenterMessage { get; set; }
+        public TicketingConfig TicketingConfigWithWelcomeMessage { get; set; }
+        public ModerationConfig ModerationConfig { get; set; }
     }
 }

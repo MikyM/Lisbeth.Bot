@@ -51,14 +51,13 @@ namespace Lisbeth.Bot.API
             CreateMap<TicketingConfig, TicketingConfig>();
             CreateMap<ModerationConfig, ModerationConfig>();
             CreateMap<TagAddReqDto, Tag>()
-                .ForMember(dest => dest.UserId, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
+                .ForMember(dest => dest.CreatorId, source => source.MapFrom(x => x.RequestedOnBehalfOfId))
+                .ForMember(dest => dest.LastEditById, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
             CreateMap<EmbedConfigDto, EmbedConfig>();
-            CreateMap<TagGetReqDto, Tag>()
-                .ForMember(dest => dest.UserId, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
             CreateMap<TagEditReqDto, Tag>()
-                .ForMember(dest => dest.UserId, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
+                .ForMember(dest => dest.LastEditById, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
             CreateMap<TagDisableReqDto, Tag>()
-                .ForMember(dest => dest.UserId, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
+                .ForMember(dest => dest.LastEditById, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
 
             CreateMap<RoleEmojiMappingReqDto, RoleEmojiMapping>();
             CreateMap<RoleMenuReqDto, RoleMenu>();

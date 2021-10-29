@@ -15,15 +15,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Lisbeth.Bot.Domain.Entities.Base
+using MikyM.Common.DataAccessLayer.Specifications;
+
+namespace Lisbeth.Bot.DataAccessLayer.Specifications.Tag
 {
-    public class EmbedConfigEntity : SnowflakeEntity
+    public class TagByGuildAndNameSpec : Specification<Domain.Entities.Tag>
     {
-        public long? EmbedConfigId { get; set; }
-        public EmbedConfig EmbedConfig { get; set; }
-        public ulong CreatorId { get; set; }
-        public ulong LastEditById { get; set; }
-        public ulong GuildId { get; set; }
-        public string Name { get; set; }
+        public TagByGuildAndNameSpec(string name, ulong guildId)
+        {
+            Where(x => x.Name == name);
+            Where(x => x.GuildId == guildId);
+        }
     }
 }

@@ -15,9 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Collections.Generic;
-using System.Text.Json;
 using Lisbeth.Bot.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -28,6 +25,45 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
     {
         public void Configure(EntityTypeBuilder<Guild> builder)
         {
+            builder.ToTable("guild");
+
+            builder.Property(x => x.Id).HasColumnName("id").HasColumnType("bigint").ValueGeneratedOnAdd().IsRequired();
+            builder.Property(x => x.IsDisabled).HasColumnName("is_disabled").HasColumnType("boolean").IsRequired();
+            builder.Property(x => x.CreatedAt).HasColumnName("created_at").HasColumnType("timestamp")
+                .ValueGeneratedOnAdd().IsRequired();
+            builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamp").IsRequired();
+
+            builder.Property(x => x.GuildId).HasColumnName("guild_id").HasColumnType("bigint").ValueGeneratedOnAdd()
+                .IsRequired();
+            builder.Property(x => x.UserId).HasColumnName("inviter_id").HasColumnType("bigint");
+            builder.Property(x => x.EmbedHexColor).HasColumnName("embed_hex_color").HasColumnType("varchar(40)")
+                .HasMaxLength(40).IsRequired();
+            builder.Property(x => x.ReminderChannelId).HasColumnName("reminder_channel_id").HasColumnType("bigint");
+
+            builder.Metadata.FindNavigation(nameof(Guild.Tags)).SetPropertyAccessMode(PropertyAccessMode.Field);
+            builder.Metadata.FindNavigation(nameof(Guild.Bans)).SetPropertyAccessMode(PropertyAccessMode.Field);
+            builder.Metadata.FindNavigation(nameof(Guild.Mutes)).SetPropertyAccessMode(PropertyAccessMode.Field);
+            builder.Metadata.FindNavigation(nameof(Guild.Prunes)).SetPropertyAccessMode(PropertyAccessMode.Field);
+            builder.Metadata.FindNavigation(nameof(Guild.RoleMenus)).SetPropertyAccessMode(PropertyAccessMode.Field);
+            builder.Metadata.FindNavigation(nameof(Guild.GuildServerBoosters))
+                .SetPropertyAccessMode(PropertyAccessMode.Field);
+            builder.Metadata.FindNavigation(nameof(Guild.Reminders)).SetPropertyAccessMode(PropertyAccessMode.Field);
+            builder.Metadata.FindNavigation(nameof(Guild.RecurringReminders))
+                .SetPropertyAccessMode(PropertyAccessMode.Field);
+
+            builder.HasIndex(x => x.GuildId)
+                .IsUnique();
+
+            builder.HasOne(x => x.ModerationConfig)
+                .WithOne(x => x.Guild)
+                .HasForeignKey<ModerationConfig>(x => x.GuildId)
+                .HasPrincipalKey<Guild>(x => x.GuildId);
+
+            builder.HasOne(x => x.TicketingConfig)
+                .WithOne(x => x.Guild)
+                .HasForeignKey<TicketingConfig>(x => x.GuildId)
+                .HasPrincipalKey<Guild>(x => x.GuildId);
+
             builder
                 .HasMany(x => x.Mutes)
                 .WithOne(x => x.Guild)
@@ -78,130 +114,6 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
                 .HasForeignKey(x => x.GuildId)
                 .HasPrincipalKey(x => x.GuildId)
                 .IsRequired(false);
-
-            builder.Metadata.FindNavigation(nameof(Guild.Tags)).SetPropertyAccessMode(PropertyAccessMode.Field);
-            builder.Metadata.FindNavigation(nameof(Guild.Bans)).SetPropertyAccessMode(PropertyAccessMode.Field);
-            builder.Metadata.FindNavigation(nameof(Guild.Mutes)).SetPropertyAccessMode(PropertyAccessMode.Field);
-            builder.Metadata.FindNavigation(nameof(Guild.Prunes)).SetPropertyAccessMode(PropertyAccessMode.Field);
-            builder.Metadata.FindNavigation(nameof(Guild.RoleMenus)).SetPropertyAccessMode(PropertyAccessMode.Field);
-            builder.Metadata.FindNavigation(nameof(Guild.GuildServerBoosters))
-                .SetPropertyAccessMode(PropertyAccessMode.Field);
-            builder.Metadata.FindNavigation(nameof(Guild.Reminders)).SetPropertyAccessMode(PropertyAccessMode.Field);
-            builder.Metadata.FindNavigation(nameof(Guild.RecurringReminders))
-                .SetPropertyAccessMode(PropertyAccessMode.Field);
-
-            builder.ToTable("guild");
-
-            builder.Property(x => x.Id).HasColumnName("id").HasColumnType("bigint").ValueGeneratedOnAdd().IsRequired();
-            builder.Property(x => x.IsDisabled).HasColumnName("is_disabled").HasColumnType("boolean").IsRequired();
-            builder.Property(x => x.CreatedAt).HasColumnName("created_at").HasColumnType("timestamp")
-                .ValueGeneratedOnAdd().IsRequired();
-            builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamp").IsRequired();
-
-            builder.Property(x => x.GuildId).HasColumnName("guild_id").HasColumnType("bigint").ValueGeneratedOnAdd()
-                .IsRequired();
-            builder.Property(x => x.UserId).HasColumnName("inviter_id").HasColumnType("bigint");
-            builder.Property(x => x.EmbedHexColor).HasColumnName("embed_hex_color").HasColumnType("varchar(40)")
-                .HasMaxLength(40).IsRequired();
-            builder.Property(x => x.ReminderChannelId).HasColumnName("reminder_channel_id").HasColumnType("bigint");
-
-            builder.OwnsOne<TicketingConfig>(nameof(Guild.TicketingConfig), ownedNavigationBuilder =>
-            {
-                ownedNavigationBuilder.ToTable("guild_ticketing_config");
-
-                ownedNavigationBuilder.Property(x => x.Id).HasColumnName("id").HasColumnType("bigint")
-                    .ValueGeneratedOnAdd().IsRequired();
-                ownedNavigationBuilder.Property(x => x.IsDisabled).HasColumnName("is_disabled").HasColumnType("boolean")
-                    .IsRequired();
-                ownedNavigationBuilder.Property(x => x.CreatedAt).HasColumnName("created_at").HasColumnType("timestamp")
-                    .ValueGeneratedOnAdd().IsRequired();
-                ownedNavigationBuilder.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamp")
-                    .IsRequired();
-
-                ownedNavigationBuilder.Property(x => x.GuildId).HasColumnName("guild_id").HasColumnType("bigint")
-                    .ValueGeneratedOnAdd().IsRequired();
-                ownedNavigationBuilder.Property(x => x.ClosedCategoryId).HasColumnName("closed_category_id")
-                    .HasColumnType("bigint");
-                ownedNavigationBuilder.Property(x => x.OpenedCategoryId).HasColumnName("opened_category_id")
-                    .HasColumnType("bigint");
-                ownedNavigationBuilder.Property(x => x.LogChannelId).HasColumnName("log_channel_id")
-                    .HasColumnType("bigint");
-                ownedNavigationBuilder.Property(x => x.LastTicketId).HasColumnName("last_ticket_id")
-                    .HasColumnType("bigint");
-                ownedNavigationBuilder.Property(x => x.OpenedNamePrefix).HasColumnName("opened_name_prefix")
-                    .HasColumnType("varchar(100)").HasMaxLength(100);
-                ownedNavigationBuilder.Property(x => x.ClosedNamePrefix)
-                    .HasColumnName("closed_name_prefix")
-                    .HasColumnType("varchar(100)")
-                    .HasMaxLength(100);
-                ownedNavigationBuilder.Property(x => x.CleanAfter)
-                    .HasColumnName("clean_after")
-                    .HasColumnType("bigint")
-                    .HasConversion(x => x.Value.Ticks, x => TimeSpan.FromTicks(x));
-                ownedNavigationBuilder.Property(x => x.CloseAfter)
-                    .HasColumnName("close_after")
-                    .HasColumnType("bigint")
-                    .HasConversion(x => x.Value.Ticks, x => TimeSpan.FromTicks(x));
-                ownedNavigationBuilder.Property(x => x.TicketCenterMessageDescription)
-                    .HasColumnName("ticket_center_message_description")
-                    .HasColumnType("text");
-                ownedNavigationBuilder.Property(x => x.TicketWelcomeMessageDescription)
-                    .HasColumnName("ticket_welcome_message_description")
-                    .HasColumnType("text");
-                ownedNavigationBuilder.Property(x => x.TicketCenterMessageFields)
-                    .HasColumnName("ticket_center_message_fields")
-                    .HasColumnType("text")
-                    .HasConversion(
-                        x => JsonSerializer.Serialize(x, new JsonSerializerOptions {IgnoreNullValues = true}),
-                        x => JsonSerializer.Deserialize<List<DiscordField>>(x,
-                            new JsonSerializerOptions {IgnoreNullValues = true}));
-                ownedNavigationBuilder.Property(x => x.TicketWelcomeMessageFields)
-                    .HasColumnName("ticket_welcome_message_fields")
-                    .HasColumnType("text")
-                    .HasConversion(
-                        x => JsonSerializer.Serialize(x, new JsonSerializerOptions {IgnoreNullValues = true}),
-                        x => JsonSerializer.Deserialize<List<DiscordField>>(x,
-                            new JsonSerializerOptions {IgnoreNullValues = true}));
-
-                ownedNavigationBuilder
-                    .WithOwner(x => x.Guild)
-                    .HasForeignKey(x => x.GuildId)
-                    .HasPrincipalKey(x => x.Id);
-            });
-
-            builder.OwnsOne<ModerationConfig>(nameof(Guild.ModerationConfig), ownedNavigationBuilder =>
-            {
-                ownedNavigationBuilder.ToTable("guild_moderation_config");
-
-                ownedNavigationBuilder.Property(x => x.Id).HasColumnName("id").HasColumnType("bigint")
-                    .ValueGeneratedOnAdd().IsRequired();
-                ownedNavigationBuilder.Property(x => x.IsDisabled).HasColumnName("is_disabled").HasColumnType("boolean")
-                    .IsRequired();
-                ownedNavigationBuilder.Property(x => x.CreatedAt).HasColumnName("created_at").HasColumnType("timestamp")
-                    .ValueGeneratedOnAdd().IsRequired();
-                ownedNavigationBuilder.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamp")
-                    .IsRequired();
-
-                ownedNavigationBuilder.Property(x => x.GuildId).HasColumnName("guild_id").HasColumnType("bigint")
-                    .ValueGeneratedOnAdd().IsRequired();
-                ownedNavigationBuilder.Property(x => x.MemberEventsLogChannelId)
-                    .HasColumnName("member_events_log_channel_id").HasColumnType("bigint");
-                ownedNavigationBuilder.Property(x => x.MessageDeletedEventsLogChannelId)
-                    .HasColumnName("message_deleted_events_log_channel_id").HasColumnType("bigint");
-                ownedNavigationBuilder.Property(x => x.MessageUpdatedEventsLogChannelId)
-                    .HasColumnName("message_updated_events_log_channel_id").HasColumnType("bigint");
-                ownedNavigationBuilder.Property(x => x.MuteRoleId).HasColumnName("mute_role_id")
-                    .HasColumnType("bigint");
-                ownedNavigationBuilder.Property(x => x.MemberWelcomeMessage).HasColumnName("member_welcome_message")
-                    .HasColumnType("text");
-                ownedNavigationBuilder.Property(x => x.MemberWelcomeMessageTitle)
-                    .HasColumnName("member_welcome_message_title").HasColumnType("varchar(256)").HasMaxLength(256);
-
-                ownedNavigationBuilder
-                    .WithOwner(x => x.Guild)
-                    .HasForeignKey(x => x.GuildId)
-                    .HasPrincipalKey(x => x.Id);
-            });
         }
     }
 }

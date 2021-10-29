@@ -22,6 +22,7 @@ using AutoMapper;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Services.Interfaces.Database;
 using Lisbeth.Bot.DataAccessLayer;
+using Lisbeth.Bot.DataAccessLayer.Specifications.Tag;
 using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.Application.Services;
@@ -35,6 +36,15 @@ namespace Lisbeth.Bot.Application.Services.Database
     {
         public TagService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
         {
+        }
+
+        public async Task<bool> AddAsync(TagAddReqDto req, bool shouldSave = false)
+        {
+            var res = await base.LongCountAsync(new TagByGuildAndNameSpec(req.Name, req.GuildId));
+            if (res != 0) return false;
+
+            await base.AddAsync(req, shouldSave);
+            return true;
         }
 
         public async Task UpdateTagEmbedConfigAsync(TagEditReqDto req, bool shouldSave = false)
@@ -54,9 +64,12 @@ namespace Lisbeth.Bot.Application.Services.Database
             if (tag.IsDisabled) throw new ArgumentException("Can't update embed config for a disabled tag, enable the tag first.");
 
             base.BeginUpdate(tag);
-            tag.EmbedConfig = _mapper.Map<Tag>(req).EmbedConfig;
-            
-            if(shouldSave) await base.CommitAsync();
+            if (req.EmbedConfig is not null) tag.EmbedConfig = _mapper.Map<EmbedConfig>(req.EmbedConfig);
+            tag.LastEditById = req.RequestedOnBehalfOfId;
+            if (!string.IsNullOrWhiteSpace(req.Name)) tag.Name = req.Name;
+            if (!string.IsNullOrWhiteSpace(req.Text)) tag.Text = req.Text;
+
+            if (shouldSave) await base.CommitAsync();
         }
 
         public async Task DisableAsync(TagDisableReqDto req, bool shouldSave = false)

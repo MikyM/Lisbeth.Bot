@@ -23,6 +23,7 @@ using DSharpPlus.Entities;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Services.Interfaces;
 using Lisbeth.Bot.Application.Services.Interfaces.Database;
+using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.DataAccessLayer.Specifications.GuildSpecifications;
 using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.Entities;
@@ -48,7 +49,7 @@ namespace Lisbeth.Bot.Application.Services
             var guild = await _guildService.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithModerationSpecifications(guildId));
 
-            if (guild  is null) return;
+            if (guild?.ModerationConfig is null) return;
 
             bool wasMuted = rolesBefore.Any(x => x.Id == guild.ModerationConfig.MuteRoleId);
             bool isMuted = rolesAfter.Any(x => x.Id == guild.ModerationConfig.MuteRoleId);

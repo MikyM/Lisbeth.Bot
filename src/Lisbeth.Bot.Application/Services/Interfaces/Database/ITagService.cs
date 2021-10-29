@@ -25,6 +25,7 @@ namespace Lisbeth.Bot.Application.Services.Interfaces.Database
 {
     public interface ITagService : ICrudService<Tag, LisbethBotDbContext>
     {
+        Task<bool> AddAsync(TagAddReqDto req, bool shouldSave = false);
         Task UpdateTagEmbedConfigAsync(TagEditReqDto req, bool shouldSave = false);
         Task DisableAsync(TagDisableReqDto req, bool shouldSave = false);
     }

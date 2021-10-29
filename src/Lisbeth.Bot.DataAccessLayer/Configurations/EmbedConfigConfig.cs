@@ -53,6 +53,10 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
                 .HasMaxLength(200);
             builder.Property(x => x.FooterImageUrl).HasColumnName("footer_image_url")
                 .HasColumnType("varchar(1000)").HasMaxLength(1000);
+            builder.Property(x => x.CreatorId).HasColumnName("creator_id")
+                .HasColumnType("bigint").IsRequired();
+            builder.Property(x => x.LastEditById).HasColumnName("last_edit_by_id")
+                .HasColumnType("bigint").IsRequired();
             builder.Property(x => x.AuthorImageUrl).HasColumnName("author_image_url")
                 .HasColumnType("varchar(1000)").HasMaxLength(1000);
             builder.Property(x => x.ImageUrl).HasColumnName("image_url")
@@ -69,7 +73,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
             builder.Property(x => x.ThumbnailWidth).HasColumnName("thumbnail_width").HasColumnType("integer")
                 .IsRequired();
 
-            builder.HasOne(x => x.Reminder)
+/*            builder.HasOne(x => x.Reminder)
                 .WithOne(x => x.EmbedConfig)
                 .HasForeignKey<Reminder>(x => x.EmbedConfigId)
                 .HasPrincipalKey<EmbedConfig>(x => x.Id)
@@ -92,6 +96,24 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
                 .HasForeignKey<RoleMenu>(x => x.EmbedConfigId)
                 .HasPrincipalKey<EmbedConfig>(x => x.Id)
                 .IsRequired(false);
+
+            builder.HasOne(x => x.TicketingConfigWithCenterMessage)
+                .WithOne(x => x.CenterEmbedConfig)
+                .HasForeignKey<TicketingConfig>(x => x.CenterEmbedConfigId)
+                .HasPrincipalKey<EmbedConfig>(x => x.Id)
+                .IsRequired(false);
+
+            builder.HasOne(x => x.TicketingConfigWithWelcomeMessage)
+                .WithOne(x => x.WelcomeEmbedConfig)
+                .HasForeignKey<TicketingConfig>(x => x.WelcomeEmbedConfigId)
+                .HasPrincipalKey<EmbedConfig>(x => x.Id)
+                .IsRequired(false);
+
+            builder.HasOne(x => x.ModerationConfig)
+                .WithOne(x => x.MemberWelcomeEmbedConfig)
+                .HasForeignKey<ModerationConfig>(x => x.MemberWelcomeEmbedConfigId)
+                .HasPrincipalKey<EmbedConfig>(x => x.Id)
+                .IsRequired(false);*/
         }
     }
 }

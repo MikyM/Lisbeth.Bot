@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
@@ -9,6 +10,7 @@ using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.Extensions;
+using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Application.Services.Interfaces;
 using Lisbeth.Bot.Application.Services.Interfaces.Database;
 using Lisbeth.Bot.DataAccessLayer.Specifications.GuildSpecifications;
@@ -21,6 +23,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
     public class ModerationUtilSlashCommands : ApplicationCommandModule
     {
         public IGuildService _guildService { private get; set; }
+        public IDiscordTicketService _dicordTicketService { private get; set; }
 
         [SlashRequireUserPermissions(Permissions.Administrator)]
         [SlashCommand("identity", "A command that allows checking information about a member.")]
@@ -60,36 +63,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
-            var res = await _guildService.GetBySpecAsync<Guild>(
-                new ActiveGuildByDiscordIdWithTicketingSpecifications(ctx.Guild.Id));
-            var guild = res.FirstOrDefault();
-
-            if (guild  is null) throw new ArgumentException("Guild not found in database");
-            if (guild.TicketingConfig  is null) throw new ArgumentException("Guild doesn't have ticketing configured");
-
-            var envelopeEmoji = DiscordEmoji.FromName(ctx.Client, ":envelope:");
-            var embed = new DiscordEmbedBuilder();
-            embed.WithTitle($"__{ctx.Guild.Name}'s Support Ticket Center__");
-            embed.WithDescription(guild.TicketingConfig.TicketCenterMessageDescription);
-
-            if (guild.TicketingConfig.TicketCenterMessageFields is not null && guild.TicketingConfig.TicketCenterMessageFields.Count != 0)
-            {
-                int i = 1;
-                foreach (var field in guild.TicketingConfig.TicketCenterMessageFields.TakeWhile(_ => i < 25))
-                {
-                    embed.AddField(field.Title, field.Text);
-                    i++;
-                }
-            }
-
-            embed.WithFooter("Click on the button below to create a ticket");
-            embed.WithColor(new DiscordColor(guild.EmbedHexColor));
-
-            var btn = new DiscordButtonComponent(ButtonStyle.Primary, "ticket_open_btn", "Open a ticket", false,
-                new DiscordComponentEmoji(envelopeEmoji));
-            var builder = new DiscordMessageBuilder();
-            builder.AddEmbed(embed.Build());
-            builder.AddComponents(btn);
+            var builder = await _dicordTicketService.GetTicketCenterEmbedAsync(ctx);
 
             await ctx.Channel.SendMessageAsync(builder);
             await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()

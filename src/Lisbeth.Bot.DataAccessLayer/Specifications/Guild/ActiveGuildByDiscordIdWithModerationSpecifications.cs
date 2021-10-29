@@ -15,15 +15,19 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Lisbeth.Bot.Domain.Entities.Base
+
+using MikyM.Common.DataAccessLayer.Specifications;
+using MikyM.Common.DataAccessLayer.Specifications.Builders;
+
+namespace Lisbeth.Bot.DataAccessLayer.Specifications.Guild
 {
-    public class EmbedConfigEntity : SnowflakeEntity
+    public class ActiveGuildByDiscordIdWithModerationSpecifications : Specification<Domain.Entities.Guild>
     {
-        public long? EmbedConfigId { get; set; }
-        public EmbedConfig EmbedConfig { get; set; }
-        public ulong CreatorId { get; set; }
-        public ulong LastEditById { get; set; }
-        public ulong GuildId { get; set; }
-        public string Name { get; set; }
+        public ActiveGuildByDiscordIdWithModerationSpecifications(ulong discordGuildId)
+        {
+            Where(x => !x.IsDisabled);
+            Where(x => x.GuildId == discordGuildId);
+            IncludeWithChildren(x => x.ModerationConfig).ThenInclude(x => x.MemberWelcomeEmbedConfig);
+        }
     }
 }

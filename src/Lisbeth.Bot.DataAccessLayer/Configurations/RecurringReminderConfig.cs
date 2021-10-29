@@ -51,7 +51,8 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
                 .IsRequired()
                 .ValueGeneratedOnAdd();
             builder.Property(x => x.GuildId).HasColumnName("guild_id").HasColumnType("bigint");
-            builder.Property(x => x.UserId).HasColumnName("user_id").HasColumnType("bigint").IsRequired();
+            builder.Property(x => x.CreatorId).HasColumnName("creator_id").HasColumnType("bigint").IsRequired();
+            builder.Property(x => x.LastEditById).HasColumnName("lasted_edit_by_id").HasColumnType("bigint").IsRequired();
             builder.Property(x => x.Text).HasColumnName("text").HasColumnType("text");
             builder.Property(x => x.IsGuildReminder)
                 .HasColumnName("is_guild_reminder")
@@ -63,6 +64,12 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
                 .HasMaxLength(100)
                 .IsRequired();
             builder.Property(x => x.EmbedConfigId).HasColumnName("embed_config_id").HasColumnType("bigint");
+
+            builder.HasOne(x => x.EmbedConfig)
+                .WithOne(x => x.RecurringReminder)
+                .HasForeignKey<RecurringReminder>(x => x.EmbedConfigId)
+                .HasPrincipalKey<EmbedConfig>(x => x.Id)
+                .IsRequired(false);
         }
     }
 }

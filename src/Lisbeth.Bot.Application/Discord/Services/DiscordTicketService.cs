@@ -38,6 +38,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Buttons;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Selects;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.SelectValues;
@@ -53,15 +54,17 @@ namespace Lisbeth.Bot.Application.Discord.Services
         private readonly ILogger<DiscordTicketService> _logger;
         private readonly ITicketService _ticketService;
         private readonly IAsyncExecutor _asyncExecutor;
+        private readonly IDiscordEmbedProvider _embedProvider;
 
         public DiscordTicketService(IDiscordService discord, ITicketService ticketService, IGuildService guildService,
-            ILogger<DiscordTicketService> logger, IAsyncExecutor asyncExecutor)
+            ILogger<DiscordTicketService> logger, IAsyncExecutor asyncExecutor, IDiscordEmbedProvider embedProvider)
         {
             _discord = discord;
             _ticketService = ticketService;
             _guildService = guildService;
             _logger = logger;
             _asyncExecutor = asyncExecutor;
+            _embedProvider = embedProvider;
         }
 
         public async Task<DiscordMessageBuilder> OpenTicketAsync(TicketOpenReqDto req)
@@ -598,26 +601,19 @@ namespace Lisbeth.Bot.Application.Discord.Services
             }
 
             var embed = new DiscordEmbedBuilder();
-            embed.WithColor(new DiscordColor(guildCfg.EmbedHexColor));
-            if (guildCfg.TicketingConfig.TicketWelcomeMessageDescription is not null &&
-                guildCfg.TicketingConfig.TicketWelcomeMessageDescription != "")
+
+            if (guildCfg.TicketingConfig.WelcomeEmbedConfig is not null)
             {
+                embed = _embedProvider.ConfigureEmbed(guildCfg.TicketingConfig.WelcomeEmbedConfig);
+                embed.WithDescription(embed.Description.Replace("@ownerMention@", owner.Mention));
+            }
+            else
+            {
+                embed.WithColor(new DiscordColor(guildCfg.EmbedHexColor));
                 embed.WithDescription(
-                    guildCfg.TicketingConfig.TicketWelcomeMessageDescription.Replace("@ownerMention@", owner.Mention));
+                    guildCfg.TicketingConfig.BaseWelcomeMessage.Replace("@ownerMention@", owner.Mention));
+                embed.WithColor(new DiscordColor(guildCfg.EmbedHexColor));
             }
-
-
-            if (guildCfg.TicketingConfig.TicketWelcomeMessageFields is not null &&
-                guildCfg.TicketingConfig.TicketWelcomeMessageFields.Count != 0)
-            {
-                int i = 1;
-                foreach (var field in guildCfg.TicketingConfig.TicketWelcomeMessageFields.TakeWhile(_ => i < 25))
-                {
-                    embed.AddField(field.Title, field.Text.Replace("@ownerMention@", owner.Mention));
-                    i++;
-                }
-            }
-
             embed.WithFooter($"Ticket Id: {req.GuildSpecificId}");
 
             var btn = new DiscordButtonComponent(ButtonStyle.Primary, nameof(TicketButton.TicketOpenButton), "Close this ticket", false,
@@ -1076,6 +1072,39 @@ namespace Lisbeth.Bot.Application.Discord.Services
             embed.WithFooter($"Ticket Id: {ticket.GuildSpecificId}");
 
             return embed.Build();
+        }
+
+        public async Task<DiscordMessageBuilder> GetTicketCenterEmbedAsync(InteractionContext ctx)
+        {
+            var guild = await _guildService.GetSingleBySpecAsync<Guild>(
+                new ActiveGuildByDiscordIdWithTicketingSpecifications(ctx.Guild.Id));
+
+            if (guild is null) throw new ArgumentException("Guild not found in database");
+            if (guild.TicketingConfig is null) throw new ArgumentException("Guild doesn't have ticketing configured");
+
+            var envelopeEmoji = DiscordEmoji.FromName(ctx.Client, ":envelope:");
+            var embed = new DiscordEmbedBuilder();
+
+            if (guild.TicketingConfig.CenterEmbedConfig is not null)
+            {
+                embed = _embedProvider.ConfigureEmbed(guild.TicketingConfig.CenterEmbedConfig);
+            }
+            else
+            {
+                embed.WithTitle($"__{ctx.Guild.Name}'s Support Ticket Center__");
+                embed.WithDescription(guild.TicketingConfig.BaseCenterMessage);
+                embed.WithColor(new DiscordColor(guild.EmbedHexColor));
+            }
+            
+            embed.WithFooter("Click on the button below to create a ticket");
+
+            var btn = new DiscordButtonComponent(ButtonStyle.Primary, "ticket_open_btn", "Open a ticket", false,
+                new DiscordComponentEmoji(envelopeEmoji));
+            var builder = new DiscordMessageBuilder();
+            builder.AddEmbed(embed.Build());
+            builder.AddComponents(btn);
+
+            return builder;
         }
     }
 }

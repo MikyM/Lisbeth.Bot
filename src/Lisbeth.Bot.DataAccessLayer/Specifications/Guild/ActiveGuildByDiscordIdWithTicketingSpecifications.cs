@@ -18,16 +18,18 @@
 
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.DataAccessLayer.Specifications;
+using MikyM.Common.DataAccessLayer.Specifications.Builders;
 
 namespace Lisbeth.Bot.DataAccessLayer.Specifications.GuildSpecifications
 {
-    public class ActiveGuildByDiscordIdWithModerationSpecifications : Specification<Guild>
+    public class ActiveGuildByDiscordIdWithTicketingSpecifications : Specification<Guild>
     {
-        public ActiveGuildByDiscordIdWithModerationSpecifications(ulong discordGuildId)
+        public ActiveGuildByDiscordIdWithTicketingSpecifications(ulong discordGuildId)
         {
             Where(x => !x.IsDisabled);
             Where(x => x.GuildId == discordGuildId);
-            Include(x => x.ModerationConfig);
+            IncludeWithChildren(x => x.TicketingConfig).ThenInclude(x => x.CenterEmbedConfig);
+            IncludeWithChildren(x => x.TicketingConfig).ThenInclude(x => x.WelcomeEmbedConfig);
         }
     }
 }

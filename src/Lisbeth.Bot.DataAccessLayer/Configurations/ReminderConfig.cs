@@ -45,7 +45,8 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
                     x => JsonSerializer.Deserialize<List<string>>(x,
                         new JsonSerializerOptions {IgnoreNullValues = true}));
             builder.Property(x => x.GuildId).HasColumnName("guild_id").HasColumnType("bigint");
-            builder.Property(x => x.UserId).HasColumnName("user_id").HasColumnType("bigint").IsRequired();
+            builder.Property(x => x.CreatorId).HasColumnName("creator_id").HasColumnType("bigint").IsRequired();
+            builder.Property(x => x.LastEditById).HasColumnName("lasted_edit_by_id").HasColumnType("bigint").IsRequired();
             builder.Property(x => x.Text).HasColumnName("text").HasColumnType("text");
             builder.Property(x => x.SetFor).HasColumnName("set_for").HasColumnType("timestamp").IsRequired();
             builder.Property(x => x.EmbedConfigId).HasColumnName("embed_config_id").HasColumnType("bigint");
@@ -53,6 +54,12 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
                 .HasColumnName("is_guild_reminder")
                 .HasColumnType("boolean")
                 .IsRequired();
+
+            builder.HasOne(x => x.EmbedConfig)
+                .WithOne(x => x.Reminder)
+                .HasForeignKey<Reminder>(x => x.EmbedConfigId)
+                .HasPrincipalKey<EmbedConfig>(x => x.Id)
+                .IsRequired(false);
         }
     }
 }

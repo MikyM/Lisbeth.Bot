@@ -22,7 +22,6 @@ using Lisbeth.Bot.DataAccessLayer.Specifications.BanSpecifications;
 using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.Entities;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Services
