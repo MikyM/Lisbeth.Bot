@@ -24,7 +24,8 @@ namespace Lisbeth.Bot.Application.Discord.Helpers
     {
         public static bool IsValid(this DiscordEmbedBuilder value)
         {
-            return !(value.Author?.Name.Length + value.Footer?.Text.Length + value.Description?.Length + value.Title?.Length +
+            return !(value.Author?.Name.Length + value.Footer?.Text.Length + value.Description?.Length +
+                value.Title?.Length +
                 value.Fields?.Sum(x => x.Value.Length + x.Name.Length) > 6000);
         }
     }

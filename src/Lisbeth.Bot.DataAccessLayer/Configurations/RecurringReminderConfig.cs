@@ -52,7 +52,8 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
                 .ValueGeneratedOnAdd();
             builder.Property(x => x.GuildId).HasColumnName("guild_id").HasColumnType("bigint");
             builder.Property(x => x.CreatorId).HasColumnName("creator_id").HasColumnType("bigint").IsRequired();
-            builder.Property(x => x.LastEditById).HasColumnName("lasted_edit_by_id").HasColumnType("bigint").IsRequired();
+            builder.Property(x => x.LastEditById).HasColumnName("lasted_edit_by_id").HasColumnType("bigint")
+                .IsRequired();
             builder.Property(x => x.Text).HasColumnName("text").HasColumnType("text");
             builder.Property(x => x.IsGuildReminder)
                 .HasColumnName("is_guild_reminder")

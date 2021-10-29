@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
@@ -26,7 +27,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
     {
         public Task<DiscordEmbed> CreateNewMenuAsync(InteractionContext ctx)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
     }
 }

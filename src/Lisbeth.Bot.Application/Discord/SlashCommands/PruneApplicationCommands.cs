@@ -47,7 +47,8 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
             long id = 0,
             [Option("reason", "Reason for ban")] string reason = "No reason provided")
         {
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
+                new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
             if (count > 99) count = 99;
 

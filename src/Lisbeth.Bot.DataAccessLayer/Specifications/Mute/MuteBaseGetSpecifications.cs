@@ -16,12 +16,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.DataAccessLayer.Specifications;
 
-namespace Lisbeth.Bot.DataAccessLayer.Specifications.MuteSpecifications
+namespace Lisbeth.Bot.DataAccessLayer.Specifications.Mute
 {
-    public class MuteBaseGetSpecifications : Specification<Mute>
+    public class MuteBaseGetSpecifications : Specification<Domain.Entities.Mute>
     {
         public MuteBaseGetSpecifications(long? id = null, ulong? userId = null, ulong? guildId = null,
             ulong? appliedById = null, DateTime? liftedOn = null, DateTime? appliedOn = null, ulong? liftedById = null,

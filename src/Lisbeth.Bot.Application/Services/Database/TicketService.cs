@@ -25,7 +25,7 @@ using DSharpPlus.Entities;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Services.Interfaces.Database;
 using Lisbeth.Bot.DataAccessLayer;
-using Lisbeth.Bot.DataAccessLayer.Specifications.TicketSpecifications;
+using Lisbeth.Bot.DataAccessLayer.Specifications.Ticket;
 using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.Application.Services;
@@ -44,22 +44,22 @@ namespace Lisbeth.Bot.Application.Services.Database
         {
             var ticket = await base.GetSingleBySpecAsync<Ticket>(
                 new TicketBaseGetSpecifications(null, null, guildId, channelId, null, false, 1));
-            
-            if (ticket  is null) return;
+
+            if (ticket is null) return;
 
             var req = new TicketCloseReqDto(ticket.Id, ticket.UserId, ticket.GuildId, ticket.ChannelId,
                 requestedOnBehalfOfId);
-            await this.CloseAsync(req, ticket);
+            await CloseAsync(req, ticket);
         }
 
         public async Task<Ticket> CloseAsync(TicketCloseReqDto req, bool shouldSave = false)
         {
-            if (req  is null) throw new ArgumentNullException(nameof(req));
+            if (req is null) throw new ArgumentNullException(nameof(req));
 
             var ticket = await base.GetSingleBySpecAsync<Ticket>(new TicketBaseGetSpecifications(req.Id, req.OwnerId,
                 req.GuildId, req.ChannelId, req.GuildSpecificId));
 
-            if (ticket  is null) return null;
+            if (ticket is null) return null;
 
             base.BeginUpdate(ticket);
             ticket.ClosedById = req.RequestedById;
@@ -73,7 +73,7 @@ namespace Lisbeth.Bot.Application.Services.Database
 
         public async Task<Ticket> CloseAsync(TicketCloseReqDto req, Ticket ticket)
         {
-            if (req  is null) throw new ArgumentNullException(nameof(req));
+            if (req is null) throw new ArgumentNullException(nameof(req));
 
             base.BeginUpdate(ticket);
             ticket.ClosedById = req.RequestedById;
@@ -88,7 +88,7 @@ namespace Lisbeth.Bot.Application.Services.Database
 
         public async Task<Ticket> OpenAsync(TicketOpenReqDto req)
         {
-            if (req  is null) throw new ArgumentNullException(nameof(req));
+            if (req is null) throw new ArgumentNullException(nameof(req));
 
             var ticket = await base.GetSingleBySpecAsync<Ticket>(
                 new TicketBaseGetSpecifications(null, req.OwnerId, req.GuildId));
@@ -101,7 +101,7 @@ namespace Lisbeth.Bot.Application.Services.Database
 
         public async Task<Ticket> ReopenAsync(TicketReopenReqDto req, Ticket ticket)
         {
-            if (req  is null) throw new ArgumentNullException(nameof(req));
+            if (req is null) throw new ArgumentNullException(nameof(req));
 
             base.BeginUpdate(ticket);
             ticket.ReopenedById = req.RequestedById;
@@ -117,12 +117,12 @@ namespace Lisbeth.Bot.Application.Services.Database
 
         public async Task<Ticket> ReopenAsync(TicketReopenReqDto req)
         {
-            if (req  is null) throw new ArgumentNullException(nameof(req));
+            if (req is null) throw new ArgumentNullException(nameof(req));
 
             var ticket = await base.GetSingleBySpecAsync<Ticket>(new TicketBaseGetSpecifications(req.Id, req.OwnerId,
                 req.GuildId, req.ChannelId, req.GuildSpecificId, true));
 
-            if (ticket  is null) return null;
+            if (ticket is null) return null;
 
             base.BeginUpdate(ticket);
             ticket.ReopenedById = req.RequestedById;
@@ -138,8 +138,8 @@ namespace Lisbeth.Bot.Application.Services.Database
 
         public async Task SetAddedUsersAsync(Ticket ticket, IEnumerable<ulong> userIds, bool shouldSave = false)
         {
-            if (userIds  is null) throw new ArgumentNullException(nameof(userIds));
-            if (ticket  is null) throw new ArgumentNullException(nameof(ticket));
+            if (userIds is null) throw new ArgumentNullException(nameof(userIds));
+            if (ticket is null) throw new ArgumentNullException(nameof(ticket));
             var discordMembers = userIds.ToList();
             if (!discordMembers.Any()) return;
 
@@ -150,8 +150,8 @@ namespace Lisbeth.Bot.Application.Services.Database
 
         public async Task SetAddedRolesAsync(Ticket ticket, IEnumerable<ulong> roleIds, bool shouldSave = false)
         {
-            if (roleIds  is null) throw new ArgumentNullException(nameof(roleIds));
-            if (ticket  is null) throw new ArgumentNullException(nameof(ticket));
+            if (roleIds is null) throw new ArgumentNullException(nameof(roleIds));
+            if (ticket is null) throw new ArgumentNullException(nameof(ticket));
             var discordRoles = roleIds.ToList();
             if (!discordRoles.Any()) return;
 
@@ -162,10 +162,10 @@ namespace Lisbeth.Bot.Application.Services.Database
 
         public async Task CheckAndSetPrivacyAsync(Ticket ticket, DiscordGuild guild)
         {
-            if (ticket  is null) throw new ArgumentNullException(nameof(ticket));
-            if (guild  is null) throw new ArgumentNullException(nameof(guild));
+            if (ticket is null) throw new ArgumentNullException(nameof(ticket));
+            if (guild is null) throw new ArgumentNullException(nameof(guild));
 
-            var isPrivate = await this.IsTicketPrivateAsync(ticket, guild);
+            var isPrivate = await IsTicketPrivateAsync(ticket, guild);
 
             if (isPrivate == ticket.IsPrivate) return;
 
@@ -176,10 +176,10 @@ namespace Lisbeth.Bot.Application.Services.Database
 
         public async Task<bool> IsTicketPrivateAsync(Ticket ticket, DiscordGuild guild)
         {
-            if (ticket  is null) throw new ArgumentNullException(nameof(ticket));
-            if (guild  is null) throw new ArgumentNullException(nameof(guild));
+            if (ticket is null) throw new ArgumentNullException(nameof(ticket));
+            if (guild is null) throw new ArgumentNullException(nameof(guild));
 
-            if (ticket.AddedUserIds  is null || ticket.AddedUserIds.Count == 0) return false;
+            if (ticket.AddedUserIds is null || ticket.AddedUserIds.Count == 0) return false;
 
             foreach (var id in ticket.AddedUserIds)
             {

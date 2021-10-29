@@ -17,12 +17,11 @@
 
 
 using System.Linq;
-using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.DataAccessLayer.Specifications;
 
-namespace Lisbeth.Bot.DataAccessLayer.Specifications.GuildSpecifications
+namespace Lisbeth.Bot.DataAccessLayer.Specifications.Guild
 {
-    public class ActiveGuildByDiscordIdWithTicketingAndTicketsSpecifications : Specification<Guild>
+    public class ActiveGuildByDiscordIdWithTicketingAndTicketsSpecifications : Specification<Domain.Entities.Guild>
     {
         public ActiveGuildByDiscordIdWithTicketingAndTicketsSpecifications(ulong discordGuildId)
         {

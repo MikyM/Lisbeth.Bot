@@ -22,7 +22,7 @@ using Lisbeth.Bot.Application.Validation.ReusablePropertyValidation;
 using Lisbeth.Bot.Domain.DTOs.Request;
 using MikyM.Discord.Interfaces;
 
-namespace Lisbeth.Bot.Application.Validation
+namespace Lisbeth.Bot.Application.Validation.Ticket
 {
     public class TicketAddReqValidator : AbstractValidator<TicketAddReqDto>
     {

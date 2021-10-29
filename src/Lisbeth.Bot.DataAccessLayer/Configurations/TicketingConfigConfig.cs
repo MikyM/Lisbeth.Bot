@@ -32,60 +32,60 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
             builder.Property(x => x.Id).HasColumnName("id").HasColumnType("bigint")
                 .ValueGeneratedOnAdd().IsRequired();
             builder.Property(x => x.IsDisabled).HasColumnName("is_disabled").HasColumnType("boolean")
-                        .IsRequired();
+                .IsRequired();
             builder.Property(x => x.CreatedAt).HasColumnName("created_at").HasColumnType("timestamp")
-                        .ValueGeneratedOnAdd().IsRequired();
+                .ValueGeneratedOnAdd().IsRequired();
             builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamp")
-                        .IsRequired();
+                .IsRequired();
 
             builder.Property(x => x.GuildId).HasColumnName("guild_id").HasColumnType("bigint")
-                        .ValueGeneratedOnAdd().IsRequired();
+                .ValueGeneratedOnAdd().IsRequired();
             builder.Property(x => x.ClosedCategoryId).HasColumnName("closed_category_id")
-                        .HasColumnType("bigint");
+                .HasColumnType("bigint");
             builder.Property(x => x.OpenedCategoryId).HasColumnName("opened_category_id")
-                        .HasColumnType("bigint");
+                .HasColumnType("bigint");
             builder.Property(x => x.LogChannelId).HasColumnName("log_channel_id")
-                        .HasColumnType("bigint");
+                .HasColumnType("bigint");
             builder.Property(x => x.LastTicketId).HasColumnName("last_ticket_id")
-                        .HasColumnType("bigint");
+                .HasColumnType("bigint");
             builder.Property(x => x.OpenedNamePrefix).HasColumnName("opened_name_prefix")
-                        .HasColumnType("varchar(100)").HasMaxLength(100);
+                .HasColumnType("varchar(100)").HasMaxLength(100);
             builder.Property(x => x.ClosedNamePrefix)
-                        .HasColumnName("closed_name_prefix")
-                        .HasColumnType("varchar(100)")
-                        .HasMaxLength(100);
+                .HasColumnName("closed_name_prefix")
+                .HasColumnType("varchar(100)")
+                .HasMaxLength(100);
             builder.Property(x => x.CleanAfter)
-                        .HasColumnName("clean_after")
-                        .HasColumnType("bigint")
-                        .HasConversion(x => x.Value.Ticks, x => TimeSpan.FromTicks(x));
+                .HasColumnName("clean_after")
+                .HasColumnType("bigint")
+                .HasConversion(x => x.Value.Ticks, x => TimeSpan.FromTicks(x));
             builder.Property(x => x.CloseAfter)
-                        .HasColumnName("close_after")
-                        .HasColumnType("bigint")
-                        .HasConversion(x => x.Value.Ticks, x => TimeSpan.FromTicks(x));
+                .HasColumnName("close_after")
+                .HasColumnType("bigint")
+                .HasConversion(x => x.Value.Ticks, x => TimeSpan.FromTicks(x));
             builder.Property(x => x.BaseCenterMessage)
-                        .HasColumnName("center_message_description")
-                        .HasColumnType("text");
+                .HasColumnName("center_message_description")
+                .HasColumnType("text");
             builder.Property(x => x.BaseWelcomeMessage)
-                        .HasColumnName("welcome_message_description")
-                        .HasColumnType("text");
+                .HasColumnName("welcome_message_description")
+                .HasColumnType("text");
             builder.Property(x => x.CenterEmbedConfigId)
-                        .HasColumnName("center_embed_config_id")
-                        .HasColumnType("bigint");
+                .HasColumnName("center_embed_config_id")
+                .HasColumnType("bigint");
             builder.Property(x => x.WelcomeEmbedConfigId)
-                        .HasColumnName("center_embed_config_id")
-                        .HasColumnType("bigint");
+                .HasColumnName("center_embed_config_id")
+                .HasColumnType("bigint");
 
             builder.HasOne(x => x.WelcomeEmbedConfig)
-                        .WithOne(x => x.TicketingConfigWithWelcomeMessage)
-                        .HasForeignKey<TicketingConfig>(x => x.WelcomeEmbedConfigId)
-                        .HasPrincipalKey<EmbedConfig>(x => x.Id)
-                        .IsRequired(false);
+                .WithOne(x => x.TicketingConfigWithWelcomeMessage)
+                .HasForeignKey<TicketingConfig>(x => x.WelcomeEmbedConfigId)
+                .HasPrincipalKey<EmbedConfig>(x => x.Id)
+                .IsRequired(false);
 
             builder.HasOne(x => x.CenterEmbedConfig)
-                        .WithOne(x => x.TicketingConfigWithCenterMessage)
-                        .HasForeignKey<TicketingConfig>(x => x.CenterEmbedConfigId)
-                        .HasPrincipalKey<EmbedConfig>(x => x.Id)
-                        .IsRequired(false);
+                .WithOne(x => x.TicketingConfigWithCenterMessage)
+                .HasForeignKey<TicketingConfig>(x => x.CenterEmbedConfigId)
+                .HasPrincipalKey<EmbedConfig>(x => x.Id)
+                .IsRequired(false);
         }
     }
 }

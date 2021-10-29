@@ -39,7 +39,7 @@ using Lisbeth.Bot.Application.Enums;
 using Lisbeth.Bot.Application.Extensions;
 using Lisbeth.Bot.Application.Services.Interfaces.Database;
 using Lisbeth.Bot.DataAccessLayer;
-using Lisbeth.Bot.DataAccessLayer.Specifications.EmbedConfigEntitySpecifications;
+using Lisbeth.Bot.DataAccessLayer.Specifications.EmbedConfig;
 using Lisbeth.Bot.Domain.Entities;
 using Lisbeth.Bot.Domain.Entities.Base;
 using MikyM.Common.Application.Interfaces;
@@ -65,11 +65,12 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
         public async Task<(DiscordEmbed Embed, bool IsSuccess)> ConfigureAsync(InteractionContext ctx, string idOrName)
         {
-            if (ctx  is null) throw new ArgumentNullException(nameof(ctx));
+            if (ctx is null) throw new ArgumentNullException(nameof(ctx));
 
             bool isValidId = long.TryParse(idOrName, out long id);
-            
-            var entity = await _service.GetSingleBySpecAsync<T>(new ActiveWithEmbedCfgByIdOrNameSpecifications<T>(isValidId ? id : null, idOrName, ctx.Guild.Id));
+
+            var entity = await _service.GetSingleBySpecAsync<T>(
+                new ActiveWithEmbedCfgByIdOrNameSpecifications<T>(isValidId ? id : null, idOrName, ctx.Guild.Id));
 
             if (entity is null) throw new ArgumentException("Target object not found.");
             if (entity.GuildId != ctx.Guild.Id) throw new DiscordNotAuthorizedException();
@@ -301,7 +302,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             if (waitResult.TimedOut)
             {
-                await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(GetTimedOutEmbed(foundEntity.Id.ToString())));
+                await ctx.EditResponseAsync(
+                    new DiscordWebhookBuilder().AddEmbed(GetTimedOutEmbed(foundEntity.Id.ToString())));
                 return (currentResult, false);
             }
 
@@ -309,7 +311,6 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 throw new ArgumentException("Response can't be empty or null.");
 
             if (waitResult.Result.Content.Trim() == "@remove@")
-            {
                 switch (action)
                 {
                     case EmbedConfigModuleType.Author:
@@ -343,9 +344,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     default:
                         throw new ArgumentOutOfRangeException(nameof(action), action, null);
                 }
-            }
             else
-            {
                 switch (action)
                 {
                     case EmbedConfigModuleType.Author:
@@ -456,7 +455,6 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     default:
                         throw new ArgumentOutOfRangeException(nameof(action), action, null);
                 }
-            }
 
             if (!currentResult.IsValid())
                 throw new ArgumentException("Total count of characters in an embed can't exceed 6000.");
@@ -469,7 +467,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             if (btnWaitResult.TimedOut)
             {
-                await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(GetTimedOutEmbed(foundEntity.Id.ToString())));
+                await ctx.EditResponseAsync(
+                    new DiscordWebhookBuilder().AddEmbed(GetTimedOutEmbed(foundEntity.Id.ToString())));
                 return (null, false);
             }
 
@@ -477,7 +476,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             {
                 case nameof(EmbedConfigButton.EmbedConfigConfirmButton):
                     var newEmbed = _mapper.Map<EmbedConfig>(currentResult.Build());
-                    if (foundEntity.EmbedConfig  is null)
+                    if (foundEntity.EmbedConfig is null)
                     {
                         _service.BeginUpdate(foundEntity);
                         foundEntity.EmbedConfig = newEmbed;

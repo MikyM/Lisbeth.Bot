@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
-using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
@@ -11,9 +8,8 @@ using DSharpPlus.SlashCommands.Attributes;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
-using Lisbeth.Bot.Application.Services.Interfaces;
 using Lisbeth.Bot.Application.Services.Interfaces.Database;
-using Lisbeth.Bot.DataAccessLayer.Specifications.GuildSpecifications;
+using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.Domain.Entities;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands
@@ -31,14 +27,15 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
         public async Task IdentityCommand(InteractionContext ctx,
             [Option("user", "User to identify")] DiscordUser user)
         {
-            if (user  is null) throw new ArgumentNullException(nameof(user));
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
+            if (user is null) throw new ArgumentNullException(nameof(user));
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
+                new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
             var res = await _guildService.GetBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(ctx.Guild.Id));
             var guild = res.FirstOrDefault();
 
-            if (guild  is null) throw new ArgumentException("Guild not found in database");
+            if (guild is null) throw new ArgumentException("Guild not found in database");
 
             var member = (DiscordMember) user;
 
@@ -61,7 +58,8 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
         [SlashCommand("ticket-center", "A command that allows creating a ticket center message")]
         public async Task TicketCenterCommand(InteractionContext ctx)
         {
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
+                new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
             var builder = await _dicordTicketService.GetTicketCenterEmbedAsync(ctx);
 
@@ -85,15 +83,16 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             [Option("Close", "Should Lisbeth close open tickets after X hours")]
             string closeAfter = "")
         {
-            if (openedCat  is null) throw new ArgumentNullException(nameof(openedCat));
-            if (closedCat  is null) throw new ArgumentNullException(nameof(closedCat));
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
+            if (openedCat is null) throw new ArgumentNullException(nameof(openedCat));
+            if (closedCat is null) throw new ArgumentNullException(nameof(closedCat));
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
+                new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
             var res = await _guildService.GetBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(ctx.Guild.Id));
             var guild = res.FirstOrDefault();
 
-            if (guild  is null) throw new ArgumentException("Guild not found in database");
+            if (guild is null) throw new ArgumentException("Guild not found in database");
             if (guild.TicketingConfig is not null)
                 throw new ArgumentException("Guild already has a ticketing configuration");
 
@@ -118,19 +117,22 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
         public async Task ModConfigCommand(InteractionContext ctx,
             [Option("deleted", "Channel for message deletion logs")]
             DiscordChannel deletedChannel, [Option("updated", "Channel for message update logs")]
-            DiscordChannel updatedChannel, [Option("mute", "Mute role Id")]
-            string muteRoleId)
+            DiscordChannel updatedChannel, [Option("mute", "Mute role Id")] string muteRoleId)
         {
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
+                new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
             var res = await _guildService.GetBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(ctx.Guild.Id));
             var guild = res.FirstOrDefault();
 
-            if (guild  is null) throw new ArgumentException("Guild not found in database");
+            if (guild is null) throw new ArgumentException("Guild not found in database");
 
-            var modConfig = new ModerationConfig()
-            { MuteRoleId = ulong.Parse(muteRoleId), MessageDeletedEventsLogChannelId = deletedChannel.Id, MessageUpdatedEventsLogChannelId = updatedChannel.Id };
+            var modConfig = new ModerationConfig
+            {
+                MuteRoleId = ulong.Parse(muteRoleId), MessageDeletedEventsLogChannelId = deletedChannel.Id,
+                MessageUpdatedEventsLogChannelId = updatedChannel.Id
+            };
 
             _guildService.BeginUpdate(guild);
             guild.SetModerationConfig(modConfig);
@@ -144,7 +146,8 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
         [SlashCommand("guild-add", "A command that adds current guild to bot's database.")]
         public async Task TestGuild(InteractionContext ctx)
         {
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
+                new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
             var guild = new Guild {GuildId = ctx.Guild.Id, UserId = ctx.User.Id, IsDisabled = false};
 

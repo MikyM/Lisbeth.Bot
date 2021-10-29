@@ -15,18 +15,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
+using FluentValidation;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
-using Lisbeth.Bot.Domain.DTOs.Request;
-using System;
-using System.Threading.Tasks;
-using FluentValidation;
 using Lisbeth.Bot.Application.Validation.Tag;
-using VimeoDotNet.Models;
-using Tag = Lisbeth.Bot.Domain.Entities.Tag;
+using Lisbeth.Bot.Domain.DTOs.Request;
+using Lisbeth.Bot.Domain.Entities;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands
 {
@@ -38,10 +37,13 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
         public IDiscordEmbedConfiguratorService<Tag> _discordEmbedTagConfiguratorService { private get; set; }
 
         [SlashCommand("tag", "Allows working with tags.")]
-        public async Task TagCommand(InteractionContext ctx, 
-            [Option("action", "Type of action to perform")] TagActionType action,
-            [Option("name-or-id", "Type of action to perform")] string idOrName = "",
-            [Option("text", "Base text for the tag.")] string text = "")
+        public async Task TagCommand(InteractionContext ctx,
+            [Option("action", "Type of action to perform")]
+            TagActionType action,
+            [Option("name-or-id", "Type of action to perform")]
+            string idOrName = "",
+            [Option("text", "Base text for the tag.")]
+            string text = "")
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
@@ -49,7 +51,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             bool isSuccess = true;
             bool isEmbedConfig = false;
 
-            (DiscordEmbed Embed, string Text) result = new (null, "");
+            (DiscordEmbed Embed, string Text) result = new(null, "");
 
             switch (action)
             {
@@ -74,7 +76,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     if (string.IsNullOrWhiteSpace(idOrName))
                         throw new ArgumentException("You must supply name.");
 
-                    var addReq = new TagAddReqDto()
+                    var addReq = new TagAddReqDto
                     {
                         GuildId = ctx.Guild.Id,
                         Name = idOrName,
@@ -91,7 +93,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     if (!isId && string.IsNullOrWhiteSpace(idOrName))
                         throw new ArgumentException("You must supply a valid Id or name");
 
-                    var editReq = new TagEditReqDto()
+                    var editReq = new TagEditReqDto
                     {
                         GuildId = ctx.Guild.Id,
                         Id = isId ? id : null,
@@ -109,7 +111,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     if (!isId && string.IsNullOrWhiteSpace(idOrName))
                         throw new ArgumentException("You must supply a valid Id or name");
 
-                    var removeReq = new TagDisableReqDto()
+                    var removeReq = new TagDisableReqDto
                     {
                         GuildId = ctx.Guild.Id,
                         Id = isId ? id : null,
@@ -134,7 +136,9 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
 
             if (result.Embed is not null)
             {
-                if (isSuccess && isEmbedConfig) await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(result.Embed).WithContent("Final result:"));
+                if (isSuccess && isEmbedConfig)
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(result.Embed)
+                        .WithContent("Final result:"));
                 else await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(result.Embed));
             }
             else

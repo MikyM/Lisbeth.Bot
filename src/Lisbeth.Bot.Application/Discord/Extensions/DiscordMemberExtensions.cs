@@ -15,10 +15,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus;
-using DSharpPlus.Entities;
 using System.Linq;
 using System.Threading.Tasks;
+using DSharpPlus;
+using DSharpPlus.Entities;
 
 namespace Lisbeth.Bot.Application.Discord.Extensions
 {
@@ -59,10 +59,10 @@ namespace Lisbeth.Bot.Application.Discord.Extensions
         public static bool IsModerator(this DiscordMember member)
         {
             return member.Roles.Any(x =>
-                x.Permissions.HasPermission(Permissions.BanMembers)) ||
-                member.Permissions.HasPermission(Permissions.BanMembers) ||
-                member.Permissions.HasPermission(Permissions.All) ||
-                member.IsOwner;
+                       x.Permissions.HasPermission(Permissions.BanMembers)) ||
+                   member.Permissions.HasPermission(Permissions.BanMembers) ||
+                   member.Permissions.HasPermission(Permissions.All) ||
+                   member.IsOwner;
         }
 
         public static bool IsBotOwner(this DiscordMember member, DiscordClient client)

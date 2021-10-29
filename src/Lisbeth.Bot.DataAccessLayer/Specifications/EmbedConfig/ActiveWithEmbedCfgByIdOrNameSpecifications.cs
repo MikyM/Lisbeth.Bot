@@ -15,21 +15,26 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Lisbeth.Bot.Domain.Entities;
+using Lisbeth.Bot.Domain.Entities.Base;
 using MikyM.Common.DataAccessLayer.Specifications;
-using System;
 
-namespace Lisbeth.Bot.DataAccessLayer.Specifications.MuteSpecifications
+namespace Lisbeth.Bot.DataAccessLayer.Specifications.EmbedConfig
 {
-    public class ActiveExpiredMutePerGuildSpec : Specification<Mute>
+    public class ActiveWithEmbedCfgByIdOrNameSpecifications<T> : Specification<T> where T : EmbedConfigEntity
     {
-        public ActiveExpiredMutePerGuildSpec(ulong targetUserId, ulong guildId)
+        public ActiveWithEmbedCfgByIdOrNameSpecifications(long? id, string name, ulong? guildId = null)
         {
-            Where(x => !x.IsDisabled);
-            Where(x => x.GuildId == guildId);
-            Where(x => x.UserId == targetUserId);
-            Where(x => x.AppliedUntil <= DateTime.UtcNow);
-            Where(x => !x.Guild.IsDisabled);
+            Include(x => x.EmbedConfig);
+
+            if (id.HasValue)
+            {
+                Where(x => x.Id == id);
+            }
+            else
+            {
+                Where(x => x.Name == name);
+                Where(x => x.GuildId == guildId);
+            }
         }
     }
 }

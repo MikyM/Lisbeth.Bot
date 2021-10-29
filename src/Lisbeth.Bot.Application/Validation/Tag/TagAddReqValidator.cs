@@ -38,8 +38,8 @@ namespace Lisbeth.Bot.Application.Validation.Tag
                 x.SetAsyncValidator(new DiscordGuildIdValidator<TagAddReqDto>(discord)));
             RuleFor(x => x.RequestedOnBehalfOfId).NotEmpty()
                 .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<TagAddReqDto>(discord)));
-            RuleFor(x => x.Text).NotEmpty().When(x => x.EmbedConfig  is null);
-            RuleFor(x => x.EmbedConfig).NotEmpty().When(x => x.Text  is null or  "");
+            RuleFor(x => x.Text).NotEmpty().When(x => x.EmbedConfig is null);
+            RuleFor(x => x.EmbedConfig).NotEmpty().When(x => x.Text is null or "");
         }
     }
 }

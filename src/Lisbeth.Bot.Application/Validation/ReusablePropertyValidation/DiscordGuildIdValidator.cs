@@ -40,7 +40,7 @@ namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
             try
             {
                 var result = await _discord.GetGuildAsync(value);
-                if (result  is null) return false;
+                if (result is null) return false;
                 if (!_suppressCacheCheck && !_discord.Guilds.TryGetValue(value, out _)) return false;
             }
             catch (Exception)

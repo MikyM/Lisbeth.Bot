@@ -16,13 +16,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Common.DataAccessLayer.Specifications.Builders;
 
-namespace Lisbeth.Bot.DataAccessLayer.Specifications.GuildSpecifications
+namespace Lisbeth.Bot.DataAccessLayer.Specifications.Guild
 {
-    public class ActiveGuildByDiscordIdWithTicketingSpecifications : Specification<Guild>
+    public class ActiveGuildByDiscordIdWithTicketingSpecifications : Specification<Domain.Entities.Guild>
     {
         public ActiveGuildByDiscordIdWithTicketingSpecifications(ulong discordGuildId)
         {

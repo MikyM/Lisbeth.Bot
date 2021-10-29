@@ -42,8 +42,8 @@ namespace Lisbeth.Bot.Application.Validation.Tag
             RuleFor(x => x.RequestedOnBehalfOfId)
                 .NotEmpty()
                 .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<TagEditReqDto>(discord)));
-            RuleFor(x => x.Text).NotEmpty().When(x => x.EmbedConfig  is null);
-            RuleFor(x => x.EmbedConfig).NotEmpty().When(x => x.Text  is null or "");
+            RuleFor(x => x.Text).NotEmpty().When(x => x.EmbedConfig is null);
+            RuleFor(x => x.EmbedConfig).NotEmpty().When(x => x.Text is null or "");
         }
     }
 }

@@ -34,7 +34,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders
 
         public async Task<string> BuildAsync()
         {
-            if (Users  is null || Users.Count == 0) return "";
+            if (Users is null || Users.Count == 0) return "";
 
             string usersHtml = "";
             foreach (var user in Users)

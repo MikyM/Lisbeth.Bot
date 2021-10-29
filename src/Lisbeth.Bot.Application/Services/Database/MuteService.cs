@@ -15,18 +15,18 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Threading.Tasks;
 using AutoMapper;
+using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Services.Interfaces.Database;
 using Lisbeth.Bot.DataAccessLayer;
-using Lisbeth.Bot.DataAccessLayer.Specifications.MuteSpecifications;
+using Lisbeth.Bot.DataAccessLayer.Specifications.Mute;
 using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.Application.Services;
 using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
-using System;
-using System.Threading.Tasks;
-using JetBrains.Annotations;
 
 namespace Lisbeth.Bot.Application.Services.Database
 {
@@ -39,11 +39,11 @@ namespace Lisbeth.Bot.Application.Services.Database
 
         public async Task<(long Id, Mute FoundEntity)> AddOrExtendAsync(MuteReqDto req, bool shouldSave = false)
         {
-            if (req  is null) throw new ArgumentNullException(nameof(req));
+            if (req is null) throw new ArgumentNullException(nameof(req));
 
             var entity = await base.GetSingleBySpecAsync<Mute>(new Specification<Mute>(x =>
-                    x.UserId == req.TargetUserId && x.GuildId == req.GuildId && !x.IsDisabled && !x.Guild.IsDisabled));
-            if (entity  is null) return (await base.AddAsync(req, shouldSave), null);
+                x.UserId == req.TargetUserId && x.GuildId == req.GuildId && !x.IsDisabled && !x.Guild.IsDisabled));
+            if (entity is null) return (await base.AddAsync(req, shouldSave), null);
 
             if (entity.AppliedUntil > req.AppliedUntil) return (entity.Id, entity);
 
@@ -61,10 +61,12 @@ namespace Lisbeth.Bot.Application.Services.Database
 
         public async Task<Mute> DisableAsync(MuteDisableReqDto entry, bool shouldSave = false)
         {
-            if (entry  is null) throw new ArgumentNullException(nameof(entry));
+            if (entry is null) throw new ArgumentNullException(nameof(entry));
 
-            var entity = await base.GetSingleBySpecAsync<Mute>(new ActiveExpiredMutePerGuildSpec(entry.TargetUserId.Value, entry.GuildId.Value));
-            if (entity  is null) return null;
+            var entity =
+                await base.GetSingleBySpecAsync<Mute>(
+                    new ActiveExpiredMutePerGuildSpec(entry.TargetUserId.Value, entry.GuildId.Value));
+            if (entity is null) return null;
 
             base.BeginUpdate(entity);
             entity.IsDisabled = true;

@@ -22,15 +22,15 @@ namespace Lisbeth.Bot.Application.Helpers
 {
     public sealed class ScheduledEnqueuedState : ScheduledState
     {
-        public string Queue { get; }
-
         public ScheduledEnqueuedState(TimeSpan enqueueIn) : this(DateTime.UtcNow.Add(enqueueIn))
         {
         }
 
         public ScheduledEnqueuedState(DateTime enqueuedAt, string queue = null) : base(enqueuedAt.ToUniversalTime())
         {
-            this.Queue = queue?.Trim();
+            Queue = queue?.Trim();
         }
+
+        public string Queue { get; }
     }
 }

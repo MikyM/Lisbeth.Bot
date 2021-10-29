@@ -15,10 +15,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Hangfire;
-using JetBrains.Annotations;
 using System;
 using System.Linq.Expressions;
+using Hangfire;
+using JetBrains.Annotations;
 
 namespace Lisbeth.Bot.Application.Helpers
 {
@@ -26,17 +26,19 @@ namespace Lisbeth.Bot.Application.Helpers
     public static class HangfireExtensions
     {
         public static string Schedule([Hangfire.Annotations.NotNull] this IBackgroundJobClient client,
-            [Hangfire.Annotations.NotNull, Hangfire.Annotations.InstantHandle] Expression<Action> methodCall, DateTime enqueueAt, string queue)
+            [Hangfire.Annotations.NotNull] [Hangfire.Annotations.InstantHandle]
+            Expression<Action> methodCall, DateTime enqueueAt, string queue)
         {
-            if (client  is null) throw new ArgumentNullException(nameof(client));
+            if (client is null) throw new ArgumentNullException(nameof(client));
 
             return client.Create(methodCall, new ScheduledEnqueuedState(enqueueAt, queue));
         }
 
         public static string Schedule<T>([Hangfire.Annotations.NotNull] this IBackgroundJobClient client,
-            [Hangfire.Annotations.NotNull, Hangfire.Annotations.InstantHandle] Expression<Action<T>> methodCall, DateTime enqueueAt, string queue)
+            [Hangfire.Annotations.NotNull] [Hangfire.Annotations.InstantHandle]
+            Expression<Action<T>> methodCall, DateTime enqueueAt, string queue)
         {
-            if (client  is null) throw new ArgumentNullException(nameof(client));
+            if (client is null) throw new ArgumentNullException(nameof(client));
 
             return client.Create(methodCall, new ScheduledEnqueuedState(enqueueAt, queue));
         }

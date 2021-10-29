@@ -16,15 +16,15 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using Emzi0767.Utilities;
 using FluentValidation;
 using FluentValidation.Validators;
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
 {
@@ -51,7 +51,7 @@ namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
             try
             {
                 guild = await _discord.GetGuildAsync((ulong) _guildId);
-                if (guild  is null)
+                if (guild is null)
                 {
                     _guildExists = false;
                     return false;
@@ -66,7 +66,7 @@ namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
             try
             {
                 var user = await guild.GetMemberAsync(value);
-                if (user  is null) _memberExists = false;
+                if (user is null) _memberExists = false;
             }
             catch (Exception)
             {
@@ -76,7 +76,7 @@ namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
             try
             {
                 var role = guild.Roles.FirstOrDefault(x => x.Key == value).Value;
-                if (role  is null) _roleExists = false;
+                if (role is null) _roleExists = false;
             }
             catch (Exception)
             {
@@ -91,7 +91,6 @@ namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
             return _guildExists
                 ? "'{PropertyName}' is not a valid Discord Id or a discord member or a role with given Id doesn't exist / isn't guilds part."
                 : "'{PropertyName}' is not a valid Discord Id or a discord guild does not exist.";
-
         }
 
 

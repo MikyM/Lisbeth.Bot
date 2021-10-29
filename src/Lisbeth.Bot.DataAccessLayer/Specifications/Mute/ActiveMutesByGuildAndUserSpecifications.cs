@@ -17,12 +17,11 @@
 
 
 using System;
-using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.DataAccessLayer.Specifications;
 
-namespace Lisbeth.Bot.DataAccessLayer.Specifications.MuteSpecifications
+namespace Lisbeth.Bot.DataAccessLayer.Specifications.Mute
 {
-    public class ActiveMutesByGuildAndUserSpecifications : Specification<Mute>
+    public class ActiveMutesByGuildAndUserSpecifications : Specification<Domain.Entities.Mute>
     {
         public ActiveMutesByGuildAndUserSpecifications(ulong guildId, ulong userId)
         {

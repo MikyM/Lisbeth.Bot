@@ -30,7 +30,6 @@ using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
 using JetBrains.Annotations;
 using Lisbeth.Bot.DataAccessLayer;
-using Lisbeth.Bot.Domain;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
@@ -94,11 +93,11 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             if (!dat.Any() || !dat.First().Any())
             {
                 embed = new DiscordEmbedBuilder
-                    {
-                        Title = "Given query produced no results.",
-                        Description = string.Concat("Query: ", Formatter.InlineCode(query), "."),
-                        Color = new DiscordColor(0x007FFF)
-                    };
+                {
+                    Title = "Given query produced no results.",
+                    Description = string.Concat("Query: ", Formatter.InlineCode(query), "."),
+                    Color = new DiscordColor(0x007FFF)
+                };
                 await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
                 return;
             }

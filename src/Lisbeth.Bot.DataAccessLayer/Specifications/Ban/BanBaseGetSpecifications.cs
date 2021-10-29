@@ -15,16 +15,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Lisbeth.Bot.Domain.Entities;
+using System;
 using MikyM.Common.DataAccessLayer.Specifications;
 
-namespace Lisbeth.Bot.DataAccessLayer.Specifications.TicketSpecifications
+namespace Lisbeth.Bot.DataAccessLayer.Specifications.Ban
 {
-    public class TicketBaseGetSpecifications : Specification<Ticket>
+    public class BanBaseGetSpecifications : Specification<Domain.Entities.Ban>
     {
-        public TicketBaseGetSpecifications(long? id = null, ulong? userId = null, ulong? guildId = null,
-            ulong? channelId = null, long? guildSpecificId = null, bool isDisabled = false, int limit = 0,
-            bool takeAny = false)
+        public BanBaseGetSpecifications(long? id = null, ulong? userId = null, ulong? guildId = null,
+            ulong? appliedById = null, DateTime? liftedOn = null, DateTime? appliedOn = null, ulong? liftedById = null,
+            int limit = 0, bool isDisabled = false)
         {
             if (id is not null)
                 Where(x => x.Id == id);
@@ -32,12 +32,18 @@ namespace Lisbeth.Bot.DataAccessLayer.Specifications.TicketSpecifications
                 Where(x => x.UserId == userId);
             if (guildId is not null)
                 Where(x => x.GuildId == guildId);
-            if (channelId is not null)
-                Where(x => x.ChannelId == channelId);
-            if (guildSpecificId is not null)
-                Where(x => x.GuildSpecificId == guildSpecificId);
+            if (appliedById is not null)
+                Where(x => x.AppliedById == appliedById);
+            if (liftedById is not null)
+                Where(x => x.LiftedById == liftedById);
+            if (liftedOn is not null)
+                Where(x => x.LiftedOn == liftedOn);
+            if (appliedOn is not null)
+                Where(x => x.CreatedAt == appliedOn);
+            if (liftedById is not null)
+                Where(x => x.LiftedById == liftedById);
 
-            if (!takeAny) Where(x => x.IsDisabled == isDisabled);
+            Where(x => x.IsDisabled == isDisabled);
 
             OrderByDescending(x => x.CreatedAt);
 

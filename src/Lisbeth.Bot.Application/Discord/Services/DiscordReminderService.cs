@@ -15,10 +15,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
-using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {
@@ -26,17 +27,17 @@ namespace Lisbeth.Bot.Application.Discord.Services
     {
         public Task<DiscordEmbed> SetNewReminderAsync(InteractionContext ctx)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public Task<DiscordEmbed> DisableReminderAsync(InteractionContext ctx)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public Task<DiscordEmbed> RescheduleReminderAsync(InteractionContext ctx)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
     }
 }

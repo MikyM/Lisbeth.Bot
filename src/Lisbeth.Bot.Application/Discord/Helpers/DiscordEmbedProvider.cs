@@ -33,15 +33,17 @@ namespace Lisbeth.Bot.Application.Discord.Helpers
     {
         public DiscordEmbedBuilder ConfigureEmbed(EmbedConfig config)
         {
-            if (config  is null) throw new ArgumentNullException(nameof(config));
+            if (config is null) throw new ArgumentNullException(nameof(config));
 
             var builder = new DiscordEmbedBuilder();
 
             if (!string.IsNullOrWhiteSpace(config.Author)) builder.WithAuthor(config.Author);
-            else if (!string.IsNullOrWhiteSpace(config.Author) && !string.IsNullOrWhiteSpace(config.AuthorImageUrl)) builder.WithAuthor(config.Author, null,  config.AuthorImageUrl);
+            else if (!string.IsNullOrWhiteSpace(config.Author) && !string.IsNullOrWhiteSpace(config.AuthorImageUrl))
+                builder.WithAuthor(config.Author, null, config.AuthorImageUrl);
 
             if (!string.IsNullOrWhiteSpace(config.Footer)) builder.WithFooter(config.Footer);
-            else if (!string.IsNullOrWhiteSpace(config.Footer) && !string.IsNullOrWhiteSpace(config.FooterImageUrl)) builder.WithFooter(config.Footer, config.FooterImageUrl);
+            else if (!string.IsNullOrWhiteSpace(config.Footer) && !string.IsNullOrWhiteSpace(config.FooterImageUrl))
+                builder.WithFooter(config.Footer, config.FooterImageUrl);
 
             if (!string.IsNullOrWhiteSpace(config.Description)) builder.WithDescription(config.Description);
 
@@ -55,13 +57,12 @@ namespace Lisbeth.Bot.Application.Discord.Helpers
 
             if (!string.IsNullOrWhiteSpace(config.Thumbnail))
                 builder.WithThumbnail(config.Thumbnail, config.ThumbnailHeight, config.ThumbnailWidth);
-                
-            if (config.Fields  is null || config.Fields.Count == 0) return builder;
 
-            foreach (var field in config.Fields.Where(field => !string.IsNullOrWhiteSpace(field.Text) && !string.IsNullOrWhiteSpace(field.Title)))
-            {
+            if (config.Fields is null || config.Fields.Count == 0) return builder;
+
+            foreach (var field in config.Fields.Where(field =>
+                !string.IsNullOrWhiteSpace(field.Text) && !string.IsNullOrWhiteSpace(field.Title)))
                 builder.AddField(field.Title, field.Text);
-            }
 
             return builder;
         }

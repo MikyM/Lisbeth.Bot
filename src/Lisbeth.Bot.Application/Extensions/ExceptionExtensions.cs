@@ -8,7 +8,7 @@ namespace Lisbeth.Bot.Application.Extensions
     {
         public static string GetFullMessage(this Exception ex)
         {
-            return ex.InnerException  is null ? ex.Message : ex.Message + " --> " + ex.InnerException.GetFullMessage();
+            return ex.InnerException is null ? ex.Message : ex.Message + " --> " + ex.InnerException.GetFullMessage();
         }
 
         public static IEnumerable<Exception> GetAllExceptions(this Exception exception)

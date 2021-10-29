@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Threading.Tasks;
 using DSharpPlus.EventArgs;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.Helpers;
@@ -22,18 +23,18 @@ using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Application.Services.Interfaces.Database;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.Domain.Entities;
-using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {
     [UsedImplicitly]
     public class DiscordGuildService : IDiscordGuildService
     {
-        private readonly IGuildService _guildService;
-        private readonly IDiscordEmbedProvider _embedProvider;
         private readonly IEmbedConfigService _embedConfigService;
+        private readonly IDiscordEmbedProvider _embedProvider;
+        private readonly IGuildService _guildService;
 
-        public DiscordGuildService(IGuildService guildService, IDiscordEmbedProvider embedProvider, IEmbedConfigService embedConfigService)
+        public DiscordGuildService(IGuildService guildService, IDiscordEmbedProvider embedProvider,
+            IEmbedConfigService embedConfigService)
         {
             _guildService = guildService;
             _embedProvider = embedProvider;

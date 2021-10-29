@@ -15,14 +15,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Services.Interfaces;
 using Lisbeth.Bot.Application.Services.Interfaces.Database;
-using Lisbeth.Bot.DataAccessLayer.Specifications.BanSpecifications;
+using Lisbeth.Bot.DataAccessLayer.Specifications.Ban;
 using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.Entities;
-using System;
-using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Services
 {
@@ -56,7 +56,7 @@ namespace Lisbeth.Bot.Application.Services
             var ban = await _banService.GetSingleBySpecAsync<Ban>(
                 new BanBaseGetSpecifications(null, targetId, guildId));
 
-            if (ban  is null) return;
+            if (ban is null) return;
 
             await _banService.DisableAsync(new BanDisableReqDto(targetId, guildId, requestedOnBehalfOfId));
         }

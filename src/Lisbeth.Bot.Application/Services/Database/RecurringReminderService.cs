@@ -26,7 +26,8 @@ using MikyM.Common.DataAccessLayer.UnitOfWork;
 namespace Lisbeth.Bot.Application.Services.Database
 {
     [UsedImplicitly]
-    public class RecurringReminderService : CrudService<RecurringReminder, LisbethBotDbContext>, IRecurringReminderService
+    public class RecurringReminderService : CrudService<RecurringReminder, LisbethBotDbContext>,
+        IRecurringReminderService
     {
         public RecurringReminderService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
         {

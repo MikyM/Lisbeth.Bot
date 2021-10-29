@@ -16,7 +16,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using JetBrains.Annotations;
@@ -51,17 +50,15 @@ namespace Lisbeth.Bot.Application.Services.Database
         {
             Tag tag;
             if (req.Id.HasValue)
-            {
                 tag = await base.GetAsync<Tag>(req.Id.Value);
-            }
             else if (req.Name is not null && req.Name != "")
-            {
-                tag = await base.GetSingleBySpecAsync<Tag>(new Specification<Tag>(x => x.Name == req.Name && x.GuildId == req.GuildId));
-            }
+                tag = await base.GetSingleBySpecAsync<Tag>(new Specification<Tag>(x =>
+                    x.Name == req.Name && x.GuildId == req.GuildId));
             else throw new ArgumentException("Invalid tag Id/Name was provided.");
 
-            if (tag  is null) throw new ArgumentException("Tag doesn't exist.");
-            if (tag.IsDisabled) throw new ArgumentException("Can't update embed config for a disabled tag, enable the tag first.");
+            if (tag is null) throw new ArgumentException("Tag doesn't exist.");
+            if (tag.IsDisabled)
+                throw new ArgumentException("Can't update embed config for a disabled tag, enable the tag first.");
 
             base.BeginUpdate(tag);
             if (req.EmbedConfig is not null) tag.EmbedConfig = _mapper.Map<EmbedConfig>(req.EmbedConfig);
@@ -76,16 +73,13 @@ namespace Lisbeth.Bot.Application.Services.Database
         {
             Tag tag;
             if (req.Id.HasValue)
-            {
                 tag = await base.GetAsync<Tag>(req.Id.Value);
-            }
             else if (req.Name is not null && req.Name != "")
-            {
-                tag = await base.GetSingleBySpecAsync<Tag>(new Specification<Tag>(x => x.Name == req.Name && x.GuildId == req.GuildId));
-            }
+                tag = await base.GetSingleBySpecAsync<Tag>(new Specification<Tag>(x =>
+                    x.Name == req.Name && x.GuildId == req.GuildId));
             else throw new ArgumentException("Invalid tag Id/Name was provided.");
 
-            if (tag  is null) throw new ArgumentException("Tag doesn't exist.");
+            if (tag is null) throw new ArgumentException("Tag doesn't exist.");
             if (tag.IsDisabled) return;
 
             base.BeginUpdate(tag);

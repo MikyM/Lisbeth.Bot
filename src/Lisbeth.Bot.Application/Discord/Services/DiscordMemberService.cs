@@ -15,6 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using JetBrains.Annotations;
@@ -23,13 +26,10 @@ using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Application.Services.Interfaces.Database;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
-using Lisbeth.Bot.DataAccessLayer.Specifications.MuteSpecifications;
+using Lisbeth.Bot.DataAccessLayer.Specifications.Mute;
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Discord.Interfaces;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {
@@ -37,11 +37,12 @@ namespace Lisbeth.Bot.Application.Discord.Services
     public class DiscordMemberService : IDiscordMemberService
     {
         private readonly IDiscordService _discord;
+        private readonly IDiscordEmbedProvider _embedProvider;
         private readonly IGuildService _guildService;
         private readonly IMuteService _muteService;
-        private readonly IDiscordEmbedProvider _embedProvider;
 
-        public DiscordMemberService(IDiscordService discord, IGuildService guildService, IMuteService muteService, IDiscordEmbedProvider embedProvider)
+        public DiscordMemberService(IDiscordService discord, IGuildService guildService, IMuteService muteService,
+            IDiscordEmbedProvider embedProvider)
         {
             _guildService = guildService;
             _muteService = muteService;
@@ -51,20 +52,20 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
         public async Task LogMemberRemovedEventAsync(GuildMemberRemoveEventArgs args)
         {
-            if (args  is null) throw new ArgumentNullException(nameof(args));
+            if (args is null) throw new ArgumentNullException(nameof(args));
 
             var res = await _guildService.GetBySpecAsync<Guild>(
                 new Specification<Guild>(x => x.GuildId == args.Guild.Id && !x.IsDisabled));
 
             var guild = res.FirstOrDefault();
 
-            if (guild?.ModerationConfig?.MemberEventsLogChannelId  is null) return;
+            if (guild?.ModerationConfig?.MemberEventsLogChannelId is null) return;
 
             DiscordChannel logChannel =
                 args.Guild.Channels.FirstOrDefault(x => x.Key == guild.ModerationConfig.MemberEventsLogChannelId.Value)
                     .Value;
 
-            if (logChannel  is null) return;
+            if (logChannel is null) return;
 
             string reasonLeft = "No reason found";
 
@@ -114,9 +115,10 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
         public async Task SendWelcomeMessageAsync(GuildMemberAddEventArgs args)
         {
-            if (args  is null) throw new ArgumentNullException(nameof(args));
+            if (args is null) throw new ArgumentNullException(nameof(args));
 
-            var guild = await _guildService.GetSingleBySpecAsync<Guild>(new ActiveGuildByDiscordIdWithModerationSpecifications(args.Guild.Id));
+            var guild = await _guildService.GetSingleBySpecAsync<Guild>(
+                new ActiveGuildByDiscordIdWithModerationSpecifications(args.Guild.Id));
 
             if (guild?.ModerationConfig?.BaseMemberWelcomeMessage is null) return;
 
@@ -143,18 +145,18 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
         public async Task MemberMuteCheckAsync(GuildMemberAddEventArgs args)
         {
-            if (args  is null) throw new ArgumentNullException(nameof(args));
+            if (args is null) throw new ArgumentNullException(nameof(args));
 
             var res = await _muteService.GetBySpecAsync<Mute>(
                 new ActiveMutesByGuildAndUserSpecifications(args.Guild.Id, args.Member.Id));
 
             var mute = res.FirstOrDefault();
 
-            if (mute?.Guild.ModerationConfig  is null) return; // no mod config enabled so we don't care
+            if (mute?.Guild.ModerationConfig is null) return; // no mod config enabled so we don't care
 
             var role = args.Guild.Roles.FirstOrDefault(x => x.Key == mute.Guild.ModerationConfig.MuteRoleId).Value;
 
-            if (role  is null) return;
+            if (role is null) return;
 
             await args.Member.GrantRoleAsync(role);
         }

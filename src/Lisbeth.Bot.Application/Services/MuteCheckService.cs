@@ -24,7 +24,6 @@ using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Services.Interfaces;
 using Lisbeth.Bot.Application.Services.Interfaces.Database;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
-using Lisbeth.Bot.DataAccessLayer.Specifications.GuildSpecifications;
 using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.Entities;
 
@@ -33,8 +32,8 @@ namespace Lisbeth.Bot.Application.Services
     [UsedImplicitly]
     public class MuteCheckService : IMuteCheckService
     {
-        private readonly IMuteService _muteService;
         private readonly IGuildService _guildService;
+        private readonly IMuteService _muteService;
 
         public MuteCheckService(IMuteService muteService, IGuildService guildService)
         {
@@ -42,7 +41,8 @@ namespace Lisbeth.Bot.Application.Services
             _guildService = guildService;
         }
 
-        public async Task CheckForNonBotMuteActionAsync(ulong targetId, ulong guildId, ulong requestedOnBehalfOfId, IReadOnlyList<DiscordRole> rolesBefore, IReadOnlyList<DiscordRole> rolesAfter)
+        public async Task CheckForNonBotMuteActionAsync(ulong targetId, ulong guildId, ulong requestedOnBehalfOfId,
+            IReadOnlyList<DiscordRole> rolesBefore, IReadOnlyList<DiscordRole> rolesAfter)
         {
             await Task.Delay(1000);
 
@@ -60,7 +60,8 @@ namespace Lisbeth.Bot.Application.Services
                     await _muteService.DisableAsync(new MuteDisableReqDto(targetId, guildId, requestedOnBehalfOfId));
                     break;
                 case false when isMuted:
-                    await _muteService.AddOrExtendAsync(new MuteReqDto(targetId, guildId, requestedOnBehalfOfId, DateTime.MaxValue));
+                    await _muteService.AddOrExtendAsync(new MuteReqDto(targetId, guildId, requestedOnBehalfOfId,
+                        DateTime.MaxValue));
                     break;
             }
         }

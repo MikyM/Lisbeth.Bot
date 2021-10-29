@@ -15,6 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using JetBrains.Annotations;
@@ -24,14 +27,11 @@ using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Application.Exceptions;
 using Lisbeth.Bot.Application.Services.Interfaces.Database;
-using Lisbeth.Bot.DataAccessLayer.Specifications.GuildSpecifications;
+using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Discord.Interfaces;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {
@@ -39,11 +39,12 @@ namespace Lisbeth.Bot.Application.Discord.Services
     public class DiscordTagService : IDiscordTagService
     {
         private readonly IDiscordService _discord;
+        private readonly IDiscordEmbedProvider _embedProvider;
         private readonly IGuildService _guildService;
         private readonly ITagService _tagService;
-        private readonly IDiscordEmbedProvider _embedProvider;
 
-        public DiscordTagService(IDiscordService discord, IGuildService guildService, ITagService tagService, IDiscordEmbedProvider embedProvider)
+        public DiscordTagService(IDiscordService discord, IGuildService guildService, ITagService tagService,
+            IDiscordEmbedProvider embedProvider)
         {
             _discord = discord;
             _guildService = guildService;
@@ -53,7 +54,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
         public async Task<DiscordEmbed> AddAsync(TagAddReqDto req)
         {
-            if (req  is null) throw new ArgumentNullException(nameof(req));
+            if (req is null) throw new ArgumentNullException(nameof(req));
 
             DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
             DiscordMember creator = await guild.GetMemberAsync(req.RequestedOnBehalfOfId);
@@ -63,46 +64,25 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
         public async Task<DiscordEmbed> AddAsync(InteractionContext ctx, TagAddReqDto req)
         {
-            if (ctx  is null) throw new ArgumentNullException(nameof(ctx));
-            if (req  is null) throw new ArgumentNullException(nameof(req));
+            if (ctx is null) throw new ArgumentNullException(nameof(ctx));
+            if (req is null) throw new ArgumentNullException(nameof(req));
 
             return await AddAsync(ctx.Guild, ctx.Member, req);
         }
 
-        private async Task<DiscordEmbed> AddAsync(DiscordGuild guild, DiscordMember creator, TagAddReqDto req)
-        {
-            if (guild  is null) throw new ArgumentNullException(nameof(guild));
-            if (creator  is null) throw new ArgumentNullException(nameof(creator));
-            if (req  is null) throw new ArgumentNullException(nameof(req));
-
-            var guildCfg = await _guildService.GetSingleBySpecAsync<Guild>(new ActiveGuildByDiscordIdWithTagsSpecifications(req.GuildId));
-            if (guildCfg  is null)
-                throw new NotFoundException($"Guild with Id: {guild.Id} doesn't exist in the database.");
-
-            if (!creator.IsModerator())
-                throw new DiscordNotAuthorizedException("You are not authorized to create tags");
-
-            var res = await _tagService.AddAsync(req, true);
-
-            if (!res) throw new ArgumentException($"Tag with name {req.Name} already exists.");
-            
-            var embed = new DiscordEmbedBuilder();
-            embed.WithColor(new DiscordColor(guildCfg.EmbedHexColor));
-            embed.WithDescription("Tag added successfully");
-
-            return embed.Build();
-        }
-
         public async Task<DiscordEmbed> EditAsync(TagEditReqDto req)
         {
-            if (req  is null) throw new ArgumentNullException(nameof(req));
+            if (req is null) throw new ArgumentNullException(nameof(req));
 
             DiscordGuild guild = null;
-            if (req.GuildId.HasValue) guild = await _discord.Client.GetGuildAsync(req.GuildId.Value);
+            if (req.GuildId.HasValue)
+            {
+                guild = await _discord.Client.GetGuildAsync(req.GuildId.Value);
+            }
             else if (req.Id.HasValue)
             {
                 var tag = await _tagService.GetAsync<Tag>(req.Id.Value);
-                if (tag  is null) throw new NotFoundException("Tag with given Id was not found");
+                if (tag is null) throw new NotFoundException("Tag with given Id was not found");
                 guild = await _discord.Client.GetGuildAsync(tag.GuildId);
             }
 
@@ -113,20 +93,106 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
         public async Task<DiscordEmbed> EditAsync(InteractionContext ctx, TagEditReqDto req)
         {
-            if (ctx  is null) throw new ArgumentNullException(nameof(ctx));
-            if (req  is null) throw new ArgumentNullException(nameof(req));
+            if (ctx is null) throw new ArgumentNullException(nameof(ctx));
+            if (req is null) throw new ArgumentNullException(nameof(req));
 
             return await EditAsync(ctx.Guild, ctx.Member, req);
         }
 
+        public async Task<(DiscordEmbed Embed, string Text)> GetAsync(TagGetReqDto req)
+        {
+            if (req is null) throw new ArgumentNullException(nameof(req));
+
+            DiscordGuild guild = null;
+            if (req.GuildId.HasValue)
+            {
+                guild = await _discord.Client.GetGuildAsync(req.GuildId.Value);
+            }
+            else if (req.Id.HasValue)
+            {
+                var tag = await _tagService.GetAsync<Tag>(req.Id.Value);
+                if (tag is null) throw new NotFoundException("Tag with given Id was not found");
+                guild = await _discord.Client.GetGuildAsync(tag.GuildId);
+            }
+
+            DiscordMember requestingUser = await guild.GetMemberAsync(req.RequestedOnBehalfOfId);
+
+            return await GetAsync(guild, requestingUser, req);
+        }
+
+        public async Task<(DiscordEmbed Embed, string Text)> GetAsync(InteractionContext ctx, TagGetReqDto req)
+        {
+            if (ctx is null) throw new ArgumentNullException(nameof(ctx));
+            if (req is null) throw new ArgumentNullException(nameof(req));
+
+            return await GetAsync(ctx.Guild, ctx.Member, req);
+        }
+
+        public async Task<DiscordEmbed> DisableAsync(TagDisableReqDto req)
+        {
+            if (req is null) throw new ArgumentNullException(nameof(req));
+
+            DiscordGuild guild = null;
+            if (req.GuildId.HasValue)
+            {
+                guild = await _discord.Client.GetGuildAsync(req.GuildId.Value);
+            }
+            else if (req.Id.HasValue)
+            {
+                var tag = await _tagService.GetAsync<Tag>(req.Id.Value);
+                if (tag is null) throw new NotFoundException("Tag with given Id was not found");
+                guild = await _discord.Client.GetGuildAsync(tag.GuildId);
+            }
+
+            DiscordMember requestingUser = await guild.GetMemberAsync(req.RequestedOnBehalfOfId);
+
+            return await DisableAsync(guild, requestingUser, req);
+        }
+
+        public async Task<DiscordEmbed> DisableAsync(InteractionContext ctx, TagDisableReqDto req)
+        {
+            if (ctx is null) throw new ArgumentNullException(nameof(ctx));
+            if (req is null) throw new ArgumentNullException(nameof(req));
+
+            return await DisableAsync(ctx.Guild, ctx.Member, req);
+        }
+
+        private async Task<DiscordEmbed> AddAsync(DiscordGuild guild, DiscordMember creator, TagAddReqDto req)
+        {
+            if (guild is null) throw new ArgumentNullException(nameof(guild));
+            if (creator is null) throw new ArgumentNullException(nameof(creator));
+            if (req is null) throw new ArgumentNullException(nameof(req));
+
+            var guildCfg =
+                await _guildService.GetSingleBySpecAsync<Guild>(
+                    new ActiveGuildByDiscordIdWithTagsSpecifications(req.GuildId));
+            if (guildCfg is null)
+                throw new NotFoundException($"Guild with Id: {guild.Id} doesn't exist in the database.");
+
+            if (!creator.IsModerator())
+                throw new DiscordNotAuthorizedException("You are not authorized to create tags");
+
+            var res = await _tagService.AddAsync(req, true);
+
+            if (!res) throw new ArgumentException($"Tag with name {req.Name} already exists.");
+
+            var embed = new DiscordEmbedBuilder();
+            embed.WithColor(new DiscordColor(guildCfg.EmbedHexColor));
+            embed.WithDescription("Tag added successfully");
+
+            return embed.Build();
+        }
+
         private async Task<DiscordEmbed> EditAsync(DiscordGuild guild, DiscordMember requestingUser, TagEditReqDto req)
         {
-            if (guild  is null) throw new ArgumentNullException(nameof(guild));
-            if (requestingUser  is null) throw new ArgumentNullException(nameof(requestingUser));
-            if (req  is null) throw new ArgumentNullException(nameof(req));
+            if (guild is null) throw new ArgumentNullException(nameof(guild));
+            if (requestingUser is null) throw new ArgumentNullException(nameof(requestingUser));
+            if (req is null) throw new ArgumentNullException(nameof(req));
 
-            var guildCfg = await _guildService.GetSingleBySpecAsync<Guild>(new ActiveGuildByDiscordIdWithTagsSpecifications(guild.Id));
-            if (guildCfg  is null)
+            var guildCfg =
+                await _guildService.GetSingleBySpecAsync<Guild>(
+                    new ActiveGuildByDiscordIdWithTagsSpecifications(guild.Id));
+            if (guildCfg is null)
                 throw new NotFoundException($"Guild with Id: {guild.Id} doesn't exist in the database.");
 
             if (!requestingUser.IsModerator())
@@ -141,37 +207,12 @@ namespace Lisbeth.Bot.Application.Discord.Services
             return embed.Build();
         }
 
-        public async Task<(DiscordEmbed Embed, string Text)> GetAsync(TagGetReqDto req)
+        private async Task<(DiscordEmbed Embed, string Text)> GetAsync(DiscordGuild guild, DiscordMember requestingUser,
+            TagGetReqDto req)
         {
-            if (req  is null) throw new ArgumentNullException(nameof(req));
-
-            DiscordGuild guild = null;
-            if (req.GuildId.HasValue) guild = await _discord.Client.GetGuildAsync(req.GuildId.Value);
-            else if (req.Id.HasValue)
-            {
-                var tag = await _tagService.GetAsync<Tag>(req.Id.Value);
-                if (tag  is null) throw new NotFoundException("Tag with given Id was not found");
-                guild = await _discord.Client.GetGuildAsync(tag.GuildId);
-            }
-
-            DiscordMember requestingUser = await guild.GetMemberAsync(req.RequestedOnBehalfOfId);
-
-            return await GetAsync(guild, requestingUser, req);
-        }
-
-        public async Task<(DiscordEmbed Embed, string Text)> GetAsync(InteractionContext ctx, TagGetReqDto req)
-        {
-            if (ctx  is null) throw new ArgumentNullException(nameof(ctx));
-            if (req  is null) throw new ArgumentNullException(nameof(req));
-
-            return await GetAsync(ctx.Guild, ctx.Member, req);
-        }
-
-        private async Task<(DiscordEmbed Embed, string Text)> GetAsync(DiscordGuild guild, DiscordMember requestingUser, TagGetReqDto req)
-        {
-            if (guild  is null) throw new ArgumentNullException(nameof(guild));
-            if (requestingUser  is null) throw new ArgumentNullException(nameof(requestingUser));
-            if (req  is null) throw new ArgumentNullException(nameof(req));
+            if (guild is null) throw new ArgumentNullException(nameof(guild));
+            if (requestingUser is null) throw new ArgumentNullException(nameof(requestingUser));
+            if (req is null) throw new ArgumentNullException(nameof(req));
 
             Tag tag;
             if (requestingUser.IsBotOwner(_discord.Client))
@@ -182,57 +223,41 @@ namespace Lisbeth.Bot.Application.Discord.Services
             }
             else
             {
-                var guildCfg = await _guildService.GetSingleBySpecAsync<Guild>(new ActiveGuildByDiscordIdWithTagsSpecifications(guild.Id));
+                var guildCfg =
+                    await _guildService.GetSingleBySpecAsync<Guild>(
+                        new ActiveGuildByDiscordIdWithTagsSpecifications(guild.Id));
                 if (guildCfg is null)
                     throw new NotFoundException($"Guild with Id: {guild.Id} doesn't exist in the database.");
 
                 if (requestingUser.Guild.Id != guild.Id) throw new DiscordNotAuthorizedException();
 
-                tag = req.Id.HasValue ? guildCfg.Tags.FirstOrDefault(x => x.Id == req.Id) : guildCfg.Tags.FirstOrDefault(x => x.Name == req.Name);
+                tag = req.Id.HasValue
+                    ? guildCfg.Tags.FirstOrDefault(x => x.Id == req.Id)
+                    : guildCfg.Tags.FirstOrDefault(x => x.Name == req.Name);
 
                 if (requestingUser.Guild.Id != guild.Id) throw new DiscordNotAuthorizedException();
             }
 
-            if (tag  is null) throw new NotFoundException("Tag not found");
-            if (tag.IsDisabled && !requestingUser.IsBotOwner(_discord.Client)) throw new DisabledEntityException("Found tag is disabled");
+            if (tag is null) throw new NotFoundException("Tag not found");
+            if (tag.IsDisabled && !requestingUser.IsBotOwner(_discord.Client))
+                throw new DisabledEntityException("Found tag is disabled");
 
-            return tag.EmbedConfig  is null ? (null, tag.Text) : (_embedProvider.ConfigureEmbed(tag.EmbedConfig).Build(), tag.Text);
+            return tag.EmbedConfig is null
+                ? (null, tag.Text)
+                : (_embedProvider.ConfigureEmbed(tag.EmbedConfig).Build(), tag.Text);
         }
 
-        public async Task<DiscordEmbed> DisableAsync(TagDisableReqDto req)
+        private async Task<DiscordEmbed> DisableAsync(DiscordGuild guild, DiscordMember requestingUser,
+            TagDisableReqDto req)
         {
-            if (req  is null) throw new ArgumentNullException(nameof(req));
+            if (guild is null) throw new ArgumentNullException(nameof(guild));
+            if (requestingUser is null) throw new ArgumentNullException(nameof(requestingUser));
+            if (req is null) throw new ArgumentNullException(nameof(req));
 
-            DiscordGuild guild = null;
-            if (req.GuildId.HasValue) guild = await _discord.Client.GetGuildAsync(req.GuildId.Value);
-            else if (req.Id.HasValue)
-            {
-                var tag = await _tagService.GetAsync<Tag>(req.Id.Value);
-                if (tag  is null) throw new NotFoundException("Tag with given Id was not found");
-                guild = await _discord.Client.GetGuildAsync(tag.GuildId);
-            }
-
-            DiscordMember requestingUser = await guild.GetMemberAsync(req.RequestedOnBehalfOfId);
-
-            return await DisableAsync(guild, requestingUser, req);
-        }
-
-        public async Task<DiscordEmbed> DisableAsync(InteractionContext ctx, TagDisableReqDto req)
-        {
-            if (ctx  is null) throw new ArgumentNullException(nameof(ctx));
-            if (req  is null) throw new ArgumentNullException(nameof(req));
-
-            return await DisableAsync(ctx.Guild, ctx.Member, req);
-        }
-
-        private async Task<DiscordEmbed> DisableAsync(DiscordGuild guild, DiscordMember requestingUser, TagDisableReqDto req)
-        {
-            if (guild  is null) throw new ArgumentNullException(nameof(guild));
-            if (requestingUser  is null) throw new ArgumentNullException(nameof(requestingUser));
-            if (req  is null) throw new ArgumentNullException(nameof(req));
-
-            var guildCfg = await _guildService.GetSingleBySpecAsync<Guild>(new ActiveGuildByDiscordIdWithTagsSpecifications(guild.Id));
-            if (guildCfg  is null)
+            var guildCfg =
+                await _guildService.GetSingleBySpecAsync<Guild>(
+                    new ActiveGuildByDiscordIdWithTagsSpecifications(guild.Id));
+            if (guildCfg is null)
                 throw new NotFoundException($"Guild with Id: {guild.Id} doesn't exist in the database.");
 
             if (!requestingUser.IsModerator())

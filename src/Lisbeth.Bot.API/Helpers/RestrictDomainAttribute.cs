@@ -4,7 +4,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
-namespace EclipseBot.API.Helpers
+namespace Lisbeth.Bot.API.Helpers
 {
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
     public class RestrictDomainAttribute : Attribute, IAuthorizationFilter

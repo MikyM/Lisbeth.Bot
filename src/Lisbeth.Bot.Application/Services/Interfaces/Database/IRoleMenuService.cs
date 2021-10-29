@@ -23,6 +23,5 @@ namespace Lisbeth.Bot.Application.Services.Interfaces.Database
 {
     public interface IRoleMenuService : ICrudService<RoleMenu, LisbethBotDbContext>
     {
-        
     }
 }

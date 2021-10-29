@@ -17,19 +17,17 @@
 
 
 using System;
-using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.DataAccessLayer.Specifications;
 
-namespace Lisbeth.Bot.DataAccessLayer.Specifications.MuteSpecifications
+namespace Lisbeth.Bot.DataAccessLayer.Specifications.Ban
 {
-    public class ActiveExpiredMutesInActiveGuildsSpecifications : Specification<Mute>
+    public class ActiveExpiredBansInActiveGuildsSpecifications : Specification<Domain.Entities.Ban>
     {
-        public ActiveExpiredMutesInActiveGuildsSpecifications()
+        public ActiveExpiredBansInActiveGuildsSpecifications()
         {
             Where(x => !x.IsDisabled);
             Where(x => !x.Guild.IsDisabled);
             Where(x => x.AppliedUntil <= DateTime.UtcNow);
-            Include(x => x.Guild);
             OrderBy(x => x.Guild.Id);
         }
     }

@@ -9,7 +9,6 @@ using Imgur.API;
 using Imgur.API.Authentication;
 using Imgur.API.Endpoints;
 using Imgur.API.Models;
-using Lisbeth.Bot.Domain;
 using MikyM.Common.Domain;
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport.Models

@@ -15,7 +15,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Threading.Tasks;
 using AutoMapper;
+using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Services.Interfaces.Database;
 using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.Domain.DTOs.Request;
@@ -23,10 +26,6 @@ using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.Application.Services;
 using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-using JetBrains.Annotations;
 
 namespace Lisbeth.Bot.Application.Services.Database
 {
@@ -39,12 +38,12 @@ namespace Lisbeth.Bot.Application.Services.Database
 
         public async Task<(long Id, Ban FoundEntity)> AddOrExtendAsync(BanReqDto req, bool shouldSave = false)
         {
-            if (req  is null) throw new ArgumentNullException(nameof(req));
+            if (req is null) throw new ArgumentNullException(nameof(req));
 
             var entity = await base.GetSingleBySpecAsync<Ban>(new Specification<Ban>(x =>
-                    x.UserId == req.TargetUserId && x.GuildId == req.GuildId && !x.IsDisabled));
+                x.UserId == req.TargetUserId && x.GuildId == req.GuildId && !x.IsDisabled));
 
-            if (entity  is null) return (await base.AddAsync(req, shouldSave), null);
+            if (entity is null) return (await base.AddAsync(req, shouldSave), null);
 
             if (entity.AppliedUntil > req.AppliedUntil) return (entity.Id, entity);
 
@@ -62,12 +61,12 @@ namespace Lisbeth.Bot.Application.Services.Database
 
         public async Task<Ban> DisableAsync(BanDisableReqDto entry, bool shouldSave = false)
         {
-            if (entry  is null) throw new ArgumentNullException(nameof(entry));
+            if (entry is null) throw new ArgumentNullException(nameof(entry));
 
             var entity = await base.GetSingleBySpecAsync<Ban>(
                 new Specification<Ban>(x =>
                     x.UserId == entry.TargetUserId && x.GuildId == entry.GuildId && !x.IsDisabled));
-            if (entity  is null) return null;
+            if (entity is null) return null;
 
             base.BeginUpdate(entity);
             entity.IsDisabled = true;

@@ -24,7 +24,6 @@ using DSharpPlus.SlashCommands.Attributes;
 using FluentValidation;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
-using Lisbeth.Bot.Application.Validation;
 using Lisbeth.Bot.Application.Validation.Ticket;
 using Lisbeth.Bot.Domain.DTOs.Request;
 
@@ -47,9 +46,10 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             [Option("target", "A user or a role to add")]
             SnowflakeObject target)
         {
-            if (target  is null) throw new ArgumentNullException(nameof(target));
+            if (target is null) throw new ArgumentNullException(nameof(target));
 
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
+                new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
             DiscordEmbed embed;
             switch (action)
@@ -61,7 +61,8 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     embed = await _discordTicketService.AddToTicketAsync(ctx, addReq);
                     break;
                 case TicketActionType.Remove:
-                    var removeReq = new TicketRemoveReqDto(null, null, ctx.Guild.Id, ctx.Channel.Id, ctx.User.Id, target.Id);
+                    var removeReq = new TicketRemoveReqDto(null, null, ctx.Guild.Id, ctx.Channel.Id, ctx.User.Id,
+                        target.Id);
                     var removeReqValidator = new TicketRemoveReqValidator(ctx.Client);
                     await removeReqValidator.ValidateAndThrowAsync(removeReq);
                     embed = await _discordTicketService.RemoveFromTicketAsync(ctx, removeReq);

@@ -15,14 +15,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Domain.Entities;
-using System;
-using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands
 {
@@ -33,7 +33,9 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
         public IDiscordEmbedConfiguratorService<Tag> _embedConfigService { private get; set; }
 
         [SlashCommand("test", "something")]
-        public async Task EmbedConfigCommand(InteractionContext ctx, [Option("target", "The id of a reminder, tag or role menu to create embed for,")] string id)
+        public async Task EmbedConfigCommand(InteractionContext ctx,
+            [Option("target", "The id of a reminder, tag or role menu to create embed for,")]
+            string id)
         {
             if (!long.TryParse(id, out long parsedId)) throw new ArgumentException(nameof(id));
 

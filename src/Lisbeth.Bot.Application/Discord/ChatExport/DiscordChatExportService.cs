@@ -15,19 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus.Entities;
-using JetBrains.Annotations;
-using Lisbeth.Bot.Application.Discord.ChatExport.Builders;
-using Lisbeth.Bot.Application.Discord.ChatExport.Models;
-using Lisbeth.Bot.Application.Discord.Exceptions;
-using Lisbeth.Bot.Application.Services.Interfaces;
-using Lisbeth.Bot.DataAccessLayer.Specifications.TicketSpecifications;
-using Lisbeth.Bot.Domain.DTOs.Request;
-using Lisbeth.Bot.Domain.Entities;
-using Microsoft.Extensions.Logging;
-using MikyM.Common.DataAccessLayer.Specifications;
-using MikyM.Discord.Interfaces;
-using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -35,7 +22,19 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using DSharpPlus.Entities;
+using JetBrains.Annotations;
+using Lisbeth.Bot.Application.Discord.ChatExport.Builders;
+using Lisbeth.Bot.Application.Discord.ChatExport.Models;
+using Lisbeth.Bot.Application.Discord.Exceptions;
 using Lisbeth.Bot.Application.Services.Interfaces.Database;
+using Lisbeth.Bot.DataAccessLayer.Specifications.Ticket;
+using Lisbeth.Bot.Domain.DTOs.Request;
+using Lisbeth.Bot.Domain.Entities;
+using Microsoft.Extensions.Logging;
+using MikyM.Common.DataAccessLayer.Specifications;
+using MikyM.Discord.Interfaces;
+using Serilog;
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport
 {
@@ -58,7 +57,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
 
         public async Task<DiscordEmbed> ExportToHtmlAsync(TicketExportReqDto req)
         {
-            if (req  is null) throw new ArgumentNullException(nameof(req));
+            if (req is null) throw new ArgumentNullException(nameof(req));
 
             DiscordChannel target = null;
             DiscordMember requestingMember;
@@ -68,7 +67,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
             if (req.Id.HasValue)
             {
                 ticket = await _ticketService.GetAsync<Ticket>(req.Id.Value);
-                if (ticket  is null)
+                if (ticket is null)
                     throw new ArgumentException("Opened ticket with given params doesn't exist in the database.");
 
                 req.ChannelId = ticket.ChannelId;
@@ -80,7 +79,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
                 var res = await _ticketService.GetBySpecAsync<Ticket>(
                     new TicketBaseGetSpecifications(null, req.OwnerId, req.GuildId, null, null, false, 1));
                 ticket = res.FirstOrDefault();
-                if (ticket  is null)
+                if (ticket is null)
                     throw new ArgumentException("Opened ticket with given params doesn't exist in the database.");
 
                 req.ChannelId = ticket.ChannelId;
@@ -93,7 +92,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
                     new TicketBaseGetSpecifications(null, null, req.GuildId, null, req.GuildSpecificId.Value, false,
                         1));
                 ticket = res.FirstOrDefault();
-                if (ticket  is null)
+                if (ticket is null)
                     throw new ArgumentException("Opened ticket with given params doesn't exist in the database.");
 
                 req.ChannelId = ticket.ChannelId;
@@ -105,7 +104,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
                 var res = await _ticketService.GetBySpecAsync<Ticket>(
                     new TicketBaseGetSpecifications(null, null, null, req.ChannelId, null, false, 1));
                 ticket = res.FirstOrDefault();
-                if (ticket  is null)
+                if (ticket is null)
                     throw new ArgumentException("Opened ticket with given params doesn't exist in the database.");
                 req.OwnerId = ticket.UserId;
                 try
@@ -151,7 +150,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
 
         public async Task<DiscordEmbed> ExportToHtmlAsync(DiscordInteraction intr)
         {
-            if (intr  is null) throw new ArgumentNullException(nameof(intr));
+            if (intr is null) throw new ArgumentNullException(nameof(intr));
 
             return await ExportToHtmlAsync(intr.Guild, intr.Channel, (DiscordMember) intr.User);
         }
@@ -161,9 +160,9 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
         {
             try
             {
-                if (guild  is null) throw new ArgumentNullException(nameof(guild));
-                if (target  is null) throw new ArgumentNullException(nameof(target));
-                if (requestingMember  is null) throw new ArgumentNullException(nameof(requestingMember));
+                if (guild is null) throw new ArgumentNullException(nameof(guild));
+                if (target is null) throw new ArgumentNullException(nameof(target));
+                if (requestingMember is null) throw new ArgumentNullException(nameof(requestingMember));
 
                 var resGuild =
                     await _guildService.GetBySpecAsync<Guild>(
@@ -171,9 +170,9 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
 
                 var guildCfg = resGuild.FirstOrDefault();
 
-                if (guildCfg  is null) throw new ArgumentException("Guild doesn't exist in database.");
+                if (guildCfg is null) throw new ArgumentException("Guild doesn't exist in database.");
 
-                if (ticket  is null)
+                if (ticket is null)
                 {
                     var res = await _ticketService.GetBySpecAsync<Ticket>(
                         new TicketBaseGetSpecifications(null, null, guild.Id, target.Id, null, false, 1, true));
@@ -182,9 +181,9 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
 
                 DiscordChannel ticketLogChannel;
 
-                if (ticket  is null) throw new ArgumentException("Ticket doesn't exist in database.");
+                if (ticket is null) throw new ArgumentException("Ticket doesn't exist in database.");
 
-                if (guildCfg.TicketingConfig.LogChannelId  is null)
+                if (guildCfg.TicketingConfig.LogChannelId is null)
                     throw new ArgumentException("Guild doesn't have ticketing log channel set.");
 
                 try
@@ -225,7 +224,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
                 {
                     await Task.Delay(1000);
                     var newMessages = await target.GetMessagesBeforeAsync(messages.Last().Id);
-                    if (newMessages.Count == 0 || newMessages.Any(x=> x.Id == ticket.MessageOpenId)) break;
+                    if (newMessages.Count == 0 || newMessages.Any(x => x.Id == ticket.MessageOpenId)) break;
 
                     messages.AddRange(newMessages);
                 }
@@ -290,7 +289,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
                 messageBuilder.WithFile($"transcript-{target.Name}.html", ms);
                 messageBuilder.WithEmbed(embedBuilder.Build());
 
-                Log.Logger.Information(requestingMember  is null
+                Log.Logger.Information(requestingMember is null
                     ? $"Automatically saved transcript of {target.Name}"
                     : $"User {requestingMember.Username}#{requestingMember.Discriminator} with ID: {requestingMember.Id} saved transcript of {target.Name}");
 

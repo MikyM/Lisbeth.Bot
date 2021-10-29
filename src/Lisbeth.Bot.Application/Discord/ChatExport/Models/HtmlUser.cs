@@ -15,14 +15,14 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Models
 
         public string Build()
         {
-            if (User  is null) return "";
+            if (User is null) return "";
 
             return $"<div class=\"user-info\">{User.Username}#{User.Discriminator} ID: {User.Id}</div>";
         }
 
         public async Task<string> BuildAvatar()
         {
-            if (User  is null) return "";
+            if (User is null) return "";
 
             HtmlImage avatar;
             string url;

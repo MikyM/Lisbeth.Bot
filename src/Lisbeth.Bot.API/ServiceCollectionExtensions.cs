@@ -81,6 +81,7 @@ namespace Lisbeth.Bot.API
 
             #endregion
 
+
             #region events
 
             services.AddDiscordSlashCommandsEventsSubscriber<SlashCommandEventsHandler>();
