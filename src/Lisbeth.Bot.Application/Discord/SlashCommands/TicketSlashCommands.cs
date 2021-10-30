@@ -26,6 +26,7 @@ using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Application.Validation.Ticket;
 using Lisbeth.Bot.Domain.DTOs.Request;
+using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 
 // ReSharper disable InconsistentNaming
 

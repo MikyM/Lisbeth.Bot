@@ -8,7 +8,7 @@ using DSharpPlus.SlashCommands.Attributes;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
-using Lisbeth.Bot.Application.Services.Interfaces.Database;
+using Lisbeth.Bot.Application.Services.Database.Interfaces;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.Domain.Entities;
 
@@ -71,42 +71,27 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
         [UsedImplicitly]
         [SlashRequireUserPermissions(Permissions.Administrator)]
         [SlashCommand("ticket-config", "A command that allows setting ticketing module up")]
-        public async Task TicketConfigCommand(InteractionContext ctx,
-            [Option("Active", "Category for opened (active) tickets")]
-            string openedCat,
-            [Option("Inactive", "Category for closed (inactive) tickets")]
-            string closedCat,
-            [Option("Log", "Channel for ticket logs and transcripts")]
-            DiscordChannel logChannel = null,
-            [Option("Clean", "Should Lisbeth clean closed tickets after X hours")]
-            string cleanAfter = "",
-            [Option("Close", "Should Lisbeth close open tickets after X hours")]
-            string closeAfter = "")
+        public async Task TicketConfigCommand(InteractionContext ctx, [Option("action", "Action to perform")] ModerationActionType action)
         {
-            if (openedCat is null) throw new ArgumentNullException(nameof(openedCat));
-            if (closedCat is null) throw new ArgumentNullException(nameof(closedCat));
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
-            var res = await _guildService.GetBySpecAsync<Guild>(
-                new ActiveGuildByDiscordIdWithTicketingSpecifications(ctx.Guild.Id));
-            var guild = res.FirstOrDefault();
+            DiscordEmbed embed;
+            switch (action)
+            {
+                case ModerationActionType.Enable:
+                    embed = await _guildService.AddConfigAsync(addReq, true);
+                    break;
+                case ModerationActionType.Repair:
+                    break;
+                case ModerationActionType.Edit:
+                    break;
+                case ModerationActionType.Disable:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(action), action, null);
+            }
 
-            if (guild is null) throw new ArgumentException("Guild not found in database");
-            if (guild.TicketingConfig is not null)
-                throw new ArgumentException("Guild already has a ticketing configuration");
-
-            var ticketConfig = new TicketingConfig
-                {OpenedCategoryId = ulong.Parse(openedCat), ClosedCategoryId = ulong.Parse(closedCat)};
-            if (logChannel is not null) ticketConfig.LogChannelId = logChannel.Id;
-            if (cleanAfter != "" && TimeSpan.TryParse(cleanAfter, out var cleanAfterTimeSpan))
-                ticketConfig.CloseAfter = cleanAfterTimeSpan;
-            if (closeAfter != "" && TimeSpan.TryParse(closeAfter, out var closeAfterTimeSpan))
-                ticketConfig.CloseAfter = closeAfterTimeSpan;
-
-            _guildService.BeginUpdate(guild);
-            guild.SetTicketingConfig(ticketConfig);
-            await _guildService.CommitAsync();
 
             await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("Done"));
         }

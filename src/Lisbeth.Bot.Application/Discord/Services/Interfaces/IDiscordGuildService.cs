@@ -15,8 +15,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Threading.Tasks;
+using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using DSharpPlus.SlashCommands;
+using Lisbeth.Bot.Domain.DTOs.Request;
+using System.Threading.Tasks;
+using Lisbeth.Bot.Application.Enums;
+using Lisbeth.Bot.Domain.DTOs.Request.Base;
+using Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig;
+using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
 
 namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
 {
@@ -24,5 +31,17 @@ namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
     {
         Task HandleGuildCreateAsync(GuildCreateEventArgs args);
         Task HandleGuildDeleteAsync(GuildDeleteEventArgs args);
+        Task<DiscordEmbed> CreateModuleAsync(ModerationConfigReqDto req);
+        Task<DiscordEmbed> CreateModuleAsync(InteractionContext ctx, ModerationConfigReqDto req);
+        Task<DiscordEmbed> CreateModuleAsync(InteractionContext ctx, TicketingConfigReqDto req);
+        Task<DiscordEmbed> CreateModuleAsync(TicketingConfigReqDto req);
+        Task<DiscordEmbed> DisableModuleAsync(ModerationConfigDisableReqDto req);
+        Task<DiscordEmbed> DisableModuleAsync(TicketingConfigDisableReqDto req);
+        Task<DiscordEmbed> DisableModuleAsync(ModerationConfigDisableReqDto req, InteractionContext ctx);
+        Task<DiscordEmbed> DisableModuleAsync(TicketingConfigDisableReqDto req, InteractionContext ctx);
+        Task<DiscordEmbed> RepairConfigAsync(ModerationConfigRepairReqDto req);
+        Task<DiscordEmbed> RepairConfigAsync(TicketingConfigRepairReqDto req);
+        Task<DiscordEmbed> RepairConfigAsync(ModerationConfigRepairReqDto req, InteractionContext ctx);
+        Task<DiscordEmbed> RepairConfigAsync(TicketingConfigRepairReqDto req, InteractionContext ctx);
     }
 }

@@ -35,11 +35,12 @@ using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Application.Exceptions;
 using Lisbeth.Bot.Application.Extensions;
 using Lisbeth.Bot.Application.Helpers;
-using Lisbeth.Bot.Application.Services.Interfaces.Database;
+using Lisbeth.Bot.Application.Services.Database.Interfaces;
 using Lisbeth.Bot.Application.Validation.Ticket;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Ticket;
 using Lisbeth.Bot.Domain.DTOs.Request;
+using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 using Lisbeth.Bot.Domain.Entities;
 using Microsoft.Extensions.Logging;
 using MikyM.Discord.Interfaces;
@@ -72,7 +73,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (req is null) throw new ArgumentNullException(nameof(req));
 
             DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
-            DiscordMember owner = await guild.GetMemberAsync(req.OwnerId);
+            DiscordMember owner = await guild.GetMemberAsync(req.RequestedOnBehalfOfId);
 
             return await OpenTicketAsync(guild, owner, req);
         }
@@ -146,12 +147,12 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             try
             {
-                requestingMember = await guild.GetMemberAsync(req.RequestedById);
+                requestingMember = await guild.GetMemberAsync(req.RequestedOnBehalfOfId);
             }
             catch (Exception ex)
             {
                 throw new DiscordNotFoundException(
-                    $"User with Id: {req.RequestedById} doesn't exist or isn't this guild's member.", ex);
+                    $"User with Id: {req.RequestedOnBehalfOfId} doesn't exist or isn't this guild's member.", ex);
             }
 
             return await CloseTicketAsync(guild, target, requestingMember, req);
@@ -226,12 +227,12 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             try
             {
-                requestingMember = await guild.GetMemberAsync(req.RequestedById);
+                requestingMember = await guild.GetMemberAsync(req.RequestedOnBehalfOfId);
             }
             catch (Exception ex)
             {
                 throw new DiscordNotFoundException(
-                    $"User with Id: {req.RequestedById} doesn't exist or isn't this guild's target.", ex);
+                    $"User with Id: {req.RequestedOnBehalfOfId} doesn't exist or isn't this guild's target.", ex);
             }
 
             return await ReopenTicketAsync(guild, target, requestingMember, req);
@@ -308,12 +309,12 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             try
             {
-                requestingMember = await guild.GetMemberAsync(req.RequestedById);
+                requestingMember = await guild.GetMemberAsync(req.RequestedOnBehalfOfId);
             }
             catch (Exception ex)
             {
                 throw new DiscordNotFoundException(
-                    $"User with Id: {req.RequestedById} doesn't exist or isn't this guild's member.", ex);
+                    $"User with Id: {req.RequestedOnBehalfOfId} doesn't exist or isn't this guild's member.", ex);
             }
 
             try
@@ -423,12 +424,12 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             try
             {
-                requestingMember = await guild.GetMemberAsync(req.RequestedById);
+                requestingMember = await guild.GetMemberAsync(req.RequestedOnBehalfOfId);
             }
             catch (Exception ex)
             {
                 throw new DiscordNotFoundException(
-                    $"User with Id: {req.RequestedById} doesn't exist or isn't this guild's member.", ex);
+                    $"User with Id: {req.RequestedOnBehalfOfId} doesn't exist or isn't this guild's member.", ex);
             }
 
             try
@@ -842,7 +843,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             req.ClosedMessageId = closeMsg.Id;
             await _ticketService.CloseAsync(req, ticket);
 
-            if (guildCfg.TicketingConfig.LogChannelId is null || ticket.IsPrivate) return msgBuilder;
+            if (ticket.IsPrivate) return msgBuilder;
 
             _ = _asyncExecutor.ExecuteAsync<IDiscordChatExportService>(async x => await x.ExportToHtmlAsync(guild,
                 target, requestingMember,

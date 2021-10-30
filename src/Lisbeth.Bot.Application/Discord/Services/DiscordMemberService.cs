@@ -24,7 +24,7 @@ using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
-using Lisbeth.Bot.Application.Services.Interfaces.Database;
+using Lisbeth.Bot.Application.Services.Database.Interfaces;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Mute;
 using Lisbeth.Bot.Domain.Entities;
@@ -62,7 +62,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (guild?.ModerationConfig?.MemberEventsLogChannelId is null) return;
 
             DiscordChannel logChannel =
-                args.Guild.Channels.FirstOrDefault(x => x.Key == guild.ModerationConfig.MemberEventsLogChannelId.Value)
+                args.Guild.Channels.FirstOrDefault(x => x.Key == guild.ModerationConfig.MemberEventsLogChannelId)
                     .Value;
 
             if (logChannel is null) return;

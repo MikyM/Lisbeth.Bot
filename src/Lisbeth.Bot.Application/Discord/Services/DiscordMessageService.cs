@@ -25,7 +25,7 @@ using DSharpPlus.SlashCommands;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
-using Lisbeth.Bot.Application.Services.Interfaces.Database;
+using Lisbeth.Bot.Application.Services.Database.Interfaces;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.Entities;
@@ -259,7 +259,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (guild?.ModerationConfig?.MessageUpdatedEventsLogChannelId is null) return;
 
             DiscordChannel logChannel = args.Guild.Channels
-                .FirstOrDefault(x => x.Key == guild.ModerationConfig.MessageUpdatedEventsLogChannelId.Value)
+                .FirstOrDefault(x => x.Key == guild.ModerationConfig.MessageUpdatedEventsLogChannelId)
                 .Value;
 
             if (logChannel is null) return;
@@ -321,7 +321,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (guild?.ModerationConfig?.MessageDeletedEventsLogChannelId is null) return;
 
             DiscordChannel logChannel = args.Guild.Channels
-                .FirstOrDefault(x => x.Key == guild.ModerationConfig.MessageDeletedEventsLogChannelId.Value)
+                .FirstOrDefault(x => x.Key == guild.ModerationConfig.MessageDeletedEventsLogChannelId)
                 .Value;
 
             if (logChannel is null) return;
@@ -397,7 +397,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (guild?.ModerationConfig?.MessageDeletedEventsLogChannelId is null) return;
 
             DiscordChannel logChannel = args.Guild.Channels
-                .FirstOrDefault(x => x.Key == guild.ModerationConfig.MessageDeletedEventsLogChannelId.Value)
+                .FirstOrDefault(x => x.Key == guild.ModerationConfig.MessageDeletedEventsLogChannelId)
                 .Value;
 
             if (logChannel is null) return;

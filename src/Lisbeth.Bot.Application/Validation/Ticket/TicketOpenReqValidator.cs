@@ -20,6 +20,7 @@ using DSharpPlus;
 using FluentValidation;
 using Lisbeth.Bot.Application.Validation.ReusablePropertyValidation;
 using Lisbeth.Bot.Domain.DTOs.Request;
+using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Validation.Ticket
@@ -37,7 +38,7 @@ namespace Lisbeth.Bot.Application.Validation.Ticket
             RuleFor(x => x.GuildId)
                 .NotEmpty()
                 .DependentRules(x => x.SetAsyncValidator(new DiscordGuildIdValidator<TicketOpenReqDto>(discord)));
-            RuleFor(x => x.OwnerId)
+            RuleFor(x => x.RequestedOnBehalfOfId)
                 .NotEmpty()
                 .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<TicketOpenReqDto>(discord)));
         }

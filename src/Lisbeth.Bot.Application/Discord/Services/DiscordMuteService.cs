@@ -28,10 +28,11 @@ using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Application.Exceptions;
 using Lisbeth.Bot.Application.Extensions;
-using Lisbeth.Bot.Application.Services.Interfaces.Database;
+using Lisbeth.Bot.Application.Services.Database.Interfaces;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Mute;
 using Lisbeth.Bot.Domain.DTOs.Request;
+using Lisbeth.Bot.Domain.DTOs.Request.Mute;
 using Lisbeth.Bot.Domain.Entities;
 using Microsoft.Extensions.Logging;
 using MikyM.Common.DataAccessLayer.Specifications;
@@ -214,10 +215,9 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             DiscordChannel channel = null;
 
-            var guildRes =
-                await _guildService.GetBySpecAsync<Guild>(
+            var guildCfg =
+                await _guildService.GetSingleBySpecAsync<Guild>(
                     new Specification<Guild>(x => x.GuildId == guild.Id && !x.IsDisabled));
-            var guildCfg = guildRes.FirstOrDefault();
 
             if (guildCfg is null)
                 throw new NotFoundException($"Guild with Id: {guild.Id} doesn't exist in the database.");
@@ -225,18 +225,16 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (guildCfg.ModerationConfig is null)
                 throw new DisabledEntityException($"Guild with Id: {guild.Id} doesn't have moderation module enabled.");
 
-            if (guildCfg.ModerationConfig.MemberEventsLogChannelId is not null)
-                try
-                {
-                    channel = await _discord.Client.GetChannelAsync(guildCfg.ModerationConfig.MemberEventsLogChannelId
-                        .Value);
-                }
-                catch (Exception ex)
-                {
-                    throw new DiscordNotFoundException(
-                        $"Log channel with Id: {guildCfg.ModerationConfig.MemberEventsLogChannelId} doesn't exist.",
-                        ex);
-                }
+            try
+            {
+                channel = await _discord.Client.GetChannelAsync(guildCfg.ModerationConfig.MemberEventsLogChannelId);
+            }
+            catch (Exception ex)
+            {
+                throw new DiscordNotFoundException(
+                    $"Log channel with Id: {guildCfg.ModerationConfig.MemberEventsLogChannelId} doesn't exist.",
+                    ex);
+            }
 
             if (req.AppliedUntil < DateTime.UtcNow)
                 throw new ArgumentException("Mute until date must be in the future.");
@@ -342,9 +340,6 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 }
             }
 
-            if (!guildCfg.ModerationConfig.MemberEventsLogChannelId.HasValue)
-                return embed; // means we're not sending to log channel
-
             // means we're logging to log channel and returning an embed for interaction or other purposes
 
             try
@@ -385,18 +380,16 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (guildCfg.ModerationConfig is null)
                 throw new DisabledEntityException($"Guild with Id: {guild.Id} doesn't have moderation module enabled.");
 
-            if (guildCfg.ModerationConfig.MemberEventsLogChannelId is not null)
-                try
-                {
-                    channel = await _discord.Client.GetChannelAsync(guildCfg.ModerationConfig.MemberEventsLogChannelId
-                        .Value);
-                }
-                catch (Exception ex)
-                {
-                    throw new DiscordNotFoundException(
-                        $"Log channel with Id: {guildCfg.ModerationConfig.MemberEventsLogChannelId} doesn't exist.",
-                        ex);
-                }
+            try
+            {
+                channel = await _discord.Client.GetChannelAsync(guildCfg.ModerationConfig.MemberEventsLogChannelId);
+            }
+            catch (Exception ex)
+            {
+                throw new DiscordNotFoundException(
+                    $"Log channel with Id: {guildCfg.ModerationConfig.MemberEventsLogChannelId} doesn't exist.",
+                    ex);
+            }
 
             var embed = new DiscordEmbedBuilder();
             embed.WithColor(0x18315C);
@@ -437,9 +430,6 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 embed.WithFooter($"Case ID: {res.Id} | Member ID: {target.Id}");
             }
 
-            if (!guildCfg.ModerationConfig.MemberEventsLogChannelId.HasValue)
-                return embed; // means we're not sending to log channel
-
             // means we're logging to log channel and returning an embed for interaction or other purposes
 
             try
@@ -463,11 +453,9 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (moderator is null) throw new ArgumentNullException(nameof(moderator));
             if (req is null) throw new ArgumentNullException(nameof(req));
 
-            var guildRes =
-                await _guildService.GetBySpecAsync<Guild>(
+            var guildCfg =
+                await _guildService.GetSingleBySpecAsync<Guild>(
                     new Specification<Guild>(x => x.GuildId == guild.Id && !x.IsDisabled));
-            var guildCfg = guildRes.FirstOrDefault();
-
             if (guildCfg is null)
                 throw new NotFoundException($"Guild with Id: {guild.Id} doesn't exist in the database.");
 
@@ -476,18 +464,16 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             DiscordChannel channel = null;
 
-            if (guildCfg.ModerationConfig.MemberEventsLogChannelId is not null)
-                try
-                {
-                    channel = await _discord.Client.GetChannelAsync(guildCfg.ModerationConfig.MemberEventsLogChannelId
-                        .Value);
-                }
-                catch (Exception ex)
-                {
-                    throw new DiscordNotFoundException(
-                        $"Log channel with Id: {guildCfg.ModerationConfig.MemberEventsLogChannelId} doesn't exist.",
-                        ex);
-                }
+            try
+            {
+                channel = await _discord.Client.GetChannelAsync(guildCfg.ModerationConfig.MemberEventsLogChannelId);
+            }
+            catch (Exception ex)
+            {
+                throw new DiscordNotFoundException(
+                    $"Log channel with Id: {guildCfg.ModerationConfig.MemberEventsLogChannelId} doesn't exist.",
+                    ex);
+            }
 
             if (!moderator.IsModerator())
                 throw new DiscordNotAuthorizedException(nameof(moderator));
@@ -541,9 +527,6 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 embed.WithDescription("No mute info found.");
                 embed.WithFooter($"Case ID: unknown | User ID: {target.Id}");
             }
-
-            if (!guildCfg.ModerationConfig.MemberEventsLogChannelId.HasValue)
-                return embed; // means we're not sending to log channel
 
             // means we're logging to log channel and returning an embed for interaction or other purposes
 

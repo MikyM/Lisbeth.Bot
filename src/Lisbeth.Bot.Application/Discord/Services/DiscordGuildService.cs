@@ -15,14 +15,27 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Threading.Tasks;
+using DSharpPlus;
+using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using DSharpPlus.SlashCommands;
 using JetBrains.Annotations;
+using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
-using Lisbeth.Bot.Application.Services.Interfaces.Database;
+using Lisbeth.Bot.Application.Services.Database.Interfaces;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
+using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.Entities;
+using MikyM.Discord.Interfaces;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using Lisbeth.Bot.Application.Discord.Exceptions;
+using Lisbeth.Bot.Application.Enums;
+using Lisbeth.Bot.Application.Exceptions;
+using Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig;
+using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {
@@ -32,13 +45,15 @@ namespace Lisbeth.Bot.Application.Discord.Services
         private readonly IEmbedConfigService _embedConfigService;
         private readonly IDiscordEmbedProvider _embedProvider;
         private readonly IGuildService _guildService;
+        private readonly IDiscordService _discord;
 
-        public DiscordGuildService(IGuildService guildService, IDiscordEmbedProvider embedProvider,
-            IEmbedConfigService embedConfigService)
+        public DiscordGuildService(IEmbedConfigService embedConfigService, IDiscordEmbedProvider embedProvider,
+            IGuildService guildService, IDiscordService discord)
         {
-            _guildService = guildService;
-            _embedProvider = embedProvider;
             _embedConfigService = embedConfigService;
+            _embedProvider = embedProvider;
+            _guildService = guildService;
+            _discord = discord;
         }
 
         public async Task HandleGuildCreateAsync(GuildCreateEventArgs args)
@@ -67,6 +82,399 @@ namespace Lisbeth.Bot.Application.Discord.Services
             var guild = await _guildService.GetSingleBySpecAsync<Guild>(new GuildByIdSpec(args.Guild.Id));
 
             if (guild is not null) await _guildService.DisableAsync(guild, true);
+        }
+
+
+        public async Task<DiscordEmbed> CreateModuleAsync(TicketingConfigReqDto req)
+        {
+            if (req is null) throw new ArgumentNullException(nameof(req));
+
+            DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
+
+            return await this.CreateTicketingModuleAsync(guild, await guild.GetMemberAsync(req.RequestedOnBehalfOfId), req);
+        }
+
+        public async Task<DiscordEmbed> CreateModuleAsync(InteractionContext ctx, TicketingConfigReqDto req)
+        {
+            if (ctx is null) throw new ArgumentNullException(nameof(ctx));
+            if (req is null) throw new ArgumentNullException(nameof(req));
+
+            return await this.CreateTicketingModuleAsync(ctx.Guild, ctx.Member, req);
+        }
+
+        private async Task<DiscordEmbed> CreateTicketingModuleAsync(DiscordGuild guild, DiscordMember requestingMember, TicketingConfigReqDto req)
+        {
+            if (guild is null) throw new ArgumentNullException(nameof(guild));
+            if (requestingMember is null) throw new ArgumentNullException(nameof(requestingMember));
+            if (req is null) throw new ArgumentNullException(nameof(req));
+
+            if (!requestingMember.IsAdmin()) throw new DiscordNotAuthorizedException();
+
+            var everyoneDeny = new[] {new DiscordOverwriteBuilder(guild.EveryoneRole).Deny(Permissions.AccessChannels)};
+            var openedCat = await guild.CreateChannelAsync("TICKETS", ChannelType.Category, null,
+                "Category with opened tickets", null, null, everyoneDeny);
+            var closedCat = await guild.CreateChannelAsync("TICKETS-ARCHIVE", ChannelType.Category, null,
+                "Category with closed tickets", null, null, everyoneDeny);
+            var ticketLogs = await guild.CreateTextChannelAsync("ticket-logs", closedCat, "Channel with ticket logs and transcripts",
+                everyoneDeny);
+
+            req.OpenedCategoryId = openedCat.Id;
+            req.ClosedCategoryId = closedCat.Id;
+            req.LogChannelId = ticketLogs.Id;
+            var res = await _guildService.AddConfigAsync(req, true);
+            if (res is null) throw new InvalidOperationException("Guild already has an enabled ticketing configuration");
+
+            var embed = new DiscordEmbedBuilder();
+            embed.WithColor(new DiscordColor(res.EmbedHexColor));
+            embed.WithAuthor("Ticketing configuration");
+            embed.WithDescription("Process completed successfully");
+            embed.AddField("Opened ticket category", openedCat.Mention);
+            embed.AddField("Closed ticket category", closedCat.Mention);
+            embed.AddField("Ticket log channel", ticketLogs.Mention);
+            embed.WithFooter($"Lisbeth configuration requested by {requestingMember.GetFullDisplayName()} | Id: {requestingMember.Id}");
+
+            return embed.Build();
+        }
+
+        public async Task<DiscordEmbed> CreateModuleAsync(ModerationConfigReqDto req)
+        {
+            if (req is null) throw new ArgumentNullException(nameof(req));
+
+            DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
+
+            return await this.CreateModerationModuleAsync(guild, await guild.GetMemberAsync(req.RequestedOnBehalfOfId), req);
+        }
+
+        public async Task<DiscordEmbed> CreateModuleAsync(InteractionContext ctx, ModerationConfigReqDto req)
+        {
+            if (ctx is null) throw new ArgumentNullException(nameof(ctx));
+            if (req is null) throw new ArgumentNullException(nameof(req));
+
+            return await this.CreateModerationModuleAsync(ctx.Guild, ctx.Member, req);
+        }
+
+        private async Task<DiscordEmbed> CreateModerationModuleAsync(DiscordGuild guild, DiscordMember requestingMember, ModerationConfigReqDto req)
+        {
+            if (guild is null) throw new ArgumentNullException(nameof(guild));
+            if (requestingMember is null) throw new ArgumentNullException(nameof(requestingMember));
+            if (req is null) throw new ArgumentNullException(nameof(req));
+
+            if (!requestingMember.IsAdmin()) throw new DiscordNotAuthorizedException();
+
+            var everyoneDeny = new[] {new DiscordOverwriteBuilder(guild.EveryoneRole).Deny(Permissions.AccessChannels)};
+            var moderationCat = await guild.CreateChannelAsync("MODERATION", ChannelType.Category, null,
+                "Moderation category", null, null, everyoneDeny);
+            var moderationChannelLog = await guild.CreateTextChannelAsync("moderation-logs", moderationCat, 
+                "Category with moderation logs", everyoneDeny);
+            var memberEventsLogChannel = await guild.CreateTextChannelAsync("member-logs", moderationCat,
+                "Category with member logs", everyoneDeny);
+            var messageEditLogChannel = await guild.CreateTextChannelAsync("edit-logs", moderationCat,
+                "Category with message edit logs", everyoneDeny);
+            var messageDeleteLogChannel = await guild.CreateTextChannelAsync("delete-logs", moderationCat,
+                "Category with message delete logs", everyoneDeny);
+
+            req.MemberEventsLogChannelId = memberEventsLogChannel.Id;
+            req.MessageDeletedEventsLogChannelId = messageDeleteLogChannel.Id;
+            req.MessageUpdatedEventsLogChannelId = messageEditLogChannel.Id;
+            req.ModerationLogChannelId = moderationChannelLog.Id;
+            var res = await _guildService.AddConfigAsync(req, true);
+            if (res is null) throw new InvalidOperationException("Guild already has an enabled ticketing configuration");
+
+            var embed = new DiscordEmbedBuilder();
+            embed.WithColor(new DiscordColor(res.EmbedHexColor));
+            embed.WithAuthor("Moderation configuration");
+            embed.WithDescription("Process completed successfully");
+            embed.AddField("Moderation category", moderationCat.Mention);
+            embed.AddField("Moderation log channel", moderationChannelLog.Mention);
+            embed.AddField("Member log channel", memberEventsLogChannel.Mention);
+            embed.AddField("Message edited log channel", messageEditLogChannel.Mention);
+            embed.AddField("Message deleted channel", messageDeleteLogChannel.Mention);
+            embed.WithFooter($"Lisbeth configuration requested by {requestingMember.GetFullDisplayName()} | Id: {requestingMember.Id}");
+
+            return embed.Build();
+        }
+
+        public async Task<DiscordEmbed> RepairConfigAsync([NotNull] ModerationConfigRepairReqDto req, [NotNull] InteractionContext ctx)
+        {
+            if (req == null) throw new ArgumentNullException(nameof(req));
+            if (ctx == null) throw new ArgumentNullException(nameof(ctx));
+
+            return await this.RepairConfigAsync(ctx.Guild, GuildConfigType.Moderation, ctx.Member);
+        }
+
+        public async Task<DiscordEmbed> RepairConfigAsync([NotNull] TicketingConfigRepairReqDto req)
+        {
+            if (req == null) throw new ArgumentNullException(nameof(req));
+
+            DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
+
+            return await this.RepairConfigAsync(guild, GuildConfigType.Ticketing, await guild.GetMemberAsync(req.RequestedOnBehalfOfId));
+        }
+
+        public async Task<DiscordEmbed> RepairConfigAsync([NotNull] ModerationConfigRepairReqDto req)
+        {
+            if (req == null) throw new ArgumentNullException(nameof(req));
+
+            DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
+
+            return await this.RepairConfigAsync(guild, GuildConfigType.Moderation, await guild.GetMemberAsync(req.RequestedOnBehalfOfId));
+        }
+
+        public async Task<DiscordEmbed> RepairConfigAsync([NotNull] TicketingConfigRepairReqDto req,
+            [NotNull] InteractionContext ctx)
+        {
+            if (req == null) throw new ArgumentNullException(nameof(req));
+            if (ctx == null) throw new ArgumentNullException(nameof(ctx));
+
+            return await this.RepairConfigAsync(ctx.Guild, GuildConfigType.Ticketing, ctx.Member);
+        }
+
+        private async Task<DiscordEmbed> RepairConfigAsync([NotNull] DiscordGuild discordGuild, GuildConfigType type, DiscordMember requestingMember)
+        {
+            if (discordGuild == null) throw new ArgumentNullException(nameof(discordGuild));
+            if (requestingMember is null) throw new ArgumentNullException(nameof(requestingMember));
+            if (!requestingMember.IsAdmin()) throw new DiscordNotAuthorizedException();
+
+            Guild guild;
+            DiscordOverwriteBuilder[] everyoneDeny;
+
+            var embed = new DiscordEmbedBuilder();
+             
+            switch (type)
+            {
+                case GuildConfigType.Ticketing:
+                    guild = await _guildService.GetSingleBySpecAsync<Guild>(
+                        new ActiveGuildByDiscordIdWithTicketingSpecifications(discordGuild.Id));
+                    if (guild?.TicketingConfig is null)
+                        throw new NotFoundException("Guild or ticketing config not found");
+                    if (guild.TicketingConfig.IsDisabled)
+                        throw new DisabledEntityException("First enable ticketing module.");
+
+                    everyoneDeny = new[]
+                    {
+                        new DiscordOverwriteBuilder(discordGuild.EveryoneRole).Deny(Permissions.AccessChannels)
+                    };
+
+                    DiscordChannel newOpenedCat = null;
+                    DiscordChannel newClosedCat = null;
+                    DiscordChannel newTicketLogChannel = null;
+                    DiscordChannel closedCat = null;
+
+                    _guildService.BeginUpdate(guild.TicketingConfig);
+
+                    try
+                    {
+                        var openedCat = await _discord.Client.GetChannelAsync(guild.TicketingConfig.OpenedCategoryId);
+                        if (openedCat is null) throw new DiscordNotFoundException();
+                    }
+                    catch
+                    {
+                        newOpenedCat = await discordGuild.CreateChannelAsync("TICKETS", ChannelType.Category, null,
+                            "Category with opened tickets", null, null, everyoneDeny);
+                        guild.TicketingConfig.OpenedCategoryId = newOpenedCat.Id;
+                    }
+
+                    try
+                    {
+                        closedCat = await _discord.Client.GetChannelAsync(guild.TicketingConfig.ClosedCategoryId);
+                        if (closedCat is null) throw new DiscordNotFoundException();
+                    }
+                    catch
+                    {
+                        newClosedCat = await discordGuild.CreateChannelAsync("TICKETS-ARCHIVE", ChannelType.Category,
+                            null, "Category with closed tickets", null, null, everyoneDeny);
+                        guild.TicketingConfig.ClosedCategoryId = newClosedCat.Id;
+                    }
+
+                    try
+                    {
+                        var ticketLogs = await _discord.Client.GetChannelAsync(guild.TicketingConfig.LogChannelId);
+                        if (ticketLogs is null) throw new DiscordNotFoundException();
+                    }
+                    catch
+                    {
+                        newTicketLogChannel = await discordGuild.CreateTextChannelAsync("ticket-logs",
+                            closedCat ?? newClosedCat, "Channel with ticket logs and transcripts", everyoneDeny);
+                        guild.TicketingConfig.LogChannelId = newTicketLogChannel.Id;
+                    }
+
+                    if (newOpenedCat is not null || newClosedCat is not null || newTicketLogChannel is not null)
+                        await _guildService.CommitAsync();
+
+                    if (newOpenedCat is not null) embed.AddField("Opened ticket category", newOpenedCat.Mention);
+                    if (newClosedCat is not null) embed.AddField("Closed ticket category", newClosedCat.Mention);
+                    if (newTicketLogChannel is not null) embed.AddField("Ticket log channel", newTicketLogChannel.Mention);
+
+                    break;
+                case GuildConfigType.Moderation:
+                    guild = await _guildService.GetSingleBySpecAsync<Guild>(
+                        new ActiveGuildByDiscordIdWithModerationSpecifications(discordGuild.Id));
+
+                    if (guild?.ModerationConfig is null)
+                        throw new NotFoundException("Guild or ticketing config not found");
+                    if (guild.ModerationConfig.IsDisabled)
+                        throw new DisabledEntityException("First enable ticketing module.");
+
+                    everyoneDeny = new[]
+                    {
+                        new DiscordOverwriteBuilder(discordGuild.EveryoneRole).Deny(Permissions.AccessChannels)
+                    };
+
+                    DiscordChannel newMemberEventsLogChannel = null;
+                    DiscordChannel newMessageDeletedEventsLogChannel = null;
+                    DiscordChannel newMessageUpdatedEventsLogChannel = null;
+                    DiscordChannel newModerationLogChannel = null;
+
+                    var newModerationCat = discordGuild.Channels.FirstOrDefault(x =>
+                            string.Equals(x.Value.Name.ToLower(), "moderation",
+                                StringComparison.InvariantCultureIgnoreCase))
+                        .Value ?? await discordGuild.CreateChannelAsync("MODERATION", ChannelType.Category, null,
+                        "Moderation category", null, null, everyoneDeny);
+
+                    _guildService.BeginUpdate(guild.TicketingConfig);
+
+                    try
+                    {
+                        var moderationChannelLog =
+                            await _discord.Client.GetChannelAsync(guild.ModerationConfig.ModerationLogChannelId);
+                        if (moderationChannelLog is null) throw new DiscordNotFoundException();
+                    }
+                    catch
+                    {
+                        newModerationLogChannel = await discordGuild.CreateTextChannelAsync("moderation-logs",
+                            newModerationCat, "Category with moderation logs", everyoneDeny);
+                        guild.ModerationConfig.ModerationLogChannelId = newModerationLogChannel.Id;
+                    }
+
+                    try
+                    {
+                        var memberEventsLogChannel =
+                            await _discord.Client.GetChannelAsync(guild.ModerationConfig.MemberEventsLogChannelId);
+                        if (memberEventsLogChannel is null) throw new DiscordNotFoundException();
+                    }
+                    catch
+                    {
+                        newMemberEventsLogChannel = await discordGuild.CreateTextChannelAsync("member-logs",
+                            newModerationCat, "Category with member logs", everyoneDeny);
+                        guild.ModerationConfig.MemberEventsLogChannelId = newMemberEventsLogChannel.Id;
+                    }
+
+                    try
+                    {
+                        var messageEditLogChannel =
+                            await _discord.Client.GetChannelAsync(guild.ModerationConfig
+                                .MessageUpdatedEventsLogChannelId);
+                        if (messageEditLogChannel is null) throw new DiscordNotFoundException();
+                    }
+                    catch
+                    {
+                        newMessageUpdatedEventsLogChannel = await discordGuild.CreateTextChannelAsync("edit-logs",
+                            newModerationCat, "Category with edited message logs", everyoneDeny);
+                        guild.ModerationConfig.MessageUpdatedEventsLogChannelId = newMessageUpdatedEventsLogChannel.Id;
+                    }
+
+                    try
+                    {
+                        var messageDeleteLogChannel =
+                            await _discord.Client.GetChannelAsync(guild.ModerationConfig
+                                .MessageDeletedEventsLogChannelId);
+                        if (messageDeleteLogChannel is null) throw new DiscordNotFoundException();
+                    }
+                    catch
+                    {
+                        newMessageDeletedEventsLogChannel = await discordGuild.CreateTextChannelAsync("delete-logs",
+                            newModerationCat, "Category with deleted message logs", everyoneDeny);
+                        guild.ModerationConfig.MessageDeletedEventsLogChannelId = newMessageDeletedEventsLogChannel.Id;
+                    }
+
+                    if (newMemberEventsLogChannel is not null || newMessageUpdatedEventsLogChannel is not null ||
+                        newMessageDeletedEventsLogChannel is not null || newModerationLogChannel is not null)
+                        await _guildService.CommitAsync();
+
+                    embed.AddField("Moderation category", newModerationCat.Mention);
+                    if (newModerationLogChannel is not null) embed.AddField("Moderation log channel", newModerationLogChannel.Mention);
+                    if (newMemberEventsLogChannel is not null) embed.AddField("Member log channel", newMemberEventsLogChannel.Mention);
+                    if (newMessageUpdatedEventsLogChannel is not null) embed.AddField("Message edited log channel", newMessageUpdatedEventsLogChannel.Mention);
+                    if (newMessageDeletedEventsLogChannel is not null) embed.AddField("Message deleted channel", newMessageDeletedEventsLogChannel.Mention);
+
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
+            }
+
+            embed.WithDescription("Process completed successfully");
+            embed.WithColor(new DiscordColor(guild.EmbedHexColor));
+            embed.WithAuthor($"{type} configuration repair");
+            embed.WithFooter($"Lisbeth configuration requested by {requestingMember.GetFullDisplayName()} | Id: {requestingMember.Id}");
+
+            return embed.Build();
+        }
+
+        public async Task<DiscordEmbed> DisableModuleAsync([NotNull] ModerationConfigDisableReqDto req)
+        {
+            if (req is null) throw new ArgumentNullException(nameof(req));
+
+            DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
+
+            return await this.DisableModuleAsync(guild, await guild.GetMemberAsync(req.RequestedOnBehalfOfId), GuildConfigType.Moderation);
+        }
+
+        public async Task<DiscordEmbed> DisableModuleAsync([NotNull] TicketingConfigDisableReqDto req)
+        {
+            if (req is null) throw new ArgumentNullException(nameof(req));
+
+            DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
+
+            return await this.DisableModuleAsync(guild, await guild.GetMemberAsync(req.RequestedOnBehalfOfId), GuildConfigType.Ticketing);
+        }
+        public async Task<DiscordEmbed> DisableModuleAsync([NotNull] ModerationConfigDisableReqDto req,
+            [NotNull] InteractionContext ctx)
+        {
+            if (req == null) throw new ArgumentNullException(nameof(req));
+            if (ctx == null) throw new ArgumentNullException(nameof(ctx));
+
+            return await this.DisableModuleAsync(ctx.Guild, ctx.Member, GuildConfigType.Moderation);
+        }
+        public async Task<DiscordEmbed> DisableModuleAsync([NotNull] TicketingConfigDisableReqDto req,
+            [NotNull] InteractionContext ctx)
+        {
+            if (req == null) throw new ArgumentNullException(nameof(req));
+            if (ctx == null) throw new ArgumentNullException(nameof(ctx));
+
+            return await this.DisableModuleAsync(ctx.Guild, ctx.Member, GuildConfigType.Ticketing);
+        }
+
+        private async Task<DiscordEmbed> DisableModuleAsync(DiscordGuild discordGuild, DiscordMember requestingMember, GuildConfigType type)
+        {
+            if (!requestingMember.IsAdmin()) throw new DiscordNotAuthorizedException();
+
+            var guild = await _guildService.GetSingleBySpecAsync<Guild>(
+                new ActiveGuildByDiscordIdWithTicketingSpecifications(discordGuild.Id));
+            switch (type)
+            {
+                case GuildConfigType.Ticketing:
+                    if (guild?.TicketingConfig is null)
+                        throw new NotFoundException("Guild or ticketing config not found");
+                    if (guild.TicketingConfig.IsDisabled)
+                        throw new InvalidOperationException("Module already disabled.");
+
+                    await _guildService.DisableConfigAsync(discordGuild.Id, GuildConfigType.Ticketing, true);
+                    break;
+                case GuildConfigType.Moderation:
+                    if (guild?.ModerationConfig is null)
+                        throw new NotFoundException("Guild or moderation config not found");
+                    if (guild.ModerationConfig.IsDisabled)
+                        throw new InvalidOperationException("Module already disabled.");
+
+                    await _guildService.DisableConfigAsync(discordGuild.Id, GuildConfigType.Moderation, true);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
+            }
+
+            return new DiscordEmbedBuilder().WithAuthor("Guild configurator")
+                .WithDescription("Module disabled successfully").WithColor(new DiscordColor(guild.EmbedHexColor))
+                .Build();
         }
     }
 }

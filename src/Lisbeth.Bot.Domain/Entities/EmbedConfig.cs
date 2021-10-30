@@ -21,7 +21,7 @@ using Lisbeth.Bot.Domain.Entities.Base;
 
 namespace Lisbeth.Bot.Domain.Entities
 {
-    public class EmbedConfig : SnowflakeEntity
+    public sealed class EmbedConfig : SnowflakeEntity
     {
         public string Author { get; set; }
         public string AuthorUrl { get; set; }

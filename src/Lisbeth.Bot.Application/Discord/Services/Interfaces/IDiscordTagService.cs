@@ -19,6 +19,7 @@ using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Domain.DTOs.Request;
+using Lisbeth.Bot.Domain.DTOs.Request.Tag;
 
 namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
 {

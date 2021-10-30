@@ -27,9 +27,10 @@ using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.ChatExport.Builders;
 using Lisbeth.Bot.Application.Discord.ChatExport.Models;
 using Lisbeth.Bot.Application.Discord.Exceptions;
-using Lisbeth.Bot.Application.Services.Interfaces.Database;
+using Lisbeth.Bot.Application.Services.Database.Interfaces;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Ticket;
 using Lisbeth.Bot.Domain.DTOs.Request;
+using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 using Lisbeth.Bot.Domain.Entities;
 using Microsoft.Extensions.Logging;
 using MikyM.Common.DataAccessLayer.Specifications;
@@ -183,13 +184,10 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
 
                 if (ticket is null) throw new ArgumentException("Ticket doesn't exist in database.");
 
-                if (guildCfg.TicketingConfig.LogChannelId is null)
-                    throw new ArgumentException("Guild doesn't have ticketing log channel set.");
-
                 try
                 {
                     ticketLogChannel =
-                        await _discord.Client.GetChannelAsync(guildCfg.TicketingConfig.LogChannelId.Value);
+                        await _discord.Client.GetChannelAsync(guildCfg.TicketingConfig.LogChannelId);
                 }
                 catch (Exception)
                 {

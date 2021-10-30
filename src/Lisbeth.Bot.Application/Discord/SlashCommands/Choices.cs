@@ -67,4 +67,12 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
         [ChoiceName("configure-embed")] ConfigureEmbed,
         [ChoiceName("remove")] Remove
     }
+
+    public enum ModerationActionType
+    {
+        [ChoiceName("enable")] Enable,
+        [ChoiceName("repair")] Repair,
+        [ChoiceName("edit")] Edit,
+        [ChoiceName("disable")] Disable
+    }
 }

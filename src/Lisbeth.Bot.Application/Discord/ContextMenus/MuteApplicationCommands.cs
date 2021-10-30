@@ -26,6 +26,7 @@ using FluentValidation;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Validation;
 using Lisbeth.Bot.Domain.DTOs.Request;
+using Lisbeth.Bot.Domain.DTOs.Request.Mute;
 
 // ReSharper disable once CheckNamespace
 namespace Lisbeth.Bot.Application.Discord.ApplicationCommands

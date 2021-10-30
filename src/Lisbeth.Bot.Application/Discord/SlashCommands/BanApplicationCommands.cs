@@ -27,6 +27,7 @@ using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Application.Extensions;
 using Lisbeth.Bot.Application.Validation;
 using Lisbeth.Bot.Domain.DTOs.Request;
+using Lisbeth.Bot.Domain.DTOs.Request.Ban;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands
 {

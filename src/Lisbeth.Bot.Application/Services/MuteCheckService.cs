@@ -21,10 +21,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using JetBrains.Annotations;
+using Lisbeth.Bot.Application.Services.Database.Interfaces;
 using Lisbeth.Bot.Application.Services.Interfaces;
-using Lisbeth.Bot.Application.Services.Interfaces.Database;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.Domain.DTOs.Request;
+using Lisbeth.Bot.Domain.DTOs.Request.Mute;
 using Lisbeth.Bot.Domain.Entities;
 
 namespace Lisbeth.Bot.Application.Services

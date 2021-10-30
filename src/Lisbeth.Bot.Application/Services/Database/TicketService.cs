@@ -23,10 +23,11 @@ using AutoMapper;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using JetBrains.Annotations;
-using Lisbeth.Bot.Application.Services.Interfaces.Database;
+using Lisbeth.Bot.Application.Services.Database.Interfaces;
 using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Ticket;
 using Lisbeth.Bot.Domain.DTOs.Request;
+using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.Application.Services;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
@@ -62,7 +63,7 @@ namespace Lisbeth.Bot.Application.Services.Database
             if (ticket is null) return null;
 
             base.BeginUpdate(ticket);
-            ticket.ClosedById = req.RequestedById;
+            ticket.ClosedById = req.RequestedOnBehalfOfId;
             ticket.ClosedOn = DateTime.UtcNow;
             ticket.IsDisabled = true;
 
@@ -76,7 +77,7 @@ namespace Lisbeth.Bot.Application.Services.Database
             if (req is null) throw new ArgumentNullException(nameof(req));
 
             base.BeginUpdate(ticket);
-            ticket.ClosedById = req.RequestedById;
+            ticket.ClosedById = req.RequestedOnBehalfOfId;
             ticket.ClosedOn = DateTime.UtcNow;
             ticket.IsDisabled = true;
             ticket.MessageCloseId = req.ClosedMessageId;
@@ -91,7 +92,7 @@ namespace Lisbeth.Bot.Application.Services.Database
             if (req is null) throw new ArgumentNullException(nameof(req));
 
             var ticket = await base.GetSingleBySpecAsync<Ticket>(
-                new TicketBaseGetSpecifications(null, req.OwnerId, req.GuildId));
+                new TicketBaseGetSpecifications(null, req.RequestedOnBehalfOfId, req.GuildId));
             if (ticket is not null) return null;
 
             var id = await base.AddAsync(req, true);
@@ -104,7 +105,7 @@ namespace Lisbeth.Bot.Application.Services.Database
             if (req is null) throw new ArgumentNullException(nameof(req));
 
             base.BeginUpdate(ticket);
-            ticket.ReopenedById = req.RequestedById;
+            ticket.ReopenedById = req.RequestedOnBehalfOfId;
             ticket.ReopenedOn = DateTime.UtcNow;
             ticket.IsDisabled = false;
             ticket.MessageCloseId = null;
@@ -125,7 +126,7 @@ namespace Lisbeth.Bot.Application.Services.Database
             if (ticket is null) return null;
 
             base.BeginUpdate(ticket);
-            ticket.ReopenedById = req.RequestedById;
+            ticket.ReopenedById = req.RequestedOnBehalfOfId;
             ticket.ReopenedOn = DateTime.UtcNow;
             ticket.IsDisabled = false;
             ticket.MessageCloseId = null;

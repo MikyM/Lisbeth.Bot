@@ -18,6 +18,7 @@
 
 using FluentValidation;
 using Lisbeth.Bot.Domain.DTOs.Request;
+using Lisbeth.Bot.Domain.DTOs.Request.Guild;
 
 namespace Lisbeth.Bot.Application.Validation
 {

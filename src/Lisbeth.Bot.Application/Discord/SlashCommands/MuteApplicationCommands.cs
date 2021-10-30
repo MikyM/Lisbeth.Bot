@@ -28,6 +28,7 @@ using Lisbeth.Bot.Application.Discord.SlashCommands;
 using Lisbeth.Bot.Application.Extensions;
 using Lisbeth.Bot.Application.Validation;
 using Lisbeth.Bot.Domain.DTOs.Request;
+using Lisbeth.Bot.Domain.DTOs.Request.Mute;
 
 // ReSharper disable once CheckNamespace
 namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
@@ -47,7 +48,7 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
             [Option("action", "Action type")] MuteActionType actionType,
             [Option("user", "User to mute")] DiscordUser user,
             [Option("length", "For how long should the user be muted")]
-            string length = "",
+            string length = "perm",
             [Option("reason", "Reason for mute")] string reason = "No reason provided")
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,

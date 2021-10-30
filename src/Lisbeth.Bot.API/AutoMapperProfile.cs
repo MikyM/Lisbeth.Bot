@@ -20,6 +20,11 @@ using AutoMapper;
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Domain.DTOs;
 using Lisbeth.Bot.Domain.DTOs.Request;
+using Lisbeth.Bot.Domain.DTOs.Request.Ban;
+using Lisbeth.Bot.Domain.DTOs.Request.Guild;
+using Lisbeth.Bot.Domain.DTOs.Request.Mute;
+using Lisbeth.Bot.Domain.DTOs.Request.Tag;
+using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 using Lisbeth.Bot.Domain.Entities;
 
 namespace Lisbeth.Bot.API
@@ -47,7 +52,7 @@ namespace Lisbeth.Bot.API
             CreateMap<GuildGetReqDto, Guild>();
             CreateMap<TicketExportReqDto, Ticket>();
             CreateMap<TicketOpenReqDto, Ticket>()
-                .ForMember(dest => dest.UserId, source => source.MapFrom(x => x.OwnerId));
+                .ForMember(dest => dest.UserId, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
             CreateMap<TicketingConfig, TicketingConfig>();
             CreateMap<ModerationConfig, ModerationConfig>();
             CreateMap<TagAddReqDto, Tag>()

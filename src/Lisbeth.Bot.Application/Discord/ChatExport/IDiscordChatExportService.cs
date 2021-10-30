@@ -18,6 +18,7 @@
 using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Domain.DTOs.Request;
+using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 using Lisbeth.Bot.Domain.Entities;
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport

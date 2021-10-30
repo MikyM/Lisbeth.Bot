@@ -41,11 +41,11 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
             builder.Property(x => x.GuildId).HasColumnName("guild_id").HasColumnType("bigint")
                 .ValueGeneratedOnAdd().IsRequired();
             builder.Property(x => x.ClosedCategoryId).HasColumnName("closed_category_id")
-                .HasColumnType("bigint");
+                .HasColumnType("bigint").IsRequired();
             builder.Property(x => x.OpenedCategoryId).HasColumnName("opened_category_id")
-                .HasColumnType("bigint");
+                .HasColumnType("bigint").IsRequired();
             builder.Property(x => x.LogChannelId).HasColumnName("log_channel_id")
-                .HasColumnType("bigint");
+                .HasColumnType("bigint").IsRequired();
             builder.Property(x => x.LastTicketId).HasColumnName("last_ticket_id")
                 .HasColumnType("bigint");
             builder.Property(x => x.OpenedNamePrefix).HasColumnName("opened_name_prefix")

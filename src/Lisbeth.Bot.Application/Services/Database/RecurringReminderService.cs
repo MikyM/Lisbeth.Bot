@@ -17,7 +17,7 @@
 
 using AutoMapper;
 using JetBrains.Annotations;
-using Lisbeth.Bot.Application.Services.Interfaces.Database;
+using Lisbeth.Bot.Application.Services.Database.Interfaces;
 using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.Application.Services;
