@@ -21,6 +21,8 @@ namespace Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig
 {
     public class TicketingConfigRepairReqDto : BaseAuthWithGuildReqDto
     {
-        
+        public ulong? LogChannelId { get; set; }
+        public ulong? ClosedCategoryId { get; set; }
+        public ulong? OpenedCategoryId { get; set; }
     }
 }

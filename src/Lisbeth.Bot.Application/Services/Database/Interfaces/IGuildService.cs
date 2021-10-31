@@ -32,6 +32,8 @@ namespace Lisbeth.Bot.Application.Services.Database.Interfaces
         Task<Guild> AddConfigAsync(TicketingConfigReqDto req, bool shouldSave = false);
         Task<bool> DisableConfigAsync(ulong guildId, GuildConfigType type, bool shouldSave = false);
         Task<Guild> EnableConfigAsync(ulong guildId, GuildConfigType type, bool shouldSave = false);
+        Task RepairModuleConfigAsync(TicketingConfigRepairReqDto req, bool shouldSave = false);
+        Task RepairModuleConfigAsync(ModerationConfigRepairReqDto req, bool shouldSave = false);
         Task EditTicketingConfigAsync(TicketingConfigEditReqDto req, bool shouldSave = false);
         Task EditModerationConfigAsync(ulong guildId, bool shouldSave = false);
     }

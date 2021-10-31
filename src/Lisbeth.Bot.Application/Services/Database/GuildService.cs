@@ -152,6 +152,38 @@ namespace Lisbeth.Bot.Application.Services.Database
             if (shouldSave) await _ticketingService.CommitAsync();
         }
 
+        public async Task RepairModuleConfigAsync(TicketingConfigRepairReqDto req, bool shouldSave = false)
+        {
+            var guild = await base.GetSingleBySpecAsync<Guild>(
+                new ActiveGuildByDiscordIdWithTicketingSpecifications(req.GuildId));
+            if (guild?.TicketingConfig is null) throw new NotFoundException("Guild doesn't exist in the database or it does not have a ticketing config");
+            if (guild.TicketingConfig.IsDisabled) throw new DisabledEntityException("Guild's ticketing config is disabled, please re-enable it first.");
+
+            _ticketingService.BeginUpdate(guild.TicketingConfig);
+            if (req.ClosedCategoryId is not null) guild.TicketingConfig.ClosedCategoryId = req.ClosedCategoryId.Value;
+            if (req.OpenedCategoryId is not null) guild.TicketingConfig.OpenedCategoryId = req.OpenedCategoryId.Value;
+            if (req.LogChannelId is not null) guild.TicketingConfig.LogChannelId = req.LogChannelId.Value;
+
+            if (shouldSave) await _ticketingService.CommitAsync();
+        }
+
+        public async Task RepairModuleConfigAsync(ModerationConfigRepairReqDto req, bool shouldSave = false)
+        {
+            var guild = await base.GetSingleBySpecAsync<Guild>(
+                new ActiveGuildByDiscordIdWithModerationSpecifications(req.GuildId));
+            if (guild?.ModerationConfig is null) throw new NotFoundException("Guild doesn't exist in the database or it does not have a moderation config");
+            if (guild.ModerationConfig.IsDisabled) throw new DisabledEntityException("Guild's moderation config is disabled, please re-enable it first.");
+
+            _moderationService.BeginUpdate(guild.ModerationConfig);
+            if (req.MemberEventsLogChannelId is not null) guild.ModerationConfig.MemberEventsLogChannelId = req.MemberEventsLogChannelId.Value;
+            if (req.MessageDeletedEventsLogChannelId is not null) guild.ModerationConfig.MessageDeletedEventsLogChannelId = req.MessageDeletedEventsLogChannelId.Value;
+            if (req.MessageUpdatedEventsLogChannelId is not null) guild.ModerationConfig.MessageUpdatedEventsLogChannelId = req.MessageUpdatedEventsLogChannelId.Value;
+            if (req.ModerationLogChannelId is not null) guild.ModerationConfig.ModerationLogChannelId = req.ModerationLogChannelId.Value;
+            if (req.MuteRoleId is not null) guild.ModerationConfig.MuteRoleId = req.MuteRoleId.Value;
+
+            if (shouldSave) await _moderationService.CommitAsync();
+        }
+
         public Task EditModerationConfigAsync(ulong guildId, bool shouldSave = false)
         {
             throw new NotImplementedException();

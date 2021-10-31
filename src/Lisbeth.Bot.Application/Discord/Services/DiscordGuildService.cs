@@ -273,7 +273,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     DiscordChannel newTicketLogChannel = null;
                     DiscordChannel closedCat = null;
 
-                    _guildService.BeginUpdate(guild.TicketingConfig);
+                    TicketingConfigRepairReqDto ticketingReq = new();
 
                     try
                     {
@@ -284,7 +284,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     {
                         newOpenedCat = await discordGuild.CreateChannelAsync("TICKETS", ChannelType.Category, null,
                             "Category with opened tickets", null, null, everyoneDeny);
-                        guild.TicketingConfig.OpenedCategoryId = newOpenedCat.Id;
+                        ticketingReq.OpenedCategoryId = newOpenedCat.Id;
                     }
 
                     try
@@ -296,7 +296,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     {
                         newClosedCat = await discordGuild.CreateChannelAsync("TICKETS-ARCHIVE", ChannelType.Category,
                             null, "Category with closed tickets", null, null, everyoneDeny);
-                        guild.TicketingConfig.ClosedCategoryId = newClosedCat.Id;
+                        ticketingReq.ClosedCategoryId = newClosedCat.Id;
                     }
 
                     try
@@ -308,15 +308,24 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     {
                         newTicketLogChannel = await discordGuild.CreateTextChannelAsync("ticket-logs",
                             closedCat ?? newClosedCat, "Channel with ticket logs and transcripts", everyoneDeny);
-                        guild.TicketingConfig.LogChannelId = newTicketLogChannel.Id;
+                        ticketingReq.LogChannelId = newTicketLogChannel.Id;
                     }
 
                     if (newOpenedCat is not null || newClosedCat is not null || newTicketLogChannel is not null)
-                        await _guildService.CommitAsync();
+                    {
+                        ticketingReq.GuildId = guild.GuildId;
+                        ticketingReq.RequestedOnBehalfOfId = requestingMember.Id;
+                        await _guildService.RepairModuleConfigAsync(ticketingReq, true);
 
-                    if (newOpenedCat is not null) embed.AddField("Opened ticket category", newOpenedCat.Mention);
-                    if (newClosedCat is not null) embed.AddField("Closed ticket category", newClosedCat.Mention);
-                    if (newTicketLogChannel is not null) embed.AddField("Ticket log channel", newTicketLogChannel.Mention);
+                        if (newOpenedCat is not null) embed.AddField("Opened ticket category", newOpenedCat.Mention);
+                        if (newClosedCat is not null) embed.AddField("Closed ticket category", newClosedCat.Mention);
+                        if (newTicketLogChannel is not null) embed.AddField("Ticket log channel", newTicketLogChannel.Mention);
+                    }
+                    else
+                    {
+                        embed.AddField("Result", "Nothing to repair");
+                    }
+
 
                     break;
                 case GuildConfigType.Moderation:
@@ -339,14 +348,13 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     DiscordChannel newModerationLogChannel = null;
                     DiscordRole newMuteRole = null;
 
+                    ModerationConfigRepairReqDto moderationReq = new();
+
                     var newModerationCat = discordGuild.Channels.FirstOrDefault(x =>
                             string.Equals(x.Value.Name.ToLower(), "moderation",
                                 StringComparison.InvariantCultureIgnoreCase))
                         .Value ?? await discordGuild.CreateChannelAsync("MODERATION", ChannelType.Category, null,
                         "Moderation category", null, null, everyoneDeny);
-
-                    _guildService.BeginUpdate(guild.TicketingConfig);
-
                     try
                     {
                         var moderationChannelLog =
@@ -356,8 +364,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     catch
                     {
                         newModerationLogChannel = await discordGuild.CreateTextChannelAsync("moderation-logs",
-                            newModerationCat, "Category with moderation logs", everyoneDeny);
-                        guild.ModerationConfig.ModerationLogChannelId = newModerationLogChannel.Id;
+                            newModerationCat, "Channel with moderation logs", everyoneDeny);
+                        moderationReq.ModerationLogChannelId = newModerationLogChannel.Id;
                     }
 
                     try
@@ -369,8 +377,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     catch
                     {
                         newMemberEventsLogChannel = await discordGuild.CreateTextChannelAsync("member-logs",
-                            newModerationCat, "Category with member logs", everyoneDeny);
-                        guild.ModerationConfig.MemberEventsLogChannelId = newMemberEventsLogChannel.Id;
+                            newModerationCat, "Channel with member logs", everyoneDeny);
+                        moderationReq.MemberEventsLogChannelId = newMemberEventsLogChannel.Id;
                     }
 
                     try
@@ -383,8 +391,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     catch
                     {
                         newMessageUpdatedEventsLogChannel = await discordGuild.CreateTextChannelAsync("edit-logs",
-                            newModerationCat, "Category with edited message logs", everyoneDeny);
-                        guild.ModerationConfig.MessageUpdatedEventsLogChannelId = newMessageUpdatedEventsLogChannel.Id;
+                            newModerationCat, "Channel with edited message logs", everyoneDeny);
+                        moderationReq.MessageUpdatedEventsLogChannelId = newMessageUpdatedEventsLogChannel.Id;
                     }
 
                     try
@@ -397,8 +405,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     catch
                     {
                         newMessageDeletedEventsLogChannel = await discordGuild.CreateTextChannelAsync("delete-logs",
-                            newModerationCat, "Category with deleted message logs", everyoneDeny);
-                        guild.ModerationConfig.MessageDeletedEventsLogChannelId = newMessageDeletedEventsLogChannel.Id;
+                            newModerationCat, "Channel with deleted message logs", everyoneDeny);
+                        moderationReq.MessageDeletedEventsLogChannelId = newMessageDeletedEventsLogChannel.Id;
                     }
 
                     try
@@ -409,6 +417,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     catch
                     {
                         newMuteRole = await discordGuild.CreateRoleAsync("Muted");
+                        moderationReq.MuteRoleId = newMuteRole.Id;
 
                         await Task.Delay(300); // give discord a break
 
@@ -425,14 +434,22 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     if (newMemberEventsLogChannel is not null || newMessageUpdatedEventsLogChannel is not null ||
                         newMessageDeletedEventsLogChannel is not null || newModerationLogChannel is not null ||
                         newMuteRole is not null)
-                        await _guildService.CommitAsync();
+                    {
+                        moderationReq.GuildId = guild.GuildId;
+                        moderationReq.RequestedOnBehalfOfId = requestingMember.Id;
+                        await _guildService.RepairModuleConfigAsync(moderationReq, true);
 
-                    embed.AddField("Moderation category", newModerationCat.Mention);
-                    if (newModerationLogChannel is not null) embed.AddField("Moderation log channel", newModerationLogChannel.Mention);
-                    if (newMemberEventsLogChannel is not null) embed.AddField("Member log channel", newMemberEventsLogChannel.Mention);
-                    if (newMessageUpdatedEventsLogChannel is not null) embed.AddField("Message edited log channel", newMessageUpdatedEventsLogChannel.Mention);
-                    if (newMessageDeletedEventsLogChannel is not null) embed.AddField("Message deleted channel", newMessageDeletedEventsLogChannel.Mention);
-                    if (newMuteRole is not null) embed.AddField("Muted role", newMuteRole.Mention);
+                        embed.AddField("Moderation category", newModerationCat.Mention);
+                        if (newModerationLogChannel is not null) embed.AddField("Moderation log channel", newModerationLogChannel.Mention);
+                        if (newMemberEventsLogChannel is not null) embed.AddField("Member log channel", newMemberEventsLogChannel.Mention);
+                        if (newMessageUpdatedEventsLogChannel is not null) embed.AddField("Message edited log channel", newMessageUpdatedEventsLogChannel.Mention);
+                        if (newMessageDeletedEventsLogChannel is not null) embed.AddField("Message deleted channel", newMessageDeletedEventsLogChannel.Mention);
+                        if (newMuteRole is not null) embed.AddField("Muted role", newMuteRole.Mention);
+                    }
+                    else
+                    {
+                        embed.AddField("Result", "Nothing to repair");
+                    }
 
                     break;
                 default:

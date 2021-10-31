@@ -30,6 +30,7 @@ using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.DataAccessLayer.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using MikyM.Common.Application;
 using MikyM.Common.DataAccessLayer;
 using MikyM.Common.DataAccessLayer.Specifications;
@@ -73,6 +74,7 @@ namespace Lisbeth.Bot.API
                 //optionsBuilder.UseInMemoryDatabase("testdb");
                 optionsBuilder.AddInterceptors(x.Resolve<SecondLevelCacheInterceptor>());
                 optionsBuilder.EnableSensitiveDataLogging();
+                optionsBuilder.UseLoggerFactory(x.Resolve<ILoggerFactory>());
                 optionsBuilder.UseNpgsql(
                     "User ID=lisbethbot;Password=lisbethbot;Host=localhost;Port=5438;Database=lisbeth_bot_test;");
                 return new LisbethBotDbContext(optionsBuilder.Options);
