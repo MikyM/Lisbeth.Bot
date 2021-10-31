@@ -27,6 +27,7 @@ using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Application.Discord.SlashCommands;
 using Lisbeth.Bot.Application.Extensions;
 using Lisbeth.Bot.Application.Validation;
+using Lisbeth.Bot.Application.Validation.Mute;
 using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.DTOs.Request.Mute;
 

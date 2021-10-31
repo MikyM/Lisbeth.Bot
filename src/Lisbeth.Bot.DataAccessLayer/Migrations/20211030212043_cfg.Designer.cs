@@ -3,15 +3,17 @@ using System;
 using Lisbeth.Bot.DataAccessLayer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Lisbeth.Bot.DataAccessLayer.Migrations
 {
     [DbContext(typeof(LisbethBotDbContext))]
-    partial class LisbethBotDbContextModelSnapshot : ModelSnapshot
+    [Migration("20211030212043_cfg")]
+    partial class cfg
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -873,6 +875,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                         .HasColumnName("welcome_message_description");
 
                     b.Property<long?>("CenterEmbedConfigId")
+                        .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("bigint")
                         .HasColumnName("center_embed_config_id");
 
@@ -932,8 +935,9 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                         .HasColumnName("updated_at");
 
                     b.Property<long?>("WelcomeEmbedConfigId")
+                        .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("bigint")
-                        .HasColumnName("welcome_embed_config_id");
+                        .HasColumnName("center_embed_config_id");
 
                     b.HasKey("Id");
 

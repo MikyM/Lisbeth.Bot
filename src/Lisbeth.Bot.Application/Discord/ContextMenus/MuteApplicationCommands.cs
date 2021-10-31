@@ -25,6 +25,7 @@ using DSharpPlus.SlashCommands.Attributes;
 using FluentValidation;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Validation;
+using Lisbeth.Bot.Application.Validation.Mute;
 using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.DTOs.Request.Mute;
 

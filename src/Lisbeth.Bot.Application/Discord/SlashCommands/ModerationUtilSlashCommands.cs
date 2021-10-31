@@ -5,11 +5,18 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
+using FluentValidation;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
+using Lisbeth.Bot.Application.Enums;
+using Lisbeth.Bot.Application.Extensions;
 using Lisbeth.Bot.Application.Services.Database.Interfaces;
+using Lisbeth.Bot.Application.Validation.ModerationConfig;
+using Lisbeth.Bot.Application.Validation.TicketingConfig;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
+using Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig;
+using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
 using Lisbeth.Bot.Domain.Entities;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands
@@ -19,6 +26,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
     public class ModerationUtilSlashCommands : ApplicationCommandModule
     {
         public IGuildService _guildService { private get; set; }
+        public IDiscordGuildService _discordGuildService { private get; set; }
         public IDiscordTicketService _dicordTicketService { private get; set; }
 
         [SlashRequireUserPermissions(Permissions.Administrator)]
@@ -70,30 +78,120 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
 
         [UsedImplicitly]
         [SlashRequireUserPermissions(Permissions.Administrator)]
-        [SlashCommand("ticket-config", "A command that allows setting ticketing module up")]
-        public async Task TicketConfigCommand(InteractionContext ctx, [Option("action", "Action to perform")] ModerationActionType action)
+        [SlashCommand("module", "A command that allows configuring modules")]
+        public async Task TicketConfigCommand(InteractionContext ctx, 
+            [Option("action", "Action to perform")] ModuleActionType action,
+            [Option("module", "Module to perform action on")] GuildConfigType type,
+            [Option("clean-after", "After how many hours should inactive closed tickets be cleared")] string cleanAfter = "",
+            [Option("close-after", "After how many hours should inactive opened tickets be closed")] string closeAfter= "")
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
-            DiscordEmbed embed;
-            switch (action)
+            DiscordEmbed embed = null;
+            
+            switch (type)
             {
-                case ModerationActionType.Enable:
-                    embed = await _guildService.AddConfigAsync(addReq, true);
+                case GuildConfigType.Ticketing:
+                    switch (action)
+                    {
+                        case ModuleActionType.Enable:
+                            double cleanAfterParsed = 0;
+                            double closeAfterParsed = 0;
+
+                            if (cleanAfter is not null && cleanAfter != "" && !double.TryParse(cleanAfter, out cleanAfterParsed))
+                                throw new ArgumentException("Time provided was in incorrect format",
+                                    nameof(cleanAfter));
+                            if (closeAfter is not null && closeAfter != "" && !double.TryParse(closeAfter, out closeAfterParsed))
+                                throw new ArgumentException("Time provided was in incorrect format",
+                                    nameof(closeAfter));
+
+                            if (closeAfterParsed is < 1 or > 744) throw new ArgumentException("Accepted values are in range from 1 to 744",
+                                nameof(closeAfter));
+                            if (cleanAfterParsed is < 1 or > 744) throw new ArgumentException("Accepted values are in range from 1 to 744",
+                                nameof(cleanAfter));
+
+                            var enableTicketingReq = new TicketingConfigReqDto
+                            {
+                                GuildId = ctx.Guild.Id, RequestedOnBehalfOfId = ctx.Member.Id
+                            };
+                            if (cleanAfter is not "") enableTicketingReq.CleanAfter = TimeSpan.FromHours(cleanAfterParsed);
+                            if (closeAfter is not "") enableTicketingReq.CloseAfter = TimeSpan.FromHours(closeAfterParsed);
+
+                            var enableTicketingValidator = new TicketingConfigReqValidator(ctx.Client);
+                            await enableTicketingValidator.ValidateAndThrowAsync(enableTicketingReq);
+                            embed = await _discordGuildService.CreateModuleAsync(ctx, enableTicketingReq);
+                            break;
+                        case ModuleActionType.Repair:
+                            var repairTicketingReq = new TicketingConfigRepairReqDto
+                            {
+                                GuildId = ctx.Guild.Id,
+                                RequestedOnBehalfOfId = ctx.Member.Id
+                            };
+                            var repairTicketingValidator = new TicketingConfigRepairReqValidator(ctx.Client);
+                            await repairTicketingValidator.ValidateAndThrowAsync(repairTicketingReq);
+                            embed = await _discordGuildService.RepairConfigAsync(ctx, repairTicketingReq);
+                            break;
+                        case ModuleActionType.Edit:
+                            break;
+                        case ModuleActionType.Disable:
+                            var disableTicketingReq = new TicketingConfigDisableReqDto
+                            {
+                                GuildId = ctx.Guild.Id,
+                                RequestedOnBehalfOfId = ctx.Member.Id
+                            };
+                            var disableTicketingValidator = new TicketingConfigDisableReqValidator(ctx.Client);
+                            await disableTicketingValidator.ValidateAndThrowAsync(disableTicketingReq);
+                            embed = await _discordGuildService.DisableModuleAsync(ctx, disableTicketingReq);
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException(nameof(action), action, null);
+                    }
                     break;
-                case ModerationActionType.Repair:
-                    break;
-                case ModerationActionType.Edit:
-                    break;
-                case ModerationActionType.Disable:
+                case GuildConfigType.Moderation:
+                    switch (action)
+                    {
+                        case ModuleActionType.Enable:
+                            var enableModerationReq = new ModerationConfigReqDto
+                            {
+                                GuildId = ctx.Guild.Id,
+                                RequestedOnBehalfOfId = ctx.Member.Id
+                            };
+                            var enableModerationValidator = new ModerationConfigReqValidator(ctx.Client);
+                            await enableModerationValidator.ValidateAndThrowAsync(enableModerationReq);
+                            embed = await _discordGuildService.CreateModuleAsync(ctx, enableModerationReq);
+                            break;
+                        case ModuleActionType.Repair:
+                            var repairModerationReq = new ModerationConfigRepairReqDto
+                            {
+                                GuildId = ctx.Guild.Id,
+                                RequestedOnBehalfOfId = ctx.Member.Id
+                            };
+                            var repairModerationValidator = new ModerationConfigRepairReqValidator(ctx.Client);
+                            await repairModerationValidator.ValidateAndThrowAsync(repairModerationReq);
+                            embed = await _discordGuildService.RepairConfigAsync(ctx, repairModerationReq);
+                            break;
+                        case ModuleActionType.Edit:
+                            break;
+                        case ModuleActionType.Disable:
+                            var disableModerationReq = new ModerationConfigDisableReqDto
+                            {
+                                GuildId = ctx.Guild.Id,
+                                RequestedOnBehalfOfId = ctx.Member.Id
+                            };
+                            var disableModerationValidator = new ModerationConfigDisableReqValidator(ctx.Client);
+                            await disableModerationValidator.ValidateAndThrowAsync(disableModerationReq);
+                            embed = await _discordGuildService.DisableModuleAsync(ctx, disableModerationReq);
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException(nameof(action), action, null);
+                    }
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(action), action, null);
+                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
 
-
-            await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("Done"));
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
         }
 
         [UsedImplicitly]

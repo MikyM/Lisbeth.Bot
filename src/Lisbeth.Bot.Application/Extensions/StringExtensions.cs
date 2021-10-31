@@ -22,6 +22,11 @@ namespace Lisbeth.Bot.Application.Extensions
 {
     public static class StringExtensions
     {
+        public static bool IsDigitsOnly(this string input)
+        {
+            return input.All(c => c is >= '0' and <= '9');
+        }
+
         public static (DateTime? FinalDateFromToday, TimeSpan Duration) ToDateTimeDuration(this string input)
         {
             if (input is null) throw new ArgumentNullException(nameof(input));

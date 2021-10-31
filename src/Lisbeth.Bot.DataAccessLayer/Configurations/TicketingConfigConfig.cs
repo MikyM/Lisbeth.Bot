@@ -72,7 +72,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
                 .HasColumnName("center_embed_config_id")
                 .HasColumnType("bigint");
             builder.Property(x => x.WelcomeEmbedConfigId)
-                .HasColumnName("center_embed_config_id")
+                .HasColumnName("welcome_embed_config_id")
                 .HasColumnType("bigint");
 
             builder.HasOne(x => x.WelcomeEmbedConfig)

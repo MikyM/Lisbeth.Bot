@@ -19,11 +19,10 @@
 using DSharpPlus;
 using FluentValidation;
 using Lisbeth.Bot.Application.Validation.ReusablePropertyValidation;
-using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.DTOs.Request.Ban;
 using MikyM.Discord.Interfaces;
 
-namespace Lisbeth.Bot.Application.Validation
+namespace Lisbeth.Bot.Application.Validation.Ban
 {
     public class BanDisableReqValidator : AbstractValidator<BanDisableReqDto>
     {

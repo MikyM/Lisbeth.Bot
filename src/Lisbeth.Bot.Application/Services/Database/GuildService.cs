@@ -15,29 +15,36 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using AutoMapper;
 using Hangfire.Annotations;
-using Lisbeth.Bot.Application.Services.Database.Interfaces;
-using Lisbeth.Bot.DataAccessLayer;
-using Lisbeth.Bot.Domain.DTOs.Request;
-using Lisbeth.Bot.Domain.Entities;
-using MikyM.Common.Application.Services;
-using MikyM.Common.DataAccessLayer.UnitOfWork;
-using System.Threading.Tasks;
 using Lisbeth.Bot.Application.Enums;
 using Lisbeth.Bot.Application.Exceptions;
+using Lisbeth.Bot.Application.Services.Database.Interfaces;
+using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
+using Lisbeth.Bot.Domain.Entities;
+using MikyM.Common.Application.Interfaces;
+using MikyM.Common.Application.Services;
+using MikyM.Common.DataAccessLayer.UnitOfWork;
+using System;
+using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Services.Database
 {
     [UsedImplicitly]
     public class GuildService : CrudService<Guild, LisbethBotDbContext>, IGuildService
     {
-        public GuildService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> ctx) : base(mapper, ctx)
+        private readonly ICrudService<ModerationConfig, LisbethBotDbContext> _moderationService;
+        private readonly ICrudService<TicketingConfig, LisbethBotDbContext> _ticketingService;
+
+        public GuildService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof,
+            ICrudService<ModerationConfig, LisbethBotDbContext> moderationService,
+            ICrudService<TicketingConfig, LisbethBotDbContext> ticketingService) : base(mapper, uof)
         {
+            _moderationService = moderationService;
+            _ticketingService = ticketingService;
         }
 
         public async Task<Guild> AddConfigAsync(TicketingConfigReqDto req, bool shouldSave = false)
@@ -49,10 +56,8 @@ namespace Lisbeth.Bot.Application.Services.Database
                 return await this.EnableConfigAsync(req.GuildId, GuildConfigType.Ticketing, shouldSave);
             else if (guild.TicketingConfig is not null && !guild.TicketingConfig.IsDisabled) throw new InvalidOperationException("Guild already has an enabled ticketing config");
 
-            base.BeginUpdate(guild);
-            guild.SetTicketingConfig(_mapper.Map<TicketingConfig>(req));
+            await _ticketingService.AddAsync(req, shouldSave);
 
-            if (shouldSave) await base.CommitAsync();
             return guild;
         }
 
@@ -63,12 +68,10 @@ namespace Lisbeth.Bot.Application.Services.Database
             if (guild is null) throw new NotFoundException("Guild doesn't exist in the database");
             if (guild.TicketingConfig is not null && guild.ModerationConfig.IsDisabled)
                 return await this.EnableConfigAsync(req.GuildId, GuildConfigType.Moderation, shouldSave);
-            else if (guild.ModerationConfig is not null && !guild.ModerationConfig.IsDisabled) throw new InvalidOperationException("Guild already has an enabled moderation config");
+            if (guild.ModerationConfig is not null && !guild.ModerationConfig.IsDisabled) throw new InvalidOperationException("Guild already has an enabled moderation config");
 
-            base.BeginUpdate(guild);
-            guild.SetModerationConfig(_mapper.Map<ModerationConfig>(req));
+            await _moderationService.AddAsync(req, shouldSave);
 
-            if (shouldSave) await base.CommitAsync();
             return guild;
         }
 
@@ -83,8 +86,7 @@ namespace Lisbeth.Bot.Application.Services.Database
                     if (guild?.TicketingConfig is null) throw new NotFoundException("Guild doesn't exist in the database or it does not have a ticketing config");
                     if (guild.TicketingConfig.IsDisabled) return false;
 
-                    base.BeginUpdate(guild.TicketingConfig);
-                    guild.TicketingConfig.IsDisabled = false;
+                    await _ticketingService.DisableAsync(guild.TicketingConfig, shouldSave);
                     break;
                 case GuildConfigType.Moderation:
                     guild = await base.GetSingleBySpecAsync<Guild>(
@@ -92,14 +94,11 @@ namespace Lisbeth.Bot.Application.Services.Database
                     if (guild?.ModerationConfig is null) throw new NotFoundException("Guild doesn't exist in the database or it does not have a moderation config");
                     if (guild.ModerationConfig.IsDisabled) return false;
 
-                    base.BeginUpdate(guild.TicketingConfig);
-                    guild.TicketingConfig.IsDisabled = false;
+                    await _moderationService.DisableAsync(guild.ModerationConfig, shouldSave);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
-
-            if (shouldSave) await base.CommitAsync();
             return true;
         }
 
@@ -114,8 +113,10 @@ namespace Lisbeth.Bot.Application.Services.Database
                     if (guild?.TicketingConfig is null) throw new NotFoundException("Guild doesn't exist in the database or it does not have a ticketing config");
                     if (!guild.TicketingConfig.IsDisabled) return null;
 
-                    base.BeginUpdate(guild.TicketingConfig);
-                    guild.TicketingConfig.IsDisabled = true;
+                    _ticketingService.BeginUpdate(guild.TicketingConfig);
+                    guild.TicketingConfig.IsDisabled = false;
+
+                    if (shouldSave) await _ticketingService.CommitAsync();
                     break;
                 case GuildConfigType.Moderation:
                     guild = await base.GetSingleBySpecAsync<Guild>(
@@ -123,14 +124,15 @@ namespace Lisbeth.Bot.Application.Services.Database
                     if (guild?.ModerationConfig is null) throw new NotFoundException("Guild doesn't exist in the database or it does not have a moderation config");
                     if (!guild.ModerationConfig.IsDisabled) return null;
 
-                    base.BeginUpdate(guild.TicketingConfig);
-                    guild.TicketingConfig.IsDisabled = true;
+                    base.BeginUpdate(guild.ModerationConfig);
+                    guild.ModerationConfig.IsDisabled = false;
+
+                    if (shouldSave) await _moderationService.CommitAsync();
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
 
-            if (shouldSave) await base.CommitAsync();
             return guild;
         }
 
@@ -141,13 +143,13 @@ namespace Lisbeth.Bot.Application.Services.Database
             if (guild?.TicketingConfig is null) throw new NotFoundException("Guild doesn't exist in the database or it does not have a ticketing config");
             if (guild.TicketingConfig.IsDisabled) throw new DisabledEntityException("Guild's ticketing config is disabled, please re-enable it first.");
 
-            base.BeginUpdate(guild.TicketingConfig);
+            _ticketingService.BeginUpdate(guild.TicketingConfig);
             guild.TicketingConfig.CleanAfter = req.CleanAfter;
             guild.TicketingConfig.CloseAfter = req.CloseAfter;
             guild.TicketingConfig.ClosedNamePrefix = req.ClosedNamePrefix;
             guild.TicketingConfig.OpenedNamePrefix = req.OpenedNamePrefix;
 
-            if (shouldSave) await base.CommitAsync();
+            if (shouldSave) await _ticketingService.CommitAsync();
         }
 
         public Task EditModerationConfigAsync(ulong guildId, bool shouldSave = false)

@@ -42,13 +42,13 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
             builder.Property(x => x.MemberEventsLogChannelId)
                 .HasColumnName("member_events_log_channel_id").HasColumnType("bigint").IsRequired();
             builder.Property(x => x.MessageDeletedEventsLogChannelId)
-                .HasColumnName("message_deleted_events_log_channel_id").HasColumnType("bigint").IsRequired(); ;
+                .HasColumnName("message_deleted_events_log_channel_id").HasColumnType("bigint").IsRequired();
             builder.Property(x => x.ModerationLogChannelId)
-                .HasColumnName("moderation_log_channel_id").HasColumnType("bigint").IsRequired(); ;
+                .HasColumnName("moderation_log_channel_id").HasColumnType("bigint").IsRequired();
             builder.Property(x => x.MessageUpdatedEventsLogChannelId)
-                .HasColumnName("message_updated_events_log_channel_id").HasColumnType("bigint").IsRequired(); ;
+                .HasColumnName("message_updated_events_log_channel_id").HasColumnType("bigint").IsRequired();
             builder.Property(x => x.MuteRoleId).HasColumnName("mute_role_id")
-                .HasColumnType("bigint").IsRequired(); ;
+                .HasColumnType("bigint").IsRequired();
             builder.Property(x => x.BaseMemberWelcomeMessage).HasColumnName("member_welcome_message")
                 .HasColumnType("text");
             builder.Property(x => x.MemberWelcomeEmbedConfigId)

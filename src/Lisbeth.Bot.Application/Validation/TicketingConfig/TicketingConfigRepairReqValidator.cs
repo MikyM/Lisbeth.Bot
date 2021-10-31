@@ -15,35 +15,24 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-
-using System;
 using DSharpPlus;
 using FluentValidation;
 using Lisbeth.Bot.Application.Validation.ReusablePropertyValidation;
-using Lisbeth.Bot.Domain.DTOs.Request;
-using Lisbeth.Bot.Domain.DTOs.Request.Mute;
+using Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig;
+using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
 using MikyM.Discord.Interfaces;
 
-namespace Lisbeth.Bot.Application.Validation
+namespace Lisbeth.Bot.Application.Validation.TicketingConfig
 {
-    public class MuteReqValidator : AbstractValidator<MuteReqDto>
+    public class TicketingConfigRepairReqValidator : AbstractValidator<TicketingConfigRepairReqDto>
     {
-        public MuteReqValidator(IDiscordService discordService) : this(discordService.Client)
+        public TicketingConfigRepairReqValidator(IDiscordService discord) : this(discord.Client) { }
+        public TicketingConfigRepairReqValidator(DiscordClient client)
         {
-        }
-
-        public MuteReqValidator(DiscordClient discord)
-        {
-            CascadeMode = CascadeMode.Stop;
-
-            RuleFor(x => x.GuildId).NotEmpty();
-            RuleFor(x => x.TargetUserId)
-                .NotEmpty()
-                .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<MuteReqDto>(discord)));
+            RuleFor(x => x.GuildId)
+                .SetAsyncValidator(new DiscordGuildIdValidator<TicketingConfigRepairReqDto>(client));
             RuleFor(x => x.RequestedOnBehalfOfId)
-                .NotEmpty()
-                .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<MuteReqDto>(discord)));
-            RuleFor(x => x.AppliedUntil).NotEmpty().Must(x => x.ToUniversalTime() > DateTime.UtcNow);
+                .SetAsyncValidator(new DiscordUserIdValidator<TicketingConfigRepairReqDto>(client));
         }
     }
 }

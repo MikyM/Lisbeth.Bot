@@ -68,7 +68,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
         [ChoiceName("remove")] Remove
     }
 
-    public enum ModerationActionType
+    public enum ModuleActionType
     {
         [ChoiceName("enable")] Enable,
         [ChoiceName("repair")] Repair,

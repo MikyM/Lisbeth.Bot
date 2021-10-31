@@ -20,22 +20,21 @@ using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.SlashCommands;
 using JetBrains.Annotations;
+using Lisbeth.Bot.Application.Discord.Exceptions;
 using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
+using Lisbeth.Bot.Application.Enums;
+using Lisbeth.Bot.Application.Exceptions;
 using Lisbeth.Bot.Application.Services.Database.Interfaces;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
-using Lisbeth.Bot.Domain.DTOs.Request;
+using Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig;
+using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Discord.Interfaces;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Lisbeth.Bot.Application.Discord.Exceptions;
-using Lisbeth.Bot.Application.Enums;
-using Lisbeth.Bot.Application.Exceptions;
-using Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig;
-using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {
@@ -111,6 +110,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (!requestingMember.IsAdmin()) throw new DiscordNotAuthorizedException();
 
             var everyoneDeny = new[] {new DiscordOverwriteBuilder(guild.EveryoneRole).Deny(Permissions.AccessChannels)};
+
             var openedCat = await guild.CreateChannelAsync("TICKETS", ChannelType.Category, null,
                 "Category with opened tickets", null, null, everyoneDeny);
             var closedCat = await guild.CreateChannelAsync("TICKETS-ARCHIVE", ChannelType.Category, null,
@@ -172,11 +172,24 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 "Category with message edit logs", everyoneDeny);
             var messageDeleteLogChannel = await guild.CreateTextChannelAsync("delete-logs", moderationCat,
                 "Category with message delete logs", everyoneDeny);
+            var mutedRole = await guild.CreateRoleAsync("Muted");
+
+            await Task.Delay(300); // give discord a break
+
+            foreach (var channel in guild.Channels.Values.Where(x => x.Type is ChannelType.Category or ChannelType.Text))
+            {
+                await channel.AddOverwriteAsync(mutedRole, deny: Permissions.SendMessages);
+                await channel.AddOverwriteAsync(mutedRole, deny: Permissions.SendMessagesInThreads);
+                await channel.AddOverwriteAsync(mutedRole, deny: Permissions.AddReactions);
+
+                await Task.Delay(500); // give discord a break
+            }
 
             req.MemberEventsLogChannelId = memberEventsLogChannel.Id;
             req.MessageDeletedEventsLogChannelId = messageDeleteLogChannel.Id;
             req.MessageUpdatedEventsLogChannelId = messageEditLogChannel.Id;
             req.ModerationLogChannelId = moderationChannelLog.Id;
+            req.MuteRoleId = mutedRole.Id;
             var res = await _guildService.AddConfigAsync(req, true);
             if (res is null) throw new InvalidOperationException("Guild already has an enabled ticketing configuration");
 
@@ -189,12 +202,13 @@ namespace Lisbeth.Bot.Application.Discord.Services
             embed.AddField("Member log channel", memberEventsLogChannel.Mention);
             embed.AddField("Message edited log channel", messageEditLogChannel.Mention);
             embed.AddField("Message deleted channel", messageDeleteLogChannel.Mention);
+            embed.AddField("Muted role", mutedRole.Mention);
             embed.WithFooter($"Lisbeth configuration requested by {requestingMember.GetFullDisplayName()} | Id: {requestingMember.Id}");
 
             return embed.Build();
         }
 
-        public async Task<DiscordEmbed> RepairConfigAsync([NotNull] ModerationConfigRepairReqDto req, [NotNull] InteractionContext ctx)
+        public async Task<DiscordEmbed> RepairConfigAsync([NotNull] InteractionContext ctx, [NotNull] ModerationConfigRepairReqDto req)
         {
             if (req == null) throw new ArgumentNullException(nameof(req));
             if (ctx == null) throw new ArgumentNullException(nameof(ctx));
@@ -220,8 +234,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             return await this.RepairConfigAsync(guild, GuildConfigType.Moderation, await guild.GetMemberAsync(req.RequestedOnBehalfOfId));
         }
 
-        public async Task<DiscordEmbed> RepairConfigAsync([NotNull] TicketingConfigRepairReqDto req,
-            [NotNull] InteractionContext ctx)
+        public async Task<DiscordEmbed> RepairConfigAsync([NotNull] InteractionContext ctx, [NotNull] TicketingConfigRepairReqDto req)
         {
             if (req == null) throw new ArgumentNullException(nameof(req));
             if (ctx == null) throw new ArgumentNullException(nameof(ctx));
@@ -324,6 +337,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     DiscordChannel newMessageDeletedEventsLogChannel = null;
                     DiscordChannel newMessageUpdatedEventsLogChannel = null;
                     DiscordChannel newModerationLogChannel = null;
+                    DiscordRole newMuteRole = null;
 
                     var newModerationCat = discordGuild.Channels.FirstOrDefault(x =>
                             string.Equals(x.Value.Name.ToLower(), "moderation",
@@ -387,8 +401,30 @@ namespace Lisbeth.Bot.Application.Discord.Services
                         guild.ModerationConfig.MessageDeletedEventsLogChannelId = newMessageDeletedEventsLogChannel.Id;
                     }
 
+                    try
+                    {
+                        var mutedRole = discordGuild.GetRole(guild.ModerationConfig.MuteRoleId);
+                        if (mutedRole is null) throw new DiscordNotFoundException();
+                    }
+                    catch
+                    {
+                        newMuteRole = await discordGuild.CreateRoleAsync("Muted");
+
+                        await Task.Delay(300); // give discord a break
+
+                        foreach (var channel in discordGuild.Channels.Values.Where(x => x.Type is ChannelType.Category or ChannelType.Text))
+                        {
+                            await channel.AddOverwriteAsync(newMuteRole, deny: Permissions.SendMessages);
+                            await channel.AddOverwriteAsync(newMuteRole, deny: Permissions.SendMessagesInThreads);
+                            await channel.AddOverwriteAsync(newMuteRole, deny: Permissions.AddReactions);
+
+                            await Task.Delay(500); // give discord a break
+                        }
+                    }
+
                     if (newMemberEventsLogChannel is not null || newMessageUpdatedEventsLogChannel is not null ||
-                        newMessageDeletedEventsLogChannel is not null || newModerationLogChannel is not null)
+                        newMessageDeletedEventsLogChannel is not null || newModerationLogChannel is not null ||
+                        newMuteRole is not null)
                         await _guildService.CommitAsync();
 
                     embed.AddField("Moderation category", newModerationCat.Mention);
@@ -396,6 +432,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     if (newMemberEventsLogChannel is not null) embed.AddField("Member log channel", newMemberEventsLogChannel.Mention);
                     if (newMessageUpdatedEventsLogChannel is not null) embed.AddField("Message edited log channel", newMessageUpdatedEventsLogChannel.Mention);
                     if (newMessageDeletedEventsLogChannel is not null) embed.AddField("Message deleted channel", newMessageDeletedEventsLogChannel.Mention);
+                    if (newMuteRole is not null) embed.AddField("Muted role", newMuteRole.Mention);
 
                     break;
                 default:
@@ -427,16 +464,14 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             return await this.DisableModuleAsync(guild, await guild.GetMemberAsync(req.RequestedOnBehalfOfId), GuildConfigType.Ticketing);
         }
-        public async Task<DiscordEmbed> DisableModuleAsync([NotNull] ModerationConfigDisableReqDto req,
-            [NotNull] InteractionContext ctx)
+        public async Task<DiscordEmbed> DisableModuleAsync([NotNull] InteractionContext ctx, [NotNull] ModerationConfigDisableReqDto req)
         {
             if (req == null) throw new ArgumentNullException(nameof(req));
             if (ctx == null) throw new ArgumentNullException(nameof(ctx));
 
             return await this.DisableModuleAsync(ctx.Guild, ctx.Member, GuildConfigType.Moderation);
         }
-        public async Task<DiscordEmbed> DisableModuleAsync([NotNull] TicketingConfigDisableReqDto req,
-            [NotNull] InteractionContext ctx)
+        public async Task<DiscordEmbed> DisableModuleAsync([NotNull] InteractionContext ctx, [NotNull] TicketingConfigDisableReqDto req)
         {
             if (req == null) throw new ArgumentNullException(nameof(req));
             if (ctx == null) throw new ArgumentNullException(nameof(ctx));

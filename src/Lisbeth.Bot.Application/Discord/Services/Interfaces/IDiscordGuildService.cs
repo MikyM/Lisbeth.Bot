@@ -18,12 +18,9 @@
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.SlashCommands;
-using Lisbeth.Bot.Domain.DTOs.Request;
-using System.Threading.Tasks;
-using Lisbeth.Bot.Application.Enums;
-using Lisbeth.Bot.Domain.DTOs.Request.Base;
 using Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
+using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
 {
@@ -37,11 +34,11 @@ namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
         Task<DiscordEmbed> CreateModuleAsync(TicketingConfigReqDto req);
         Task<DiscordEmbed> DisableModuleAsync(ModerationConfigDisableReqDto req);
         Task<DiscordEmbed> DisableModuleAsync(TicketingConfigDisableReqDto req);
-        Task<DiscordEmbed> DisableModuleAsync(ModerationConfigDisableReqDto req, InteractionContext ctx);
-        Task<DiscordEmbed> DisableModuleAsync(TicketingConfigDisableReqDto req, InteractionContext ctx);
+        Task<DiscordEmbed> DisableModuleAsync(InteractionContext ctx, ModerationConfigDisableReqDto req);
+        Task<DiscordEmbed> DisableModuleAsync(InteractionContext ctx, TicketingConfigDisableReqDto req);
         Task<DiscordEmbed> RepairConfigAsync(ModerationConfigRepairReqDto req);
         Task<DiscordEmbed> RepairConfigAsync(TicketingConfigRepairReqDto req);
-        Task<DiscordEmbed> RepairConfigAsync(ModerationConfigRepairReqDto req, InteractionContext ctx);
-        Task<DiscordEmbed> RepairConfigAsync(TicketingConfigRepairReqDto req, InteractionContext ctx);
+        Task<DiscordEmbed> RepairConfigAsync(InteractionContext ctx, ModerationConfigRepairReqDto req);
+        Task<DiscordEmbed> RepairConfigAsync(InteractionContext ctx, TicketingConfigRepairReqDto req);
     }
 }

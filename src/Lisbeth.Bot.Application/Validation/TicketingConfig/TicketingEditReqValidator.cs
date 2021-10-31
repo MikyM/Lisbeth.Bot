@@ -15,19 +15,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Lisbeth.Bot.DataAccessLayer.Repositories.Interfaces;
-using Lisbeth.Bot.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
-using MikyM.Common.DataAccessLayer.Repositories;
-using MikyM.Common.DataAccessLayer.Specifications.Evaluators;
-
-namespace Lisbeth.Bot.DataAccessLayer.Repositories
+namespace Lisbeth.Bot.Application.Validation.TicketingConfig
 {
-    public class GuildRepository : Repository<Guild>, IGuildRepository
+    public class TicketingEditReqValidator
     {
-        public GuildRepository(DbContext context, ISpecificationEvaluator specificationEvaluator) : base(context,
-            specificationEvaluator)
-        {
-        }
+        
     }
 }

@@ -15,19 +15,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Lisbeth.Bot.DataAccessLayer.Repositories.Interfaces;
-using Lisbeth.Bot.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
-using MikyM.Common.DataAccessLayer.Repositories;
-using MikyM.Common.DataAccessLayer.Specifications.Evaluators;
 
-namespace Lisbeth.Bot.DataAccessLayer.Repositories
+using FluentValidation;
+using Lisbeth.Bot.Domain.DTOs.Request.Guild;
+
+namespace Lisbeth.Bot.Application.Validation.Guild
 {
-    public class GuildRepository : Repository<Guild>, IGuildRepository
+    public class GuildGetReqValidator : AbstractValidator<GuildGetReqDto>
     {
-        public GuildRepository(DbContext context, ISpecificationEvaluator specificationEvaluator) : base(context,
-            specificationEvaluator)
-        {
-        }
     }
 }
