@@ -20,17 +20,17 @@ using Autofac.Extensions.DependencyInjection;
 using Hangfire;
 using Lisbeth.Bot.API.ExceptionMiddleware;
 using Lisbeth.Bot.API.Helpers;
+using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Application.Helpers;
-using Lisbeth.Bot.Domain;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using MikyM.Common.Domain;
 using Serilog;
 using System.Globalization;
-using MikyM.Common.Domain;
 
 namespace Lisbeth.Bot.API
 {
@@ -75,6 +75,10 @@ namespace Lisbeth.Bot.API
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            Log.Logger.Debug("Waiting for discord's guild download completion.");
+            WaitForDownloadCompletion.ReadyToOperateEvent.WaitAsync().Wait();
+            Log.Logger.Debug("Discord fully operational.");
+
             ContainerProvider.Container = app.ApplicationServices.GetAutofacRoot();
             GlobalConfiguration.Configuration.UseAutofacActivator(app.ApplicationServices.GetAutofacRoot());
             _ = ContainerProvider.Container
@@ -90,7 +94,7 @@ namespace Lisbeth.Bot.API
 
             app.UseHangfireDashboard("/hangfire",
                 env.IsDevelopment()
-                    ? new DashboardOptions { AppPath = "kek", Authorization = new[] { new HangfireAuthFilterAlwaysAuth() } }
+                    ? new DashboardOptions { AppPath = "kek", Authorization = new[] { new HangfireAlwaysAuthFilter() } }
                     : new DashboardOptions { AppPath = "kek", Authorization = new[] { new HangfireAuthFilter() } });
             app.UseMiddleware<CustomExceptionMiddleware>();
             app.UseHttpsRedirection();

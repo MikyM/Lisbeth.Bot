@@ -15,26 +15,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Linq;
-using MikyM.Common.DataAccessLayer.Specifications.Extensions;
+using Hangfire.Dashboard;
 
-namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators
+namespace Lisbeth.Bot.API.Helpers
 {
-    public class SearchEvaluator : IEvaluator
+    public class HangfireAlwaysAuthFilter : IDashboardAuthorizationFilter
     {
-        private SearchEvaluator()
+        public bool Authorize(DashboardContext context)
         {
-        }
-
-        public static SearchEvaluator Instance { get; } = new();
-
-        public bool IsCriteriaEvaluator { get; } = true;
-
-        public IQueryable<T> GetQuery<T>(IQueryable<T> query, ISpecification<T> specification) where T : class
-        {
-            return specification.SearchCriterias.GroupBy(x => x.SearchGroup)
-                .Select(searchCriteria => searchCriteria.Select(x => (x.Selector, x.SearchTerm)))
-                .Aggregate(query, (current, criterias) => current.Search(criterias));
+            return true;
         }
     }
 }

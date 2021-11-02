@@ -15,15 +15,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Hangfire.Dashboard;
+using Emzi0767.Utilities;
 
-namespace Lisbeth.Bot.API.Helpers
+namespace Lisbeth.Bot.Application.Discord.Helpers
 {
-    public class HangfireAuthFilterAlwaysAuth : IDashboardAuthorizationFilter
+    public static class WaitForDownloadCompletion
     {
-        public bool Authorize(DashboardContext context)
-        {
-            return true;
-        }
+        public static readonly AsyncManualResetEvent ReadyToOperateEvent = new (false);
     }
 }

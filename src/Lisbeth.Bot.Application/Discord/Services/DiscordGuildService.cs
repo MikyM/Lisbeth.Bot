@@ -178,11 +178,11 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             foreach (var channel in guild.Channels.Values.Where(x => x.Type is ChannelType.Category or ChannelType.Text))
             {
-                await channel.AddOverwriteAsync(mutedRole, deny: Permissions.SendMessages);
-                await channel.AddOverwriteAsync(mutedRole, deny: Permissions.SendMessagesInThreads);
-                await channel.AddOverwriteAsync(mutedRole, deny: Permissions.AddReactions);
-
-                await Task.Delay(500); // give discord a break
+                await channel.AddOverwriteAsync(mutedRole,
+                    deny: Permissions.SendMessages | Permissions.SendMessagesInThreads |
+                          Permissions.AddReactions | Permissions.CreatePrivateThreads |
+                          Permissions.CreatePublicThreads);
+                await Task.Delay(500);
             }
 
             req.MemberEventsLogChannelId = memberEventsLogChannel.Id;
@@ -423,11 +423,11 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
                         foreach (var channel in discordGuild.Channels.Values.Where(x => x.Type is ChannelType.Category or ChannelType.Text))
                         {
-                            await channel.AddOverwriteAsync(newMuteRole, deny: Permissions.SendMessages);
-                            await channel.AddOverwriteAsync(newMuteRole, deny: Permissions.SendMessagesInThreads);
-                            await channel.AddOverwriteAsync(newMuteRole, deny: Permissions.AddReactions);
-
-                            await Task.Delay(500); // give discord a break
+                            await channel.AddOverwriteAsync(newMuteRole,
+                                deny: Permissions.SendMessages | Permissions.SendMessagesInThreads |
+                                      Permissions.AddReactions | Permissions.CreatePrivateThreads |
+                                      Permissions.CreatePublicThreads);
+                            await Task.Delay(500);
                         }
                     }
 

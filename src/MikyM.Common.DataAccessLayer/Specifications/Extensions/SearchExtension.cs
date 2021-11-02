@@ -37,7 +37,7 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Extensions
         ///     </list>
         /// </param>
         /// <returns></returns>
-        public static IQueryable<T> GroupBy<T>(this IQueryable<T> source,
+        public static IQueryable<T> Search<T>(this IQueryable<T> source,
             IEnumerable<(Expression<Func<T, string>> selector, string searchTerm)> criterias)
         {
             var parameter = Expression.Parameter(typeof(T), "x");

@@ -15,30 +15,18 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.IO;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.EventArgs;
 using Lisbeth.Bot.Application.Discord.Helpers;
-using Lisbeth.Bot.Application.Discord.Services.Interfaces;
-using Lisbeth.Bot.Application.Helpers;
 using MikyM.Discord.Events;
 
 namespace Lisbeth.Bot.Application.Discord.EventHandlers
 {
-    public class GuildEventsHandler : IDiscordGuildEventsSubscriber
+    public class ReadyToOperateHandler : IDiscordGuildEventsSubscriber
     {
-        private readonly IAsyncExecutor _asyncExecutor;
-
-        public GuildEventsHandler(IAsyncExecutor asyncExecutor)
-        {
-            _asyncExecutor = asyncExecutor;
-
-        }
-
         public Task DiscordOnGuildCreated(DiscordClient sender, GuildCreateEventArgs args)
         {
-            _ = _asyncExecutor.ExecuteAsync<IDiscordGuildService>(async x => await x.HandleGuildCreateAsync(args));
             return Task.CompletedTask;
         }
 
@@ -54,7 +42,6 @@ namespace Lisbeth.Bot.Application.Discord.EventHandlers
 
         public Task DiscordOnGuildDeleted(DiscordClient sender, GuildDeleteEventArgs args)
         {
-            _ = _asyncExecutor.ExecuteAsync<IDiscordGuildService>(async x => await x.HandleGuildDeleteAsync(args));
             return Task.CompletedTask;
         }
 
@@ -63,9 +50,10 @@ namespace Lisbeth.Bot.Application.Discord.EventHandlers
             return Task.CompletedTask;
         }
 
-        public Task DiscordOnGuildDownloadCompleted(DiscordClient sender, GuildDownloadCompletedEventArgs args)
+        public async Task DiscordOnGuildDownloadCompleted(DiscordClient sender, GuildDownloadCompletedEventArgs args)
         {
-            return Task.CompletedTask;
+            if (!WaitForDownloadCompletion.ReadyToOperateEvent.IsSet)
+                await WaitForDownloadCompletion.ReadyToOperateEvent.SetAsync();
         }
 
         public Task DiscordOnGuildEmojisUpdated(DiscordClient sender, GuildEmojisUpdateEventArgs args)

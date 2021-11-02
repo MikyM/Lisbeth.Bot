@@ -28,6 +28,7 @@ using Lisbeth.Bot.API.HealthChecks;
 using Lisbeth.Bot.Application.Discord.ApplicationCommands;
 using Lisbeth.Bot.Application.Discord.EventHandlers;
 using Lisbeth.Bot.Application.Discord.SlashCommands;
+using Lisbeth.Bot.Application.Helpers;
 using Lisbeth.Bot.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -42,7 +43,6 @@ using OpenTracing.Mock;
 using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Lisbeth.Bot.Application.Helpers;
 
 namespace Lisbeth.Bot.API
 {
@@ -57,6 +57,8 @@ namespace Lisbeth.Bot.API
                 options.Intents = DiscordIntents.All;
             });
             services.AddDiscordHostedService();
+
+            services.AddDiscordGuildEventsSubscriber<ReadyToOperateHandler>();
 
             #region commands
 

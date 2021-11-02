@@ -34,23 +34,23 @@ namespace Lisbeth.Bot.Application.Discord.Extensions
             return member.DisplayName + "#" + member.Discriminator;
         }
 
-        public static async Task<bool> Mute(this DiscordMember member, DiscordGuild guild, ulong roleId)
+        public static async Task<bool> Mute(this DiscordMember member, ulong roleId)
         {
             if (member.Permissions.HasPermission(Permissions.BanMembers))
                 return false;
 
-            DiscordRole mutedRole = guild.Roles.FirstOrDefault(x => x.Key == roleId).Value;
+            DiscordRole mutedRole = member.Guild.Roles.FirstOrDefault(x => x.Key == roleId).Value;
             await member.GrantRoleAsync(mutedRole);
 
             return true;
         }
 
-        public static async Task<bool> Unmute(this DiscordMember member, DiscordGuild guild, ulong roleId)
+        public static async Task<bool> Unmute(this DiscordMember member, ulong roleId)
         {
             if (member.Permissions.HasPermission(Permissions.BanMembers))
                 return false;
 
-            DiscordRole mutedRole = guild.Roles.FirstOrDefault(x => x.Key == roleId).Value;
+            DiscordRole mutedRole = member.Guild.Roles.FirstOrDefault(x => x.Key == roleId).Value;
             await member.RevokeRoleAsync(mutedRole);
 
             return true;
