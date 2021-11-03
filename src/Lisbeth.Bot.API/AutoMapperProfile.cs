@@ -24,6 +24,7 @@ using Lisbeth.Bot.Domain.DTOs.Request.Ban;
 using Lisbeth.Bot.Domain.DTOs.Request.Guild;
 using Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.Mute;
+using Lisbeth.Bot.Domain.DTOs.Request.RoleMenu;
 using Lisbeth.Bot.Domain.DTOs.Request.Tag;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
@@ -66,8 +67,8 @@ namespace Lisbeth.Bot.API
             CreateMap<TagDisableReqDto, Tag>()
                 .ForMember(dest => dest.LastEditById, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
 
-            CreateMap<RoleEmojiMappingReqDto, RoleEmojiMapping>();
-            CreateMap<RoleMenuReqDto, RoleMenu>();
+            CreateMap<RoleMenuOptionReqDto, RoleMenuOption>();
+            CreateMap<RoleMenuAddReqDto, RoleMenu>();
             CreateMap<DiscordFieldDto, DiscordField>();
             CreateMap<EmbedConfigDto, EmbedConfig>();
 
@@ -104,6 +105,11 @@ namespace Lisbeth.Bot.API
                 .ForMember(dest => dest.ThumbnailWidth, source => source.PreCondition(x => x.Thumbnail is not null))
                 .ForMember(dest => dest.ThumbnailWidth, source => source.MapFrom(x => x.Thumbnail.Width))
                 .ForMember(dest => dest.Id, source => source.Ignore());
+
+            CreateMap<RoleMenuAddReqDto, RoleMenu>()
+                .ForMember(dest => dest.CreatorId, source => source.MapFrom(x => x.RequestedOnBehalfOfId))
+                .ForMember(dest => dest.LastEditById, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
+            CreateMap<RoleMenuOptionReqDto, RoleMenuOption>();
         }
     }
 }

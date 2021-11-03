@@ -32,10 +32,12 @@ namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
         private readonly DiscordClient _discord;
         private bool _doesGuildExist = true;
         private object _guildId;
+        private readonly bool _suppressGuildCheck;
 
-        public DiscordChannelIdValidator(DiscordClient discord)
+        public DiscordChannelIdValidator(DiscordClient discord, bool suppressGuildCheck = false)
         {
             _discord = discord;
+            _suppressGuildCheck = suppressGuildCheck;
         }
 
         public async Task<bool> IsValidAsync(ValidationContext<T> context, ulong value, CancellationToken cancellation)
@@ -61,8 +63,9 @@ namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
 
                 try
                 {
-                    var channel = guild.Channels.FirstOrDefault(x => x.Key == value).Value;
+                    var channel = await _discord.GetChannelAsync(value);
                     if (channel is null) return false;
+                    if (!_suppressGuildCheck && channel.Guild.Id != guild.Id) return false;
                 }
                 catch (Exception)
                 {

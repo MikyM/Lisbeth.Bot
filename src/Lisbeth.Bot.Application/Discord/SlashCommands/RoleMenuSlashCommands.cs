@@ -15,31 +15,34 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using FluentValidation;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
+using Lisbeth.Bot.Application.Validation.RoleMenu;
 using Lisbeth.Bot.Application.Validation.Tag;
+using Lisbeth.Bot.Domain.DTOs.Request;
+using Lisbeth.Bot.Domain.DTOs.Request.RoleMenu;
 using Lisbeth.Bot.Domain.DTOs.Request.Tag;
 using Lisbeth.Bot.Domain.Entities;
-using System;
-using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands
 {
     [UsedImplicitly]
     [SlashModuleLifespan(SlashModuleLifespan.Transient)]
-    public class TagSlashCommands : ApplicationCommandModule
+    public class RoleMenuSlashCommands
     {
-        public IDiscordTagService _discordTagService { private get; set; }
-        public IDiscordEmbedConfiguratorService<Tag> _discordEmbedTagConfiguratorService { private get; set; }
+        public IDiscordRoleMenuService _discordRoleMenuService { private get; set; }
+        public IDiscordEmbedConfiguratorService<RoleMenu> _discordEmbedConfiguratorService { private get; set; }
 
         [SlashCommand("tag", "Allows working with tags.")]
-        public async Task TagCommand(InteractionContext ctx,
+        public async Task RoleMenuCommand(InteractionContext ctx,
             [Option("action", "Type of action to perform")]
-            TagActionType action,
+            RoleMenuActionType action,
             [Option("channel", "Channel to send the tag to.")]
             DiscordChannel channel = null,
             [Option("id", "Type of action to perform")]
@@ -52,16 +55,17 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             bool isId = long.TryParse(idOrName, out long id);
             bool isSuccess = true;
             bool isEmbedConfig = false;
+            DiscordWebhookBuilder wbhk = null;
 
             (DiscordEmbed Embed, string Text) result = new(null, "");
 
             switch (action)
             {
-                case TagActionType.Get:
+                case RoleMenuActionType.Get:
                     if (!isId && string.IsNullOrWhiteSpace(idOrName))
                         throw new ArgumentException("You must supply a valid Id or name");
 
-                    var getReq = new TagGetReqDto
+                    var getReq = new RoleMenuGetReqDto()
                     {
                         GuildId = ctx.Guild.Id,
                         Id = isId ? id : null,
@@ -69,16 +73,18 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                         RequestedOnBehalfOfId = ctx.User.Id
                     };
 
-                    var getValidator = new TagGetReqValidator(ctx.Client);
+                    var getValidator = new RoleMenuGetReqValidator(ctx.Client);
                     await getValidator.ValidateAndThrowAsync(getReq);
 
-                    result = await _discordTagService.GetAsync(ctx, getReq);
+                    var getResult = await _discordRoleMenuService.GetAsync(ctx, getReq);
+                    wbhk = getResult.Builder;
+                    result.Text = getResult.Text;
                     break;
-                case TagActionType.Add:
+                case RoleMenuActionType.Add:
                     if (string.IsNullOrWhiteSpace(idOrName))
                         throw new ArgumentException("You must supply name.");
 
-                    var addReq = new TagAddReqDto
+                    var addReq = new RoleMenuAddReqDto()
                     {
                         GuildId = ctx.Guild.Id,
                         Name = idOrName,
@@ -86,16 +92,19 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                         Text = text
                     };
 
-                    var addValidator = new TagAddReqValidator(ctx.Client);
+                    var addValidator = new RoleMenuAddReqValidator(ctx.Client);
                     await addValidator.ValidateAndThrowAsync(addReq);
 
-                    result.Embed = await _discordTagService.AddAsync(ctx, addReq);
+                    var partialResult = await _discordRoleMenuService.CreateRoleMenuAsync(ctx, addReq);
+
+                    result.Embed = partialResult.Embed;
+
                     break;
-                case TagActionType.Edit:
+                case RoleMenuActionType.Edit:
                     if (!isId && string.IsNullOrWhiteSpace(idOrName))
                         throw new ArgumentException("You must supply a valid Id or name");
 
-                    var editReq = new TagEditReqDto
+                    var editReq = new RoleMenuEditReqDto()
                     {
                         GuildId = ctx.Guild.Id,
                         Id = isId ? id : null,
@@ -104,16 +113,16 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                         Text = text
                     };
 
-                    var editValidator = new TagEditReqValidator(ctx.Client);
+                    var editValidator = new RoleMenuEditReqValidator(ctx.Client);
                     await editValidator.ValidateAndThrowAsync(editReq);
 
-                    result.Embed = await _discordTagService.EditAsync(ctx, editReq);
+                    //result.Embed = await _discordRoleMenuService.EditAsync(ctx, editReq);
                     break;
-                case TagActionType.Remove:
+                case RoleMenuActionType.Remove:
                     if (!isId && string.IsNullOrWhiteSpace(idOrName))
                         throw new ArgumentException("You must supply a valid Id or name");
 
-                    var removeReq = new TagDisableReqDto
+                    var removeReq = new RoleMenuDisableReqDto()
                     {
                         GuildId = ctx.Guild.Id,
                         Id = isId ? id : null,
@@ -121,24 +130,24 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                         RequestedOnBehalfOfId = ctx.User.Id
                     };
 
-                    var disableValidator = new TagDisableReqValidator(ctx.Client);
+                    var disableValidator = new RoleMenuDisableReqValidator(ctx.Client);
                     await disableValidator.ValidateAndThrowAsync(removeReq);
 
-                    result.Embed = await _discordTagService.DisableAsync(ctx, removeReq);
+                   // result.Embed = await _discordRoleMenuService..DisableAsync(ctx, removeReq);
                     break;
-                case TagActionType.ConfigureEmbed:
-                    var cfgResult = await _discordEmbedTagConfiguratorService.ConfigureAsync(ctx, idOrName);
+                case RoleMenuActionType.ConfigureEmbed:
+                    var cfgResult = await _discordEmbedConfiguratorService.ConfigureAsync(ctx, idOrName);
                     result.Embed = cfgResult.Embed;
                     isSuccess = cfgResult.IsSuccess;
                     isEmbedConfig = true;
                     break;
-                case TagActionType.Send:
+                case RoleMenuActionType.Send:
                     if (!isId && string.IsNullOrWhiteSpace(idOrName))
                         throw new ArgumentException("You must supply a valid Id or name");
                     if (channel is null)
                         throw new ArgumentException("You must supply a channel to send a tag");
 
-                    var sendReq = new TagSendReqDto()
+                    var sendReq = new RoleMenuSendReqDto()
                     {
                         GuildId = ctx.Guild.Id,
                         Id = isId ? id : null,
@@ -147,10 +156,12 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                         ChannelId = channel.Id
                     };
 
-                    var sendValidator = new TagSendReqValidator(ctx.Client);
+                    var sendValidator = new RoleMenuSendReqValidator(ctx.Client);
                     await sendValidator.ValidateAndThrowAsync(sendReq);
 
-                    result = await _discordTagService.SendAsync(ctx, sendReq);
+                    var sendResult = await _discordRoleMenuService.SendAsync(ctx, sendReq);
+                    wbhk = sendResult.Builder;
+                    result.Text = sendResult.Text;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(action), action, null);
@@ -158,14 +169,17 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
 
             if (result.Embed is not null)
             {
-                if (isSuccess && isEmbedConfig)
+                if (isSuccess && isEmbedConfig && wbhk is null)
                     await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(result.Embed)
                         .WithContent("Final result:"));
                 else await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(result.Embed));
             }
             else
             {
-                await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent(result.Text));
+                if (wbhk is null)
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent(result.Text));
+                else
+                    await ctx.EditResponseAsync(wbhk);
             }
         }
     }

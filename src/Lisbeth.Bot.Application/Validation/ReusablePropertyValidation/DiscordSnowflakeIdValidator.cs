@@ -35,6 +35,7 @@ namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
         private object _guildId;
         private bool _memberExists = true;
         private bool _roleExists = true;
+        private bool _channelExists = true;
 
         public DiscordSnowflakeIdValidator(DiscordClient discord)
         {
@@ -75,7 +76,7 @@ namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
 
             try
             {
-                var role = guild.Roles.FirstOrDefault(x => x.Key == value).Value;
+                var role = guild.GetRole(value); 
                 if (role is null) _roleExists = false;
             }
             catch (Exception)
@@ -83,7 +84,18 @@ namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
                 _roleExists = false;
             }
 
-            return _roleExists || _memberExists;
+            try
+            {
+                var channel = await _discord.GetChannelAsync(value);
+                if (channel is null) _channelExists = false;
+                if (channel is not null && channel.Guild.Id != guild.Id) _channelExists = false;
+            }
+            catch (Exception)
+            {
+                _channelExists = false;
+            }
+
+            return _roleExists || _memberExists || _channelExists;
         }
 
         public string GetDefaultMessageTemplate(string errorCode)

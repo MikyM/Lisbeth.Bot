@@ -15,14 +15,21 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Threading.Tasks;
 using DSharpPlus.Entities;
+using DSharpPlus.EventArgs;
 using DSharpPlus.SlashCommands;
+using Lisbeth.Bot.Domain.DTOs.Request.RoleMenu;
+using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
 {
     public interface IDiscordRoleMenuService
     {
-        Task<DiscordEmbed> CreateNewMenuAsync(InteractionContext ctx);
+        Task<(DiscordEmbed Embed, bool IsSuccess)> CreateRoleMenuAsync(InteractionContext ctx, RoleMenuAddReqDto req);
+        Task<(DiscordWebhookBuilder Builder, string Text)> GetAsync(RoleMenuGetReqDto req);
+        Task<(DiscordWebhookBuilder Builder, string Text)> GetAsync(InteractionContext ctx, RoleMenuGetReqDto req);
+        Task<(DiscordWebhookBuilder Builder, string Text)> SendAsync(RoleMenuSendReqDto req);
+        Task<(DiscordWebhookBuilder Builder, string Text)> SendAsync(InteractionContext ctx, RoleMenuSendReqDto req);
+        Task HandleOptionSelectionAsync(ComponentInteractionCreateEventArgs args);
     }
 }

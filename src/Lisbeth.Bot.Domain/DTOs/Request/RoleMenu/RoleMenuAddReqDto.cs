@@ -15,26 +15,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using Lisbeth.Bot.Domain.Entities.Base;
 using System.Collections.Generic;
+using Lisbeth.Bot.Domain.DTOs.Request.Base;
 
-namespace Lisbeth.Bot.Domain.Entities
+namespace Lisbeth.Bot.Domain.DTOs.Request.RoleMenu
 {
-    public class RoleMenu : EmbedConfigEntity
+    public class RoleMenuAddReqDto : BaseAuthWithGuildReqDto
     {
-        private readonly HashSet<RoleMenuOption> roleMenuOptions;
-
         public string Text { get; set; }
-        public string CustomSelectComponentId { get; set; }
-        public IReadOnlyCollection<RoleMenuOption> RoleMenuOptions { get; set; }
-
-        public Guild Guild { get; set; }
-
-        public void AddRoleMenuOption(RoleMenuOption roleMenuOption)
-        {
-            if (roleMenuOption is null) throw new ArgumentNullException(nameof(roleMenuOption));
-            roleMenuOptions.Add(roleMenuOption);
-        }
+        public string Name { get; set; }
+        public List<RoleMenuOptionReqDto> RoleMenuOptions { get; set; }
+        public EmbedConfigDto EmbedConfig { get; set; }
     }
 }

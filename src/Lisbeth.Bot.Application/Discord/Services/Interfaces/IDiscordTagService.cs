@@ -15,11 +15,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
-using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.DTOs.Request.Tag;
+using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
 {
@@ -31,6 +30,8 @@ namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
         Task<DiscordEmbed> EditAsync(InteractionContext ctx, TagEditReqDto req);
         Task<(DiscordEmbed Embed, string Text)> GetAsync(TagGetReqDto req);
         Task<(DiscordEmbed Embed, string Text)> GetAsync(InteractionContext ctx, TagGetReqDto req);
+        Task<(DiscordEmbed Embed, string Text)> SendAsync(TagSendReqDto req);
+        Task<(DiscordEmbed Embed, string Text)> SendAsync(InteractionContext ctx, TagSendReqDto req);
         Task<DiscordEmbed> DisableAsync(TagDisableReqDto req);
         Task<DiscordEmbed> DisableAsync(InteractionContext ctx, TagDisableReqDto req);
     }

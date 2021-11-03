@@ -18,30 +18,20 @@
 using DSharpPlus;
 using FluentValidation;
 using Lisbeth.Bot.Application.Validation.ReusablePropertyValidation;
-using Lisbeth.Bot.Domain.DTOs.Request.Tag;
+using Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig;
 using MikyM.Discord.Interfaces;
 
-namespace Lisbeth.Bot.Application.Validation.Tag
+namespace Lisbeth.Bot.Application.Validation.ModerationConfig
 {
-    public class TagGetReqValidator : AbstractValidator<TagGetReqDto>
+    public class CreateMuteOverwritesReqValidator : AbstractValidator<CreateMuteOverwritesReqDto>
     {
-        public TagGetReqValidator(IDiscordService discordService) : this(discordService.Client)
+        public CreateMuteOverwritesReqValidator(IDiscordService discord) : this(discord.Client) { }
+        public CreateMuteOverwritesReqValidator(DiscordClient client)
         {
-        }
-
-        public TagGetReqValidator(DiscordClient discord)
-        {
-            CascadeMode = CascadeMode.Stop;
-
-            RuleFor(x => x.Id).NotEmpty().When(x => x.Name is not null && !x.GuildId.HasValue);
-            RuleFor(x => x.Name).NotEmpty().When(x => !x.Id.HasValue);
             RuleFor(x => x.GuildId)
-                .NotEmpty()
-                .When(x => !x.Id.HasValue)
-                .DependentRules(x => x.SetAsyncValidator(new DiscordGuildIdValidator<TagGetReqDto>(discord)));
+                .SetAsyncValidator(new DiscordGuildIdValidator<CreateMuteOverwritesReqDto>(client));
             RuleFor(x => x.RequestedOnBehalfOfId)
-                .NotEmpty()
-                .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<TagGetReqDto>(discord)));
+                .SetAsyncValidator(new DiscordUserIdValidator<CreateMuteOverwritesReqDto>(client));
         }
     }
 }

@@ -15,26 +15,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using Lisbeth.Bot.Domain.Entities.Base;
-using System.Collections.Generic;
+using MikyM.Common.DataAccessLayer.Specifications;
 
-namespace Lisbeth.Bot.Domain.Entities
+namespace Lisbeth.Bot.DataAccessLayer.Specifications.RoleMenu
 {
-    public class RoleMenu : EmbedConfigEntity
+    public class RoleMenuByNameAndGuildWithOptionsSpec : Specification<Domain.Entities.RoleMenu>
     {
-        private readonly HashSet<RoleMenuOption> roleMenuOptions;
-
-        public string Text { get; set; }
-        public string CustomSelectComponentId { get; set; }
-        public IReadOnlyCollection<RoleMenuOption> RoleMenuOptions { get; set; }
-
-        public Guild Guild { get; set; }
-
-        public void AddRoleMenuOption(RoleMenuOption roleMenuOption)
+        public RoleMenuByNameAndGuildWithOptionsSpec(string name, ulong guildId)
         {
-            if (roleMenuOption is null) throw new ArgumentNullException(nameof(roleMenuOption));
-            roleMenuOptions.Add(roleMenuOption);
+            Where(x => x.GuildId == guildId);
+            Where(x => x.Name == name);
+            Include(x => x.RoleMenuOptions);
         }
     }
 }

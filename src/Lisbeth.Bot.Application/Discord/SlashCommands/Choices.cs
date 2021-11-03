@@ -62,6 +62,17 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
     public enum TagActionType
     {
         [ChoiceName("get")] Get,
+        [ChoiceName("send")] Send,
+        [ChoiceName("add")] Add,
+        [ChoiceName("edit")] Edit,
+        [ChoiceName("configure-embed")] ConfigureEmbed,
+        [ChoiceName("remove")] Remove
+    }
+
+    public enum RoleMenuActionType
+    {
+        [ChoiceName("get")] Get,
+        [ChoiceName("send")] Send,
         [ChoiceName("add")] Add,
         [ChoiceName("edit")] Edit,
         [ChoiceName("configure-embed")] ConfigureEmbed,

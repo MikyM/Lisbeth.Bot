@@ -30,6 +30,8 @@ using MikyM.Common.Application.Services;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
 using System;
 using System.Threading.Tasks;
+using Lisbeth.Bot.Domain.DTOs.Request;
+using Lisbeth.Bot.Domain.DTOs.Request.RoleMenu;
 
 namespace Lisbeth.Bot.Application.Services.Database
 {
@@ -38,13 +40,16 @@ namespace Lisbeth.Bot.Application.Services.Database
     {
         private readonly ICrudService<ModerationConfig, LisbethBotDbContext> _moderationService;
         private readonly ICrudService<TicketingConfig, LisbethBotDbContext> _ticketingService;
+        private readonly ICrudService<RoleMenu, LisbethBotDbContext> _roleMenuService;
 
         public GuildService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof,
             ICrudService<ModerationConfig, LisbethBotDbContext> moderationService,
-            ICrudService<TicketingConfig, LisbethBotDbContext> ticketingService) : base(mapper, uof)
+            ICrudService<TicketingConfig, LisbethBotDbContext> ticketingService,
+            ICrudService<RoleMenu, LisbethBotDbContext> roleMenuService) : base(mapper, uof)
         {
             _moderationService = moderationService;
             _ticketingService = ticketingService;
+            _roleMenuService = roleMenuService;
         }
 
         public async Task<Guild> AddConfigAsync(TicketingConfigReqDto req, bool shouldSave = false)
@@ -187,6 +192,15 @@ namespace Lisbeth.Bot.Application.Services.Database
         public Task EditModerationConfigAsync(ulong guildId, bool shouldSave = false)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task AddRoleMenuAsync(RoleMenuAddReqDto req, bool shouldSave = false)
+        {
+            var guild = await base.GetSingleBySpecAsync<Guild>(
+                new ActiveGuildByIdSpec(req.GuildId));
+            if (guild is null) throw new NotFoundException("Guild doesn't exist in the database");
+
+            await _roleMenuService.AddAsync(req, shouldSave);
         }
     }
 }

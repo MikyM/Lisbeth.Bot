@@ -15,18 +15,19 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
+using Lisbeth.Bot.Domain.Entities.Base;
 
-namespace Lisbeth.Bot.Domain.DTOs.Request
+namespace Lisbeth.Bot.Domain.Entities
 {
-    public class RoleMenuReqDto
+    public class RoleMenuOption : SnowflakeEntity
     {
-        public ulong MessageId { get; set; }
-        public string Text { get; set; }
+        public long RoleMenuId { get; set; }
+        public ulong RoleId { get; set; }
+        public string Emoji { get; set; }
         public string Name { get; set; }
-        public ulong GuildId { get; set; }
-        public ulong UserId { get; set; }
-        public EmbedConfigDto EmbedConfig { get; set; }
-        public List<RoleEmojiMappingReqDto> RoleEmojiMapping { get; set; }
+        public string Description { get; set; }
+        public string CustomSelectOptionValueId { get; set; }
+
+        public RoleMenu RoleMenu { get; set; }
     }
 }

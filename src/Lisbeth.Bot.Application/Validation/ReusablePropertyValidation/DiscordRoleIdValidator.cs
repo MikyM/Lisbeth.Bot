@@ -61,7 +61,7 @@ namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
 
             try
             {
-                var role = guild.Roles.FirstOrDefault(x => x.Key == value).Value;
+                var role = guild.GetRole(value);
                 if (role is null) return false;
             }
             catch (Exception)

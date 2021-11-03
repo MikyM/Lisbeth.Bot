@@ -21,6 +21,7 @@ using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
 using System.Threading.Tasks;
+using Lisbeth.Bot.Domain.DTOs.Request;
 
 namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
 {
@@ -40,5 +41,7 @@ namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
         Task<DiscordEmbed> RepairConfigAsync(TicketingConfigRepairReqDto req);
         Task<DiscordEmbed> RepairConfigAsync(InteractionContext ctx, ModerationConfigRepairReqDto req);
         Task<DiscordEmbed> RepairConfigAsync(InteractionContext ctx, TicketingConfigRepairReqDto req);
+        Task<int> CreateOverwritesForMutedRoleAsync(CreateMuteOverwritesReqDto req);
+        Task<int> CreateOverwritesForMutedRoleAsync(InteractionContext ctx, CreateMuteOverwritesReqDto req);
     }
 }

@@ -18,18 +18,19 @@
 using DSharpPlus;
 using FluentValidation;
 using Lisbeth.Bot.Application.Validation.ReusablePropertyValidation;
+using Lisbeth.Bot.Domain.DTOs.Request.RoleMenu;
 using Lisbeth.Bot.Domain.DTOs.Request.Tag;
 using MikyM.Discord.Interfaces;
 
-namespace Lisbeth.Bot.Application.Validation.Tag
+namespace Lisbeth.Bot.Application.Validation.RoleMenu
 {
-    public class TagGetReqValidator : AbstractValidator<TagGetReqDto>
+    public class RoleMenuDisableReqValidator : AbstractValidator<RoleMenuDisableReqDto>
     {
-        public TagGetReqValidator(IDiscordService discordService) : this(discordService.Client)
+        public RoleMenuDisableReqValidator(IDiscordService discordService) : this(discordService.Client)
         {
         }
 
-        public TagGetReqValidator(DiscordClient discord)
+        public RoleMenuDisableReqValidator(DiscordClient discord)
         {
             CascadeMode = CascadeMode.Stop;
 
@@ -38,10 +39,10 @@ namespace Lisbeth.Bot.Application.Validation.Tag
             RuleFor(x => x.GuildId)
                 .NotEmpty()
                 .When(x => !x.Id.HasValue)
-                .DependentRules(x => x.SetAsyncValidator(new DiscordGuildIdValidator<TagGetReqDto>(discord)));
+                .DependentRules(x => x.SetAsyncValidator(new DiscordGuildIdValidator<RoleMenuDisableReqDto>(discord)));
             RuleFor(x => x.RequestedOnBehalfOfId)
                 .NotEmpty()
-                .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<TagGetReqDto>(discord)));
+                .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<RoleMenuDisableReqDto>(discord)));
         }
     }
 }

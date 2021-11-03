@@ -23,13 +23,13 @@ using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Validation.Tag
 {
-    public class TagGetReqValidator : AbstractValidator<TagGetReqDto>
+    public class TagSendReqValidator : AbstractValidator<TagSendReqDto>
     {
-        public TagGetReqValidator(IDiscordService discordService) : this(discordService.Client)
+        public TagSendReqValidator(IDiscordService discordService) : this(discordService.Client)
         {
         }
 
-        public TagGetReqValidator(DiscordClient discord)
+        public TagSendReqValidator(DiscordClient discord)
         {
             CascadeMode = CascadeMode.Stop;
 
@@ -38,10 +38,13 @@ namespace Lisbeth.Bot.Application.Validation.Tag
             RuleFor(x => x.GuildId)
                 .NotEmpty()
                 .When(x => !x.Id.HasValue)
-                .DependentRules(x => x.SetAsyncValidator(new DiscordGuildIdValidator<TagGetReqDto>(discord)));
+                .DependentRules(x => x.SetAsyncValidator(new DiscordGuildIdValidator<TagSendReqDto>(discord)));
             RuleFor(x => x.RequestedOnBehalfOfId)
                 .NotEmpty()
-                .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<TagGetReqDto>(discord)));
+                .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<TagSendReqDto>(discord)));
+            RuleFor(x => x.ChannelId)
+                .NotEmpty()
+                .DependentRules(x => x.SetAsyncValidator(new DiscordChannelIdValidator<TagSendReqDto>(discord)));
         }
     }
 }

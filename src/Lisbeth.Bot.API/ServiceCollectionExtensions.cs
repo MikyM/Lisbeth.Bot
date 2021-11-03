@@ -93,6 +93,7 @@ namespace Lisbeth.Bot.API
             services.AddDiscordChannelEventsSubscriber<TicketEventsHandler>();
             services.AddDiscordMiscEventsSubscriber<EmbedConfigEventHandler>();
             services.AddDiscordGuildEventsSubscriber<GuildEventsHandler>();
+            services.AddDiscordMiscEventsSubscriber<RoleMenuEventHandler>();
 
             #endregion
         }

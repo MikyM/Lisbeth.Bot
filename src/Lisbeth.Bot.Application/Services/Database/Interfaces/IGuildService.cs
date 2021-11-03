@@ -20,6 +20,7 @@ using Lisbeth.Bot.Application.Enums;
 using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig;
+using Lisbeth.Bot.Domain.DTOs.Request.RoleMenu;
 using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.Application.Interfaces;
@@ -36,5 +37,6 @@ namespace Lisbeth.Bot.Application.Services.Database.Interfaces
         Task RepairModuleConfigAsync(ModerationConfigRepairReqDto req, bool shouldSave = false);
         Task EditTicketingConfigAsync(TicketingConfigEditReqDto req, bool shouldSave = false);
         Task EditModerationConfigAsync(ulong guildId, bool shouldSave = false);
+        Task AddRoleMenuAsync(RoleMenuAddReqDto req, bool shouldSave = false);
     }
 }

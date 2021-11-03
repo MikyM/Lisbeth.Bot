@@ -15,11 +15,19 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Lisbeth.Bot.Domain.DTOs.Request
+using System.Text.RegularExpressions;
+
+namespace Lisbeth.Bot.Application.Discord.Extensions
 {
-    public class RoleEmojiMappingReqDto
+    public static class StringExtensions
     {
-        public string Emoji { get; set; }
-        public string Role { get; set; }
+        public static bool TryParseRoleMention(this string value, out ulong roleId)
+        {
+            var res = Regex.Match(value, "(?<=\\<@&)[0-9]{17,18}(?=\\>)");
+
+            roleId = res.Success ? ulong.Parse(res.Value) : 0;
+
+            return res.Success;
+        }
     }
 }
