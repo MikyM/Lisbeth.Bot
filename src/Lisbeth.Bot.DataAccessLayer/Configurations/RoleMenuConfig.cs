@@ -19,8 +19,6 @@
 using Lisbeth.Bot.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System.Collections.Generic;
-using System.Text.Json;
 
 namespace Lisbeth.Bot.DataAccessLayer.Configurations
 {

@@ -102,7 +102,7 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Builders
             this ISpecificationBuilder<T> specificationBuilder,
             int take) where T : class
         {
-            if (specificationBuilder.Specification.Take != null) throw new DuplicateTakeException();
+            if (specificationBuilder.Specification.Take is not null) throw new DuplicateTakeException();
 
             specificationBuilder.Specification.Take = take;
             specificationBuilder.Specification.IsPagingEnabled = true;
@@ -113,7 +113,7 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Builders
             this ISpecificationBuilder<T> specificationBuilder,
             int skip) where T : class
         {
-            if (specificationBuilder.Specification.Skip != null) throw new DuplicateSkipException();
+            if (specificationBuilder.Specification.Skip is not null) throw new DuplicateSkipException();
 
             specificationBuilder.Specification.Skip = skip;
             specificationBuilder.Specification.IsPagingEnabled = true;

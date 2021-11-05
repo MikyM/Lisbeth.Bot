@@ -41,6 +41,14 @@ namespace Lisbeth.Bot.Application.Discord.Services
         private readonly IMainReminderService _reminderService;
         private readonly IGuildService _guildService;
 
+        public DiscordReminderService(IDiscordService discord, IMainReminderService reminderService,
+            IGuildService guildService)
+        {
+            _discord = discord;
+            _reminderService = reminderService;
+            _guildService = guildService;
+        }
+
         public async Task<DiscordEmbed> SetNewReminderAsync([NotNull] SetReminderReqDto req)
         {
             if (req is null) throw new ArgumentNullException(nameof(req));

@@ -43,9 +43,17 @@ namespace Lisbeth.Bot.Application.Services
         private readonly IRecurringReminderService _recurringReminderService;
         private readonly IBackgroundJobClient _backgroundJobClient;
 
+        public MainReminderService(IReminderService reminderService, IRecurringReminderService recurringReminderService,
+            IBackgroundJobClient backgroundJobClient)
+        {
+            _reminderService = reminderService;
+            _recurringReminderService = recurringReminderService;
+            _backgroundJobClient = backgroundJobClient;
+        }
+
         public async Task<ReminderResDto> SetNewReminderAsync([NotNull] SetReminderReqDto req)
         {
-            if (req == null) throw new ArgumentNullException(nameof(req));
+            if (req is null) throw new ArgumentNullException(nameof(req));
 
             long remindersPerUser =
                 await _reminderService.LongCountAsync(new ActiveRemindersPerUserSpec(req.RequestedOnBehalfOfId)) +
@@ -62,7 +70,7 @@ namespace Lisbeth.Bot.Application.Services
             if (remindersPerUser >= 10) throw new ArgumentException("A user can have up to 10 active reminders");
             if (remindersPerGuild >= 200) throw new ArgumentException("A guild can have up to 200 active reminders");
 
-            if (req.SetFor is not null || !string.IsNullOrWhiteSpace(req.TimeSpanExpression)) // handle single reminder as first option
+            if (req.SetFor.HasValue || !string.IsNullOrWhiteSpace(req.TimeSpanExpression)) // handle single reminder as first option
             {
                 DateTime setFor;
                 if (!string.IsNullOrWhiteSpace(req.TimeSpanExpression))
@@ -112,9 +120,9 @@ namespace Lisbeth.Bot.Application.Services
 
         public async Task<ReminderResDto> RescheduleReminderAsync([NotNull] RescheduleReminderReqDto req)
         {
-            if (req == null) throw new ArgumentNullException(nameof(req));
+            if (req is null) throw new ArgumentNullException(nameof(req));
 
-            if (req.SetFor is not null || !string.IsNullOrWhiteSpace(req.TimeSpanExpression)) // handle single reminder
+            if (req.SetFor.HasValue || !string.IsNullOrWhiteSpace(req.TimeSpanExpression)) // handle single reminder
             {
                 var reminder = await _reminderService.GetSingleBySpecAsync<Reminder>(
                     new ActiveReminderByNameOrIdAndGuildSpec(req.Name, req.GuildId, req.ReminderId));
@@ -170,7 +178,7 @@ namespace Lisbeth.Bot.Application.Services
 
         public async Task<ReminderResDto> DisableReminderAsync([NotNull] DisableReminderReqDto req)
         {
-            if (req == null) throw new ArgumentNullException(nameof(req));
+            if (req is null) throw new ArgumentNullException(nameof(req));
 
             switch (req.Type)
             {

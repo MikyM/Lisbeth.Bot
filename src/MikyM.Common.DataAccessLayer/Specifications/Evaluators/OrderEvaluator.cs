@@ -53,7 +53,7 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators
                         _ => current
                     });
 
-            if (orderedQuery != null) query = orderedQuery;
+            if (orderedQuery is not null) query = orderedQuery;
 
             return query;
         }
@@ -79,7 +79,7 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators
                         _ => current
                     });
 
-            if (orderedQuery != null) query = orderedQuery;
+            if (orderedQuery is not null) query = orderedQuery;
 
             return query;
         }
