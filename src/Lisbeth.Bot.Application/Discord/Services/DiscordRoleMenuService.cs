@@ -344,18 +344,18 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             if (!long.TryParse(args.Id, out long parsed)) return;
 
-            var roleMenu = await _roleMenuService.GetSingleBySpecAsync<RoleMenu>(new RoleMenuByIdWithOptionsSpec(parsed));
+            //var roleMenu = await _roleMenuService.GetSingleBySpecAsync<RoleMenu>(new RoleMenuByIdWithOptionsSpec(parsed));
 
             try
             {
                 if (!ulong.TryParse(args.Values[0].Split('_', StringSplitOptions.RemoveEmptyEntries).Last().Trim(),
                     out var parsedValue)) return;
 
-                var option = roleMenu.RoleMenuOptions.FirstOrDefault(x => x.RoleId == parsedValue);
+                /*var option = roleMenu.RoleMenuOptions.FirstOrDefault(x => x.RoleId == parsedValue);
 
-                if (option is null) return;
+                if (option is null) return;*/
 
-                var role = args.Guild.GetRole(option.RoleId);
+                var role = args.Guild.GetRole(parsedValue); //.GetRole(option.RoleId);
 
                 var member = await args.Guild.GetMemberAsync(args.User.Id);
 

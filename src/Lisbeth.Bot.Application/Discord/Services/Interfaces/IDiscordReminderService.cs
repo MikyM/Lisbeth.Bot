@@ -15,16 +15,21 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
+using Lisbeth.Bot.Domain.Enums;
+using System.Threading.Tasks;
+using Lisbeth.Bot.Domain.DTOs.Request.Reminder;
 
 namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
 {
     public interface IDiscordReminderService
     {
-        Task<DiscordEmbed> SetNewReminderAsync(InteractionContext ctx);
-        Task<DiscordEmbed> DisableReminderAsync(InteractionContext ctx);
-        Task<DiscordEmbed> RescheduleReminderAsync(InteractionContext ctx);
+        Task<DiscordEmbed> SetNewReminderAsync(SetReminderReqDto req);
+        Task<DiscordEmbed> SetNewReminderAsync(InteractionContext ctx, SetReminderReqDto req);
+        Task<DiscordEmbed> DisableReminderAsync(DisableReminderReqDto req);
+        Task<DiscordEmbed> DisableReminderAsync(InteractionContext ctx, DisableReminderReqDto req);
+        Task<DiscordEmbed> RescheduleReminderAsync(RescheduleReminderReqDto req);
+        Task<DiscordEmbed> RescheduleReminderAsync(InteractionContext ctx, RescheduleReminderReqDto req);
     }
 }

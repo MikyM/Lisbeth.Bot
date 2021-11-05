@@ -17,11 +17,15 @@
 
 using AutoMapper;
 using JetBrains.Annotations;
+using Lisbeth.Bot.Application.Exceptions;
 using Lisbeth.Bot.Application.Services.Database.Interfaces;
 using Lisbeth.Bot.DataAccessLayer;
+using Lisbeth.Bot.DataAccessLayer.Specifications.RecurringReminder;
+using Lisbeth.Bot.Domain.DTOs.Request.Reminder;
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.Application.Services;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
+using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Services.Database
 {
@@ -31,6 +35,27 @@ namespace Lisbeth.Bot.Application.Services.Database
     {
         public RecurringReminderService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
         {
+        }
+
+        public async Task SetHangfireIdAsync(long reminderId, string hangfireId, bool shouldSave = false)
+        {
+            var reminder = await base.GetAsync<RecurringReminder>(reminderId);
+            reminder.HangfireId = long.Parse(hangfireId);
+
+            if (shouldSave) await base.CommitAsync();
+        }
+
+        public async Task RescheduleAsync(RescheduleReminderReqDto req, bool shouldSave = false)
+        {
+            var reminder = await base.GetSingleBySpecAsync<RecurringReminder>(
+                new ActiveRecurringReminderByNameOrIdAndGuildSpec(req.Name, req.GuildId, req.ReminderId));
+            if (reminder is null) throw new NotFoundException();
+
+            base.BeginUpdate(reminder);
+            reminder.CronExpression = req.CronExpression;
+            reminder.LastEditById = req.RequestedOnBehalfOfId;
+
+            if (shouldSave) await base.CommitAsync();
         }
     }
 }

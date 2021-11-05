@@ -25,6 +25,7 @@ namespace Lisbeth.Bot.Domain.Entities
     {
         public DateTime SetFor { get; set; }
         public string Text { get; set; }
+        public long HangfireId { get; set; }
         public List<string> Mentions { get; set; }
         public bool IsGuildReminder { get; set; }
 

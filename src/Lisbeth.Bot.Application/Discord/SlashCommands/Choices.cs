@@ -48,15 +48,10 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
 
     public enum ReminderActionType
     {
-        [ChoiceName("add")] Add,
+        [ChoiceName("add")] Set,
         [ChoiceName("reschedule")] Reschedule,
-        [ChoiceName("remove")] Remove
-    }
-
-    public enum ReminderType
-    {
-        Single,
-        Recurring
+        [ChoiceName("configure-embed")] ConfigureEmbed,
+        [ChoiceName("remove")] Disable
     }
 
     public enum TagActionType

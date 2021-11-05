@@ -61,12 +61,12 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             {
                 case BanActionType.Add:
 
-                    DateTime? liftsOn = length.ToDateTimeDuration().FinalDateFromToday;
+                    bool isValid = length.TryParseToDurationAndNextOccurrence(out var occurrence, out _);
 
-                    if (liftsOn is null)
+                    if (!isValid)
                         throw new ArgumentException($"Parameter {nameof(length)} can't be parsed to a known duration.");
 
-                    var banReq = new BanReqDto(validId, ctx.Guild.Id, ctx.User.Id, liftsOn.Value, reason);
+                    var banReq = new BanReqDto(validId, ctx.Guild.Id, ctx.User.Id, occurrence, reason);
                     var banReqValidator = new BanReqValidator(ctx.Client);
                     await banReqValidator.ValidateAndThrowAsync(banReq);
 

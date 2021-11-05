@@ -15,19 +15,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
-using Lisbeth.Bot.Domain.Entities.Base;
+using MikyM.Common.DataAccessLayer.Specifications;
 
-namespace Lisbeth.Bot.Domain.Entities
+namespace Lisbeth.Bot.DataAccessLayer.Specifications.Reminder
 {
-    public class RecurringReminder : EmbedConfigEntity
+    public class ActiveRemindersPerGuildSpec : Specification<Domain.Entities.Reminder>
     {
-        public string CronExpression { get; set; }
-        public long HangfireId { get; set; }
-        public string Text { get; set; }
-        public List<string> Mentions { get; set; }
-        public bool IsGuildReminder { get; set; }
-
-        public Guild Guild { get; set; }
+        public ActiveRemindersPerGuildSpec(ulong guildId)
+        {
+            Where(x => x.GuildId == guildId);
+            Where(x => !x.IsDisabled);
+        }
     }
 }

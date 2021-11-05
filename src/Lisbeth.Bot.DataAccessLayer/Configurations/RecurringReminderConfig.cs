@@ -65,6 +65,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
                 .HasMaxLength(100)
                 .IsRequired();
             builder.Property(x => x.EmbedConfigId).HasColumnName("embed_config_id").HasColumnType("bigint");
+            builder.Property(x => x.HangfireId).HasColumnName("hangfire_id").HasColumnType("bigint").IsRequired();
 
             builder.HasOne(x => x.EmbedConfig)
                 .WithOne(x => x.RecurringReminder)

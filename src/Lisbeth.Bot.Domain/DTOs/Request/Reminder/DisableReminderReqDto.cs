@@ -15,19 +15,27 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
-using Lisbeth.Bot.Domain.Entities.Base;
+using Lisbeth.Bot.Domain.DTOs.Request.Base;
+using Lisbeth.Bot.Domain.Enums;
 
-namespace Lisbeth.Bot.Domain.Entities
+namespace Lisbeth.Bot.Domain.DTOs.Request.Reminder
 {
-    public class RecurringReminder : EmbedConfigEntity
+    public class DisableReminderReqDto : BaseAuthWithGuildReqDto
     {
-        public string CronExpression { get; set; }
-        public long HangfireId { get; set; }
-        public string Text { get; set; }
-        public List<string> Mentions { get; set; }
-        public bool IsGuildReminder { get; set; }
+        public ReminderType Type { get; set; }
+        public string Name { get; set; }
+        public long? ReminderId { get; set; }
 
-        public Guild Guild { get; set; }
+        public DisableReminderReqDto()
+        {
+            
+        }
+
+        public DisableReminderReqDto(ReminderType type, string name, ulong guildId, ulong requestedOnBehalfOfId, long? reminderId = null) : base(guildId, requestedOnBehalfOfId)
+        {
+            Type = type;
+            Name = name;
+            ReminderId = reminderId;
+        }
     }
 }

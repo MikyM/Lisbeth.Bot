@@ -27,12 +27,12 @@ namespace Lisbeth.Bot.Application.Extensions
             return input.All(c => c is >= '0' and <= '9');
         }
 
-        public static (DateTime? FinalDateFromToday, TimeSpan Duration) ToDateTimeDuration(this string input)
+        public static bool TryParseToDurationAndNextOccurrence(this string input, out DateTime occurrence, out TimeSpan duration)
         {
             if (input is null) throw new ArgumentNullException(nameof(input));
 
             TimeSpan tmsp = new TimeSpan();
-            DateTime? result;
+            DateTime result;
 
             if (int.TryParse(input, out int inputInMinutes))
             {
@@ -49,12 +49,22 @@ namespace Lisbeth.Bot.Application.Extensions
                 int parsedInput = 0;
                 char inputType = 'x';
 
-                if (!char.IsDigit(input.First())) return (null, tmsp);
+                if (!char.IsDigit(input.First()))
+                {
+                    occurrence = DateTime.MinValue;
+                    duration = TimeSpan.MinValue;
+                    return false;
+                }
 
                 foreach (var c in input.Where(c => !char.IsDigit(c)))
                 {
                     inputType = char.ToLower(c);
-                    if (inputType is not ('m' or 'd' or 'w' or 'y' or 'h')) return (null, tmsp);
+                    if (inputType is not ('m' or 'd' or 'w' or 'y' or 'h'))
+                    {
+                        occurrence = DateTime.MinValue;
+                        duration = TimeSpan.MinValue;
+                        return false;
+                    }
                     parsedInput = int.Parse(input[..input.IndexOf(c)]);
                     break;
                 }
@@ -62,38 +72,66 @@ namespace Lisbeth.Bot.Application.Extensions
                 switch (inputType)
                 {
                     case 'h':
-                        if (parsedInput > 8784) return (null, tmsp);
+                        if (parsedInput > 8784)
+                        {
+                            occurrence = DateTime.MinValue;
+                            duration = TimeSpan.MinValue;
+                            return false;
+                        }
                         tmsp = TimeSpan.FromHours(parsedInput);
                         break;
 
                     case 'd':
-                        if (parsedInput > 366) return (null, tmsp);
+                        if (parsedInput > 366)
+                        {
+                            occurrence = DateTime.MinValue;
+                            duration = TimeSpan.MinValue;
+                            return false;
+                        }
                         tmsp = TimeSpan.FromDays(parsedInput);
                         break;
 
                     case 'w':
-                        if (parsedInput > 53) return (null, tmsp);
+                        if (parsedInput > 53)
+                        {
+                            occurrence = DateTime.MinValue;
+                            duration = TimeSpan.MinValue;
+                            return false;
+                        }
                         tmsp = TimeSpan.FromDays(parsedInput * 7);
                         break;
 
                     case 'm':
-                        if (parsedInput > 12) return (null, tmsp);
+                        if (parsedInput > 12)
+                        {
+                            occurrence = DateTime.MinValue;
+                            duration = TimeSpan.MinValue;
+                            return false;
+                        }
                         tmsp = TimeSpan.FromDays(parsedInput * 31);
                         break;
 
                     case 'y':
-                        if (parsedInput > 1) return (null, tmsp);
+                        if (parsedInput > 1)
+                        {
+                            occurrence = DateTime.MinValue;
+                            duration = TimeSpan.MinValue;
+                            return false;
+                        }
                         tmsp = TimeSpan.FromDays(parsedInput * 365);
                         break;
 
                     default:
-                        return (null, tmsp);
+                        throw new ArgumentException();
                 }
 
                 result = DateTime.UtcNow.Add(tmsp);
             }
 
-            return (result, tmsp);
+            occurrence = result;
+            duration = tmsp;
+
+            return true;
         }
 
         /// <summary>

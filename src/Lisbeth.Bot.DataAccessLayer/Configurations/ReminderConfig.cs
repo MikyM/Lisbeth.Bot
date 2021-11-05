@@ -55,6 +55,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
                 .HasColumnName("is_guild_reminder")
                 .HasColumnType("boolean")
                 .IsRequired();
+            builder.Property(x => x.HangfireId).HasColumnName("hangfire_id").HasColumnType("bigint").IsRequired();
 
             builder.HasOne(x => x.EmbedConfig)
                 .WithOne(x => x.Reminder)

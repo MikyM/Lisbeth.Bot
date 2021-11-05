@@ -15,10 +15,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Threading.Tasks;
 using AutoMapper;
 using JetBrains.Annotations;
+using Lisbeth.Bot.Application.Exceptions;
+using Lisbeth.Bot.Application.Extensions;
 using Lisbeth.Bot.Application.Services.Database.Interfaces;
 using Lisbeth.Bot.DataAccessLayer;
+using Lisbeth.Bot.DataAccessLayer.Specifications.Reminder;
+using Lisbeth.Bot.Domain.DTOs.Request.Reminder;
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.Application.Services;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
@@ -30,6 +36,27 @@ namespace Lisbeth.Bot.Application.Services.Database
     {
         public ReminderService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
         {
+        }
+
+        public async Task SetHangfireIdAsync(long reminderId, string hangfireId, bool shouldSave = false)
+        {
+            var reminder = await base.GetAsync<Reminder>(reminderId);
+            reminder.HangfireId = long.Parse(hangfireId);
+
+            if (shouldSave) await base.CommitAsync();
+        }
+
+        public async Task RescheduleAsync(RescheduleReminderReqDto req, bool shouldSave = false)
+        {
+            var reminder = await base.GetSingleBySpecAsync<Reminder>(new ActiveReminderByNameOrIdAndGuildSpec(req.Name, req.GuildId, req.ReminderId));
+            if (reminder is null) throw new NotFoundException();
+
+            base.BeginUpdate(reminder);
+            var isValid = req.TimeSpanExpression.TryParseToDurationAndNextOccurrence(out var occurrence, out _);
+            reminder.SetFor = req.SetFor ?? (isValid ? occurrence : throw new ArgumentException(nameof(req.TimeSpanExpression)));
+            reminder.LastEditById = req.RequestedOnBehalfOfId;
+
+            if (shouldSave) await base.CommitAsync();
         }
     }
 }

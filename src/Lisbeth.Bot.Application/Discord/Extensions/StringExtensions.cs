@@ -23,11 +23,34 @@ namespace Lisbeth.Bot.Application.Discord.Extensions
     {
         public static bool TryParseRoleMention(this string value, out ulong roleId)
         {
-            var res = Regex.Match(value, "(?<=\\<@&)[0-9]{17,18}(?=\\>)");
+            var res = Regex.Match(value, @"(?<=\\<@&)[0-9]{17,18}(?=\\>)");
 
             roleId = res.Success ? ulong.Parse(res.Value) : 0;
 
             return res.Success;
+        }
+
+        public static bool TryParseUserMention(this string value, out ulong roleId)
+        {
+            var res = Regex.Match(value, @"(?<=\<@!|\<@)[0-9]{17,18}(?=\>)");
+
+            roleId = res.Success ? ulong.Parse(res.Value) : 0;
+
+            return res.Success;
+        }
+
+        public static bool TryParseChannelMention(this string value, out ulong roleId)
+        {
+            var res = Regex.Match(value, @"(?<=\<#)[0-9]{17,18}(?=\>)");
+
+            roleId = res.Success ? ulong.Parse(res.Value) : 0;
+
+            return res.Success;
+        }
+
+        public static bool TryParseDiscordMention(this string value, out ulong mentionId)
+        {
+            return TryParseUserMention(value, out mentionId) || TryParseChannelMention(value, out mentionId) || TryParseRoleMention(value, out mentionId);
         }
     }
 }

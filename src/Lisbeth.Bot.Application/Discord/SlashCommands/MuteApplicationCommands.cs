@@ -60,12 +60,12 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
             switch (actionType)
             {
                 case MuteActionType.Add:
-                    DateTime? liftsOn = length.ToDateTimeDuration().FinalDateFromToday;
-                    if (liftsOn is null)
+                    bool isValid = length.TryParseToDurationAndNextOccurrence(out var occurrence, out _);
+                    if (!isValid)
                         throw new ArgumentException($"Parameter {nameof(length)} can't be parsed to a known duration.");
                     if (length is "") throw new ArgumentException($"Parameter {nameof(length)} can't be empty.");
 
-                    var muteReq = new MuteReqDto(user.Id, ctx.Guild.Id, ctx.User.Id, liftsOn.Value, reason);
+                    var muteReq = new MuteReqDto(user.Id, ctx.Guild.Id, ctx.User.Id, occurrence, reason);
                     var muteReqValidator = new MuteReqValidator(ctx.Client);
                     await muteReqValidator.ValidateAndThrowAsync(muteReq);
 

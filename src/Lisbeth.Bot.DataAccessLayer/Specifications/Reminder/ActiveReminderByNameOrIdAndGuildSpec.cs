@@ -15,19 +15,27 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Lisbeth.Bot.Domain.DTOs.Request.Base
+using MikyM.Common.DataAccessLayer.Specifications;
+
+namespace Lisbeth.Bot.DataAccessLayer.Specifications.Reminder
 {
-    public class BaseAuthWithGuildReqDto : BaseAuthReqDto
+    public class ActiveReminderByNameOrIdAndGuildSpec : Specification<Domain.Entities.Reminder>
     {
-        public ulong GuildId { get; set; }
+        public ActiveReminderByNameOrIdAndGuildSpec(long id) : this("", null, id) {}
+        public ActiveReminderByNameOrIdAndGuildSpec(string name, ulong guildId) : this(name, guildId, null) {}
 
-        public BaseAuthWithGuildReqDto()
+        public ActiveReminderByNameOrIdAndGuildSpec(string name, ulong? guildId, long? id)
         {
-        }
-
-        public BaseAuthWithGuildReqDto(ulong guildId, ulong requestedOnBehalfOfId) : base(requestedOnBehalfOfId)
-        {
-            GuildId = guildId;
+            Where(x => !x.IsDisabled);
+            if (id.HasValue)
+            {
+                Where(x => x.Id == id);
+            }
+            else
+            {
+                Where(x => x.GuildId == guildId);
+                Where(x => x.Name == name);
+            }
         }
     }
 }
