@@ -34,8 +34,12 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators
 
         public IQueryable<T> GetQuery<T>(IQueryable<T> query, ISpecification<T> specification) where T : class
         {
+            if (specification.IncludeStrings is null) return query;
+
             query = specification.IncludeStrings.Aggregate(query,
                 (current, includeString) => current.Include(includeString));
+
+            if (specification.IncludeExpressions is null) return query;
 
             foreach (var includeInfo in specification.IncludeExpressions)
                 if (includeInfo.Type == IncludeTypeEnum.Include)

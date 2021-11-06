@@ -1,5 +1,6 @@
-﻿// This file is part of Lisbeth.Bot project
+// This file is part of Lisbeth.Bot project
 //
+// Copyright (C) 2017 Jarl Gullberg
 // Copyright (C) 2021 Krzysztof Kupisz - MikyM
 // 
 // This program is free software: you can redistribute it and/or modify
@@ -15,19 +16,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using MikyM.Common.DataAccessLayer.Repositories;
-
-namespace MikyM.Common.DataAccessLayer.UnitOfWork
+namespace MikyM.Common.DataAccessLayer.Results.Errors
 {
-    public interface IUnitOfWork<TContext> : IDisposable where TContext : DbContext
-    {
-        TContext Context { get; }
-        TRepository? GetRepository<TRepository>() where TRepository : IBaseRepository;
-        Task<int> CommitAsync();
-        Task RollbackAsync();
-        Task UseTransaction();
-    }
+    /// <summary>
+    /// Represents a failure to find something that was searched for.
+    /// </summary>
+    /// <param name="Message">The custom message to provide.</param>
+    public record NotFoundError(string Message = "The searched-for entity was not found.") : ResultError(Message);
 }

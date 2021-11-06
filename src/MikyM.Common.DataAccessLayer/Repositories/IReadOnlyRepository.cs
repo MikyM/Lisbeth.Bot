@@ -27,23 +27,25 @@ namespace MikyM.Common.DataAccessLayer.Repositories
     {
         ValueTask<TEntity> GetAsync(params object[] keyValues);
 
-        Task<TEntity> GetSingleBySpecAsync(ISpecification<TEntity> specification = null);
+        Task<TEntity> GetSingleBySpecAsync(ISpecification<TEntity> specification);
 
         Task<TProjectTo> GetSingleBySpecAsync<TProjectTo>(
-            ISpecification<TEntity, TProjectTo> specification = null)
+            ISpecification<TEntity, TProjectTo> specification)
             where TProjectTo : class;
 
         Task<IReadOnlyList<TEntity>> GetBySpecAsync(PaginationFilter filter,
-            ISpecification<TEntity> specification = null);
+            ISpecification<TEntity> specification);
 
         Task<IReadOnlyList<TProjectTo>> GetBySpecAsync<TProjectTo>(PaginationFilter filter,
-            ISpecification<TEntity, TProjectTo> specification = null) where TProjectTo : class;
+            ISpecification<TEntity, TProjectTo> specification) where TProjectTo : class;
 
-        Task<IReadOnlyList<TEntity>> GetBySpecAsync(ISpecification<TEntity> specification = null);
+        Task<IReadOnlyList<TEntity>> GetBySpecAsync(ISpecification<TEntity> specification);
 
         Task<IReadOnlyList<TProjectTo>> GetBySpecAsync<TProjectTo>(
-            ISpecification<TEntity, TProjectTo> specification = null) where TProjectTo : class;
+            ISpecification<TEntity, TProjectTo> specification) where TProjectTo : class;
 
-        Task<long> LongCountAsync(ISpecification<TEntity> specification = null);
+        Task<long> LongCountAsync(ISpecification<TEntity> specification);
+
+        Task<IReadOnlyList<TEntity>> GetAny(PaginationFilter? filter = null);
     }
 }

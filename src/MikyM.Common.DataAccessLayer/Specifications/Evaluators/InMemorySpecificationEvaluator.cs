@@ -62,7 +62,7 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators
         public virtual IEnumerable<T> Evaluate<T>(IEnumerable<T> source, ISpecification<T> specification)
             where T : class
         {
-            if (specification.SearchCriterias.Any())
+            if ((specification.SearchCriterias ?? throw new InvalidOperationException()).Any())
                 throw new NotSupportedException(
                     "The specification contains Search expressions and can't be evaluated with in-memory evaluator.");
 

@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Linq;
 using MikyM.Common.DataAccessLayer.Specifications.Extensions;
 
@@ -32,7 +33,7 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators
 
         public IQueryable<T> GetQuery<T>(IQueryable<T> query, ISpecification<T> specification) where T : class
         {
-            return specification.SearchCriterias.GroupBy(x => x.SearchGroup)
+            return (specification.SearchCriterias ?? throw new InvalidOperationException()).GroupBy(x => x.SearchGroup)
                 .Select(searchCriteria => searchCriteria.Select(x => (x.Selector, x.SearchTerm)))
                 .Aggregate(query, (current, criterias) => current.Search(criterias));
         }

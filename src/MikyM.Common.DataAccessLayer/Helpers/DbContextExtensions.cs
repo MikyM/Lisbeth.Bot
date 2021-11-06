@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 
@@ -22,7 +23,7 @@ namespace MikyM.Common.DataAccessLayer.Helpers
 {
     public static class DbContextExtensions
     {
-        public static TEntity FindTracked<TEntity>(this DbContext context, params object[] keyValues)
+        public static TEntity? FindTracked<TEntity>(this DbContext context, params object[] keyValues)
             where TEntity : class
         {
             var entityType = context.Model.FindEntityType(typeof(TEntity));

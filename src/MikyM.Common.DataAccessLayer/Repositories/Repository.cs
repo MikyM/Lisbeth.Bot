@@ -94,7 +94,7 @@ namespace MikyM.Common.DataAccessLayer.Repositories
 
         public virtual void Delete(long id)
         {
-            var entity = _context.FindTracked<TEntity>(id) ?? (TEntity) Activator.CreateInstance(typeof(TEntity), id);
+            var entity = _context.FindTracked<TEntity>(id) ?? (TEntity) Activator.CreateInstance(typeof(TEntity), id)!;
             _context.Set<TEntity>().Remove(entity);
         }
 
@@ -106,7 +106,7 @@ namespace MikyM.Common.DataAccessLayer.Repositories
         public virtual void DeleteRange(IEnumerable<long> ids)
         {
             var entities = ids.Select(id =>
-                    _context.FindTracked<TEntity>(id) ?? (TEntity) Activator.CreateInstance(typeof(TEntity), id))
+                    _context.FindTracked<TEntity>(id) ?? (TEntity) Activator.CreateInstance(typeof(TEntity), id)!)
                 .ToList();
             _context.Set<TEntity>().RemoveRange(entities);
         }

@@ -30,8 +30,8 @@ namespace MikyM.Common.DataAccessLayer
         }
 
         public EntityEntry Entry { get; }
-        public string UserId { get; set; }
-        public string TableName { get; set; }
+        public string? UserId { get; set; }
+        public string? TableName { get; set; }
         public Dictionary<string, object> KeyValues { get; } = new();
         public Dictionary<string, object> OldValues { get; } = new();
         public Dictionary<string, object> NewValues { get; } = new();

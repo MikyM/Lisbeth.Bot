@@ -48,8 +48,8 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators
                     {
                         OrderTypeEnum.OrderBy => query.OrderBy(orderExpression.KeySelector),
                         OrderTypeEnum.OrderByDescending => query.OrderByDescending(orderExpression.KeySelector),
-                        OrderTypeEnum.ThenBy => current.ThenBy(orderExpression.KeySelector),
-                        OrderTypeEnum.ThenByDescending => current.ThenByDescending(orderExpression.KeySelector),
+                        OrderTypeEnum.ThenBy => current?.ThenBy(orderExpression.KeySelector),
+                        OrderTypeEnum.ThenByDescending => current?.ThenByDescending(orderExpression.KeySelector),
                         _ => current
                     });
 
@@ -73,8 +73,8 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators
                         OrderTypeEnum.OrderBy => query.OrderBy(orderExpression.KeySelector.Compile()),
                         OrderTypeEnum.OrderByDescending => query.OrderByDescending(
                             orderExpression.KeySelector.Compile()),
-                        OrderTypeEnum.ThenBy => current.ThenBy(orderExpression.KeySelector.Compile()),
-                        OrderTypeEnum.ThenByDescending => current.ThenByDescending(
+                        OrderTypeEnum.ThenBy => current?.ThenBy(orderExpression.KeySelector.Compile()),
+                        OrderTypeEnum.ThenByDescending => current?.ThenByDescending(
                             orderExpression.KeySelector.Compile()),
                         _ => current
                     });

@@ -45,13 +45,13 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Extensions
             Expression? expr =
                 (from criteria in criterias
                     where criteria.selector is not null && !string.IsNullOrEmpty(criteria.searchTerm)
-                    let functions = Expression.Property(null, typeof(EF).GetProperty(nameof(EF.Functions)))
+                    let functions = Expression.Property(null, typeof(EF).GetProperty(nameof(EF.Functions)) ?? throw new InvalidOperationException())
                     let like =
                         typeof(DbFunctionsExtensions).GetMethod(nameof(DbFunctionsExtensions.Like),
                             new[] {functions.Type, typeof(string), typeof(string)})
                     let propertySelector =
                         ParameterReplacerVisitor.Replace(criteria.selector, criteria.selector.Parameters[0], parameter)
-                    select Expression.Call(null, like, functions, (propertySelector as LambdaExpression)?.Body,
+                    select Expression.Call(null, like, functions, (propertySelector as LambdaExpression)?.Body ?? throw new InvalidOperationException(),
                         Expression.Constant(criteria.searchTerm))).Aggregate<MethodCallExpression, Expression?>(null,
                     (current, likeExpression) =>
                         current is null ? likeExpression : Expression.OrElse(current, likeExpression));

@@ -58,7 +58,7 @@ namespace MikyM.Common.DataAccessLayer.Specifications
         /// <summary>
         ///     The collection of predicates to group by.
         /// </summary>
-        Expression<Func<T, object>> GroupByExpression { get; }
+        Expression<Func<T, object>>? GroupByExpression { get; }
 
         /// <summary>
         ///     The collections of functions used to determine the sorting (and subsequent sorting),
@@ -66,18 +66,18 @@ namespace MikyM.Common.DataAccessLayer.Specifications
         ///     <para>KeySelector, a function to extract a key from an element.</para>
         ///     <para>OrderType, whether to (subsequently) sort ascending or descending</para>
         /// </summary>
-        IEnumerable<(Expression<Func<T, object>> KeySelector, OrderTypeEnum OrderType)> OrderExpressions { get; }
+        IEnumerable<(Expression<Func<T, object>> KeySelector, OrderTypeEnum OrderType)>? OrderExpressions { get; }
 
         /// <summary>
         ///     The collection of <see cref="IncludeExpressionInfo" />s describing each include expression.
         ///     This information is utilized to build Include/ThenInclude functions in the query.
         /// </summary>
-        IEnumerable<IncludeExpressionInfo> IncludeExpressions { get; }
+        IEnumerable<IncludeExpressionInfo>? IncludeExpressions { get; }
 
         /// <summary>
         ///     The collection of navigation properties, as strings, to include in the query.
         /// </summary>
-        IEnumerable<string> IncludeStrings { get; }
+        IEnumerable<string>? IncludeStrings { get; }
 
         /// <summary>
         ///     The collection of 'SQL LIKE' operations, constructed by;
@@ -87,7 +87,7 @@ namespace MikyM.Common.DataAccessLayer.Specifications
         ///         <item>SearchGroup, the index used to group sets of Selectors and SearchTerms together.</item>
         ///     </list>
         /// </summary>
-        IEnumerable<(Expression<Func<T, string>> Selector, string SearchTerm, int SearchGroup)> SearchCriterias { get; }
+        IEnumerable<(Expression<Func<T, string>> Selector, string SearchTerm, int SearchGroup)>? SearchCriterias { get; }
 
         /// <summary>
         ///     The number of elements to return.

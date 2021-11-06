@@ -84,7 +84,7 @@ namespace MikyM.Common.DataAccessLayer.Specifications
 
         public IEnumerable<IncludeExpressionInfo> IncludeExpressions { get; } = new List<IncludeExpressionInfo>();
 
-        public Expression<Func<T, object>> GroupByExpression { get; internal set; }
+        public Expression<Func<T, object>>? GroupByExpression { get; internal set; }
 
         public IEnumerable<string> IncludeStrings { get; } = new List<string>();
 
@@ -123,13 +123,13 @@ namespace MikyM.Common.DataAccessLayer.Specifications
             return this;
         }
 
-        protected Specification<T> OrderBy(Expression<Func<T, object>> orderByExpression)
+        protected Specification<T> OrderBy(Expression<Func<T, object?>> orderByExpression)
         {
             Query.OrderBy(orderByExpression);
             return this;
         }
 
-        protected Specification<T> OrderByDescending(Expression<Func<T, object>> orderByDescendingExpression)
+        protected Specification<T> OrderByDescending(Expression<Func<T, object?>> orderByDescendingExpression)
         {
             Query.OrderByDescending(orderByDescendingExpression);
             return this;

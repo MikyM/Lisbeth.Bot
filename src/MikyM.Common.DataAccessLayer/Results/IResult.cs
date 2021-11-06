@@ -1,5 +1,6 @@
-﻿// This file is part of Lisbeth.Bot project
+// This file is part of Lisbeth.Bot project
 //
+// Copyright (C) 2017 Jarl Gullberg
 // Copyright (C) 2021 Krzysztof Kupisz - MikyM
 // 
 // This program is free software: you can redistribute it and/or modify
@@ -15,19 +16,29 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using MikyM.Common.DataAccessLayer.Repositories;
+using JetBrains.Annotations;
 
-namespace MikyM.Common.DataAccessLayer.UnitOfWork
+namespace MikyM.Common.DataAccessLayer.Results
 {
-    public interface IUnitOfWork<TContext> : IDisposable where TContext : DbContext
+    /// <summary>
+    /// Represents the public API of an interface.
+    /// </summary>
+    [PublicAPI]
+    public interface IResult
     {
-        TContext Context { get; }
-        TRepository? GetRepository<TRepository>() where TRepository : IBaseRepository;
-        Task<int> CommitAsync();
-        Task RollbackAsync();
-        Task UseTransaction();
+        /// <summary>
+        /// Gets a value indicating whether the result was successful.
+        /// </summary>
+        bool IsSuccess { get; }
+
+        /// <summary>
+        /// Gets the error, if any.
+        /// </summary>
+        IResultError? Error { get; }
+
+        /// <summary>
+        /// Gets the inner result, if any.
+        /// </summary>
+        IResult? Inner { get; }
     }
 }
