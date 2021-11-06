@@ -44,7 +44,7 @@ namespace Lisbeth.Bot.Application.Discord.EventHandlers
             embed.WithColor(new DiscordColor(170, 1, 20));
             embed.WithAuthor($"{noEntryEmoji} Context menu errored");
             embed.AddField("Type", args.Exception.GetType().ToString());
-            embed.AddField("Message", args.Exception.GetFullMessage());
+            embed.AddField("message", args.Exception.GetFullMessage());
             args.Context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
             return Task.CompletedTask;
         }
@@ -62,7 +62,7 @@ namespace Lisbeth.Bot.Application.Discord.EventHandlers
             embed.WithColor(new DiscordColor(170, 1, 20));
             embed.WithAuthor($"{noEntryEmoji} Command errored");
             embed.AddField("Type", args.Exception.GetType().ToString());
-            embed.AddField("Message", args.Exception.GetFullMessage());
+            embed.AddField("message", args.Exception.GetFullMessage());
             args.Context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
             return Task.CompletedTask;
         }

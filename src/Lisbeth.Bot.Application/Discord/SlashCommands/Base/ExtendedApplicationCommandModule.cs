@@ -15,22 +15,28 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
-using Lisbeth.Bot.Domain.DTOs.Request.Ban;
 using MikyM.Common.Application.Results;
-using System.Threading.Tasks;
 
-namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
+namespace Lisbeth.Bot.Application.Discord.SlashCommands.Base
 {
-    public interface IDiscordBanService
+    public class ExtendedApplicationCommandModule : ApplicationCommandModule
     {
-        Task<Result<DiscordEmbed>> BanAsync(BanReqDto req);
-        Task<Result<DiscordEmbed>> BanAsync(InteractionContext ctx, BanReqDto req);
-        Task<Result<DiscordEmbed>> UnbanAsync(BanDisableReqDto req);
-        Task<Result<DiscordEmbed>> UnbanAsync(InteractionContext ctx, BanDisableReqDto req);
-        Task<Result<DiscordEmbed>> GetSpecificUserGuildBanAsync(BanGetReqDto req);
-        Task<Result<DiscordEmbed>> GetSpecificUserGuildBanAsync(InteractionContext ctx, BanGetReqDto req);
-        Task<Result> UnbanCheckAsync();
+        protected DiscordEmbed GetUnsuccessfulResultEmbed(IResult result, DiscordClient discord) =>
+            this.GetUnsuccessfulResultEmbed(result.Error, discord);
+
+        protected DiscordEmbed GetUnsuccessfulResultEmbed(IResultError error, DiscordClient discord) =>
+            this.GetUnsuccessfulResultEmbed(error.message, discord);
+
+        protected DiscordEmbed GetUnsuccessfulResultEmbed(string error, DiscordClient discord)
+        {
+            var noEntryEmoji = DiscordEmoji.FromName(discord, ":x:");
+
+            return new DiscordEmbedBuilder().WithColor(new DiscordColor(170, 1, 20))
+                .WithAuthor($"{noEntryEmoji} Operation errored")
+                .AddField("Message", error);
+        }
     }
 }

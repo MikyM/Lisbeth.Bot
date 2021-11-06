@@ -8,7 +8,7 @@ namespace Lisbeth.Bot.Application.Extensions
     {
         public static string GetFullMessage(this Exception ex)
         {
-            return ex.InnerException is null ? ex.Message : ex.Message + " --> " + ex.InnerException.GetFullMessage();
+            return ex.InnerException is null ? ex.message : ex.message + " --> " + ex.InnerException.GetFullMessage();
         }
 
         public static IEnumerable<Exception> GetAllExceptions(this Exception exception)
@@ -26,8 +26,8 @@ namespace Lisbeth.Bot.Application.Extensions
         public static string ToFormattedString(this Exception exception)
         {
             var messages = exception.GetAllExceptions()
-                .Where(e => !string.IsNullOrWhiteSpace(e.Message))
-                .Select(exceptionPart => exceptionPart.Message.Trim() + "\r\n" +
+                .Where(e => !string.IsNullOrWhiteSpace(e.message))
+                .Select(exceptionPart => exceptionPart.message.Trim() + "\r\n" +
                                          (exceptionPart.StackTrace is not null ? exceptionPart.StackTrace.Trim() : ""));
 
             return string.Join("\r\n\r\n", messages);

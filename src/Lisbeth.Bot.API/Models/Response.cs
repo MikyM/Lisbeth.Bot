@@ -22,13 +22,13 @@ namespace Lisbeth.Bot.API.Models
         public Response(bool isSuccess = true)
         {
             Succeeded = isSuccess;
-            Message = string.Empty;
+            message = string.Empty;
             Errors = null;
         }
 
         public bool Succeeded { get; set; }
         public string[] Errors { get; set; }
-        public string Message { get; set; }
+        public string message { get; set; }
     }
 
     public class Response<T> : Response

@@ -15,19 +15,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
 using FluentValidation;
 using JetBrains.Annotations;
-using Lisbeth.Bot.Application.Validation;
 using Lisbeth.Bot.Application.Validation.Mute;
-using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.DTOs.Request.Mute;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 // ReSharper disable once CheckNamespace
 namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
@@ -49,10 +47,16 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
             var muteReqValidator = new MuteReqValidator(ctx.Client);
             await muteReqValidator.ValidateAndThrowAsync(muteReq);
 
-            var embed = await _discordMuteService.MuteAsync(ctx, muteReq);
+            var result = await _discordMuteService.MuteAsync(ctx, muteReq);
 
-            await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(embed)
-                .AsEphemeral(true));
+            if (result.IsSuccess)
+                await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                    .AddEmbed(result.Entity)
+                    .AsEphemeral(true));
+            else
+                await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                    .AddEmbed(base.GetUnsuccessfulResultEmbed(result, ctx.Client))
+                    .AsEphemeral(true));
         }
 
         [UsedImplicitly]
@@ -66,10 +70,16 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
             var muteDisableReqValidator = new MuteDisableReqValidator(ctx.Client);
             await muteDisableReqValidator.ValidateAndThrowAsync(muteDisableReq);
 
-            var embed = await _discordMuteService.UnmuteAsync(ctx, muteDisableReq);
+            var result = await _discordMuteService.UnmuteAsync(ctx, muteDisableReq);
 
-            await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(embed)
-                .AsEphemeral(true));
+            if (result.IsSuccess)
+                await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                    .AddEmbed(result.Entity)
+                    .AsEphemeral(true));
+            else
+                await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                    .AddEmbed(base.GetUnsuccessfulResultEmbed(result, ctx.Client))
+                    .AsEphemeral(true));
         }
 
         [UsedImplicitly]
@@ -83,10 +93,16 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
             var muteGetReqValidator = new MuteGetReqValidator(ctx.Client);
             await muteGetReqValidator.ValidateAndThrowAsync(muteGetReq);
 
-            var embed = await _discordMuteService.GetSpecificUserGuildMuteAsync(ctx, muteGetReq);
+            var result = await _discordMuteService.GetSpecificUserGuildMuteAsync(ctx, muteGetReq);
 
-            await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(embed)
-                .AsEphemeral(true));
+            if (result.IsSuccess)
+                await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                    .AddEmbed(result.Entity)
+                    .AsEphemeral(true));
+            else
+                await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                    .AddEmbed(base.GetUnsuccessfulResultEmbed(result, ctx.Client))
+                    .AsEphemeral(true));
         }
 
         #endregion
@@ -105,10 +121,16 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
             var muteReqValidator = new MuteReqValidator(ctx.Client);
             await muteReqValidator.ValidateAndThrowAsync(muteReq);
 
-            var embed = await _discordMuteService.MuteAsync(ctx, muteReq);
+            var result = await _discordMuteService.MuteAsync(ctx, muteReq);
 
-            await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(embed)
-                .AsEphemeral(true));
+            if (result.IsSuccess)
+                await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                    .AddEmbed(result.Entity)
+                    .AsEphemeral(true));
+            else
+                await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                    .AddEmbed(base.GetUnsuccessfulResultEmbed(result, ctx.Client))
+                    .AsEphemeral(true));
         }
 
         [UsedImplicitly]
@@ -123,7 +145,7 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
             var muteReqValidator = new MuteReqValidator(ctx.Client);
             await muteReqValidator.ValidateAndThrowAsync(muteReq);
 
-            var embed = await _discordMuteService.MuteAsync(ctx, muteReq);
+            var result = await _discordMuteService.MuteAsync(ctx, muteReq);
 
             //await _discordMessageService.PruneAsync()
 
@@ -134,8 +156,14 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
 
             await ctx.Channel.DeleteMessagesAsync(msgsToDel);
 
-            await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(embed)
-                .AsEphemeral(true));
+            if (result.IsSuccess)
+                await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                    .AddEmbed(result.Entity)
+                    .AsEphemeral(true));
+            else
+                await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                    .AddEmbed(base.GetUnsuccessfulResultEmbed(result, ctx.Client))
+                    .AsEphemeral(true));
         }
 
         #endregion

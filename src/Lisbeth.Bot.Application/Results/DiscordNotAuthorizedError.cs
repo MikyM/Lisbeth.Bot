@@ -1,6 +1,5 @@
-// This file is part of Lisbeth.Bot project
+﻿// This file is part of Lisbeth.Bot project
 //
-// Copyright (C) 2017 Jarl Gullberg
 // Copyright (C) 2021 Krzysztof Kupisz - MikyM
 // 
 // This program is free software: you can redistribute it and/or modify
@@ -16,15 +15,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
+using MikyM.Common.Application.Results;
 
-namespace MikyM.Common.DataAccessLayer.Results.Errors
+namespace Lisbeth.Bot.Application.Results
 {
     /// <summary>
-    /// Represents an error raised when an attempt to perform an invalid operation is made.
+    /// Represents a perform an action due to authorization.
     /// </summary>
-    /// <param name="Message">The error message.</param>
-    /// <remarks>Used in place of <see cref="InvalidOperationException"/>.</remarks>
-    public record InvalidOperationError(string Message = "The requested operation is invalid.")
-        : ResultError(Message);
+    /// <param name="Message">The custom message to provide.</param>
+    public record DiscordNotAuthorizedError
+        (string Message = "Action not authorized.") : ResultError(Message);
 }

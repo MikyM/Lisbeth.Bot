@@ -1,5 +1,6 @@
-﻿// This file is part of Lisbeth.Bot project
+// This file is part of Lisbeth.Bot project
 //
+// Copyright (C) 2017 Jarl Gullberg
 // Copyright (C) 2021 Krzysztof Kupisz - MikyM
 // 
 // This program is free software: you can redistribute it and/or modify
@@ -15,19 +16,19 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Threading.Tasks;
-using Lisbeth.Bot.DataAccessLayer;
-using Lisbeth.Bot.Domain.DTOs.Request;
-using Lisbeth.Bot.Domain.DTOs.Request.Ban;
-using Lisbeth.Bot.Domain.Entities;
-using MikyM.Common.Application.Interfaces;
-using MikyM.Common.Application.Results;
+using JetBrains.Annotations;
 
-namespace Lisbeth.Bot.Application.Services.Database.Interfaces
+namespace MikyM.Common.Application.Results
 {
-    public interface IBanService : ICrudService<Ban, LisbethBotDbContext>
+    /// <summary>
+    /// Represents an error returned by a result.
+    /// </summary>
+    [PublicAPI]
+    public interface IResultError
     {
-        Task<Result<(long Id, Ban FoundEntity)>> AddOrExtendAsync(BanReqDto req, bool shouldSave = false);
-        Task<Result<Ban>> DisableAsync(BanDisableReqDto entry, bool shouldSave = false);
+        /// <summary>
+        /// Gets the human-readable error message.
+        /// </summary>
+        string message { get; }
     }
 }

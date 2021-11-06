@@ -15,19 +15,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Threading.Tasks;
-using Lisbeth.Bot.DataAccessLayer;
-using Lisbeth.Bot.Domain.DTOs.Request;
-using Lisbeth.Bot.Domain.DTOs.Request.Ban;
-using Lisbeth.Bot.Domain.Entities;
-using MikyM.Common.Application.Interfaces;
-using MikyM.Common.Application.Results;
-
-namespace Lisbeth.Bot.Application.Services.Database.Interfaces
+namespace Lisbeth.Bot.Application.Enums
 {
-    public interface IBanService : ICrudService<Ban, LisbethBotDbContext>
+    public enum DiscordEntityType
     {
-        Task<Result<(long Id, Ban FoundEntity)>> AddOrExtendAsync(BanReqDto req, bool shouldSave = false);
-        Task<Result<Ban>> DisableAsync(BanDisableReqDto entry, bool shouldSave = false);
+        Guild,
+        Channel,
+        Member,
+        User,
+        Role
     }
 }

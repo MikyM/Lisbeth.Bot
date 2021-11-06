@@ -15,18 +15,19 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Threading.Tasks;
 using AutoMapper;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Services.Database.Interfaces;
 using Lisbeth.Bot.DataAccessLayer;
-using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.DTOs.Request.Ban;
 using Lisbeth.Bot.Domain.Entities;
+using MikyM.Common.Application.Results;
+using MikyM.Common.Application.Results.Errors;
 using MikyM.Common.Application.Services;
 using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
+using System;
+using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Services.Database
 {
@@ -37,46 +38,50 @@ namespace Lisbeth.Bot.Application.Services.Database
         {
         }
 
-        public async Task<(long Id, Ban FoundEntity)> AddOrExtendAsync(BanReqDto req, bool shouldSave = false)
+        public async Task<Result<(long Id, Ban FoundEntity)>> AddOrExtendAsync(BanReqDto req, bool shouldSave = false)
         {
             if (req is null) throw new ArgumentNullException(nameof(req));
 
-            var entity = await base.GetSingleBySpecAsync<Ban>(new Specification<Ban>(x =>
+            var result = await base.GetSingleBySpecAsync<Ban>(new Specification<Ban>(x =>
                 x.UserId == req.TargetUserId && x.GuildId == req.GuildId && !x.IsDisabled));
 
-            if (entity is null) return (await base.AddAsync(req, shouldSave), null);
+            if (!result.IsSuccess)
+            {
+                var partial = await base.AddAsync(req, shouldSave);
+                return Result<(long Id, Ban FoundEntity)>.FromSuccess((partial.Entity, null));
+            }
 
-            if (entity.AppliedUntil > req.AppliedUntil) return (entity.Id, entity);
+            if (result.Entity.AppliedUntil > req.AppliedUntil) return (result.Entity.Id, result.Entity);
 
-            var shallowCopy = entity.ShallowCopy();
+            var shallowCopy = result.Entity.ShallowCopy();
 
-            base.BeginUpdate(entity);
-            entity.AppliedById = req.RequestedOnBehalfOfId;
-            entity.AppliedUntil = req.AppliedUntil;
-            entity.Reason = req.Reason;
+            base.BeginUpdate(result.Entity);
+            result.Entity.AppliedById = req.RequestedOnBehalfOfId;
+            result.Entity.AppliedUntil = req.AppliedUntil;
+            result.Entity.Reason = req.Reason;
 
             if (shouldSave) await base.CommitAsync();
 
-            return (entity.Id, shallowCopy);
+            return Result<(long Id, Ban FoundEntity)>.FromSuccess((result.Entity.Id, shallowCopy));
         }
 
-        public async Task<Ban> DisableAsync(BanDisableReqDto entry, bool shouldSave = false)
+        public async Task<Result<Ban>> DisableAsync(BanDisableReqDto entry, bool shouldSave = false)
         {
             if (entry is null) throw new ArgumentNullException(nameof(entry));
 
-            var entity = await base.GetSingleBySpecAsync<Ban>(
+            var result = await base.GetSingleBySpecAsync<Ban>(
                 new Specification<Ban>(x =>
                     x.UserId == entry.TargetUserId && x.GuildId == entry.GuildId && !x.IsDisabled));
-            if (entity is null) return null;
+            if (!result.IsSuccess) return Result<Ban>.FromError(new NotFoundError(), result);
 
-            base.BeginUpdate(entity);
-            entity.IsDisabled = true;
-            entity.LiftedOn = DateTime.UtcNow;
-            entity.LiftedById = entry.RequestedOnBehalfOfId;
+            base.BeginUpdate(result.Entity);
+            result.Entity.IsDisabled = true;
+            result.Entity.LiftedOn = DateTime.UtcNow;
+            result.Entity.LiftedById = entry.RequestedOnBehalfOfId;
 
             if (shouldSave) await base.CommitAsync();
 
-            return entity;
+            return Result<Ban>.FromSuccess(result.Entity);
         }
     }
 }

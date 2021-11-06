@@ -15,25 +15,25 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
-using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.DTOs.Request.Mute;
+using MikyM.Common.Application.Results;
+using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
 {
     public interface IDiscordMuteService
     {
-        Task<DiscordEmbed> MuteAsync(MuteReqDto req);
-        Task<DiscordEmbed> MuteAsync(ContextMenuContext ctx, MuteReqDto req);
-        Task<DiscordEmbed> MuteAsync(InteractionContext ctx, MuteReqDto req);
-        Task<DiscordEmbed> UnmuteAsync(MuteDisableReqDto req);
-        Task<DiscordEmbed> UnmuteAsync(ContextMenuContext ctx, MuteDisableReqDto req);
-        Task<DiscordEmbed> UnmuteAsync(InteractionContext ctx, MuteDisableReqDto req);
-        Task<DiscordEmbed> GetSpecificUserGuildMuteAsync(MuteGetReqDto req);
-        Task<DiscordEmbed> GetSpecificUserGuildMuteAsync(InteractionContext ctx, MuteGetReqDto req);
-        Task<DiscordEmbed> GetSpecificUserGuildMuteAsync(ContextMenuContext ctx, MuteGetReqDto req);
-        Task UnmuteCheckAsync();
+        Task<Result<DiscordEmbed>> MuteAsync(MuteReqDto req);
+        Task<Result<DiscordEmbed>> MuteAsync(ContextMenuContext ctx, MuteReqDto req);
+        Task<Result<DiscordEmbed>> MuteAsync(InteractionContext ctx, MuteReqDto req);
+        Task<Result<DiscordEmbed>> UnmuteAsync(MuteDisableReqDto req);
+        Task<Result<DiscordEmbed>> UnmuteAsync(ContextMenuContext ctx, MuteDisableReqDto req);
+        Task<Result<DiscordEmbed>> UnmuteAsync(InteractionContext ctx, MuteDisableReqDto req);
+        Task<Result<DiscordEmbed>> GetSpecificUserGuildMuteAsync(MuteGetReqDto req);
+        Task<Result<DiscordEmbed>> GetSpecificUserGuildMuteAsync(InteractionContext ctx, MuteGetReqDto req);
+        Task<Result<DiscordEmbed>> GetSpecificUserGuildMuteAsync(ContextMenuContext ctx, MuteGetReqDto req);
+        Task<Result> UnmuteCheckAsync();
     }
 }

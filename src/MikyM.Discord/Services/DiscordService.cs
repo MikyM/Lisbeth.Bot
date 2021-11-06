@@ -594,7 +594,7 @@ namespace MikyM.Discord.Services
 
             #endregion
 
-            #region Message
+            #region message
 
             Client.MessageCreated += async (sender, args) =>
             {
@@ -604,7 +604,7 @@ namespace MikyM.Discord.Services
                 if (args.Guild is not null) workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
                 workScope.Span.SetTag("Channel.Id", args.Channel.Id.ToString());
                 workScope.Span.SetTag("Author.Id", args.Author.Id.ToString());
-                workScope.Span.SetTag("Message.Id", args.Message.Id.ToString());
+                workScope.Span.SetTag("message.Id", args.Message.Id.ToString());
 
                 using var scope = ServiceProvider.CreateScope();
 
@@ -618,7 +618,7 @@ namespace MikyM.Discord.Services
                     .IgnoreActiveSpan()
                     .StartActive(true);
                 workScope.Span.SetTag("Channel.Id", args.Channel.Id.ToString());
-                workScope.Span.SetTag("Message.Id", args.Message.Id.ToString());
+                workScope.Span.SetTag("message.Id", args.Message.Id.ToString());
 
                 using var scope = ServiceProvider.CreateScope();
 
@@ -634,7 +634,7 @@ namespace MikyM.Discord.Services
                 if (args.Guild is not null) workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
                 workScope.Span.SetTag("Channel.Id", args.Channel.Id.ToString());
                 workScope.Span.SetTag("Author.Id", args.Author.Id.ToString());
-                workScope.Span.SetTag("Message.Id", args.Message.Id.ToString());
+                workScope.Span.SetTag("message.Id", args.Message.Id.ToString());
 
                 using var scope = ServiceProvider.CreateScope();
 
@@ -649,7 +649,7 @@ namespace MikyM.Discord.Services
                     .StartActive(true);
                 if (args.Guild is not null) workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
                 workScope.Span.SetTag("Channel.Id", args.Channel.Id.ToString());
-                workScope.Span.SetTag("Message.Id", args.Message.Id.ToString());
+                workScope.Span.SetTag("message.Id", args.Message.Id.ToString());
 
                 using var scope = ServiceProvider.CreateScope();
 
@@ -673,7 +673,7 @@ namespace MikyM.Discord.Services
 
             #endregion
 
-            #region Message Reaction
+            #region message Reaction
 
             Client.MessageReactionAdded += async (sender, args) =>
             {
@@ -683,7 +683,7 @@ namespace MikyM.Discord.Services
                 workScope.Span.SetTag("Guild.Id", args.Guild.Id);
                 workScope.Span.SetTag("Channel.Id", args.Channel.Id);
                 workScope.Span.SetTag("User.Id", args.User.Id);
-                workScope.Span.SetTag("Message.Id", args.Message.Id);
+                workScope.Span.SetTag("message.Id", args.Message.Id);
 
                 using var scope = ServiceProvider.CreateScope();
 
@@ -699,7 +699,7 @@ namespace MikyM.Discord.Services
                 workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
                 workScope.Span.SetTag("Channel.Id", args.Channel.Id.ToString());
                 workScope.Span.SetTag("User.Id", args.User.Id.ToString());
-                workScope.Span.SetTag("Message.Id", args.Message.Id.ToString());
+                workScope.Span.SetTag("message.Id", args.Message.Id.ToString());
 
                 using var scope = ServiceProvider.CreateScope();
 
@@ -714,7 +714,7 @@ namespace MikyM.Discord.Services
                     .StartActive(true);
                 workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
                 workScope.Span.SetTag("Channel.Id", args.Channel.Id.ToString());
-                workScope.Span.SetTag("Message.Id", args.Message.Id.ToString());
+                workScope.Span.SetTag("message.Id", args.Message.Id.ToString());
 
                 using var scope = ServiceProvider.CreateScope();
 
@@ -729,7 +729,7 @@ namespace MikyM.Discord.Services
                     .StartActive(true);
                 workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
                 workScope.Span.SetTag("Channel.Id", args.Channel.Id.ToString());
-                workScope.Span.SetTag("Message.Id", args.Message.Id.ToString());
+                workScope.Span.SetTag("message.Id", args.Message.Id.ToString());
                 workScope.Span.SetTag("Emoji.Id", args.Emoji.Id.ToString());
 
                 using var scope = ServiceProvider.CreateScope();

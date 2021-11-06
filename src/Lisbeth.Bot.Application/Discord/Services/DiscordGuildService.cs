@@ -199,8 +199,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
             embed.AddField("Moderation category", moderationCat.Mention);
             embed.AddField("Moderation log channel", moderationChannelLog.Mention);
             embed.AddField("Member log channel", memberEventsLogChannel.Mention);
-            embed.AddField("Message edited log channel", messageEditLogChannel.Mention);
-            embed.AddField("Message deleted channel", messageDeleteLogChannel.Mention);
+            embed.AddField("message edited log channel", messageEditLogChannel.Mention);
+            embed.AddField("message deleted channel", messageDeleteLogChannel.Mention);
             embed.AddField("Muted role", mutedRole.Mention);
             embed.WithFooter($"Lisbeth configuration requested by {requestingMember.GetFullDisplayName()} | Id: {requestingMember.Id}");
 
@@ -434,8 +434,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
                         embed.AddField("Moderation category", newModerationCat.Mention);
                         if (newModerationLogChannel is not null) embed.AddField("Moderation log channel", newModerationLogChannel.Mention);
                         if (newMemberEventsLogChannel is not null) embed.AddField("Member log channel", newMemberEventsLogChannel.Mention);
-                        if (newMessageUpdatedEventsLogChannel is not null) embed.AddField("Message edited log channel", newMessageUpdatedEventsLogChannel.Mention);
-                        if (newMessageDeletedEventsLogChannel is not null) embed.AddField("Message deleted channel", newMessageDeletedEventsLogChannel.Mention);
+                        if (newMessageUpdatedEventsLogChannel is not null) embed.AddField("message edited log channel", newMessageUpdatedEventsLogChannel.Mention);
+                        if (newMessageDeletedEventsLogChannel is not null) embed.AddField("message deleted channel", newMessageDeletedEventsLogChannel.Mention);
                         if (newMuteRole is not null) embed.AddField("Muted role", newMuteRole.Mention);
                     }
                     else

@@ -17,20 +17,14 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using JetBrains.Annotations;
-using MikyM.Common.DataAccessLayer.Results.Errors.Bases;
 
-namespace MikyM.Common.DataAccessLayer.Results.Errors
+namespace MikyM.Common.Application.Results.Errors
 {
     /// <summary>
-    /// Represents an error arising from an argument being outside of an expected range.
+    /// Represents an error raised when an attempt to perform an invalid operation is made.
     /// </summary>
-    /// <param name="Name">The name of the argument.</param>
-    /// <param name="Message">The error message.</param>
-    /// <remarks>Used in place of <see cref="ArgumentOutOfRangeException"/>.</remarks>
-    public record ArgumentOutOfRangeError
-    (
-        [InvokerParameterName] string Name,
-        string Message = "Value was outside of the expected range"
-    ) : ArgumentError(Name, Message);
+    /// <param name="message">The error message.</param>
+    /// <remarks>Used in place of <see cref="InvalidOperationException"/>.</remarks>
+    public record InvalidOperationError(string message = "The requested operation is invalid.")
+        : ResultError(message);
 }

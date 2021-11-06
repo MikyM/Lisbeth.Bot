@@ -43,7 +43,7 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
             long count,
             [Option("user", "User to target prune at")]
             DiscordUser user = null,
-            [Option("id", "Message id to prune to")]
+            [Option("id", "message id to prune to")]
             long id = 0,
             [Option("reason", "Reason for ban")] string reason = "No reason provided")
         {

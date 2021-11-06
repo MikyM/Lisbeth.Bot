@@ -16,29 +16,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using JetBrains.Annotations;
-
-namespace MikyM.Common.DataAccessLayer.Results
+namespace MikyM.Common.Application.Results.Errors
 {
     /// <summary>
-    /// Represents the public API of an interface.
+    /// Represents a failure to find something that was searched for.
     /// </summary>
-    [PublicAPI]
-    public interface IResult
-    {
-        /// <summary>
-        /// Gets a value indicating whether the result was successful.
-        /// </summary>
-        bool IsSuccess { get; }
-
-        /// <summary>
-        /// Gets the error, if any.
-        /// </summary>
-        IResultError? Error { get; }
-
-        /// <summary>
-        /// Gets the inner result, if any.
-        /// </summary>
-        IResult? Inner { get; }
-    }
+    /// <param name="message">The custom message to provide.</param>
+    public record NotFoundError(string message = "The searched-for entity was not found.") : ResultError(message);
 }

@@ -134,7 +134,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 }
                 catch (Exception)
                 {
-                    throw new ArgumentException($"Message with Id: {req.MessageId} doesn't exist.");
+                    throw new ArgumentException($"message with Id: {req.MessageId} doesn't exist.");
                 }
 
             if (logChannelId != 0)
@@ -248,8 +248,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
         {
             if (args is null) throw new ArgumentNullException(nameof(args));
 
-            if (args.Author.IsBot || args.MessageBefore.Content == args.Message.Content &&
-                args.MessageBefore.Attachments.Count == args.Message.Attachments.Count) return;
+            if (args.Author.IsBot || args.MessageBefore.Content == args.message.Content &&
+                args.MessageBefore.Attachments.Count == args.message.Attachments.Count) return;
 
             var res = await _guildService.GetBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithModerationSpecifications(args.Guild.Id));
@@ -265,12 +265,12 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (logChannel is null) return;
 
             string oldContent = args.MessageBefore.Content;
-            string newContent = args.Message.Content;
+            string newContent = args.message.Content;
             string oldAttachmentsString = "No attachments";
             string newAttachmentsString = "No attachments";
 
             var oldAttachments = args.MessageBefore.Attachments;
-            var newAttachments = args.Message.Attachments;
+            var newAttachments = args.message.Attachments;
 
             List<string> oldAttachmentUrls = oldAttachments.Select(attachment => attachment.ProxyUrl).ToList();
             List<string> newAttachmentUrls = newAttachments.Select(attachment => attachment.ProxyUrl).ToList();
@@ -284,17 +284,17 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (newContent == "") newContent = "No content";
 
             var embed = new DiscordEmbedBuilder();
-            embed.WithTitle("Message has been edited");
+            embed.WithTitle("message has been edited");
             embed.WithThumbnail(args.Author.AvatarUrl);
             embed.AddField("Author", $"{args.Author.GetFullUsername()}", true);
-            embed.AddField("Author mention", $"{args.Message.Author.Mention}", true);
+            embed.AddField("Author mention", $"{args.message.Author.Mention}", true);
             embed.AddField("Channel", $"{args.Channel.Mention}", true);
-            embed.AddField("Date sent", $"{args.Message.Timestamp}");
+            embed.AddField("Date sent", $"{args.message.Timestamp}");
             embed.AddField("Old content", oldContent);
             embed.AddField("Old attachments", oldAttachmentsString);
             embed.AddField("New content", newContent);
             embed.AddField("New attachments", newAttachmentsString);
-            embed.WithFooter($"Message Id: {args.Message.Id} || Author Id: {args.Message.Author.Id}");
+            embed.WithFooter($"message Id: {args.message.Id} || Author Id: {args.message.Author.Id}");
             embed.WithColor(new DiscordColor(guild.EmbedHexColor));
 
             try
@@ -311,7 +311,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
         {
             if (args is null) throw new ArgumentNullException(nameof(args));
 
-            if (args.Message.Author.IsBot) return;
+            if (args.message.Author.IsBot) return;
 
             var res = await _guildService.GetBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithModerationSpecifications(args.Guild.Id));
@@ -326,10 +326,10 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             if (logChannel is null) return;
 
-            string content = args.Message.Content;
+            string content = args.message.Content;
             string attachmentsString = "No attachments";
-            var attachments = args.Message.Attachments;
-            DiscordUser deletedBy = args.Message.Author;
+            var attachments = args.message.Attachments;
+            DiscordUser deletedBy = args.message.Author;
 
             await Task.Delay(500);
 
@@ -343,7 +343,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (filtered.Count() != 0)
             {
                 var deletedLog = (DiscordAuditLogMessageEntry) filtered[0];
-                if (deletedLog.Channel == args.Channel && args.Message.Author.Id == deletedLog.Target.Id)
+                if (deletedLog.Channel == args.Channel && args.message.Author.Id == deletedLog.Target.Id)
                     deletedBy = deletedLog.UserResponsible;
             }
 
@@ -354,25 +354,25 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             var embed = new DiscordEmbedBuilder();
 
-            embed.WithThumbnail(args.Message.Author.AvatarUrl);
-            embed.AddField("Author", $"{args.Message.Author.GetFullUsername()}", true);
-            embed.AddField("Author mention", $"{args.Message.Author.Mention}", true);
+            embed.WithThumbnail(args.message.Author.AvatarUrl);
+            embed.AddField("Author", $"{args.message.Author.GetFullUsername()}", true);
+            embed.AddField("Author mention", $"{args.message.Author.Mention}", true);
             embed.AddField("Channel", $"{args.Channel.Mention}", true);
             if (filteredBans.Count() != 0)
             {
-                embed.WithTitle("Message has been deleted due to ban prune");
+                embed.WithTitle("message has been deleted due to ban prune");
                 embed.AddField("Deleted by", $"{filteredBans[0].UserResponsible.Mention}");
             }
             else
             {
-                embed.WithTitle("Message has been deleted");
+                embed.WithTitle("message has been deleted");
                 embed.AddField("Deleted by", $"{deletedBy.Mention}");
             }
 
-            embed.AddField("Date sent", $"{args.Message.Timestamp}");
+            embed.AddField("Date sent", $"{args.message.Timestamp}");
             embed.AddField("Content", content);
             embed.AddField("Attachments", attachmentsString);
-            embed.WithFooter($"Message Id: {args.Message.Id} || Author Id: {args.Message.Author.Id}");
+            embed.WithFooter($"message Id: {args.message.Id} || Author Id: {args.message.Author.Id}");
             embed.WithColor(new DiscordColor(guild.EmbedHexColor));
 
             try
@@ -435,24 +435,24 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
                 if (filtered.Count() != 0)
                 {
-                    embed.WithTitle("Message has been deleted due to ban prune");
+                    embed.WithTitle("message has been deleted due to ban prune");
                     embed.AddField("Pruned by", $"{filtered[0].UserResponsible.Mention}");
                 }
                 else if (filteredBulk.Count() != 0)
                 {
-                    embed.WithTitle("Message has been deleted via prune command");
+                    embed.WithTitle("message has been deleted via prune command");
                     embed.AddField("Pruned by", $"{filteredBulk[0].UserResponsible.Mention}");
                 }
                 else
                 {
-                    embed.WithTitle("Message has been deleted in a bulk deletion action");
+                    embed.WithTitle("message has been deleted in a bulk deletion action");
                     embed.AddField("Pruned by", "Unknown");
                 }
 
                 embed.AddField("Date sent", $"{msg.Timestamp}");
                 embed.AddField("Content", content);
                 embed.AddField("Attachments", attachmentsString);
-                embed.WithFooter($"Message ID: {msg.Id} || Author ID: {msg.Author.Id}");
+                embed.WithFooter($"message ID: {msg.Id} || Author ID: {msg.Author.Id}");
                 embed.WithColor(new DiscordColor(guild.EmbedHexColor));
 
                 try

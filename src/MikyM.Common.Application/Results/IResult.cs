@@ -16,41 +16,29 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using JetBrains.Annotations;
 
-namespace MikyM.Common.DataAccessLayer.Results.Errors
+namespace MikyM.Common.Application.Results
 {
     /// <summary>
-    /// Represents an error caused by an exception.
+    /// Represents the public API of an interface.
     /// </summary>
     [PublicAPI]
-    public sealed record ExceptionError : ResultError
+    public interface IResult
     {
         /// <summary>
-        /// Gets the exception that caused the error.
+        /// Gets a value indicating whether the result was successful.
         /// </summary>
-        public Exception Exception { get; }
+        bool IsSuccess { get; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ExceptionError"/> class.
+        /// Gets the error, if any.
         /// </summary>
-        /// <param name="exception">The exception that caused the error.</param>
-        public ExceptionError(Exception exception)
-            : base(exception.Message)
-        {
-            this.Exception = exception;
-        }
+        IResultError? Error { get; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ExceptionError"/> class.
+        /// Gets the inner result, if any.
         /// </summary>
-        /// <param name="exception">The exception that caused the error.</param>
-        /// <param name="message">The custom human-readable error message.</param>
-        public ExceptionError(Exception exception, string message)
-            : base(message)
-        {
-            this.Exception = exception;
-        }
+        IResult? Inner { get; }
     }
 }

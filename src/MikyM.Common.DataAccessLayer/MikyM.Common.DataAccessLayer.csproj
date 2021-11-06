@@ -16,7 +16,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Results\" />
     <Folder Include="Specifications\Builders\" />
   </ItemGroup>
 

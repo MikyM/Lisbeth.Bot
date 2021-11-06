@@ -1,6 +1,5 @@
-// This file is part of Lisbeth.Bot project
+﻿// This file is part of Lisbeth.Bot project
 //
-// Copyright (C) 2017 Jarl Gullberg
 // Copyright (C) 2021 Krzysztof Kupisz - MikyM
 // 
 // This program is free software: you can redistribute it and/or modify
@@ -16,11 +15,19 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace MikyM.Common.DataAccessLayer.Results.Errors
+using MikyM.Common.Application.Results;
+
+namespace Lisbeth.Bot.Application.Results
 {
     /// <summary>
-    /// Represents a failure to find something that was searched for.
+    /// Represents a perform an action due to authorization.
     /// </summary>
-    /// <param name="Message">The custom message to provide.</param>
-    public record NotFoundError(string Message = "The searched-for entity was not found.") : ResultError(Message);
+    public record DisabledEntityError : ResultError
+    {
+        /// <summary>
+        /// Represents a perform an action due to authorization.
+        /// </summary>
+        /// <param name="entityTypeName">Type of the entity that's disabled.</param>
+        public DisabledEntityError(string entityTypeName) : base($"Found {entityTypeName} entity is disabled (deleted).") { }
+    }
 }

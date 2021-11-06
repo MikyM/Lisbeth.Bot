@@ -1,6 +1,5 @@
-// This file is part of Lisbeth.Bot project
+﻿// This file is part of Lisbeth.Bot project
 //
-// Copyright (C) 2017 Jarl Gullberg
 // Copyright (C) 2021 Krzysztof Kupisz - MikyM
 // 
 // This program is free software: you can redistribute it and/or modify
@@ -17,20 +16,15 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using JetBrains.Annotations;
-using MikyM.Common.DataAccessLayer.Results.Errors.Bases;
+using MikyM.Common.Application.Results;
 
-namespace MikyM.Common.DataAccessLayer.Results.Errors
+namespace Lisbeth.Bot.Application.Results
 {
     /// <summary>
-    /// Represents an error arising from an argument being null.
+    /// Represents an error raised when an attempt to perform an invalid operation is made.
     /// </summary>
-    /// <param name="Name">The name of the argument.</param>
     /// <param name="Message">The error message.</param>
-    /// <remarks>Used in place of <see cref="ArgumentNullException"/>.</remarks>
-    public record ArgumentNullError
-    (
-        [InvokerParameterName] string Name,
-        string Message = "Value may not be null"
-    ) : ArgumentError(Name, Message);
+    /// <remarks>Used in place of <see cref="InvalidOperationException"/>.</remarks>
+    public record DiscordInvalidOperationError(string Message = "The requested operation is invalid.")
+        : ResultError(Message);
 }

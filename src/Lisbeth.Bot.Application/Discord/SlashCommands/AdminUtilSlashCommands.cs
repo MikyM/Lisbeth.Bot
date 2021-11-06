@@ -215,7 +215,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     Title = "Execution failed",
                     Description =
                         string.Concat("Execution failed after ", sw2.ElapsedMilliseconds.ToString("#,##0"),
-                            "ms with `", rex.GetType(), ": ", rex.Message, "`."),
+                            "ms with `", rex.GetType(), ": ", rex.message, "`."),
                     Color = new DiscordColor(0xD091B2)
                 };
                 await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));

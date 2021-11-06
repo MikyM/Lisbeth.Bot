@@ -1,5 +1,6 @@
-﻿// This file is part of Lisbeth.Bot project
+// This file is part of Lisbeth.Bot project
 //
+// Copyright (C) 2017 Jarl Gullberg
 // Copyright (C) 2021 Krzysztof Kupisz - MikyM
 // 
 // This program is free software: you can redistribute it and/or modify
@@ -15,16 +16,21 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using JetBrains.Annotations;
+using MikyM.Common.Application.Results.Errors.Bases;
 
-namespace Lisbeth.Bot.Application.Discord.ContextMenus
+namespace MikyM.Common.Application.Results.Errors
 {
-    // Menus for bans
-    [UsedImplicitly]
-    public class BanApplicationCommands
-    {
-        //For user commands
-
-        //For message commands
-    }
+    /// <summary>
+    /// Represents an error arising from an argument being outside of an expected range.
+    /// </summary>
+    /// <param name="Name">The name of the argument.</param>
+    /// <param name="message">The error message.</param>
+    /// <remarks>Used in place of <see cref="ArgumentOutOfRangeException"/>.</remarks>
+    public record ArgumentOutOfRangeError
+    (
+        [InvokerParameterName] string Name,
+        string message = "Value was outside of the expected range"
+    ) : ArgumentError(Name, message);
 }

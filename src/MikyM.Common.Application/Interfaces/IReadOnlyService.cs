@@ -18,6 +18,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using MikyM.Common.Application.Results;
 using MikyM.Common.DataAccessLayer.Filters;
 using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Common.Domain.Entities;
@@ -27,19 +28,19 @@ namespace MikyM.Common.Application.Interfaces
     public interface IReadOnlyService<TEntity, TContext> : IServiceBase<TContext>
         where TEntity : AggregateRootEntity where TContext : DbContext
     {
-        Task<TGetResult> GetAsync<TGetResult>(long id) where TGetResult : class;
+        Task<Result<TGetResult>> GetAsync<TGetResult>(long id) where TGetResult : class;
 
-        Task<TGetResult> GetSingleBySpecAsync<TGetResult>(ISpecification<TEntity> specification = null)
+        Task<Result<TGetResult>> GetSingleBySpecAsync<TGetResult>(ISpecification<TEntity> specification)
             where TGetResult : class;
 
-        //Task<IReadOnlyList<TGetResult>> GetSingleBySpecAsync<TGetResult>(ISpecification<TEntity> specification = null) where TGetResult : class;
-
-        Task<IReadOnlyList<TGetResult>> GetBySpecAsync<TGetResult>(ISpecification<TEntity> specification = null)
+        Task<Result<IReadOnlyList<TGetResult>>> GetBySpecAsync<TGetResult>(ISpecification<TEntity> specification)
             where TGetResult : class;
 
-        Task<IReadOnlyList<TGetResult>> GetBySpecAsync<TGetResult>(PaginationFilterDto filter,
-            ISpecification<TEntity> specification = null) where TGetResult : class;
+        Task<Result<IReadOnlyList<TGetResult>>> GetBySpecAsync<TGetResult>(PaginationFilterDto filter,
+            ISpecification<TEntity> specification) where TGetResult : class;
 
-        Task<long> LongCountAsync(ISpecification<TEntity> specification = null);
+        Task<Result<IReadOnlyList<TGetResult>>> GetAnyAsync<TGetResult>(PaginationFilterDto? filter = null) where TGetResult : class;
+
+        Task<Result<long>> LongCountAsync(ISpecification<TEntity>? specification = null);
     }
 }

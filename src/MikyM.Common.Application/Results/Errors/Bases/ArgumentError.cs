@@ -16,13 +16,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using JetBrains.Annotations;
 
-#pragma warning disable CS1591
-
-namespace MikyM.Common.DataAccessLayer.Results
+namespace MikyM.Common.Application.Results.Errors.Bases
 {
     /// <summary>
-    /// Acts as a base class for result errors.
+    /// Represents an error arising from an argument to a function.
     /// </summary>
-    public abstract record ResultError(string Message) : IResultError;
+    /// <param name="Name">The name of the argument.</param>
+    /// <param name="message">The error message.</param>
+    /// <remarks>Used in place of <see cref="ArgumentException"/>.</remarks>
+    public abstract record ArgumentError([InvokerParameterName] string Name, string message)
+        : ResultError($"Error in argument {Name}: {message}");
 }

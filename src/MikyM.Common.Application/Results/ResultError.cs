@@ -16,19 +16,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using JetBrains.Annotations;
 
-namespace MikyM.Common.DataAccessLayer.Results
+#pragma warning disable CS1591
+
+namespace MikyM.Common.Application.Results
 {
     /// <summary>
-    /// Represents an error returned by a result.
+    /// Acts as a base class for result errors.
     /// </summary>
-    [PublicAPI]
-    public interface IResultError
-    {
-        /// <summary>
-        /// Gets the human-readable error message.
-        /// </summary>
-        string Message { get; }
-    }
+    public abstract record ResultError(string message) : IResultError;
 }

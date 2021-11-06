@@ -73,7 +73,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
 
             await ctx.Channel.SendMessageAsync(builder);
             await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
-                .WithContent("Message sent successfully").AsEphemeral(true));
+                .WithContent("message sent successfully").AsEphemeral(true));
         }
 
         [UsedImplicitly]

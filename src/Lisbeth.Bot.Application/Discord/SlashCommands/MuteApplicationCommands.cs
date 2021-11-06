@@ -15,8 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
@@ -25,18 +23,20 @@ using FluentValidation;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Application.Discord.SlashCommands;
+using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
 using Lisbeth.Bot.Application.Extensions;
-using Lisbeth.Bot.Application.Validation;
 using Lisbeth.Bot.Application.Validation.Mute;
-using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.DTOs.Request.Mute;
+using MikyM.Common.Application.Results;
+using System;
+using System.Threading.Tasks;
 
 // ReSharper disable once CheckNamespace
 namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
 {
     [SlashModuleLifespan(SlashModuleLifespan.Transient)]
     [UsedImplicitly]
-    public partial class MuteApplicationCommands : ApplicationCommandModule
+    public partial class MuteApplicationCommands : ExtendedApplicationCommandModule
     {
         // ReSharper disable once InconsistentNaming
         public IDiscordMuteService _discordMuteService { private get; set; }
@@ -55,7 +55,7 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
-            DiscordEmbed embed;
+            Result<DiscordEmbed> result;
 
             switch (actionType)
             {
@@ -69,28 +69,34 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
                     var muteReqValidator = new MuteReqValidator(ctx.Client);
                     await muteReqValidator.ValidateAndThrowAsync(muteReq);
 
-                    embed = await _discordMuteService.MuteAsync(ctx, muteReq);
+                    result = await _discordMuteService.MuteAsync(ctx, muteReq);
                     break;
                 case MuteActionType.Remove:
                     var muteDisableReq = new MuteDisableReqDto(user.Id, ctx.Guild.Id, ctx.User.Id);
                     var muteDisableReqValidator = new MuteDisableReqValidator(ctx.Client);
                     await muteDisableReqValidator.ValidateAndThrowAsync(muteDisableReq);
 
-                    embed = await _discordMuteService.UnmuteAsync(ctx, muteDisableReq);
+                    result = await _discordMuteService.UnmuteAsync(ctx, muteDisableReq);
                     break;
                 case MuteActionType.Get:
                     var muteGetReq = new MuteGetReqDto(ctx.User.Id, null, user.Id, ctx.Guild.Id);
                     var muteGetReqValidator = new MuteGetReqValidator(ctx.Client);
                     await muteGetReqValidator.ValidateAndThrowAsync(muteGetReq);
 
-                    embed = await _discordMuteService.GetSpecificUserGuildMuteAsync(ctx, muteGetReq);
+                    result = await _discordMuteService.GetSpecificUserGuildMuteAsync(ctx, muteGetReq);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(actionType), actionType, null);
             }
 
-            await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(embed)
-                .AsEphemeral(true));
+            if (result.IsSuccess)
+                await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                    .AddEmbed(result.Entity)
+                    .AsEphemeral(true));
+            else
+                await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                    .AddEmbed(base.GetUnsuccessfulResultEmbed(result, ctx.Client))
+                    .AsEphemeral(true));
         }
     }
 }

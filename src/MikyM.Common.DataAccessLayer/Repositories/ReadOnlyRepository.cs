@@ -39,18 +39,18 @@ namespace MikyM.Common.DataAccessLayer.Repositories
             _specificationEvaluator = specificationEvaluator;
         }
 
-        public virtual async ValueTask<TEntity> GetAsync(params object[] keyValues)
+        public virtual async ValueTask<TEntity?> GetAsync(params object[] keyValues)
         {
-            return await _context.Set<TEntity>().FindAsync(keyValues);
+            return await (_context.Set<TEntity>().FindAsync(keyValues));
         }
 
-        public virtual async Task<TEntity> GetSingleBySpecAsync(ISpecification<TEntity> specification)
+        public virtual async Task<TEntity?> GetSingleBySpecAsync(ISpecification<TEntity> specification)
         {
             return await ApplySpecification(specification)
                 .FirstOrDefaultAsync();
         }
 
-        public virtual async Task<TProjectTo> GetSingleBySpecAsync<TProjectTo>(
+        public virtual async Task<TProjectTo?> GetSingleBySpecAsync<TProjectTo>(
             ISpecification<TEntity, TProjectTo> specification) where TProjectTo : class
         {
             return await ApplySpecification(specification)
@@ -98,13 +98,15 @@ namespace MikyM.Common.DataAccessLayer.Repositories
                 : specification.PostProcessingAction(result).ToList();
         }
 
-        public virtual async Task<long> LongCountAsync(ISpecification<TEntity> specification)
+        public virtual async Task<long> LongCountAsync(ISpecification<TEntity>? specification = null)
         {
+            if (specification is null) return await _context.Set<TEntity>().LongCountAsync();
+
             return await ApplySpecification(specification)
                 .LongCountAsync();
         }
 
-        public virtual async Task<IReadOnlyList<TEntity>> GetAny(PaginationFilter? filter = null)
+        public virtual async Task<IReadOnlyList<TEntity>> GetAnyAsync(PaginationFilter? filter = null)
         {
             return filter is null
                 ? await _context.Set<TEntity>().ToListAsync()

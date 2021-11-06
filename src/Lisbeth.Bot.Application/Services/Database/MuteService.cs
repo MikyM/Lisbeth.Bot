@@ -15,19 +15,20 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Threading.Tasks;
 using AutoMapper;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Services.Database.Interfaces;
 using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Mute;
-using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.DTOs.Request.Mute;
 using Lisbeth.Bot.Domain.Entities;
+using MikyM.Common.Application.Results;
+using MikyM.Common.Application.Results.Errors;
 using MikyM.Common.Application.Services;
 using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
+using System;
+using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Services.Database
 {
@@ -38,13 +39,19 @@ namespace Lisbeth.Bot.Application.Services.Database
         {
         }
 
-        public async Task<(long Id, Mute FoundEntity)> AddOrExtendAsync(MuteReqDto req, bool shouldSave = false)
+        public async Task<Result<(long Id, Mute? FoundEntity)>> AddOrExtendAsync(MuteReqDto req, bool shouldSave = false)
         {
             if (req is null) throw new ArgumentNullException(nameof(req));
 
-            var entity = await base.GetSingleBySpecAsync<Mute>(new Specification<Mute>(x =>
+            var result = await base.GetSingleBySpecAsync<Mute>(new Specification<Mute>(x =>
                 x.UserId == req.TargetUserId && x.GuildId == req.GuildId && !x.IsDisabled && !x.Guild.IsDisabled));
-            if (entity is null) return (await base.AddAsync(req, shouldSave), null);
+            if (!result.IsSuccess)
+            {
+                var partial = await base.AddAsync(req, shouldSave);
+                return Result<(long Id, Mute? FoundEntity)>.FromSuccess((partial.Entity, null));
+            }
+
+            var entity = result.Entity;
 
             if (entity.AppliedUntil > req.AppliedUntil) return (entity.Id, entity);
 
@@ -60,14 +67,16 @@ namespace Lisbeth.Bot.Application.Services.Database
             return (entity.Id, shallowCopy);
         }
 
-        public async Task<Mute> DisableAsync(MuteDisableReqDto entry, bool shouldSave = false)
+        public async Task<Result<Mute>> DisableAsync(MuteDisableReqDto entry, bool shouldSave = false)
         {
             if (entry is null) throw new ArgumentNullException(nameof(entry));
 
-            var entity =
+            var result =
                 await base.GetSingleBySpecAsync<Mute>(
                     new ActiveExpiredMutePerGuildSpec(entry.TargetUserId.Value, entry.GuildId.Value));
-            if (entity is null) return null;
+            if (!result.IsSuccess) return Result<Mute>.FromError(new NotFoundError());
+
+            var entity = result.Entity;
 
             base.BeginUpdate(entity);
             entity.IsDisabled = true;

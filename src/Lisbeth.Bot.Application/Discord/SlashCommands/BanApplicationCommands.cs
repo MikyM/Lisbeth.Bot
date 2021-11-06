@@ -15,8 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
@@ -24,17 +22,19 @@ using DSharpPlus.SlashCommands.Attributes;
 using FluentValidation;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
+using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
 using Lisbeth.Bot.Application.Extensions;
-using Lisbeth.Bot.Application.Validation;
 using Lisbeth.Bot.Application.Validation.Ban;
-using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.DTOs.Request.Ban;
+using MikyM.Common.Application.Results;
+using System;
+using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands
 {
     [SlashModuleLifespan(SlashModuleLifespan.Transient)]
     [UsedImplicitly]
-    public class BanApplicationCommands : ApplicationCommandModule
+    public class BanApplicationCommands : ExtendedApplicationCommandModule
     {
         [UsedImplicitly]
         // ReSharper disable once InconsistentNaming
@@ -51,7 +51,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
-            DiscordEmbed embed;
+            Result<DiscordEmbed> result;
 
             if (user is null && id == "") throw new ArgumentException("You must supply either a user or a user Id");
 
@@ -70,7 +70,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     var banReqValidator = new BanReqValidator(ctx.Client);
                     await banReqValidator.ValidateAndThrowAsync(banReq);
 
-                    embed = await _discordBanService.BanAsync(ctx, banReq);
+                    result = await _discordBanService.BanAsync(ctx, banReq);
                     break;
                 case BanActionType.Remove:
                     if (id == "") throw new ArgumentException("You must supply an Id of the user to unban.");
@@ -79,20 +79,26 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     var banDisableReqValidator = new BanDisableReqValidator(ctx.Client);
                     await banDisableReqValidator.ValidateAndThrowAsync(banDisableReq);
 
-                    embed = await _discordBanService.UnbanAsync(ctx, banDisableReq);
+                    result = await _discordBanService.UnbanAsync(ctx, banDisableReq);
                     break;
                 case BanActionType.Get:
                     var banGetReq = new BanGetReqDto(ctx.User.Id, null, validId, ctx.Guild.Id);
                     var banGetReqValidator = new BanGetReqValidator(ctx.Client);
                     await banGetReqValidator.ValidateAndThrowAsync(banGetReq);
-                    embed = await _discordBanService.GetSpecificUserGuildBanAsync(ctx, banGetReq);
+                    result = await _discordBanService.GetSpecificUserGuildBanAsync(ctx, banGetReq);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(actionType), actionType, null);
             }
 
-            await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(embed)
-                .AsEphemeral(true));
+            if (result.IsSuccess)
+                await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                    .AddEmbed(result.Entity)
+                    .AsEphemeral(true));
+            else
+                await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                    .AddEmbed(base.GetUnsuccessfulResultEmbed(result, ctx.Client))
+                    .AsEphemeral(true));
         }
     }
 }

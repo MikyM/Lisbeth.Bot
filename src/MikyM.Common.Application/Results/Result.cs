@@ -19,11 +19,11 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
-using MikyM.Common.DataAccessLayer.Results.Errors;
+using MikyM.Common.Application.Results.Errors;
 
 #pragma warning disable SA1402
 
-namespace MikyM.Common.DataAccessLayer.Results
+namespace MikyM.Common.Application.Results
 {
     /// <inheritdoc />
     [PublicAPI]
