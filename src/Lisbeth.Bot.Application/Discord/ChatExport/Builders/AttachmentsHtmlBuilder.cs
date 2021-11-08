@@ -26,16 +26,17 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders
 {
     public class AttachmentsHtmlBuilder : IAsyncHtmlBuilder
     {
+        public AttachmentsHtmlBuilder() { }
         public AttachmentsHtmlBuilder(IReadOnlyList<DiscordAttachment> attachments)
         {
             Attachments ??= attachments ?? throw new ArgumentNullException(nameof(attachments));
         }
 
-        public IReadOnlyList<DiscordAttachment> Attachments { get; private set; }
+        public IReadOnlyList<DiscordAttachment>? Attachments { get; private set; }
 
         public async Task<string> BuildAsync()
         {
-            if (Attachments.Count == 0) return "";
+            if (Attachments is null || Attachments.Count == 0) return "";
             List<DiscordAttachment> imageAttachments = Attachments
                 .Where(a => HtmlImage.SupportedTypes.Any(x => x == a.Url.Split('.').Last())).ToList();
             List<DiscordAttachment> videoAttachments = Attachments

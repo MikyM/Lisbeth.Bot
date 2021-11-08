@@ -15,19 +15,23 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
+using Lisbeth.Bot.Application.Enums;
+using Lisbeth.Bot.Application.Results;
 using Lisbeth.Bot.Application.Services.Database.Interfaces;
 using Lisbeth.Bot.DataAccessLayer.Specifications.RecurringReminder;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Reminder;
 using Lisbeth.Bot.Domain.Entities;
 using Lisbeth.Bot.Domain.Enums;
+using MikyM.Common.Application.Results;
+using MikyM.Common.Application.Results.Errors;
 using MikyM.Discord.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {
@@ -49,12 +53,12 @@ namespace Lisbeth.Bot.Application.Discord.Services
             _embedProvider = embedProvider;
         }
 
-        public async Task SendReminderAsync(long reminderId, ReminderType type)
+        public async Task<Result> SendReminderAsync(long reminderId, ReminderType type)
         {
             Guild guild;
-            EmbedConfig embedConfig;
-            string text;
-            List<string> mentions;
+            EmbedConfig? embedConfig;
+            string? text;
+            List<string>? mentions;
             DiscordChannel channel;
 
             switch (type)
@@ -62,20 +66,20 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 case ReminderType.Single:
                     var rem = await _reminderService.GetSingleBySpecAsync<Reminder>(
                         new ActiveReminderByIdWithEmbedSpec(reminderId));
-                    if (rem?.Guild.ReminderChannelId is null) return;
-                    guild = rem.Guild;
-                    embedConfig = rem.EmbedConfig;
-                    text = rem.Text;
-                    mentions = rem.Mentions;
+                    if (!rem.IsSuccess || rem.Entity.Guild?.ReminderChannelId is null) return Result.FromError(new NotFoundError());
+                    guild = rem.Entity.Guild;
+                    embedConfig = rem.Entity.EmbedConfig;
+                    text = rem.Entity.Text;
+                    mentions = rem.Entity.Mentions;
                     break;
                 case ReminderType.Recurring:
                     var recRem = await _recurringReminderService.GetSingleBySpecAsync<RecurringReminder>(
                         new ActiveRecurringReminderByIdWithEmbedSpec(reminderId));
-                    if (recRem?.Guild.ReminderChannelId is null) return;
-                    guild = recRem.Guild;
-                    embedConfig = recRem.EmbedConfig;
-                    text = recRem.Text;
-                    mentions = recRem.Mentions;
+                    if (!recRem.IsSuccess || recRem.Entity.Guild?.ReminderChannelId is null) return Result.FromError(new NotFoundError());
+                    guild = recRem.Entity.Guild;
+                    embedConfig = recRem.Entity.EmbedConfig;
+                    text = recRem.Entity.Text;
+                    mentions = recRem.Entity.Mentions;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
@@ -85,10 +89,10 @@ namespace Lisbeth.Bot.Application.Discord.Services
             {
                 channel = await _discord.Client.GetChannelAsync(guild.ReminderChannelId.Value);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // ignore
-                return;
+                return Result.FromError(new DiscordNotFoundError(DiscordEntityType.Channel));
             }
 
             if (embedConfig is not null)
@@ -96,6 +100,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     _embedProvider.ConfigureEmbed(embedConfig).Build()));
             else
                 await channel.SendMessageAsync(string.Join(' ', mentions + "\n\n" + text));
+
+            return Result.FromSuccess();
         }
     }
 }

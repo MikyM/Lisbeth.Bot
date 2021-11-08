@@ -24,5 +24,5 @@ namespace MikyM.Common.Application.Results
     /// <summary>
     /// Acts as a base class for result errors.
     /// </summary>
-    public abstract record ResultError(string message) : IResultError;
+    public abstract record ResultError(string Message) : IResultError;
 }

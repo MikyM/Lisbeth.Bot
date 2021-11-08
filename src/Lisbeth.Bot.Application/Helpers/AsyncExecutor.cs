@@ -21,6 +21,7 @@ using Autofac;
 using Lisbeth.Bot.Application.Extensions;
 using Microsoft.Extensions.Logging;
 
+#nullable disable
 // ReSharper disable UseAwaitUsing
 
 namespace Lisbeth.Bot.Application.Helpers

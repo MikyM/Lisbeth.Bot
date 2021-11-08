@@ -15,22 +15,34 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Linq;
 using DSharpPlus.Entities;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Domain.Entities;
+using MikyM.Common.Application.Results;
+using MikyM.Discord.Interfaces;
+using System;
+using System.Linq;
 
 namespace Lisbeth.Bot.Application.Discord.Helpers
 {
     public interface IDiscordEmbedProvider
     {
         DiscordEmbedBuilder ConfigureEmbed(EmbedConfig config);
+        DiscordEmbed GetUnsuccessfulResultEmbed(IResult result);
+        DiscordEmbed GetUnsuccessfulResultEmbed(IResultError error);
+        DiscordEmbed GetUnsuccessfulResultEmbed(string error);
     }
 
     [UsedImplicitly]
     public class DiscordEmbedProvider : IDiscordEmbedProvider
     {
+        private readonly IDiscordService _discord;
+
+        public DiscordEmbedProvider(IDiscordService discord)
+        {
+            _discord = discord;
+        }
+
         public DiscordEmbedBuilder ConfigureEmbed(EmbedConfig config)
         {
             if (config is null) throw new ArgumentNullException(nameof(config));
@@ -56,7 +68,7 @@ namespace Lisbeth.Bot.Application.Discord.Helpers
             if (!string.IsNullOrWhiteSpace(config.Title)) builder.WithTitle(config.Title);
 
             if (!string.IsNullOrWhiteSpace(config.Thumbnail))
-                builder.WithThumbnail(config.Thumbnail, config.ThumbnailHeight, config.ThumbnailWidth);
+                builder.WithThumbnail(config.Thumbnail, config.ThumbnailHeight ?? throw new InvalidOperationException(), config.ThumbnailWidth ?? throw new InvalidOperationException());
 
             if (config.Fields is null || config.Fields.Count == 0) return builder;
 
@@ -65,6 +77,20 @@ namespace Lisbeth.Bot.Application.Discord.Helpers
                 builder.AddField(field.Title, field.Text);
 
             return builder;
+        }
+
+        public DiscordEmbed GetUnsuccessfulResultEmbed(IResult result) =>
+            this.GetUnsuccessfulResultEmbed(result.Error ?? throw new InvalidOperationException("Given result does not contain an error"));
+
+        public DiscordEmbed GetUnsuccessfulResultEmbed(IResultError error) =>
+            this.GetUnsuccessfulResultEmbed(error.Message);
+
+        public DiscordEmbed GetUnsuccessfulResultEmbed(string error)
+        {
+            return new DiscordEmbedBuilder().WithColor(new DiscordColor(170, 1, 20))
+                .WithAuthor($"{DiscordEmoji.FromName(_discord.Client, ":x:")} Operation errored")
+                .AddField("Message", error)
+                .Build();
         }
     }
 }

@@ -19,11 +19,12 @@ using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Domain.Entities.Base;
+using MikyM.Common.Application.Results;
 
 namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
 {
     public interface IDiscordEmbedConfiguratorService<T> where T : EmbedConfigEntity
     {
-        Task<(DiscordEmbed Embed, bool IsSuccess)> ConfigureAsync(InteractionContext ctx, string idOrName);
+        Task<Result<DiscordEmbed>> ConfigureAsync(InteractionContext ctx, string idOrName);
     }
 }

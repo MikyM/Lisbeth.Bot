@@ -23,29 +23,29 @@ namespace Lisbeth.Bot.Domain.Entities
 {
     public sealed class EmbedConfig : SnowflakeEntity
     {
-        public string Author { get; set; }
-        public string AuthorUrl { get; set; }
-        public string Footer { get; set; }
-        public string ImageUrl { get; set; }
-        public string FooterImageUrl { get; set; }
-        public string AuthorImageUrl { get; set; }
-        public string Description { get; set; }
-        public string Thumbnail { get; set; }
-        public int ThumbnailHeight { get; set; }
-        public int ThumbnailWidth { get; set; }
-        public string Title { get; set; }
+        public string? Author { get; set; }
+        public string? AuthorUrl { get; set; }
+        public string? Footer { get; set; }
+        public string? ImageUrl { get; set; }
+        public string? FooterImageUrl { get; set; }
+        public string? AuthorImageUrl { get; set; }
+        public string? Description { get; set; }
+        public string? Thumbnail { get; set; }
+        public int? ThumbnailHeight { get; set; }
+        public int? ThumbnailWidth { get; set; }
+        public string? Title { get; set; }
         public ulong CreatorId { get; set; }
         public ulong LastEditById { get; set; }
         public DateTime? Timestamp { get; set; }
         public string HexColor { get; set; } = "#7d7d7d";
-        public List<DiscordField> Fields { get; set; }
+        public List<DiscordField>? Fields { get; set; }
 
-        public Reminder Reminder { get; set; }
-        public RecurringReminder RecurringReminder { get; set; }
-        public Tag Tag { get; set; }
-        public RoleMenu RoleMenu { get; set; }
-        public TicketingConfig TicketingConfigWithCenterMessage { get; set; }
-        public TicketingConfig TicketingConfigWithWelcomeMessage { get; set; }
-        public ModerationConfig ModerationConfig { get; set; }
+        public Reminder? Reminder { get; set; }
+        public RecurringReminder? RecurringReminder { get; set; }
+        public Tag? Tag { get; set; }
+        public RoleMenu? RoleMenu { get; set; }
+        public TicketingConfig? TicketingConfigWithCenterMessage { get; set; }
+        public TicketingConfig? TicketingConfigWithWelcomeMessage { get; set; }
+        public ModerationConfig? ModerationConfig { get; set; }
     }
 }

@@ -29,6 +29,6 @@ namespace MikyM.Common.Application.Results
         /// <summary>
         /// Gets the human-readable error message.
         /// </summary>
-        string message { get; }
+        string Message { get; }
     }
 }

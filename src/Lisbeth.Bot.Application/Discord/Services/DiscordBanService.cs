@@ -162,7 +162,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     }
                     else
                     {
-                        var res = await _banService.GetAsync<Ban>(req.Id.Value);
+                        var res = await _banService.GetAsync<Ban>(req.Id ?? throw new InvalidOperationException());
 
                         if (res.IsSuccess)
                             target = await _discord.Client.GetUserAsync(res.Entity.UserId);
@@ -230,7 +230,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     }
                     else
                     {
-                        var res = await _banService.GetAsync<Ban>(req.Id.Value);
+                        var res = await _banService.GetAsync<Ban>(req.Id ?? throw new InvalidOperationException());
 
                         if (res.IsSuccess)
                             target = await _discord.Client.GetUserAsync(res.Entity.UserId);
@@ -256,7 +256,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             if (moderator.Guild.Id != guild.Id) throw new ArgumentException(nameof(moderator));
 
-            DiscordMember targetMember;
+            DiscordMember? targetMember;
             try
             {
                 targetMember = await guild.GetMemberAsync(target.Id);
@@ -271,8 +271,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (targetMember is not null && targetMember.IsModerator())
                 return Result<DiscordEmbed>.FromError(new DiscordNotAuthorizedError());
 
-            DiscordBan ban;
-            DiscordChannel channel = null;
+            DiscordBan? ban;
+            DiscordChannel channel;
 
             var guildCfg =
                 await _guildService.GetSingleBySpecAsync<Guild>(
@@ -330,7 +330,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             }
             else
             {
-                DiscordUser previousMod;
+                DiscordUser? previousMod;
                 try
                 {
                     previousMod = await _discord.Client.GetUserAsync(foundEntity.AppliedById);
@@ -385,8 +385,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (moderator is null) throw new ArgumentNullException(nameof(moderator));
             if (req is null) throw new ArgumentNullException(nameof(req));
 
-            DiscordChannel channel = null;
-            DiscordBan ban;
+            DiscordChannel channel;
+            DiscordBan? ban;
 
             var result =
                 await _guildService.GetSingleBySpecAsync<Guild>(
@@ -404,7 +404,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             {
                 channel = await _discord.Client.GetChannelAsync(guildCfg.ModerationConfig.MemberEventsLogChannelId);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return Result<DiscordEmbed>.FromError(new DiscordNotFoundError(DiscordEntityType.Channel));
             }
@@ -493,8 +493,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (guildCfg.ModerationConfig is null)
                 return Result<DiscordEmbed>.FromError(new DisabledEntityError(nameof(guildCfg.ModerationConfig)));
 
-            DiscordChannel channel = null;
-            DiscordBan discordBan;
+            DiscordChannel channel;
+            DiscordBan? discordBan;
 
             try
             {
@@ -524,7 +524,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             if (res.IsSuccess)
             {
-                DiscordUser banningMod = null;
+                DiscordUser? banningMod = null;
                 try
                 {
                     banningMod = await _discord.Client.GetUserAsync(res.Entity.AppliedById);
@@ -541,7 +541,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 embed.AddField("Reason", res.Entity.Reason);
                 if (res.Entity.LiftedById != 0)
                 {
-                    DiscordUser liftingMod = null;
+                    DiscordUser? liftingMod = null;
                     try
                     {
                         if (req.LiftedById is not null) liftingMod = await _discord.Client.GetUserAsync(res.Entity.LiftedById);

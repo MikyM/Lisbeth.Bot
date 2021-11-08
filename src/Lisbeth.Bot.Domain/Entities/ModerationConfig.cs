@@ -26,12 +26,12 @@ namespace Lisbeth.Bot.Domain.Entities
         public ulong MessageUpdatedEventsLogChannelId { get; set; }
         public ulong ModerationLogChannelId { get; set; }
         public ulong MuteRoleId { get; set; }
-        public string BaseMemberWelcomeMessage { get; set; }
+        public string? BaseMemberWelcomeMessage { get; set; }
 
         public long? MemberWelcomeEmbedConfigId { get; set; }
-        public EmbedConfig MemberWelcomeEmbedConfig { get; set; }
+        public EmbedConfig? MemberWelcomeEmbedConfig { get; set; }
 
         public ulong GuildId { get; set; }
-        public Guild Guild { get; set; }
+        public Guild? Guild { get; set; }
     }
 }

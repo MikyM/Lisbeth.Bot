@@ -26,6 +26,6 @@ namespace Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig
         public ulong MessageUpdatedEventsLogChannelId { get; set; }
         public ulong ModerationLogChannelId { get; set; }
         public ulong MuteRoleId { get; set; }
-        public string BaseMemberWelcomeMessage { get; set; }
+        public string? BaseMemberWelcomeMessage { get; set; }
     }
 }

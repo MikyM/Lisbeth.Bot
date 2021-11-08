@@ -31,7 +31,7 @@ namespace Lisbeth.Bot.Application.Discord.Extensions
             return ContainerProvider.Container.Resolve<IDiscordService>().Client.Guilds.Any(x => x.Key == guildId);
         }
 
-        public static bool TryGetGuildFromCache(this ulong guildId, out DiscordGuild guild)
+        public static bool TryGetGuildFromCache(this ulong guildId, out DiscordGuild? guild)
         {
             return ContainerProvider.Container.Resolve<IDiscordService>()
                 .Client.Guilds.TryGetValue(guildId, out guild);

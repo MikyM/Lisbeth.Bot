@@ -15,35 +15,37 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using FluentValidation;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
+using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
 using Lisbeth.Bot.Application.Extensions;
 using Lisbeth.Bot.Application.Validation.Reminder;
 using Lisbeth.Bot.Domain.DTOs.Request.Reminder;
 using Lisbeth.Bot.Domain.Entities;
 using Lisbeth.Bot.Domain.Enums;
+using MikyM.Common.Application.Results;
 using NCrontab;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands
 {
     [UsedImplicitly]
     [SlashModuleLifespan(SlashModuleLifespan.Transient)]
     [SlashCommandGroup("reminder", "Reminder commands")]
-    public class ReminderSlashCommands : ApplicationCommandModule
+    public class ReminderSlashCommands : ExtendedApplicationCommandModule
     {
-        public IDiscordReminderService _reminderService { private get; set; }
-        public IDiscordEmbedConfiguratorService<Reminder> _reminderEmbedConfiguratorService { private get; set; }
-        public IDiscordEmbedConfiguratorService<RecurringReminder> _recurringReminderEmbedConfiguratorService { private get; set; }
+        public IDiscordReminderService? _reminderService { private get; set; }
+        public IDiscordEmbedConfiguratorService<Reminder>? _reminderEmbedConfiguratorService { private get; set; }
+        public IDiscordEmbedConfiguratorService<RecurringReminder>? _recurringReminderEmbedConfiguratorService { private get; set; }
 
         [UsedImplicitly]
         [SlashCommand("single", "Single reminder command")]
@@ -62,7 +64,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             string name = "")
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
-            DiscordEmbed embed;
+            Result<DiscordEmbed> result;
 
             bool isValidDateTime = DateTime.TryParseExact(time, "dd/MM/yyyy hh:mm tt", DateTimeFormatInfo.InvariantInfo,
                 DateTimeStyles.None, out DateTime parsedDateTime);
@@ -106,7 +108,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                                 mentionList, ctx.Guild.Id, ctx.Member.Id);
                             var setReqValidator = new SetReminderReqValidator(ctx.Client);
                             await setReqValidator.ValidateAndThrowAsync(setReq);
-                            embed = await _reminderService.SetNewReminderAsync(ctx, setReq);
+                            result = await _reminderService!.SetNewReminderAsync(ctx, setReq);
                             break;
                         case ReminderActionType.Reschedule:
                             var rescheduleReq = new RescheduleReminderReqDto(name, isValidCron ? time : null,
@@ -114,19 +116,21 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                                 ctx.Member.Id, name.IsDigitsOnly() ? long.Parse(name) : null);
                             var rescheduleReqValidator = new RescheduleReminderReqValidator(ctx.Client);
                             await rescheduleReqValidator.ValidateAndThrowAsync(rescheduleReq);
-                            embed = await _reminderService.RescheduleReminderAsync(ctx, rescheduleReq);
+                            result = await _reminderService!.RescheduleReminderAsync(ctx, rescheduleReq);
                             break;
                         case ReminderActionType.ConfigureEmbed:
                             switch (reminderType)
                             {
                                 case ReminderType.Single:
-                                    var res = await _reminderEmbedConfiguratorService.ConfigureAsync(ctx, name);
-                                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(res.Embed));
+                                    var res = await _reminderEmbedConfiguratorService!.ConfigureAsync(ctx, name);
+                                    if (res.IsSuccess) await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(res.Entity));
+                                    else await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(res, ctx.Client)));
                                     return;
                                 case ReminderType.Recurring:
                                     var resRec =
-                                        await _recurringReminderEmbedConfiguratorService.ConfigureAsync(ctx, name);
-                                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(resRec.Embed));
+                                        await _recurringReminderEmbedConfiguratorService!.ConfigureAsync(ctx, name);
+                                    if (resRec.IsSuccess) await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(resRec.Entity));
+                                    else await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(resRec, ctx.Client)));
                                     return;
                                 default:
                                     throw new ArgumentOutOfRangeException(nameof(reminderType), reminderType, null);
@@ -136,7 +140,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                                 name.IsDigitsOnly() ? long.Parse(name) : null);
                             var disableReqValidator = new DisableReminderReqValidator(ctx.Client);
                             await disableReqValidator.ValidateAndThrowAsync(disableReq);
-                            embed = await _reminderService.DisableReminderAsync(ctx, disableReq);
+                            result = await _reminderService!.DisableReminderAsync(ctx, disableReq);
                             break;
                         default:
                             throw new ArgumentOutOfRangeException(nameof(actionType), actionType, null);
@@ -145,7 +149,8 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     break;
             }
 
-            await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
+            if (result.IsSuccess) await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(result.Entity));
+            else await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(result, ctx.Client)));
         }
     }
 }

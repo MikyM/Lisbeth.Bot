@@ -15,28 +15,28 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Threading.Tasks;
 using Lisbeth.Bot.Application.Enums;
 using Lisbeth.Bot.DataAccessLayer;
-using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.RoleMenu;
 using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.Application.Interfaces;
+using MikyM.Common.Application.Results;
+using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Services.Database.Interfaces
 {
     public interface IGuildService : ICrudService<Guild, LisbethBotDbContext>
     {
-        Task<Guild> AddConfigAsync(ModerationConfigReqDto req, bool shouldSave = false);
-        Task<Guild> AddConfigAsync(TicketingConfigReqDto req, bool shouldSave = false);
-        Task<bool> DisableConfigAsync(ulong guildId, GuildConfigType type, bool shouldSave = false);
-        Task<Guild> EnableConfigAsync(ulong guildId, GuildConfigType type, bool shouldSave = false);
-        Task RepairModuleConfigAsync(TicketingConfigRepairReqDto req, bool shouldSave = false);
-        Task RepairModuleConfigAsync(ModerationConfigRepairReqDto req, bool shouldSave = false);
-        Task EditTicketingConfigAsync(TicketingConfigEditReqDto req, bool shouldSave = false);
-        Task EditModerationConfigAsync(ulong guildId, bool shouldSave = false);
-        Task AddRoleMenuAsync(RoleMenuAddReqDto req, bool shouldSave = false);
+        Task<Result<Guild>> AddConfigAsync(ModerationConfigReqDto req, bool shouldSave = false);
+        Task<Result<Guild>> AddConfigAsync(TicketingConfigReqDto req, bool shouldSave = false);
+        Task<Result> DisableConfigAsync(ulong guildId, GuildConfigType type, bool shouldSave = false);
+        Task<Result<Guild>> EnableConfigAsync(ulong guildId, GuildConfigType type, bool shouldSave = false);
+        Task<Result> RepairModuleConfigAsync(TicketingConfigRepairReqDto req, bool shouldSave = false);
+        Task<Result> RepairModuleConfigAsync(ModerationConfigRepairReqDto req, bool shouldSave = false);
+        Task<Result> EditTicketingConfigAsync(TicketingConfigEditReqDto req, bool shouldSave = false);
+        Task<Result> EditModerationConfigAsync(ulong guildId, bool shouldSave = false);
+        Task<Result> AddRoleMenuAsync(RoleMenuAddReqDto req, bool shouldSave = false);
     }
 }

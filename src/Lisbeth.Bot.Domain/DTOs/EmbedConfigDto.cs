@@ -21,13 +21,13 @@ namespace Lisbeth.Bot.Domain.DTOs
 {
     public class EmbedConfigDto
     {
-        public string Author { get; set; }
-        public string AuthorUrl { get; set; }
-        public string Footer { get; set; }
-        public string ImageUrl { get; set; }
-        public string FooterImageUrl { get; set; }
-        public string AuthorImageUrl { get; set; }
-        public string Description { get; set; }
-        public List<DiscordFieldDto> Fields { get; set; }
+        public string? Author { get; set; }
+        public string? AuthorUrl { get; set; }
+        public string? Footer { get; set; }
+        public string? ImageUrl { get; set; }
+        public string? FooterImageUrl { get; set; }
+        public string? AuthorImageUrl { get; set; }
+        public string? Description { get; set; }
+        public List<DiscordFieldDto>? Fields { get; set; }
     }
 }

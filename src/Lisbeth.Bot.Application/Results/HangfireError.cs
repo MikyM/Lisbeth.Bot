@@ -15,16 +15,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
-using Lisbeth.Bot.Domain.DTOs.Request.Base;
+using System;
+using MikyM.Common.Application.Results;
 
-namespace Lisbeth.Bot.Domain.DTOs.Request.RoleMenu
+namespace Lisbeth.Bot.Application.Results
 {
-    public class RoleMenuAddReqDto : BaseAuthWithGuildReqDto
-    {
-        public string? Text { get; set; }
-        public string? Name { get; set; }
-        public List<RoleMenuOptionReqDto>? RoleMenuOptions { get; set; }
-        public EmbedConfigDto? EmbedConfig { get; set; }
-    }
+    /// <summary>
+    /// Represents an error raised when an attempt to perform an invalid operation is made.
+    /// </summary>
+    /// <param name="Message">The error message.</param>
+    /// <remarks>Used in place of <see cref="InvalidOperationException"/>.</remarks>
+    public record HangfireError(string Message = "Hangfire threw an exception.")
+        : ResultError(Message);
 }

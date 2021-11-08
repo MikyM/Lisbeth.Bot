@@ -15,19 +15,19 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Threading.Tasks;
 using AutoMapper;
 using JetBrains.Annotations;
-using Lisbeth.Bot.Application.Exceptions;
 using Lisbeth.Bot.Application.Extensions;
 using Lisbeth.Bot.Application.Services.Database.Interfaces;
 using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Reminder;
 using Lisbeth.Bot.Domain.DTOs.Request.Reminder;
 using Lisbeth.Bot.Domain.Entities;
+using MikyM.Common.Application.Results;
 using MikyM.Common.Application.Services;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
+using System;
+using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Services.Database
 {
@@ -38,25 +38,32 @@ namespace Lisbeth.Bot.Application.Services.Database
         {
         }
 
-        public async Task SetHangfireIdAsync(long reminderId, string hangfireId, bool shouldSave = false)
+        public async Task<Result> SetHangfireIdAsync(long reminderId, string hangfireId, bool shouldSave = false)
         {
-            var reminder = await base.GetAsync<Reminder>(reminderId);
-            reminder.HangfireId = long.Parse(hangfireId);
+            var result = await base.GetAsync<Reminder>(reminderId);
+
+            if (!result.IsSuccess) return Result.FromError(result);
+
+            result.Entity.HangfireId = long.Parse(hangfireId);
 
             if (shouldSave) await base.CommitAsync();
+
+            return Result.FromSuccess();
         }
 
-        public async Task RescheduleAsync(RescheduleReminderReqDto req, bool shouldSave = false)
+        public async Task<Result> RescheduleAsync(RescheduleReminderReqDto req, bool shouldSave = false)
         {
-            var reminder = await base.GetSingleBySpecAsync<Reminder>(new ActiveReminderByNameOrIdAndGuildSpec(req.Name, req.GuildId, req.ReminderId));
-            if (reminder is null) throw new NotFoundException();
+            var result = await base.GetSingleBySpecAsync<Reminder>(new ActiveReminderByNameOrIdAndGuildSpec(req.Name, req.GuildId, req.ReminderId));
+            if (!result.IsSuccess) return Result.FromError(result);
 
-            base.BeginUpdate(reminder);
+            base.BeginUpdate(result.Entity);
             var isValid = req.TimeSpanExpression.TryParseToDurationAndNextOccurrence(out var occurrence, out _);
-            reminder.SetFor = req.SetFor ?? (isValid ? occurrence : throw new ArgumentException(nameof(req.TimeSpanExpression)));
-            reminder.LastEditById = req.RequestedOnBehalfOfId;
+            result.Entity.SetFor = req.SetFor ?? (isValid ? occurrence : throw new ArgumentException(nameof(req.TimeSpanExpression)));
+            result.Entity.LastEditById = req.RequestedOnBehalfOfId;
 
             if (shouldSave) await base.CommitAsync();
+
+            return Result.FromSuccess();
         }
     }
 }

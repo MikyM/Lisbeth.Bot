@@ -16,13 +16,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
 using Autofac;
 using DSharpPlus;
 using DSharpPlus.Entities;
@@ -37,6 +30,13 @@ using Microsoft.EntityFrameworkCore;
 using MikyM.Common.Application.Interfaces;
 using MikyM.Common.Domain;
 using MikyM.Common.Domain.Entities;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands
 {
@@ -45,9 +45,9 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
     [UsedImplicitly]
     public class AdminUtilSlashCommands : ApplicationCommandModule
     {
-        [UsedImplicitly] public LisbethBotDbContext _ctx { private get; set; }
+        [UsedImplicitly] public LisbethBotDbContext? _ctx { private get; set; }
 
-        [UsedImplicitly] public IReadOnlyService<AuditLog, LisbethBotDbContext> _service { private get; set; }
+        [UsedImplicitly] public IReadOnlyService<AuditLog, LisbethBotDbContext>? _service { private get; set; }
 
         [SlashRequireOwner]
         [SlashCommand("audit", "Gets last 10 audit logs.")]
@@ -56,8 +56,8 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder().AsEphemeral(bool.Parse(shouldEph)));
-            var res = await _service.GetBySpecAsync<AuditLog>();
-            string botRes = res.Aggregate("",
+            var res = await _service!.GetAnyAsync<AuditLog>();
+            string botRes = res.Entity.Aggregate("",
                 (current, resp) =>
                     current +
                     $"\n Affected columns: {resp.AffectedColumns}, Table: {resp.TableName}, Old: {resp.OldValues}, New: {resp.NewValues}, Type: {resp.Type}");
@@ -73,17 +73,17 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder().AsEphemeral(bool.Parse(shouldEph)));
-            var dat = new List<Dictionary<string, string>>();
+            var dat = new List<Dictionary<string, string?>>();
             int i;
 
-            using var cmd = _ctx.Database.GetDbConnection().CreateCommand();
+            using var cmd = _ctx!.Database.GetDbConnection().CreateCommand();
             await _ctx.Database.OpenConnectionAsync();
 
             cmd.CommandText = query;
             using var rdr = await cmd.ExecuteReaderAsync();
             while (await rdr.ReadAsync())
             {
-                var dict = new Dictionary<string, string>();
+                var dict = new Dictionary<string, string?>();
                 for (i = 0; i < rdr.FieldCount; i++)
                     dict[rdr.GetName(i)] = rdr[i] is DBNull ? "<null>" : rdr[i].ToString();
                 dat.Add(dict);
@@ -194,7 +194,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             }
 
             Exception rex;
-            ScriptState<object> css = null;
+            ScriptState<object>? css = null;
             var sw2 = Stopwatch.StartNew();
             try
             {
@@ -215,7 +215,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     Title = "Execution failed",
                     Description =
                         string.Concat("Execution failed after ", sw2.ElapsedMilliseconds.ToString("#,##0"),
-                            "ms with `", rex.GetType(), ": ", rex.message, "`."),
+                            "ms with `", rex.GetType(), ": ", rex.Message, "`."),
                     Color = new DiscordColor(0xD091B2)
                 };
                 await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
@@ -225,11 +225,11 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             // execution succeeded
             embed = new DiscordEmbedBuilder {Title = "Evaluation successful", Color = new DiscordColor(0xD091B2)};
 
-            embed.AddField("Result", css.ReturnValue is not null ? css.ReturnValue.ToString() : "No value returned")
+            embed.AddField("Result", css?.ReturnValue is not null ? css.ReturnValue.ToString() : "No value returned")
                 .AddField("Compilation time", string.Concat(sw1.ElapsedMilliseconds.ToString("#,##0"), "ms"), true)
                 .AddField("Execution time", string.Concat(sw2.ElapsedMilliseconds.ToString("#,##0"), "ms"), true);
 
-            if (css.ReturnValue is not null) embed.AddField("Return type", css.ReturnValue.GetType().ToString(), true);
+            if (css?.ReturnValue is not null) embed.AddField("Return type", css.ReturnValue.GetType().ToString(), true);
 
             await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
         }

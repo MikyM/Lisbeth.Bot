@@ -20,12 +20,13 @@ using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.Domain.DTOs.Request.Reminder;
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.Application.Interfaces;
+using MikyM.Common.Application.Results;
 
 namespace Lisbeth.Bot.Application.Services.Database.Interfaces
 {
     public interface IRecurringReminderService : ICrudService<RecurringReminder, LisbethBotDbContext>
     {
-        Task SetHangfireIdAsync(long reminderId, string hangfireId, bool shouldSave = false);
-        Task RescheduleAsync(RescheduleReminderReqDto req, bool shouldSave = false);
+        Task<Result> SetHangfireIdAsync(long reminderId, string hangfireId, bool shouldSave = false);
+        Task<Result> RescheduleAsync(RescheduleReminderReqDto req, bool shouldSave = false);
     }
 }

@@ -21,6 +21,7 @@ namespace Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Buttons
     {
         EmbedConfigConfirmButton,
         EmbedConfigAbortButton,
-        EmbedConfigFinalButton
+        EmbedConfigFinalButton,
+        EmbedConfigContinueButton
     }
 }

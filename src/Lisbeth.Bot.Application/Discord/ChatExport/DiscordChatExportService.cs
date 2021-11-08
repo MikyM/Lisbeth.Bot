@@ -15,13 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.ChatExport.Builders;
@@ -29,13 +22,22 @@ using Lisbeth.Bot.Application.Discord.ChatExport.Models;
 using Lisbeth.Bot.Application.Discord.Exceptions;
 using Lisbeth.Bot.Application.Services.Database.Interfaces;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Ticket;
-using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 using Lisbeth.Bot.Domain.Entities;
 using Microsoft.Extensions.Logging;
+using MikyM.Common.Application.Results;
 using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Discord.Interfaces;
 using Serilog;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using Lisbeth.Bot.Application.Results;
+using MikyM.Common.Application.Results.Errors;
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport
 {
@@ -56,66 +58,68 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
             _logger = logger;
         }
 
-        public async Task<DiscordEmbed> ExportToHtmlAsync(TicketExportReqDto req)
+        public async Task<Result<DiscordEmbed>> ExportToHtmlAsync(TicketExportReqDto req)
         {
             if (req is null) throw new ArgumentNullException(nameof(req));
 
-            DiscordChannel target = null;
+            DiscordChannel? target = null;
             DiscordMember requestingMember;
             DiscordUser owner;
             Ticket ticket;
 
             if (req.Id.HasValue)
             {
-                ticket = await _ticketService.GetAsync<Ticket>(req.Id.Value);
-                if (ticket is null)
-                    throw new ArgumentException("Opened ticket with given params doesn't exist in the database.");
+                var ticketResult = await _ticketService.GetAsync<Ticket>(req.Id.Value);
+                if (!ticketResult.IsSuccess)
+                    return new NotFoundError("Opened ticket with given params doesn't exist in the database.");
 
+                ticket = ticketResult.Entity;
                 req.ChannelId = ticket.ChannelId;
                 req.GuildId = ticket.GuildId;
                 req.OwnerId = ticket.UserId;
             }
             else if (req.OwnerId.HasValue && req.GuildId.HasValue)
             {
-                var res = await _ticketService.GetBySpecAsync<Ticket>(
+                var res = await _ticketService.GetSingleBySpecAsync<Ticket>(
                     new TicketBaseGetSpecifications(null, req.OwnerId, req.GuildId, null, null, false, 1));
-                ticket = res.FirstOrDefault();
-                if (ticket is null)
-                    throw new ArgumentException("Opened ticket with given params doesn't exist in the database.");
+                if (!res.IsSuccess)
+                    return new NotFoundError("Opened ticket with given params doesn't exist in the database.");
 
+                ticket = res.Entity;
                 req.ChannelId = ticket.ChannelId;
                 req.GuildId = ticket.GuildId;
                 req.OwnerId = ticket.UserId;
             }
             else if (req.GuildSpecificId.HasValue && req.GuildId.HasValue)
             {
-                var res = await _ticketService.GetBySpecAsync<Ticket>(
+                var res = await _ticketService.GetSingleBySpecAsync<Ticket>(
                     new TicketBaseGetSpecifications(null, null, req.GuildId, null, req.GuildSpecificId.Value, false,
                         1));
-                ticket = res.FirstOrDefault();
-                if (ticket is null)
-                    throw new ArgumentException("Opened ticket with given params doesn't exist in the database.");
+                if (!res.IsSuccess)
+                    return new NotFoundError("Opened ticket with given params doesn't exist in the database.");
 
+                ticket = res.Entity;
                 req.ChannelId = ticket.ChannelId;
                 req.GuildId = ticket.GuildId;
                 req.OwnerId = ticket.UserId;
             }
             else
             {
-                var res = await _ticketService.GetBySpecAsync<Ticket>(
+                var res = await _ticketService.GetSingleBySpecAsync<Ticket>(
                     new TicketBaseGetSpecifications(null, null, null, req.ChannelId, null, false, 1));
-                ticket = res.FirstOrDefault();
-                if (ticket is null)
-                    throw new ArgumentException("Opened ticket with given params doesn't exist in the database.");
+                if (!res.IsSuccess)
+                    return new NotFoundError("Opened ticket with given params doesn't exist in the database.");
+
+                ticket = res.Entity;
                 req.OwnerId = ticket.UserId;
                 try
                 {
-                    target = await _discord.Client.GetChannelAsync(req.ChannelId.Value);
+                    target = await _discord.Client.GetChannelAsync(req.ChannelId ?? throw new InvalidOperationException());
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    throw new DiscordNotFoundException(
-                        $"User with Id: {req.ChannelId} doesn't exist or isn't this guild's member.", ex);
+                    return new DiscordNotFoundError(
+                        $"User with Id: {req.ChannelId} doesn't exist or isn't this guild's member.");
                 }
             }
 
@@ -124,40 +128,40 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
             var guild = target.Guild;
 
             if (guild.Id != ticket.GuildId)
-                throw new ArgumentException("Requested ticket doesn't belong to this guild");
+                return new DiscordNotAuthorizedError("Requested ticket doesn't belong to this guild");
 
             try
             {
                 requestingMember = await guild.GetMemberAsync(req.RequestedOnBehalfOfId);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw new DiscordNotFoundException(
-                    $"User with Id: {req.RequestedOnBehalfOfId} doesn't exist or isn't this guild's member.", ex);
+                return new DiscordNotFoundError(
+                    $"User with Id: {req.RequestedOnBehalfOfId} doesn't exist or isn't this guild's member.");
             }
 
             try
             {
                 owner = await _discord.Client.GetUserAsync(req.OwnerId.Value);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw new DiscordNotFoundException(
-                    $"User with Id: {req.OwnerId} doesn't exist or isn't this guild's member.", ex);
+                return new DiscordNotFoundError(
+                    $"User with Id: {req.OwnerId} doesn't exist or isn't this guild's member.");
             }
 
             return await ExportToHtmlAsync(guild, target, requestingMember, owner, ticket);
         }
 
-        public async Task<DiscordEmbed> ExportToHtmlAsync(DiscordInteraction intr)
+        public async Task<Result<DiscordEmbed>> ExportToHtmlAsync(DiscordInteraction intr)
         {
             if (intr is null) throw new ArgumentNullException(nameof(intr));
 
             return await ExportToHtmlAsync(intr.Guild, intr.Channel, (DiscordMember) intr.User);
         }
 
-        public async Task<DiscordEmbed> ExportToHtmlAsync(DiscordGuild guild, DiscordChannel target,
-            DiscordMember requestingMember, DiscordUser owner = null, Ticket ticket = null)
+        public async Task<Result<DiscordEmbed>> ExportToHtmlAsync(DiscordGuild guild, DiscordChannel target,
+            DiscordMember requestingMember, DiscordUser? owner = null, Ticket? ticket = null)
         {
             try
             {
@@ -166,23 +170,26 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
                 if (requestingMember is null) throw new ArgumentNullException(nameof(requestingMember));
 
                 var resGuild =
-                    await _guildService.GetBySpecAsync<Guild>(
+                    await _guildService.GetSingleBySpecAsync<Guild>(
                         new Specification<Guild>(x => x.GuildId == guild.Id && !x.IsDisabled));
 
-                var guildCfg = resGuild.FirstOrDefault();
+                if (!resGuild.IsSuccess) return new NotFoundError("Guild doesn't exist in database.");
 
-                if (guildCfg is null) throw new ArgumentException("Guild doesn't exist in database.");
+                if (resGuild.Entity.TicketingConfig is null) return new DisabledEntityError("Guild doesn't have ticketing enabled.");
+
+                var guildCfg = resGuild.Entity;
 
                 if (ticket is null)
                 {
-                    var res = await _ticketService.GetBySpecAsync<Ticket>(
+                    var res = await _ticketService.GetSingleBySpecAsync<Ticket>(
                         new TicketBaseGetSpecifications(null, null, guild.Id, target.Id, null, false, 1, true));
-                    ticket = res.FirstOrDefault();
+                    
+                    if (!res.IsSuccess) return new NotFoundError("Ticket doesn't exist in database.");
+
+                    ticket = res.Entity;
                 }
 
                 DiscordChannel ticketLogChannel;
-
-                if (ticket is null) throw new ArgumentException("Ticket doesn't exist in database.");
 
                 try
                 {
@@ -191,7 +198,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
                 }
                 catch (Exception)
                 {
-                    throw new ArgumentException(
+                    return new DiscordNotFoundError(
                         $"Channel with Id: {guildCfg.TicketingConfig.LogChannelId} doesn't exist.");
                 }
 
@@ -201,14 +208,14 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
                 }
                 catch (Exception)
                 {
-                    throw new ArgumentException($"User with Id: {ticket.UserId} doesn't exist.");
+                    return new DiscordNotFoundError($"User with Id: {ticket.UserId} doesn't exist.");
                 }
 
-                if (guild.Id != target.GuildId) throw new ArgumentException("Channel doesn't belong to this guild");
+                if (guild.Id != target.GuildId) return new DiscordNotAuthorizedError("Channel doesn't belong to this guild");
                 if (guild.Id != ticketLogChannel.GuildId)
-                    throw new ArgumentException("Ticket log channel doesn't belong to this guild");
+                    return new DiscordNotAuthorizedError("Ticket log channel doesn't belong to this guild");
                 if (guild.Id != requestingMember.Guild.Id)
-                    throw new ArgumentException("Requesting member isn't in this guild");
+                    return new DiscordNotAuthorizedError("Requesting member isn't in this guild");
 
                 await Task.Delay(500);
                 List<DiscordUser> users = new();
@@ -236,28 +243,28 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
                 string css;
                 if (File.Exists(path))
                 {
-                    using StreamReader streamReader = new StreamReader(path, Encoding.UTF8);
+                    using StreamReader streamReader = new (path, Encoding.UTF8);
                     css = await streamReader.ReadToEndAsync();
                     css = css.Trim().Replace("\r", string.Empty);
                     css = css.Trim().Replace("\n", string.Empty);
                 }
                 else
                 {
-                    throw new Exception($"CSS file was not found at {path}");
+                    throw new IOException($"CSS file was not found at {path}");
                 }
 
                 path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Discord", "ChatExport", "ChatExport.js");
                 string js;
                 if (File.Exists(path))
                 {
-                    using StreamReader streamReader = new StreamReader(path, Encoding.UTF8);
+                    using StreamReader streamReader = new (path, Encoding.UTF8);
                     js = await streamReader.ReadToEndAsync();
                     js = js.Trim().Replace("\r", string.Empty);
                     js = js.Trim().Replace("\n", string.Empty);
                 }
                 else
                 {
-                    throw new Exception($"JS file was not found at {path}");
+                    throw new IOException($"JS file was not found at {path}");
                 }
 
                 var htmlChatBuilder = new HtmlChatBuilder();
@@ -281,24 +288,20 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
                 embedBuilder.AddField("Users in transcript", usersString);
                 embedBuilder.WithColor(new DiscordColor(guildCfg.EmbedHexColor));
 
-                MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(html));
-                DiscordMessageBuilder messageBuilder = new DiscordMessageBuilder();
+                MemoryStream ms = new (Encoding.UTF8.GetBytes(html));
+                DiscordMessageBuilder messageBuilder = new ();
 
                 messageBuilder.WithFile($"transcript-{target.Name}.html", ms);
                 messageBuilder.WithEmbed(embedBuilder.Build());
 
-                Log.Logger.Information(requestingMember is null
-                    ? $"Automatically saved transcript of {target.Name}"
-                    : $"User {requestingMember.Username}#{requestingMember.Discriminator} with ID: {requestingMember.Id} saved transcript of {target.Name}");
-
                 await ticketLogChannel.SendMessageAsync(messageBuilder);
 
-                return embed;
+                return embed.Build();
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Exporting to HTML failed with: {ex}");
-                return null;
+                return Result<DiscordEmbed>.FromError(ex);
             }
         }
     }

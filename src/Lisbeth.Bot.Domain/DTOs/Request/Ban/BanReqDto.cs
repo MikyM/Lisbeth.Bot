@@ -35,7 +35,7 @@ namespace Lisbeth.Bot.Domain.DTOs.Request.Ban
         }
 
         public BanReqDto(ulong targetUserId, ulong guildId, ulong requestedOnBehalfOfId, DateTime appliedUntil,
-            string reason)
+            string? reason)
         {
             TargetUserId = targetUserId;
             GuildId = guildId;
@@ -49,6 +49,6 @@ namespace Lisbeth.Bot.Domain.DTOs.Request.Ban
 
         public DateTime AppliedUntil { get; set; }
         public ulong RequestedOnBehalfOfId { get; set; }
-        public string Reason { get; set; }
+        public string? Reason { get; set; }
     }
 }

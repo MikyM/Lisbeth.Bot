@@ -50,13 +50,13 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Models
             var userMatches = Regex.Matches(result, @"(?<=\<@!|\<@)[0-9]{17,18}(?=\>)");
             foreach (var userMatch in userMatches)
             {
-                DiscordUser user = Users.FirstOrDefault(x => x.Id == ulong.Parse(userMatch.ToString()));
+                DiscordUser? user = Users.FirstOrDefault(x => x.Id == ulong.Parse(userMatch.ToString() ?? "0"));
                 if (user is not null)
                     result = result.Replace($"<@!{user.Id}>", $"<span class=\"user-mention\">@{user.Username}</span>");
                 else
                     try
                     {
-                        user = await _discord.Client.GetUserAsync(ulong.Parse(userMatch.ToString()));
+                        user = await _discord.Client.GetUserAsync(ulong.Parse(userMatch.ToString() ?? "0"));
                         result = result.Replace($"<@!{user.Id}>",
                             $"<span class=\"user-mention\">@{user.Username}</span>");
                     }
@@ -75,7 +75,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Models
             var roleMatches = Regex.Matches(result, @"(?<=\<@&)[0-9]{17,18}(?=\>)");
             foreach (var roleMatch in roleMatches)
             {
-                DiscordRole role = Guild.Roles.FirstOrDefault(x => x.Value.Id == ulong.Parse(roleMatch.ToString()))
+                DiscordRole? role = Guild.Roles.FirstOrDefault(x => x.Value.Id == ulong.Parse(roleMatch.ToString() ?? "0"))
                     .Value;
                 if (role is not null)
                     result = result.Replace($"<@!{role.Id}>", $"<span class=\"user-mention\">@{role.Name}</span>");
@@ -97,7 +97,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Models
             foreach (var channelMatch in channelMatches)
                 try
                 {
-                    DiscordChannel channel = Guild.GetChannel(ulong.Parse(channelMatch.ToString()));
+                    DiscordChannel channel = Guild.GetChannel(ulong.Parse(channelMatch.ToString() ?? "0"));
                     result = result.Replace($"<#{channel.Id}>",
                         $"<span class=\"channel-mention\">#{channel.Name}</span>");
                 }

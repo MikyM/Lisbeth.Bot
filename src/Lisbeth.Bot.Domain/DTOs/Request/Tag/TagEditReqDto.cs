@@ -20,10 +20,10 @@ namespace Lisbeth.Bot.Domain.DTOs.Request.Tag
     public class TagEditReqDto
     {
         public long? Id { get; set; }
-        public string Name { get; set; }
+        public string? Name { get; set; }
         public ulong RequestedOnBehalfOfId { get; set; }
         public ulong? GuildId { get; set; }
-        public string Text { get; set; }
-        public EmbedConfigDto EmbedConfig { get; set; }
+        public string? Text { get; set; }
+        public EmbedConfigDto? EmbedConfig { get; set; }
     }
 }

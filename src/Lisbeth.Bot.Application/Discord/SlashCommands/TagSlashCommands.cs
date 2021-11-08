@@ -26,12 +26,14 @@ using Lisbeth.Bot.Domain.DTOs.Request.Tag;
 using Lisbeth.Bot.Domain.Entities;
 using System;
 using System.Threading.Tasks;
+using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
+using MikyM.Common.Application.Results;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands
 {
     [UsedImplicitly]
     [SlashModuleLifespan(SlashModuleLifespan.Transient)]
-    public class TagSlashCommands : ApplicationCommandModule
+    public class TagSlashCommands : ExtendedApplicationCommandModule
     {
         public IDiscordTagService _discordTagService { private get; set; }
         public IDiscordEmbedConfiguratorService<Tag> _discordEmbedTagConfiguratorService { private get; set; }
@@ -50,10 +52,9 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
             bool isId = long.TryParse(idOrName, out long id);
-            bool isSuccess = true;
-            bool isEmbedConfig = false;
 
-            (DiscordEmbed Embed, string Text) result = new(null, "");
+            Result<(DiscordEmbed? Embed, string Text)>? result = null;
+            Result<DiscordEmbed>? partial = null;
 
             switch (action)
             {
@@ -89,7 +90,8 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     var addValidator = new TagAddReqValidator(ctx.Client);
                     await addValidator.ValidateAndThrowAsync(addReq);
 
-                    result.Embed = await _discordTagService.AddAsync(ctx, addReq);
+                    partial = await _discordTagService.AddAsync(ctx, addReq);
+                    
                     break;
                 case TagActionType.Edit:
                     if (!isId && string.IsNullOrWhiteSpace(idOrName))
@@ -107,7 +109,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     var editValidator = new TagEditReqValidator(ctx.Client);
                     await editValidator.ValidateAndThrowAsync(editReq);
 
-                    result.Embed = await _discordTagService.EditAsync(ctx, editReq);
+                    partial = await _discordTagService.EditAsync(ctx, editReq);
                     break;
                 case TagActionType.Remove:
                     if (!isId && string.IsNullOrWhiteSpace(idOrName))
@@ -124,13 +126,10 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     var disableValidator = new TagDisableReqValidator(ctx.Client);
                     await disableValidator.ValidateAndThrowAsync(removeReq);
 
-                    result.Embed = await _discordTagService.DisableAsync(ctx, removeReq);
+                    partial = await _discordTagService.DisableAsync(ctx, removeReq);
                     break;
                 case TagActionType.ConfigureEmbed:
-                    var cfgResult = await _discordEmbedTagConfiguratorService.ConfigureAsync(ctx, idOrName);
-                    result.Embed = cfgResult.Embed;
-                    isSuccess = cfgResult.IsSuccess;
-                    isEmbedConfig = true;
+                    partial = await _discordEmbedTagConfiguratorService.ConfigureAsync(ctx, idOrName);
                     break;
                 case TagActionType.Send:
                     if (!isId && string.IsNullOrWhiteSpace(idOrName))
@@ -156,16 +155,19 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     throw new ArgumentOutOfRangeException(nameof(action), action, null);
             }
 
-            if (result.Embed is not null)
+            if (partial.HasValue)
             {
-                if (isSuccess && isEmbedConfig)
-                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(result.Embed)
-                        .WithContent("Final result:"));
-                else await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(result.Embed));
+                if (partial.Value.IsSuccess) await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(partial.Value.Entity));
+                else await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(partial, ctx.Client)));
             }
-            else
+            else if (result.HasValue)
             {
-                await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent(result.Text));
+                if (!result.Value.IsSuccess) await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(result, ctx.Client)));
+                else
+                {
+                    if (result.Value.Entity.Embed is not null) await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(result.Value.Entity.Embed));
+                    else await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent(result.Value.Entity.Text));
+                }
             }
         }
     }

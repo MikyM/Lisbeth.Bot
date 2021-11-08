@@ -19,16 +19,24 @@ using System;
 using System.Collections.Generic;
 using Lisbeth.Bot.Domain.Entities.Base;
 
+// ReSharper disable CollectionNeverUpdated.Local
+// ReSharper disable InconsistentNaming
+
 namespace Lisbeth.Bot.Domain.Entities
 {
     public sealed class ServerBooster : SnowflakeEntity
     {
-        private readonly HashSet<GuildServerBooster> guildServerBoosters;
+        private readonly HashSet<GuildServerBooster>? guildServerBoosters;
+
+        public ServerBooster()
+        {
+            this.guildServerBoosters ??= new HashSet<GuildServerBooster>();
+        }
 
         public ulong GuildId { get; set; }
         public ulong UserId { get; set; }
         public DateTime BoostingSince { get; set; } = DateTime.UtcNow;
         public int BoostCount { get; set; } = 1;
-        public IReadOnlyCollection<GuildServerBooster> GuildServerBoosters => guildServerBoosters;
+        public IReadOnlyCollection<GuildServerBooster>? GuildServerBoosters => guildServerBoosters;
     }
 }

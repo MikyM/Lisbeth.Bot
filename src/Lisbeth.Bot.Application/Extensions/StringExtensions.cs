@@ -142,7 +142,7 @@ namespace Lisbeth.Bot.Application.Extensions
         /// <param name="until">an optional string to search before</param>
         /// <param name="comparison">an optional comparison for the search</param>
         /// <returns>a substring based on the search</returns>
-        public static string GetStringBetween(this string value, string from = null, string until = null,
+        public static string GetStringBetween(this string value, string? from = null, string? until = null,
             StringComparison comparison = StringComparison.InvariantCulture)
         {
             var fromLength = (from ?? string.Empty).Length;

@@ -32,17 +32,12 @@ namespace Lisbeth.Bot.Application.Helpers
 
         public void OnCreated(CreatedContext filterContext)
         {
-            string queue = null;
-
-            switch (filterContext.InitialState)
+            string? queue = filterContext.InitialState switch
             {
-                case EnqueuedState enqueuedState:
-                    queue = enqueuedState.Queue;
-                    break;
-                case ScheduledEnqueuedState scheduledEnqueuedState:
-                    queue = scheduledEnqueuedState.Queue;
-                    break;
-            }
+                EnqueuedState enqueuedState => enqueuedState.Queue,
+                ScheduledEnqueuedState scheduledEnqueuedState => scheduledEnqueuedState.Queue,
+                _ => null
+            };
 
             if (!string.IsNullOrWhiteSpace(queue)) filterContext.SetJobParameter(QueueParameterName, queue);
         }

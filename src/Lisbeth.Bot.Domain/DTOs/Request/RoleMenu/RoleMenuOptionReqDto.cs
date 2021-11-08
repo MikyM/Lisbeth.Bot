@@ -21,8 +21,8 @@ namespace Lisbeth.Bot.Domain.DTOs.Request.RoleMenu
     {
         public long? RoleMenuId { get; set; }
         public ulong RoleId { get; set; }
-        public string Emoji { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
+        public string? Emoji { get; set; }
+        public string? Name { get; set; }
+        public string? Description { get; set; }
     }
 }

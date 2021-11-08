@@ -20,10 +20,10 @@ namespace Lisbeth.Bot.Domain.Entities.Base
     public class EmbedConfigEntity : SnowflakeEntity
     {
         public long? EmbedConfigId { get; set; }
-        public EmbedConfig EmbedConfig { get; set; }
+        public EmbedConfig? EmbedConfig { get; set; }
         public ulong CreatorId { get; set; }
         public ulong LastEditById { get; set; }
         public ulong GuildId { get; set; }
-        public string Name { get; set; }
+        public string? Name { get; set; }
     }
 }

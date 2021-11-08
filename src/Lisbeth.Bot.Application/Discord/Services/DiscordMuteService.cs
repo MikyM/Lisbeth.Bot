@@ -494,7 +494,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (res.IsSuccess)
             {
                 var mute = res.Entity;
-                DiscordUser mutingMod = null;
+                DiscordUser? mutingMod = null;
                 try
                 {
                     mutingMod = await _discord.Client.GetUserAsync(mute.AppliedById);
@@ -511,7 +511,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 embed.AddField("Reason", mute.Reason);
                 if (mute.LiftedById != 0)
                 {
-                    DiscordUser liftingMod = null;
+                    DiscordUser? liftingMod = null;
                     try
                     {
                         liftingMod = await _discord.Client.GetUserAsync(mute.LiftedById);

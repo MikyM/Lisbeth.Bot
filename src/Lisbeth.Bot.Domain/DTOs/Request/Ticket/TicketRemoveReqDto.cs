@@ -15,11 +15,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Lisbeth.Bot.Domain.DTOs.Request.Base;
+using Lisbeth.Bot.Domain.DTOs.Request.Ticket.Base;
 
 namespace Lisbeth.Bot.Domain.DTOs.Request.Ticket
 {
-    public class TicketRemoveReqDto : BaseAuthReqDto
+    public class TicketRemoveReqDto : BaseTicketGetReqDto
     {
         public TicketRemoveReqDto(long? id, ulong? ownerId, ulong? guildId, ulong? channelId, ulong requestedOnBehalfOfId,
             ulong snowflakeId)
@@ -31,12 +31,6 @@ namespace Lisbeth.Bot.Domain.DTOs.Request.Ticket
             RequestedOnBehalfOfId = requestedOnBehalfOfId;
             SnowflakeId = snowflakeId;
         }
-
-        public long? Id { get; set; }
-        public ulong? OwnerId { get; set; }
-        public ulong? GuildId { get; set; }
-        public ulong? ChannelId { get; set; }
-        public long? GuildSpecificId { get; set; }
         public ulong SnowflakeId { get; set; }
     }
 }

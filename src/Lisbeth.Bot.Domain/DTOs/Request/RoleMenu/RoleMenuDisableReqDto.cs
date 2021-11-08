@@ -20,7 +20,7 @@ namespace Lisbeth.Bot.Domain.DTOs.Request.RoleMenu
     public class RoleMenuDisableReqDto
     {
         public long? Id { get; set; }
-        public string Name { get; set; }
+        public string? Name { get; set; }
         public ulong? GuildId { get; set; }
         public ulong RequestedOnBehalfOfId { get; set; }
     }

@@ -18,12 +18,13 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using DSharpPlus.Entities;
+using MikyM.Common.Application.Results;
 
 namespace Lisbeth.Bot.Application.Services.Interfaces
 {
     public interface IMuteCheckService
     {
-        Task CheckForNonBotMuteActionAsync(ulong targetId, ulong guildId, ulong requestedOnBehalfOfId,
+        Task<Result> CheckForNonBotMuteActionAsync(ulong targetId, ulong guildId, ulong requestedOnBehalfOfId,
             IReadOnlyList<DiscordRole> rolesBefore, IReadOnlyList<DiscordRole> rolesAfter);
     }
 }

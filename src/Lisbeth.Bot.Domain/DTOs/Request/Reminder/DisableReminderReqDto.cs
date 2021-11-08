@@ -23,7 +23,7 @@ namespace Lisbeth.Bot.Domain.DTOs.Request.Reminder
     public class DisableReminderReqDto : BaseAuthWithGuildReqDto
     {
         public ReminderType Type { get; set; }
-        public string Name { get; set; }
+        public string? Name { get; set; }
         public long? ReminderId { get; set; }
 
         public DisableReminderReqDto()

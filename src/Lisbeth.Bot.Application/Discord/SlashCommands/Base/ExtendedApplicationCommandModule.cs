@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
@@ -25,18 +26,17 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands.Base
     public class ExtendedApplicationCommandModule : ApplicationCommandModule
     {
         protected DiscordEmbed GetUnsuccessfulResultEmbed(IResult result, DiscordClient discord) =>
-            this.GetUnsuccessfulResultEmbed(result.Error, discord);
+            this.GetUnsuccessfulResultEmbed(result.Error ?? throw new InvalidOperationException("Given result does not contain an error"), discord);
 
         protected DiscordEmbed GetUnsuccessfulResultEmbed(IResultError error, DiscordClient discord) =>
-            this.GetUnsuccessfulResultEmbed(error.message, discord);
+            this.GetUnsuccessfulResultEmbed(error.Message, discord);
 
         protected DiscordEmbed GetUnsuccessfulResultEmbed(string error, DiscordClient discord)
         {
-            var noEntryEmoji = DiscordEmoji.FromName(discord, ":x:");
-
             return new DiscordEmbedBuilder().WithColor(new DiscordColor(170, 1, 20))
-                .WithAuthor($"{noEntryEmoji} Operation errored")
-                .AddField("Message", error);
+                .WithAuthor($"{DiscordEmoji.FromName(discord, ":x:")} Operation errored")
+                .AddField("Message", error)
+                .Build();
         }
     }
 }

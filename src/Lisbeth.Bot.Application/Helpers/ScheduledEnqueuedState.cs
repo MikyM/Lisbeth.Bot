@@ -26,11 +26,11 @@ namespace Lisbeth.Bot.Application.Helpers
         {
         }
 
-        public ScheduledEnqueuedState(DateTime enqueuedAt, string queue = null) : base(enqueuedAt.ToUniversalTime())
+        public ScheduledEnqueuedState(DateTime enqueuedAt, string? queue = null) : base(enqueuedAt.ToUniversalTime())
         {
             Queue = queue?.Trim();
         }
 
-        public string Queue { get; }
+        public string? Queue { get; }
     }
 }

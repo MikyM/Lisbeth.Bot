@@ -15,16 +15,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
 using Lisbeth.Bot.Domain.DTOs.Request.Base;
 
-namespace Lisbeth.Bot.Domain.DTOs.Request.RoleMenu
+namespace Lisbeth.Bot.Domain.DTOs.Request.Ticket.Base
 {
-    public class RoleMenuAddReqDto : BaseAuthWithGuildReqDto
+    public class BaseTicketGetReqDto : BaseAuthReqDto
     {
-        public string? Text { get; set; }
-        public string? Name { get; set; }
-        public List<RoleMenuOptionReqDto>? RoleMenuOptions { get; set; }
-        public EmbedConfigDto? EmbedConfig { get; set; }
+        public long? Id { get; set; }
+        public ulong? OwnerId { get; set; }
+        public ulong? GuildId { get; set; }
+        public ulong? ChannelId { get; set; }
+        public long? GuildSpecificId { get; set; }
     }
 }

@@ -19,19 +19,21 @@ using AutoMapper;
 using Hangfire.Annotations;
 using Lisbeth.Bot.Application.Enums;
 using Lisbeth.Bot.Application.Exceptions;
+using Lisbeth.Bot.Application.Results;
 using Lisbeth.Bot.Application.Services.Database.Interfaces;
 using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig;
+using Lisbeth.Bot.Domain.DTOs.Request.RoleMenu;
 using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.Application.Interfaces;
+using MikyM.Common.Application.Results;
+using MikyM.Common.Application.Results.Errors;
 using MikyM.Common.Application.Services;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
 using System;
 using System.Threading.Tasks;
-using Lisbeth.Bot.Domain.DTOs.Request;
-using Lisbeth.Bot.Domain.DTOs.Request.RoleMenu;
 
 namespace Lisbeth.Bot.Application.Services.Database
 {
@@ -52,85 +54,85 @@ namespace Lisbeth.Bot.Application.Services.Database
             _roleMenuService = roleMenuService;
         }
 
-        public async Task<Guild> AddConfigAsync(TicketingConfigReqDto req, bool shouldSave = false)
+        public async Task<Result<Guild>> AddConfigAsync(TicketingConfigReqDto req, bool shouldSave = false)
         {
-            var guild = await base.GetSingleBySpecAsync<Guild>(
+            var result = await base.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(req.GuildId));
-            if (guild is null) throw new NotFoundException("Guild doesn't exist in the database");
-            if (guild.TicketingConfig is not null && guild.TicketingConfig.IsDisabled)
+            if (!result.IsSuccess) return Result<Guild>.FromError(new NotFoundError());
+            if (result.Entity.TicketingConfig is not null && result.Entity.TicketingConfig.IsDisabled)
                 return await this.EnableConfigAsync(req.GuildId, GuildConfigType.Ticketing, shouldSave);
-            else if (guild.TicketingConfig is not null && !guild.TicketingConfig.IsDisabled) throw new InvalidOperationException("Guild already has an enabled ticketing config");
+            if (result.Entity.TicketingConfig is not null && !result.Entity.TicketingConfig.IsDisabled) return Result<Guild>.FromError(new InvalidOperationError());
 
             await _ticketingService.AddAsync(req, shouldSave);
 
-            return guild;
+            return result.Entity;
         }
 
-        public async Task<Guild> AddConfigAsync(ModerationConfigReqDto req, bool shouldSave = false)
+        public async Task<Result<Guild>> AddConfigAsync(ModerationConfigReqDto req, bool shouldSave = false)
         {
-            var guild = await base.GetSingleBySpecAsync<Guild>(
+            var result = await base.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithModerationSpecifications(req.GuildId));
-            if (guild is null) throw new NotFoundException("Guild doesn't exist in the database");
-            if (guild.TicketingConfig is not null && guild.ModerationConfig.IsDisabled)
+            if (!result.IsSuccess) throw new NotFoundException("Guild doesn't exist in the database");
+            if (result.Entity.TicketingConfig is not null && result.Entity.ModerationConfig.IsDisabled)
                 return await this.EnableConfigAsync(req.GuildId, GuildConfigType.Moderation, shouldSave);
-            if (guild.ModerationConfig is not null && !guild.ModerationConfig.IsDisabled) throw new InvalidOperationException("Guild already has an enabled moderation config");
+            if (result.Entity.ModerationConfig is not null && !result.Entity.ModerationConfig.IsDisabled) return Result<Guild>.FromError(new InvalidOperationError());
 
             await _moderationService.AddAsync(req, shouldSave);
 
-            return guild;
+            return result.Entity;
         }
 
-        public async Task<bool> DisableConfigAsync(ulong guildId, GuildConfigType type, bool shouldSave = false)
+        public async Task<Result> DisableConfigAsync(ulong guildId, GuildConfigType type, bool shouldSave = false)
         {
-            Guild guild;
+            Result<Guild> result;
             switch (type)
             {
                 case GuildConfigType.Ticketing:
-                    guild = await base.GetSingleBySpecAsync<Guild>(
+                    result = await base.GetSingleBySpecAsync<Guild>(
                         new ActiveGuildByDiscordIdWithTicketingSpecifications(guildId));
-                    if (guild?.TicketingConfig is null) throw new NotFoundException("Guild doesn't exist in the database or it does not have a ticketing config");
-                    if (guild.TicketingConfig.IsDisabled) return false;
+                    if (!result.IsSuccess || result.Entity.TicketingConfig is null) return Result.FromError(new NotFoundError());
+                    if (result.Entity.IsDisabled) return Result.FromError(new DisabledEntityError(nameof(result.Entity.TicketingConfig)));
 
-                    await _ticketingService.DisableAsync(guild.TicketingConfig, shouldSave);
+                    await _ticketingService.DisableAsync(result.Entity.TicketingConfig, shouldSave);
                     break;
                 case GuildConfigType.Moderation:
-                    guild = await base.GetSingleBySpecAsync<Guild>(
+                    result = await base.GetSingleBySpecAsync<Guild>(
                         new ActiveGuildByDiscordIdWithModerationSpecifications(guildId));
-                    if (guild?.ModerationConfig is null) throw new NotFoundException("Guild doesn't exist in the database or it does not have a moderation config");
-                    if (guild.ModerationConfig.IsDisabled) return false;
+                    if (!result.IsSuccess || result.Entity.ModerationConfig is null) return Result.FromError(new NotFoundError());
+                    if (result.Entity.IsDisabled) return Result.FromError(new DisabledEntityError(nameof(result.Entity.ModerationConfig)));
 
-                    await _moderationService.DisableAsync(guild.ModerationConfig, shouldSave);
+                    await _moderationService.DisableAsync(result.Entity.ModerationConfig, shouldSave);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
-            return true;
+            return Result.FromSuccess();
         }
 
-        public async Task<Guild> EnableConfigAsync(ulong guildId, GuildConfigType type, bool shouldSave = false)
+        public async Task<Result<Guild>> EnableConfigAsync(ulong guildId, GuildConfigType type, bool shouldSave = false)
         {
-            Guild guild;
+            Result<Guild> result;
             switch (type)
             {
                 case GuildConfigType.Ticketing:
-                    guild = await base.GetSingleBySpecAsync<Guild>(
+                    result = await base.GetSingleBySpecAsync<Guild>(
                         new ActiveGuildByDiscordIdWithTicketingSpecifications(guildId));
-                    if (guild?.TicketingConfig is null) throw new NotFoundException("Guild doesn't exist in the database or it does not have a ticketing config");
-                    if (!guild.TicketingConfig.IsDisabled) return null;
+                    if (!result.IsSuccess || result.Entity.TicketingConfig is null) return Result<Guild>.FromError(new NotFoundError());
+                    if (!result.Entity.IsDisabled) return Result<Guild>.FromError(new DisabledEntityError(nameof(result.Entity.TicketingConfig)));
 
-                    _ticketingService.BeginUpdate(guild.TicketingConfig);
-                    guild.TicketingConfig.IsDisabled = false;
+                    _ticketingService.BeginUpdate(result.Entity.TicketingConfig);
+                    result.Entity.TicketingConfig.IsDisabled = false;
 
                     if (shouldSave) await _ticketingService.CommitAsync();
                     break;
                 case GuildConfigType.Moderation:
-                    guild = await base.GetSingleBySpecAsync<Guild>(
+                    result = await base.GetSingleBySpecAsync<Guild>(
                         new ActiveGuildByDiscordIdWithModerationSpecifications(guildId));
-                    if (guild?.ModerationConfig is null) throw new NotFoundException("Guild doesn't exist in the database or it does not have a moderation config");
-                    if (!guild.ModerationConfig.IsDisabled) return null;
+                    if (!result.IsSuccess || result.Entity.ModerationConfig is null) return Result<Guild>.FromError(new NotFoundError());
+                    if (!result.Entity.IsDisabled) return Result<Guild>.FromError(new DisabledEntityError(nameof(result.Entity.ModerationConfig)));
 
-                    base.BeginUpdate(guild.ModerationConfig);
-                    guild.ModerationConfig.IsDisabled = false;
+                    base.BeginUpdate(result.Entity.ModerationConfig);
+                    result.Entity.ModerationConfig.IsDisabled = false;
 
                     if (shouldSave) await _moderationService.CommitAsync();
                     break;
@@ -138,69 +140,77 @@ namespace Lisbeth.Bot.Application.Services.Database
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
 
-            return guild;
+            return result.Entity;
         }
 
-        public async Task EditTicketingConfigAsync(TicketingConfigEditReqDto req, bool shouldSave = false)
+        public async Task<Result> EditTicketingConfigAsync(TicketingConfigEditReqDto req, bool shouldSave = false)
         {
-            var guild = await base.GetSingleBySpecAsync<Guild>(
+            var result = await base.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(req.GuildId));
-            if (guild?.TicketingConfig is null) throw new NotFoundException("Guild doesn't exist in the database or it does not have a ticketing config");
-            if (guild.TicketingConfig.IsDisabled) throw new DisabledEntityException("Guild's ticketing config is disabled, please re-enable it first.");
+            if (!result.IsSuccess || result.Entity.TicketingConfig is null) return Result.FromError(new NotFoundError());
+            if (result.Entity.TicketingConfig.IsDisabled) return Result.FromError(new DisabledEntityError(nameof(result.Entity.TicketingConfig)));
 
-            _ticketingService.BeginUpdate(guild.TicketingConfig);
-            guild.TicketingConfig.CleanAfter = req.CleanAfter;
-            guild.TicketingConfig.CloseAfter = req.CloseAfter;
-            guild.TicketingConfig.ClosedNamePrefix = req.ClosedNamePrefix;
-            guild.TicketingConfig.OpenedNamePrefix = req.OpenedNamePrefix;
+            _ticketingService.BeginUpdate(result.Entity.TicketingConfig);
+            result.Entity.TicketingConfig.CleanAfter = req.CleanAfter;
+            result.Entity.TicketingConfig.CloseAfter = req.CloseAfter;
+            result.Entity.TicketingConfig.ClosedNamePrefix = req.ClosedNamePrefix;
+            result.Entity.TicketingConfig.OpenedNamePrefix = req.OpenedNamePrefix;
 
             if (shouldSave) await _ticketingService.CommitAsync();
+
+            return Result.FromSuccess();
         }
 
-        public async Task RepairModuleConfigAsync(TicketingConfigRepairReqDto req, bool shouldSave = false)
+        public async Task<Result> RepairModuleConfigAsync(TicketingConfigRepairReqDto req, bool shouldSave = false)
         {
-            var guild = await base.GetSingleBySpecAsync<Guild>(
+            var result = await base.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(req.GuildId));
-            if (guild?.TicketingConfig is null) throw new NotFoundException("Guild doesn't exist in the database or it does not have a ticketing config");
-            if (guild.TicketingConfig.IsDisabled) throw new DisabledEntityException("Guild's ticketing config is disabled, please re-enable it first.");
+            if (!result.IsSuccess || result.Entity.TicketingConfig is null) return Result.FromError(new NotFoundError());
+            if (result.Entity.TicketingConfig.IsDisabled) return Result.FromError(new DisabledEntityError(nameof(result.Entity.TicketingConfig)));
 
-            _ticketingService.BeginUpdate(guild.TicketingConfig);
-            if (req.ClosedCategoryId is not null) guild.TicketingConfig.ClosedCategoryId = req.ClosedCategoryId.Value;
-            if (req.OpenedCategoryId is not null) guild.TicketingConfig.OpenedCategoryId = req.OpenedCategoryId.Value;
-            if (req.LogChannelId is not null) guild.TicketingConfig.LogChannelId = req.LogChannelId.Value;
+            _ticketingService.BeginUpdate(result.Entity.TicketingConfig);
+            if (req.ClosedCategoryId is not null) result.Entity.TicketingConfig.ClosedCategoryId = req.ClosedCategoryId.Value;
+            if (req.OpenedCategoryId is not null) result.Entity.TicketingConfig.OpenedCategoryId = req.OpenedCategoryId.Value;
+            if (req.LogChannelId is not null) result.Entity.TicketingConfig.LogChannelId = req.LogChannelId.Value;
 
             if (shouldSave) await _ticketingService.CommitAsync();
+
+            return Result.FromSuccess();
         }
 
-        public async Task RepairModuleConfigAsync(ModerationConfigRepairReqDto req, bool shouldSave = false)
+        public async Task<Result> RepairModuleConfigAsync(ModerationConfigRepairReqDto req, bool shouldSave = false)
         {
-            var guild = await base.GetSingleBySpecAsync<Guild>(
-                new ActiveGuildByDiscordIdWithModerationSpecifications(req.GuildId));
-            if (guild?.ModerationConfig is null) throw new NotFoundException("Guild doesn't exist in the database or it does not have a moderation config");
-            if (guild.ModerationConfig.IsDisabled) throw new DisabledEntityException("Guild's moderation config is disabled, please re-enable it first.");
+            var result = await base.GetSingleBySpecAsync<Guild>(
+                new ActiveGuildByDiscordIdWithTicketingSpecifications(req.GuildId));
+            if (!result.IsSuccess || result.Entity.ModerationConfig is null) return Result.FromError(new NotFoundError());
+            if (result.Entity.ModerationConfig.IsDisabled) return Result.FromError(new DisabledEntityError(nameof(result.Entity.ModerationConfig)));
 
-            _moderationService.BeginUpdate(guild.ModerationConfig);
-            if (req.MemberEventsLogChannelId is not null) guild.ModerationConfig.MemberEventsLogChannelId = req.MemberEventsLogChannelId.Value;
-            if (req.MessageDeletedEventsLogChannelId is not null) guild.ModerationConfig.MessageDeletedEventsLogChannelId = req.MessageDeletedEventsLogChannelId.Value;
-            if (req.MessageUpdatedEventsLogChannelId is not null) guild.ModerationConfig.MessageUpdatedEventsLogChannelId = req.MessageUpdatedEventsLogChannelId.Value;
-            if (req.ModerationLogChannelId is not null) guild.ModerationConfig.ModerationLogChannelId = req.ModerationLogChannelId.Value;
-            if (req.MuteRoleId is not null) guild.ModerationConfig.MuteRoleId = req.MuteRoleId.Value;
+            _moderationService.BeginUpdate(result.Entity.ModerationConfig);
+            if (req.MemberEventsLogChannelId is not null) result.Entity.ModerationConfig.MemberEventsLogChannelId = req.MemberEventsLogChannelId.Value;
+            if (req.MessageDeletedEventsLogChannelId is not null) result.Entity.ModerationConfig.MessageDeletedEventsLogChannelId = req.MessageDeletedEventsLogChannelId.Value;
+            if (req.MessageUpdatedEventsLogChannelId is not null) result.Entity.ModerationConfig.MessageUpdatedEventsLogChannelId = req.MessageUpdatedEventsLogChannelId.Value;
+            if (req.ModerationLogChannelId is not null) result.Entity.ModerationConfig.ModerationLogChannelId = req.ModerationLogChannelId.Value;
+            if (req.MuteRoleId is not null) result.Entity.ModerationConfig.MuteRoleId = req.MuteRoleId.Value;
 
             if (shouldSave) await _moderationService.CommitAsync();
+
+            return Result.FromSuccess();
         }
 
-        public Task EditModerationConfigAsync(ulong guildId, bool shouldSave = false)
+        public Task<Result> EditModerationConfigAsync(ulong guildId, bool shouldSave = false)
         {
             throw new NotImplementedException();
         }
 
-        public async Task AddRoleMenuAsync(RoleMenuAddReqDto req, bool shouldSave = false)
+        public async Task<Result> AddRoleMenuAsync(RoleMenuAddReqDto req, bool shouldSave = false)
         {
-            var guild = await base.GetSingleBySpecAsync<Guild>(
+            var result = await base.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByIdSpec(req.GuildId));
-            if (guild is null) throw new NotFoundException("Guild doesn't exist in the database");
+            if (!result.IsSuccess) return Result.FromError(new NotFoundError());
 
-            await _roleMenuService.AddAsync(req, shouldSave);
+            var partial = await _roleMenuService.AddAsync(req, shouldSave);
+
+            return partial.IsSuccess ? Result.FromSuccess() : Result.FromError(partial.Error);
         }
     }
 }

@@ -21,7 +21,7 @@ namespace Lisbeth.Bot.Domain.Entities
 {
     public class Tag : EmbedConfigEntity
     {
-        public string Text { get; set; }
-        public Guild Guild { get; set; }
+        public string? Text { get; set; }
+        public Guild? Guild { get; set; }
     }
 }

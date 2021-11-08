@@ -15,16 +15,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
-using Lisbeth.Bot.Domain.DTOs.Request.Base;
+using MikyM.Common.Application.Results;
 
-namespace Lisbeth.Bot.Domain.DTOs.Request.RoleMenu
+namespace Lisbeth.Bot.Application.Results
 {
-    public class RoleMenuAddReqDto : BaseAuthWithGuildReqDto
-    {
-        public string? Text { get; set; }
-        public string? Name { get; set; }
-        public List<RoleMenuOptionReqDto>? RoleMenuOptions { get; set; }
-        public EmbedConfigDto? EmbedConfig { get; set; }
-    }
+    /// <summary>
+    /// Represents a perform an action due to authorization.
+    /// </summary>
+    public record DiscordTimedOutError(string Message = "Interaction timed out.") : ResultError(Message);
 }

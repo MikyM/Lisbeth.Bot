@@ -30,7 +30,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
     [SlashModuleLifespan(SlashModuleLifespan.Transient)]
     public class EmbedConfigSlashCommands : ApplicationCommandModule
     {
-        public IDiscordEmbedConfiguratorService<Tag> _embedConfigService { private get; set; }
+        public IDiscordEmbedConfiguratorService<Tag>? _embedConfigService { private get; set; }
 
         [SlashCommand("test", "something")]
         public async Task EmbedConfigCommand(InteractionContext ctx,
@@ -41,9 +41,9 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
 
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
-            var result = await _embedConfigService.ConfigureAsync(ctx, parsedId.ToString());
+            var result = await _embedConfigService!.ConfigureAsync(ctx, parsedId.ToString());
 
-            await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(result.Embed));
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(result.Entity));
         }
     }
 }

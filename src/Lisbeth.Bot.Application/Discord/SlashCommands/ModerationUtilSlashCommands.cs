@@ -1,7 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using DSharpPlus;
+﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
@@ -9,8 +6,8 @@ using FluentValidation;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
+using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
 using Lisbeth.Bot.Application.Enums;
-using Lisbeth.Bot.Application.Extensions;
 using Lisbeth.Bot.Application.Services.Database.Interfaces;
 using Lisbeth.Bot.Application.Validation.ModerationConfig;
 using Lisbeth.Bot.Application.Validation.TicketingConfig;
@@ -18,16 +15,19 @@ using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
 using Lisbeth.Bot.Domain.Entities;
+using MikyM.Common.Application.Results;
+using System;
+using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands
 {
     [SlashCommandGroup("mod", "Moderation commands")]
     [SlashModuleLifespan(SlashModuleLifespan.Transient)]
-    public class ModerationUtilSlashCommands : ApplicationCommandModule
+    public class ModerationUtilSlashCommands : ExtendedApplicationCommandModule
     {
-        public IGuildService _guildService { private get; set; }
-        public IDiscordGuildService _discordGuildService { private get; set; }
-        public IDiscordTicketService _dicordTicketService { private get; set; }
+        public IGuildService? _guildService { private get; set; }
+        public IDiscordGuildService? _discordGuildService { private get; set; }
+        public IDiscordTicketService? _dicordTicketService { private get; set; }
 
         [SlashRequireUserPermissions(Permissions.Administrator)]
         [SlashCommand("identity", "A command that allows checking information about a member.")]
@@ -39,11 +39,10 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
-            var res = await _guildService.GetBySpecAsync<Guild>(
+            var res = await _guildService!.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(ctx.Guild.Id));
-            var guild = res.FirstOrDefault();
 
-            if (guild is null) throw new ArgumentException("Guild not found in database");
+            if (!res.IsSuccess) throw new ArgumentException("Guild not found in database");
 
             var member = (DiscordMember) user;
 
@@ -53,7 +52,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             embed.AddField("Member's identity", $"{user.GetFullUsername()}", true);
             embed.AddField("Joined guild", $"{member.JoinedAt}");
             embed.AddField("Account created", $"{member.CreationTimestamp}");
-            embed.WithColor(new DiscordColor(guild.EmbedHexColor));
+            embed.WithColor(new DiscordColor(res.Entity.EmbedHexColor));
             embed.WithFooter($"Member Id: {member.Id}");
 
             await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(embed.Build())
@@ -69,9 +68,9 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
-            var builder = await _dicordTicketService.GetTicketCenterEmbedAsync(ctx);
+            var builder = await _dicordTicketService!.GetTicketCenterEmbedAsync(ctx);
 
-            await ctx.Channel.SendMessageAsync(builder);
+            await ctx.Channel.SendMessageAsync(builder.Entity);
             await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
                 .WithContent("message sent successfully").AsEphemeral(true));
         }
@@ -82,13 +81,13 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
         public async Task TicketConfigCommand(InteractionContext ctx, 
             [Option("action", "Action to perform")] ModuleActionType action,
             [Option("module", "Module to perform action on")] GuildConfigType type,
-            [Option("clean-after", "After how many hours should inactive closed tickets be cleared")] string cleanAfter = "",
-            [Option("close-after", "After how many hours should inactive opened tickets be closed")] string closeAfter= "")
+            [Option("clean-after", "After how many hours should inactive closed tickets be cleared")] string? cleanAfter = "",
+            [Option("close-after", "After how many hours should inactive opened tickets be closed")] string? closeAfter= "")
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
-            DiscordEmbed embed = null;
+            Result<DiscordEmbed>? result = null;
             
             switch (type)
             {
@@ -120,7 +119,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
 
                             var enableTicketingValidator = new TicketingConfigReqValidator(ctx.Client);
                             await enableTicketingValidator.ValidateAndThrowAsync(enableTicketingReq);
-                            embed = await _discordGuildService.CreateModuleAsync(ctx, enableTicketingReq);
+                            result = await _discordGuildService!.CreateModuleAsync(ctx, enableTicketingReq);
                             break;
                         case ModuleActionType.Repair:
                             var repairTicketingReq = new TicketingConfigRepairReqDto
@@ -130,7 +129,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                             };
                             var repairTicketingValidator = new TicketingConfigRepairReqValidator(ctx.Client);
                             await repairTicketingValidator.ValidateAndThrowAsync(repairTicketingReq);
-                            embed = await _discordGuildService.RepairConfigAsync(ctx, repairTicketingReq);
+                            result = await _discordGuildService!.RepairConfigAsync(ctx, repairTicketingReq);
                             break;
                         case ModuleActionType.Edit:
                             break;
@@ -142,7 +141,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                             };
                             var disableTicketingValidator = new TicketingConfigDisableReqValidator(ctx.Client);
                             await disableTicketingValidator.ValidateAndThrowAsync(disableTicketingReq);
-                            embed = await _discordGuildService.DisableModuleAsync(ctx, disableTicketingReq);
+                            result = await _discordGuildService.DisableModuleAsync(ctx, disableTicketingReq);
                             break;
                         default:
                             throw new ArgumentOutOfRangeException(nameof(action), action, null);
@@ -159,7 +158,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                             };
                             var enableModerationValidator = new ModerationConfigReqValidator(ctx.Client);
                             await enableModerationValidator.ValidateAndThrowAsync(enableModerationReq);
-                            embed = await _discordGuildService.CreateModuleAsync(ctx, enableModerationReq);
+                            result = await _discordGuildService!.CreateModuleAsync(ctx, enableModerationReq);
                             break;
                         case ModuleActionType.Repair:
                             var repairModerationReq = new ModerationConfigRepairReqDto
@@ -169,7 +168,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                             };
                             var repairModerationValidator = new ModerationConfigRepairReqValidator(ctx.Client);
                             await repairModerationValidator.ValidateAndThrowAsync(repairModerationReq);
-                            embed = await _discordGuildService.RepairConfigAsync(ctx, repairModerationReq);
+                            result = await _discordGuildService!.RepairConfigAsync(ctx, repairModerationReq);
                             break;
                         case ModuleActionType.Edit:
                             break;
@@ -181,7 +180,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                             };
                             var disableModerationValidator = new ModerationConfigDisableReqValidator(ctx.Client);
                             await disableModerationValidator.ValidateAndThrowAsync(disableModerationReq);
-                            embed = await _discordGuildService.DisableModuleAsync(ctx, disableModerationReq);
+                            result = await _discordGuildService!.DisableModuleAsync(ctx, disableModerationReq);
                             break;
                         default:
                             throw new ArgumentOutOfRangeException(nameof(action), action, null);
@@ -191,7 +190,9 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
 
-            await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
+            if (!result.HasValue) return;
+            if (result.Value.IsSuccess) await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(result.Value.Entity));
+            else await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(result, ctx.Client)));
         }
 
         [UsedImplicitly]
@@ -205,11 +206,11 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
-            var res = await _guildService.GetBySpecAsync<Guild>(
+            var res = await _guildService!.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(ctx.Guild.Id));
-            var guild = res.FirstOrDefault();
+            if (!res.IsSuccess) throw new ArgumentException("Guild not found in database");
 
-            if (guild is null) throw new ArgumentException("Guild not found in database");
+            var guild = res.Entity;
 
             var modConfig = new ModerationConfig
             {
@@ -234,7 +235,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
 
             var guild = new Guild {GuildId = ctx.Guild.Id, UserId = ctx.User.Id, IsDisabled = false};
 
-            await _guildService.AddAsync(guild, true);
+            await _guildService!.AddAsync(guild, true);
 
             await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("Done"));
         }

@@ -23,11 +23,11 @@ namespace Lisbeth.Bot.Domain.Entities
     {
         public long RoleMenuId { get; set; }
         public ulong RoleId { get; set; }
-        public string Emoji { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public string CustomSelectOptionValueId { get; set; }
+        public string? Emoji { get; set; }
+        public string? Name { get; set; }
+        public string? Description { get; set; }
+        public string? CustomSelectOptionValueId { get; set; }
 
-        public RoleMenu RoleMenu { get; set; }
+        public RoleMenu? RoleMenu { get; set; }
     }
 }

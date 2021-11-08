@@ -15,9 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using JetBrains.Annotations;
@@ -28,8 +25,12 @@ using Lisbeth.Bot.Application.Services.Database.Interfaces;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Mute;
 using Lisbeth.Bot.Domain.Entities;
+using MikyM.Common.Application.Results;
 using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Discord.Interfaces;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {
@@ -50,22 +51,15 @@ namespace Lisbeth.Bot.Application.Discord.Services
             _embedProvider = embedProvider;
         }
 
-        public async Task LogMemberRemovedEventAsync(GuildMemberRemoveEventArgs args)
+        public async Task<Result> LogMemberRemovedEventAsync(GuildMemberRemoveEventArgs args)
         {
             if (args is null) throw new ArgumentNullException(nameof(args));
 
-            var res = await _guildService.GetBySpecAsync<Guild>(
+            var res = await _guildService.GetSingleBySpecAsync<Guild>(
                 new Specification<Guild>(x => x.GuildId == args.Guild.Id && !x.IsDisabled));
 
-            var guild = res.FirstOrDefault();
-
-            if (guild?.ModerationConfig?.MemberEventsLogChannelId is null) return;
-
-            DiscordChannel logChannel =
-                args.Guild.Channels.FirstOrDefault(x => x.Key == guild.ModerationConfig.MemberEventsLogChannelId)
-                    .Value;
-
-            if (logChannel is null) return;
+            if (!res.IsSuccess || res.Entity.ModerationConfig is null) return Result.FromSuccess();
+            if (!args.Guild.Channels.TryGetValue(res.Entity.ModerationConfig.MemberEventsLogChannelId, out var logChannel)) return Result.FromSuccess();
 
             string reasonLeft = "No reason found";
 
@@ -98,7 +92,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             embed.AddField("Member's mention", $"{args.Member.Mention}", true);
             embed.AddField("Joined guild", $"{args.Member.JoinedAt}");
             embed.AddField("Account created", $"{args.Member.CreationTimestamp}");
-            embed.WithColor(new DiscordColor(guild.EmbedHexColor));
+            embed.WithColor(new DiscordColor(res.Entity.EmbedHexColor));
             embed.WithFooter($"Member ID: {args.Member.Id}");
 
             if (reasonLeft != "No reason found") embed.AddField("Reason for leaving", reasonLeft);
@@ -107,58 +101,61 @@ namespace Lisbeth.Bot.Application.Discord.Services
             {
                 await _discord.Client.SendMessageAsync(logChannel, embed.Build());
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // probably should tell idiots to fix channel id in config but idk how so return for now, mebe msg members with admin privs
             }
+
+            return Result.FromSuccess();
         }
 
-        public async Task SendWelcomeMessageAsync(GuildMemberAddEventArgs args)
+        public async Task<Result> SendWelcomeMessageAsync(GuildMemberAddEventArgs args)
         {
             if (args is null) throw new ArgumentNullException(nameof(args));
 
-            var guild = await _guildService.GetSingleBySpecAsync<Guild>(
+            var result = await _guildService.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithModerationSpecifications(args.Guild.Id));
 
-            if (guild?.ModerationConfig?.BaseMemberWelcomeMessage is null) return;
+
+            if (!result.IsSuccess || result.Entity.ModerationConfig?.BaseMemberWelcomeMessage is null) return Result.FromSuccess();
 
             var embed = new DiscordEmbedBuilder();
-            if (guild.ModerationConfig.MemberWelcomeEmbedConfig is not null)
+            if (result.Entity.ModerationConfig.MemberWelcomeEmbedConfig is not null)
             {
-                embed = _embedProvider.ConfigureEmbed(guild.ModerationConfig.MemberWelcomeEmbedConfig);
+                embed = _embedProvider.ConfigureEmbed(result.Entity.ModerationConfig.MemberWelcomeEmbedConfig);
             }
             else
             {
-                embed.WithColor(new DiscordColor(guild.EmbedHexColor));
-                embed.WithDescription(guild.ModerationConfig.BaseMemberWelcomeMessage);
+                embed.WithColor(new DiscordColor(result.Entity.EmbedHexColor));
+                embed.WithDescription(result.Entity.ModerationConfig.BaseMemberWelcomeMessage);
             }
 
             try
             {
                 await args.Member.SendMessageAsync(embed.Build());
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // probably should tell idiots to fix channel id in config but idk how so return for now, mebe msg members with admin privs
             }
+            
+            return Result.FromSuccess();
         }
 
-        public async Task MemberMuteCheckAsync(GuildMemberAddEventArgs args)
+        public async Task<Result> MemberMuteCheckAsync(GuildMemberAddEventArgs args)
         {
             if (args is null) throw new ArgumentNullException(nameof(args));
 
-            var res = await _muteService.GetBySpecAsync<Mute>(
+            var res = await _muteService.GetSingleBySpecAsync<Mute>(
                 new ActiveMutesByGuildAndUserSpecifications(args.Guild.Id, args.Member.Id));
 
-            var mute = res.FirstOrDefault();
+            if (!res.IsSuccess || res.Entity.Guild.ModerationConfig is null) return Result.FromSuccess(); // no mod config enabled so we don't care
 
-            if (mute?.Guild.ModerationConfig is null) return; // no mod config enabled so we don't care
-
-            var role = args.Guild.Roles.FirstOrDefault(x => x.Key == mute.Guild.ModerationConfig.MuteRoleId).Value;
-
-            if (role is null) return;
+            if (!args.Guild.Roles.TryGetValue(res.Entity.Guild.ModerationConfig.MuteRoleId, out var role)) return Result.FromSuccess();
 
             await args.Member.GrantRoleAsync(role);
+
+            return Result.FromSuccess();
         }
     }
 }

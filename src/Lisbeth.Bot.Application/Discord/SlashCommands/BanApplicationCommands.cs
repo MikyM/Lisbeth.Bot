@@ -44,7 +44,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
         [SlashCommand("ban", "A command that allows banning a user.")]
         public async Task BanCommand(InteractionContext ctx,
             [Option("action", "Action type")] BanActionType actionType,
-            [Option("user", "User to ban")] DiscordUser user = null, [Option("id", "User Id to ban")] string id = "",
+            [Option("user", "User to ban")] DiscordUser? user = null, [Option("id", "User Id to ban")] string id = "",
             [Option("length", "For how long should the user be banned")]
             string length = "perm", [Option("reason", "Reason for ban")] string reason = "No reason provided")
         {

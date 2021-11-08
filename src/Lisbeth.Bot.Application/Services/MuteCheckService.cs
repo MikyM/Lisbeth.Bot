@@ -15,18 +15,19 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Services.Database.Interfaces;
 using Lisbeth.Bot.Application.Services.Interfaces;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
-using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.DTOs.Request.Mute;
 using Lisbeth.Bot.Domain.Entities;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using MikyM.Common.Application.Results;
+using MikyM.Common.Application.Results.Errors;
 
 namespace Lisbeth.Bot.Application.Services
 {
@@ -42,18 +43,18 @@ namespace Lisbeth.Bot.Application.Services
             _guildService = guildService;
         }
 
-        public async Task CheckForNonBotMuteActionAsync(ulong targetId, ulong guildId, ulong requestedOnBehalfOfId,
+        public async Task<Result> CheckForNonBotMuteActionAsync(ulong targetId, ulong guildId, ulong requestedOnBehalfOfId,
             IReadOnlyList<DiscordRole> rolesBefore, IReadOnlyList<DiscordRole> rolesAfter)
         {
             await Task.Delay(1000);
 
-            var guild = await _guildService.GetSingleBySpecAsync<Guild>(
+            var result = await _guildService.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithModerationSpecifications(guildId));
 
-            if (guild?.ModerationConfig is null) return;
+            if (!result.IsSuccess || result.Entity.ModerationConfig is null) return Result.FromError(new NotFoundError());
 
-            bool wasMuted = rolesBefore.Any(x => x.Id == guild.ModerationConfig.MuteRoleId);
-            bool isMuted = rolesAfter.Any(x => x.Id == guild.ModerationConfig.MuteRoleId);
+            bool wasMuted = rolesBefore.Any(x => x.Id == result.Entity.ModerationConfig.MuteRoleId);
+            bool isMuted = rolesAfter.Any(x => x.Id == result.Entity.ModerationConfig.MuteRoleId);
 
             switch (wasMuted)
             {
@@ -65,6 +66,8 @@ namespace Lisbeth.Bot.Application.Services
                         DateTime.MaxValue));
                     break;
             }
+
+            return Result.FromSuccess();
         }
     }
 }

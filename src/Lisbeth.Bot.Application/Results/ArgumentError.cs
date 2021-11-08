@@ -15,16 +15,20 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
-using Lisbeth.Bot.Domain.DTOs.Request.Base;
+using MikyM.Common.Application.Results;
 
-namespace Lisbeth.Bot.Domain.DTOs.Request.RoleMenu
+namespace Lisbeth.Bot.Application.Results
 {
-    public class RoleMenuAddReqDto : BaseAuthWithGuildReqDto
+    /// <summary>
+    /// Represents a failure to find something that was searched for from Discord services.
+    /// </summary>
+    public record ArgumentError : ResultError
     {
-        public string? Text { get; set; }
-        public string? Name { get; set; }
-        public List<RoleMenuOptionReqDto>? RoleMenuOptions { get; set; }
-        public EmbedConfigDto? EmbedConfig { get; set; }
+        /// <summary>
+        /// Represents a failure to find something that was searched for from Discord services.
+        /// </summary>
+        /// <param name="name">Argument name.</param>
+        /// <param name="message">Custom message.</param>
+        public ArgumentError(string? name = null, string? message = null) : base(message ?? $"Given {(name is null ? "argument" : $"{name}")} is not valid.") { }
     }
 }

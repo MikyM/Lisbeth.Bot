@@ -22,10 +22,10 @@ namespace Lisbeth.Bot.Domain.DTOs.Request.Reminder
 {
     public class RescheduleReminderReqDto : BaseAuthWithGuildReqDto
     {
-        public string Name { get; set; }
-        public string CronExpression { get; set; }
+        public string? Name { get; set; }
+        public string? CronExpression { get; set; }
         public DateTime? SetFor { get; set; }
-        public string TimeSpanExpression { get; set; }
+        public string? TimeSpanExpression { get; set; }
         public long? ReminderId { get; set; }
         public long? NewHangfireId { get; set; }
 
@@ -33,7 +33,7 @@ namespace Lisbeth.Bot.Domain.DTOs.Request.Reminder
         {
         }
 
-        public RescheduleReminderReqDto(string name, string cronExpression, DateTime? setFor, string timeSpanExpression, ulong guildId, ulong requestedOnBehalfOfId, long? reminderId = null, long? newHangfireId = null) : base(guildId, requestedOnBehalfOfId)
+        public RescheduleReminderReqDto(string name, string? cronExpression, DateTime? setFor, string? timeSpanExpression, ulong guildId, ulong requestedOnBehalfOfId, long? reminderId = null, long? newHangfireId = null) : base(guildId, requestedOnBehalfOfId)
         {
             Name = name;
             CronExpression = cronExpression;

@@ -33,11 +33,11 @@ namespace Lisbeth.Bot.Domain.Entities
         public ulong MessageOpenId { get; set; }
         public ulong? MessageCloseId { get; set; }
         public ulong? MessageReopenId { get; set; }
-        public List<ulong> AddedUserIds { get; set; }
-        public List<ulong> AddedRoleIds { get; set; }
+        public List<ulong>? AddedUserIds { get; set; }
+        public List<ulong>? AddedRoleIds { get; set; }
         public bool IsPrivate { get; set; }
 
-        public Guild Guild { get; set; }
+        public Guild? Guild { get; set; }
         public ulong GuildId { get; set; }
     }
 }

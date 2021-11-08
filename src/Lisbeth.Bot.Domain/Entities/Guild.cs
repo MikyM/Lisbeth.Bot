@@ -19,35 +19,51 @@ using Lisbeth.Bot.Domain.Entities.Base;
 using System;
 using System.Collections.Generic;
 
+// ReSharper disable CollectionNeverUpdated.Local
+// ReSharper disable InconsistentNaming
+
 namespace Lisbeth.Bot.Domain.Entities
 {
     public sealed class Guild : SnowflakeEntity
     {
-        private readonly HashSet<Ban> bans;
-        private readonly HashSet<GuildServerBooster> guildServerBoosters;
-        private readonly HashSet<Mute> mutes;
-        private readonly HashSet<Prune> prunes;
-        private readonly HashSet<RecurringReminder> recurringReminders;
-        private readonly HashSet<Reminder> reminders;
-        private readonly HashSet<Ticket> tickets;
-        private readonly HashSet<Tag> tags;
-        private readonly HashSet<RoleMenu> roleMenus;
+        private readonly HashSet<Ban>? bans;
+        private readonly HashSet<GuildServerBooster>? guildServerBoosters;
+        private readonly HashSet<Mute>? mutes;
+        private readonly HashSet<Prune>? prunes;
+        private readonly HashSet<RecurringReminder>? recurringReminders;
+        private readonly HashSet<Reminder>? reminders;
+        private readonly HashSet<Ticket>? tickets;
+        private readonly HashSet<Tag>? tags;
+        private readonly HashSet<RoleMenu>? roleMenus;
+
+        public Guild()
+        {
+            this.bans ??= new HashSet<Ban>();
+            this.guildServerBoosters ??= new HashSet<GuildServerBooster>();
+            this.mutes ??= new HashSet<Mute>();
+            this.prunes ??= new HashSet<Prune>();
+            this.recurringReminders ??= new HashSet<RecurringReminder>();
+            this.reminders ??= new HashSet<Reminder>();
+            this.tickets ??= new HashSet<Ticket>();
+            this.tags ??= new HashSet<Tag>();
+            this.roleMenus ??= new HashSet<RoleMenu>();
+        }
 
         public ulong GuildId { get; set; }
         public ulong UserId { get; set; }
         public ulong? ReminderChannelId { get; set; }
-        public TicketingConfig TicketingConfig { get; private set; }
-        public ModerationConfig ModerationConfig { get; private set; }
+        public TicketingConfig? TicketingConfig { get; private set; }
+        public ModerationConfig? ModerationConfig { get; private set; }
         public string EmbedHexColor { get; set; } = "#26296e";
-        public IReadOnlyCollection<Mute> Mutes => mutes;
-        public IReadOnlyCollection<Ban> Bans => bans;
-        public IReadOnlyCollection<Prune> Prunes => prunes;
-        public IReadOnlyCollection<Ticket> Tickets => tickets;
-        public IReadOnlyCollection<GuildServerBooster> GuildServerBoosters => guildServerBoosters;
-        public IReadOnlyCollection<Reminder> Reminders => reminders;
-        public IReadOnlyCollection<RecurringReminder> RecurringReminders => recurringReminders;
-        public IReadOnlyCollection<Tag> Tags => tags;
-        public IReadOnlyCollection<RoleMenu> RoleMenus => roleMenus;
+        public IReadOnlyCollection<Mute>? Mutes => mutes;
+        public IReadOnlyCollection<Ban>? Bans => bans;
+        public IReadOnlyCollection<Prune>? Prunes => prunes;
+        public IReadOnlyCollection<Ticket>? Tickets => tickets;
+        public IReadOnlyCollection<GuildServerBooster>? GuildServerBoosters => guildServerBoosters;
+        public IReadOnlyCollection<Reminder>? Reminders => reminders;
+        public IReadOnlyCollection<RecurringReminder>? RecurringReminders => recurringReminders;
+        public IReadOnlyCollection<Tag>? Tags => tags;
+        public IReadOnlyCollection<RoleMenu>? RoleMenus => roleMenus;
 
 /*        public Guild()
         {
@@ -57,45 +73,45 @@ namespace Lisbeth.Bot.Domain.Entities
         public void AddMute(Mute mute)
         {
             if (mute  is null) throw new ArgumentNullException(nameof(mute));
-            mutes.Add(mute);
+            mutes?.Add(mute);
         }
 
         public void AddPrune(Prune prune)
         {
             if (prune  is null) throw new ArgumentNullException(nameof(prune));
-            prunes.Add(prune);
+            prunes?.Add(prune);
         }
 
         public void AddBan(Ban ban)
         {
             if (ban  is null) throw new ArgumentNullException(nameof(ban));
-            bans.Add(ban);
+            bans?.Add(ban);
         }
 
         public void AddServerBooster(GuildServerBooster guildServerBooster)
         {
             if (guildServerBooster  is null) throw new ArgumentNullException(nameof(guildServerBooster));
-            guildServerBoosters.Add(guildServerBooster);
+            guildServerBoosters?.Add(guildServerBooster);
         }
 
         public bool AddTag(Tag tag)
         {
-            if (tag  is null) throw new ArgumentNullException(nameof(tag));
-            return tags.Add(tag);
+            if (tag is null) throw new ArgumentNullException(nameof(tag));
+            return tags is not null && tags.Add(tag);
         }
 
         public bool RemoveTag(string name)
         {
             if (name is "") throw new ArgumentException("Name can't be empty", nameof(name));
-            var res = tags.RemoveWhere(x => x.Name == name);
+            var res = tags?.RemoveWhere(x => x.Name == name);
             return res > 0;
         }
 
         public bool EditTag(Tag tag)
         {
             if (tag  is null) throw new ArgumentNullException(nameof(tag));
-            var res = tags.RemoveWhere(x => x.Name == tag.Name);
-            return res != 0 && tags.Add(tag);
+            var res = tags?.RemoveWhere(x => x.Name == tag.Name);
+            return tags is not null && res != 0 && tags.Add(tag);
         }
 
         public void SetTicketingConfig(TicketingConfig config)

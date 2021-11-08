@@ -17,19 +17,19 @@
 
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
-using Lisbeth.Bot.Domain.Enums;
-using System.Threading.Tasks;
 using Lisbeth.Bot.Domain.DTOs.Request.Reminder;
+using MikyM.Common.Application.Results;
+using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
 {
     public interface IDiscordReminderService
     {
-        Task<DiscordEmbed> SetNewReminderAsync(SetReminderReqDto req);
-        Task<DiscordEmbed> SetNewReminderAsync(InteractionContext ctx, SetReminderReqDto req);
-        Task<DiscordEmbed> DisableReminderAsync(DisableReminderReqDto req);
-        Task<DiscordEmbed> DisableReminderAsync(InteractionContext ctx, DisableReminderReqDto req);
-        Task<DiscordEmbed> RescheduleReminderAsync(RescheduleReminderReqDto req);
-        Task<DiscordEmbed> RescheduleReminderAsync(InteractionContext ctx, RescheduleReminderReqDto req);
+        Task<Result<DiscordEmbed>> SetNewReminderAsync(SetReminderReqDto req);
+        Task<Result<DiscordEmbed>> SetNewReminderAsync(InteractionContext ctx, SetReminderReqDto req);
+        Task<Result<DiscordEmbed>> DisableReminderAsync(DisableReminderReqDto req);
+        Task<Result<DiscordEmbed>> DisableReminderAsync(InteractionContext ctx, DisableReminderReqDto req);
+        Task<Result<DiscordEmbed>> RescheduleReminderAsync(RescheduleReminderReqDto req);
+        Task<Result<DiscordEmbed>> RescheduleReminderAsync(InteractionContext ctx, RescheduleReminderReqDto req);
     }
 }

@@ -24,11 +24,11 @@ namespace Lisbeth.Bot.Domain.Entities
     public class Reminder : EmbedConfigEntity
     {
         public DateTime SetFor { get; set; }
-        public string Text { get; set; }
+        public string? Text { get; set; }
         public long HangfireId { get; set; }
-        public List<string> Mentions { get; set; }
+        public List<string>? Mentions { get; set; }
         public bool IsGuildReminder { get; set; }
 
-        public Guild Guild { get; set; }
+        public Guild? Guild { get; set; }
     }
 }

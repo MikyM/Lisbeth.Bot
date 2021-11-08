@@ -15,26 +15,25 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using FluentValidation;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
+using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
 using Lisbeth.Bot.Application.Validation.RoleMenu;
-using Lisbeth.Bot.Application.Validation.Tag;
-using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.DTOs.Request.RoleMenu;
-using Lisbeth.Bot.Domain.DTOs.Request.Tag;
 using Lisbeth.Bot.Domain.Entities;
+using MikyM.Common.Application.Results;
+using System;
+using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands
 {
     [UsedImplicitly]
     [SlashModuleLifespan(SlashModuleLifespan.Transient)]
-    public class RoleMenuSlashCommands
+    public class RoleMenuSlashCommands : ExtendedApplicationCommandModule
     {
         public IDiscordRoleMenuService _discordRoleMenuService { private get; set; }
         public IDiscordEmbedConfiguratorService<RoleMenu> _discordEmbedConfiguratorService { private get; set; }
@@ -53,11 +52,9 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
             bool isId = long.TryParse(idOrName, out long id);
-            bool isSuccess = true;
-            bool isEmbedConfig = false;
-            DiscordWebhookBuilder wbhk = null;
 
-            (DiscordEmbed Embed, string Text) result = new(null, "");
+            Result<(DiscordWebhookBuilder? Embed, string Text)>? result = null;
+            Result<DiscordEmbed>? partial = null;
 
             switch (action)
             {
@@ -76,9 +73,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     var getValidator = new RoleMenuGetReqValidator(ctx.Client);
                     await getValidator.ValidateAndThrowAsync(getReq);
 
-                    var getResult = await _discordRoleMenuService.GetAsync(ctx, getReq);
-                    wbhk = getResult.Builder;
-                    result.Text = getResult.Text;
+                    result = await _discordRoleMenuService.GetAsync(ctx, getReq);
                     break;
                 case RoleMenuActionType.Add:
                     if (string.IsNullOrWhiteSpace(idOrName))
@@ -95,10 +90,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     var addValidator = new RoleMenuAddReqValidator(ctx.Client);
                     await addValidator.ValidateAndThrowAsync(addReq);
 
-                    var partialResult = await _discordRoleMenuService.CreateRoleMenuAsync(ctx, addReq);
-
-                    result.Embed = partialResult.Embed;
-
+                    partial = await _discordRoleMenuService.CreateRoleMenuAsync(ctx, addReq);
                     break;
                 case RoleMenuActionType.Edit:
                     if (!isId && string.IsNullOrWhiteSpace(idOrName))
@@ -133,13 +125,10 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     var disableValidator = new RoleMenuDisableReqValidator(ctx.Client);
                     await disableValidator.ValidateAndThrowAsync(removeReq);
 
-                   // result.Embed = await _discordRoleMenuService..DisableAsync(ctx, removeReq);
+                    //partial = await _discordRoleMenuService.DisableAsync(ctx, removeReq);
                     break;
                 case RoleMenuActionType.ConfigureEmbed:
-                    var cfgResult = await _discordEmbedConfiguratorService.ConfigureAsync(ctx, idOrName);
-                    result.Embed = cfgResult.Embed;
-                    isSuccess = cfgResult.IsSuccess;
-                    isEmbedConfig = true;
+                    partial = await _discordEmbedConfiguratorService.ConfigureAsync(ctx, idOrName);
                     break;
                 case RoleMenuActionType.Send:
                     if (!isId && string.IsNullOrWhiteSpace(idOrName))
@@ -159,27 +148,25 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     var sendValidator = new RoleMenuSendReqValidator(ctx.Client);
                     await sendValidator.ValidateAndThrowAsync(sendReq);
 
-                    var sendResult = await _discordRoleMenuService.SendAsync(ctx, sendReq);
-                    wbhk = sendResult.Builder;
-                    result.Text = sendResult.Text;
+                    result = await _discordRoleMenuService.SendAsync(ctx, sendReq);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(action), action, null);
             }
 
-            if (result.Embed is not null)
+            if (partial.HasValue)
             {
-                if (isSuccess && isEmbedConfig && wbhk is null)
-                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(result.Embed)
-                        .WithContent("Final result:"));
-                else await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(result.Embed));
+                if (partial.Value.IsSuccess) await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(partial.Value.Entity));
+                else await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(partial, ctx.Client)));
             }
-            else
+            else if (result.HasValue)
             {
-                if (wbhk is null)
-                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent(result.Text));
+                if (!result.Value.IsSuccess) await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(result, ctx.Client)));
                 else
-                    await ctx.EditResponseAsync(wbhk);
+                {
+                    if (result.Value.Entity.Embed is not null) await ctx.EditResponseAsync(result.Value.Entity.Embed);
+                    else await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent(result.Value.Entity.Text));
+                }
             }
         }
     }

@@ -38,7 +38,7 @@ namespace Lisbeth.Bot.Application.Services.Database
         {
         }
 
-        public async Task<Result<(long Id, Ban FoundEntity)>> AddOrExtendAsync(BanReqDto req, bool shouldSave = false)
+        public async Task<Result<(long Id, Ban? FoundEntity)>> AddOrExtendAsync(BanReqDto req, bool shouldSave = false)
         {
             if (req is null) throw new ArgumentNullException(nameof(req));
 
@@ -48,7 +48,7 @@ namespace Lisbeth.Bot.Application.Services.Database
             if (!result.IsSuccess)
             {
                 var partial = await base.AddAsync(req, shouldSave);
-                return Result<(long Id, Ban FoundEntity)>.FromSuccess((partial.Entity, null));
+                return Result<(long Id, Ban? FoundEntity)>.FromSuccess((partial.Entity, null));
             }
 
             if (result.Entity.AppliedUntil > req.AppliedUntil) return (result.Entity.Id, result.Entity);
@@ -62,7 +62,7 @@ namespace Lisbeth.Bot.Application.Services.Database
 
             if (shouldSave) await base.CommitAsync();
 
-            return Result<(long Id, Ban FoundEntity)>.FromSuccess((result.Entity.Id, shallowCopy));
+            return Result<(long Id, Ban? FoundEntity)>.FromSuccess((result.Entity.Id, shallowCopy));
         }
 
         public async Task<Result<Ban>> DisableAsync(BanDisableReqDto entry, bool shouldSave = false)

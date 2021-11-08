@@ -23,9 +23,9 @@ namespace Lisbeth.Bot.Domain.DTOs.Response
     public class ReminderResDto
     {
         public long Id { get; set; }
-        public string Name { get; set; }
+        public string? Name { get; set; }
         public DateTime NextOccurrence { get; set; }
-        public List<string> Mentions { get; set; }
+        public List<string>? Mentions { get; set; }
 
         public ReminderResDto()
         {

@@ -17,12 +17,12 @@
 
 using AutoMapper;
 using JetBrains.Annotations;
-using Lisbeth.Bot.Application.Exceptions;
 using Lisbeth.Bot.Application.Services.Database.Interfaces;
 using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.DataAccessLayer.Specifications.RecurringReminder;
 using Lisbeth.Bot.Domain.DTOs.Request.Reminder;
 using Lisbeth.Bot.Domain.Entities;
+using MikyM.Common.Application.Results;
 using MikyM.Common.Application.Services;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
 using System.Threading.Tasks;
@@ -37,25 +37,32 @@ namespace Lisbeth.Bot.Application.Services.Database
         {
         }
 
-        public async Task SetHangfireIdAsync(long reminderId, string hangfireId, bool shouldSave = false)
+        public async Task<Result> SetHangfireIdAsync(long reminderId, string hangfireId, bool shouldSave = false)
         {
-            var reminder = await base.GetAsync<RecurringReminder>(reminderId);
-            reminder.HangfireId = long.Parse(hangfireId);
+            var result = await base.GetAsync<RecurringReminder>(reminderId);
+
+            if (!result.IsSuccess) return Result.FromError(result);
+
+            result.Entity.HangfireId = long.Parse(hangfireId);
 
             if (shouldSave) await base.CommitAsync();
+
+            return Result.FromSuccess();
         }
 
-        public async Task RescheduleAsync(RescheduleReminderReqDto req, bool shouldSave = false)
+        public async Task<Result> RescheduleAsync(RescheduleReminderReqDto req, bool shouldSave = false)
         {
-            var reminder = await base.GetSingleBySpecAsync<RecurringReminder>(
+            var result = await base.GetSingleBySpecAsync<RecurringReminder>(
                 new ActiveRecurringReminderByNameOrIdAndGuildSpec(req.Name, req.GuildId, req.ReminderId));
-            if (reminder is null) throw new NotFoundException();
+            if (!result.IsSuccess) return Result.FromError(result);
 
-            base.BeginUpdate(reminder);
-            reminder.CronExpression = req.CronExpression;
-            reminder.LastEditById = req.RequestedOnBehalfOfId;
+            base.BeginUpdate(result.Entity);
+            result.Entity.CronExpression = req.CronExpression;
+            result.Entity.LastEditById = req.RequestedOnBehalfOfId;
 
             if (shouldSave) await base.CommitAsync();
+
+            return Result.FromSuccess();
         }
     }
 }

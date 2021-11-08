@@ -30,8 +30,11 @@ using Lisbeth.Bot.Domain.Entities;
 using Lisbeth.Bot.Domain.Enums;
 using MikyM.Discord.Interfaces;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
+using Lisbeth.Bot.Application.Results;
+using MikyM.Common.Application.Results;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {
@@ -49,7 +52,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             _guildService = guildService;
         }
 
-        public async Task<DiscordEmbed> SetNewReminderAsync([NotNull] SetReminderReqDto req)
+        public async Task<Result<DiscordEmbed>> SetNewReminderAsync(SetReminderReqDto req)
         {
             if (req is null) throw new ArgumentNullException(nameof(req));
 
@@ -58,8 +61,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
             return await this.SetNewReminderAsync(guild, await guild.GetMemberAsync(req.RequestedOnBehalfOfId), req);
         }
 
-        public async Task<DiscordEmbed> SetNewReminderAsync([NotNull] InteractionContext ctx,
-            [NotNull] SetReminderReqDto req)
+        public async Task<Result<DiscordEmbed>> SetNewReminderAsync(InteractionContext ctx,
+            SetReminderReqDto req)
         {
             if (ctx is null) throw new ArgumentNullException(nameof(ctx));
             if (req is null) throw new ArgumentNullException(nameof(req));
@@ -67,34 +70,34 @@ namespace Lisbeth.Bot.Application.Discord.Services
             return await this.SetNewReminderAsync(ctx.Guild, ctx.Member, req);
         }
 
-        private async Task<DiscordEmbed> SetNewReminderAsync([NotNull] DiscordGuild discordGuild, [NotNull] DiscordMember requestingMember,
-            [NotNull] SetReminderReqDto req)
+        private async Task<Result<DiscordEmbed>> SetNewReminderAsync(DiscordGuild discordGuild, DiscordMember requestingMember,
+            SetReminderReqDto req)
         {
             if (discordGuild is null) throw new ArgumentNullException(nameof(discordGuild));
             if (requestingMember is null) throw new ArgumentNullException(nameof(requestingMember));
             if (req is null) throw new ArgumentNullException(nameof(req));
 
             if (!string.IsNullOrWhiteSpace(req.CronExpression) && !requestingMember.IsModerator())
-                throw new DiscordNotAuthorizedException();
+                return Result<DiscordEmbed>.FromError(new DiscordNotAuthorizedError());
 
-            var guild = await _guildService.GetSingleBySpecAsync<Guild>(new ActiveGuildByIdSpec(req.GuildId));
+            var result = await _guildService.GetSingleBySpecAsync<Guild>(new ActiveGuildByIdSpec(req.GuildId));
 
-            if (guild is null) throw new NotFoundException(nameof(req.GuildId));
+            if (!result.IsSuccess) return Result<DiscordEmbed>.FromError(result);
 
             var res = await _reminderService.SetNewReminderAsync(req);
 
-            var embed = new DiscordEmbedBuilder().WithColor(new DiscordColor(guild.EmbedHexColor))
+            var embed = new DiscordEmbedBuilder().WithColor(new DiscordColor(result.Entity.EmbedHexColor))
                 .WithAuthor("Lisbeth reminder service")
                 .WithDescription("Reminder set successfully")
-                .AddField("Reminder's id", res.Id.ToString())
-                .AddField("Reminder's name", res.Name)
-                .AddField("Next occurrence", res.NextOccurrence.ToString(CultureInfo.InvariantCulture))
-                .AddField("Mentions", string.Join(", ", res.Mentions));
+                .AddField("Reminder's id", res.Entity.Id.ToString())
+                .AddField("Reminder's name", res.Entity.Name)
+                .AddField("Next occurrence", res.Entity.NextOccurrence.ToString(CultureInfo.InvariantCulture))
+                .AddField("Mentions", string.Join(", ", res.Entity.Mentions));
 
             return embed.Build();
         }
 
-        public async Task<DiscordEmbed> DisableReminderAsync([NotNull] DisableReminderReqDto req)
+        public async Task<Result<DiscordEmbed>> DisableReminderAsync(DisableReminderReqDto req)
         {
             if (req is null) throw new ArgumentNullException(nameof(req));
 
@@ -103,8 +106,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
             return await this.DisableReminderAsync(guild, await guild.GetMemberAsync(req.RequestedOnBehalfOfId), req);
         }
 
-        public async Task<DiscordEmbed> DisableReminderAsync([NotNull] InteractionContext ctx,
-            [NotNull] DisableReminderReqDto req)
+        public async Task<Result<DiscordEmbed>> DisableReminderAsync(InteractionContext ctx,
+            DisableReminderReqDto req)
         {
             if (ctx is null) throw new ArgumentNullException(nameof(ctx));
             if (req is null) throw new ArgumentNullException(nameof(req));
@@ -112,32 +115,32 @@ namespace Lisbeth.Bot.Application.Discord.Services
             return await this.DisableReminderAsync(ctx.Guild, ctx.Member, req);
         }
 
-        private async Task<DiscordEmbed> DisableReminderAsync([NotNull] DiscordGuild discordGuild, [NotNull] DiscordMember requestingMember,
-            [NotNull] DisableReminderReqDto req)
+        private async Task<Result<DiscordEmbed>> DisableReminderAsync(DiscordGuild discordGuild, DiscordMember requestingMember,
+            DisableReminderReqDto req)
         {
             if (discordGuild is null) throw new ArgumentNullException(nameof(discordGuild));
             if (requestingMember is null) throw new ArgumentNullException(nameof(requestingMember));
             if (req is null) throw new ArgumentNullException(nameof(req));
 
             if (req.Type is ReminderType.Recurring && !requestingMember.IsModerator())
-                throw new DiscordNotAuthorizedException();
+                return Result<DiscordEmbed>.FromError(new DiscordNotAuthorizedError());
 
-            var guild = await _guildService.GetSingleBySpecAsync<Guild>(new ActiveGuildByIdSpec(req.GuildId));
+            var result = await _guildService.GetSingleBySpecAsync<Guild>(new ActiveGuildByIdSpec(req.GuildId));
 
-            if (guild is null) throw new NotFoundException(nameof(req.GuildId));
+            if (!result.IsSuccess) return Result<DiscordEmbed>.FromError(result);
 
             var res = await _reminderService.DisableReminderAsync(req);
 
-            var embed = new DiscordEmbedBuilder().WithColor(new DiscordColor(guild.EmbedHexColor))
+            var embed = new DiscordEmbedBuilder().WithColor(new DiscordColor(result.Entity.EmbedHexColor))
                 .WithAuthor("Lisbeth reminder service")
                 .WithDescription("Reminder disabled successfully")
-                .AddField("Reminder's id", res.Id.ToString())
-                .AddField("Reminder's name", res.Name);
+                .AddField("Reminder's id", res.Entity.Id.ToString())
+                .AddField("Reminder's name", res.Entity.Name);
 
             return embed.Build();
         }
 
-        public async Task<DiscordEmbed> RescheduleReminderAsync([NotNull] RescheduleReminderReqDto req)
+        public async Task<Result<DiscordEmbed>> RescheduleReminderAsync(RescheduleReminderReqDto req)
         {
             if (req is null) throw new ArgumentNullException(nameof(req));
 
@@ -146,8 +149,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
             return await this.RescheduleReminderAsync(guild, await guild.GetMemberAsync(req.RequestedOnBehalfOfId), req);
         }
 
-        public async Task<DiscordEmbed> RescheduleReminderAsync([NotNull] InteractionContext ctx,
-            [NotNull] RescheduleReminderReqDto req)
+        public async Task<Result<DiscordEmbed>> RescheduleReminderAsync(InteractionContext ctx,
+            RescheduleReminderReqDto req)
         {
             if (ctx is null) throw new ArgumentNullException(nameof(ctx));
             if (req is null) throw new ArgumentNullException(nameof(req));
@@ -155,29 +158,29 @@ namespace Lisbeth.Bot.Application.Discord.Services
             return await this.RescheduleReminderAsync(ctx.Guild, ctx.Member, req);
         }
 
-        private async Task<DiscordEmbed> RescheduleReminderAsync([NotNull] DiscordGuild discordGuild, [NotNull] DiscordMember requestingMember,
-            [NotNull] RescheduleReminderReqDto req)
+        private async Task<Result<DiscordEmbed>> RescheduleReminderAsync(DiscordGuild discordGuild, DiscordMember requestingMember,
+            RescheduleReminderReqDto req)
         {
             if (discordGuild is null) throw new ArgumentNullException(nameof(discordGuild));
             if (requestingMember is null) throw new ArgumentNullException(nameof(requestingMember));
             if (req is null) throw new ArgumentNullException(nameof(req));
 
             if (!string.IsNullOrWhiteSpace(req.CronExpression) && !requestingMember.IsModerator())
-                throw new DiscordNotAuthorizedException();
+                return Result<DiscordEmbed>.FromError(new DiscordNotAuthorizedError());
 
-            var guild = await _guildService.GetSingleBySpecAsync<Guild>(new ActiveGuildByIdSpec(req.GuildId));
+            var result = await _guildService.GetSingleBySpecAsync<Guild>(new ActiveGuildByIdSpec(req.GuildId));
 
-            if (guild is null) throw new NotFoundException(nameof(req.GuildId));
+            if (!result.IsSuccess) return Result<DiscordEmbed>.FromError(result);
 
             var res = await _reminderService.RescheduleReminderAsync(req);
 
-            var embed = new DiscordEmbedBuilder().WithColor(new DiscordColor(guild.EmbedHexColor))
+            var embed = new DiscordEmbedBuilder().WithColor(new DiscordColor(result.Entity.EmbedHexColor))
                 .WithAuthor("Lisbeth reminder service")
                 .WithDescription("Reminder rescheduled successfully")
-                .AddField("Reminder's id", res.Id.ToString())
-                .AddField("Reminder's name", res.Name)
-                .AddField("Next occurrence", res.NextOccurrence.ToString(CultureInfo.InvariantCulture))
-                .AddField("Mentions", string.Join(", ", res.Mentions));
+                .AddField("Reminder's id", res.Entity.Id.ToString())
+                .AddField("Reminder's name", res.Entity.Name)
+                .AddField("Next occurrence", res.Entity.NextOccurrence.ToString(CultureInfo.InvariantCulture))
+                .AddField("Mentions", string.Join(", ", res.Entity.Mentions ?? new List<string>()));
 
             return embed.Build();
         }
