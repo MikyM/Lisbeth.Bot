@@ -53,7 +53,7 @@ namespace Lisbeth.Bot.Application.Validation.Reminder
             RuleFor(x => x.TimeSpanExpression)
                 .NotEmpty()
                 .When(x => !x.SetFor.HasValue && string.IsNullOrWhiteSpace(x.CronExpression))
-                .DependentRules(x => x.Must(y => y.TryParseToDurationAndNextOccurrence(out _, out _)));
+                .DependentRules(x => x.Must(y => y!.TryParseToDurationAndNextOccurrence(out _, out _)));
         }
     }
 }

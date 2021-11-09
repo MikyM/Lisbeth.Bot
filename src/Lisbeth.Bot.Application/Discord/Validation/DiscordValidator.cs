@@ -33,8 +33,8 @@ namespace Lisbeth.Bot.Application.Discord.Validation
         }
 
         public ulong ObjectId { get; }
-        public TDiscordType RetrievedObject { get; private set; }
-        public Exception Exception { get; private set; }
+        public TDiscordType? RetrievedObject { get; private set; }
+        public Exception? Exception { get; private set; }
 
         public async Task<bool> IsValidAsync()
         {

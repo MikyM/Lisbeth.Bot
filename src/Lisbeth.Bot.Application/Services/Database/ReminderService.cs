@@ -57,7 +57,7 @@ namespace Lisbeth.Bot.Application.Services.Database
             if (!result.IsSuccess) return Result.FromError(result);
 
             base.BeginUpdate(result.Entity);
-            var isValid = req.TimeSpanExpression.TryParseToDurationAndNextOccurrence(out var occurrence, out _);
+            var isValid = (req.TimeSpanExpression ?? throw new InvalidOperationException()).TryParseToDurationAndNextOccurrence(out var occurrence, out _);
             result.Entity.SetFor = req.SetFor ?? (isValid ? occurrence : throw new ArgumentException(nameof(req.TimeSpanExpression)));
             result.Entity.LastEditById = req.RequestedOnBehalfOfId;
 

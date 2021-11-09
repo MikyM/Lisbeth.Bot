@@ -92,7 +92,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 .AddField("Reminder's id", res.Entity.Id.ToString())
                 .AddField("Reminder's name", res.Entity.Name)
                 .AddField("Next occurrence", res.Entity.NextOccurrence.ToString(CultureInfo.InvariantCulture))
-                .AddField("Mentions", string.Join(", ", res.Entity.Mentions));
+                .AddField("Mentions", string.Join(", ", res.Entity.Mentions ?? throw new InvalidOperationException()));
 
             return embed.Build();
         }

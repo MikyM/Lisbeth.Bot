@@ -51,8 +51,8 @@ namespace MikyM.Discord.Extensions.SlashCommands
         [UsedImplicitly]
         public static IServiceCollection AddDiscordSlashCommands(
             this IServiceCollection services,
-            Action<SlashCommandsConfiguration?> configuration = null,
-            Action<SlashCommandsExtension?> extension = null,
+            Action<SlashCommandsConfiguration?>? configuration = null,
+            Action<SlashCommandsExtension?>? extension = null,
             bool autoRegisterSubscribers = true
         )
         {

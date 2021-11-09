@@ -31,7 +31,7 @@ namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
     {
         private readonly DiscordClient _discord;
         private bool _doesGuildExist = true;
-        private object _guildId;
+        private object? _guildId;
         private readonly bool _suppressGuildCheck;
 
         public DiscordChannelIdValidator(DiscordClient discord, bool suppressGuildCheck = false)

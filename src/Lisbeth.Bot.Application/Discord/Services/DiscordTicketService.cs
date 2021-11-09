@@ -1,17 +1,17 @@
 ﻿// This file is part of Lisbeth.Bot project
 //
 // Copyright (C) 2021 Krzysztof Kupisz - MikyM
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
@@ -226,11 +226,11 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 {
                     var res = await _guildService.GetSingleBySpecAsync<Guild>(
                         new ActiveGuildByDiscordIdWithTicketingAndInactiveTicketsSpecifications(guildId));
-                    
+
                     if (!res.IsSuccess) continue;
 
                     if (res.Entity.TicketingConfig?.CleanAfter is null) continue;
-                    if (res.Entity.Tickets.Count == 0) continue;
+                    if (res.Entity.Tickets?.Count == 0) continue;
 
                     var guildCfg = res.Entity;
 
@@ -248,7 +248,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
                     foreach (var closedTicketChannel in closedCat.Children)
                     {
-                        if (guildCfg.Tickets.All(x => x.ChannelId != closedTicketChannel.Id)) continue;
+                        if ((guildCfg.Tickets ?? throw new InvalidOperationException()).All(x => x.ChannelId != closedTicketChannel.Id)) continue;
 
                         var lastMessage = await closedTicketChannel.GetMessagesAsync(1);
                         if (lastMessage is null || lastMessage.Count == 0) continue;
@@ -280,11 +280,11 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 {
                     var res = await _guildService.GetSingleBySpecAsync<Guild>(
                         new ActiveGuildByDiscordIdWithTicketingAndTicketsSpecifications(guildId));
-                    
+
                     if (!res.IsSuccess) continue;
 
                     if (res.Entity.TicketingConfig?.CloseAfter is null) continue;
-                    if (res.Entity.Tickets.Count == 0) continue;
+                    if (res.Entity.Tickets?.Count == 0) continue;
 
                     var guildCfg = res.Entity;
 
@@ -302,7 +302,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
                     foreach (var openedTicketChannel in openedCat.Children)
                     {
-                        if (guildCfg.Tickets.All(x => x.ChannelId != openedTicketChannel.Id)) continue;
+                        if ((guildCfg.Tickets ?? throw new InvalidOperationException()).All(x => x.ChannelId != openedTicketChannel.Id)) continue;
 
                         var lastMessage = await openedTicketChannel.GetMessagesAsync(1);
                         var msg = lastMessage?.FirstOrDefault();
@@ -382,7 +382,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             var guildRes =
                 await _guildService.GetSingleBySpecAsync<Guild>(
                     new ActiveGuildByDiscordIdWithTicketingSpecifications(guild.Id));
-            
+
             if (!guildRes.IsSuccess) return Result<DiscordMessageBuilder>.FromError(guildRes);
 
             if (guildRes.Entity.TicketingConfig is null)

@@ -23,6 +23,6 @@ namespace Lisbeth.Bot.Application.Services.Interfaces
 {
     public interface IUriService
     {
-        public Uri GetPageUri(PaginationFilter filter, string route, IQueryCollection queryParams = null);
+        public Uri GetPageUri(PaginationFilter filter, string route, IQueryCollection? queryParams = null);
     }
 }

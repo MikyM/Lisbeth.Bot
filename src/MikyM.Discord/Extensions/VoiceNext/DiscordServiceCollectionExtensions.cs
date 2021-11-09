@@ -41,7 +41,7 @@ namespace MikyM.Discord.Extensions.VoiceNext
         [UsedImplicitly]
         public static IServiceCollection AddDiscordVoiceNext(
             this IServiceCollection services,
-            Action<VoiceNextConfiguration?> configure = null
+            Action<VoiceNextConfiguration?>? configure = null
         )
         {
             services.AddSingleton(typeof(IDiscordExtensionConfiguration), provider =>

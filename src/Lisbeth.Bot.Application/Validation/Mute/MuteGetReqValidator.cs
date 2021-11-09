@@ -58,8 +58,8 @@ namespace Lisbeth.Bot.Application.Validation.Mute
                 .When(x => x.LiftedById.HasValue);
 
             // ReSharper disable once PossibleInvalidOperationException
-            RuleFor(x => x.AppliedOn).Must(x => x.Value <= DateTime.UtcNow).When(x => x.AppliedOn.HasValue);
-            RuleFor(x => x.LiftedOn).Must(x => x.Value <= DateTime.UtcNow).When(x => x.LiftedOn.HasValue);
+            RuleFor(x => x.AppliedOn).Must(x => x!.Value <= DateTime.UtcNow).When(x => x.AppliedOn.HasValue);
+            RuleFor(x => x.LiftedOn).Must(x => x!.Value <= DateTime.UtcNow).When(x => x.LiftedOn.HasValue);
         }
     }
 }

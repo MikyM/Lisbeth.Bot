@@ -73,7 +73,7 @@ namespace Lisbeth.Bot.Application.Services.Database
             var result = await base.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithModerationSpecifications(req.GuildId));
             if (!result.IsSuccess) throw new NotFoundException("Guild doesn't exist in the database");
-            if (result.Entity.TicketingConfig is not null && result.Entity.ModerationConfig.IsDisabled)
+            if (result.Entity.ModerationConfig is not null && result.Entity.ModerationConfig.IsDisabled)
                 return await this.EnableConfigAsync(req.GuildId, GuildConfigType.Moderation, shouldSave);
             if (result.Entity.ModerationConfig is not null && !result.Entity.ModerationConfig.IsDisabled) return Result<Guild>.FromError(new InvalidOperationError());
 

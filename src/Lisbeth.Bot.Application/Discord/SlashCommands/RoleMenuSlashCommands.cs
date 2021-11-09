@@ -35,15 +35,15 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
     [SlashModuleLifespan(SlashModuleLifespan.Transient)]
     public class RoleMenuSlashCommands : ExtendedApplicationCommandModule
     {
-        public IDiscordRoleMenuService _discordRoleMenuService { private get; set; }
-        public IDiscordEmbedConfiguratorService<RoleMenu> _discordEmbedConfiguratorService { private get; set; }
+        public IDiscordRoleMenuService? _discordRoleMenuService { private get; set; }
+        public IDiscordEmbedConfiguratorService<RoleMenu>? _discordEmbedConfiguratorService { private get; set; }
 
         [SlashCommand("tag", "Allows working with tags.")]
         public async Task RoleMenuCommand(InteractionContext ctx,
             [Option("action", "Type of action to perform")]
             RoleMenuActionType action,
             [Option("channel", "Channel to send the tag to.")]
-            DiscordChannel channel = null,
+            DiscordChannel? channel = null,
             [Option("id", "Type of action to perform")]
             string idOrName = "",
             [Option("text", "Base text for the tag.")]
@@ -73,7 +73,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     var getValidator = new RoleMenuGetReqValidator(ctx.Client);
                     await getValidator.ValidateAndThrowAsync(getReq);
 
-                    result = await _discordRoleMenuService.GetAsync(ctx, getReq);
+                    result = await _discordRoleMenuService!.GetAsync(ctx, getReq);
                     break;
                 case RoleMenuActionType.Add:
                     if (string.IsNullOrWhiteSpace(idOrName))
@@ -90,7 +90,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     var addValidator = new RoleMenuAddReqValidator(ctx.Client);
                     await addValidator.ValidateAndThrowAsync(addReq);
 
-                    partial = await _discordRoleMenuService.CreateRoleMenuAsync(ctx, addReq);
+                    partial = await _discordRoleMenuService!.CreateRoleMenuAsync(ctx, addReq);
                     break;
                 case RoleMenuActionType.Edit:
                     if (!isId && string.IsNullOrWhiteSpace(idOrName))
@@ -128,7 +128,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     //partial = await _discordRoleMenuService.DisableAsync(ctx, removeReq);
                     break;
                 case RoleMenuActionType.ConfigureEmbed:
-                    partial = await _discordEmbedConfiguratorService.ConfigureAsync(ctx, idOrName);
+                    partial = await _discordEmbedConfiguratorService!.ConfigureAsync(ctx, idOrName);
                     break;
                 case RoleMenuActionType.Send:
                     if (!isId && string.IsNullOrWhiteSpace(idOrName))
@@ -148,7 +148,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     var sendValidator = new RoleMenuSendReqValidator(ctx.Client);
                     await sendValidator.ValidateAndThrowAsync(sendReq);
 
-                    result = await _discordRoleMenuService.SendAsync(ctx, sendReq);
+                    result = await _discordRoleMenuService!.SendAsync(ctx, sendReq);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(action), action, null);

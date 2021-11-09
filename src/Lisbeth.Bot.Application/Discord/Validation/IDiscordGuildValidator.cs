@@ -22,7 +22,7 @@ namespace Lisbeth.Bot.Application.Discord.Validation
     public interface IDiscordGuildValidator<TDiscordType> : IAsyncValidator where TDiscordType : class
     {
         ulong ObjectId { get; }
-        TDiscordType RetrievedObject { get; }
-        Exception Exception { get; }
+        TDiscordType? RetrievedObject { get; }
+        Exception? Exception { get; }
     }
 }

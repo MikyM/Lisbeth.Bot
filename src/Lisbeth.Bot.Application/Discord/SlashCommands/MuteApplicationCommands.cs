@@ -1,17 +1,17 @@
 ﻿// This file is part of Lisbeth.Bot project
 //
 // Copyright (C) 2021 Krzysztof Kupisz - MikyM
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
@@ -39,8 +39,8 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
     public partial class MuteApplicationCommands : ExtendedApplicationCommandModule
     {
         // ReSharper disable once InconsistentNaming
-        public IDiscordMuteService _discordMuteService { private get; set; }
-        public IDiscordMessageService _discordMessageService { private get; set; }
+        public IDiscordMuteService? _discordMuteService { private get; set; }
+        public IDiscordMessageService? _discordMessageService { private get; set; }
 
         [SlashRequireUserPermissions(Permissions.BanMembers)]
         [SlashCommand("mute", "A command that allows mute actions.")]
@@ -69,21 +69,21 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
                     var muteReqValidator = new MuteReqValidator(ctx.Client);
                     await muteReqValidator.ValidateAndThrowAsync(muteReq);
 
-                    result = await _discordMuteService.MuteAsync(ctx, muteReq);
+                    result = await _discordMuteService!.MuteAsync(ctx, muteReq);
                     break;
                 case MuteActionType.Remove:
                     var muteDisableReq = new MuteDisableReqDto(user.Id, ctx.Guild.Id, ctx.User.Id);
                     var muteDisableReqValidator = new MuteDisableReqValidator(ctx.Client);
                     await muteDisableReqValidator.ValidateAndThrowAsync(muteDisableReq);
 
-                    result = await _discordMuteService.UnmuteAsync(ctx, muteDisableReq);
+                    result = await _discordMuteService!.UnmuteAsync(ctx, muteDisableReq);
                     break;
                 case MuteActionType.Get:
                     var muteGetReq = new MuteGetReqDto(ctx.User.Id, null, user.Id, ctx.Guild.Id);
                     var muteGetReqValidator = new MuteGetReqValidator(ctx.Client);
                     await muteGetReqValidator.ValidateAndThrowAsync(muteGetReq);
 
-                    result = await _discordMuteService.GetSpecificUserGuildMuteAsync(ctx, muteGetReq);
+                    result = await _discordMuteService!.GetSpecificUserGuildMuteAsync(ctx, muteGetReq);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(actionType), actionType, null);

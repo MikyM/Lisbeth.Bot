@@ -60,7 +60,7 @@ namespace MikyM.Discord.Services
             LogFactory = logFactory;
         }
 
-        public DiscordClient Client { get; private set; }
+        public DiscordClient Client { get; private set; } = null!;
 
         internal void Initialize()
         {
@@ -97,15 +97,15 @@ namespace MikyM.Discord.Services
 
             //
             // Grab the content of the user-set intents and merge them with what the subscribers need
-            // 
+            //
             var property = typeof(DiscordConfiguration).GetProperty("Intents");
-            property = property.DeclaringType.GetProperty("Intents");
-            var intents = (DiscordIntents) property.GetValue(DiscordOptions.Value,
-                BindingFlags.NonPublic | BindingFlags.Instance, null, null, null);
+            property = property?.DeclaringType?.GetProperty("Intents");
+            var intents = (DiscordIntents) (property?.GetValue(DiscordOptions.Value,
+                BindingFlags.NonPublic | BindingFlags.Instance, null, null, null) ?? throw new InvalidOperationException());
 
             //
             // Merge/enrich intents the user requested with those the subscribers require
-            // 
+            //
 
             if (channelEventsSubscriber.Any()) intents |= DiscordIntents.Guilds;
             if (guildEventSubscribers.Any()) intents |= DiscordIntents.Guilds | DiscordIntents.GuildEmojis;
@@ -124,11 +124,11 @@ namespace MikyM.Discord.Services
             {
                 //
                 // Overwrite with DI configured logging factory
-                // 
+                //
                 LoggerFactory = LogFactory,
                 //
                 // Use merged intents
-                // 
+                //
                 Intents = intents
             };
 
@@ -136,7 +136,7 @@ namespace MikyM.Discord.Services
 
             //
             // Load options that should load in before Connect call
-            // 
+            //
             ServiceProvider.GetServices<IDiscordExtensionConfiguration>();
 
             #region WebSocket

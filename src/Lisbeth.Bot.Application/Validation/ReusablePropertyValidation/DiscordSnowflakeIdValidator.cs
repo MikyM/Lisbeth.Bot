@@ -32,7 +32,7 @@ namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
     {
         private readonly DiscordClient _discord;
         private bool _guildExists = true;
-        private object _guildId;
+        private object? _guildId;
         private bool _memberExists = true;
         private bool _roleExists = true;
         private bool _channelExists = true;

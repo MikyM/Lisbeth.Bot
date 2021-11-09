@@ -52,7 +52,7 @@ namespace MikyM.Discord.Extensions.CommandsNext
         public static IServiceCollection AddDiscordCommandsNext(
             this IServiceCollection services,
             Action<CommandsNextConfiguration> configuration,
-            Action<CommandsNextExtension?> extension = null,
+            Action<CommandsNextExtension?>? extension = null,
             bool autoRegisterSubscribers = true
         )
         {
@@ -64,7 +64,7 @@ namespace MikyM.Discord.Extensions.CommandsNext
 
                 //
                 // Make all services available to bot commands
-                // 
+                //
                 options.Services = provider;
 
                 var discord = provider.GetRequiredService<IDiscordService>().Client;

@@ -149,7 +149,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             var res = await _muteService.GetSingleBySpecAsync<Mute>(
                 new ActiveMutesByGuildAndUserSpecifications(args.Guild.Id, args.Member.Id));
 
-            if (!res.IsSuccess || res.Entity.Guild.ModerationConfig is null) return Result.FromSuccess(); // no mod config enabled so we don't care
+            if (!res.IsSuccess || res.Entity.Guild?.ModerationConfig is null) return Result.FromSuccess(); // no mod config enabled so we don't care
 
             if (!args.Guild.Roles.TryGetValue(res.Entity.Guild.ModerationConfig.MuteRoleId, out var role)) return Result.FromSuccess();
 

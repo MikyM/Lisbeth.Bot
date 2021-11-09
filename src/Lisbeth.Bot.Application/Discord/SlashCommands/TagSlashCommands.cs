@@ -1,17 +1,17 @@
 ﻿// This file is part of Lisbeth.Bot project
 //
 // Copyright (C) 2021 Krzysztof Kupisz - MikyM
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
@@ -35,15 +35,15 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
     [SlashModuleLifespan(SlashModuleLifespan.Transient)]
     public class TagSlashCommands : ExtendedApplicationCommandModule
     {
-        public IDiscordTagService _discordTagService { private get; set; }
-        public IDiscordEmbedConfiguratorService<Tag> _discordEmbedTagConfiguratorService { private get; set; }
+        public IDiscordTagService? _discordTagService { private get; set; }
+        public IDiscordEmbedConfiguratorService<Tag>? _discordEmbedTagConfiguratorService { private get; set; }
 
         [SlashCommand("tag", "Allows working with tags.")]
         public async Task TagCommand(InteractionContext ctx,
             [Option("action", "Type of action to perform")]
             TagActionType action,
             [Option("channel", "Channel to send the tag to.")]
-            DiscordChannel channel = null,
+            DiscordChannel? channel = null,
             [Option("id", "Type of action to perform")]
             string idOrName = "",
             [Option("text", "Base text for the tag.")]
@@ -73,7 +73,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     var getValidator = new TagGetReqValidator(ctx.Client);
                     await getValidator.ValidateAndThrowAsync(getReq);
 
-                    result = await _discordTagService.GetAsync(ctx, getReq);
+                    result = await _discordTagService!.GetAsync(ctx, getReq);
                     break;
                 case TagActionType.Add:
                     if (string.IsNullOrWhiteSpace(idOrName))
@@ -90,8 +90,8 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     var addValidator = new TagAddReqValidator(ctx.Client);
                     await addValidator.ValidateAndThrowAsync(addReq);
 
-                    partial = await _discordTagService.AddAsync(ctx, addReq);
-                    
+                    partial = await _discordTagService!.AddAsync(ctx, addReq);
+
                     break;
                 case TagActionType.Edit:
                     if (!isId && string.IsNullOrWhiteSpace(idOrName))
@@ -109,7 +109,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     var editValidator = new TagEditReqValidator(ctx.Client);
                     await editValidator.ValidateAndThrowAsync(editReq);
 
-                    partial = await _discordTagService.EditAsync(ctx, editReq);
+                    partial = await _discordTagService!.EditAsync(ctx, editReq);
                     break;
                 case TagActionType.Remove:
                     if (!isId && string.IsNullOrWhiteSpace(idOrName))
@@ -126,10 +126,10 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     var disableValidator = new TagDisableReqValidator(ctx.Client);
                     await disableValidator.ValidateAndThrowAsync(removeReq);
 
-                    partial = await _discordTagService.DisableAsync(ctx, removeReq);
+                    partial = await _discordTagService!.DisableAsync(ctx, removeReq);
                     break;
                 case TagActionType.ConfigureEmbed:
-                    partial = await _discordEmbedTagConfiguratorService.ConfigureAsync(ctx, idOrName);
+                    partial = await _discordEmbedTagConfiguratorService!.ConfigureAsync(ctx, idOrName);
                     break;
                 case TagActionType.Send:
                     if (!isId && string.IsNullOrWhiteSpace(idOrName))
@@ -149,7 +149,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     var sendValidator = new TagSendReqValidator(ctx.Client);
                     await sendValidator.ValidateAndThrowAsync(sendReq);
 
-                    result = await _discordTagService.SendAsync(ctx, sendReq);
+                    result = await _discordTagService!.SendAsync(ctx, sendReq);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(action), action, null);

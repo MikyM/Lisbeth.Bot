@@ -50,7 +50,7 @@ namespace Lisbeth.Bot.Application.Validation.Reminder
             RuleFor(x => x.TimeSpanExpression)
                 .NotEmpty()
                 .When(x => x.SetFor is null && string.IsNullOrWhiteSpace(x.CronExpression))
-                .DependentRules(x => x.Must(y => y.TryParseToDurationAndNextOccurrence(out _, out _)));
+                .DependentRules(x => x.Must(y => y!.TryParseToDurationAndNextOccurrence(out _, out _)));
             RuleFor(x => x.Mentions)
                 .NotEmpty()
                 .DependentRules(x =>

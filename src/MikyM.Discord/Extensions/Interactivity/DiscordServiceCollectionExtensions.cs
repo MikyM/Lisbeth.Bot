@@ -44,7 +44,7 @@ namespace MikyM.Discord.Extensions.Interactivity
         public static IServiceCollection AddDiscordInteractivity(
             this IServiceCollection services,
             Action<InteractivityConfiguration> configuration,
-            Action<InteractivityExtension?> extension = null
+            Action<InteractivityExtension?>? extension = null
         )
         {
             services.AddSingleton(typeof(IDiscordExtensionConfiguration), provider =>

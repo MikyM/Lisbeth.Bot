@@ -196,8 +196,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 if (requestingUser.Guild.Id != guild.Id) return new DiscordNotAuthorizedError();
 
                 tag = req.Id.HasValue
-                    ? guildCfg.Entity.Tags.FirstOrDefault(x => x.Id == req.Id)
-                    : guildCfg.Entity.Tags.FirstOrDefault(x => x.Name == req.Name);
+                    ? guildCfg.Entity.Tags?.FirstOrDefault(x => x.Id == req.Id)
+                    : guildCfg.Entity.Tags?.FirstOrDefault(x => x.Name == req.Name);
             }
 
             if (tag is null) return new NotFoundError("Tag not found");
@@ -327,8 +327,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 if (requestingUser.Guild.Id != guild.Id) return new DiscordNotAuthorizedError();
 
                 tag = req.Id.HasValue
-                    ? guildCfg.Entity.Tags.FirstOrDefault(x => x.Id == req.Id)
-                    : guildCfg.Entity.Tags.FirstOrDefault(x => x.Name == req.Name);
+                    ? guildCfg.Entity.Tags?.FirstOrDefault(x => x.Id == req.Id)
+                    : guildCfg.Entity.Tags?.FirstOrDefault(x => x.Name == req.Name);
             }
 
             if (tag is null) return new NotFoundError("Tag not found");

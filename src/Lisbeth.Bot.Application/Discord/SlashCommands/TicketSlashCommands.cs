@@ -1,17 +1,17 @@
 ﻿// This file is part of Lisbeth.Bot project
 //
 // Copyright (C) 2021 Krzysztof Kupisz - MikyM
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
@@ -37,7 +37,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
     [UsedImplicitly]
     public class TicketSlashCommands : ExtendedApplicationCommandModule
     {
-        public IDiscordTicketService _discordTicketService { private get; set; }
+        public IDiscordTicketService? _discordTicketService { private get; set; }
 
         [UsedImplicitly]
         [SlashRequireUserPermissions(Permissions.BanMembers)]
@@ -60,14 +60,14 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     var addReq = new TicketAddReqDto(null, null, ctx.Guild.Id, ctx.Channel.Id, ctx.User.Id, target.Id);
                     var addReqValidator = new TicketAddReqValidator(ctx.Client);
                     await addReqValidator.ValidateAndThrowAsync(addReq);
-                    result = await _discordTicketService.AddToTicketAsync(ctx, addReq);
+                    result = await _discordTicketService!.AddToTicketAsync(ctx, addReq);
                     break;
                 case TicketActionType.Remove:
                     var removeReq = new TicketRemoveReqDto(null, null, ctx.Guild.Id, ctx.Channel.Id, ctx.User.Id,
                         target.Id);
                     var removeReqValidator = new TicketRemoveReqValidator(ctx.Client);
                     await removeReqValidator.ValidateAndThrowAsync(removeReq);
-                    result = await _discordTicketService.RemoveFromTicketAsync(ctx, removeReq);
+                    result = await _discordTicketService!.RemoveFromTicketAsync(ctx, removeReq);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(action), action, null);

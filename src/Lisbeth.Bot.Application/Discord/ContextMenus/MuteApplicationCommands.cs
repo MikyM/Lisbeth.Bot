@@ -47,7 +47,7 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
             var muteReqValidator = new MuteReqValidator(ctx.Client);
             await muteReqValidator.ValidateAndThrowAsync(muteReq);
 
-            var result = await _discordMuteService.MuteAsync(ctx, muteReq);
+            var result = await _discordMuteService!.MuteAsync(ctx, muteReq);
 
             if (result.IsSuccess)
                 await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
@@ -70,7 +70,7 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
             var muteDisableReqValidator = new MuteDisableReqValidator(ctx.Client);
             await muteDisableReqValidator.ValidateAndThrowAsync(muteDisableReq);
 
-            var result = await _discordMuteService.UnmuteAsync(ctx, muteDisableReq);
+            var result = await _discordMuteService!.UnmuteAsync(ctx, muteDisableReq);
 
             if (result.IsSuccess)
                 await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
@@ -93,7 +93,7 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
             var muteGetReqValidator = new MuteGetReqValidator(ctx.Client);
             await muteGetReqValidator.ValidateAndThrowAsync(muteGetReq);
 
-            var result = await _discordMuteService.GetSpecificUserGuildMuteAsync(ctx, muteGetReq);
+            var result = await _discordMuteService!.GetSpecificUserGuildMuteAsync(ctx, muteGetReq);
 
             if (result.IsSuccess)
                 await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
@@ -121,7 +121,7 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
             var muteReqValidator = new MuteReqValidator(ctx.Client);
             await muteReqValidator.ValidateAndThrowAsync(muteReq);
 
-            var result = await _discordMuteService.MuteAsync(ctx, muteReq);
+            var result = await _discordMuteService!.MuteAsync(ctx, muteReq);
 
             if (result.IsSuccess)
                 await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
@@ -145,7 +145,7 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
             var muteReqValidator = new MuteReqValidator(ctx.Client);
             await muteReqValidator.ValidateAndThrowAsync(muteReq);
 
-            var result = await _discordMuteService.MuteAsync(ctx, muteReq);
+            var result = await _discordMuteService!.MuteAsync(ctx, muteReq);
 
             //await _discordMessageService.PruneAsync()
 

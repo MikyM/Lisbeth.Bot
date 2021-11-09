@@ -1,17 +1,17 @@
 ﻿// This file is part of Lisbeth.Bot project
 //
 // Copyright (C) 2021 Krzysztof Kupisz - MikyM
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
@@ -38,7 +38,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
     {
         [UsedImplicitly]
         // ReSharper disable once InconsistentNaming
-        public IDiscordBanService _discordBanService { private get; set; }
+        public IDiscordBanService? _discordBanService { private get; set; }
 
         [SlashRequireUserPermissions(Permissions.BanMembers)]
         [SlashCommand("ban", "A command that allows banning a user.")]
@@ -70,7 +70,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     var banReqValidator = new BanReqValidator(ctx.Client);
                     await banReqValidator.ValidateAndThrowAsync(banReq);
 
-                    result = await _discordBanService.BanAsync(ctx, banReq);
+                    result = await _discordBanService!.BanAsync(ctx, banReq);
                     break;
                 case BanActionType.Remove:
                     if (id == "") throw new ArgumentException("You must supply an Id of the user to unban.");
@@ -79,13 +79,13 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     var banDisableReqValidator = new BanDisableReqValidator(ctx.Client);
                     await banDisableReqValidator.ValidateAndThrowAsync(banDisableReq);
 
-                    result = await _discordBanService.UnbanAsync(ctx, banDisableReq);
+                    result = await _discordBanService!.UnbanAsync(ctx, banDisableReq);
                     break;
                 case BanActionType.Get:
                     var banGetReq = new BanGetReqDto(ctx.User.Id, null, validId, ctx.Guild.Id);
                     var banGetReqValidator = new BanGetReqValidator(ctx.Client);
                     await banGetReqValidator.ValidateAndThrowAsync(banGetReq);
-                    result = await _discordBanService.GetSpecificUserGuildBanAsync(ctx, banGetReq);
+                    result = await _discordBanService!.GetSpecificUserGuildBanAsync(ctx, banGetReq);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(actionType), actionType, null);

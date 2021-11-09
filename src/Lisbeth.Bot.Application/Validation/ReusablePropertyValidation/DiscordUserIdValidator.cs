@@ -31,7 +31,7 @@ namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
         private readonly DiscordClient _discord;
         private readonly bool _suppressMemberCheck;
         private bool _doesGuildExist = true;
-        private object _guildId;
+        private object? _guildId;
 
         public DiscordUserIdValidator(DiscordClient discord, bool suppressMemberCheck = false)
         {

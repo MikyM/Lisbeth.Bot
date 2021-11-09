@@ -78,7 +78,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
         [UsedImplicitly]
         [SlashRequireUserPermissions(Permissions.Administrator)]
         [SlashCommand("module", "A command that allows configuring modules")]
-        public async Task TicketConfigCommand(InteractionContext ctx, 
+        public async Task TicketConfigCommand(InteractionContext ctx,
             [Option("action", "Action to perform")] ModuleActionType action,
             [Option("module", "Module to perform action on")] GuildConfigType type,
             [Option("clean-after", "After how many hours should inactive closed tickets be cleared")] string? cleanAfter = "",
@@ -88,7 +88,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                 new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
             Result<DiscordEmbed>? result = null;
-            
+
             switch (type)
             {
                 case GuildConfigType.Ticketing:
@@ -141,7 +141,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                             };
                             var disableTicketingValidator = new TicketingConfigDisableReqValidator(ctx.Client);
                             await disableTicketingValidator.ValidateAndThrowAsync(disableTicketingReq);
-                            result = await _discordGuildService.DisableModuleAsync(ctx, disableTicketingReq);
+                            result = await _discordGuildService!.DisableModuleAsync(ctx, disableTicketingReq);
                             break;
                         default:
                             throw new ArgumentOutOfRangeException(nameof(action), action, null);

@@ -33,7 +33,7 @@ namespace Lisbeth.Bot.Application.Services
             _baseUri = baseUri;
         }
 
-        public Uri GetPageUri(PaginationFilter filter, string route, IQueryCollection queryParams = null)
+        public Uri GetPageUri(PaginationFilter filter, string route, IQueryCollection? queryParams = null)
         {
             var endpointUri = string.Concat(_baseUri, route);
 
