@@ -16,12 +16,23 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Globalization;
 using System.IO;
 using System.Reflection;
+using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using Hangfire;
+using Lisbeth.Bot.API.ExceptionMiddleware;
+using Lisbeth.Bot.API.Helpers;
+using Lisbeth.Bot.Application.Discord.Helpers;
+using Lisbeth.Bot.Application.Helpers;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using MikyM.Common.Domain;
 using Serilog;
 using Serilog.Events;
 
@@ -39,7 +50,80 @@ namespace Lisbeth.Bot.API
             try
             {
                 Log.Information("Starting web host");
-                CreateHostBuilder(args).Build().Run();
+
+                var builder = WebApplication.CreateBuilder(args);
+
+                builder.WebHost.ConfigureAppConfiguration((_, config) =>
+                {
+                    config.SetBasePath(AppDomain.CurrentDomain.BaseDirectory);
+                    config.AddJsonFile("appsettings.json", false, true);
+                    config.AddJsonFile("appsettings.Development.json", true, true);
+                    config.AddEnvironmentVariables();
+                    config.Build();
+                });
+
+                // Add services to the container.
+                CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
+
+                builder.Services.AddControllers(options =>
+                    options.Conventions.Add(new RouteTokenTransformerConvention(new SlugifyParameterTransformer())));
+                builder.Services.ConfigureSwagger();
+                builder.Services.AddHttpClient();
+                builder.Services.ConfigureDiscord();
+                builder.Services.ConfigureHangfire();
+                builder.Services.ConfigureApiKey(builder.Configuration);
+                builder.Services.ConfigureRateLimiting(builder.Configuration);
+                builder.Services.ConfigureEfCache();
+                builder.Services.ConfigureApiVersioning();
+                builder.Services.ConfigureHealthChecks();
+                builder.Services.ConfigureFluentValidation();
+                builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
+                builder.Host.ConfigureContainer<ContainerBuilder>(cb => cb.RegisterModule(new AutofacContainerModule()));
+                builder.WebHost.UseSentry();
+                builder.Host.UseSerilog((context, services, configuration) => configuration
+                    .ReadFrom.Configuration(context.Configuration)
+                    .ReadFrom.Services(services));
+
+                var app = builder.Build();
+
+                // Configure the HTTP request pipeline.
+                Log.Logger.Debug("Waiting for discord's guild download completion.");
+                WaitForDownloadCompletion.ReadyToOperateEvent.WaitAsync().Wait();
+                Log.Logger.Debug("Discord fully operational.");
+
+                ContainerProvider.Container = app.Services.GetAutofacRoot();
+                GlobalConfiguration.Configuration.UseAutofacActivator(app.Services.GetAutofacRoot());
+                _ = ContainerProvider.Container
+                    .Resolve<IAsyncExecutor>()
+                    .ExecuteAsync(async () => await RecurringJobHelper.ScheduleAllDefinedAfterDelayAsync());
+
+                if (app.Environment.IsDevelopment())
+                {
+                    app.UseDeveloperExceptionPage();
+                    app.UseSwagger();
+                    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Lisbeth.Bot v1"));
+                }
+
+                app.UseHangfireDashboard("/hangfire",
+                    app.Environment.IsDevelopment()
+                        ? new DashboardOptions { AppPath = "kek", Authorization = new[] { new HangfireAlwaysAuthFilter() } }
+                        : new DashboardOptions { AppPath = "kek", Authorization = new[] { new HangfireAuthFilter() } });
+                app.UseMiddleware<CustomExceptionMiddleware>();
+                app.UseHttpsRedirection();
+                app.UseRouting();
+                app.UseSentryTracing();
+                app.UseAuthentication();
+                app.UseAuthorization();
+                app.UseSerilogRequestLogging();
+
+                app.UseEndpoints(endpoints =>
+                {
+                    if (app.Environment.IsDevelopment()) endpoints.MapHealthChecks("/health").AllowAnonymous();
+                    else endpoints.MapHealthChecks("/health");
+                    endpoints.MapControllers();
+                });
+
+                app.Run();
             }
             catch (Exception ex)
             {
@@ -49,28 +133,6 @@ namespace Lisbeth.Bot.API
             {
                 Log.CloseAndFlush();
             }
-        }
-
-        public static IHostBuilder CreateHostBuilder(string[] args)
-        {
-            return Host.CreateDefaultBuilder(args)
-                .UseServiceProviderFactory(new AutofacServiceProviderFactory())
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>();
-                    webBuilder.UseSentry();
-                })
-                .ConfigureAppConfiguration((_, config) =>
-                {
-                    config.SetBasePath(AppDomain.CurrentDomain.BaseDirectory);
-                    config.AddJsonFile("appsettings.json", false, true);
-                    config.AddJsonFile("appsettings.Development.json", true, true);
-                    config.AddEnvironmentVariables();
-                    config.Build();
-                })
-                .UseSerilog((context, services, configuration) => configuration
-                    .ReadFrom.Configuration(context.Configuration)
-                    .ReadFrom.Services(services));
         }
     }
 }
