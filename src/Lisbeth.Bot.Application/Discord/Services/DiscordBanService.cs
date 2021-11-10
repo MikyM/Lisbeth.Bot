@@ -26,6 +26,7 @@ using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Application.Enums;
 using Lisbeth.Bot.Application.Extensions;
+using Lisbeth.Bot.Application.Hangfire;
 using Lisbeth.Bot.Application.Helpers;
 using Lisbeth.Bot.Application.Results;
 using Lisbeth.Bot.Application.Services.Database.Interfaces;

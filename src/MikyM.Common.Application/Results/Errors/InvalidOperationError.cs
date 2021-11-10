@@ -23,8 +23,8 @@ namespace MikyM.Common.Application.Results.Errors
     /// <summary>
     /// Represents an error raised when an attempt to perform an invalid operation is made.
     /// </summary>
-    /// <param name="message">The error message.</param>
+    /// <param name="Message">The error message.</param>
     /// <remarks>Used in place of <see cref="InvalidOperationException"/>.</remarks>
-    public record InvalidOperationError(string message = "The requested operation is invalid.")
-        : ResultError(message);
+    public record InvalidOperationError(string Message = "The requested operation is invalid.")
+        : ResultError(Message);
 }

@@ -40,7 +40,7 @@ namespace MikyM.Common.DataAccessLayer
 
         public AuditLog ToAudit()
         {
-            return new()
+            return new AuditLog
             {
                 UserId = UserId,
                 Type = AuditType.ToString(),

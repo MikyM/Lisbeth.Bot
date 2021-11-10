@@ -24,6 +24,7 @@ using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Application.Enums;
+using Lisbeth.Bot.Application.Hangfire;
 using Lisbeth.Bot.Application.Helpers;
 using Lisbeth.Bot.Application.Results;
 using Lisbeth.Bot.Application.Services.Database.Interfaces;
@@ -64,6 +65,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             string? text;
             List<string>? mentions;
             DiscordChannel channel;
+            ulong? channelId;
 
             switch (type)
             {
@@ -76,6 +78,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     embedConfig = rem.Entity.EmbedConfig;
                     text = rem.Entity.Text;
                     mentions = rem.Entity.Mentions;
+                    channelId = rem.Entity.ChannelId;
                     break;
                 case ReminderType.Recurring:
                     var recRem = await _recurringReminderService.GetSingleBySpecAsync<RecurringReminder>(
@@ -86,6 +89,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     embedConfig = recRem.Entity.EmbedConfig;
                     text = recRem.Entity.Text;
                     mentions = recRem.Entity.Mentions;
+                    channelId = recRem.Entity.ChannelId;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
@@ -93,7 +97,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             try
             {
-                channel = await _discord.Client.GetChannelAsync(guild.ReminderChannelId.Value);
+                channel = channelId.HasValue ? await _discord.Client.GetChannelAsync(channelId.Value) : await _discord.Client.GetChannelAsync(guild.ReminderChannelId.Value);
             }
             catch (Exception)
             {
@@ -102,10 +106,10 @@ namespace Lisbeth.Bot.Application.Discord.Services
             }
 
             if (embedConfig is not null)
-                await channel.SendMessageAsync(string.Join(' ', mentions,
-                    _embedProvider.ConfigureEmbed(embedConfig).Build()));
+                await channel.SendMessageAsync(string.Join(' ', mentions ?? throw new InvalidOperationException()),
+                    _embedProvider.ConfigureEmbed(embedConfig).Build());
             else
-                await channel.SendMessageAsync(string.Join(' ', mentions + "\n\n" + text));
+                await channel.SendMessageAsync(string.Join(' ', mentions ?? throw new InvalidOperationException()) + "\n\n" + text);
 
             return Result.FromSuccess();
         }

@@ -25,13 +25,13 @@ namespace MikyM.Common.Application.Results.Errors
     /// Represents a set of errors produced by an operation.
     /// </summary>
     /// <param name="Errors">The errors.</param>
-    /// <param name="message">The custom error message, if any.</param>
+    /// <param name="Message">The custom error message, if any.</param>
     /// <remarks>Used in place of <see cref="AggregateException"/>.</remarks>
     public record AggregateError
     (
         IReadOnlyCollection<IResult> Errors,
-        string message = "One or more errors occurred."
-    ) : ResultError(message)
+        string Message = "One or more errors occurred."
+    ) : ResultError(Message)
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="AggregateError"/> class.

@@ -34,10 +34,14 @@ namespace Lisbeth.Bot.Application.Validation.Reminder
 
         public SetReminderReqValidator(DiscordClient discord)
         {
-            RuleFor(x => x.RequestedOnBehalfOfId).NotEmpty().DependentRules(x =>
-                x.SetAsyncValidator(new DiscordUserIdValidator<SetReminderReqDto>(discord)));
-            RuleFor(x => x.GuildId).NotEmpty().DependentRules(x =>
-                x.SetAsyncValidator(new DiscordGuildIdValidator<SetReminderReqDto>(discord)));
+            this.CascadeMode = CascadeMode.Stop;
+
+            RuleFor(x => x.RequestedOnBehalfOfId)
+                .NotEmpty()
+                .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<SetReminderReqDto>(discord)));
+            RuleFor(x => x.GuildId)
+                .NotEmpty()
+                .DependentRules(x => x.SetAsyncValidator(new DiscordGuildIdValidator<SetReminderReqDto>(discord)));
             RuleFor(x => x.Name).NotEmpty();
             RuleFor(x => x.CronExpression)
                 .NotEmpty()
@@ -46,16 +50,19 @@ namespace Lisbeth.Bot.Application.Validation.Reminder
                 .NotEmpty()
                 .When(x => string.IsNullOrWhiteSpace(x.TimeSpanExpression) &&
                            string.IsNullOrWhiteSpace(x.CronExpression))
-                .DependentRules(x => x.InclusiveBetween(DateTime.UtcNow, DateTime.UtcNow.AddYears(1)));
+                .InclusiveBetween(DateTime.UtcNow, DateTime.UtcNow.AddYears(1))
+                .When(x => x.SetFor.HasValue);
             RuleFor(x => x.TimeSpanExpression)
                 .NotEmpty()
                 .When(x => x.SetFor is null && string.IsNullOrWhiteSpace(x.CronExpression))
-                .DependentRules(x => x.Must(y => y!.TryParseToDurationAndNextOccurrence(out _, out _)));
+                .Must(y => y!.TryParseToDurationAndNextOccurrence(out _, out _))
+                .When(x => !string.IsNullOrEmpty(x.TimeSpanExpression));
             RuleFor(x => x.Mentions)
                 .NotEmpty()
-                .DependentRules(x =>
-                    x.ForEach(y => y.NotEmpty().DependentRules(z => z.Must(m => m.TryParseDiscordMention(out _)))));
+                .DependentRules(x => x.ForEach(y => y.NotEmpty().Must(m => m.TryParseDiscordMention(out _))));
             RuleFor(x => x.Text).NotEmpty();
+            RuleFor(x => x.ChannelId).SetAsyncValidator(new DiscordChannelIdValidator<SetReminderReqDto>(discord))
+                .When(x => x.ChannelId.HasValue);
         }
     }
 }

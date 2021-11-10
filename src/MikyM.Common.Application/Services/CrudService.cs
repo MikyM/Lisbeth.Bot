@@ -44,12 +44,12 @@ namespace MikyM.Common.Application.Services
             if (entry is TEntity rootEntity)
             {
                 entity = rootEntity;
-                _unitOfWork.GetRepository<Repository<TEntity>>()?.Add(entity);
+                UnitOfWork.GetRepository<Repository<TEntity>>()?.Add(entity);
             }
             else
             {
-                entity = _mapper.Map<TEntity>(entry);
-                _unitOfWork.GetRepository<Repository<TEntity>>()?.Add(entity);
+                entity = Mapper.Map<TEntity>(entry);
+                UnitOfWork.GetRepository<Repository<TEntity>>()?.Add(entity);
             }
 
             if (!shouldSave) return 0;
@@ -67,12 +67,12 @@ namespace MikyM.Common.Application.Services
             if (entries is IEnumerable<TEntity> rootEntities)
             {
                 entities = rootEntities;
-                _unitOfWork.GetRepository<Repository<TEntity>>()?.AddRange(entities);
+                UnitOfWork.GetRepository<Repository<TEntity>>()?.AddRange(entities);
             }
             else
             {
-                entities = _mapper.Map<IEnumerable<TEntity>>(entries);
-                _unitOfWork.GetRepository<Repository<TEntity>>()?.AddRange(entities);
+                entities = Mapper.Map<IEnumerable<TEntity>>(entries);
+                UnitOfWork.GetRepository<Repository<TEntity>>()?.AddRange(entities);
             }
 
             if (!shouldSave) return new List<long>();
@@ -85,9 +85,9 @@ namespace MikyM.Common.Application.Services
             if (entry  is null) throw new ArgumentNullException(nameof(entry));
 
             if (entry is TEntity rootEntity)
-                _unitOfWork.GetRepository<Repository<TEntity>>()?.BeginUpdate(rootEntity);
+                UnitOfWork.GetRepository<Repository<TEntity>>()?.BeginUpdate(rootEntity);
             else
-                _unitOfWork.GetRepository<Repository<TEntity>>()?.BeginUpdate(_mapper.Map<TEntity>(entry));
+                UnitOfWork.GetRepository<Repository<TEntity>>()?.BeginUpdate(Mapper.Map<TEntity>(entry));
 
             return Result.FromSuccess();
         }
@@ -97,10 +97,10 @@ namespace MikyM.Common.Application.Services
             if (entries  is null) throw new ArgumentNullException(nameof(entries));
 
             if (entries is IEnumerable<TEntity> rootEntities)
-                _unitOfWork.GetRepository<Repository<TEntity>>()?.BeginUpdateRange(rootEntities);
+                UnitOfWork.GetRepository<Repository<TEntity>>()?.BeginUpdateRange(rootEntities);
             else
-                _unitOfWork.GetRepository<Repository<TEntity>>()
-                    ?.BeginUpdateRange(_mapper.Map<IEnumerable<TEntity>>(entries));
+                UnitOfWork.GetRepository<Repository<TEntity>>()
+                    ?.BeginUpdateRange(Mapper.Map<IEnumerable<TEntity>>(entries));
 
             return Result.FromSuccess();
         }
@@ -114,12 +114,12 @@ namespace MikyM.Common.Application.Services
             if (entry is TEntity rootEntity)
             {
                 entity = rootEntity;
-                _unitOfWork.GetRepository<Repository<TEntity>>()?.AddOrUpdate(entity);
+                UnitOfWork.GetRepository<Repository<TEntity>>()?.AddOrUpdate(entity);
             }
             else
             {
-                entity = _mapper.Map<TEntity>(entry);
-                _unitOfWork.GetRepository<Repository<TEntity>>()?.AddOrUpdate(entity);
+                entity = Mapper.Map<TEntity>(entry);
+                UnitOfWork.GetRepository<Repository<TEntity>>()?.AddOrUpdate(entity);
             }
 
             if (!shouldSave) return 0;
@@ -137,13 +137,13 @@ namespace MikyM.Common.Application.Services
             if (entries is IEnumerable<TEntity> rootEntities)
             {
                 entities = rootEntities;
-                _unitOfWork.GetRepository<Repository<TEntity>>()?.AddOrUpdateRange(entities);
+                UnitOfWork.GetRepository<Repository<TEntity>>()?.AddOrUpdateRange(entities);
             }
             else
             {
-                entities = _mapper.Map<IEnumerable<TEntity>>(entries);
-                _unitOfWork.GetRepository<Repository<TEntity>>()
-                    ?.AddOrUpdateRange(_mapper.Map<IEnumerable<TEntity>>(entities));
+                entities = Mapper.Map<IEnumerable<TEntity>>(entries);
+                UnitOfWork.GetRepository<Repository<TEntity>>()
+                    ?.AddOrUpdateRange(Mapper.Map<IEnumerable<TEntity>>(entities));
             }
 
             if (!shouldSave) return new List<long>();
@@ -156,9 +156,9 @@ namespace MikyM.Common.Application.Services
             if (entry  is null) throw new ArgumentNullException(nameof(entry));
 
             if (entry is TEntity rootEntity)
-                _unitOfWork.GetRepository<Repository<TEntity>>()?.Delete(rootEntity);
+                UnitOfWork.GetRepository<Repository<TEntity>>()?.Delete(rootEntity);
             else
-                _unitOfWork.GetRepository<Repository<TEntity>>()?.Delete(_mapper.Map<TEntity>(entry));
+                UnitOfWork.GetRepository<Repository<TEntity>>()?.Delete(Mapper.Map<TEntity>(entry));
 
             if (shouldSave) await CommitAsync();
 
@@ -167,7 +167,7 @@ namespace MikyM.Common.Application.Services
 
         public virtual async Task<Result> DeleteAsync(long id, bool shouldSave = false)
         {
-            _unitOfWork.GetRepository<Repository<TEntity>>()?.Delete(id);
+            UnitOfWork.GetRepository<Repository<TEntity>>()?.Delete(id);
 
             if (shouldSave) await CommitAsync();
 
@@ -178,7 +178,7 @@ namespace MikyM.Common.Application.Services
         {
             if (ids  is null) throw new ArgumentNullException(nameof(ids));
 
-            _unitOfWork.GetRepository<Repository<TEntity>>()?.DeleteRange(ids);
+            UnitOfWork.GetRepository<Repository<TEntity>>()?.DeleteRange(ids);
 
             if (shouldSave) await CommitAsync();
 
@@ -191,10 +191,10 @@ namespace MikyM.Common.Application.Services
             if (entries  is null) throw new ArgumentNullException(nameof(entries));
 
             if (entries is IEnumerable<TEntity> rootEntities)
-                _unitOfWork.GetRepository<Repository<TEntity>>()?.DeleteRange(rootEntities);
+                UnitOfWork.GetRepository<Repository<TEntity>>()?.DeleteRange(rootEntities);
             else
-                _unitOfWork.GetRepository<Repository<TEntity>>()?
-                    .DeleteRange(_mapper.Map<IEnumerable<TEntity>>(entries));
+                UnitOfWork.GetRepository<Repository<TEntity>>()?
+                    .DeleteRange(Mapper.Map<IEnumerable<TEntity>>(entries));
 
             if (shouldSave) await CommitAsync();
 
@@ -203,7 +203,7 @@ namespace MikyM.Common.Application.Services
 
         public virtual async Task<Result> DisableAsync(long id, bool shouldSave = false)
         {
-            await _unitOfWork.GetRepository<Repository<TEntity>>()?
+            await UnitOfWork.GetRepository<Repository<TEntity>>()?
                 .DisableAsync(id)!;
 
             if (shouldSave) await CommitAsync();
@@ -216,9 +216,9 @@ namespace MikyM.Common.Application.Services
             if (entry  is null) throw new ArgumentNullException(nameof(entry));
 
             if (entry is TEntity rootEntity)
-                _unitOfWork.GetRepository<Repository<TEntity>>()?.Disable(rootEntity);
+                UnitOfWork.GetRepository<Repository<TEntity>>()?.Disable(rootEntity);
             else
-                _unitOfWork.GetRepository<Repository<TEntity>>()?.Disable(_mapper.Map<TEntity>(entry));
+                UnitOfWork.GetRepository<Repository<TEntity>>()?.Disable(Mapper.Map<TEntity>(entry));
 
             if (shouldSave) await CommitAsync();
 
@@ -229,7 +229,7 @@ namespace MikyM.Common.Application.Services
         {
             if (ids  is null) throw new ArgumentNullException(nameof(ids));
 
-            await _unitOfWork.GetRepository<Repository<TEntity>>()
+            await UnitOfWork.GetRepository<Repository<TEntity>>()
                 ?.DisableRangeAsync(ids)!;
 
             if (shouldSave) await CommitAsync();
@@ -243,10 +243,10 @@ namespace MikyM.Common.Application.Services
             if (entries  is null) throw new ArgumentNullException(nameof(entries));
 
             if (entries is IEnumerable<TEntity> rootEntities)
-                _unitOfWork.GetRepository<Repository<TEntity>>()?.DisableRange(rootEntities);
+                UnitOfWork.GetRepository<Repository<TEntity>>()?.DisableRange(rootEntities);
             else
-                _unitOfWork.GetRepository<Repository<TEntity>>()?
-                    .DeleteRange(_mapper.Map<IEnumerable<TEntity>>(entries));
+                UnitOfWork.GetRepository<Repository<TEntity>>()?
+                    .DeleteRange(Mapper.Map<IEnumerable<TEntity>>(entries));
 
             if (shouldSave) await CommitAsync();
 

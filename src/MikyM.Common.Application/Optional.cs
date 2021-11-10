@@ -99,7 +99,7 @@ namespace MikyM.Common.Application
         }
 
         /// <summary>
-        /// Checks whether this proerty's value is equal to another value.
+        /// Checks whether this property's value is equal to another value.
         /// </summary>
         /// <param name="other">Value to compare this property's value against.</param>
         /// <returns>Whether the supplied value is equal to the value of this property.</returns>

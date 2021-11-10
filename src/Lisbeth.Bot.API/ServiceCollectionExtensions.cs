@@ -31,6 +31,7 @@ using Lisbeth.Bot.API.HealthChecks;
 using Lisbeth.Bot.Application.Discord.ApplicationCommands;
 using Lisbeth.Bot.Application.Discord.EventHandlers;
 using Lisbeth.Bot.Application.Discord.SlashCommands;
+using Lisbeth.Bot.Application.Hangfire;
 using Lisbeth.Bot.Application.Helpers;
 using Lisbeth.Bot.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
@@ -107,8 +108,8 @@ namespace Lisbeth.Bot.API
                 options.UsePostgreSqlStorage(
                     "User ID=lisbethbot;Password=lisbethbot;Host=localhost;Port=5438;Database=lisbeth_bot_hangfire_test;",
                     new PostgreSqlStorageOptions { QueuePollInterval = TimeSpan.FromSeconds(15) });
-                options.UseFilter(new PreserveOriginalQueueAttribute());
-                options.UseFilter(new QueueFilter());
+                //options.UseFilter(new QueueFilter());
+                //options.UseFilter(new PreserveOriginalQueueAttribute());
             });
 
             services.AddHangfireServer(options =>

@@ -34,10 +34,10 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
             builder.Property(x => x.IsDisabled).HasColumnName("is_disabled").HasColumnType("boolean").IsRequired();
             builder.Property(x => x.CreatedAt)
                 .HasColumnName("created_at")
-                .HasColumnType("timestamp")
+                .HasColumnType("timestamptz")
                 .ValueGeneratedOnAdd()
                 .IsRequired();
-            builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamp").IsRequired();
+            builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz").IsRequired();
 
             builder.Property(x => x.Description).HasColumnName("description").HasColumnType("varchar(4096)");
             builder.Property(x => x.Fields)
@@ -74,7 +74,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
                 .HasMaxLength(40)
                 .IsRequired();
             builder.Property(x => x.Title).HasColumnName("title").HasColumnType("varchar(256)").HasMaxLength(256);
-            builder.Property(x => x.Timestamp).HasColumnName("timestamp").HasColumnType("timestamp");
+            builder.Property(x => x.Timestamp).HasColumnName("Timestamp").HasColumnType("timestamptz");
             builder.Property(x => x.Thumbnail)
                 .HasColumnName("thumbnail")
                 .HasColumnType("varchar(100)")

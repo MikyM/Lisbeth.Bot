@@ -111,8 +111,7 @@ namespace Lisbeth.Bot.API
 
                 app.UseHangfireDashboard("/hangfire",
                     app.Environment.IsDevelopment()
-                        ? new DashboardOptions
-                            { AppPath = "kek", Authorization = new[] { new HangfireAlwaysAuthFilter() } }
+                        ? new DashboardOptions { AppPath = "kek", Authorization = new[] { new HangfireAlwaysAuthFilter() } }
                         : new DashboardOptions { AppPath = "kek", Authorization = new[] { new HangfireAuthFilter() } });
                 app.UseMiddleware<CustomExceptionMiddleware>();
                 app.UseHttpsRedirection();

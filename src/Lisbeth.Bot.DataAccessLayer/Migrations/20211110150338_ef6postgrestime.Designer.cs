@@ -3,6 +3,7 @@ using System;
 using Lisbeth.Bot.DataAccessLayer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Lisbeth.Bot.DataAccessLayer.Migrations
 {
     [DbContext(typeof(LisbethBotDbContext))]
-    partial class LisbethBotDbContextModelSnapshot : ModelSnapshot
+    [Migration("20211110150338_ef6postgrestime")]
+    partial class ef6postgrestime
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -176,7 +178,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
 
                     b.Property<DateTime?>("Timestamp")
                         .HasColumnType("timestamptz")
-                        .HasColumnName("Timestamp");
+                        .HasColumnName("timestamptz");
 
                     b.Property<string>("Title")
                         .HasMaxLength(256)
@@ -471,10 +473,6 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<decimal?>("ChannelId")
-                        .HasColumnType("numeric(20,0)")
-                        .HasColumnName("bigint");
-
                     b.Property<DateTime?>("CreatedAt")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
@@ -499,9 +497,8 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("guild_id");
 
-                    b.Property<string>("HangfireId")
-                        .HasMaxLength(300)
-                        .HasColumnType("varchar(300)")
+                    b.Property<long>("HangfireId")
+                        .HasColumnType("bigint")
                         .HasColumnName("hangfire_id");
 
                     b.Property<bool>("IsDisabled")
@@ -555,10 +552,6 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<decimal?>("ChannelId")
-                        .HasColumnType("numeric(20,0)")
-                        .HasColumnName("bigint");
-
                     b.Property<DateTime?>("CreatedAt")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
@@ -577,9 +570,8 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("guild_id");
 
-                    b.Property<string>("HangfireId")
-                        .HasMaxLength(300)
-                        .HasColumnType("varchar(300)")
+                    b.Property<long>("HangfireId")
+                        .HasColumnType("bigint")
                         .HasColumnName("hangfire_id");
 
                     b.Property<bool>("IsDisabled")

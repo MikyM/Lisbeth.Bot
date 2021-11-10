@@ -43,7 +43,7 @@ namespace Lisbeth.Bot.Application.Services.Database
 
             if (!result.IsSuccess) return Result.FromError(result);
 
-            result.Entity.HangfireId = long.Parse(hangfireId);
+            result.Entity.HangfireId = hangfireId;
 
             if (shouldSave) await base.CommitAsync();
 

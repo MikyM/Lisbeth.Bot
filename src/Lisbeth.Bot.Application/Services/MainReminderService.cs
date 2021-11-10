@@ -22,6 +22,7 @@ using Hangfire;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Application.Extensions;
+using Lisbeth.Bot.Application.Hangfire;
 using Lisbeth.Bot.Application.Helpers;
 using Lisbeth.Bot.Application.Results;
 using Lisbeth.Bot.Application.Services.Database.Interfaces;
@@ -94,7 +95,7 @@ namespace Lisbeth.Bot.Application.Services
                 if (string.IsNullOrWhiteSpace(req.Name))
                     req.Name = $"{req.GuildId}_{req.RequestedOnBehalfOfId}_{DateTime.UtcNow}";
 
-                var partial = await _reminderService.AddAsync(req);
+                var partial = await _reminderService.AddAsync(req, true);
                 string hangfireId =
                     _backgroundJobClient.Schedule<IDiscordSendReminderService>(
                         x => x.SendReminderAsync(partial.Entity, ReminderType.Single), setFor.ToUniversalTime(),
@@ -105,13 +106,15 @@ namespace Lisbeth.Bot.Application.Services
             }
             else // handle recurring reminder, validated req must either fall to first if or have a cron expression
             {
-                var parsed = CrontabSchedule.TryParse(req.TimeSpanExpression);
-                if (parsed is null)
+                var parsed = CrontabSchedule.TryParse(req.CronExpression);
+                var parsedWithSeconds = CrontabSchedule.TryParse(req.CronExpression, new CrontabSchedule.ParseOptions { IncludingSeconds = true });
+                if (parsed is null && parsedWithSeconds is null)
                     return Result<ReminderResDto>.FromError(new ArgumentError(nameof(recGuild.Entity),
                         "Invalid cron expression"));
-                if (parsed.GetNextOccurrences(DateTime.UtcNow, DateTime.UtcNow.AddHours(1)).Count() > 12)
+                if (parsed is not null && parsed.GetNextOccurrences(DateTime.UtcNow, DateTime.UtcNow.AddHours(1)).Count() > 12 ||
+                    parsedWithSeconds is not null && parsedWithSeconds.GetNextOccurrences(DateTime.UtcNow, DateTime.UtcNow.AddHours(1)).Count() > 12)
                     return new ArgumentError(nameof(recGuild.Entity),
-                        "Cron expressions with more than 12 occurences per hour (more frequent than every 5 minutes) are not allowed");
+                        "Cron expressions with more than 12 occurrences per hour (more frequent than every 5 minutes) are not allowed");
 
                 var count = await _recurringReminderService.LongCountAsync(
                     new ActiveRecurringRemindersPerGuildByNameSpec(req.GuildId, req.Name));
@@ -121,13 +124,15 @@ namespace Lisbeth.Bot.Application.Services
 
                 string jobName = $"{req.GuildId}_{req.Name}";
 
-                var partial = await _recurringReminderService.AddAsync(req);
+                var partial = await _recurringReminderService.AddAsync(req, true);
                 RecurringJob.AddOrUpdate<IDiscordSendReminderService>(jobName,
                     x => x.SendReminderAsync(partial.Entity, ReminderType.Recurring),
                     req.CronExpression, TimeZoneInfo.Utc, "reminder");
                 await _recurringReminderService.SetHangfireIdAsync(partial.Entity, jobName, true);
 
-                return new ReminderResDto(partial.Entity, req.Name, parsed.GetNextOccurrence(DateTime.UtcNow),
+                return new ReminderResDto(partial.Entity, req.Name,
+                    parsed?.GetNextOccurrence(DateTime.UtcNow).ToUniversalTime() ??
+                    parsedWithSeconds?.GetNextOccurrence(DateTime.UtcNow).ToUniversalTime() ?? throw new InvalidOperationException(),
                     req.Mentions);
             }
         }
@@ -154,7 +159,7 @@ namespace Lisbeth.Bot.Application.Services
                     setFor = req.SetFor ?? throw new InvalidOperationException();
                 }
 
-                bool res = BackgroundJob.Delete(result.Entity.HangfireId.ToString());
+                bool res = BackgroundJob.Delete(result.Entity.HangfireId);
 
                 if (!res) return new HangfireError("Hangfire failed to delete the job");
 
@@ -202,7 +207,7 @@ namespace Lisbeth.Bot.Application.Services
                         new ActiveReminderByNameOrIdAndGuildSpec(req.Name, req.GuildId, req.ReminderId));
                     if (!singleResult.IsSuccess) return Result<ReminderResDto>.FromError(singleResult);
 
-                    bool res = BackgroundJob.Delete(singleResult.Entity.HangfireId.ToString());
+                    bool res = BackgroundJob.Delete(singleResult.Entity.HangfireId);
 
                     if (!res) throw new Exception("Hangfire failed to delete a scheduled job");
 
@@ -215,7 +220,7 @@ namespace Lisbeth.Bot.Application.Services
                         new ActiveRecurringReminderByNameOrIdAndGuildSpec(req.Name, req.GuildId, req.ReminderId));
                     if (!recurringResult.IsSuccess) return Result<ReminderResDto>.FromError(recurringResult);
 
-                    RecurringJob.RemoveIfExists(recurringResult.Entity.HangfireId.ToString());
+                    RecurringJob.RemoveIfExists(recurringResult.Entity.HangfireId);
 
                     await _recurringReminderService.DisableAsync(req, true);
 

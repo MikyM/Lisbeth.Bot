@@ -18,7 +18,7 @@
 using System;
 using Hangfire.States;
 
-namespace Lisbeth.Bot.Application.Helpers
+namespace Lisbeth.Bot.Application.Hangfire
 {
     public sealed class ScheduledEnqueuedState : ScheduledState
     {

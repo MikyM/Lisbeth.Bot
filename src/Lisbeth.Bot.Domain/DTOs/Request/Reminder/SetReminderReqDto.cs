@@ -28,7 +28,7 @@ namespace Lisbeth.Bot.Domain.DTOs.Request.Reminder
         }
 
         public SetReminderReqDto(string name, string? cronExpression, DateTime? setFor, string? timeSpanExpression,
-            string text, List<string> mentions, ulong guildId, ulong requestedOnBehalfOfId) : base(guildId,
+            string text, List<string> mentions, ulong guildId, ulong requestedOnBehalfOfId, ulong? channelId = null) : base(guildId,
             requestedOnBehalfOfId)
         {
             Name = name;
@@ -37,6 +37,7 @@ namespace Lisbeth.Bot.Domain.DTOs.Request.Reminder
             TimeSpanExpression = timeSpanExpression;
             Text = text;
             Mentions = mentions;
+            ChannelId = channelId;
         }
 
         public string? Name { get; set; }
@@ -44,6 +45,7 @@ namespace Lisbeth.Bot.Domain.DTOs.Request.Reminder
         public DateTime? SetFor { get; set; }
         public string? TimeSpanExpression { get; set; }
         public string? Text { get; set; }
+        public ulong? ChannelId { get; set; }
         public List<string>? Mentions { get; set; }
     }
 }

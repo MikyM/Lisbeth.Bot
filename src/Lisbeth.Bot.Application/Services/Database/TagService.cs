@@ -65,7 +65,7 @@ namespace Lisbeth.Bot.Application.Services.Database
                     "Can't update embed config for a disabled tag, enable the tag first.");
 
             base.BeginUpdate(tag.Entity);
-            if (req.EmbedConfig is not null) tag.Entity.EmbedConfig = _mapper.Map<EmbedConfig>(req.EmbedConfig);
+            if (req.EmbedConfig is not null) tag.Entity.EmbedConfig = Mapper.Map<EmbedConfig>(req.EmbedConfig);
             tag.Entity.LastEditById = req.RequestedOnBehalfOfId;
             if (!string.IsNullOrWhiteSpace(req.Name)) tag.Entity.Name = req.Name;
             if (!string.IsNullOrWhiteSpace(req.Text)) tag.Entity.Text = req.Text;

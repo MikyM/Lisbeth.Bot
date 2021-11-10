@@ -15,14 +15,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using Hangfire.Common;
 using Hangfire.States;
 using Hangfire.Storage;
-using Lisbeth.Bot.Application.Extensions;
-using Serilog;
 
-namespace Lisbeth.Bot.Application.Helpers
+namespace Lisbeth.Bot.Application.Hangfire
 {
     public class PreserveOriginalQueueAttribute : JobFilterAttribute, IApplyStateFilter
     {
@@ -37,15 +34,8 @@ namespace Lisbeth.Bot.Application.Helpers
             if (originalQueue is not null)
                 enqueuedState.Queue = originalQueue;
             else
-                try
-                {
-                    context.Connection.SetJobParameter(context.BackgroundJob.Id, "OriginalQueue",
-                        SerializationHelper.Serialize(enqueuedState.Queue));
-                }
-                catch (Exception ex)
-                {
-                    Log.Logger.Error(ex.GetFullMessage());
-                }
+                context.Connection.SetJobParameter(context.BackgroundJob.Id, "OriginalQueue",
+                    SerializationHelper.Serialize(enqueuedState.Queue));
         }
 
         public void OnStateUnapplied(ApplyStateContext context, IWriteOnlyTransaction transaction)

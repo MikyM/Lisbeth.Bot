@@ -26,29 +26,29 @@ namespace MikyM.Common.Application.Services
 {
     public abstract class ServiceBase<TContext> : IServiceBase<TContext> where TContext : DbContext
     {
-        protected readonly IMapper _mapper;
-        protected readonly IUnitOfWork<TContext> _unitOfWork;
+        protected readonly IMapper Mapper;
+        protected readonly IUnitOfWork<TContext> UnitOfWork;
         private bool _disposed;
 
         protected ServiceBase(IMapper mapper, IUnitOfWork<TContext> uof)
         {
-            _mapper = mapper;
-            _unitOfWork = uof;
+            Mapper = mapper;
+            UnitOfWork = uof;
         }
 
         public virtual async Task<int> CommitAsync()
         {
-            return await _unitOfWork.CommitAsync();
+            return await UnitOfWork.CommitAsync();
         }
 
         public virtual async Task RollbackAsync()
         {
-            await _unitOfWork.RollbackAsync();
+            await UnitOfWork.RollbackAsync();
         }
 
         public virtual async Task BeginTransactionAsync()
         {
-            await _unitOfWork.UseTransaction();
+            await UnitOfWork.UseTransaction();
         }
 
         // Public implementation of Dispose pattern callable by consumers.
@@ -63,7 +63,7 @@ namespace MikyM.Common.Application.Services
         {
             if (_disposed) return;
 
-            if (disposing) _unitOfWork?.Dispose();
+            if (disposing) UnitOfWork?.Dispose();
 
             _disposed = true;
         }

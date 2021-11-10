@@ -34,10 +34,10 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
             builder.Property(x => x.IsDisabled).HasColumnName("is_disabled").HasColumnType("boolean").IsRequired();
             builder.Property(x => x.CreatedAt)
                 .HasColumnName("created_at")
-                .HasColumnType("timestamp")
+                .HasColumnType("timestamptz")
                 .ValueGeneratedOnAdd()
                 .IsRequired();
-            builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamp").IsRequired();
+            builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz").IsRequired();
 
             builder.Property(x => x.Mentions)
                 .HasColumnName("tags")
@@ -70,7 +70,8 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
                 .HasMaxLength(100)
                 .IsRequired();
             builder.Property(x => x.EmbedConfigId).HasColumnName("embed_config_id").HasColumnType("bigint");
-            builder.Property(x => x.HangfireId).HasColumnName("hangfire_id").HasColumnType("bigint").IsRequired();
+            builder.Property(x => x.HangfireId).HasColumnName("hangfire_id").HasColumnType("varchar(300)").HasMaxLength(300);
+            builder.Property(x => x.ChannelId).HasColumnName("bigint");
 
             builder.HasOne(x => x.EmbedConfig)
                 .WithOne(x => x.RecurringReminder)

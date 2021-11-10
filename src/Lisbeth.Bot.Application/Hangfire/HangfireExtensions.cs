@@ -20,13 +20,13 @@ using System.Linq.Expressions;
 using Hangfire;
 using JetBrains.Annotations;
 
-namespace Lisbeth.Bot.Application.Helpers
+namespace Lisbeth.Bot.Application.Hangfire
 {
     [UsedImplicitly]
     public static class HangfireExtensions
     {
-        public static string Schedule([Hangfire.Annotations.NotNull] this IBackgroundJobClient client,
-            [Hangfire.Annotations.NotNull] [Hangfire.Annotations.InstantHandle]
+        public static string Schedule([global::Hangfire.Annotations.NotNull] this IBackgroundJobClient client,
+            [global::Hangfire.Annotations.NotNull] [global::Hangfire.Annotations.InstantHandle]
             Expression<Action> methodCall, DateTime enqueueAt, string queue)
         {
             if (client is null) throw new ArgumentNullException(nameof(client));
@@ -34,8 +34,8 @@ namespace Lisbeth.Bot.Application.Helpers
             return client.Create(methodCall, new ScheduledEnqueuedState(enqueueAt, queue));
         }
 
-        public static string Schedule<T>([Hangfire.Annotations.NotNull] this IBackgroundJobClient client,
-            [Hangfire.Annotations.NotNull] [Hangfire.Annotations.InstantHandle]
+        public static string Schedule<T>([global::Hangfire.Annotations.NotNull] this IBackgroundJobClient client,
+            [global::Hangfire.Annotations.NotNull] [global::Hangfire.Annotations.InstantHandle]
             Expression<Action<T>> methodCall, DateTime enqueueAt, string queue)
         {
             if (client is null) throw new ArgumentNullException(nameof(client));

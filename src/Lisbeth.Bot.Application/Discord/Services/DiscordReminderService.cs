@@ -118,14 +118,18 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             if (!result.IsSuccess) return Result<DiscordEmbed>.FromError(result);
 
+            if (req.ChannelId.HasValue && !requestingMember.IsModerator()) return Result<DiscordEmbed>.FromError(new DiscordNotAuthorizedError("Only moderators can set specific channel reminders."));
+
             var res = await _reminderService.SetNewReminderAsync(req);
+
+            if (!res.IsSuccess) return Result<DiscordEmbed>.FromError(res);
 
             var embed = new DiscordEmbedBuilder().WithColor(new DiscordColor(result.Entity.EmbedHexColor))
                 .WithAuthor("Lisbeth reminder service")
                 .WithDescription("Reminder set successfully")
                 .AddField("Reminder's id", res.Entity.Id.ToString())
                 .AddField("Reminder's name", res.Entity.Name)
-                .AddField("Next occurrence", res.Entity.NextOccurrence.ToString(CultureInfo.InvariantCulture))
+                .AddField("Next occurrence", res.Entity.NextOccurrence.ToUniversalTime().ToString("dd/MM/yyyy hh:mm tt") + " UTC")
                 .AddField("Mentions", string.Join(", ", res.Entity.Mentions ?? throw new InvalidOperationException()));
 
             return embed.Build();

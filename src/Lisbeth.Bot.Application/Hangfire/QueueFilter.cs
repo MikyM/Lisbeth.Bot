@@ -16,13 +16,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-using System;
 using Hangfire.Client;
 using Hangfire.States;
-using Lisbeth.Bot.Application.Extensions;
-using Serilog;
 
-namespace Lisbeth.Bot.Application.Helpers
+namespace Lisbeth.Bot.Application.Hangfire
 {
     public sealed class QueueFilter : IClientFilter, IElectStateFilter
     {
@@ -42,15 +39,7 @@ namespace Lisbeth.Bot.Application.Helpers
                 _ => null
             };
 
-            if (!string.IsNullOrWhiteSpace(queue))
-                try
-                {
-                    filterContext.SetJobParameter(QueueParameterName, queue);
-                }
-                catch (Exception ex)
-                {
-                    Log.Logger.Error(ex.GetFullMessage());
-                }
+            if (!string.IsNullOrWhiteSpace(queue)) filterContext.SetJobParameter(QueueParameterName, queue);
         }
 
         public void OnStateElection(ElectStateContext context)
@@ -59,9 +48,7 @@ namespace Lisbeth.Bot.Application.Helpers
 
             string queue = context.GetJobParameter<string>(QueueParameterName.Trim());
 
-            if (string.IsNullOrWhiteSpace(queue)) queue = EnqueuedState.DefaultQueue;
-
-            context.CandidateState = new EnqueuedState(queue);
+            if (!string.IsNullOrWhiteSpace(queue)) context.CandidateState = new EnqueuedState(queue);
         }
     }
 }

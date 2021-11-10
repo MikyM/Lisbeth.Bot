@@ -24,6 +24,7 @@ using Lisbeth.Bot.Domain.DTOs.Request.Ban;
 using Lisbeth.Bot.Domain.DTOs.Request.Guild;
 using Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.Mute;
+using Lisbeth.Bot.Domain.DTOs.Request.Reminder;
 using Lisbeth.Bot.Domain.DTOs.Request.RoleMenu;
 using Lisbeth.Bot.Domain.DTOs.Request.Tag;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
@@ -110,6 +111,14 @@ namespace Lisbeth.Bot.API
                 .ForMember(dest => dest.CreatorId, source => source.MapFrom(x => x.RequestedOnBehalfOfId))
                 .ForMember(dest => dest.LastEditById, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
             CreateMap<RoleMenuOptionReqDto, RoleMenuOption>();
+
+            CreateMap<SetReminderReqDto, Reminder>()
+                .ForMember(dest => dest.CreatorId, source => source.MapFrom(x => x.RequestedOnBehalfOfId))
+                .ForMember(dest => dest.LastEditById, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
+
+            CreateMap<SetReminderReqDto, RecurringReminder>()
+                .ForMember(dest => dest.CreatorId, source => source.MapFrom(x => x.RequestedOnBehalfOfId))
+                .ForMember(dest => dest.LastEditById, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
         }
     }
 }

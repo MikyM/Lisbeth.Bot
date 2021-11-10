@@ -3,6 +3,7 @@ using System;
 using Lisbeth.Bot.DataAccessLayer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Lisbeth.Bot.DataAccessLayer.Migrations
 {
     [DbContext(typeof(LisbethBotDbContext))]
-    partial class LisbethBotDbContextModelSnapshot : ModelSnapshot
+    [Migration("20211110170426_hangfirestringid")]
+    partial class hangfirestringid
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -471,10 +473,6 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<decimal?>("ChannelId")
-                        .HasColumnType("numeric(20,0)")
-                        .HasColumnName("bigint");
-
                     b.Property<DateTime?>("CreatedAt")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
@@ -500,6 +498,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                         .HasColumnName("guild_id");
 
                     b.Property<string>("HangfireId")
+                        .IsRequired()
                         .HasMaxLength(300)
                         .HasColumnType("varchar(300)")
                         .HasColumnName("hangfire_id");
@@ -555,10 +554,6 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<decimal?>("ChannelId")
-                        .HasColumnType("numeric(20,0)")
-                        .HasColumnName("bigint");
-
                     b.Property<DateTime?>("CreatedAt")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
@@ -578,6 +573,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                         .HasColumnName("guild_id");
 
                     b.Property<string>("HangfireId")
+                        .IsRequired()
                         .HasMaxLength(300)
                         .HasColumnType("varchar(300)")
                         .HasColumnName("hangfire_id");
