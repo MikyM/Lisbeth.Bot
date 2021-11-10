@@ -44,7 +44,7 @@ namespace Lisbeth.Bot.API.Helpers
 
         public static async Task ScheduleAllDefinedAfterDelayAsync()
         {
-            await Task.Delay(5000);
+            await Task.Delay(10000);
             ScheduleAutomaticUnban();
             ScheduleAutomaticUnmute();
             Log.Logger.Information("Recurring jobs scheduled.");

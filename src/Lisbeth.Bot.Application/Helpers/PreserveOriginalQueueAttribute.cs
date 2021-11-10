@@ -34,8 +34,16 @@ namespace Lisbeth.Bot.Application.Helpers
             if (originalQueue is not null)
                 enqueuedState.Queue = originalQueue;
             else
-                context.Connection.SetJobParameter(context.BackgroundJob.Id, "OriginalQueue",
-                    SerializationHelper.Serialize(enqueuedState.Queue));
+                try
+                {
+                    context.Connection.SetJobParameter(context.BackgroundJob.Id, "OriginalQueue",
+                        SerializationHelper.Serialize(enqueuedState.Queue));
+                }
+                catch
+                {
+                    //
+                }
+
         }
 
         public void OnStateUnapplied(ApplyStateContext context, IWriteOnlyTransaction transaction)

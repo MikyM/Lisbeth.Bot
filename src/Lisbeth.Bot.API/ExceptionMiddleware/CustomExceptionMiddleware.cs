@@ -56,7 +56,7 @@ namespace Lisbeth.Bot.API.ExceptionMiddleware
             return context.Response.WriteAsync(new ErrorDetails
             {
                 StatusCode = context.Response.StatusCode,
-                message = "Internal Server Error"
+                Message = "Internal Server Error"
             }.ToString());
         }
     }

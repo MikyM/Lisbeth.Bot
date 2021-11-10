@@ -15,16 +15,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Globalization;
-using System.IO;
-using System.Reflection;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Hangfire;
 using Lisbeth.Bot.API.ExceptionMiddleware;
 using Lisbeth.Bot.API.Helpers;
-using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Application.Helpers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -35,6 +30,8 @@ using Microsoft.Extensions.Hosting;
 using MikyM.Common.Domain;
 using Serilog;
 using Serilog.Events;
+using System;
+using System.Globalization;
 
 namespace Lisbeth.Bot.API
 {
@@ -53,17 +50,13 @@ namespace Lisbeth.Bot.API
 
                 var builder = WebApplication.CreateBuilder(args);
 
-                builder.WebHost.ConfigureAppConfiguration((_, config) =>
-                {
-                    config.SetBasePath(AppDomain.CurrentDomain.BaseDirectory);
-                    config.AddJsonFile("appsettings.json", false, true);
-                    config.AddJsonFile("appsettings.Development.json", true, true);
-                    config.AddEnvironmentVariables();
-                    config.Build();
-                });
-
                 // Add services to the container.
                 CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
+
+                builder.Configuration.SetBasePath(AppDomain.CurrentDomain.BaseDirectory);
+                if (builder.Environment.IsProduction()) builder.Configuration.AddJsonFile("appsettings.json", false, true);
+                builder.Configuration.AddJsonFile("appsettings.Development.json", true, true);
+                builder.Configuration.AddEnvironmentVariables();
 
                 builder.Services.AddControllers(options =>
                     options.Conventions.Add(new RouteTokenTransformerConvention(new SlugifyParameterTransformer())));
@@ -77,18 +70,20 @@ namespace Lisbeth.Bot.API
                 builder.Services.ConfigureApiVersioning();
                 builder.Services.ConfigureHealthChecks();
                 builder.Services.ConfigureFluentValidation();
+
                 builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
                 builder.Host.ConfigureContainer<ContainerBuilder>(cb => cb.RegisterModule(new AutofacContainerModule()));
-                builder.WebHost.UseSentry();
-                builder.Host.UseSerilog((context, services, configuration) => configuration
-                    .ReadFrom.Configuration(context.Configuration)
+                builder.Host.UseSerilog((hostBuilder, services, configuration) => configuration
+                    .ReadFrom.Configuration(hostBuilder.Configuration)
                     .ReadFrom.Services(services));
+
+                builder.WebHost.UseSentry();
 
                 var app = builder.Build();
 
                 // Configure the HTTP request pipeline.
                 Log.Logger.Debug("Waiting for discord's guild download completion.");
-                WaitForDownloadCompletion.ReadyToOperateEvent.WaitAsync().Wait();
+                //WaitForDownloadCompletion.ReadyToOperateEvent.WaitAsync().Wait();
                 Log.Logger.Debug("Discord fully operational.");
 
                 ContainerProvider.Container = app.Services.GetAutofacRoot();
@@ -96,7 +91,7 @@ namespace Lisbeth.Bot.API
                 _ = ContainerProvider.Container
                     .Resolve<IAsyncExecutor>()
                     .ExecuteAsync(async () => await RecurringJobHelper.ScheduleAllDefinedAfterDelayAsync());
-
+                
                 if (app.Environment.IsDevelopment())
                 {
                     app.UseDeveloperExceptionPage();

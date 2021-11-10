@@ -64,16 +64,16 @@ namespace Lisbeth.Bot.API
 
             services.AddDiscordSlashCommands(_ => { }, extension =>
             {
-                extension.RegisterCommands<MuteApplicationCommands>(790631933758799912);
-                extension.RegisterCommands<BanApplicationCommands>(790631933758799912);
-                extension.RegisterCommands<TicketSlashCommands>(790631933758799912);
-                extension.RegisterCommands<AdminUtilSlashCommands>(790631933758799912);
-                extension.RegisterCommands<PruneApplicationCommands>(790631933758799912);
-                extension.RegisterCommands<ModerationUtilSlashCommands>(790631933758799912);
-                extension.RegisterCommands<TagSlashCommands>(790631933758799912);
-                extension.RegisterCommands<ReminderSlashCommands>(790631933758799912);
-                extension.RegisterCommands<EmbedConfigSlashCommands>(790631933758799912);
-                extension.RegisterCommands<RoleMenuSlashCommands>(790631933758799912);
+                extension?.RegisterCommands<MuteApplicationCommands>(790631933758799912);
+                extension?.RegisterCommands<BanApplicationCommands>(790631933758799912);
+                extension?.RegisterCommands<TicketSlashCommands>(790631933758799912);
+                extension?.RegisterCommands<AdminUtilSlashCommands>(790631933758799912);
+                extension?.RegisterCommands<PruneApplicationCommands>(790631933758799912);
+                extension?.RegisterCommands<ModerationUtilSlashCommands>(790631933758799912);
+                extension?.RegisterCommands<TagSlashCommands>(790631933758799912);
+                extension?.RegisterCommands<ReminderSlashCommands>(790631933758799912);
+                extension?.RegisterCommands<EmbedConfigSlashCommands>(790631933758799912);
+                extension?.RegisterCommands<RoleMenuSlashCommands>(790631933758799912);
             });
             services.AddDiscordInteractivity(options =>
             {
