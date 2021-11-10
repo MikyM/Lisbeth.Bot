@@ -37,6 +37,7 @@ using System;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using Lisbeth.Bot.Application.Helpers;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {
@@ -184,7 +185,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             return await GetSpecificUserGuildMuteAsync(ctx.Guild, ctx.TargetMember, ctx.Member, req);
         }
 
-        [Queue("moderation")]
+        [Queue("moderation"), PreserveOriginalQueue]
         public async Task<Result> UnmuteCheckAsync()
         {
             try
@@ -202,8 +203,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Automatic unban failed with: {ex.GetFullMessage()}");
-                return Result.FromError(new InvalidOperationError($"Automatic unban failed with: {ex.GetFullMessage()}"));
+                _logger.LogError($"Automatic unmute failed with: {ex.GetFullMessage()}");
+                return Result.FromError(new InvalidOperationError($"Automatic unmute failed with: {ex.GetFullMessage()}"));
             }
 
             return Result.FromSuccess();

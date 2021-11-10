@@ -36,6 +36,7 @@ using MikyM.Discord.Interfaces;
 using System;
 using System.Globalization;
 using System.Threading.Tasks;
+using Lisbeth.Bot.Application.Helpers;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {
@@ -56,7 +57,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             _logger = logger;
         }
 
-        [Queue("moderation")]
+        [Queue("moderation"), PreserveOriginalQueue]
         public async Task<Result> UnbanCheckAsync()
         {
             try

@@ -18,6 +18,9 @@
 
 using Hangfire.Client;
 using Hangfire.States;
+using Lisbeth.Bot.Application.Extensions;
+using Serilog;
+using System;
 
 namespace Lisbeth.Bot.Application.Helpers
 {
@@ -39,7 +42,15 @@ namespace Lisbeth.Bot.Application.Helpers
                 _ => null
             };
 
-            if (!string.IsNullOrWhiteSpace(queue)) filterContext.SetJobParameter(QueueParameterName, queue);
+            if (!string.IsNullOrWhiteSpace(queue))
+                try
+                {
+                    filterContext.SetJobParameter(QueueParameterName, queue);
+                }
+                catch (Exception ex)
+                {
+                     Log.Logger.Error(ex.GetFullMessage());
+                }
         }
 
         public void OnStateElection(ElectStateContext context)
@@ -50,7 +61,7 @@ namespace Lisbeth.Bot.Application.Helpers
 
             if (string.IsNullOrWhiteSpace(queue)) queue = EnqueuedState.DefaultQueue;
 
-            context.CandidateState = new EnqueuedState();
+            context.CandidateState = new EnqueuedState(queue);
         }
     }
 }
