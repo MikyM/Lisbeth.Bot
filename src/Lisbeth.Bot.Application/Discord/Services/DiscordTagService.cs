@@ -15,26 +15,24 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using JetBrains.Annotations;
-using Lisbeth.Bot.Application.Discord.Exceptions;
 using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
-using Lisbeth.Bot.Application.Exceptions;
+using Lisbeth.Bot.Application.Results;
 using Lisbeth.Bot.Application.Services.Database.Interfaces;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.Domain.DTOs.Request.Tag;
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.Application.Results;
+using MikyM.Common.Application.Results.Errors;
 using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Discord.Interfaces;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-using Lisbeth.Bot.Application.Results;
-using MikyM.Common.Application.Results.Errors;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {
@@ -91,7 +89,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             if (guild is null) throw new InvalidOperationException();
 
-            DiscordMember requestingUser = await guild.GetMemberAsync(req.RequestedOnBehalfOfId) ;
+            DiscordMember requestingUser = await guild.GetMemberAsync(req.RequestedOnBehalfOfId);
 
             return await EditAsync(guild, requestingUser, req);
         }
@@ -121,7 +119,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             }
 
             if (guild is null) throw new InvalidOperationException();
-            
+
             DiscordMember requestingUser = await guild.GetMemberAsync(req.RequestedOnBehalfOfId);
 
             return await GetAsync(guild, requestingUser, req);
@@ -159,62 +157,13 @@ namespace Lisbeth.Bot.Application.Discord.Services
             return await SendAsync(guild, requestingUser, target, req);
         }
 
-        public async Task<Result<(DiscordEmbed? Embed, string Text)>> SendAsync(InteractionContext ctx, TagSendReqDto req)
+        public async Task<Result<(DiscordEmbed? Embed, string Text)>> SendAsync(InteractionContext ctx,
+            TagSendReqDto req)
         {
             if (ctx is null) throw new ArgumentNullException(nameof(ctx));
             if (req is null) throw new ArgumentNullException(nameof(req));
 
             return await SendAsync(ctx.Guild, ctx.Member, ctx.ResolvedChannelMentions[0], req);
-        }
-
-        private async Task<Result<(DiscordEmbed? Embed, string Text)>> SendAsync(DiscordGuild guild, DiscordMember requestingUser,
-            DiscordChannel target, TagGetReqDto req)
-        {
-            if (guild is null) throw new ArgumentNullException(nameof(guild));
-            if (requestingUser is null) throw new ArgumentNullException(nameof(requestingUser));
-            if (target is null) throw new ArgumentNullException(nameof(target));
-            if (req is null) throw new ArgumentNullException(nameof(req));
-
-            Tag? tag;
-            if (requestingUser.IsBotOwner(_discord.Client))
-            {
-                Result<Tag> partial;
-                if (req.Id.HasValue) partial = await _tagService.GetAsync<Tag>(req.Id.Value);
-                else partial = await _tagService.GetSingleBySpecAsync<Tag>(new Specification<Tag>(x => x.Name == req.Name));
-
-                if (!partial.IsSuccess) return Result<(DiscordEmbed? Embed, string Text)>.FromError(partial);
-
-                tag = partial.Entity;
-            }
-            else
-            {
-                var guildCfg =
-                    await _guildService.GetSingleBySpecAsync<Guild>(
-                        new ActiveGuildByDiscordIdWithTagsSpecifications(guild.Id));
-                if (!guildCfg.IsSuccess)
-                    return Result<(DiscordEmbed? Embed, string Text)>.FromError(guildCfg);
-                if (requestingUser.Guild.Id != guild.Id) return new DiscordNotAuthorizedError();
-
-                tag = req.Id.HasValue
-                    ? guildCfg.Entity.Tags?.FirstOrDefault(x => x.Id == req.Id)
-                    : guildCfg.Entity.Tags?.FirstOrDefault(x => x.Name == req.Name);
-            }
-
-            if (tag is null) return new NotFoundError("Tag not found");
-            if (tag.IsDisabled && !requestingUser.IsBotOwner(_discord.Client))
-                return new DisabledEntityError("Tag not found");
-
-            if (tag.EmbedConfig is null)
-            {
-                await target.SendMessageAsync(tag.Text);
-                return (null, tag.Text ?? throw new ArgumentNullException());
-            }
-            else
-            {
-                var embed = _embedProvider.ConfigureEmbed(tag.EmbedConfig).Build();
-                await target.SendMessageAsync(embed);
-                return (embed, tag.Text ?? throw new ArgumentNullException());
-            }
         }
 
         public async Task<Result<DiscordEmbed>> DisableAsync(TagDisableReqDto req)
@@ -248,6 +197,57 @@ namespace Lisbeth.Bot.Application.Discord.Services
             return await DisableAsync(ctx.Guild, ctx.Member, req);
         }
 
+        private async Task<Result<(DiscordEmbed? Embed, string Text)>> SendAsync(DiscordGuild guild,
+            DiscordMember requestingUser,
+            DiscordChannel target, TagGetReqDto req)
+        {
+            if (guild is null) throw new ArgumentNullException(nameof(guild));
+            if (requestingUser is null) throw new ArgumentNullException(nameof(requestingUser));
+            if (target is null) throw new ArgumentNullException(nameof(target));
+            if (req is null) throw new ArgumentNullException(nameof(req));
+
+            Tag? tag;
+            if (requestingUser.IsBotOwner(_discord.Client))
+            {
+                Result<Tag> partial;
+                if (req.Id.HasValue) partial = await _tagService.GetAsync<Tag>(req.Id.Value);
+                else
+                    partial = await _tagService.GetSingleBySpecAsync<Tag>(
+                        new Specification<Tag>(x => x.Name == req.Name));
+
+                if (!partial.IsSuccess) return Result<(DiscordEmbed? Embed, string Text)>.FromError(partial);
+
+                tag = partial.Entity;
+            }
+            else
+            {
+                var guildCfg =
+                    await _guildService.GetSingleBySpecAsync<Guild>(
+                        new ActiveGuildByDiscordIdWithTagsSpecifications(guild.Id));
+                if (!guildCfg.IsSuccess)
+                    return Result<(DiscordEmbed? Embed, string Text)>.FromError(guildCfg);
+                if (requestingUser.Guild.Id != guild.Id) return new DiscordNotAuthorizedError();
+
+                tag = req.Id.HasValue
+                    ? guildCfg.Entity.Tags?.FirstOrDefault(x => x.Id == req.Id)
+                    : guildCfg.Entity.Tags?.FirstOrDefault(x => x.Name == req.Name);
+            }
+
+            if (tag is null) return new NotFoundError("Tag not found");
+            if (tag.IsDisabled && !requestingUser.IsBotOwner(_discord.Client))
+                return new DisabledEntityError("Tag not found");
+
+            if (tag.EmbedConfig is null)
+            {
+                await target.SendMessageAsync(tag.Text);
+                return (null, tag.Text ?? throw new ArgumentNullException());
+            }
+
+            var embed = _embedProvider.ConfigureEmbed(tag.EmbedConfig).Build();
+            await target.SendMessageAsync(embed);
+            return (embed, tag.Text ?? throw new ArgumentNullException());
+        }
+
         private async Task<Result<DiscordEmbed>> AddAsync(DiscordGuild guild, DiscordMember creator, TagAddReqDto req)
         {
             if (guild is null) throw new ArgumentNullException(nameof(guild));
@@ -274,7 +274,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
             return embed.Build();
         }
 
-        private async Task<Result<DiscordEmbed>> EditAsync(DiscordGuild guild, DiscordMember requestingUser, TagEditReqDto req)
+        private async Task<Result<DiscordEmbed>> EditAsync(DiscordGuild guild, DiscordMember requestingUser,
+            TagEditReqDto req)
         {
             if (guild is null) throw new ArgumentNullException(nameof(guild));
             if (requestingUser is null) throw new ArgumentNullException(nameof(requestingUser));
@@ -298,7 +299,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
             return embed.Build();
         }
 
-        private async Task<Result<(DiscordEmbed? Embed, string Text)>> GetAsync(DiscordGuild guild, DiscordMember requestingUser,
+        private async Task<Result<(DiscordEmbed? Embed, string Text)>> GetAsync(DiscordGuild guild,
+            DiscordMember requestingUser,
             TagGetReqDto req)
         {
             if (guild is null) throw new ArgumentNullException(nameof(guild));
@@ -310,7 +312,9 @@ namespace Lisbeth.Bot.Application.Discord.Services
             {
                 Result<Tag> partial;
                 if (req.Id.HasValue) partial = await _tagService.GetAsync<Tag>(req.Id.Value);
-                else partial = await _tagService.GetSingleBySpecAsync<Tag>(new Specification<Tag>(x => x.Name == req.Name));
+                else
+                    partial = await _tagService.GetSingleBySpecAsync<Tag>(
+                        new Specification<Tag>(x => x.Name == req.Name));
 
                 if (!partial.IsSuccess) return Result<(DiscordEmbed? Embed, string Text)>.FromError(partial);
 
@@ -337,7 +341,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             return tag.EmbedConfig is null
                 ? (null, tag.Text ?? throw new ArgumentNullException())
-                : (_embedProvider.ConfigureEmbed(tag.EmbedConfig).Build(), tag.Text ?? throw new ArgumentNullException());
+                : (_embedProvider.ConfigureEmbed(tag.EmbedConfig).Build(),
+                    tag.Text ?? throw new ArgumentNullException());
         }
 
         private async Task<Result<DiscordEmbed>> DisableAsync(DiscordGuild guild, DiscordMember requestingUser,

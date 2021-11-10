@@ -101,7 +101,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (moderator is null)
                 try
                 {
-                        moderator = await _discord.Client.GetUserAsync(req.RequestedOnBehalfOfId ?? throw new InvalidOperationException());
+                    moderator = await _discord.Client.GetUserAsync(req.RequestedOnBehalfOfId ??
+                                                                   throw new InvalidOperationException());
                 }
                 catch (Exception)
                 {
@@ -181,7 +182,9 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     {
                         await Task.Delay(300);
                         messagesToDelete.Clear();
-                        messagesToDelete.AddRange(await channel.GetMessagesAfterAsync(lastMessage?.Id ?? throw new InvalidOperationException()));
+                        messagesToDelete.AddRange(
+                            await channel.GetMessagesAfterAsync(
+                                lastMessage?.Id ?? throw new InvalidOperationException()));
                         if (idToSkip != 0)
                             messagesToDelete.RemoveAll(x => x.Interaction is not null && x.Interaction.Id == idToSkip);
                         if (messagesToDelete.Count == 0)
@@ -203,7 +206,9 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     {
                         await Task.Delay(300);
                         messagesToDelete.Clear();
-                        var tempMessages = await channel.GetMessagesAfterAsync(lastMessage?.Id ?? throw new InvalidOperationException());
+                        var tempMessages =
+                            await channel.GetMessagesAfterAsync(
+                                lastMessage?.Id ?? throw new InvalidOperationException());
                         if (messagesToDelete.Count == 0)
                             break;
                         messagesToDelete.AddRange(tempMessages.Where(x => x.Author.Id == author?.Id));
@@ -307,7 +312,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             var res = await _guildService.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithModerationSpecifications(args.Guild.Id));
-            
+
             if (!res.IsSuccess) throw new ArgumentException();
 
             var guild = res.Entity;
@@ -336,7 +341,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             if (filtered.Count() != 0)
             {
-                var deletedLog = (DiscordAuditLogMessageEntry) filtered[0];
+                var deletedLog = (DiscordAuditLogMessageEntry)filtered[0];
                 if (deletedLog.Channel == args.Channel && args.Message.Author.Id == deletedLog.Target.Id)
                     deletedBy = deletedLog.UserResponsible;
             }

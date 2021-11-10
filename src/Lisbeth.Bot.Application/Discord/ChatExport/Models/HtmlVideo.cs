@@ -19,7 +19,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Models
         }
 
         private string DiscordLink { get; }
-        public static List<string> SupportedTypes { get; } = new() {"mp4", "mov", "wmv", "avi", "flv"};
+        public static List<string> SupportedTypes { get; } = new() { "mp4", "mov", "wmv", "avi", "flv" };
 
         public async Task<string> GetVimeoLink()
         {

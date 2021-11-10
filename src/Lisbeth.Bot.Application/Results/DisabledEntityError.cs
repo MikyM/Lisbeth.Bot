@@ -20,14 +20,17 @@ using MikyM.Common.Application.Results;
 namespace Lisbeth.Bot.Application.Results
 {
     /// <summary>
-    /// Represents a perform an action due to authorization.
+    ///     Represents a perform an action due to authorization.
     /// </summary>
     public record DisabledEntityError : ResultError
     {
         /// <summary>
-        /// Represents a perform an action due to authorization.
+        ///     Represents a perform an action due to authorization.
         /// </summary>
         /// <param name="entityTypeName">Type of the entity that's disabled.</param>
-        public DisabledEntityError(string entityTypeName) : base($"Found {entityTypeName} entity is disabled (deleted).") { }
+        public DisabledEntityError(string entityTypeName) : base(
+            $"Found {entityTypeName} entity is disabled (deleted).")
+        {
+        }
     }
 }

@@ -50,7 +50,8 @@ namespace Lisbeth.Bot.Application.Discord.Extensions
 
         public static bool TryParseDiscordMention(this string value, out ulong mentionId)
         {
-            return TryParseUserMention(value, out mentionId) || TryParseChannelMention(value, out mentionId) || TryParseRoleMention(value, out mentionId);
+            return TryParseUserMention(value, out mentionId) || TryParseChannelMention(value, out mentionId) ||
+                   TryParseRoleMention(value, out mentionId);
         }
     }
 }

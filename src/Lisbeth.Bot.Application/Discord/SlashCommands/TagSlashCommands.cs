@@ -15,18 +15,18 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using FluentValidation;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
+using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
 using Lisbeth.Bot.Application.Validation.Tag;
 using Lisbeth.Bot.Domain.DTOs.Request.Tag;
 using Lisbeth.Bot.Domain.Entities;
-using System;
-using System.Threading.Tasks;
-using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
 using MikyM.Common.Application.Results;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands
@@ -137,7 +137,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     if (channel is null)
                         throw new ArgumentException("You must supply a channel to send a tag");
 
-                    var sendReq = new TagSendReqDto()
+                    var sendReq = new TagSendReqDto
                     {
                         GuildId = ctx.Guild.Id,
                         Id = isId ? id : null,
@@ -157,15 +157,23 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
 
             if (partial.HasValue)
             {
-                if (partial.Value.IsSuccess) await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(partial.Value.Entity));
-                else await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(partial, ctx.Client)));
+                if (partial.Value.IsSuccess)
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(partial.Value.Entity));
+                else
+                    await ctx.EditResponseAsync(
+                        new DiscordWebhookBuilder().AddEmbed(GetUnsuccessfulResultEmbed(partial, ctx.Client)));
             }
             else if (result.HasValue)
             {
-                if (!result.Value.IsSuccess) await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(result, ctx.Client)));
+                if (!result.Value.IsSuccess)
+                {
+                    await ctx.EditResponseAsync(
+                        new DiscordWebhookBuilder().AddEmbed(GetUnsuccessfulResultEmbed(result, ctx.Client)));
+                }
                 else
                 {
-                    if (result.Value.Entity.Embed is not null) await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(result.Value.Entity.Embed));
+                    if (result.Value.Entity.Embed is not null)
+                        await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(result.Value.Entity.Embed));
                     else await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent(result.Value.Entity.Text));
                 }
             }

@@ -15,6 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using Hangfire;
 using JetBrains.Annotations;
@@ -31,19 +34,16 @@ using Lisbeth.Bot.Domain.Enums;
 using MikyM.Common.Application.Results;
 using MikyM.Common.Application.Results.Errors;
 using MikyM.Discord.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {
     [UsedImplicitly]
     public class DiscordSendReminderService : IDiscordSendReminderService
     {
-        private readonly IReminderService _reminderService;
-        private readonly IRecurringReminderService _recurringReminderService;
         private readonly IDiscordService _discord;
         private readonly IDiscordEmbedProvider _embedProvider;
+        private readonly IRecurringReminderService _recurringReminderService;
+        private readonly IReminderService _reminderService;
 
         public DiscordSendReminderService(IReminderService reminderService,
             IRecurringReminderService recurringReminderService, IDiscordService discord,
@@ -55,7 +55,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
             _embedProvider = embedProvider;
         }
 
-        [Queue("reminder"), PreserveOriginalQueue]
+        [Queue("reminder")]
+        [PreserveOriginalQueue]
         public async Task<Result> SendReminderAsync(long reminderId, ReminderType type)
         {
             Guild guild;
@@ -69,7 +70,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 case ReminderType.Single:
                     var rem = await _reminderService.GetSingleBySpecAsync<Reminder>(
                         new ActiveReminderByIdWithEmbedSpec(reminderId));
-                    if (!rem.IsSuccess || rem.Entity.Guild?.ReminderChannelId is null) return Result.FromError(new NotFoundError());
+                    if (!rem.IsSuccess || rem.Entity.Guild?.ReminderChannelId is null)
+                        return Result.FromError(new NotFoundError());
                     guild = rem.Entity.Guild;
                     embedConfig = rem.Entity.EmbedConfig;
                     text = rem.Entity.Text;
@@ -78,7 +80,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 case ReminderType.Recurring:
                     var recRem = await _recurringReminderService.GetSingleBySpecAsync<RecurringReminder>(
                         new ActiveRecurringReminderByIdWithEmbedSpec(reminderId));
-                    if (!recRem.IsSuccess || recRem.Entity.Guild?.ReminderChannelId is null) return Result.FromError(new NotFoundError());
+                    if (!recRem.IsSuccess || recRem.Entity.Guild?.ReminderChannelId is null)
+                        return Result.FromError(new NotFoundError());
                     guild = recRem.Entity.Guild;
                     embedConfig = recRem.Entity.EmbedConfig;
                     text = recRem.Entity.Text;
@@ -87,7 +90,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
-            
+
             try
             {
                 channel = await _discord.Client.GetChannelAsync(guild.ReminderChannelId.Value);

@@ -19,6 +19,5 @@ namespace Lisbeth.Bot.Application.Validation.ModerationConfig
 {
     public class ModerationConfigEditReqValidator
     {
-        
     }
 }

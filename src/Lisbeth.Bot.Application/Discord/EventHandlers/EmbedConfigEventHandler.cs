@@ -15,13 +15,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.EventArgs;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Buttons;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Selects;
 using MikyM.Discord.Events;
-using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.EventHandlers
 {

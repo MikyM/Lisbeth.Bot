@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
@@ -26,8 +28,6 @@ using Lisbeth.Bot.Application.Validation.RoleMenu;
 using Lisbeth.Bot.Domain.DTOs.Request.RoleMenu;
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.Application.Results;
-using System;
-using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands
 {
@@ -62,7 +62,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     if (!isId && string.IsNullOrWhiteSpace(idOrName))
                         throw new ArgumentException("You must supply a valid Id or name");
 
-                    var getReq = new RoleMenuGetReqDto()
+                    var getReq = new RoleMenuGetReqDto
                     {
                         GuildId = ctx.Guild.Id,
                         Id = isId ? id : null,
@@ -79,7 +79,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     if (string.IsNullOrWhiteSpace(idOrName))
                         throw new ArgumentException("You must supply name.");
 
-                    var addReq = new RoleMenuAddReqDto()
+                    var addReq = new RoleMenuAddReqDto
                     {
                         GuildId = ctx.Guild.Id,
                         Name = idOrName,
@@ -96,7 +96,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     if (!isId && string.IsNullOrWhiteSpace(idOrName))
                         throw new ArgumentException("You must supply a valid Id or name");
 
-                    var editReq = new RoleMenuEditReqDto()
+                    var editReq = new RoleMenuEditReqDto
                     {
                         GuildId = ctx.Guild.Id,
                         Id = isId ? id : null,
@@ -114,7 +114,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     if (!isId && string.IsNullOrWhiteSpace(idOrName))
                         throw new ArgumentException("You must supply a valid Id or name");
 
-                    var removeReq = new RoleMenuDisableReqDto()
+                    var removeReq = new RoleMenuDisableReqDto
                     {
                         GuildId = ctx.Guild.Id,
                         Id = isId ? id : null,
@@ -136,7 +136,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     if (channel is null)
                         throw new ArgumentException("You must supply a channel to send a tag");
 
-                    var sendReq = new RoleMenuSendReqDto()
+                    var sendReq = new RoleMenuSendReqDto
                     {
                         GuildId = ctx.Guild.Id,
                         Id = isId ? id : null,
@@ -156,12 +156,19 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
 
             if (partial.HasValue)
             {
-                if (partial.Value.IsSuccess) await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(partial.Value.Entity));
-                else await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(partial, ctx.Client)));
+                if (partial.Value.IsSuccess)
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(partial.Value.Entity));
+                else
+                    await ctx.EditResponseAsync(
+                        new DiscordWebhookBuilder().AddEmbed(GetUnsuccessfulResultEmbed(partial, ctx.Client)));
             }
             else if (result.HasValue)
             {
-                if (!result.Value.IsSuccess) await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(result, ctx.Client)));
+                if (!result.Value.IsSuccess)
+                {
+                    await ctx.EditResponseAsync(
+                        new DiscordWebhookBuilder().AddEmbed(GetUnsuccessfulResultEmbed(result, ctx.Client)));
+                }
                 else
                 {
                     if (result.Value.Entity.Embed is not null) await ctx.EditResponseAsync(result.Value.Entity.Embed);

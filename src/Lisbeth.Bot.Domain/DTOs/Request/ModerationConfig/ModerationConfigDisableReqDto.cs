@@ -21,6 +21,5 @@ namespace Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig
 {
     public class ModerationConfigDisableReqDto : BaseAuthWithGuildReqDto
     {
-        
     }
 }

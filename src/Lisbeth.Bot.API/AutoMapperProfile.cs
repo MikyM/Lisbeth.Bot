@@ -92,10 +92,10 @@ namespace Lisbeth.Bot.API
                 .ForMember(dest => dest.ImageUrl, source => source.MapFrom(x => x.Image.Url))
                 .ForMember(dest => dest.Fields,
                     source => source.MapFrom(x =>
-                        x.Fields.Select(y => new DiscordField {Text = y.Value, Title = y.Name})))
+                        x.Fields.Select(y => new DiscordField { Text = y.Value, Title = y.Name })))
                 .ForMember(dest => dest.Title, source => source.MapFrom(x => x.Title))
                 .ForMember(dest => dest.Timestamp, source => source.PreCondition(x => x.Timestamp.HasValue))
-                .ForMember(dest => dest.Timestamp, source => source.MapFrom(x => x.Timestamp.Value.DateTime))
+                .ForMember(dest => dest.Timestamp, source => source.MapFrom(x => x.Timestamp!.Value.DateTime))
                 .ForMember(dest => dest.HexColor, source => source.PreCondition(x => x.Color.HasValue))
                 .ForMember(dest => dest.HexColor, source => source.MapFrom(x => x.Color.Value.ToString()))
                 .ForMember(dest => dest.Thumbnail, source => source.PreCondition(x => x.Thumbnail is not null))

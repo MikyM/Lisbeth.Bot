@@ -27,7 +27,8 @@ namespace Lisbeth.Bot.Application.Extensions
             return input.All(c => c is >= '0' and <= '9');
         }
 
-        public static bool TryParseToDurationAndNextOccurrence(this string input, out DateTime occurrence, out TimeSpan duration)
+        public static bool TryParseToDurationAndNextOccurrence(this string input, out DateTime occurrence,
+            out TimeSpan duration)
         {
             if (input is null) throw new ArgumentNullException(nameof(input));
 
@@ -65,6 +66,7 @@ namespace Lisbeth.Bot.Application.Extensions
                         duration = TimeSpan.MinValue;
                         return false;
                     }
+
                     parsedInput = int.Parse(input[..input.IndexOf(c)]);
                     break;
                 }
@@ -78,6 +80,7 @@ namespace Lisbeth.Bot.Application.Extensions
                             duration = TimeSpan.MinValue;
                             return false;
                         }
+
                         tmsp = TimeSpan.FromHours(parsedInput);
                         break;
 
@@ -88,6 +91,7 @@ namespace Lisbeth.Bot.Application.Extensions
                             duration = TimeSpan.MinValue;
                             return false;
                         }
+
                         tmsp = TimeSpan.FromDays(parsedInput);
                         break;
 
@@ -98,6 +102,7 @@ namespace Lisbeth.Bot.Application.Extensions
                             duration = TimeSpan.MinValue;
                             return false;
                         }
+
                         tmsp = TimeSpan.FromDays(parsedInput * 7);
                         break;
 
@@ -108,6 +113,7 @@ namespace Lisbeth.Bot.Application.Extensions
                             duration = TimeSpan.MinValue;
                             return false;
                         }
+
                         tmsp = TimeSpan.FromDays(parsedInput * 31);
                         break;
 
@@ -118,6 +124,7 @@ namespace Lisbeth.Bot.Application.Extensions
                             duration = TimeSpan.MinValue;
                             return false;
                         }
+
                         tmsp = TimeSpan.FromDays(parsedInput * 365);
                         break;
 

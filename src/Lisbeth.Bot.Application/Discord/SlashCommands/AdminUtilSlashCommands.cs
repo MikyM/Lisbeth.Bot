@@ -16,6 +16,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
 using Autofac;
 using DSharpPlus;
 using DSharpPlus.Entities;
@@ -30,13 +37,6 @@ using Microsoft.EntityFrameworkCore;
 using MikyM.Common.Application.Interfaces;
 using MikyM.Common.Domain;
 using MikyM.Common.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands
 {
@@ -51,8 +51,8 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
 
         [SlashRequireOwner]
         [SlashCommand("audit", "Gets last 10 audit logs.")]
-        public async Task AuditCommand(InteractionContext ctx, [Option("ephemeral", "Whether response should be eph")]
-            string shouldEph = "true")
+        public async Task AuditCommand(InteractionContext ctx,
+            [Option("ephemeral", "Whether response should be eph")] string shouldEph = "true")
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder().AsEphemeral(bool.Parse(shouldEph)));
@@ -67,9 +67,9 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
 
         [SlashRequireOwner]
         [SlashCommand("sql", "A command that runs sql query.")]
-        public async Task MuteCommand(InteractionContext ctx, [Option("query", "Sql query to be executed.")]
-            string query, [Option("ephemeral", "Whether response should be eph")]
-            string shouldEph = "true")
+        public async Task MuteCommand(InteractionContext ctx,
+            [Option("query", "Sql query to be executed.")] string query,
+            [Option("ephemeral", "Whether response should be eph")] string shouldEph = "true")
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder().AsEphemeral(bool.Parse(shouldEph)));
@@ -149,7 +149,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
 
             code = code[cs1..cs2];
 
-            var embed = new DiscordEmbedBuilder {Title = "Evaluating...", Color = new DiscordColor(0xD091B2)};
+            var embed = new DiscordEmbedBuilder { Title = "Evaluating...", Color = new DiscordColor(0xD091B2) };
             await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
 
             var globals = new EvaluationEnvironment(ctx);
@@ -223,7 +223,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             }
 
             // execution succeeded
-            embed = new DiscordEmbedBuilder {Title = "Evaluation successful", Color = new DiscordColor(0xD091B2)};
+            embed = new DiscordEmbedBuilder { Title = "Evaluation successful", Color = new DiscordColor(0xD091B2) };
 
             embed.AddField("Result", css?.ReturnValue is not null ? css.ReturnValue.ToString() : "No value returned")
                 .AddField("Compilation time", string.Concat(sw1.ElapsedMilliseconds.ToString("#,##0"), "ms"), true)

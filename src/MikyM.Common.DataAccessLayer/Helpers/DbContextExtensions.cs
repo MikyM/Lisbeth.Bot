@@ -27,9 +27,9 @@ namespace MikyM.Common.DataAccessLayer.Helpers
             where TEntity : class
         {
             var entityType = context.Model.FindEntityType(typeof(TEntity));
-            var key = entityType.FindPrimaryKey();
+            var key = entityType?.FindPrimaryKey();
             var stateManager = context.GetDependencies().StateManager;
-            var entry = stateManager.TryGetEntry(key, keyValues);
+            var entry = stateManager.TryGetEntry(key ?? throw new InvalidOperationException(), keyValues);
             return entry?.Entity as TEntity;
         }
     }

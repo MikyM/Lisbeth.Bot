@@ -15,11 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.IO;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.EventArgs;
-using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Application.Helpers;
 using MikyM.Discord.Events;
@@ -33,7 +31,6 @@ namespace Lisbeth.Bot.Application.Discord.EventHandlers
         public GuildEventsHandler(IAsyncExecutor asyncExecutor)
         {
             _asyncExecutor = asyncExecutor;
-
         }
 
         public Task DiscordOnGuildCreated(DiscordClient sender, GuildCreateEventArgs args)

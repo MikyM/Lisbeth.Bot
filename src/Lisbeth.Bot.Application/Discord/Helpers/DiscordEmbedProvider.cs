@@ -15,13 +15,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Linq;
 using DSharpPlus.Entities;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.Application.Results;
 using MikyM.Discord.Interfaces;
-using System;
-using System.Linq;
 
 namespace Lisbeth.Bot.Application.Discord.Helpers
 {
@@ -68,22 +68,29 @@ namespace Lisbeth.Bot.Application.Discord.Helpers
             if (!string.IsNullOrWhiteSpace(config.Title)) builder.WithTitle(config.Title);
 
             if (!string.IsNullOrWhiteSpace(config.Thumbnail))
-                builder.WithThumbnail(config.Thumbnail, config.ThumbnailHeight ?? throw new InvalidOperationException(), config.ThumbnailWidth ?? throw new InvalidOperationException());
+                builder.WithThumbnail(config.Thumbnail, config.ThumbnailHeight ?? throw new InvalidOperationException(),
+                    config.ThumbnailWidth ?? throw new InvalidOperationException());
 
             if (config.Fields is null || config.Fields.Count == 0) return builder;
 
             foreach (var field in config.Fields.Where(field =>
-                !string.IsNullOrWhiteSpace(field.Text) && !string.IsNullOrWhiteSpace(field.Title)))
+                         !string.IsNullOrWhiteSpace(field.Text) && !string.IsNullOrWhiteSpace(field.Title)))
                 builder.AddField(field.Title, field.Text);
 
             return builder;
         }
 
-        public DiscordEmbed GetUnsuccessfulResultEmbed(IResult result) =>
-            this.GetUnsuccessfulResultEmbed(result.Error ?? throw new InvalidOperationException("Given result does not contain an error"));
+        public DiscordEmbed GetUnsuccessfulResultEmbed(IResult result)
+        {
+            return GetUnsuccessfulResultEmbed(result.Error ??
+                                              throw new InvalidOperationException(
+                                                  "Given result does not contain an error"));
+        }
 
-        public DiscordEmbed GetUnsuccessfulResultEmbed(IResultError error) =>
-            this.GetUnsuccessfulResultEmbed(error.Message);
+        public DiscordEmbed GetUnsuccessfulResultEmbed(IResultError error)
+        {
+            return GetUnsuccessfulResultEmbed(error.Message);
+        }
 
         public DiscordEmbed GetUnsuccessfulResultEmbed(string error)
         {

@@ -15,34 +15,31 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
-using JetBrains.Annotations;
-using Lisbeth.Bot.Application.Discord.Exceptions;
 using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
-using Lisbeth.Bot.Application.Exceptions;
+using Lisbeth.Bot.Application.Results;
 using Lisbeth.Bot.Application.Services.Database.Interfaces;
 using Lisbeth.Bot.Application.Services.Interfaces;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.Domain.DTOs.Request.Reminder;
 using Lisbeth.Bot.Domain.Entities;
 using Lisbeth.Bot.Domain.Enums;
-using MikyM.Discord.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Threading.Tasks;
-using Lisbeth.Bot.Application.Results;
 using MikyM.Common.Application.Results;
+using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {
     public class DiscordReminderService : IDiscordReminderService
     {
         private readonly IDiscordService _discord;
-        private readonly IMainReminderService _reminderService;
         private readonly IGuildService _guildService;
+        private readonly IMainReminderService _reminderService;
 
         public DiscordReminderService(IDiscordService discord, IMainReminderService reminderService,
             IGuildService guildService)
@@ -58,7 +55,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
 
-            return await this.SetNewReminderAsync(guild, await guild.GetMemberAsync(req.RequestedOnBehalfOfId), req);
+            return await SetNewReminderAsync(guild, await guild.GetMemberAsync(req.RequestedOnBehalfOfId), req);
         }
 
         public async Task<Result<DiscordEmbed>> SetNewReminderAsync(InteractionContext ctx,
@@ -67,10 +64,47 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (ctx is null) throw new ArgumentNullException(nameof(ctx));
             if (req is null) throw new ArgumentNullException(nameof(req));
 
-            return await this.SetNewReminderAsync(ctx.Guild, ctx.Member, req);
+            return await SetNewReminderAsync(ctx.Guild, ctx.Member, req);
         }
 
-        private async Task<Result<DiscordEmbed>> SetNewReminderAsync(DiscordGuild discordGuild, DiscordMember requestingMember,
+        public async Task<Result<DiscordEmbed>> DisableReminderAsync(DisableReminderReqDto req)
+        {
+            if (req is null) throw new ArgumentNullException(nameof(req));
+
+            DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
+
+            return await DisableReminderAsync(guild, await guild.GetMemberAsync(req.RequestedOnBehalfOfId), req);
+        }
+
+        public async Task<Result<DiscordEmbed>> DisableReminderAsync(InteractionContext ctx,
+            DisableReminderReqDto req)
+        {
+            if (ctx is null) throw new ArgumentNullException(nameof(ctx));
+            if (req is null) throw new ArgumentNullException(nameof(req));
+
+            return await DisableReminderAsync(ctx.Guild, ctx.Member, req);
+        }
+
+        public async Task<Result<DiscordEmbed>> RescheduleReminderAsync(RescheduleReminderReqDto req)
+        {
+            if (req is null) throw new ArgumentNullException(nameof(req));
+
+            DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
+
+            return await RescheduleReminderAsync(guild, await guild.GetMemberAsync(req.RequestedOnBehalfOfId), req);
+        }
+
+        public async Task<Result<DiscordEmbed>> RescheduleReminderAsync(InteractionContext ctx,
+            RescheduleReminderReqDto req)
+        {
+            if (ctx is null) throw new ArgumentNullException(nameof(ctx));
+            if (req is null) throw new ArgumentNullException(nameof(req));
+
+            return await RescheduleReminderAsync(ctx.Guild, ctx.Member, req);
+        }
+
+        private async Task<Result<DiscordEmbed>> SetNewReminderAsync(DiscordGuild discordGuild,
+            DiscordMember requestingMember,
             SetReminderReqDto req)
         {
             if (discordGuild is null) throw new ArgumentNullException(nameof(discordGuild));
@@ -97,25 +131,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
             return embed.Build();
         }
 
-        public async Task<Result<DiscordEmbed>> DisableReminderAsync(DisableReminderReqDto req)
-        {
-            if (req is null) throw new ArgumentNullException(nameof(req));
-
-            DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
-
-            return await this.DisableReminderAsync(guild, await guild.GetMemberAsync(req.RequestedOnBehalfOfId), req);
-        }
-
-        public async Task<Result<DiscordEmbed>> DisableReminderAsync(InteractionContext ctx,
-            DisableReminderReqDto req)
-        {
-            if (ctx is null) throw new ArgumentNullException(nameof(ctx));
-            if (req is null) throw new ArgumentNullException(nameof(req));
-
-            return await this.DisableReminderAsync(ctx.Guild, ctx.Member, req);
-        }
-
-        private async Task<Result<DiscordEmbed>> DisableReminderAsync(DiscordGuild discordGuild, DiscordMember requestingMember,
+        private async Task<Result<DiscordEmbed>> DisableReminderAsync(DiscordGuild discordGuild,
+            DiscordMember requestingMember,
             DisableReminderReqDto req)
         {
             if (discordGuild is null) throw new ArgumentNullException(nameof(discordGuild));
@@ -140,25 +157,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
             return embed.Build();
         }
 
-        public async Task<Result<DiscordEmbed>> RescheduleReminderAsync(RescheduleReminderReqDto req)
-        {
-            if (req is null) throw new ArgumentNullException(nameof(req));
-
-            DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
-
-            return await this.RescheduleReminderAsync(guild, await guild.GetMemberAsync(req.RequestedOnBehalfOfId), req);
-        }
-
-        public async Task<Result<DiscordEmbed>> RescheduleReminderAsync(InteractionContext ctx,
-            RescheduleReminderReqDto req)
-        {
-            if (ctx is null) throw new ArgumentNullException(nameof(ctx));
-            if (req is null) throw new ArgumentNullException(nameof(req));
-
-            return await this.RescheduleReminderAsync(ctx.Guild, ctx.Member, req);
-        }
-
-        private async Task<Result<DiscordEmbed>> RescheduleReminderAsync(DiscordGuild discordGuild, DiscordMember requestingMember,
+        private async Task<Result<DiscordEmbed>> RescheduleReminderAsync(DiscordGuild discordGuild,
+            DiscordMember requestingMember,
             RescheduleReminderReqDto req)
         {
             if (discordGuild is null) throw new ArgumentNullException(nameof(discordGuild));

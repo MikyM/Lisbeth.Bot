@@ -21,10 +21,10 @@ using MikyM.Common.Application.Results;
 namespace Lisbeth.Bot.Application.Results
 {
     /// <summary>
-    /// Represents an error raised when an attempt to perform an invalid operation is made.
+    ///     Represents an error raised when an attempt to perform an invalid operation is made.
     /// </summary>
     /// <param name="Message">The error message.</param>
-    /// <remarks>Used in place of <see cref="InvalidOperationException"/>.</remarks>
+    /// <remarks>Used in place of <see cref="InvalidOperationException" />.</remarks>
     public record HangfireError(string Message = "Hangfire threw an exception.")
         : ResultError(Message);
 }

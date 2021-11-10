@@ -21,8 +21,13 @@ namespace Lisbeth.Bot.DataAccessLayer.Specifications.Reminder
 {
     public class ActiveReminderByNameOrIdAndGuildSpec : Specification<Domain.Entities.Reminder>
     {
-        public ActiveReminderByNameOrIdAndGuildSpec(long id) : this("", null, id) {}
-        public ActiveReminderByNameOrIdAndGuildSpec(string name, ulong guildId) : this(name, guildId, null) {}
+        public ActiveReminderByNameOrIdAndGuildSpec(long id) : this("", null, id)
+        {
+        }
+
+        public ActiveReminderByNameOrIdAndGuildSpec(string name, ulong guildId) : this(name, guildId, null)
+        {
+        }
 
         public ActiveReminderByNameOrIdAndGuildSpec(string name, ulong? guildId, long? id)
         {

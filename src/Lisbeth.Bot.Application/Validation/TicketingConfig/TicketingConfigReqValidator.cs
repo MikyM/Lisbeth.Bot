@@ -18,7 +18,6 @@
 using DSharpPlus;
 using FluentValidation;
 using Lisbeth.Bot.Application.Validation.ReusablePropertyValidation;
-using Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
 using MikyM.Discord.Interfaces;
 
@@ -26,7 +25,10 @@ namespace Lisbeth.Bot.Application.Validation.TicketingConfig
 {
     public class TicketingConfigReqValidator : AbstractValidator<TicketingConfigReqDto>
     {
-        public TicketingConfigReqValidator(IDiscordService discord) : this(discord.Client) { }
+        public TicketingConfigReqValidator(IDiscordService discord) : this(discord.Client)
+        {
+        }
+
         public TicketingConfigReqValidator(DiscordClient client)
         {
             RuleFor(x => x.GuildId)

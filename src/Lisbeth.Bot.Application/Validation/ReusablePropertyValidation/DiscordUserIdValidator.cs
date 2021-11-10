@@ -47,7 +47,7 @@ namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
                 DiscordGuild guild;
                 try
                 {
-                    guild = await _discord.GetGuildAsync((ulong) _guildId);
+                    guild = await _discord.GetGuildAsync((ulong)_guildId);
                     if (guild is null)
                     {
                         _doesGuildExist = false;

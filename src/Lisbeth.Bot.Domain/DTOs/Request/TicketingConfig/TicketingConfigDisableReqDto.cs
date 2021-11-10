@@ -21,6 +21,5 @@ namespace Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig
 {
     public class TicketingConfigDisableReqDto : BaseAuthWithGuildReqDto
     {
-        
     }
 }

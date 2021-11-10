@@ -21,7 +21,8 @@ namespace Lisbeth.Bot.Domain.DTOs.Request.Ticket
 {
     public class TicketRemoveReqDto : BaseTicketGetReqDto
     {
-        public TicketRemoveReqDto(long? id, ulong? ownerId, ulong? guildId, ulong? channelId, ulong requestedOnBehalfOfId,
+        public TicketRemoveReqDto(long? id, ulong? ownerId, ulong? guildId, ulong? channelId,
+            ulong requestedOnBehalfOfId,
             ulong snowflakeId)
         {
             Id = id;
@@ -31,6 +32,7 @@ namespace Lisbeth.Bot.Domain.DTOs.Request.Ticket
             RequestedOnBehalfOfId = requestedOnBehalfOfId;
             SnowflakeId = snowflakeId;
         }
+
         public ulong SnowflakeId { get; set; }
     }
 }

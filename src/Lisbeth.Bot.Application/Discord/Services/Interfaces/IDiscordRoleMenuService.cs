@@ -15,11 +15,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Domain.DTOs.Request.RoleMenu;
-using System.Threading.Tasks;
 using MikyM.Common.Application.Results;
 
 namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
@@ -28,9 +28,15 @@ namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
     {
         Task<Result<DiscordEmbed>> CreateRoleMenuAsync(InteractionContext ctx, RoleMenuAddReqDto req);
         Task<Result<(DiscordWebhookBuilder? Builder, string Text)>> GetAsync(RoleMenuGetReqDto req);
-        Task<Result<(DiscordWebhookBuilder? Builder, string Text)>> GetAsync(InteractionContext ctx, RoleMenuGetReqDto req);
+
+        Task<Result<(DiscordWebhookBuilder? Builder, string Text)>> GetAsync(InteractionContext ctx,
+            RoleMenuGetReqDto req);
+
         Task<Result<(DiscordWebhookBuilder? Builder, string Text)>> SendAsync(RoleMenuSendReqDto req);
-        Task<Result<(DiscordWebhookBuilder? Builder, string Text)>> SendAsync(InteractionContext ctx, RoleMenuSendReqDto req);
+
+        Task<Result<(DiscordWebhookBuilder? Builder, string Text)>> SendAsync(InteractionContext ctx,
+            RoleMenuSendReqDto req);
+
         Task<Result> HandleOptionSelectionAsync(ComponentInteractionCreateEventArgs args);
     }
 }

@@ -15,6 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
@@ -34,19 +37,16 @@ using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.Application.Results;
 using MikyM.Common.Application.Results.Errors;
 using MikyM.Discord.Interfaces;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {
     [UsedImplicitly]
     public class DiscordGuildService : IDiscordGuildService
     {
+        private readonly IDiscordService _discord;
         private readonly IEmbedConfigService _embedConfigService;
         private readonly IDiscordEmbedProvider _embedProvider;
         private readonly IGuildService _guildService;
-        private readonly IDiscordService _discord;
 
         public DiscordGuildService(IEmbedConfigService embedConfigService, IDiscordEmbedProvider embedProvider,
             IGuildService guildService, IDiscordService discord)
@@ -56,14 +56,14 @@ namespace Lisbeth.Bot.Application.Discord.Services
             _guildService = guildService;
             _discord = discord;
         }
-        
+
         public async Task<Result> HandleGuildCreateAsync(GuildCreateEventArgs args)
         {
             var result = await _guildService.GetSingleBySpecAsync<Guild>(new GuildByIdSpec(args.Guild.Id));
 
             if (!result.IsSuccess)
             {
-                await _guildService.AddAsync(new Guild {GuildId = args.Guild.Id, UserId = args.Guild.OwnerId}, true);
+                await _guildService.AddAsync(new Guild { GuildId = args.Guild.Id, UserId = args.Guild.OwnerId }, true);
                 var embedResult = await _embedConfigService.GetAsync<EmbedConfig>(1);
                 await args.Guild.Owner.SendMessageAsync(_embedProvider.ConfigureEmbed(embedResult.Entity).Build());
             }
@@ -96,7 +96,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
 
-            return await this.CreateTicketingModuleAsync(guild, await guild.GetMemberAsync(req.RequestedOnBehalfOfId), req);
+            return await CreateTicketingModuleAsync(guild, await guild.GetMemberAsync(req.RequestedOnBehalfOfId), req);
         }
 
         public async Task<Result<DiscordEmbed>> CreateModuleAsync(InteractionContext ctx, TicketingConfigReqDto req)
@@ -104,10 +104,141 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (ctx is null) throw new ArgumentNullException(nameof(ctx));
             if (req is null) throw new ArgumentNullException(nameof(req));
 
-            return await this.CreateTicketingModuleAsync(ctx.Guild, ctx.Member, req);
+            return await CreateTicketingModuleAsync(ctx.Guild, ctx.Member, req);
         }
 
-        private async Task<Result<DiscordEmbed>> CreateTicketingModuleAsync(DiscordGuild guild, DiscordMember requestingMember, TicketingConfigReqDto req)
+        public async Task<Result<DiscordEmbed>> CreateModuleAsync(ModerationConfigReqDto req)
+        {
+            if (req is null) throw new ArgumentNullException(nameof(req));
+
+            DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
+
+            return await CreateModerationModuleAsync(guild, await guild.GetMemberAsync(req.RequestedOnBehalfOfId), req);
+        }
+
+        public async Task<Result<DiscordEmbed>> CreateModuleAsync(InteractionContext ctx, ModerationConfigReqDto req)
+        {
+            if (ctx is null) throw new ArgumentNullException(nameof(ctx));
+            if (req is null) throw new ArgumentNullException(nameof(req));
+
+            return await CreateModerationModuleAsync(ctx.Guild, ctx.Member, req);
+        }
+
+        public async Task<Result<DiscordEmbed>> RepairConfigAsync(InteractionContext ctx,
+            ModerationConfigRepairReqDto req)
+        {
+            if (req is null) throw new ArgumentNullException(nameof(req));
+            if (ctx is null) throw new ArgumentNullException(nameof(ctx));
+
+            return await RepairConfigAsync(ctx.Guild, GuildConfigType.Moderation, ctx.Member);
+        }
+
+        public async Task<Result<DiscordEmbed>> RepairConfigAsync(TicketingConfigRepairReqDto req)
+        {
+            if (req is null) throw new ArgumentNullException(nameof(req));
+
+            DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
+
+            return await RepairConfigAsync(guild, GuildConfigType.Ticketing,
+                await guild.GetMemberAsync(req.RequestedOnBehalfOfId));
+        }
+
+        public async Task<Result<DiscordEmbed>> RepairConfigAsync(ModerationConfigRepairReqDto req)
+        {
+            if (req is null) throw new ArgumentNullException(nameof(req));
+
+            DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
+
+            return await RepairConfigAsync(guild, GuildConfigType.Moderation,
+                await guild.GetMemberAsync(req.RequestedOnBehalfOfId));
+        }
+
+        public async Task<Result<DiscordEmbed>> RepairConfigAsync(InteractionContext ctx,
+            TicketingConfigRepairReqDto req)
+        {
+            if (req is null) throw new ArgumentNullException(nameof(req));
+            if (ctx is null) throw new ArgumentNullException(nameof(ctx));
+
+            return await RepairConfigAsync(ctx.Guild, GuildConfigType.Ticketing, ctx.Member);
+        }
+
+        public async Task<Result<DiscordEmbed>> DisableModuleAsync(ModerationConfigDisableReqDto req)
+        {
+            if (req is null) throw new ArgumentNullException(nameof(req));
+
+            DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
+
+            return await DisableModuleAsync(guild, await guild.GetMemberAsync(req.RequestedOnBehalfOfId),
+                GuildConfigType.Moderation);
+        }
+
+        public async Task<Result<DiscordEmbed>> DisableModuleAsync(TicketingConfigDisableReqDto req)
+        {
+            if (req is null) throw new ArgumentNullException(nameof(req));
+
+            DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
+
+            return await DisableModuleAsync(guild, await guild.GetMemberAsync(req.RequestedOnBehalfOfId),
+                GuildConfigType.Ticketing);
+        }
+
+        public async Task<Result<DiscordEmbed>> DisableModuleAsync(InteractionContext ctx,
+            ModerationConfigDisableReqDto req)
+        {
+            if (req is null) throw new ArgumentNullException(nameof(req));
+            if (ctx is null) throw new ArgumentNullException(nameof(ctx));
+
+            return await DisableModuleAsync(ctx.Guild, ctx.Member, GuildConfigType.Moderation);
+        }
+
+        public async Task<Result<DiscordEmbed>> DisableModuleAsync(InteractionContext ctx,
+            TicketingConfigDisableReqDto req)
+        {
+            if (req is null) throw new ArgumentNullException(nameof(req));
+            if (ctx is null) throw new ArgumentNullException(nameof(ctx));
+
+            return await DisableModuleAsync(ctx.Guild, ctx.Member, GuildConfigType.Ticketing);
+        }
+
+        public async Task<Result<int>> CreateOverwritesForMutedRoleAsync(CreateMuteOverwritesReqDto req)
+        {
+            if (req is null) throw new ArgumentNullException(nameof(req));
+
+            var guildResult = await _guildService.GetSingleBySpecAsync<Guild>(
+                new ActiveGuildByDiscordIdWithModerationSpecifications(req.GuildId));
+
+            if (!guildResult.IsSuccess || guildResult.Entity.ModerationConfig is null)
+                return Result<int>.FromError(new NotFoundError());
+            if (guildResult.Entity.ModerationConfig.IsDisabled)
+                return Result<int>.FromError(new DisabledEntityError(nameof(guildResult.Entity.ModerationConfig)));
+
+            var discordGuild = await _discord.Client.GetGuildAsync(req.GuildId);
+
+            return await CreateOverwritesForMutedRoleAsync(discordGuild,
+                discordGuild.Roles[guildResult.Entity.ModerationConfig.MuteRoleId],
+                await discordGuild.GetMemberAsync(req.RequestedOnBehalfOfId));
+        }
+
+        public async Task<Result<int>> CreateOverwritesForMutedRoleAsync(InteractionContext ctx,
+            CreateMuteOverwritesReqDto req)
+        {
+            if (ctx is null) throw new ArgumentNullException(nameof(ctx));
+            if (req is null) throw new ArgumentNullException(nameof(req));
+
+            var guildResult = await _guildService.GetSingleBySpecAsync<Guild>(
+                new ActiveGuildByDiscordIdWithModerationSpecifications(req.GuildId));
+
+            if (!guildResult.IsSuccess || guildResult.Entity.ModerationConfig is null)
+                return Result<int>.FromError(new NotFoundError());
+            if (guildResult.Entity.ModerationConfig.IsDisabled)
+                return Result<int>.FromError(new DisabledEntityError(nameof(guildResult.Entity.ModerationConfig)));
+
+            return await CreateOverwritesForMutedRoleAsync(ctx.Guild,
+                ctx.Guild.Roles[guildResult.Entity.ModerationConfig.MuteRoleId], ctx.Member);
+        }
+
+        private async Task<Result<DiscordEmbed>> CreateTicketingModuleAsync(DiscordGuild guild,
+            DiscordMember requestingMember, TicketingConfigReqDto req)
         {
             if (guild is null) throw new ArgumentNullException(nameof(guild));
             if (requestingMember is null) throw new ArgumentNullException(nameof(requestingMember));
@@ -115,13 +246,15 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             if (!requestingMember.IsAdmin()) return Result<DiscordEmbed>.FromError(new DiscordNotAuthorizedError());
 
-            var everyoneDeny = new[] {new DiscordOverwriteBuilder(guild.EveryoneRole).Deny(Permissions.AccessChannels)};
+            var everyoneDeny = new[]
+                { new DiscordOverwriteBuilder(guild.EveryoneRole).Deny(Permissions.AccessChannels) };
 
             var openedCat = await guild.CreateChannelAsync("TICKETS", ChannelType.Category, null,
                 "Category with opened tickets", null, null, everyoneDeny);
             var closedCat = await guild.CreateChannelAsync("TICKETS-ARCHIVE", ChannelType.Category, null,
                 "Category with closed tickets", null, null, everyoneDeny);
-            var ticketLogs = await guild.CreateTextChannelAsync("ticket-logs", closedCat, "Channel with ticket logs and transcripts",
+            var ticketLogs = await guild.CreateTextChannelAsync("ticket-logs", closedCat,
+                "Channel with ticket logs and transcripts",
                 everyoneDeny);
 
             req.OpenedCategoryId = openedCat.Id;
@@ -137,29 +270,14 @@ namespace Lisbeth.Bot.Application.Discord.Services
             embed.AddField("Opened ticket category", openedCat.Mention);
             embed.AddField("Closed ticket category", closedCat.Mention);
             embed.AddField("Ticket log channel", ticketLogs.Mention);
-            embed.WithFooter($"Lisbeth configuration requested by {requestingMember.GetFullDisplayName()} | Id: {requestingMember.Id}");
+            embed.WithFooter(
+                $"Lisbeth configuration requested by {requestingMember.GetFullDisplayName()} | Id: {requestingMember.Id}");
 
             return embed.Build();
         }
 
-        public async Task<Result<DiscordEmbed>> CreateModuleAsync(ModerationConfigReqDto req)
-        {
-            if (req is null) throw new ArgumentNullException(nameof(req));
-
-            DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
-
-            return await this.CreateModerationModuleAsync(guild, await guild.GetMemberAsync(req.RequestedOnBehalfOfId), req);
-        }
-
-        public async Task<Result<DiscordEmbed>> CreateModuleAsync(InteractionContext ctx, ModerationConfigReqDto req)
-        {
-            if (ctx is null) throw new ArgumentNullException(nameof(ctx));
-            if (req is null) throw new ArgumentNullException(nameof(req));
-
-            return await this.CreateModerationModuleAsync(ctx.Guild, ctx.Member, req);
-        }
-
-        private async Task<Result<DiscordEmbed>> CreateModerationModuleAsync(DiscordGuild guild, DiscordMember requestingMember, ModerationConfigReqDto req)
+        private async Task<Result<DiscordEmbed>> CreateModerationModuleAsync(DiscordGuild guild,
+            DiscordMember requestingMember, ModerationConfigReqDto req)
         {
             if (guild is null) throw new ArgumentNullException(nameof(guild));
             if (requestingMember is null) throw new ArgumentNullException(nameof(requestingMember));
@@ -167,10 +285,11 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             if (!requestingMember.IsAdmin()) return Result<DiscordEmbed>.FromError(new DiscordNotAuthorizedError());
 
-            var everyoneDeny = new[] {new DiscordOverwriteBuilder(guild.EveryoneRole).Deny(Permissions.AccessChannels)};
+            var everyoneDeny = new[]
+                { new DiscordOverwriteBuilder(guild.EveryoneRole).Deny(Permissions.AccessChannels) };
             var moderationCat = await guild.CreateChannelAsync("MODERATION", ChannelType.Category, null,
                 "Moderation category", null, null, everyoneDeny);
-            var moderationChannelLog = await guild.CreateTextChannelAsync("moderation-logs", moderationCat, 
+            var moderationChannelLog = await guild.CreateTextChannelAsync("moderation-logs", moderationCat,
                 "Category with moderation logs", everyoneDeny);
             var memberEventsLogChannel = await guild.CreateTextChannelAsync("member-logs", moderationCat,
                 "Category with member logs", everyoneDeny);
@@ -182,7 +301,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             await Task.Delay(300); // give discord a break
 
-            _ = await this.CreateOverwritesForMutedRoleAsync(guild, mutedRole, requestingMember);
+            _ = await CreateOverwritesForMutedRoleAsync(guild, mutedRole, requestingMember);
 
             req.MemberEventsLogChannelId = memberEventsLogChannel.Id;
             req.MessageDeletedEventsLogChannelId = messageDeleteLogChannel.Id;
@@ -202,46 +321,14 @@ namespace Lisbeth.Bot.Application.Discord.Services
             embed.AddField("message edited log channel", messageEditLogChannel.Mention);
             embed.AddField("message deleted channel", messageDeleteLogChannel.Mention);
             embed.AddField("Muted role", mutedRole.Mention);
-            embed.WithFooter($"Lisbeth configuration requested by {requestingMember.GetFullDisplayName()} | Id: {requestingMember.Id}");
+            embed.WithFooter(
+                $"Lisbeth configuration requested by {requestingMember.GetFullDisplayName()} | Id: {requestingMember.Id}");
 
             return embed.Build();
         }
 
-        public async Task<Result<DiscordEmbed>> RepairConfigAsync(InteractionContext ctx, ModerationConfigRepairReqDto req)
-        {
-            if (req is null) throw new ArgumentNullException(nameof(req));
-            if (ctx is null) throw new ArgumentNullException(nameof(ctx));
-
-            return await this.RepairConfigAsync(ctx.Guild, GuildConfigType.Moderation, ctx.Member);
-        }
-
-        public async Task<Result<DiscordEmbed>> RepairConfigAsync(TicketingConfigRepairReqDto req)
-        {
-            if (req is null) throw new ArgumentNullException(nameof(req));
-
-            DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
-
-            return await this.RepairConfigAsync(guild, GuildConfigType.Ticketing, await guild.GetMemberAsync(req.RequestedOnBehalfOfId));
-        }
-
-        public async Task<Result<DiscordEmbed>> RepairConfigAsync(ModerationConfigRepairReqDto req)
-        {
-            if (req is null) throw new ArgumentNullException(nameof(req));
-
-            DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
-
-            return await this.RepairConfigAsync(guild, GuildConfigType.Moderation, await guild.GetMemberAsync(req.RequestedOnBehalfOfId));
-        }
-
-        public async Task<Result<DiscordEmbed>> RepairConfigAsync(InteractionContext ctx, TicketingConfigRepairReqDto req)
-        {
-            if (req is null) throw new ArgumentNullException(nameof(req));
-            if (ctx is null) throw new ArgumentNullException(nameof(ctx));
-
-            return await this.RepairConfigAsync(ctx.Guild, GuildConfigType.Ticketing, ctx.Member);
-        }
-
-        private async Task<Result<DiscordEmbed>> RepairConfigAsync([NotNull] DiscordGuild discordGuild, GuildConfigType type, DiscordMember requestingMember)
+        private async Task<Result<DiscordEmbed>> RepairConfigAsync([NotNull] DiscordGuild discordGuild,
+            GuildConfigType type, DiscordMember requestingMember)
         {
             if (discordGuild is null) throw new ArgumentNullException(nameof(discordGuild));
             if (requestingMember is null) throw new ArgumentNullException(nameof(requestingMember));
@@ -252,7 +339,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             DiscordOverwriteBuilder[] everyoneDeny;
 
             var embed = new DiscordEmbedBuilder();
-             
+
             switch (type)
             {
                 case GuildConfigType.Ticketing:
@@ -261,7 +348,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     if (!guildResult.IsSuccess || guildResult.Entity.TicketingConfig is null)
                         return Result<DiscordEmbed>.FromError(new NotFoundError());
                     if (guildResult.Entity.TicketingConfig.IsDisabled)
-                        return Result<DiscordEmbed>.FromError(new DisabledEntityError(nameof(guildResult.Entity.TicketingConfig)));
+                        return Result<DiscordEmbed>.FromError(
+                            new DisabledEntityError(nameof(guildResult.Entity.TicketingConfig)));
 
                     guild = guildResult.Entity;
 
@@ -276,7 +364,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     DiscordChannel? closedCat = null;
 
                     TicketingConfigRepairReqDto ticketingReq = new();
-                    
+
                     try
                     {
                         var openedCat = await _discord.Client.GetChannelAsync(guild.TicketingConfig.OpenedCategoryId);
@@ -321,7 +409,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
                         if (newOpenedCat is not null) embed.AddField("Opened ticket category", newOpenedCat.Mention);
                         if (newClosedCat is not null) embed.AddField("Closed ticket category", newClosedCat.Mention);
-                        if (newTicketLogChannel is not null) embed.AddField("Ticket log channel", newTicketLogChannel.Mention);
+                        if (newTicketLogChannel is not null)
+                            embed.AddField("Ticket log channel", newTicketLogChannel.Mention);
                     }
                     else
                     {
@@ -337,7 +426,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     if (!guildResult.IsSuccess || guildResult.Entity.ModerationConfig is null)
                         return Result<DiscordEmbed>.FromError(new NotFoundError());
                     if (guildResult.Entity.ModerationConfig.IsDisabled)
-                        return Result<DiscordEmbed>.FromError(new DisabledEntityError(nameof(guildResult.Entity.ModerationConfig)));
+                        return Result<DiscordEmbed>.FromError(
+                            new DisabledEntityError(nameof(guildResult.Entity.ModerationConfig)));
 
                     guild = guildResult.Entity;
 
@@ -363,7 +453,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     {
                         var moderationChannelLog =
                             await _discord.Client.GetChannelAsync(guild.ModerationConfig.ModerationLogChannelId);
-                        if (moderationChannelLog is null) return Result<DiscordEmbed>.FromError(new DiscordNotFoundError());
+                        if (moderationChannelLog is null)
+                            return Result<DiscordEmbed>.FromError(new DiscordNotFoundError());
                     }
                     catch
                     {
@@ -376,7 +467,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     {
                         var memberEventsLogChannel =
                             await _discord.Client.GetChannelAsync(guild.ModerationConfig.MemberEventsLogChannelId);
-                        if (memberEventsLogChannel is null) return Result<DiscordEmbed>.FromError(new DiscordNotFoundError());
+                        if (memberEventsLogChannel is null)
+                            return Result<DiscordEmbed>.FromError(new DiscordNotFoundError());
                     }
                     catch
                     {
@@ -390,7 +482,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
                         var messageEditLogChannel =
                             await _discord.Client.GetChannelAsync(guild.ModerationConfig
                                 .MessageUpdatedEventsLogChannelId);
-                        if (messageEditLogChannel is null) return Result<DiscordEmbed>.FromError(new DiscordNotFoundError());
+                        if (messageEditLogChannel is null)
+                            return Result<DiscordEmbed>.FromError(new DiscordNotFoundError());
                     }
                     catch
                     {
@@ -404,7 +497,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
                         var messageDeleteLogChannel =
                             await _discord.Client.GetChannelAsync(guild.ModerationConfig
                                 .MessageDeletedEventsLogChannelId);
-                        if (messageDeleteLogChannel is null) return Result<DiscordEmbed>.FromError(new DiscordNotFoundError());
+                        if (messageDeleteLogChannel is null)
+                            return Result<DiscordEmbed>.FromError(new DiscordNotFoundError());
                     }
                     catch
                     {
@@ -425,7 +519,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
                         await Task.Delay(300); // give discord a break
 
-                        _ = await this.CreateOverwritesForMutedRoleAsync(discordGuild, newMuteRole, requestingMember);
+                        _ = await CreateOverwritesForMutedRoleAsync(discordGuild, newMuteRole, requestingMember);
                     }
 
                     if (newMemberEventsLogChannel is not null || newMessageUpdatedEventsLogChannel is not null ||
@@ -437,10 +531,14 @@ namespace Lisbeth.Bot.Application.Discord.Services
                         await _guildService.RepairModuleConfigAsync(moderationReq, true);
 
                         embed.AddField("Moderation category", newModerationCat.Mention);
-                        if (newModerationLogChannel is not null) embed.AddField("Moderation log channel", newModerationLogChannel.Mention);
-                        if (newMemberEventsLogChannel is not null) embed.AddField("Member log channel", newMemberEventsLogChannel.Mention);
-                        if (newMessageUpdatedEventsLogChannel is not null) embed.AddField("message edited log channel", newMessageUpdatedEventsLogChannel.Mention);
-                        if (newMessageDeletedEventsLogChannel is not null) embed.AddField("message deleted channel", newMessageDeletedEventsLogChannel.Mention);
+                        if (newModerationLogChannel is not null)
+                            embed.AddField("Moderation log channel", newModerationLogChannel.Mention);
+                        if (newMemberEventsLogChannel is not null)
+                            embed.AddField("Member log channel", newMemberEventsLogChannel.Mention);
+                        if (newMessageUpdatedEventsLogChannel is not null)
+                            embed.AddField("message edited log channel", newMessageUpdatedEventsLogChannel.Mention);
+                        if (newMessageDeletedEventsLogChannel is not null)
+                            embed.AddField("message deleted channel", newMessageDeletedEventsLogChannel.Mention);
                         if (newMuteRole is not null) embed.AddField("Muted role", newMuteRole.Mention);
                     }
                     else
@@ -456,44 +554,14 @@ namespace Lisbeth.Bot.Application.Discord.Services
             embed.WithDescription("Process completed successfully");
             embed.WithColor(new DiscordColor(guild.EmbedHexColor));
             embed.WithAuthor($"{type} configuration repair");
-            embed.WithFooter($"Lisbeth configuration requested by {requestingMember.GetFullDisplayName()} | Id: {requestingMember.Id}");
+            embed.WithFooter(
+                $"Lisbeth configuration requested by {requestingMember.GetFullDisplayName()} | Id: {requestingMember.Id}");
 
             return embed.Build();
         }
 
-        public async Task<Result<DiscordEmbed>> DisableModuleAsync(ModerationConfigDisableReqDto req)
-        {
-            if (req is null) throw new ArgumentNullException(nameof(req));
-
-            DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
-
-            return await this.DisableModuleAsync(guild, await guild.GetMemberAsync(req.RequestedOnBehalfOfId), GuildConfigType.Moderation);
-        }
-
-        public async Task<Result<DiscordEmbed>> DisableModuleAsync(TicketingConfigDisableReqDto req)
-        {
-            if (req is null) throw new ArgumentNullException(nameof(req));
-
-            DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
-
-            return await this.DisableModuleAsync(guild, await guild.GetMemberAsync(req.RequestedOnBehalfOfId), GuildConfigType.Ticketing);
-        }
-        public async Task<Result<DiscordEmbed>> DisableModuleAsync(InteractionContext ctx, ModerationConfigDisableReqDto req)
-        {
-            if (req is null) throw new ArgumentNullException(nameof(req));
-            if (ctx is null) throw new ArgumentNullException(nameof(ctx));
-
-            return await this.DisableModuleAsync(ctx.Guild, ctx.Member, GuildConfigType.Moderation);
-        }
-        public async Task<Result<DiscordEmbed>> DisableModuleAsync(InteractionContext ctx, TicketingConfigDisableReqDto req)
-        {
-            if (req is null) throw new ArgumentNullException(nameof(req));
-            if (ctx is null) throw new ArgumentNullException(nameof(ctx));
-
-            return await this.DisableModuleAsync(ctx.Guild, ctx.Member, GuildConfigType.Ticketing);
-        }
-
-        private async Task<Result<DiscordEmbed>> DisableModuleAsync(DiscordGuild discordGuild, DiscordMember requestingMember, GuildConfigType type)
+        private async Task<Result<DiscordEmbed>> DisableModuleAsync(DiscordGuild discordGuild,
+            DiscordMember requestingMember, GuildConfigType type)
         {
             if (!requestingMember.IsAdmin()) throw new DiscordNotAuthorizedException();
 
@@ -522,41 +590,9 @@ namespace Lisbeth.Bot.Application.Discord.Services
             }
 
             return new DiscordEmbedBuilder().WithAuthor("Guild configurator")
-                .WithDescription("Module disabled successfully").WithColor(new DiscordColor(guildResult.Entity.EmbedHexColor))
+                .WithDescription("Module disabled successfully")
+                .WithColor(new DiscordColor(guildResult.Entity.EmbedHexColor))
                 .Build();
-        }
-
-        public async Task<Result<int>> CreateOverwritesForMutedRoleAsync(CreateMuteOverwritesReqDto req)
-        {
-            if (req is null) throw new ArgumentNullException(nameof(req));
-
-            var guildResult = await _guildService.GetSingleBySpecAsync<Guild>(
-                new ActiveGuildByDiscordIdWithModerationSpecifications(req.GuildId));
-
-            if (!guildResult.IsSuccess || guildResult.Entity.ModerationConfig is null)
-                return Result<int>.FromError(new NotFoundError());
-            if (guildResult.Entity.ModerationConfig.IsDisabled)
-                return Result<int>.FromError(new DisabledEntityError(nameof(guildResult.Entity.ModerationConfig)));
-
-            var discordGuild = await _discord.Client.GetGuildAsync(req.GuildId);
-
-            return await this.CreateOverwritesForMutedRoleAsync(discordGuild, discordGuild.Roles[guildResult.Entity.ModerationConfig.MuteRoleId], await discordGuild.GetMemberAsync(req.RequestedOnBehalfOfId));
-        }
-
-        public async Task<Result<int>> CreateOverwritesForMutedRoleAsync(InteractionContext ctx, CreateMuteOverwritesReqDto req)
-        {
-            if (ctx is null) throw new ArgumentNullException(nameof(ctx));
-            if (req is null) throw new ArgumentNullException(nameof(req));
-
-            var guildResult = await _guildService.GetSingleBySpecAsync<Guild>(
-                new ActiveGuildByDiscordIdWithModerationSpecifications(req.GuildId));
-
-            if (!guildResult.IsSuccess || guildResult.Entity.ModerationConfig is null)
-                return Result<int>.FromError(new NotFoundError());
-            if (guildResult.Entity.ModerationConfig.IsDisabled)
-                return Result<int>.FromError(new DisabledEntityError(nameof(guildResult.Entity.ModerationConfig)));
-
-            return await this.CreateOverwritesForMutedRoleAsync(ctx.Guild, ctx.Guild.Roles[guildResult.Entity.ModerationConfig.MuteRoleId], ctx.Member);
         }
 
         private async Task<Result<int>> CreateOverwritesForMutedRoleAsync([NotNull] DiscordGuild discordGuild,
@@ -569,7 +605,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (!requestingMember.IsAdmin()) return Result<int>.FromError(new DiscordNotAuthorizedError());
 
             int count = 0;
-            foreach (var channel in discordGuild.Channels.Values.Where(x => x.Type is ChannelType.Category or ChannelType.Text))
+            foreach (var channel in discordGuild.Channels.Values.Where(x =>
+                         x.Type is ChannelType.Category or ChannelType.Text))
             {
                 await channel.AddOverwriteAsync(mutedRole,
                     deny: Permissions.SendMessages | Permissions.SendMessagesInThreads |

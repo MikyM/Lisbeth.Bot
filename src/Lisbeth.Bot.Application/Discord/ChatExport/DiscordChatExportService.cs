@@ -15,20 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus.Entities;
-using JetBrains.Annotations;
-using Lisbeth.Bot.Application.Discord.ChatExport.Builders;
-using Lisbeth.Bot.Application.Discord.ChatExport.Models;
-using Lisbeth.Bot.Application.Discord.Exceptions;
-using Lisbeth.Bot.Application.Services.Database.Interfaces;
-using Lisbeth.Bot.DataAccessLayer.Specifications.Ticket;
-using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
-using Lisbeth.Bot.Domain.Entities;
-using Microsoft.Extensions.Logging;
-using MikyM.Common.Application.Results;
-using MikyM.Common.DataAccessLayer.Specifications;
-using MikyM.Discord.Interfaces;
-using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -36,8 +22,20 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using DSharpPlus.Entities;
+using JetBrains.Annotations;
+using Lisbeth.Bot.Application.Discord.ChatExport.Builders;
+using Lisbeth.Bot.Application.Discord.ChatExport.Models;
 using Lisbeth.Bot.Application.Results;
+using Lisbeth.Bot.Application.Services.Database.Interfaces;
+using Lisbeth.Bot.DataAccessLayer.Specifications.Ticket;
+using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
+using Lisbeth.Bot.Domain.Entities;
+using Microsoft.Extensions.Logging;
+using MikyM.Common.Application.Results;
 using MikyM.Common.Application.Results.Errors;
+using MikyM.Common.DataAccessLayer.Specifications;
+using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport
 {
@@ -114,7 +112,8 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
                 req.OwnerId = ticket.UserId;
                 try
                 {
-                    target = await _discord.Client.GetChannelAsync(req.ChannelId ?? throw new InvalidOperationException());
+                    target = await _discord.Client.GetChannelAsync(req.ChannelId ??
+                                                                   throw new InvalidOperationException());
                 }
                 catch (Exception)
                 {
@@ -157,7 +156,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
         {
             if (intr is null) throw new ArgumentNullException(nameof(intr));
 
-            return await ExportToHtmlAsync(intr.Guild, intr.Channel, (DiscordMember) intr.User);
+            return await ExportToHtmlAsync(intr.Guild, intr.Channel, (DiscordMember)intr.User);
         }
 
         public async Task<Result<DiscordEmbed>> ExportToHtmlAsync(DiscordGuild guild, DiscordChannel target,
@@ -175,7 +174,8 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
 
                 if (!resGuild.IsSuccess) return new NotFoundError("Guild doesn't exist in database.");
 
-                if (resGuild.Entity.TicketingConfig is null) return new DisabledEntityError("Guild doesn't have ticketing enabled.");
+                if (resGuild.Entity.TicketingConfig is null)
+                    return new DisabledEntityError("Guild doesn't have ticketing enabled.");
 
                 var guildCfg = resGuild.Entity;
 
@@ -183,7 +183,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
                 {
                     var res = await _ticketService.GetSingleBySpecAsync<Ticket>(
                         new TicketBaseGetSpecifications(null, null, guild.Id, target.Id, null, false, 1, true));
-                    
+
                     if (!res.IsSuccess) return new NotFoundError("Ticket doesn't exist in database.");
 
                     ticket = res.Entity;
@@ -211,7 +211,8 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
                     return new DiscordNotFoundError($"User with Id: {ticket.UserId} doesn't exist.");
                 }
 
-                if (guild.Id != target.GuildId) return new DiscordNotAuthorizedError("Channel doesn't belong to this guild");
+                if (guild.Id != target.GuildId)
+                    return new DiscordNotAuthorizedError("Channel doesn't belong to this guild");
                 if (guild.Id != ticketLogChannel.GuildId)
                     return new DiscordNotAuthorizedError("Ticket log channel doesn't belong to this guild");
                 if (guild.Id != requestingMember.Guild.Id)
@@ -243,7 +244,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
                 string css;
                 if (File.Exists(path))
                 {
-                    using StreamReader streamReader = new (path, Encoding.UTF8);
+                    using StreamReader streamReader = new(path, Encoding.UTF8);
                     css = await streamReader.ReadToEndAsync();
                     css = css.Trim().Replace("\r", string.Empty);
                     css = css.Trim().Replace("\n", string.Empty);
@@ -257,7 +258,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
                 string js;
                 if (File.Exists(path))
                 {
-                    using StreamReader streamReader = new (path, Encoding.UTF8);
+                    using StreamReader streamReader = new(path, Encoding.UTF8);
                     js = await streamReader.ReadToEndAsync();
                     js = js.Trim().Replace("\r", string.Empty);
                     js = js.Trim().Replace("\n", string.Empty);
@@ -288,8 +289,8 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
                 embedBuilder.AddField("Users in transcript", usersString);
                 embedBuilder.WithColor(new DiscordColor(guildCfg.EmbedHexColor));
 
-                MemoryStream ms = new (Encoding.UTF8.GetBytes(html));
-                DiscordMessageBuilder messageBuilder = new ();
+                MemoryStream ms = new(Encoding.UTF8.GetBytes(html));
+                DiscordMessageBuilder messageBuilder = new();
 
                 messageBuilder.WithFile($"transcript-{target.Name}.html", ms);
                 messageBuilder.WithEmbed(embedBuilder.Build());

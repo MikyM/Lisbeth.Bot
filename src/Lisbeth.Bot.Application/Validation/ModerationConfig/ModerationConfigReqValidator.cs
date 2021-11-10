@@ -25,7 +25,10 @@ namespace Lisbeth.Bot.Application.Validation.ModerationConfig
 {
     public class ModerationConfigReqValidator : AbstractValidator<ModerationConfigReqDto>
     {
-        public ModerationConfigReqValidator(IDiscordService discord) : this(discord.Client) { }
+        public ModerationConfigReqValidator(IDiscordService discord) : this(discord.Client)
+        {
+        }
+
         public ModerationConfigReqValidator(DiscordClient client)
         {
             RuleFor(x => x.GuildId)

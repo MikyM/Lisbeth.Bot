@@ -1,4 +1,6 @@
-﻿using DSharpPlus;
+﻿using System;
+using System.Threading.Tasks;
+using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
@@ -16,8 +18,6 @@ using Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.Application.Results;
-using System;
-using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands
 {
@@ -44,7 +44,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
 
             if (!res.IsSuccess) throw new ArgumentException("Guild not found in database");
 
-            var member = (DiscordMember) user;
+            var member = (DiscordMember)user;
 
             var embed = new DiscordEmbedBuilder();
             embed.WithThumbnail(member.AvatarUrl);
@@ -79,10 +79,14 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
         [SlashRequireUserPermissions(Permissions.Administrator)]
         [SlashCommand("module", "A command that allows configuring modules")]
         public async Task TicketConfigCommand(InteractionContext ctx,
-            [Option("action", "Action to perform")] ModuleActionType action,
-            [Option("module", "Module to perform action on")] GuildConfigType type,
-            [Option("clean-after", "After how many hours should inactive closed tickets be cleared")] string? cleanAfter = "",
-            [Option("close-after", "After how many hours should inactive opened tickets be closed")] string? closeAfter= "")
+            [Option("action", "Action to perform")]
+            ModuleActionType action,
+            [Option("module", "Module to perform action on")]
+            GuildConfigType type,
+            [Option("clean-after", "After how many hours should inactive closed tickets be cleared")]
+            string? cleanAfter = "",
+            [Option("close-after", "After how many hours should inactive opened tickets be closed")]
+            string? closeAfter = "")
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder().AsEphemeral(true));
@@ -98,24 +102,30 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                             double cleanAfterParsed = 0;
                             double closeAfterParsed = 0;
 
-                            if (cleanAfter is not null && cleanAfter != "" && !double.TryParse(cleanAfter, out cleanAfterParsed))
+                            if (cleanAfter is not null && cleanAfter != "" &&
+                                !double.TryParse(cleanAfter, out cleanAfterParsed))
                                 throw new ArgumentException("Time provided was in incorrect format",
                                     nameof(cleanAfter));
-                            if (closeAfter is not null && closeAfter != "" && !double.TryParse(closeAfter, out closeAfterParsed))
+                            if (closeAfter is not null && closeAfter != "" &&
+                                !double.TryParse(closeAfter, out closeAfterParsed))
                                 throw new ArgumentException("Time provided was in incorrect format",
                                     nameof(closeAfter));
 
-                            if (closeAfterParsed is < 1 or > 744) throw new ArgumentException("Accepted values are in range from 1 to 744",
-                                nameof(closeAfter));
-                            if (cleanAfterParsed is < 1 or > 744) throw new ArgumentException("Accepted values are in range from 1 to 744",
-                                nameof(cleanAfter));
+                            if (closeAfterParsed is < 1 or > 744)
+                                throw new ArgumentException("Accepted values are in range from 1 to 744",
+                                    nameof(closeAfter));
+                            if (cleanAfterParsed is < 1 or > 744)
+                                throw new ArgumentException("Accepted values are in range from 1 to 744",
+                                    nameof(cleanAfter));
 
                             var enableTicketingReq = new TicketingConfigReqDto
                             {
                                 GuildId = ctx.Guild.Id, RequestedOnBehalfOfId = ctx.Member.Id
                             };
-                            if (cleanAfter is not "") enableTicketingReq.CleanAfter = TimeSpan.FromHours(cleanAfterParsed);
-                            if (closeAfter is not "") enableTicketingReq.CloseAfter = TimeSpan.FromHours(closeAfterParsed);
+                            if (cleanAfter is not "")
+                                enableTicketingReq.CleanAfter = TimeSpan.FromHours(cleanAfterParsed);
+                            if (closeAfter is not "")
+                                enableTicketingReq.CloseAfter = TimeSpan.FromHours(closeAfterParsed);
 
                             var enableTicketingValidator = new TicketingConfigReqValidator(ctx.Client);
                             await enableTicketingValidator.ValidateAndThrowAsync(enableTicketingReq);
@@ -146,6 +156,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                         default:
                             throw new ArgumentOutOfRangeException(nameof(action), action, null);
                     }
+
                     break;
                 case GuildConfigType.Moderation:
                     switch (action)
@@ -185,14 +196,18 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                         default:
                             throw new ArgumentOutOfRangeException(nameof(action), action, null);
                     }
+
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
 
             if (!result.HasValue) return;
-            if (result.Value.IsSuccess) await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(result.Value.Entity));
-            else await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(result, ctx.Client)));
+            if (result.Value.IsSuccess)
+                await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(result.Value.Entity));
+            else
+                await ctx.EditResponseAsync(
+                    new DiscordWebhookBuilder().AddEmbed(GetUnsuccessfulResultEmbed(result, ctx.Client)));
         }
 
         [UsedImplicitly]
@@ -200,8 +215,9 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
         [SlashCommand("moderation-config", "A command that allows setting moderation module up")]
         public async Task ModConfigCommand(InteractionContext ctx,
             [Option("deleted", "Channel for message deletion logs")]
-            DiscordChannel deletedChannel, [Option("updated", "Channel for message update logs")]
-            DiscordChannel updatedChannel, [Option("mute", "Mute role Id")] string muteRoleId)
+            DiscordChannel deletedChannel,
+            [Option("updated", "Channel for message update logs")] DiscordChannel updatedChannel,
+            [Option("mute", "Mute role Id")] string muteRoleId)
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder().AsEphemeral(true));
@@ -233,7 +249,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
-            var guild = new Guild {GuildId = ctx.Guild.Id, UserId = ctx.User.Id, IsDisabled = false};
+            var guild = new Guild { GuildId = ctx.Guild.Id, UserId = ctx.User.Id, IsDisabled = false };
 
             await _guildService!.AddAsync(guild, true);
 

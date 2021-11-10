@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
@@ -26,8 +28,6 @@ using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
 using Lisbeth.Bot.Application.Validation.Ticket;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 using MikyM.Common.Application.Results;
-using System;
-using System.Threading.Tasks;
 
 // ReSharper disable InconsistentNaming
 
@@ -73,12 +73,14 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     throw new ArgumentOutOfRangeException(nameof(action), action, null);
             }
 
-            if (result.IsSuccess) await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(result.Entity)
-                .AsEphemeral(true));
-            else await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(result, ctx.Client))
-                .AsEphemeral(true));
-
-
+            if (result.IsSuccess)
+                await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                    .AddEmbed(result.Entity)
+                    .AsEphemeral(true));
+            else
+                await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                    .AddEmbed(GetUnsuccessfulResultEmbed(result, ctx.Client))
+                    .AsEphemeral(true));
         }
     }
 }

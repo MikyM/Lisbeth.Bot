@@ -34,7 +34,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
                 .ValueGeneratedOnAdd()
                 .IsRequired();
 
-            builder.HasKey(x => new {x.GuildId, x.ServerBoosterId});
+            builder.HasKey(x => new { x.GuildId, x.ServerBoosterId });
 
             builder
                 .HasOne(x => x.ServerBooster)

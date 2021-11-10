@@ -15,29 +15,39 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Generic;
+using System.Linq;
+
 namespace Lisbeth.Bot.API.Models
 {
     public class Response
     {
-        public Response(bool isSuccess = true)
+        public Response(IEnumerable<string>? errors) : this(null, errors)
         {
-            Succeeded = isSuccess;
-            Message = string.Empty;
-            Errors = null;
         }
 
-        public bool Succeeded { get; set; }
-        public string[] Errors { get; set; }
-        public string Message { get; set; }
+        public Response(string? message = null, IEnumerable<string>? errors = null)
+        {
+            Message = message ?? string.Empty;
+            Errors = errors?.ToArray();
+        }
+
+        public bool IsSuccess => Errors is null;
+        public string[]? Errors { get; set; }
+        public string? Message { get; set; }
     }
 
     public class Response<T> : Response
     {
-        public Response(T data, bool isSuccess = true) : base(isSuccess)
+        public Response(T? data, IEnumerable<string>? errors) : this(data, null, errors)
+        {
+        }
+
+        public Response(T? data, string? message = null, IEnumerable<string>? errors = null) : base(message, errors)
         {
             Data = data;
         }
 
-        public T Data { get; set; }
+        public T? Data { get; set; }
     }
 }

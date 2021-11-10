@@ -15,6 +15,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
@@ -29,12 +35,6 @@ using Lisbeth.Bot.Domain.Entities;
 using Lisbeth.Bot.Domain.Enums;
 using MikyM.Common.Application.Results;
 using NCrontab;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands
 {
@@ -45,7 +45,12 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
     {
         public IDiscordReminderService? _reminderService { private get; set; }
         public IDiscordEmbedConfiguratorService<Reminder>? _reminderEmbedConfiguratorService { private get; set; }
-        public IDiscordEmbedConfiguratorService<RecurringReminder>? _recurringReminderEmbedConfiguratorService { private get; set; }
+
+        public IDiscordEmbedConfiguratorService<RecurringReminder>? _recurringReminderEmbedConfiguratorService
+        {
+            private get;
+            set;
+        }
 
         [UsedImplicitly]
         [SlashCommand("single", "Single reminder command")]
@@ -82,7 +87,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             if (mentions.Length > 500) throw new ArgumentException(nameof(mentions));
 
             var mentionList = mentions is ""
-                ? new List<string> {ctx.Member.Mention}
+                ? new List<string> { ctx.Member.Mention }
                 : Regex.Matches(mentions, @"\<[^<>]*\>").Select(m => m.Value).ToList();
             mentionList.RemoveAll(string.IsNullOrWhiteSpace);
 
@@ -123,14 +128,23 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                             {
                                 case ReminderType.Single:
                                     var res = await _reminderEmbedConfiguratorService!.ConfigureAsync(ctx, name);
-                                    if (res.IsSuccess) await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(res.Entity));
-                                    else await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(res, ctx.Client)));
+                                    if (res.IsSuccess)
+                                        await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(res.Entity));
+                                    else
+                                        await ctx.EditResponseAsync(
+                                            new DiscordWebhookBuilder().AddEmbed(
+                                                GetUnsuccessfulResultEmbed(res, ctx.Client)));
                                     return;
                                 case ReminderType.Recurring:
                                     var resRec =
                                         await _recurringReminderEmbedConfiguratorService!.ConfigureAsync(ctx, name);
-                                    if (resRec.IsSuccess) await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(resRec.Entity));
-                                    else await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(resRec, ctx.Client)));
+                                    if (resRec.IsSuccess)
+                                        await ctx.EditResponseAsync(
+                                            new DiscordWebhookBuilder().AddEmbed(resRec.Entity));
+                                    else
+                                        await ctx.EditResponseAsync(
+                                            new DiscordWebhookBuilder().AddEmbed(
+                                                GetUnsuccessfulResultEmbed(resRec, ctx.Client)));
                                     return;
                                 default:
                                     throw new ArgumentOutOfRangeException(nameof(reminderType), reminderType, null);
@@ -150,7 +164,9 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             }
 
             if (result.IsSuccess) await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(result.Entity));
-            else await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(result, ctx.Client)));
+            else
+                await ctx.EditResponseAsync(
+                    new DiscordWebhookBuilder().AddEmbed(GetUnsuccessfulResultEmbed(result, ctx.Client)));
         }
     }
 }

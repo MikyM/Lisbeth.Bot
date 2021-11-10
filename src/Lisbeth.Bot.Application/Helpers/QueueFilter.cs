@@ -16,11 +16,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+using System;
 using Hangfire.Client;
 using Hangfire.States;
 using Lisbeth.Bot.Application.Extensions;
 using Serilog;
-using System;
 
 namespace Lisbeth.Bot.Application.Helpers
 {
@@ -49,7 +49,7 @@ namespace Lisbeth.Bot.Application.Helpers
                 }
                 catch (Exception ex)
                 {
-                     Log.Logger.Error(ex.GetFullMessage());
+                    Log.Logger.Error(ex.GetFullMessage());
                 }
         }
 

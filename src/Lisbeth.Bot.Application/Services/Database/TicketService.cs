@@ -15,6 +15,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using AutoMapper;
 using DSharpPlus;
 using DSharpPlus.Entities;
@@ -28,11 +32,6 @@ using MikyM.Common.Application.Results;
 using MikyM.Common.Application.Results.Errors;
 using MikyM.Common.Application.Services;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Lisbeth.Bot.Application.Results;
 
 namespace Lisbeth.Bot.Application.Services.Database
 {
@@ -43,7 +42,8 @@ namespace Lisbeth.Bot.Application.Services.Database
         {
         }
 
-        public async Task<Result> CheckForDeletedTicketChannelAsync(ulong channelId, ulong guildId, ulong requestedOnBehalfOfId)
+        public async Task<Result> CheckForDeletedTicketChannelAsync(ulong channelId, ulong guildId,
+            ulong requestedOnBehalfOfId)
         {
             var res = await base.GetSingleBySpecAsync<Ticket>(
                 new TicketBaseGetSpecifications(null, null, guildId, channelId, null, false, 1));

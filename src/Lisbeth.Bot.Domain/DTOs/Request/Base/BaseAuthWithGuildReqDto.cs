@@ -19,8 +19,6 @@ namespace Lisbeth.Bot.Domain.DTOs.Request.Base
 {
     public class BaseAuthWithGuildReqDto : BaseAuthReqDto
     {
-        public ulong GuildId { get; set; }
-
         public BaseAuthWithGuildReqDto()
         {
         }
@@ -29,5 +27,7 @@ namespace Lisbeth.Bot.Domain.DTOs.Request.Base
         {
             GuildId = guildId;
         }
+
+        public ulong GuildId { get; set; }
     }
 }

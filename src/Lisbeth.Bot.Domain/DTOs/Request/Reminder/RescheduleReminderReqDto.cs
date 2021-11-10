@@ -15,25 +15,20 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Lisbeth.Bot.Domain.DTOs.Request.Base;
 using System;
+using Lisbeth.Bot.Domain.DTOs.Request.Base;
 
 namespace Lisbeth.Bot.Domain.DTOs.Request.Reminder
 {
     public class RescheduleReminderReqDto : BaseAuthWithGuildReqDto
     {
-        public string? Name { get; set; }
-        public string? CronExpression { get; set; }
-        public DateTime? SetFor { get; set; }
-        public string? TimeSpanExpression { get; set; }
-        public long? ReminderId { get; set; }
-        public long? NewHangfireId { get; set; }
-
         public RescheduleReminderReqDto()
         {
         }
 
-        public RescheduleReminderReqDto(string name, string? cronExpression, DateTime? setFor, string? timeSpanExpression, ulong guildId, ulong requestedOnBehalfOfId, long? reminderId = null, long? newHangfireId = null) : base(guildId, requestedOnBehalfOfId)
+        public RescheduleReminderReqDto(string name, string? cronExpression, DateTime? setFor,
+            string? timeSpanExpression, ulong guildId, ulong requestedOnBehalfOfId, long? reminderId = null,
+            long? newHangfireId = null) : base(guildId, requestedOnBehalfOfId)
         {
             Name = name;
             CronExpression = cronExpression;
@@ -42,5 +37,12 @@ namespace Lisbeth.Bot.Domain.DTOs.Request.Reminder
             ReminderId = reminderId;
             NewHangfireId = newHangfireId;
         }
+
+        public string? Name { get; set; }
+        public string? CronExpression { get; set; }
+        public DateTime? SetFor { get; set; }
+        public string? TimeSpanExpression { get; set; }
+        public long? ReminderId { get; set; }
+        public long? NewHangfireId { get; set; }
     }
 }

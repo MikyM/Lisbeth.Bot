@@ -15,12 +15,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Globalization;
+using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Hangfire;
 using Lisbeth.Bot.API.ExceptionMiddleware;
 using Lisbeth.Bot.API.Helpers;
-using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Application.Helpers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -31,9 +33,6 @@ using Microsoft.Extensions.Hosting;
 using MikyM.Common.Domain;
 using Serilog;
 using Serilog.Events;
-using System;
-using System.Globalization;
-using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.API
 {
@@ -59,7 +58,8 @@ namespace Lisbeth.Bot.API
 
                 // Configuration
                 builder.Configuration.SetBasePath(AppDomain.CurrentDomain.BaseDirectory);
-                if (builder.Environment.IsProduction()) builder.Configuration.AddJsonFile("appsettings.json", false, true);
+                if (builder.Environment.IsProduction())
+                    builder.Configuration.AddJsonFile("appsettings.json", false, true);
                 builder.Configuration.AddJsonFile("appsettings.Development.json", true, true);
                 builder.Configuration.AddEnvironmentVariables();
 
@@ -79,7 +79,8 @@ namespace Lisbeth.Bot.API
 
                 // Configure Autofac
                 builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
-                builder.Host.ConfigureContainer<ContainerBuilder>(cb => cb.RegisterModule(new AutofacContainerModule()));
+                builder.Host.ConfigureContainer<ContainerBuilder>(cb =>
+                    cb.RegisterModule(new AutofacContainerModule()));
 
                 // Configure Serilog
                 builder.Host.UseSerilog((hostBuilder, services, configuration) => configuration
@@ -90,11 +91,6 @@ namespace Lisbeth.Bot.API
                 builder.WebHost.UseSentry();
 
                 var app = builder.Build();
-
-                // Wait for Discord to become fully operational
-               // Log.Logger.Debug("Waiting for discord's guild download completion.");
-                //await WaitForDownloadCompletion.ReadyToOperateEvent.WaitAsync();
-                //Log.Logger.Debug("Discord fully operational.");
 
                 // Configure Autofac job activator and static container provider for special use cases
                 ContainerProvider.Container = app.Services.GetAutofacRoot();
@@ -115,7 +111,8 @@ namespace Lisbeth.Bot.API
 
                 app.UseHangfireDashboard("/hangfire",
                     app.Environment.IsDevelopment()
-                        ? new DashboardOptions { AppPath = "kek", Authorization = new[] { new HangfireAlwaysAuthFilter() } }
+                        ? new DashboardOptions
+                            { AppPath = "kek", Authorization = new[] { new HangfireAlwaysAuthFilter() } }
                         : new DashboardOptions { AppPath = "kek", Authorization = new[] { new HangfireAuthFilter() } });
                 app.UseMiddleware<CustomExceptionMiddleware>();
                 app.UseHttpsRedirection();

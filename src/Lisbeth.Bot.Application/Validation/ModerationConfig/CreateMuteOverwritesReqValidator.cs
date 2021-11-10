@@ -25,7 +25,10 @@ namespace Lisbeth.Bot.Application.Validation.ModerationConfig
 {
     public class CreateMuteOverwritesReqValidator : AbstractValidator<CreateMuteOverwritesReqDto>
     {
-        public CreateMuteOverwritesReqValidator(IDiscordService discord) : this(discord.Client) { }
+        public CreateMuteOverwritesReqValidator(IDiscordService discord) : this(discord.Client)
+        {
+        }
+
         public CreateMuteOverwritesReqValidator(DiscordClient client)
         {
             RuleFor(x => x.GuildId)

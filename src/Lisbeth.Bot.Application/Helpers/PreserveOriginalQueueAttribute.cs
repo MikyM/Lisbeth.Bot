@@ -46,7 +46,6 @@ namespace Lisbeth.Bot.Application.Helpers
                 {
                     Log.Logger.Error(ex.GetFullMessage());
                 }
-
         }
 
         public void OnStateUnapplied(ApplyStateContext context, IWriteOnlyTransaction transaction)

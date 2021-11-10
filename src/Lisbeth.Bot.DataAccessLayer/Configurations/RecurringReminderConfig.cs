@@ -17,6 +17,7 @@
 
 using System.Collections.Generic;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Lisbeth.Bot.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -41,9 +42,11 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
             builder.Property(x => x.Mentions)
                 .HasColumnName("tags")
                 .HasColumnType("text")
-                .HasConversion(x => JsonSerializer.Serialize(x, new JsonSerializerOptions {IgnoreNullValues = true}),
+                .HasConversion(
+                    x => JsonSerializer.Serialize(x,
+                        new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull }),
                     x => JsonSerializer.Deserialize<List<string>>(x,
-                        new JsonSerializerOptions {IgnoreNullValues = true}));
+                        new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull }));
             builder.Property(x => x.Name)
                 .HasColumnName("name")
                 .HasColumnType("varchar(100)")
@@ -52,7 +55,9 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
                 .ValueGeneratedOnAdd();
             builder.Property(x => x.GuildId).HasColumnName("guild_id").HasColumnType("bigint");
             builder.Property(x => x.CreatorId).HasColumnName("creator_id").HasColumnType("bigint").IsRequired();
-            builder.Property(x => x.LastEditById).HasColumnName("lasted_edit_by_id").HasColumnType("bigint")
+            builder.Property(x => x.LastEditById)
+                .HasColumnName("lasted_edit_by_id")
+                .HasColumnType("bigint")
                 .IsRequired();
             builder.Property(x => x.Text).HasColumnName("text").HasColumnType("text");
             builder.Property(x => x.IsGuildReminder)

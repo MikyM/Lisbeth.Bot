@@ -52,7 +52,7 @@ namespace Lisbeth.Bot.API.ExceptionMiddleware
             _logger.LogError(exception, exception.GetFullMessage());
 
             context.Response.ContentType = "application/json";
-            context.Response.StatusCode = (int) HttpStatusCode.InternalServerError;
+            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
             return context.Response.WriteAsync(new ErrorDetails
             {
                 StatusCode = context.Response.StatusCode,

@@ -15,9 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Lisbeth.Bot.Domain.Entities.Base;
 using System;
 using System.Collections.Generic;
+using Lisbeth.Bot.Domain.Entities.Base;
 
 // ReSharper disable CollectionNeverUpdated.Local
 // ReSharper disable InconsistentNaming
@@ -32,21 +32,21 @@ namespace Lisbeth.Bot.Domain.Entities
         private readonly HashSet<Prune>? prunes;
         private readonly HashSet<RecurringReminder>? recurringReminders;
         private readonly HashSet<Reminder>? reminders;
-        private readonly HashSet<Ticket>? tickets;
-        private readonly HashSet<Tag>? tags;
         private readonly HashSet<RoleMenu>? roleMenus;
+        private readonly HashSet<Tag>? tags;
+        private readonly HashSet<Ticket>? tickets;
 
         public Guild()
         {
-            this.bans ??= new HashSet<Ban>();
-            this.guildServerBoosters ??= new HashSet<GuildServerBooster>();
-            this.mutes ??= new HashSet<Mute>();
-            this.prunes ??= new HashSet<Prune>();
-            this.recurringReminders ??= new HashSet<RecurringReminder>();
-            this.reminders ??= new HashSet<Reminder>();
-            this.tickets ??= new HashSet<Ticket>();
-            this.tags ??= new HashSet<Tag>();
-            this.roleMenus ??= new HashSet<RoleMenu>();
+            bans ??= new HashSet<Ban>();
+            guildServerBoosters ??= new HashSet<GuildServerBooster>();
+            mutes ??= new HashSet<Mute>();
+            prunes ??= new HashSet<Prune>();
+            recurringReminders ??= new HashSet<RecurringReminder>();
+            reminders ??= new HashSet<Reminder>();
+            tickets ??= new HashSet<Ticket>();
+            tags ??= new HashSet<Tag>();
+            roleMenus ??= new HashSet<RoleMenu>();
         }
 
         public ulong GuildId { get; set; }
@@ -72,25 +72,25 @@ namespace Lisbeth.Bot.Domain.Entities
 
         public void AddMute(Mute mute)
         {
-            if (mute  is null) throw new ArgumentNullException(nameof(mute));
+            if (mute is null) throw new ArgumentNullException(nameof(mute));
             mutes?.Add(mute);
         }
 
         public void AddPrune(Prune prune)
         {
-            if (prune  is null) throw new ArgumentNullException(nameof(prune));
+            if (prune is null) throw new ArgumentNullException(nameof(prune));
             prunes?.Add(prune);
         }
 
         public void AddBan(Ban ban)
         {
-            if (ban  is null) throw new ArgumentNullException(nameof(ban));
+            if (ban is null) throw new ArgumentNullException(nameof(ban));
             bans?.Add(ban);
         }
 
         public void AddServerBooster(GuildServerBooster guildServerBooster)
         {
-            if (guildServerBooster  is null) throw new ArgumentNullException(nameof(guildServerBooster));
+            if (guildServerBooster is null) throw new ArgumentNullException(nameof(guildServerBooster));
             guildServerBoosters?.Add(guildServerBooster);
         }
 
@@ -109,7 +109,7 @@ namespace Lisbeth.Bot.Domain.Entities
 
         public bool EditTag(Tag tag)
         {
-            if (tag  is null) throw new ArgumentNullException(nameof(tag));
+            if (tag is null) throw new ArgumentNullException(nameof(tag));
             var res = tags?.RemoveWhere(x => x.Name == tag.Name);
             return tags is not null && res != 0 && tags.Add(tag);
         }

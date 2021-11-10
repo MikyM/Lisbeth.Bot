@@ -15,6 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using AspNetCore.Authentication.ApiKey;
 using AspNetCoreRateLimit;
 using DSharpPlus;
@@ -40,9 +43,6 @@ using MikyM.Discord.Extensions.Interactivity;
 using MikyM.Discord.Extensions.SlashCommands;
 using OpenTracing;
 using OpenTracing.Mock;
-using System;
-using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.API
 {
@@ -106,14 +106,14 @@ namespace Lisbeth.Bot.API
                 options.UseRecommendedSerializerSettings();
                 options.UsePostgreSqlStorage(
                     "User ID=lisbethbot;Password=lisbethbot;Host=localhost;Port=5438;Database=lisbeth_bot_hangfire_test;",
-                    new PostgreSqlStorageOptions {QueuePollInterval = TimeSpan.FromSeconds(15)});
+                    new PostgreSqlStorageOptions { QueuePollInterval = TimeSpan.FromSeconds(15) });
                 options.UseFilter(new PreserveOriginalQueueAttribute());
                 options.UseFilter(new QueueFilter());
             });
 
             services.AddHangfireServer(options =>
             {
-                options.Queues = new[] {"critical", "moderation", "reminder", "default"};
+                options.Queues = new[] { "critical", "moderation", "reminder", "default" };
             });
         }
 
@@ -201,7 +201,7 @@ namespace Lisbeth.Bot.API
         {
             services.AddSwaggerGen(options =>
             {
-                options.SwaggerDoc("v1", new OpenApiInfo {Title = "EclipseBot", Version = "v1"});
+                options.SwaggerDoc("v1", new OpenApiInfo { Title = "EclipseBot", Version = "v1" });
                 var securityScheme = new OpenApiSecurityScheme
                 {
                     Reference = new OpenApiReference
@@ -217,7 +217,7 @@ namespace Lisbeth.Bot.API
                 options.AddSecurityDefinition(ApiKeyDefaults.AuthenticationScheme, securityScheme);
                 options.AddSecurityRequirement(new OpenApiSecurityRequirement
                 {
-                    {securityScheme, Array.Empty<string>()}
+                    { securityScheme, Array.Empty<string>() }
                 });
             });
         }
@@ -232,9 +232,11 @@ namespace Lisbeth.Bot.API
         {
             services.AddHealthChecks()
                 .AddNpgSql(
-                    "User ID=lisbethbot;Password=lisbethbot;Host=localhost;Port=5438;Database=lisbeth_bot_test;", name: "Base DB")
+                    "User ID=lisbethbot;Password=lisbethbot;Host=localhost;Port=5438;Database=lisbeth_bot_test;",
+                    name: "Base DB")
                 .AddNpgSql(
-                    "User ID=lisbethbot;Password=lisbethbot;Host=localhost;Port=5438;Database=lisbeth_bot_hangfire_test;", name: "Hangfire DB")
+                    "User ID=lisbethbot;Password=lisbethbot;Host=localhost;Port=5438;Database=lisbeth_bot_hangfire_test;",
+                    name: "Hangfire DB")
                 .AddHangfire(options =>
                 {
                     options.MinimumAvailableServers = 1;

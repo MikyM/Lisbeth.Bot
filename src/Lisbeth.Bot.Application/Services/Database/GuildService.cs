@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Threading.Tasks;
 using AutoMapper;
 using Hangfire.Annotations;
 using Lisbeth.Bot.Application.Enums;
@@ -32,8 +34,6 @@ using MikyM.Common.Application.Results;
 using MikyM.Common.Application.Results.Errors;
 using MikyM.Common.Application.Services;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
-using System;
-using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Services.Database
 {
@@ -41,8 +41,8 @@ namespace Lisbeth.Bot.Application.Services.Database
     public class GuildService : CrudService<Guild, LisbethBotDbContext>, IGuildService
     {
         private readonly ICrudService<ModerationConfig, LisbethBotDbContext> _moderationService;
-        private readonly ICrudService<TicketingConfig, LisbethBotDbContext> _ticketingService;
         private readonly ICrudService<RoleMenu, LisbethBotDbContext> _roleMenuService;
+        private readonly ICrudService<TicketingConfig, LisbethBotDbContext> _ticketingService;
 
         public GuildService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof,
             ICrudService<ModerationConfig, LisbethBotDbContext> moderationService,
@@ -60,8 +60,9 @@ namespace Lisbeth.Bot.Application.Services.Database
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(req.GuildId));
             if (!result.IsSuccess) return Result<Guild>.FromError(new NotFoundError());
             if (result.Entity.TicketingConfig is not null && result.Entity.TicketingConfig.IsDisabled)
-                return await this.EnableConfigAsync(req.GuildId, GuildConfigType.Ticketing, shouldSave);
-            if (result.Entity.TicketingConfig is not null && !result.Entity.TicketingConfig.IsDisabled) return Result<Guild>.FromError(new InvalidOperationError());
+                return await EnableConfigAsync(req.GuildId, GuildConfigType.Ticketing, shouldSave);
+            if (result.Entity.TicketingConfig is not null && !result.Entity.TicketingConfig.IsDisabled)
+                return Result<Guild>.FromError(new InvalidOperationError());
 
             await _ticketingService.AddAsync(req, shouldSave);
 
@@ -74,8 +75,9 @@ namespace Lisbeth.Bot.Application.Services.Database
                 new ActiveGuildByDiscordIdWithModerationSpecifications(req.GuildId));
             if (!result.IsSuccess) throw new NotFoundException("Guild doesn't exist in the database");
             if (result.Entity.ModerationConfig is not null && result.Entity.ModerationConfig.IsDisabled)
-                return await this.EnableConfigAsync(req.GuildId, GuildConfigType.Moderation, shouldSave);
-            if (result.Entity.ModerationConfig is not null && !result.Entity.ModerationConfig.IsDisabled) return Result<Guild>.FromError(new InvalidOperationError());
+                return await EnableConfigAsync(req.GuildId, GuildConfigType.Moderation, shouldSave);
+            if (result.Entity.ModerationConfig is not null && !result.Entity.ModerationConfig.IsDisabled)
+                return Result<Guild>.FromError(new InvalidOperationError());
 
             await _moderationService.AddAsync(req, shouldSave);
 
@@ -90,22 +92,27 @@ namespace Lisbeth.Bot.Application.Services.Database
                 case GuildConfigType.Ticketing:
                     result = await base.GetSingleBySpecAsync<Guild>(
                         new ActiveGuildByDiscordIdWithTicketingSpecifications(guildId));
-                    if (!result.IsSuccess || result.Entity.TicketingConfig is null) return Result.FromError(new NotFoundError());
-                    if (result.Entity.IsDisabled) return Result.FromError(new DisabledEntityError(nameof(result.Entity.TicketingConfig)));
+                    if (!result.IsSuccess || result.Entity.TicketingConfig is null)
+                        return Result.FromError(new NotFoundError());
+                    if (result.Entity.IsDisabled)
+                        return Result.FromError(new DisabledEntityError(nameof(result.Entity.TicketingConfig)));
 
                     await _ticketingService.DisableAsync(result.Entity.TicketingConfig, shouldSave);
                     break;
                 case GuildConfigType.Moderation:
                     result = await base.GetSingleBySpecAsync<Guild>(
                         new ActiveGuildByDiscordIdWithModerationSpecifications(guildId));
-                    if (!result.IsSuccess || result.Entity.ModerationConfig is null) return Result.FromError(new NotFoundError());
-                    if (result.Entity.IsDisabled) return Result.FromError(new DisabledEntityError(nameof(result.Entity.ModerationConfig)));
+                    if (!result.IsSuccess || result.Entity.ModerationConfig is null)
+                        return Result.FromError(new NotFoundError());
+                    if (result.Entity.IsDisabled)
+                        return Result.FromError(new DisabledEntityError(nameof(result.Entity.ModerationConfig)));
 
                     await _moderationService.DisableAsync(result.Entity.ModerationConfig, shouldSave);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
+
             return Result.FromSuccess();
         }
 
@@ -117,8 +124,10 @@ namespace Lisbeth.Bot.Application.Services.Database
                 case GuildConfigType.Ticketing:
                     result = await base.GetSingleBySpecAsync<Guild>(
                         new ActiveGuildByDiscordIdWithTicketingSpecifications(guildId));
-                    if (!result.IsSuccess || result.Entity.TicketingConfig is null) return Result<Guild>.FromError(new NotFoundError());
-                    if (!result.Entity.IsDisabled) return Result<Guild>.FromError(new DisabledEntityError(nameof(result.Entity.TicketingConfig)));
+                    if (!result.IsSuccess || result.Entity.TicketingConfig is null)
+                        return Result<Guild>.FromError(new NotFoundError());
+                    if (!result.Entity.IsDisabled)
+                        return Result<Guild>.FromError(new DisabledEntityError(nameof(result.Entity.TicketingConfig)));
 
                     _ticketingService.BeginUpdate(result.Entity.TicketingConfig);
                     result.Entity.TicketingConfig.IsDisabled = false;
@@ -128,8 +137,10 @@ namespace Lisbeth.Bot.Application.Services.Database
                 case GuildConfigType.Moderation:
                     result = await base.GetSingleBySpecAsync<Guild>(
                         new ActiveGuildByDiscordIdWithModerationSpecifications(guildId));
-                    if (!result.IsSuccess || result.Entity.ModerationConfig is null) return Result<Guild>.FromError(new NotFoundError());
-                    if (!result.Entity.IsDisabled) return Result<Guild>.FromError(new DisabledEntityError(nameof(result.Entity.ModerationConfig)));
+                    if (!result.IsSuccess || result.Entity.ModerationConfig is null)
+                        return Result<Guild>.FromError(new NotFoundError());
+                    if (!result.Entity.IsDisabled)
+                        return Result<Guild>.FromError(new DisabledEntityError(nameof(result.Entity.ModerationConfig)));
 
                     base.BeginUpdate(result.Entity.ModerationConfig);
                     result.Entity.ModerationConfig.IsDisabled = false;
@@ -147,8 +158,10 @@ namespace Lisbeth.Bot.Application.Services.Database
         {
             var result = await base.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(req.GuildId));
-            if (!result.IsSuccess || result.Entity.TicketingConfig is null) return Result.FromError(new NotFoundError());
-            if (result.Entity.TicketingConfig.IsDisabled) return Result.FromError(new DisabledEntityError(nameof(result.Entity.TicketingConfig)));
+            if (!result.IsSuccess || result.Entity.TicketingConfig is null)
+                return Result.FromError(new NotFoundError());
+            if (result.Entity.TicketingConfig.IsDisabled)
+                return Result.FromError(new DisabledEntityError(nameof(result.Entity.TicketingConfig)));
 
             _ticketingService.BeginUpdate(result.Entity.TicketingConfig);
             result.Entity.TicketingConfig.CleanAfter = req.CleanAfter;
@@ -165,12 +178,16 @@ namespace Lisbeth.Bot.Application.Services.Database
         {
             var result = await base.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(req.GuildId));
-            if (!result.IsSuccess || result.Entity.TicketingConfig is null) return Result.FromError(new NotFoundError());
-            if (result.Entity.TicketingConfig.IsDisabled) return Result.FromError(new DisabledEntityError(nameof(result.Entity.TicketingConfig)));
+            if (!result.IsSuccess || result.Entity.TicketingConfig is null)
+                return Result.FromError(new NotFoundError());
+            if (result.Entity.TicketingConfig.IsDisabled)
+                return Result.FromError(new DisabledEntityError(nameof(result.Entity.TicketingConfig)));
 
             _ticketingService.BeginUpdate(result.Entity.TicketingConfig);
-            if (req.ClosedCategoryId is not null) result.Entity.TicketingConfig.ClosedCategoryId = req.ClosedCategoryId.Value;
-            if (req.OpenedCategoryId is not null) result.Entity.TicketingConfig.OpenedCategoryId = req.OpenedCategoryId.Value;
+            if (req.ClosedCategoryId is not null)
+                result.Entity.TicketingConfig.ClosedCategoryId = req.ClosedCategoryId.Value;
+            if (req.OpenedCategoryId is not null)
+                result.Entity.TicketingConfig.OpenedCategoryId = req.OpenedCategoryId.Value;
             if (req.LogChannelId is not null) result.Entity.TicketingConfig.LogChannelId = req.LogChannelId.Value;
 
             if (shouldSave) await _ticketingService.CommitAsync();
@@ -182,14 +199,22 @@ namespace Lisbeth.Bot.Application.Services.Database
         {
             var result = await base.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(req.GuildId));
-            if (!result.IsSuccess || result.Entity.ModerationConfig is null) return Result.FromError(new NotFoundError());
-            if (result.Entity.ModerationConfig.IsDisabled) return Result.FromError(new DisabledEntityError(nameof(result.Entity.ModerationConfig)));
+            if (!result.IsSuccess || result.Entity.ModerationConfig is null)
+                return Result.FromError(new NotFoundError());
+            if (result.Entity.ModerationConfig.IsDisabled)
+                return Result.FromError(new DisabledEntityError(nameof(result.Entity.ModerationConfig)));
 
             _moderationService.BeginUpdate(result.Entity.ModerationConfig);
-            if (req.MemberEventsLogChannelId is not null) result.Entity.ModerationConfig.MemberEventsLogChannelId = req.MemberEventsLogChannelId.Value;
-            if (req.MessageDeletedEventsLogChannelId is not null) result.Entity.ModerationConfig.MessageDeletedEventsLogChannelId = req.MessageDeletedEventsLogChannelId.Value;
-            if (req.MessageUpdatedEventsLogChannelId is not null) result.Entity.ModerationConfig.MessageUpdatedEventsLogChannelId = req.MessageUpdatedEventsLogChannelId.Value;
-            if (req.ModerationLogChannelId is not null) result.Entity.ModerationConfig.ModerationLogChannelId = req.ModerationLogChannelId.Value;
+            if (req.MemberEventsLogChannelId is not null)
+                result.Entity.ModerationConfig.MemberEventsLogChannelId = req.MemberEventsLogChannelId.Value;
+            if (req.MessageDeletedEventsLogChannelId is not null)
+                result.Entity.ModerationConfig.MessageDeletedEventsLogChannelId =
+                    req.MessageDeletedEventsLogChannelId.Value;
+            if (req.MessageUpdatedEventsLogChannelId is not null)
+                result.Entity.ModerationConfig.MessageUpdatedEventsLogChannelId =
+                    req.MessageUpdatedEventsLogChannelId.Value;
+            if (req.ModerationLogChannelId is not null)
+                result.Entity.ModerationConfig.ModerationLogChannelId = req.ModerationLogChannelId.Value;
             if (req.MuteRoleId is not null) result.Entity.ModerationConfig.MuteRoleId = req.MuteRoleId.Value;
 
             if (shouldSave) await _moderationService.CommitAsync();

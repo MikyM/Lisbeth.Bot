@@ -25,11 +25,16 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands.Base
 {
     public class ExtendedApplicationCommandModule : ApplicationCommandModule
     {
-        protected DiscordEmbed GetUnsuccessfulResultEmbed(IResult result, DiscordClient discord) =>
-            this.GetUnsuccessfulResultEmbed(result.Error ?? throw new InvalidOperationException("Given result does not contain an error"), discord);
+        protected DiscordEmbed GetUnsuccessfulResultEmbed(IResult result, DiscordClient discord)
+        {
+            return GetUnsuccessfulResultEmbed(
+                result.Error ?? throw new InvalidOperationException("Given result does not contain an error"), discord);
+        }
 
-        protected DiscordEmbed GetUnsuccessfulResultEmbed(IResultError error, DiscordClient discord) =>
-            this.GetUnsuccessfulResultEmbed(error.Message, discord);
+        protected DiscordEmbed GetUnsuccessfulResultEmbed(IResultError error, DiscordClient discord)
+        {
+            return GetUnsuccessfulResultEmbed(error.Message, discord);
+        }
 
         protected DiscordEmbed GetUnsuccessfulResultEmbed(string error, DiscordClient discord)
         {

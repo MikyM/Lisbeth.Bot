@@ -22,20 +22,20 @@ namespace Lisbeth.Bot.Domain.DTOs.Request.Reminder
 {
     public class DisableReminderReqDto : BaseAuthWithGuildReqDto
     {
-        public ReminderType Type { get; set; }
-        public string? Name { get; set; }
-        public long? ReminderId { get; set; }
-
         public DisableReminderReqDto()
         {
-            
         }
 
-        public DisableReminderReqDto(ReminderType type, string name, ulong guildId, ulong requestedOnBehalfOfId, long? reminderId = null) : base(guildId, requestedOnBehalfOfId)
+        public DisableReminderReqDto(ReminderType type, string name, ulong guildId, ulong requestedOnBehalfOfId,
+            long? reminderId = null) : base(guildId, requestedOnBehalfOfId)
         {
             Type = type;
             Name = name;
             ReminderId = reminderId;
         }
+
+        public ReminderType Type { get; set; }
+        public string? Name { get; set; }
+        public long? ReminderId { get; set; }
     }
 }

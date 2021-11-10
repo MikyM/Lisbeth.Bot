@@ -15,14 +15,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Lisbeth.Bot.Domain.DTOs.Request.Base;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket.Base;
 
 namespace Lisbeth.Bot.Domain.DTOs.Request.Ticket
 {
     public class TicketCloseReqDto : BaseTicketGetReqDto
     {
-        public TicketCloseReqDto(long? id, ulong? ownerId, ulong? guildId, ulong? channelId, ulong requestedOnBehalfOfId)
+        public TicketCloseReqDto(long? id, ulong? ownerId, ulong? guildId, ulong? channelId,
+            ulong requestedOnBehalfOfId)
         {
             Id = id;
             OwnerId = ownerId;

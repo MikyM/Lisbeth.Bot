@@ -15,11 +15,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Threading.Tasks;
 using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.Domain.DTOs.Request.Mute;
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.Application.Interfaces;
-using System.Threading.Tasks;
 using MikyM.Common.Application.Results;
 
 namespace Lisbeth.Bot.Application.Services.Database.Interfaces

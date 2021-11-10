@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Threading.Tasks;
 using AutoMapper;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Extensions;
@@ -26,8 +28,6 @@ using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.Application.Results;
 using MikyM.Common.Application.Services;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
-using System;
-using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Services.Database
 {
@@ -53,12 +53,17 @@ namespace Lisbeth.Bot.Application.Services.Database
 
         public async Task<Result> RescheduleAsync(RescheduleReminderReqDto req, bool shouldSave = false)
         {
-            var result = await base.GetSingleBySpecAsync<Reminder>(new ActiveReminderByNameOrIdAndGuildSpec(req.Name, req.GuildId, req.ReminderId));
+            var result =
+                await base.GetSingleBySpecAsync<Reminder>(
+                    new ActiveReminderByNameOrIdAndGuildSpec(req.Name, req.GuildId, req.ReminderId));
             if (!result.IsSuccess) return Result.FromError(result);
 
             base.BeginUpdate(result.Entity);
-            var isValid = (req.TimeSpanExpression ?? throw new InvalidOperationException()).TryParseToDurationAndNextOccurrence(out var occurrence, out _);
-            result.Entity.SetFor = req.SetFor ?? (isValid ? occurrence : throw new ArgumentException(nameof(req.TimeSpanExpression)));
+            var isValid =
+                (req.TimeSpanExpression ?? throw new InvalidOperationException()).TryParseToDurationAndNextOccurrence(
+                    out var occurrence, out _);
+            result.Entity.SetFor = req.SetFor ??
+                                   (isValid ? occurrence : throw new ArgumentException(nameof(req.TimeSpanExpression)));
             result.Entity.LastEditById = req.RequestedOnBehalfOfId;
 
             if (shouldSave) await base.CommitAsync();

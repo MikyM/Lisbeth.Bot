@@ -25,7 +25,10 @@ namespace Lisbeth.Bot.Application.Validation.TicketingConfig
 {
     public class TicketingConfigDisableReqValidator : AbstractValidator<TicketingConfigDisableReqDto>
     {
-        public TicketingConfigDisableReqValidator(IDiscordService discord) : this(discord.Client) { }
+        public TicketingConfigDisableReqValidator(IDiscordService discord) : this(discord.Client)
+        {
+        }
+
         public TicketingConfigDisableReqValidator(DiscordClient client)
         {
             RuleFor(x => x.GuildId)

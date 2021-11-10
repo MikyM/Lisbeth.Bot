@@ -23,19 +23,13 @@ namespace Lisbeth.Bot.Domain.DTOs.Request.Reminder
 {
     public class SetReminderReqDto : BaseAuthWithGuildReqDto
     {
-        public string? Name { get; set; }
-        public string? CronExpression { get; set; }
-        public DateTime? SetFor { get; set; }
-        public string? TimeSpanExpression { get; set; }
-        public string? Text { get; set; }
-        public List<string>? Mentions { get; set; }
-
         public SetReminderReqDto()
         {
-            
         }
 
-        public SetReminderReqDto(string name, string? cronExpression, DateTime? setFor, string? timeSpanExpression, string text, List<string> mentions, ulong guildId, ulong requestedOnBehalfOfId) : base(guildId, requestedOnBehalfOfId)
+        public SetReminderReqDto(string name, string? cronExpression, DateTime? setFor, string? timeSpanExpression,
+            string text, List<string> mentions, ulong guildId, ulong requestedOnBehalfOfId) : base(guildId,
+            requestedOnBehalfOfId)
         {
             Name = name;
             CronExpression = cronExpression;
@@ -44,5 +38,12 @@ namespace Lisbeth.Bot.Domain.DTOs.Request.Reminder
             Text = text;
             Mentions = mentions;
         }
+
+        public string? Name { get; set; }
+        public string? CronExpression { get; set; }
+        public DateTime? SetFor { get; set; }
+        public string? TimeSpanExpression { get; set; }
+        public string? Text { get; set; }
+        public List<string>? Mentions { get; set; }
     }
 }

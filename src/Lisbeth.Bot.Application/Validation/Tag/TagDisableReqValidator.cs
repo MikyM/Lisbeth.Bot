@@ -18,7 +18,6 @@
 using DSharpPlus;
 using FluentValidation;
 using Lisbeth.Bot.Application.Validation.ReusablePropertyValidation;
-using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.DTOs.Request.Tag;
 using MikyM.Discord.Interfaces;
 

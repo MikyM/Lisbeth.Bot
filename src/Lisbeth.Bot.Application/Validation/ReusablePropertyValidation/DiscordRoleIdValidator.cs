@@ -16,7 +16,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -46,7 +45,7 @@ namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
             DiscordGuild guild;
             try
             {
-                guild = await _discord.GetGuildAsync((ulong) _guildId);
+                guild = await _discord.GetGuildAsync((ulong)_guildId);
                 if (guild is null)
                 {
                     _doesGuildExist = false;

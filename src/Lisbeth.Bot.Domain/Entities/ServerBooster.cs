@@ -30,7 +30,7 @@ namespace Lisbeth.Bot.Domain.Entities
 
         public ServerBooster()
         {
-            this.guildServerBoosters ??= new HashSet<GuildServerBooster>();
+            guildServerBoosters ??= new HashSet<GuildServerBooster>();
         }
 
         public ulong GuildId { get; set; }

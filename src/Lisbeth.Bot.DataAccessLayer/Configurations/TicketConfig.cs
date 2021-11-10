@@ -17,6 +17,7 @@
 
 using System.Collections.Generic;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Lisbeth.Bot.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -51,15 +52,19 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
             builder.Property(x => x.AddedRoleIds)
                 .HasColumnName("added_roles")
                 .HasColumnType("text")
-                .HasConversion(x => JsonSerializer.Serialize(x, new JsonSerializerOptions {IgnoreNullValues = true}),
+                .HasConversion(
+                    x => JsonSerializer.Serialize(x,
+                        new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull }),
                     x => JsonSerializer.Deserialize<List<ulong>>(x,
-                        new JsonSerializerOptions {IgnoreNullValues = true}));
+                        new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull }));
             builder.Property(x => x.AddedUserIds)
                 .HasColumnName("added_users")
                 .HasColumnType("text")
-                .HasConversion(x => JsonSerializer.Serialize(x, new JsonSerializerOptions {IgnoreNullValues = true}),
+                .HasConversion(
+                    x => JsonSerializer.Serialize(x,
+                        new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull }),
                     x => JsonSerializer.Deserialize<List<ulong>>(x,
-                        new JsonSerializerOptions {IgnoreNullValues = true}));
+                        new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull }));
             builder.Property(x => x.IsPrivate).HasColumnName("is_private").HasColumnType("boolean").IsRequired();
         }
     }

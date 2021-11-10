@@ -16,8 +16,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using Lisbeth.Bot.Domain.Entities.Base;
 using System.Collections.Generic;
+using Lisbeth.Bot.Domain.Entities.Base;
 
 namespace Lisbeth.Bot.Domain.Entities
 {

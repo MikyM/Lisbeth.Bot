@@ -19,6 +19,5 @@ namespace Lisbeth.Bot.Application.Validation.TicketingConfig
 {
     public class TicketingEditReqValidator
     {
-        
     }
 }

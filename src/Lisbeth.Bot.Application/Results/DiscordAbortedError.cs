@@ -20,7 +20,7 @@ using MikyM.Common.Application.Results;
 namespace Lisbeth.Bot.Application.Results
 {
     /// <summary>
-    /// Represents a perform an action due to authorization.
+    ///     Represents a perform an action due to authorization.
     /// </summary>
     public record DiscordAbortedError(string Message = "Action aborted by the user.") : ResultError(Message);
 }

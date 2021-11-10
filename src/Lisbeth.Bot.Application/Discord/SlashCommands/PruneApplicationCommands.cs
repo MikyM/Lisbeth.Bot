@@ -59,11 +59,11 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
                     switch (id)
                     {
                         case 0:
-                            var reqNoUsNoMsgId = new PruneReqDto((int) count + 1);
+                            var reqNoUsNoMsgId = new PruneReqDto((int)count + 1);
                             embed = await _discordMessageService!.PruneAsync(reqNoUsNoMsgId, 0, ctx);
                             break;
                         default:
-                            var reqNoUsWithMsgId = new PruneReqDto((int) count, (ulong) id);
+                            var reqNoUsWithMsgId = new PruneReqDto((int)count, (ulong)id);
                             embed = await _discordMessageService!.PruneAsync(reqNoUsWithMsgId, 0, ctx);
                             break;
                     }
@@ -73,11 +73,11 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
                     switch (id)
                     {
                         case 0:
-                            var reqWithUsNoMsgId = new PruneReqDto((int) count, null, user.Id);
+                            var reqWithUsNoMsgId = new PruneReqDto((int)count, null, user.Id);
                             embed = await _discordMessageService!.PruneAsync(reqWithUsNoMsgId, 0, ctx);
                             break;
                         default:
-                            var reqWithUsWithMsgId = new PruneReqDto((int) count, (ulong) id, user.Id);
+                            var reqWithUsWithMsgId = new PruneReqDto((int)count, (ulong)id, user.Id);
                             embed = await _discordMessageService!.PruneAsync(reqWithUsWithMsgId, 0, ctx);
                             break;
                     }

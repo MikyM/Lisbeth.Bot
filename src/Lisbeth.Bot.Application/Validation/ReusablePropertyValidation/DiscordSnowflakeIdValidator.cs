@@ -17,7 +17,6 @@
 
 
 using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -31,11 +30,11 @@ namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
     public class DiscordSnowflakeIdValidator<T> : IAsyncPropertyValidator<T, ulong>
     {
         private readonly DiscordClient _discord;
+        private bool _channelExists = true;
         private bool _guildExists = true;
         private object? _guildId;
         private bool _memberExists = true;
         private bool _roleExists = true;
-        private bool _channelExists = true;
 
         public DiscordSnowflakeIdValidator(DiscordClient discord)
         {
@@ -51,7 +50,7 @@ namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
             DiscordGuild guild;
             try
             {
-                guild = await _discord.GetGuildAsync((ulong) _guildId);
+                guild = await _discord.GetGuildAsync((ulong)_guildId);
                 if (guild is null)
                 {
                     _guildExists = false;
@@ -76,7 +75,7 @@ namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
 
             try
             {
-                var role = guild.GetRole(value); 
+                var role = guild.GetRole(value);
                 if (role is null) _roleExists = false;
             }
             catch (Exception)

@@ -15,6 +15,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using AutoMapper;
 using DSharpPlus;
 using DSharpPlus.Entities;
@@ -39,12 +45,6 @@ using Lisbeth.Bot.Domain.Entities.Base;
 using MikyM.Common.Application.Interfaces;
 using MikyM.Common.Application.Results;
 using MikyM.Common.Application.Results.Errors;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {
@@ -75,7 +75,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 new ActiveWithEmbedCfgByIdOrNameSpecifications<T>(isValidId ? id : null, idOrName, ctx.Guild.Id));
 
             if (!entityResult.IsSuccess) return Result<DiscordEmbed>.FromError(new NotFoundError());
-            if (entityResult.Entity.GuildId != ctx.Guild.Id) return Result<DiscordEmbed>.FromError(new DiscordNotAuthorizedError());
+            if (entityResult.Entity.GuildId != ctx.Guild.Id)
+                return Result<DiscordEmbed>.FromError(new DiscordNotAuthorizedError());
             var member = await ctx.Guild.GetMemberAsync(ctx.User.Id);
 
             if (entityResult.Entity.CreatorId != ctx.User.Id && !member.IsModerator())
@@ -175,10 +176,14 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     _ => new Result<DiscordEmbedBuilder>()
                 };
 
-                if (result.IsSuccess) resultEmbed = result.Entity;
+                if (result.IsSuccess)
+                {
+                    resultEmbed = result.Entity;
+                }
                 else
                 {
-                    var errorMsg = await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(_embedProvider.GetUnsuccessfulResultEmbed(result))
+                    var errorMsg = await ctx.EditResponseAsync(new DiscordWebhookBuilder()
+                        .AddEmbed(_embedProvider.GetUnsuccessfulResultEmbed(result))
                         .AddComponents(GetContinueButton(ctx.Client)));
                     await intr.WaitForButtonAsync(errorMsg, ctx.User, TimeSpan.FromMinutes(1));
                 }
@@ -193,7 +198,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 var waitForSelectTask = intr.WaitForSelectAsync(finalizeMsg, ctx.User,
                     nameof(EmbedConfigSelect.EmbedConfigMainSelect), TimeSpan.FromMinutes(1));
 
-                var taskAggregate = await Task.WhenAny(new[] {waitForFinalButtonTask, waitForSelectTask});
+                var taskAggregate = await Task.WhenAny(new[] { waitForFinalButtonTask, waitForSelectTask });
 
                 if (taskAggregate.Result.TimedOut ||
                     taskAggregate.Result.Result.Id == nameof(EmbedConfigButton.EmbedConfigFinalButton))
@@ -351,9 +356,11 @@ namespace Lisbeth.Bot.Application.Discord.Services
                             .GetStringBetween("@imageUrl@", "@endImageUrl@")
                             .Trim();
 
-                        if (string.IsNullOrWhiteSpace(authorText)) return Result<DiscordEmbedBuilder>.FromError(new ArgumentNullError(nameof(authorText)));
+                        if (string.IsNullOrWhiteSpace(authorText))
+                            return Result<DiscordEmbedBuilder>.FromError(new ArgumentNullError(nameof(authorText)));
                         if (authorText.Length > 256)
-                            return Result<DiscordEmbedBuilder>.FromError(new ArgumentError("Author text has a limit of 256 characters."));
+                            return Result<DiscordEmbedBuilder>.FromError(
+                                new ArgumentError("Author text has a limit of 256 characters."));
 
                         currentResult.WithAuthor(authorText, authorUrl == "" ? null : authorUrl,
                             authorImageUrl == "" ? null : authorImageUrl);
@@ -364,16 +371,19 @@ namespace Lisbeth.Bot.Application.Discord.Services
                             .GetStringBetween("@imageUrl@", "@endImageUrl@")
                             .Trim();
 
-                        if (string.IsNullOrWhiteSpace(footerText)) return Result<DiscordEmbedBuilder>.FromError(new ArgumentNullError(nameof(footerText)));
+                        if (string.IsNullOrWhiteSpace(footerText))
+                            return Result<DiscordEmbedBuilder>.FromError(new ArgumentNullError(nameof(footerText)));
                         if (footerText.Length > 2048)
-                            return Result<DiscordEmbedBuilder>.FromError(new ArgumentError("Footer text has a limit of 2048 characters."));
+                            return Result<DiscordEmbedBuilder>.FromError(
+                                new ArgumentError("Footer text has a limit of 2048 characters."));
 
                         currentResult.WithFooter(footerText, footerImageUrl == "" ? null : footerImageUrl);
                         break;
                     case EmbedConfigModuleType.Description:
                         string newDesc = waitResult.Result.Content;
                         if (newDesc.Length > 2048)
-                            return Result<DiscordEmbedBuilder>.FromError(new ArgumentError("Description text has a limit of 4096 characters."));
+                            return Result<DiscordEmbedBuilder>.FromError(
+                                new ArgumentError("Description text has a limit of 4096 characters."));
 
                         currentResult.WithDescription(newDesc);
                         break;
@@ -383,18 +393,23 @@ namespace Lisbeth.Bot.Application.Discord.Services
                         break;
                     case EmbedConfigModuleType.Field:
                         if (currentResult.Fields.Count == 25)
-                            return Result<DiscordEmbedBuilder>.FromError(new ArgumentError("This embed already has maximum number of fields (25)."));
+                            return Result<DiscordEmbedBuilder>.FromError(
+                                new ArgumentError("This embed already has maximum number of fields (25)."));
 
                         string fieldTitle = waitResult.Result.Content.GetStringBetween("@title@", "@endTitle@").Trim();
                         string fieldText = waitResult.Result.Content.GetStringBetween("@text@", "@endText@").Trim();
 
-                        if (string.IsNullOrWhiteSpace(fieldTitle)) return Result<DiscordEmbedBuilder>.FromError(new ArgumentNullError(nameof(fieldTitle)));
-                        if (string.IsNullOrWhiteSpace(fieldText)) return Result<DiscordEmbedBuilder>.FromError(new ArgumentNullError(nameof(fieldText)));
+                        if (string.IsNullOrWhiteSpace(fieldTitle))
+                            return Result<DiscordEmbedBuilder>.FromError(new ArgumentNullError(nameof(fieldTitle)));
+                        if (string.IsNullOrWhiteSpace(fieldText))
+                            return Result<DiscordEmbedBuilder>.FromError(new ArgumentNullError(nameof(fieldText)));
 
                         if (fieldTitle.Length > 256)
-                            return Result<DiscordEmbedBuilder>.FromError(new ArgumentError("Field title has a limit of 256 characters."));
+                            return Result<DiscordEmbedBuilder>.FromError(
+                                new ArgumentError("Field title has a limit of 256 characters."));
                         if (fieldText.Length > 256)
-                            return Result<DiscordEmbedBuilder>.FromError(new ArgumentError("Field text has a limit of 1024 characters."));
+                            return Result<DiscordEmbedBuilder>.FromError(
+                                new ArgumentError("Field text has a limit of 1024 characters."));
 
                         currentResult.AddField(fieldTitle, fieldText);
                         break;
@@ -402,7 +417,9 @@ namespace Lisbeth.Bot.Application.Discord.Services
                         string titleToRemove = waitResult.Result.Content.Trim();
                         int index = currentResult.Fields.ToList().FindIndex(x => x.Name == titleToRemove);
 
-                        if (index == -1) return Result<DiscordEmbedBuilder>.FromError(new ArgumentError("Field with given title wasn't found"));
+                        if (index == -1)
+                            return Result<DiscordEmbedBuilder>.FromError(
+                                new ArgumentError("Field with given title wasn't found"));
 
                         currentResult.RemoveFieldAt(index);
                         break;
@@ -410,14 +427,17 @@ namespace Lisbeth.Bot.Application.Discord.Services
                         string colorToSet = waitResult.Result.Content.Trim();
                         bool isValid = new Regex("^#?[0-9A-F]{6}$").IsMatch(colorToSet);
 
-                        if (!isValid) return Result<DiscordEmbedBuilder>.FromError(new ArgumentError("Given HEX color value is not valid"));
+                        if (!isValid)
+                            return Result<DiscordEmbedBuilder>.FromError(
+                                new ArgumentError("Given HEX color value is not valid"));
 
                         currentResult.WithColor(new DiscordColor(colorToSet));
                         break;
                     case EmbedConfigModuleType.Title:
                         string titleToSet = waitResult.Result.Content.Trim();
                         if (titleToSet.Length > 256)
-                            return Result<DiscordEmbedBuilder>.FromError(new ArgumentError("Embed title has a limit of 256 characters."));
+                            return Result<DiscordEmbedBuilder>.FromError(
+                                new ArgumentError("Embed title has a limit of 256 characters."));
 
                         currentResult.WithTitle(titleToSet);
                         break;
@@ -426,7 +446,9 @@ namespace Lisbeth.Bot.Application.Discord.Services
                         bool isValidDateTime = DateTime.TryParseExact(timeStamp, "d/MM/yyyy h:mm tt",
                             DateTimeFormatInfo.InvariantInfo, DateTimeStyles.None, out DateTime parsedDate);
 
-                        if (!isValidDateTime) return Result<DiscordEmbedBuilder>.FromError(new ArgumentError("Given date and time are not valid."));
+                        if (!isValidDateTime)
+                            return Result<DiscordEmbedBuilder>.FromError(
+                                new ArgumentError("Given date and time are not valid."));
 
                         currentResult.WithTimestamp(parsedDate);
                         break;
@@ -437,7 +459,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
                         string width = waitResult.Result.Content.GetStringBetween("@width@", "@endWidth@").Trim();
 
                         if (string.IsNullOrWhiteSpace(thumbnailUrl))
-                            return Result<DiscordEmbedBuilder>.FromError(new ArgumentError("Thumbnail URL is required."));
+                            return Result<DiscordEmbedBuilder>.FromError(
+                                new ArgumentError("Thumbnail URL is required."));
 
                         bool isHeightValid = false;
                         bool isWidthValid = false;
@@ -455,7 +478,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 }
 
             if (!currentResult.IsValid())
-                return Result<DiscordEmbedBuilder>.FromError(new ArgumentError("Total count of characters in an embed can't exceed 6000."));
+                return Result<DiscordEmbedBuilder>.FromError(
+                    new ArgumentError("Total count of characters in an embed can't exceed 6000."));
 
             var msg = await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(currentResult.Build())
                 .WithContent("Your current result is:")
@@ -539,18 +563,20 @@ namespace Lisbeth.Bot.Application.Discord.Services
             var abortBtn = new DiscordButtonComponent(ButtonStyle.Danger,
                 nameof(EmbedConfigButton.EmbedConfigAbortButton), "Abort changes and finish", false,
                 new DiscordComponentEmoji(DiscordEmoji.FromName(client, ":x:")));
-            return new List<DiscordButtonComponent> {confirmBtn, abortBtn};
+            return new List<DiscordButtonComponent> { confirmBtn, abortBtn };
         }
 
         private static DiscordButtonComponent GetMainFinalizeButton(DiscordClient client)
         {
-            return new(ButtonStyle.Primary, nameof(EmbedConfigButton.EmbedConfigFinalButton), "Finalize", false,
+            return new DiscordButtonComponent(ButtonStyle.Primary, nameof(EmbedConfigButton.EmbedConfigFinalButton),
+                "Finalize", false,
                 new DiscordComponentEmoji(DiscordEmoji.FromName(client, ":white_check_mark:")));
         }
 
         private static DiscordButtonComponent GetContinueButton(DiscordClient client)
         {
-            return new(ButtonStyle.Primary, nameof(EmbedConfigButton.EmbedConfigContinueButton), "Continue", false,
+            return new DiscordButtonComponent(ButtonStyle.Primary, nameof(EmbedConfigButton.EmbedConfigContinueButton),
+                "Continue", false,
                 new DiscordComponentEmoji(DiscordEmoji.FromName(client, ":arrow_forward:")));
         }
     }

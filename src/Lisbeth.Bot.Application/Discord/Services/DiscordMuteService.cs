@@ -15,6 +15,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Globalization;
+using System.Linq;
+using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using Hangfire;
@@ -23,6 +27,7 @@ using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Application.Enums;
 using Lisbeth.Bot.Application.Extensions;
+using Lisbeth.Bot.Application.Helpers;
 using Lisbeth.Bot.Application.Results;
 using Lisbeth.Bot.Application.Services.Database.Interfaces;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Mute;
@@ -33,11 +38,6 @@ using MikyM.Common.Application.Results;
 using MikyM.Common.Application.Results.Errors;
 using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Discord.Interfaces;
-using System;
-using System.Globalization;
-using System.Linq;
-using System.Threading.Tasks;
-using Lisbeth.Bot.Application.Helpers;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {
@@ -185,7 +185,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
             return await GetSpecificUserGuildMuteAsync(ctx.Guild, ctx.TargetMember, ctx.Member, req);
         }
 
-        [Queue("moderation"), PreserveOriginalQueue]
+        [Queue("moderation")]
+        [PreserveOriginalQueue]
         public async Task<Result> UnmuteCheckAsync()
         {
             try
@@ -204,13 +205,15 @@ namespace Lisbeth.Bot.Application.Discord.Services
             catch (Exception ex)
             {
                 _logger.LogError($"Automatic unmute failed with: {ex.GetFullMessage()}");
-                return Result.FromError(new InvalidOperationError($"Automatic unmute failed with: {ex.GetFullMessage()}"));
+                return Result.FromError(
+                    new InvalidOperationError($"Automatic unmute failed with: {ex.GetFullMessage()}"));
             }
 
             return Result.FromSuccess();
         }
 
-        private async Task<Result<DiscordEmbed>> MuteAsync(DiscordGuild guild, DiscordMember target, DiscordMember moderator,
+        private async Task<Result<DiscordEmbed>> MuteAsync(DiscordGuild guild, DiscordMember target,
+            DiscordMember moderator,
             MuteReqDto req)
         {
             if (guild is null) throw new ArgumentNullException(nameof(guild));
@@ -359,7 +362,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
             return Result<DiscordEmbed>.FromSuccess(embed.Build());
         }
 
-        private async Task<Result<DiscordEmbed>> UnmuteAsync(DiscordGuild guild, DiscordMember target, DiscordMember moderator,
+        private async Task<Result<DiscordEmbed>> UnmuteAsync(DiscordGuild guild, DiscordMember target,
+            DiscordMember moderator,
             MuteDisableReqDto req)
         {
             if (guild is null) throw new ArgumentNullException(nameof(guild));

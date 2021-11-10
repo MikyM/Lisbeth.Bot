@@ -17,6 +17,7 @@
 
 using System.Collections.Generic;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Lisbeth.Bot.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -29,48 +30,62 @@ namespace Lisbeth.Bot.DataAccessLayer.Configurations
         {
             builder.ToTable("embed_config");
 
-            builder.Property(x => x.Id).HasColumnName("id").HasColumnType("bigint")
-                .ValueGeneratedOnAdd().IsRequired();
-            builder.Property(x => x.IsDisabled).HasColumnName("is_disabled").HasColumnType("boolean")
+            builder.Property(x => x.Id).HasColumnName("id").HasColumnType("bigint").ValueGeneratedOnAdd().IsRequired();
+            builder.Property(x => x.IsDisabled).HasColumnName("is_disabled").HasColumnType("boolean").IsRequired();
+            builder.Property(x => x.CreatedAt)
+                .HasColumnName("created_at")
+                .HasColumnType("timestamp")
+                .ValueGeneratedOnAdd()
                 .IsRequired();
-            builder.Property(x => x.CreatedAt).HasColumnName("created_at").HasColumnType("timestamp")
-                .ValueGeneratedOnAdd().IsRequired();
-            builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamp")
-                .IsRequired();
+            builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamp").IsRequired();
 
             builder.Property(x => x.Description).HasColumnName("description").HasColumnType("varchar(4096)");
             builder.Property(x => x.Fields)
                 .HasColumnName("fields")
                 .HasColumnType("text")
-                .HasConversion(x => JsonSerializer.Serialize(x, new JsonSerializerOptions {IgnoreNullValues = true}),
+                .HasConversion(
+                    x => JsonSerializer.Serialize(x,
+                        new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull }),
                     x => JsonSerializer.Deserialize<List<DiscordField>>(x,
-                        new JsonSerializerOptions {IgnoreNullValues = true}));
-            builder.Property(x => x.Author).HasColumnName("author").HasColumnType("varchar(256)")
+                        new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull }));
+            builder.Property(x => x.Author).HasColumnName("author").HasColumnType("varchar(256)").HasMaxLength(200);
+            builder.Property(x => x.AuthorUrl)
+                .HasColumnName("author_url")
+                .HasColumnType("varchar(1000)")
                 .HasMaxLength(200);
-            builder.Property(x => x.AuthorUrl).HasColumnName("author_url").HasColumnType("varchar(1000)")
-                .HasMaxLength(200);
-            builder.Property(x => x.Footer).HasColumnName("footer").HasColumnType("varchar(2048)")
-                .HasMaxLength(200);
-            builder.Property(x => x.FooterImageUrl).HasColumnName("footer_image_url")
-                .HasColumnType("varchar(1000)").HasMaxLength(1000);
-            builder.Property(x => x.CreatorId).HasColumnName("creator_id")
-                .HasColumnType("bigint").IsRequired();
-            builder.Property(x => x.LastEditById).HasColumnName("last_edit_by_id")
-                .HasColumnType("bigint").IsRequired();
-            builder.Property(x => x.AuthorImageUrl).HasColumnName("author_image_url")
-                .HasColumnType("varchar(1000)").HasMaxLength(1000);
-            builder.Property(x => x.ImageUrl).HasColumnName("image_url")
-                .HasColumnType("varchar(1000)").HasMaxLength(1000);
-            builder.Property(x => x.HexColor).HasColumnName("hex_color").HasColumnType("varchar(40)")
-                .HasMaxLength(40).IsRequired();
-            builder.Property(x => x.Title).HasColumnName("title").HasColumnType("varchar(256)")
-                .HasMaxLength(256);
-            builder.Property(x => x.Timestamp).HasColumnName("timestamp").HasColumnType("timestamp");
-            builder.Property(x => x.Thumbnail).HasColumnName("thumbnail").HasColumnType("varchar(100)")
-                .HasMaxLength(100);
-            builder.Property(x => x.ThumbnailHeight).HasColumnName("thumbnail_height").HasColumnType("integer")
+            builder.Property(x => x.Footer).HasColumnName("footer").HasColumnType("varchar(2048)").HasMaxLength(200);
+            builder.Property(x => x.FooterImageUrl)
+                .HasColumnName("footer_image_url")
+                .HasColumnType("varchar(1000)")
+                .HasMaxLength(1000);
+            builder.Property(x => x.CreatorId).HasColumnName("creator_id").HasColumnType("bigint").IsRequired();
+            builder.Property(x => x.LastEditById).HasColumnName("last_edit_by_id").HasColumnType("bigint").IsRequired();
+            builder.Property(x => x.AuthorImageUrl)
+                .HasColumnName("author_image_url")
+                .HasColumnType("varchar(1000)")
+                .HasMaxLength(1000);
+            builder.Property(x => x.ImageUrl)
+                .HasColumnName("image_url")
+                .HasColumnType("varchar(1000)")
+                .HasMaxLength(1000);
+            builder.Property(x => x.HexColor)
+                .HasColumnName("hex_color")
+                .HasColumnType("varchar(40)")
+                .HasMaxLength(40)
                 .IsRequired();
-            builder.Property(x => x.ThumbnailWidth).HasColumnName("thumbnail_width").HasColumnType("integer")
+            builder.Property(x => x.Title).HasColumnName("title").HasColumnType("varchar(256)").HasMaxLength(256);
+            builder.Property(x => x.Timestamp).HasColumnName("timestamp").HasColumnType("timestamp");
+            builder.Property(x => x.Thumbnail)
+                .HasColumnName("thumbnail")
+                .HasColumnType("varchar(100)")
+                .HasMaxLength(100);
+            builder.Property(x => x.ThumbnailHeight)
+                .HasColumnName("thumbnail_height")
+                .HasColumnType("integer")
+                .IsRequired();
+            builder.Property(x => x.ThumbnailWidth)
+                .HasColumnName("thumbnail_width")
+                .HasColumnType("integer")
                 .IsRequired();
 
 /*            builder.HasOne(x => x.Reminder)

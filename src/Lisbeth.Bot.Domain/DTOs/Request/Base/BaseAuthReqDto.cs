@@ -19,8 +19,6 @@ namespace Lisbeth.Bot.Domain.DTOs.Request.Base
 {
     public class BaseAuthReqDto
     {
-        public ulong RequestedOnBehalfOfId { get; set; }
-
         public BaseAuthReqDto()
         {
         }
@@ -29,5 +27,7 @@ namespace Lisbeth.Bot.Domain.DTOs.Request.Base
         {
             RequestedOnBehalfOfId = requestedOnBehalfOfId;
         }
+
+        public ulong RequestedOnBehalfOfId { get; set; }
     }
 }

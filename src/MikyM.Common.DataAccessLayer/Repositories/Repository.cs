@@ -120,7 +120,7 @@ namespace MikyM.Common.DataAccessLayer.Repositories
         public virtual async Task DisableAsync(long id)
         {
             var entity = await GetAsync(id);
-            BeginUpdate(entity);
+            BeginUpdate(entity ?? throw new InvalidOperationException());
             entity.IsDisabled = true;
         }
 

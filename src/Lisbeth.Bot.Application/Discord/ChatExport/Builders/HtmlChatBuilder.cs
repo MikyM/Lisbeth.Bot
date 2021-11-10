@@ -26,14 +26,12 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders
 {
     public class HtmlChatBuilder : IAsyncHtmlBuilder
     {
-        public List<DiscordUser>? Users { get; private set; }
-        public List<DiscordMessage>? Messages { get; private set; }
-        public DiscordChannel? Channel { get; private set; }
-        public string? Js { get; private set; }
-        public string? Css { get; private set; }
+        public HtmlChatBuilder()
+        {
+        }
 
-        public HtmlChatBuilder() { }
-        public HtmlChatBuilder(List<DiscordUser>? users, List<DiscordMessage>? messages, DiscordChannel? channel, string? js, string? css)
+        public HtmlChatBuilder(List<DiscordUser>? users, List<DiscordMessage>? messages, DiscordChannel? channel,
+            string? js, string? css)
         {
             Users = users ?? throw new ArgumentNullException(nameof(users));
             Messages = messages ?? throw new ArgumentNullException(nameof(messages));
@@ -41,14 +39,20 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders
             Js = js ?? throw new ArgumentNullException(nameof(js));
             Css = css ?? throw new ArgumentNullException(nameof(css));
         }
-      
+
+        public List<DiscordUser>? Users { get; private set; }
+        public List<DiscordMessage>? Messages { get; private set; }
+        public DiscordChannel? Channel { get; private set; }
+        public string? Js { get; private set; }
+        public string? Css { get; private set; }
+
         public async Task<string> BuildAsync()
         {
             if (Users is null || Messages is null || Channel is null || Js is null || Css is null)
                 throw new ArgumentException("You must provide all required parameters before building.");
 
-            MessagesHtmlBuilder messagesBuilder = new (Messages);
-            MembersHtmlBuilder membersBuilder = new (Users);
+            MessagesHtmlBuilder messagesBuilder = new(Messages);
+            MembersHtmlBuilder membersBuilder = new(Users);
 
             return "<!DOCTYPE html>" +
                    "<html lang=\"en\">" +

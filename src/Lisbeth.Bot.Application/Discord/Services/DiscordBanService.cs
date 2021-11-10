@@ -15,6 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Globalization;
+using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using Hangfire;
@@ -23,6 +26,7 @@ using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Application.Enums;
 using Lisbeth.Bot.Application.Extensions;
+using Lisbeth.Bot.Application.Helpers;
 using Lisbeth.Bot.Application.Results;
 using Lisbeth.Bot.Application.Services.Database.Interfaces;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Ban;
@@ -33,10 +37,6 @@ using Microsoft.Extensions.Logging;
 using MikyM.Common.Application.Results;
 using MikyM.Common.Application.Results.Errors;
 using MikyM.Discord.Interfaces;
-using System;
-using System.Globalization;
-using System.Threading.Tasks;
-using Lisbeth.Bot.Application.Helpers;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {
@@ -57,7 +57,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
             _logger = logger;
         }
 
-        [Queue("moderation"), PreserveOriginalQueue]
+        [Queue("moderation")]
+        [PreserveOriginalQueue]
         public async Task<Result> UnbanCheckAsync()
         {
             try
@@ -76,7 +77,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
             catch (Exception ex)
             {
                 _logger.LogError($"Automatic unban failed with: {ex.GetFullMessage()}");
-                return Result.FromError(new InvalidOperationError($"Automatic unban failed with: {ex.GetFullMessage()}"));
+                return Result.FromError(
+                    new InvalidOperationError($"Automatic unban failed with: {ex.GetFullMessage()}"));
             }
 
             return Result.FromSuccess();
@@ -247,7 +249,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
             return await GetAsync(ctx.Guild, target, ctx.Member, req);
         }
 
-        private async Task<Result<DiscordEmbed>> BanAsync(DiscordGuild guild, DiscordUser target, DiscordMember moderator,
+        private async Task<Result<DiscordEmbed>> BanAsync(DiscordGuild guild, DiscordUser target,
+            DiscordMember moderator,
             BanReqDto req)
         {
             if (guild is null) throw new ArgumentNullException(nameof(guild));
@@ -283,11 +286,13 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 return Result<DiscordEmbed>.FromError(guildCfg);
 
             if (guildCfg.Entity.ModerationConfig is null)
-                return Result<DiscordEmbed>.FromError(new DisabledEntityError(nameof(guildCfg.Entity.ModerationConfig)));
+                return Result<DiscordEmbed>.FromError(
+                    new DisabledEntityError(nameof(guildCfg.Entity.ModerationConfig)));
 
             try
             {
-                channel = await _discord.Client.GetChannelAsync(guildCfg.Entity.ModerationConfig.MemberEventsLogChannelId);
+                channel = await _discord.Client.GetChannelAsync(guildCfg.Entity.ModerationConfig
+                    .MemberEventsLogChannelId);
             }
             catch (Exception)
             {
@@ -378,7 +383,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
             return Result<DiscordEmbed>.FromSuccess(embed.Build());
         }
 
-        private async Task<Result<DiscordEmbed>> UnbanAsync(DiscordGuild guild, DiscordUser target, DiscordMember moderator,
+        private async Task<Result<DiscordEmbed>> UnbanAsync(DiscordGuild guild, DiscordUser target,
+            DiscordMember moderator,
             BanDisableReqDto req)
         {
             if (guild is null) throw new ArgumentNullException(nameof(guild));
@@ -455,7 +461,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 embed.WithDescription("Successfully unbanned");
                 embed.WithFooter($"Case ID: {res.Entity.Id} | Member ID: {target.Id}");
             }
-            
+
             // means we're logging to log channel and returning an embed for interaction or other purposes
 
             try
@@ -470,7 +476,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
             return Result<DiscordEmbed>.FromSuccess(embed.Build());
         }
 
-        private async Task<Result<DiscordEmbed>> GetAsync(DiscordGuild guild, DiscordUser target, DiscordMember moderator,
+        private async Task<Result<DiscordEmbed>> GetAsync(DiscordGuild guild, DiscordUser target,
+            DiscordMember moderator,
             BanGetReqDto req)
         {
             if (guild is null) throw new ArgumentNullException(nameof(guild));
@@ -519,7 +526,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             var res = await _banService.GetSingleBySpecAsync<Ban>(
                 new BanBaseGetSpecifications(req.Id, req.TargetUserId, req.GuildId, req.AppliedById, req.LiftedOn,
                     req.AppliedOn, req.LiftedById));
-            
+
             var embed = new DiscordEmbedBuilder();
             embed.WithColor(0x18315C);
 
@@ -545,7 +552,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     DiscordUser? liftingMod = null;
                     try
                     {
-                        if (req.LiftedById is not null) liftingMod = await _discord.Client.GetUserAsync(res.Entity.LiftedById);
+                        if (req.LiftedById is not null)
+                            liftingMod = await _discord.Client.GetUserAsync(res.Entity.LiftedById);
                     }
                     catch (Exception)
                     {

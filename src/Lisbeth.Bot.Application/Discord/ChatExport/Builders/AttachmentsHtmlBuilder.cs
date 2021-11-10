@@ -26,7 +26,10 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders
 {
     public class AttachmentsHtmlBuilder : IAsyncHtmlBuilder
     {
-        public AttachmentsHtmlBuilder() { }
+        public AttachmentsHtmlBuilder()
+        {
+        }
+
         public AttachmentsHtmlBuilder(IReadOnlyList<DiscordAttachment> attachments)
         {
             Attachments ??= attachments ?? throw new ArgumentNullException(nameof(attachments));

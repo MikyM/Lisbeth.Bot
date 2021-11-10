@@ -29,7 +29,7 @@ namespace Lisbeth.Bot.API.Helpers
             long totalRecords, IUriService uriService, string route)
         {
             var response = new PagedResponse<List<T>>(pagedData, validFilter.PageNumber, validFilter.PageSize);
-            var totalPages = totalRecords / (double) validFilter.PageSize;
+            var totalPages = totalRecords / (double)validFilter.PageSize;
             int roundedTotalPages = Convert.ToInt32(Math.Ceiling(totalPages));
             response.NextPage = validFilter.PageNumber >= 1 && validFilter.PageNumber < roundedTotalPages
                 ? uriService.GetPageUri(new PaginationFilter(validFilter.PageNumber + 1, validFilter.PageSize), route)

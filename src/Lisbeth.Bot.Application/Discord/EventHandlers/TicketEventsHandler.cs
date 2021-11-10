@@ -27,7 +27,6 @@ using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.SelectValues;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Application.Helpers;
 using Lisbeth.Bot.Application.Services.Database.Interfaces;
-using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 using Microsoft.Extensions.Logging;
 using MikyM.Discord.Events;
@@ -87,7 +86,8 @@ namespace Lisbeth.Bot.Application.Discord.EventHandlers
                 case nameof(TicketButton.TicketOpenButton):
                     await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
                         new DiscordInteractionResponseBuilder().AsEphemeral(true));
-                    var openReq = new TicketOpenReqDto {GuildId = args.Guild.Id, RequestedOnBehalfOfId = args.User.Id};
+                    var openReq = new TicketOpenReqDto
+                        { GuildId = args.Guild.Id, RequestedOnBehalfOfId = args.User.Id };
                     _ = _asyncExecutor.ExecuteAsync<IDiscordTicketService>(async x =>
                         await x.OpenTicketAsync(args.Interaction, openReq));
                     break;
@@ -98,7 +98,8 @@ namespace Lisbeth.Bot.Application.Discord.EventHandlers
                         case nameof(TicketSelectValue.TicketReopenValue):
                             var req = new TicketReopenReqDto
                             {
-                                GuildId = args.Guild.Id, ChannelId = args.Channel.Id, RequestedOnBehalfOfId = args.User.Id
+                                GuildId = args.Guild.Id, ChannelId = args.Channel.Id,
+                                RequestedOnBehalfOfId = args.User.Id
                             };
                             _ = _asyncExecutor.ExecuteAsync<IDiscordTicketService>(async x =>
                                 await x.ReopenTicketAsync(args.Interaction, req));

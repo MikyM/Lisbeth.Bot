@@ -35,7 +35,7 @@ namespace Lisbeth.Bot.Domain.Entities
 
         public Mute ShallowCopy()
         {
-            return (Mute) MemberwiseClone();
+            return (Mute)MemberwiseClone();
         }
     }
 }

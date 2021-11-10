@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Threading.Tasks;
 using AutoMapper;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Services.Database.Interfaces;
@@ -26,8 +28,6 @@ using MikyM.Common.Application.Results.Errors;
 using MikyM.Common.Application.Services;
 using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
-using System;
-using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Services.Database
 {

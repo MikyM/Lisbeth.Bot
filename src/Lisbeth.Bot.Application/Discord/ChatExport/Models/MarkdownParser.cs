@@ -75,7 +75,8 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Models
             var roleMatches = Regex.Matches(result, @"(?<=\<@&)[0-9]{17,18}(?=\>)");
             foreach (var roleMatch in roleMatches)
             {
-                DiscordRole? role = Guild.Roles.FirstOrDefault(x => x.Value.Id == ulong.Parse(roleMatch.ToString() ?? "0"))
+                DiscordRole? role = Guild.Roles
+                    .FirstOrDefault(x => x.Value.Id == ulong.Parse(roleMatch.ToString() ?? "0"))
                     .Value;
                 if (role is not null)
                     result = result.Replace($"<@!{role.Id}>", $"<span class=\"user-mention\">@{role.Name}</span>");

@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
@@ -27,8 +29,6 @@ using Lisbeth.Bot.Application.Extensions;
 using Lisbeth.Bot.Application.Validation.Ban;
 using Lisbeth.Bot.Domain.DTOs.Request.Ban;
 using MikyM.Common.Application.Results;
-using System;
-using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands
 {
@@ -97,7 +97,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     .AsEphemeral(true));
             else
                 await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
-                    .AddEmbed(base.GetUnsuccessfulResultEmbed(result, ctx.Client))
+                    .AddEmbed(GetUnsuccessfulResultEmbed(result, ctx.Client))
                     .AsEphemeral(true));
         }
     }

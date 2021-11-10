@@ -16,7 +16,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -30,9 +29,9 @@ namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
     public sealed class DiscordChannelIdValidator<T> : IAsyncPropertyValidator<T, ulong>
     {
         private readonly DiscordClient _discord;
+        private readonly bool _suppressGuildCheck;
         private bool _doesGuildExist = true;
         private object? _guildId;
-        private readonly bool _suppressGuildCheck;
 
         public DiscordChannelIdValidator(DiscordClient discord, bool suppressGuildCheck = false)
         {
@@ -48,7 +47,7 @@ namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
                 DiscordGuild guild;
                 try
                 {
-                    guild = await _discord.GetGuildAsync((ulong) _guildId);
+                    guild = await _discord.GetGuildAsync((ulong)_guildId);
                     if (guild is null)
                     {
                         _doesGuildExist = false;

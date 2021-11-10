@@ -15,6 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
@@ -23,9 +26,6 @@ using FluentValidation;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Validation.Mute;
 using Lisbeth.Bot.Domain.DTOs.Request.Mute;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 
 // ReSharper disable once CheckNamespace
 namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
@@ -55,7 +55,7 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
                     .AsEphemeral(true));
             else
                 await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
-                    .AddEmbed(base.GetUnsuccessfulResultEmbed(result, ctx.Client))
+                    .AddEmbed(GetUnsuccessfulResultEmbed(result, ctx.Client))
                     .AsEphemeral(true));
         }
 
@@ -78,7 +78,7 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
                     .AsEphemeral(true));
             else
                 await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
-                    .AddEmbed(base.GetUnsuccessfulResultEmbed(result, ctx.Client))
+                    .AddEmbed(GetUnsuccessfulResultEmbed(result, ctx.Client))
                     .AsEphemeral(true));
         }
 
@@ -101,7 +101,7 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
                     .AsEphemeral(true));
             else
                 await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
-                    .AddEmbed(base.GetUnsuccessfulResultEmbed(result, ctx.Client))
+                    .AddEmbed(GetUnsuccessfulResultEmbed(result, ctx.Client))
                     .AsEphemeral(true));
         }
 
@@ -129,7 +129,7 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
                     .AsEphemeral(true));
             else
                 await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
-                    .AddEmbed(base.GetUnsuccessfulResultEmbed(result, ctx.Client))
+                    .AddEmbed(GetUnsuccessfulResultEmbed(result, ctx.Client))
                     .AsEphemeral(true));
         }
 
@@ -162,7 +162,7 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
                     .AsEphemeral(true));
             else
                 await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
-                    .AddEmbed(base.GetUnsuccessfulResultEmbed(result, ctx.Client))
+                    .AddEmbed(GetUnsuccessfulResultEmbed(result, ctx.Client))
                     .AsEphemeral(true));
         }
 

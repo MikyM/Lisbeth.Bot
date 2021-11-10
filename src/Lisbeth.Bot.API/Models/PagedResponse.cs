@@ -16,12 +16,14 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Collections.Generic;
 
 namespace Lisbeth.Bot.API.Models
 {
     public class PagedResponse<T> : Response<T>
     {
-        public PagedResponse(T data, int pageNumber, int pageSize, bool isSuccess = true) : base(data, isSuccess)
+        public PagedResponse(T data, int pageNumber, int pageSize, IEnumerable<string>? errors = null) : base(data,
+            errors)
         {
             PageNumber = pageNumber;
             PageSize = pageSize;
@@ -29,11 +31,11 @@ namespace Lisbeth.Bot.API.Models
 
         public int PageNumber { get; set; }
         public int PageSize { get; set; }
-        public Uri FirstPage { get; set; }
-        public Uri LastPage { get; set; }
+        public Uri? FirstPage { get; set; }
+        public Uri? LastPage { get; set; }
         public int TotalPages { get; set; }
         public long TotalRecords { get; set; }
-        public Uri NextPage { get; set; }
-        public Uri PreviousPage { get; set; }
+        public Uri? NextPage { get; set; }
+        public Uri? PreviousPage { get; set; }
     }
 }

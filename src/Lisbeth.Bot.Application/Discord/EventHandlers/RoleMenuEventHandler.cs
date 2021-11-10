@@ -15,13 +15,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.EventArgs;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Buttons;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Application.Helpers;
 using MikyM.Discord.Events;
-using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.EventHandlers
 {
@@ -34,7 +34,8 @@ namespace Lisbeth.Bot.Application.Discord.EventHandlers
             _asyncExecutor = asyncExecutor;
         }
 
-        public async Task DiscordOnComponentInteractionCreated(DiscordClient sender, ComponentInteractionCreateEventArgs args)
+        public async Task DiscordOnComponentInteractionCreated(DiscordClient sender,
+            ComponentInteractionCreateEventArgs args)
         {
             switch (args.Id)
             {
@@ -45,10 +46,8 @@ namespace Lisbeth.Bot.Application.Discord.EventHandlers
             }
 
             if (args.Id.Contains("role_menu_"))
-            {
                 _ = _asyncExecutor.ExecuteAsync<IDiscordRoleMenuService>(async x =>
                     await x.HandleOptionSelectionAsync(args));
-            }
         }
 
         public Task DiscordOnClientErrored(DiscordClient sender, ClientErrorEventArgs args)

@@ -21,7 +21,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Models
         }
 
         public string DiscordLink { get; }
-        public static List<string> SupportedTypes { get; } = new() {"png", "bmp", "jpg", "jpeg", "gif", "tif"};
+        public static List<string> SupportedTypes { get; } = new() { "png", "bmp", "jpg", "jpeg", "gif", "tif" };
 
         public async Task<string> GetImgurLink()
         {

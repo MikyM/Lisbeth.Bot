@@ -15,6 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using JetBrains.Annotations;
@@ -28,9 +31,6 @@ using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.Application.Results;
 using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Discord.Interfaces;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {
@@ -59,7 +59,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 new Specification<Guild>(x => x.GuildId == args.Guild.Id && !x.IsDisabled));
 
             if (!res.IsSuccess || res.Entity.ModerationConfig is null) return Result.FromSuccess();
-            if (!args.Guild.Channels.TryGetValue(res.Entity.ModerationConfig.MemberEventsLogChannelId, out var logChannel)) return Result.FromSuccess();
+            if (!args.Guild.Channels.TryGetValue(res.Entity.ModerationConfig.MemberEventsLogChannelId,
+                    out var logChannel)) return Result.FromSuccess();
 
             string reasonLeft = "No reason found";
 
@@ -117,7 +118,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 new ActiveGuildByDiscordIdWithModerationSpecifications(args.Guild.Id));
 
 
-            if (!result.IsSuccess || result.Entity.ModerationConfig?.BaseMemberWelcomeMessage is null) return Result.FromSuccess();
+            if (!result.IsSuccess || result.Entity.ModerationConfig?.BaseMemberWelcomeMessage is null)
+                return Result.FromSuccess();
 
             var embed = new DiscordEmbedBuilder();
             if (result.Entity.ModerationConfig.MemberWelcomeEmbedConfig is not null)
@@ -138,7 +140,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             {
                 // probably should tell idiots to fix channel id in config but idk how so return for now, mebe msg members with admin privs
             }
-            
+
             return Result.FromSuccess();
         }
 
@@ -149,9 +151,11 @@ namespace Lisbeth.Bot.Application.Discord.Services
             var res = await _muteService.GetSingleBySpecAsync<Mute>(
                 new ActiveMutesByGuildAndUserSpecifications(args.Guild.Id, args.Member.Id));
 
-            if (!res.IsSuccess || res.Entity.Guild?.ModerationConfig is null) return Result.FromSuccess(); // no mod config enabled so we don't care
+            if (!res.IsSuccess || res.Entity.Guild?.ModerationConfig is null)
+                return Result.FromSuccess(); // no mod config enabled so we don't care
 
-            if (!args.Guild.Roles.TryGetValue(res.Entity.Guild.ModerationConfig.MuteRoleId, out var role)) return Result.FromSuccess();
+            if (!args.Guild.Roles.TryGetValue(res.Entity.Guild.ModerationConfig.MuteRoleId, out var role))
+                return Result.FromSuccess();
 
             await args.Member.GrantRoleAsync(role);
 

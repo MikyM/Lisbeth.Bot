@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Threading.Tasks;
 using AutoMapper;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Results;
@@ -27,8 +29,6 @@ using MikyM.Common.Application.Results;
 using MikyM.Common.Application.Services;
 using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
-using System;
-using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Services.Database
 {
@@ -42,7 +42,8 @@ namespace Lisbeth.Bot.Application.Services.Database
         public async Task<Result> AddAsync(TagAddReqDto req, bool shouldSave = false)
         {
             var res = await base.LongCountAsync(new TagByGuildAndNameSpec(req.Name, req.GuildId));
-            if (res.Entity != 0) return new ArgumentError(nameof(req.Name), $"Guild already has a tag named {req.Name}");
+            if (res.Entity != 0)
+                return new ArgumentError(nameof(req.Name), $"Guild already has a tag named {req.Name}");
 
             await base.AddAsync(req, shouldSave);
             return Result.FromSuccess();
@@ -60,7 +61,8 @@ namespace Lisbeth.Bot.Application.Services.Database
 
             if (!tag.IsSuccess) return Result.FromError(tag);
             if (tag.Entity.IsDisabled)
-                return new ArgumentError(nameof(tag.Entity),"Can't update embed config for a disabled tag, enable the tag first.");
+                return new ArgumentError(nameof(tag.Entity),
+                    "Can't update embed config for a disabled tag, enable the tag first.");
 
             base.BeginUpdate(tag.Entity);
             if (req.EmbedConfig is not null) tag.Entity.EmbedConfig = _mapper.Map<EmbedConfig>(req.EmbedConfig);

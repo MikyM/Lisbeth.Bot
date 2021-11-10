@@ -15,6 +15,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
@@ -28,26 +32,21 @@ using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Buttons;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Selects;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.SelectValues;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
-using Lisbeth.Bot.Application.Exceptions;
+using Lisbeth.Bot.Application.Enums;
 using Lisbeth.Bot.Application.Extensions;
 using Lisbeth.Bot.Application.Helpers;
+using Lisbeth.Bot.Application.Results;
 using Lisbeth.Bot.Application.Services.Database.Interfaces;
 using Lisbeth.Bot.Application.Validation.Ticket;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Ticket;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
+using Lisbeth.Bot.Domain.DTOs.Request.Ticket.Base;
 using Lisbeth.Bot.Domain.Entities;
 using Microsoft.Extensions.Logging;
-using MikyM.Discord.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Lisbeth.Bot.Application.Enums;
-using Lisbeth.Bot.Application.Results;
-using Lisbeth.Bot.Domain.DTOs.Request.Ticket.Base;
 using MikyM.Common.Application.Results;
 using MikyM.Common.Application.Results.Errors;
+using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.Services
 {
@@ -87,45 +86,47 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (intr is null) throw new ArgumentNullException(nameof(intr));
             if (req is null) throw new ArgumentNullException(nameof(req));
 
-            return await OpenTicketAsync(intr.Guild, (DiscordMember) intr.User, req, intr);
+            return await OpenTicketAsync(intr.Guild, (DiscordMember)intr.User, req, intr);
         }
 
         public async Task<Result<DiscordMessageBuilder>> CloseTicketAsync(TicketCloseReqDto req)
         {
             if (req is null) throw new ArgumentNullException(nameof(req));
 
-            var res = await this.GetTicketByBaseRequestAsync(req);
+            var res = await GetTicketByBaseRequestAsync(req);
 
             if (!res.IsSuccess) return Result<DiscordMessageBuilder>.FromError(res);
 
             return await CloseTicketAsync(res.Entity.Guild, res.Entity.Channel, res.Entity.RequestingMember, req);
         }
 
-        public async Task<Result<DiscordMessageBuilder>> CloseTicketAsync(DiscordInteraction intr, TicketCloseReqDto req)
+        public async Task<Result<DiscordMessageBuilder>> CloseTicketAsync(DiscordInteraction intr,
+            TicketCloseReqDto req)
         {
             if (intr is null) throw new ArgumentNullException(nameof(intr));
             if (req is null) throw new ArgumentNullException(nameof(req));
 
-            return await CloseTicketAsync(intr.Guild, intr.Channel, (DiscordMember) intr.User, req);
+            return await CloseTicketAsync(intr.Guild, intr.Channel, (DiscordMember)intr.User, req);
         }
 
         public async Task<Result<DiscordMessageBuilder>> ReopenTicketAsync(TicketReopenReqDto req)
         {
             if (req is null) throw new ArgumentNullException(nameof(req));
 
-            var res = await this.GetTicketByBaseRequestAsync(req);
+            var res = await GetTicketByBaseRequestAsync(req);
 
             if (!res.IsSuccess) return Result<DiscordMessageBuilder>.FromError(res);
 
             return await ReopenTicketAsync(res.Entity.Guild, res.Entity.Channel, res.Entity.RequestingMember, req);
         }
 
-        public async Task<Result<DiscordMessageBuilder>> ReopenTicketAsync(DiscordInteraction intr, TicketReopenReqDto req)
+        public async Task<Result<DiscordMessageBuilder>> ReopenTicketAsync(DiscordInteraction intr,
+            TicketReopenReqDto req)
         {
             if (intr is null) throw new ArgumentNullException(nameof(intr));
             if (req is null) throw new ArgumentNullException(nameof(req));
 
-            return await ReopenTicketAsync(intr.Guild, intr.Channel, (DiscordMember) intr.User, req);
+            return await ReopenTicketAsync(intr.Guild, intr.Channel, (DiscordMember)intr.User, req);
         }
 
         public async Task<Result<DiscordEmbed>> AddToTicketAsync(TicketAddReqDto req)
@@ -135,7 +136,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             DiscordMember? targetMember = null;
             DiscordRole? targetRole = null;
 
-            var res = await this.GetTicketByBaseRequestAsync(req);
+            var res = await GetTicketByBaseRequestAsync(req);
 
             if (!res.IsSuccess) return Result<DiscordEmbed>.FromError(res);
 
@@ -159,8 +160,10 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (targetMember is null && targetRole is null) return new DiscordNotFoundError();
 
             return targetRole is null
-                ? await AddToTicketAsync(res.Entity.Guild, res.Entity.RequestingMember, res.Entity.Channel, req, targetMember)
-                : await AddToTicketAsync(res.Entity.Guild, res.Entity.RequestingMember, res.Entity.Channel, req, null, targetRole);
+                ? await AddToTicketAsync(res.Entity.Guild, res.Entity.RequestingMember, res.Entity.Channel, req,
+                    targetMember)
+                : await AddToTicketAsync(res.Entity.Guild, res.Entity.RequestingMember, res.Entity.Channel, req, null,
+                    targetRole);
         }
 
         public async Task<Result<DiscordEmbed>> AddToTicketAsync(InteractionContext ctx, TicketAddReqDto req)
@@ -191,7 +194,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             DiscordMember? targetMember = null;
             DiscordRole? targetRole = null;
 
-            var res = await this.GetTicketByBaseRequestAsync(req);
+            var res = await GetTicketByBaseRequestAsync(req);
 
             if (!res.IsSuccess) return Result<DiscordEmbed>.FromError(res);
 
@@ -214,8 +217,10 @@ namespace Lisbeth.Bot.Application.Discord.Services
             }
 
             return targetRole is null
-                ? await RemoveFromTicketAsync(res.Entity.Guild, res.Entity.RequestingMember, res.Entity.Channel, req, targetMember)
-                : await RemoveFromTicketAsync(res.Entity.Guild, res.Entity.RequestingMember, res.Entity.Channel, req, null, targetRole);
+                ? await RemoveFromTicketAsync(res.Entity.Guild, res.Entity.RequestingMember, res.Entity.Channel, req,
+                    targetMember)
+                : await RemoveFromTicketAsync(res.Entity.Guild, res.Entity.RequestingMember, res.Entity.Channel, req,
+                    null, targetRole);
         }
 
         public async Task<Result> CleanClosedTicketsAsync()
@@ -248,7 +253,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
                     foreach (var closedTicketChannel in closedCat.Children)
                     {
-                        if ((guildCfg.Tickets ?? throw new InvalidOperationException()).All(x => x.ChannelId != closedTicketChannel.Id)) continue;
+                        if ((guildCfg.Tickets ?? throw new InvalidOperationException()).All(x =>
+                                x.ChannelId != closedTicketChannel.Id)) continue;
 
                         var lastMessage = await closedTicketChannel.GetMessagesAsync(1);
                         if (lastMessage is null || lastMessage.Count == 0) continue;
@@ -302,13 +308,14 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
                     foreach (var openedTicketChannel in openedCat.Children)
                     {
-                        if ((guildCfg.Tickets ?? throw new InvalidOperationException()).All(x => x.ChannelId != openedTicketChannel.Id)) continue;
+                        if ((guildCfg.Tickets ?? throw new InvalidOperationException()).All(x =>
+                                x.ChannelId != openedTicketChannel.Id)) continue;
 
                         var lastMessage = await openedTicketChannel.GetMessagesAsync(1);
                         var msg = lastMessage?.FirstOrDefault();
                         if (msg is null) continue;
 
-                        if (!((DiscordMember) msg.Author).Permissions.HasPermission(Permissions.BanMembers)) continue;
+                        if (!((DiscordMember)msg.Author).Permissions.HasPermission(Permissions.BanMembers)) continue;
 
                         var timeDifference = DateTime.UtcNow.Subtract(msg.Timestamp.UtcDateTime);
 
@@ -320,7 +327,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
                         if (timeDifference.TotalHours >= guildCfg.TicketingConfig.CloseAfter.Value.Hours)
                             await CloseTicketAsync(guild, openedTicketChannel,
-                                (DiscordMember) _discord.Client.CurrentUser, req);
+                                (DiscordMember)_discord.Client.CurrentUser, req);
 
                         await Task.Delay(500);
                     }
@@ -343,7 +350,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(ctx.Guild.Id));
 
             if (!res.IsSuccess) return Result<DiscordMessageBuilder>.FromError(res);
-            if (res.Entity.TicketingConfig is null) return new DisabledEntityError("Guild doesn't have ticketing configured");
+            if (res.Entity.TicketingConfig is null)
+                return new DisabledEntityError("Guild doesn't have ticketing configured");
 
             var envelopeEmoji = DiscordEmoji.FromName(ctx.Client, ":envelope:");
             var embed = new DiscordEmbedBuilder();
@@ -434,7 +442,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             var msgBuilder = new DiscordMessageBuilder();
             msgBuilder.AddEmbed(embed.Build());
-            msgBuilder.AddComponents(new List<DiscordComponent> {btn});
+            msgBuilder.AddComponents(new List<DiscordComponent> { btn });
             msgBuilder.WithContent($"{owner.Mention} Welcome");
 
             var modRoles = guild.Roles.Where(x => x.Value.Permissions.HasPermission(Permissions.BanMembers));
@@ -812,7 +820,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
             return embed.Build();
         }
 
-        private async Task<Result<DiscordEmbed>> RemoveFromTicketAsync(DiscordGuild guild, DiscordMember requestingMember,
+        private async Task<Result<DiscordEmbed>> RemoveFromTicketAsync(DiscordGuild guild,
+            DiscordMember requestingMember,
             DiscordChannel targetTicketChannel, TicketRemoveReqDto req, DiscordMember? targetMember = null,
             DiscordRole? targetRole = null)
         {
@@ -898,7 +907,9 @@ namespace Lisbeth.Bot.Application.Discord.Services
             return embed.Build();
         }
 
-        private async Task<Result<(Ticket Ticket, DiscordMember RequestingMember, DiscordGuild Guild, DiscordChannel Channel)>> GetTicketByBaseRequestAsync([NotNull] BaseTicketGetReqDto req)
+        private async
+            Task<Result<(Ticket Ticket, DiscordMember RequestingMember, DiscordGuild Guild, DiscordChannel Channel)>>
+            GetTicketByBaseRequestAsync([NotNull] BaseTicketGetReqDto req)
         {
             if (req is null) throw new ArgumentNullException(nameof(req));
 
@@ -909,7 +920,9 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (req.Id.HasValue)
             {
                 var res = await _ticketService.GetAsync<Ticket>(req.Id.Value);
-                if (!res.IsSuccess) return Result<(Ticket Ticket, DiscordMember RequestingMember, DiscordGuild Guild, DiscordChannel Channel)>.FromError(res);
+                if (!res.IsSuccess)
+                    return Result<(Ticket Ticket, DiscordMember RequestingMember, DiscordGuild Guild, DiscordChannel
+                        Channel)>.FromError(res);
 
                 ticket = res.Entity;
                 req.ChannelId = ticket.ChannelId;
@@ -919,7 +932,9 @@ namespace Lisbeth.Bot.Application.Discord.Services
             {
                 var res = await _ticketService.GetSingleBySpecAsync<Ticket>(
                     new TicketBaseGetSpecifications(null, req.OwnerId, req.GuildId, null, null, false, 1));
-                if (!res.IsSuccess) return Result<(Ticket Ticket, DiscordMember RequestingMember, DiscordGuild Guild, DiscordChannel Channel)>.FromError(res);
+                if (!res.IsSuccess)
+                    return Result<(Ticket Ticket, DiscordMember RequestingMember, DiscordGuild Guild, DiscordChannel
+                        Channel)>.FromError(res);
 
                 ticket = res.Entity;
                 req.ChannelId = ticket.ChannelId;
@@ -929,7 +944,9 @@ namespace Lisbeth.Bot.Application.Discord.Services
             {
                 var res = await _ticketService.GetSingleBySpecAsync<Ticket>(
                     new TicketBaseGetSpecifications(null, null, req.GuildId, null, req.GuildSpecificId, false, 1));
-                if (!res.IsSuccess) return Result<(Ticket Ticket, DiscordMember RequestingMember, DiscordGuild Guild, DiscordChannel Channel)>.FromError(res);
+                if (!res.IsSuccess)
+                    return Result<(Ticket Ticket, DiscordMember RequestingMember, DiscordGuild Guild, DiscordChannel
+                        Channel)>.FromError(res);
 
                 ticket = res.Entity;
                 req.ChannelId = ticket.ChannelId;
@@ -939,7 +956,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
             {
                 try
                 {
-                    targetTicketChannel = await _discord.Client.GetChannelAsync(req.ChannelId ?? throw new InvalidOperationException());
+                    targetTicketChannel =
+                        await _discord.Client.GetChannelAsync(req.ChannelId ?? throw new InvalidOperationException());
                 }
                 catch (Exception)
                 {
@@ -948,7 +966,9 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
                 var res = await _ticketService.GetSingleBySpecAsync<Ticket>(
                     new TicketBaseGetSpecifications(null, null, null, req.ChannelId.Value, null, false, 1));
-                if (!res.IsSuccess) return Result<(Ticket Ticket, DiscordMember RequestingMember, DiscordGuild Guild, DiscordChannel Channel)>.FromError(res);
+                if (!res.IsSuccess)
+                    return Result<(Ticket Ticket, DiscordMember RequestingMember, DiscordGuild Guild, DiscordChannel
+                        Channel)>.FromError(res);
 
                 ticket = res.Entity;
             }

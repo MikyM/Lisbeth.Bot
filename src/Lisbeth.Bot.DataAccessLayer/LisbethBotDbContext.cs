@@ -69,7 +69,7 @@ namespace Lisbeth.Bot.DataAccessLayer
                 if (entry.Entity is AuditLog || entry.State is EntityState.Detached or EntityState.Unchanged)
                     continue;
 
-                var auditEntry = new AuditEntry(entry) {TableName = entry.Entity.GetType().Name, UserId = userId};
+                var auditEntry = new AuditEntry(entry) { TableName = entry.Entity.GetType().Name, UserId = userId };
 
                 auditEntries.Add(auditEntry);
 
@@ -112,8 +112,8 @@ namespace Lisbeth.Bot.DataAccessLayer
                                 auditEntry.ChangedColumns.Add(propertyName);
                                 auditEntry.AuditType = AuditType.Update;
                                 if (entry.Entity is Entity && propertyName == "IsDisabled" && property.IsModified &&
-                                    !(bool) property.OriginalValue &&
-                                    (bool) property.CurrentValue) auditEntry.AuditType = AuditType.Disable;
+                                    !(bool)property.OriginalValue &&
+                                    (bool)property.CurrentValue) auditEntry.AuditType = AuditType.Disable;
                                 auditEntry.OldValues[propertyName] = property.OriginalValue;
                                 auditEntry.NewValues[propertyName] = property.CurrentValue;
                             }
