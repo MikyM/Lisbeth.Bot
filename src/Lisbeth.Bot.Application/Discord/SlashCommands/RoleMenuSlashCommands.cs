@@ -38,15 +38,15 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
         public IDiscordRoleMenuService? _discordRoleMenuService { private get; set; }
         public IDiscordEmbedConfiguratorService<RoleMenu>? _discordEmbedConfiguratorService { private get; set; }
 
-        [SlashCommand("tag", "Allows working with tags.")]
+        [SlashCommand("role-menu", "Allows working with role menus.")]
         public async Task RoleMenuCommand(InteractionContext ctx,
             [Option("action", "Type of action to perform")]
             RoleMenuActionType action,
-            [Option("channel", "Channel to send the tag to.")]
+            [Option("channel", "Channel to send the tag to")]
             DiscordChannel? channel = null,
             [Option("id", "Type of action to perform")]
             string idOrName = "",
-            [Option("text", "Base text for the tag.")]
+            [Option("text", "Base text for the tag")]
             string text = "")
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
