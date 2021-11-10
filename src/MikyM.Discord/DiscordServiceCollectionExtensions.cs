@@ -103,12 +103,16 @@ namespace MikyM.Discord
         ///     Registers a <see cref="DiscordHostedService" />.
         /// </summary>
         /// <param name="services">The <see cref="IServiceCollection" />.</param>
+        /// <param name="shouldWaitForGuildDownloadCompletion">Whether library should wait for GuildDownloadCompleted event to be dispatched before continuing</param>
         /// <returns>The <see cref="IServiceCollection" />.</returns>
         [UsedImplicitly]
         public static IServiceCollection AddDiscordHostedService(
-            this IServiceCollection services
+            this IServiceCollection services,
+            bool shouldWaitForGuildDownloadCompletion = false
         )
         {
+            WaitForDownloadCompletionHelper.ShouldWait = shouldWaitForGuildDownloadCompletion;
+            if (shouldWaitForGuildDownloadCompletion) services.AddDiscordGuildEventsSubscriber<ReadyToOperateHandler>();
             return services.AddHostedService<DiscordHostedService>();
         }
     }

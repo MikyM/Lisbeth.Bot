@@ -28,6 +28,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MikyM.Discord.Interfaces;
 using MikyM.Discord.Services;
+using MikyM.Discord.Util;
 using OpenTracing;
 
 namespace MikyM.Discord
@@ -63,6 +64,13 @@ namespace MikyM.Discord
                 _logger.LogInformation("Connecting to Discord API...");
                 await _discordClient.Client.ConnectAsync();
                 _logger.LogInformation("Connected");
+
+                if (WaitForDownloadCompletionHelper.ShouldWait)
+                {
+                    _logger.LogInformation("Waiting for discord's guild download completion.");
+                    await WaitForDownloadCompletionHelper.ReadyToOperateEvent.WaitAsync();
+                    _logger.LogInformation("Discord fully operational.");
+                }
             }
         }
 

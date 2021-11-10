@@ -20,6 +20,7 @@ using Autofac.Extensions.DependencyInjection;
 using Hangfire;
 using Lisbeth.Bot.API.ExceptionMiddleware;
 using Lisbeth.Bot.API.Helpers;
+using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Application.Helpers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -32,32 +33,37 @@ using Serilog;
 using Serilog.Events;
 using System;
 using System.Globalization;
+using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.API
 {
+    // ReSharper disable once ClassNeverInstantiated.Global
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
-            Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Override("Microsoft", LogEventLevel.Debug)
-                .Enrich.FromLogContext()
-                .WriteTo.Console()
-                .CreateBootstrapLogger();
             try
             {
+                Log.Logger = new LoggerConfiguration()
+                    .MinimumLevel.Override("Microsoft", LogEventLevel.Debug)
+                    .Enrich.FromLogContext()
+                    .WriteTo.Console()
+                    .CreateBootstrapLogger();
+
                 Log.Information("Starting web host");
 
                 var builder = WebApplication.CreateBuilder(args);
 
-                // Add services to the container.
+                // Set culture
                 CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 
+                // Configuration
                 builder.Configuration.SetBasePath(AppDomain.CurrentDomain.BaseDirectory);
                 if (builder.Environment.IsProduction()) builder.Configuration.AddJsonFile("appsettings.json", false, true);
                 builder.Configuration.AddJsonFile("appsettings.Development.json", true, true);
                 builder.Configuration.AddEnvironmentVariables();
 
+                // Configure some services with base Microsoft DI
                 builder.Services.AddControllers(options =>
                     options.Conventions.Add(new RouteTokenTransformerConvention(new SlugifyParameterTransformer())));
                 builder.Services.ConfigureSwagger();
@@ -71,27 +77,35 @@ namespace Lisbeth.Bot.API
                 builder.Services.ConfigureHealthChecks();
                 builder.Services.ConfigureFluentValidation();
 
+                // Configure Autofac
                 builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
                 builder.Host.ConfigureContainer<ContainerBuilder>(cb => cb.RegisterModule(new AutofacContainerModule()));
+
+                // Configure Serilog
                 builder.Host.UseSerilog((hostBuilder, services, configuration) => configuration
                     .ReadFrom.Configuration(hostBuilder.Configuration)
                     .ReadFrom.Services(services));
 
+                // Configure Sentry
                 builder.WebHost.UseSentry();
 
                 var app = builder.Build();
 
-                // Configure the HTTP request pipeline.
-                Log.Logger.Debug("Waiting for discord's guild download completion.");
-                //WaitForDownloadCompletion.ReadyToOperateEvent.WaitAsync().Wait();
-                Log.Logger.Debug("Discord fully operational.");
+                // Wait for Discord to become fully operational
+               // Log.Logger.Debug("Waiting for discord's guild download completion.");
+                //await WaitForDownloadCompletion.ReadyToOperateEvent.WaitAsync();
+                //Log.Logger.Debug("Discord fully operational.");
 
+                // Configure Autofac job activator and static container provider for special use cases
                 ContainerProvider.Container = app.Services.GetAutofacRoot();
                 GlobalConfiguration.Configuration.UseAutofacActivator(app.Services.GetAutofacRoot());
+
+                // Schedule recurring jobs
                 _ = ContainerProvider.Container
                     .Resolve<IAsyncExecutor>()
                     .ExecuteAsync(async () => await RecurringJobHelper.ScheduleAllDefinedAfterDelayAsync());
-                
+
+                // Configure the HTTP request pipeline.
                 if (app.Environment.IsDevelopment())
                 {
                     app.UseDeveloperExceptionPage();
@@ -118,7 +132,7 @@ namespace Lisbeth.Bot.API
                     endpoints.MapControllers();
                 });
 
-                app.Run();
+                await app.RunAsync();
             }
             catch (Exception ex)
             {

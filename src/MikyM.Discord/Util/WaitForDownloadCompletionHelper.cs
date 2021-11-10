@@ -17,10 +17,11 @@
 
 using Emzi0767.Utilities;
 
-namespace Lisbeth.Bot.Application.Discord.Helpers
+namespace MikyM.Discord.Util
 {
-    public static class WaitForDownloadCompletion
+    public static class WaitForDownloadCompletionHelper
     {
+        public static bool ShouldWait { get; set; }
         public static readonly AsyncManualResetEvent ReadyToOperateEvent = new (false);
     }
 }

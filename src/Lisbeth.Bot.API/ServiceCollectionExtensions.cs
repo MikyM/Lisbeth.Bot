@@ -56,9 +56,9 @@ namespace Lisbeth.Bot.API
                 options.Token = Environment.GetEnvironmentVariable("LisbethTstToken");
                 options.Intents = DiscordIntents.All;
             });
-            services.AddDiscordHostedService();
+            services.AddDiscordHostedService(true);
 
-            services.AddDiscordGuildEventsSubscriber<ReadyToOperateHandler>();
+            //services.AddDiscordGuildEventsSubscriber<ReadyToOperateHandler>();
 
             #region commands
 

@@ -18,10 +18,9 @@
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.EventArgs;
-using Lisbeth.Bot.Application.Discord.Helpers;
 using MikyM.Discord.Events;
 
-namespace Lisbeth.Bot.Application.Discord.EventHandlers
+namespace MikyM.Discord.Util
 {
     public class ReadyToOperateHandler : IDiscordGuildEventsSubscriber
     {
@@ -52,8 +51,8 @@ namespace Lisbeth.Bot.Application.Discord.EventHandlers
 
         public async Task DiscordOnGuildDownloadCompleted(DiscordClient sender, GuildDownloadCompletedEventArgs args)
         {
-            if (!WaitForDownloadCompletion.ReadyToOperateEvent.IsSet)
-                await WaitForDownloadCompletion.ReadyToOperateEvent.SetAsync();
+            if (!WaitForDownloadCompletionHelper.ReadyToOperateEvent.IsSet)
+                await WaitForDownloadCompletionHelper.ReadyToOperateEvent.SetAsync();
         }
 
         public Task DiscordOnGuildEmojisUpdated(DiscordClient sender, GuildEmojisUpdateEventArgs args)
