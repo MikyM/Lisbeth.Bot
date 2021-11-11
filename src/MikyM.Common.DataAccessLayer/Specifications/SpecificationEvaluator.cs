@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AutoMapper.QueryableExtensions;
 using MikyM.Common.DataAccessLayer.Specifications.Evaluators;
 
 namespace MikyM.Common.DataAccessLayer.Specifications
@@ -47,11 +48,11 @@ namespace MikyM.Common.DataAccessLayer.Specifications
         public static SpecificationEvaluator Default { get; } = new();
 
         public virtual IQueryable<TResult> GetQuery<T, TResult>(IQueryable<T> query,
-            ISpecification<T, TResult> specification) where T : class
+            ISpecification<T, TResult> specification) where T : class where TResult : class
         {
-            query = GetQuery(query, (ISpecification<T>) specification);
+            query = GetQuery(query, (ISpecification<T>)specification);
 
-            return query.Select(specification.Selector ?? throw new InvalidOperationException());
+            return query.ProjectTo<TResult>();
         }
 
         public virtual IQueryable<T> GetQuery<T>(IQueryable<T> query, ISpecification<T> specification,

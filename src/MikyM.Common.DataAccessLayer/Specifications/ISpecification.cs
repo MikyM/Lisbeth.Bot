@@ -27,21 +27,14 @@ namespace MikyM.Common.DataAccessLayer.Specifications
     ///     and projects the result into <typeparamref name="TResult" />.
     /// </summary>
     /// <typeparam name="T">The type being queried against.</typeparam>
-    /// <typeparam name="TResult">The type of the result.</typeparam>
+    /// <typeparam name="TResult">The type of the result to project results to with Automapper's ProjectTo.</typeparam>
     public interface ISpecification<T, TResult> : ISpecification<T> where T : class
     {
-        /// <summary>
-        ///     The transform function to apply to the <typeparamref name="T" /> element.
-        /// </summary>
-        Expression<Func<T, TResult>>? Selector { get; }
-
         /// <summary>
         ///     The transform function to apply to the result of the query encapsulated by the
         ///     <see cref="ISpecification{T, TResult}" />.
         /// </summary>
         new Func<IEnumerable<TResult>, IEnumerable<TResult>>? PostProcessingAction { get; }
-
-        new IEnumerable<TResult> Evaluate(IEnumerable<T> entities);
     }
 
     /// <summary>

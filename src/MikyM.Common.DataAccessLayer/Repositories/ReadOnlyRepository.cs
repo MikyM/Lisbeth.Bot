@@ -60,7 +60,7 @@ namespace MikyM.Common.DataAccessLayer.Repositories
         public virtual async Task<IReadOnlyList<TEntity>> GetBySpecAsync(ISpecification<TEntity> specification)
         {
             var result = await ApplySpecification(specification).ToListAsync();
-            return specification?.PostProcessingAction is null
+            return specification.PostProcessingAction is null
                 ? result
                 : specification.PostProcessingAction(result).ToList();
         }
@@ -69,7 +69,7 @@ namespace MikyM.Common.DataAccessLayer.Repositories
             ISpecification<TEntity, TProjectTo> specification) where TProjectTo : class
         {
             var result = await ApplySpecification(specification).ToListAsync();
-            return specification?.PostProcessingAction is null
+            return specification.PostProcessingAction is null
                 ? result
                 : specification.PostProcessingAction(result).ToList();
         }
@@ -81,7 +81,7 @@ namespace MikyM.Common.DataAccessLayer.Repositories
                 .Skip((filter.PageNumber - 1) * filter.PageSize)
                 .Take(filter.PageSize)
                 .ToListAsync();
-            return specification?.PostProcessingAction is null
+            return specification.PostProcessingAction is null
                 ? result
                 : specification.PostProcessingAction(result).ToList();
         }
@@ -93,7 +93,7 @@ namespace MikyM.Common.DataAccessLayer.Repositories
                 .Skip((filter.PageNumber - 1) * filter.PageSize)
                 .Take(filter.PageSize)
                 .ToListAsync();
-            return specification?.PostProcessingAction is null
+            return specification.PostProcessingAction is null
                 ? result
                 : specification.PostProcessingAction(result).ToList();
         }
@@ -141,10 +141,9 @@ namespace MikyM.Common.DataAccessLayer.Repositories
         /// <param name="specification">The encapsulated query logic.</param>
         /// <returns>The filtered projected entities as an <see cref="IQueryable{T}" />.</returns>
         protected virtual IQueryable<TResult> ApplySpecification<TResult>(
-            ISpecification<TEntity, TResult> specification)
+            ISpecification<TEntity, TResult>? specification) where TResult : class
         {
             if (specification is null) throw new ArgumentNullException("Specification is required");
-            if (specification.Selector is null) throw new SelectorNotFoundException();
 
             return _specificationEvaluator.GetQuery(_context.Set<TEntity>().AsQueryable(), specification);
         }

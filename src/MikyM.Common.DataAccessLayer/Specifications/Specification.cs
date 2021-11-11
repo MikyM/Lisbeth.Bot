@@ -25,12 +25,17 @@ using MikyM.Common.DataAccessLayer.Specifications.Helpers;
 namespace MikyM.Common.DataAccessLayer.Specifications
 {
     /// <inheritdoc cref="ISpecification{T,TResult}" />
-    public /*abstract*/
+    public
         class Specification<T, TResult> : Specification<T>, ISpecification<T, TResult>
         where T : class where TResult : class
     {
         protected Specification() : this(InMemorySpecificationEvaluator.Default)
         {
+        }
+
+        public Specification(Expression<Func<T, bool>> criteria) : this(InMemorySpecificationEvaluator.Default)
+        {
+            Where(criteria);
         }
 
         protected Specification(IInMemorySpecificationEvaluator inMemorySpecificationEvaluator) : base(
@@ -41,18 +46,16 @@ namespace MikyM.Common.DataAccessLayer.Specifications
 
         protected new virtual ISpecificationBuilder<T, TResult> Query { get; }
 
-        public new virtual IEnumerable<TResult> Evaluate(IEnumerable<T> entities)
+        public new virtual IEnumerable<T> Evaluate(IEnumerable<T> entities)
         {
             return Evaluator.Evaluate(entities, this);
         }
-
-        public Expression<Func<T, TResult>>? Selector { get; internal set; }
-
+        
         public new Func<IEnumerable<TResult>, IEnumerable<TResult>>? PostProcessingAction { get; internal set; } = null;
     }
 
     /// <inheritdoc cref="ISpecification{T}" />
-    public /*abstract*/ class Specification<T> : ISpecification<T> where T : class
+    public class Specification<T> : ISpecification<T> where T : class
     {
         protected Specification() : this(InMemorySpecificationEvaluator.Default)
         {

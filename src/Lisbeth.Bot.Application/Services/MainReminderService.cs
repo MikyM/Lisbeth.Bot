@@ -15,15 +15,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using Hangfire;
 using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Application.Extensions;
 using Lisbeth.Bot.Application.Hangfire;
-using Lisbeth.Bot.Application.Helpers;
 using Lisbeth.Bot.Application.Results;
 using Lisbeth.Bot.Application.Services.Database.Interfaces;
 using Lisbeth.Bot.Application.Services.Interfaces;
@@ -35,6 +31,9 @@ using Lisbeth.Bot.Domain.Entities;
 using Lisbeth.Bot.Domain.Enums;
 using MikyM.Common.Application.Results;
 using NCrontab;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Services
 {
@@ -96,23 +95,27 @@ namespace Lisbeth.Bot.Application.Services
                     req.Name = $"{req.GuildId}_{req.RequestedOnBehalfOfId}_{DateTime.UtcNow}";
 
                 var partial = await _reminderService.AddAsync(req, true);
-                string hangfireId =
-                    _backgroundJobClient.Schedule<IDiscordSendReminderService>(
-                        x => x.SendReminderAsync(partial.Entity, ReminderType.Single), setFor.ToUniversalTime(),
-                        "reminder");
+                string hangfireId = _backgroundJobClient.Schedule<IDiscordSendReminderService>(
+                    x => x.SendReminderAsync(partial.Entity, ReminderType.Single), setFor.ToUniversalTime(),
+                    "reminder");
                 await _reminderService.SetHangfireIdAsync(partial.Entity, hangfireId, true);
 
                 return new ReminderResDto(partial.Entity, req.Name, setFor, req.Mentions);
             }
-            else // handle recurring reminder, validated req must either fall to first if or have a cron expression
+
+            if (string.IsNullOrWhiteSpace(req.CronExpression)) throw new InvalidOperationException();
             {
                 var parsed = CrontabSchedule.TryParse(req.CronExpression);
-                var parsedWithSeconds = CrontabSchedule.TryParse(req.CronExpression, new CrontabSchedule.ParseOptions { IncludingSeconds = true });
+                var parsedWithSeconds = CrontabSchedule.TryParse(req.CronExpression,
+                    new CrontabSchedule.ParseOptions { IncludingSeconds = true });
                 if (parsed is null && parsedWithSeconds is null)
                     return Result<ReminderResDto>.FromError(new ArgumentError(nameof(recGuild.Entity),
                         "Invalid cron expression"));
-                if (parsed is not null && parsed.GetNextOccurrences(DateTime.UtcNow, DateTime.UtcNow.AddHours(1)).Count() > 12 ||
-                    parsedWithSeconds is not null && parsedWithSeconds.GetNextOccurrences(DateTime.UtcNow, DateTime.UtcNow.AddHours(1)).Count() > 12)
+                if (parsed is not null &&
+                    parsed.GetNextOccurrences(DateTime.UtcNow, DateTime.UtcNow.AddHours(1)).Count() > 12 ||
+                    parsedWithSeconds is not null && parsedWithSeconds
+                        .GetNextOccurrences(DateTime.UtcNow, DateTime.UtcNow.AddHours(1))
+                        .Count() > 12)
                     return new ArgumentError(nameof(recGuild.Entity),
                         "Cron expressions with more than 12 occurrences per hour (more frequent than every 5 minutes) are not allowed");
 
@@ -126,15 +129,16 @@ namespace Lisbeth.Bot.Application.Services
 
                 var partial = await _recurringReminderService.AddAsync(req, true);
                 RecurringJob.AddOrUpdate<IDiscordSendReminderService>(jobName,
-                    x => x.SendReminderAsync(partial.Entity, ReminderType.Recurring),
-                    req.CronExpression, TimeZoneInfo.Utc, "reminder");
+                    x => x.SendReminderAsync(partial.Entity, ReminderType.Recurring), req.CronExpression,
+                    TimeZoneInfo.Utc, "reminder");
                 await _recurringReminderService.SetHangfireIdAsync(partial.Entity, jobName, true);
 
                 return new ReminderResDto(partial.Entity, req.Name,
                     parsed?.GetNextOccurrence(DateTime.UtcNow).ToUniversalTime() ??
-                    parsedWithSeconds?.GetNextOccurrence(DateTime.UtcNow).ToUniversalTime() ?? throw new InvalidOperationException(),
-                    req.Mentions);
+                    parsedWithSeconds?.GetNextOccurrence(DateTime.UtcNow).ToUniversalTime() ??
+                    throw new InvalidOperationException(), req.Mentions);
             }
+
         }
 
         public async Task<Result<ReminderResDto>> RescheduleReminderAsync(RescheduleReminderReqDto req)
@@ -163,16 +167,17 @@ namespace Lisbeth.Bot.Application.Services
 
                 if (!res) return new HangfireError("Hangfire failed to delete the job");
 
-                string hangfireId =
-                    _backgroundJobClient.Schedule<IDiscordSendReminderService>(
-                        x => x.SendReminderAsync(result.Entity.Id, ReminderType.Single), setFor.ToUniversalTime(),
-                        "reminder");
+                string hangfireId = _backgroundJobClient.Schedule<IDiscordSendReminderService>(
+                    x => x.SendReminderAsync(result.Entity.Id, ReminderType.Single), setFor.ToUniversalTime(),
+                    "reminder");
 
                 req.NewHangfireId = long.Parse(hangfireId);
                 await _reminderService.RescheduleAsync(req, true);
 
                 return new ReminderResDto(result.Entity.Id, result.Entity.Name, setFor, result.Entity.Mentions);
             }
+
+            if (string.IsNullOrWhiteSpace(req.CronExpression)) throw new InvalidOperationException();
 
             var parsed = CrontabSchedule.TryParse(req.TimeSpanExpression);
             if (parsed is null) return new ArgumentError(nameof(req.CronExpression), "Invalid cron expression");
@@ -187,8 +192,8 @@ namespace Lisbeth.Bot.Application.Services
             string jobName = $"{partial.Entity.GuildId}_{partial.Entity.Name}";
 
             RecurringJob.AddOrUpdate<IDiscordSendReminderService>(jobName,
-                x => x.SendReminderAsync(partial.Entity.Id, ReminderType.Recurring),
-                req.CronExpression, TimeZoneInfo.Utc, "reminder");
+                x => x.SendReminderAsync(partial.Entity.Id, ReminderType.Recurring), req.CronExpression,
+                TimeZoneInfo.Utc, "reminder");
 
             await _recurringReminderService.RescheduleAsync(req, true);
 

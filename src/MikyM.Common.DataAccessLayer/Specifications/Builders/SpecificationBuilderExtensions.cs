@@ -29,7 +29,7 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Builders
             this ISpecificationBuilder<T> specificationBuilder,
             Expression<Func<T, bool>> criteria) where T : class
         {
-            ((List<Expression<Func<T, bool>>>) specificationBuilder.Specification.WhereExpressions).Add(criteria);
+            ((List<Expression<Func<T, bool>>>)specificationBuilder.Specification.WhereExpressions).Add(criteria);
 
             return specificationBuilder;
         }
@@ -141,14 +141,14 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Builders
             return specificationBuilder;
         }
 
-        public static ISpecificationBuilder<T, TResult> Select<T, TResult>(
+        /*public static ISpecificationBuilder<T, TResult> Select<T, TResult>(
             this ISpecificationBuilder<T, TResult> specificationBuilder,
             Expression<Func<T, TResult>> selector) where T : class where TResult : class
         {
             specificationBuilder.Specification.Selector = selector;
 
             return specificationBuilder;
-        }
+        }*/
 
         public static ISpecificationBuilder<T, TResult> PostProcessingAction<T, TResult>(
             this ISpecificationBuilder<T, TResult> specificationBuilder,
