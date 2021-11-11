@@ -21,15 +21,15 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Exceptions
 {
     public class DuplicateOrderChainException : Exception
     {
-        private const string message = "The specification contains more than one Order chain!";
+        private new const string Message = "The specification contains more than one Order chain!";
 
         public DuplicateOrderChainException()
-            : base(message)
+            : base(Message)
         {
         }
 
         public DuplicateOrderChainException(Exception innerException)
-            : base(message, innerException)
+            : base(Message, innerException)
         {
         }
     }

@@ -20,6 +20,7 @@ using MikyM.Common.DataAccessLayer.Specifications.Evaluators;
 using System.Collections.Generic;
 using System.Linq;
 using EFCoreSecondLevelCacheInterceptor;
+using MikyM.Common.DataAccessLayer.Filters;
 
 namespace MikyM.Common.DataAccessLayer.Specifications
 {
@@ -48,9 +49,9 @@ namespace MikyM.Common.DataAccessLayer.Specifications
         public static SpecificationEvaluator Default { get; } = new();
 
         public virtual IQueryable<TResult> GetQuery<T, TResult>(IQueryable<T> query,
-            ISpecification<T, TResult> specification) where T : class where TResult : class
+            ISpecification<T, TResult> specification, PaginationFilter? paginationFilter = null) where T : class where TResult : class
         {
-            query = GetQuery(query, (ISpecification<T>)specification);
+            query = GetQuery(query, (ISpecification<T>)specification, paginationFilter);
 
             if (specification.MembersToExpand is not null)
             {
@@ -74,10 +75,12 @@ namespace MikyM.Common.DataAccessLayer.Specifications
         }
 
         public virtual IQueryable<T> GetQuery<T>(IQueryable<T> query, ISpecification<T> specification,
-            bool evaluateCriteriaOnly = false) where T : class
+            PaginationFilter? paginationFilter = null, bool evaluateCriteriaOnly = false) where T : class
         {
             if (specification.IsCacheEnabled.HasValue) query = !specification.IsCacheEnabled.Value ? query.NotCacheable() : query.Cacheable();
 
+            if (paginationFilter is not null && specification.PaginationFilter is null) ((Specification<T>)specification).PaginationFilter = paginationFilter;
+            
             return (evaluateCriteriaOnly ? _evaluators.Where(x => x.IsCriteriaEvaluator) : _evaluators)
                 .Aggregate(query, (current, evaluator) => evaluator.GetQuery(current, specification));
         }

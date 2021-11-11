@@ -15,16 +15,45 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using AutoMapper;
+using MikyM.Common.DataAccessLayer.Filters;
+using MikyM.Common.DataAccessLayer.Specifications.Exceptions;
+using MikyM.Common.DataAccessLayer.Specifications.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using MikyM.Common.DataAccessLayer.Specifications.Exceptions;
-using MikyM.Common.DataAccessLayer.Specifications.Helpers;
 
 namespace MikyM.Common.DataAccessLayer.Specifications.Builders
 {
     public static class SpecificationBuilderExtensions
     {
+        public static ISpecificationBuilder<T, TResult> Expand<T, TResult>(
+            this ISpecificationBuilder<T, TResult> specificationBuilder, Expression<Func<TResult, object>> expression)
+            where T : class where TResult : class
+        {
+            specificationBuilder.Specification.MembersToExpand ??= new List<Expression<Func<TResult, object>>>();
+            ((List<Expression<Func<TResult, object>>>)specificationBuilder.Specification.MembersToExpand).Add(expression);
+
+            return specificationBuilder;
+        }
+
+        public static ISpecificationBuilder<T, TResult> Expand<T, TResult>(
+            this ISpecificationBuilder<T, TResult> specificationBuilder, string member) where T : class where TResult : class
+        {
+            specificationBuilder.Specification.StringMembersToExpand ??= new List<string>();
+            ((List<string>)specificationBuilder.Specification.StringMembersToExpand).Add(member);
+
+            return specificationBuilder;
+        }
+        public static ISpecificationBuilder<T, TResult> WithMapperConfiguration<T, TResult>(
+            this ISpecificationBuilder<T, TResult> specificationBuilder,
+            MapperConfiguration mapperConfiguration) where T : class where TResult : class
+        {
+            specificationBuilder.Specification.MapperConfiguration = mapperConfiguration;
+
+            return specificationBuilder;
+        }
+
         public static ISpecificationBuilder<T> Where<T>(
             this ISpecificationBuilder<T> specificationBuilder,
             Expression<Func<T, bool>> criteria) where T : class
@@ -128,19 +157,23 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Builders
             return specificationBuilder;
         }
 
-        [Obsolete]
-        public static ISpecificationBuilder<T> Paginate<T>(
+        public static ISpecificationBuilder<T> WithPaginationFilter<T>(
             this ISpecificationBuilder<T> specificationBuilder,
-            int skip,
-            int take) where T : class
+            PaginationFilter paginationFilter) where T : class
         {
-            specificationBuilder.Skip(skip);
-            specificationBuilder.Take(take);
+            if (specificationBuilder.Specification.Skip is not null) throw new DuplicateSkipException();
+            if (specificationBuilder.Specification.Take is not null) throw new DuplicateTakeException();
+            if (specificationBuilder.Specification.PaginationFilter is not null) throw new DuplicatePaginationException();
+            if (paginationFilter is null) throw new ArgumentNullException(nameof(paginationFilter));
+
+            specificationBuilder.Specification.PaginationFilter = paginationFilter;
+            specificationBuilder.Specification.Take = paginationFilter.PageSize;
+            specificationBuilder.Specification.Skip = (paginationFilter.PageNumber - 1) * paginationFilter.PageSize;
 
             return specificationBuilder;
         }
 
-        public static ISpecificationBuilder<T> PostProcessingAction<T>(
+        public static ISpecificationBuilder<T> WithPostProcessingAction<T>(
             this ISpecificationBuilder<T> specificationBuilder,
             Func<IEnumerable<T>, IEnumerable<T>> predicate) where T : class
         {
@@ -158,7 +191,7 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Builders
             return specificationBuilder;
         }*/
 
-        public static ISpecificationBuilder<T, TResult> PostProcessingAction<T, TResult>(
+        public static ISpecificationBuilder<T, TResult> WithPostProcessingAction<T, TResult>(
             this ISpecificationBuilder<T, TResult> specificationBuilder,
             Func<IEnumerable<TResult>, IEnumerable<TResult>> predicate) where T : class where TResult : class
         {
@@ -179,10 +212,10 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Builders
             return new CacheSpecificationBuilder<T>(specificationBuilder.Specification);
         }
 
-        public static ISpecificationBuilder<T> AsNoTracking<T>(
+        public static ISpecificationBuilder<T> AsTracking<T>(
             this ISpecificationBuilder<T> specificationBuilder) where T : class
         {
-            specificationBuilder.Specification.AsNoTracking = true;
+            specificationBuilder.Specification.IsAsNoTracking = false;
 
             return specificationBuilder;
         }
@@ -190,7 +223,7 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Builders
         public static ISpecificationBuilder<T> AsSplitQuery<T>(
             this ISpecificationBuilder<T> specificationBuilder) where T : class
         {
-            specificationBuilder.Specification.AsSplitQuery = true;
+            specificationBuilder.Specification.IsAsSplitQuery = true;
 
             return specificationBuilder;
         }
@@ -198,7 +231,7 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Builders
         public static ISpecificationBuilder<T> AsNoTrackingWithIdentityResolution<T>(
             this ISpecificationBuilder<T> specificationBuilder) where T : class
         {
-            specificationBuilder.Specification.AsNoTrackingWithIdentityResolution = true;
+            specificationBuilder.Specification.IsAsNoTrackingWithIdentityResolution = true;
 
             return specificationBuilder;
         }

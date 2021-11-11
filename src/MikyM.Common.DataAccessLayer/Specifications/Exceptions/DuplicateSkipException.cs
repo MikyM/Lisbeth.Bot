@@ -21,16 +21,16 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Exceptions
 {
     public class DuplicateSkipException : Exception
     {
-        private const string message =
-            "Duplicate use of the Skip(). Ensure you don't use both Paginate() and Skip() in the same specification!";
+        private new const string Message =
+            "Duplicate use of the Skip(). Ensure you don't use both WithPaginationFilter() and Skip() in the same specification!";
 
         public DuplicateSkipException()
-            : base(message)
+            : base(Message)
         {
         }
 
         public DuplicateSkipException(Exception innerException)
-            : base(message, innerException)
+            : base(Message, innerException)
         {
         }
     }

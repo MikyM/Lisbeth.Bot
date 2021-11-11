@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using AutoMapper;
+using MikyM.Common.DataAccessLayer.Filters;
 using MikyM.Common.DataAccessLayer.Specifications.Helpers;
 
 namespace MikyM.Common.DataAccessLayer.Specifications
@@ -50,6 +51,11 @@ namespace MikyM.Common.DataAccessLayer.Specifications
     /// <typeparam name="T">The type being queried against.</typeparam>
     public interface ISpecification<T> where T : class
     {
+        /// <summary>
+        ///     Pagination filter to apply.
+        /// </summary>
+        PaginationFilter? PaginationFilter { get; }
+
         /// <summary>
         ///     The collection of predicates to filter on.
         /// </summary>
@@ -117,10 +123,21 @@ namespace MikyM.Common.DataAccessLayer.Specifications
         ///     that are returned. When true, if the entity instances are modified, this will not be detected
         ///     by the change tracker.
         /// </summary>
-        bool AsNoTracking { get; }
+        bool IsAsNoTracking { get; }
 
-        bool AsSplitQuery { get; }
-        bool AsNoTrackingWithIdentityResolution { get; }
+
+        /// <summary>
+        ///     Returns whether or not to treat this query as split query.
+        ///     by the change tracker.
+        /// </summary>
+        /// 
+        bool IsAsSplitQuery { get; }
+
+        /// <summary>
+        ///     Returns whether or not the change tracker with track the result of this query identity resolution.
+        /// </summary>
+        bool IsAsNoTrackingWithIdentityResolution { get; }
+
         IEnumerable<T> Evaluate(IEnumerable<T> entities);
     }
 }

@@ -15,16 +15,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MikyM.Common.DataAccessLayer.Filters;
 using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Common.DataAccessLayer.Specifications.Evaluators;
-using MikyM.Common.DataAccessLayer.Specifications.Exceptions;
 using MikyM.Common.Domain.Entities;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace MikyM.Common.DataAccessLayer.Repositories
 {
@@ -77,9 +76,7 @@ namespace MikyM.Common.DataAccessLayer.Repositories
         public virtual async Task<IReadOnlyList<TEntity>> GetBySpecAsync(PaginationFilter filter,
             ISpecification<TEntity> specification)
         {
-            var result = await ApplySpecification(specification)
-                .Skip((filter.PageNumber - 1) * filter.PageSize)
-                .Take(filter.PageSize)
+            var result = await ApplySpecification(specification, filter)
                 .ToListAsync();
             return specification.PostProcessingAction is null
                 ? result
@@ -89,9 +86,7 @@ namespace MikyM.Common.DataAccessLayer.Repositories
         public virtual async Task<IReadOnlyList<TProjectTo>> GetBySpecAsync<TProjectTo>(PaginationFilter filter,
             ISpecification<TEntity, TProjectTo> specification) where TProjectTo : class
         {
-            var result = await ApplySpecification(specification)
-                .Skip((filter.PageNumber - 1) * filter.PageSize)
-                .Take(filter.PageSize)
+            var result = await ApplySpecification(specification, filter)
                 .ToListAsync();
             return specification.PostProcessingAction is null
                 ? result
@@ -120,13 +115,16 @@ namespace MikyM.Common.DataAccessLayer.Repositories
         ///     <paramref name="specification" />.
         /// </summary>
         /// <param name="specification">The encapsulated query logic.</param>
+        /// <param name="paginationFilter">Pagination filter to apply if any. Note that this will NOT override an already set filter.</param>
+        /// <param name="evaluateCriteriaOnly">Whether to only evaluate criteria.</param>
         /// <returns>The filtered entities as an <see cref="IQueryable{T}" />.</returns>
         protected virtual IQueryable<TEntity> ApplySpecification(ISpecification<TEntity>? specification,
+            PaginationFilter? paginationFilter = null,
             bool evaluateCriteriaOnly = false)
         {
             if (specification is null) throw new ArgumentNullException("Specification is required");
 
-            return _specificationEvaluator.GetQuery(_context.Set<TEntity>().AsQueryable(), specification,
+            return _specificationEvaluator.GetQuery(_context.Set<TEntity>().AsQueryable(), specification, paginationFilter,
                 evaluateCriteriaOnly);
         }
 
@@ -139,13 +137,15 @@ namespace MikyM.Common.DataAccessLayer.Repositories
         /// </summary>
         /// <typeparam name="TResult">The type of the value returned by the projection.</typeparam>
         /// <param name="specification">The encapsulated query logic.</param>
+        /// <param name="paginationFilter">Pagination filter to apply if any. Note that this will NOT override an already set filter.</param>
         /// <returns>The filtered projected entities as an <see cref="IQueryable{T}" />.</returns>
         protected virtual IQueryable<TResult> ApplySpecification<TResult>(
-            ISpecification<TEntity, TResult>? specification) where TResult : class
+            ISpecification<TEntity, TResult>? specification,
+            PaginationFilter? paginationFilter = null) where TResult : class
         {
             if (specification is null) throw new ArgumentNullException("Specification is required");
 
-            return _specificationEvaluator.GetQuery(_context.Set<TEntity>().AsQueryable(), specification);
+            return _specificationEvaluator.GetQuery(_context.Set<TEntity>().AsQueryable(), specification, paginationFilter);
         }
     }
 }

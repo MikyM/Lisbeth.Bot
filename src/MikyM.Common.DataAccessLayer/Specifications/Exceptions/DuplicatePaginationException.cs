@@ -19,16 +19,17 @@ using System;
 
 namespace MikyM.Common.DataAccessLayer.Specifications.Exceptions
 {
-    public class SelectorNotFoundException : Exception
+    public class DuplicatePaginationException : Exception
     {
-        private new const string Message = "The specification must have Selector defined.";
+        private new const string Message =
+            "Duplicate use of the WithPaginatonFilter(). Ensure you don't use WithPaginationFilter() two times in the same specification!";
 
-        public SelectorNotFoundException()
+        public DuplicatePaginationException()
             : base(Message)
         {
         }
 
-        public SelectorNotFoundException(Exception innerException)
+        public DuplicatePaginationException(Exception innerException)
             : base(Message, innerException)
         {
         }

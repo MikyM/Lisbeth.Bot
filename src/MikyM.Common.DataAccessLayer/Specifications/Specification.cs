@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using AutoMapper;
+using MikyM.Common.DataAccessLayer.Filters;
 using MikyM.Common.DataAccessLayer.Specifications.Builders;
 using MikyM.Common.DataAccessLayer.Specifications.Evaluators;
 using MikyM.Common.DataAccessLayer.Specifications.Helpers;
@@ -52,10 +53,34 @@ namespace MikyM.Common.DataAccessLayer.Specifications
             return Evaluator.Evaluate(entities, this);
         }
 
-        public MapperConfiguration? MapperConfiguration { get; }
-        public IEnumerable<Expression<Func<TResult, object>>>? MembersToExpand { get; }
-        public IEnumerable<string>? StringMembersToExpand { get; }
+        public MapperConfiguration? MapperConfiguration { get; internal set; }
+        public IEnumerable<Expression<Func<TResult, object>>>? MembersToExpand { get; internal set; }
+        public IEnumerable<string>? StringMembersToExpand { get; internal set; }
         public new Func<IEnumerable<TResult>, IEnumerable<TResult>>? PostProcessingAction { get; internal set; }
+
+        protected Specification<T> WithPostProcessingAction(Func<IEnumerable<TResult>, IEnumerable<TResult>> postProcessingAction)
+        {
+            this.Query.WithPostProcessingAction(postProcessingAction);
+            return this;
+        }
+
+        protected Specification<T> WithMapperConfiguration(MapperConfiguration mapperConfiguration)
+        {
+            this.Query.WithMapperConfiguration(mapperConfiguration);
+            return this;
+        }
+
+        protected Specification<T> Expand(Expression<Func<TResult, object>> expression)
+        {
+            this.Query.Expand(expression);
+            return this;
+        }
+
+        protected Specification<T> Expand(string member)
+        {
+            this.Query.Expand(member);
+            return this;
+        }
     }
 
     /// <inheritdoc cref="ISpecification{T}" />
@@ -108,70 +133,84 @@ namespace MikyM.Common.DataAccessLayer.Specifications
 
         public int? Skip { get; internal set; }
 
+        public PaginationFilter? PaginationFilter { get; internal set; }
+
         public Func<IEnumerable<T>, IEnumerable<T>>? PostProcessingAction { get; internal set; }
         public bool? IsCacheEnabled { get; internal set; }
         public bool IsPagingEnabled { get; internal set; }
-        public bool AsNoTracking { get; internal set; } = true;
-        public bool AsSplitQuery { get; internal set; }
-        public bool AsNoTrackingWithIdentityResolution { get; internal set; }
+        public bool IsAsNoTracking { get; internal set; } = true;
+        public bool IsAsSplitQuery { get; internal set; }
+        public bool IsAsNoTrackingWithIdentityResolution { get; internal set; }
+
+        protected Specification<T> WithPostProcessingAction(Func<IEnumerable<T>, IEnumerable<T>> postProcessingAction)
+        {
+            this.Query.WithPostProcessingAction(postProcessingAction);
+            return this;
+        }
 
         protected Specification<T> Include<TProperty>(Expression<Func<T, TProperty>> includeExpression)
         {
-            Query.Include(includeExpression);
+            this.Query.Include(includeExpression);
             return this;
         }
 
         protected IIncludableSpecificationBuilder<T, TProperty> IncludeWithChildren<TProperty>(
             Expression<Func<T, TProperty>> includeExpression)
         {
-            return Query.Include(includeExpression);
+            return this.Query.Include(includeExpression);
         }
 
         protected Specification<T> Include(string includeExpression)
         {
-            Query.Include(includeExpression);
+            this.Query.Include(includeExpression);
             return this;
         }
 
         protected Specification<T> OrderBy(Expression<Func<T, object?>> orderByExpression)
         {
-            Query.OrderBy(orderByExpression);
+            this.Query.OrderBy(orderByExpression);
             return this;
         }
 
         protected Specification<T> OrderByDescending(Expression<Func<T, object?>> orderByDescendingExpression)
         {
-            Query.OrderByDescending(orderByDescendingExpression);
+            this.Query.OrderByDescending(orderByDescendingExpression);
             return this;
         }
 
         protected Specification<T> Where(Expression<Func<T, bool>> criteria)
         {
-            Query.Where(criteria);
+            this.Query.Where(criteria);
             return this;
         }
 
         protected Specification<T> GroupBy(Expression<Func<T, object>> criteria)
         {
-            Query.GroupBy(criteria);
+            this.Query.GroupBy(criteria);
             return this;
         }
 
         protected Specification<T> Search(Expression<Func<T, string>> selector, string searchTerm, int searchGroup = 1)
         {
-            Query.Search(selector, searchTerm, searchGroup);
+            this.Query.Search(selector, searchTerm, searchGroup);
+            return this;
+        }
+        
+        protected Specification<T> WithPaginationFilter(PaginationFilter paginationFilter)
+        {
+            this.Query.WithPaginationFilter(paginationFilter);
             return this;
         }
 
-        protected Specification<T> ApplyTake(int limit)
+        protected Specification<T> ApplyTake(int take)
         {
-            Take = limit;
+            this.Query.Take(take);
             return this;
         }
 
         protected Specification<T> ApplySkip(int skip)
         {
-            Skip = skip;
+            this.Query.Skip(skip);
             return this;
         }
 
@@ -181,21 +220,21 @@ namespace MikyM.Common.DataAccessLayer.Specifications
             return this;
         }
 
-        protected Specification<T> WithTracking(bool withTracking = true)
+        protected Specification<T> AsTracking()
         {
-            AsNoTracking = withTracking;
+            this.Query.AsTracking();
             return this;
         }
 
-        protected Specification<T> TreatAsSplitQuery(bool asSplitQuery = true)
+        protected Specification<T> AsSplitQuery()
         {
-            AsSplitQuery = true;
+            this.Query.AsSplitQuery();
             return this;
         }
 
-        protected Specification<T> TreatAsNoTrackingWithIdentityResolution()
+        protected Specification<T> AsNoTrackingWithIdentityResolution()
         {
-            AsNoTrackingWithIdentityResolution = true;
+            this.Query.AsNoTrackingWithIdentityResolution();
             return this;
         }
     }
