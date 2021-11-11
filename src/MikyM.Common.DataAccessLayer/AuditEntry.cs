@@ -46,9 +46,9 @@ namespace MikyM.Common.DataAccessLayer
                 Type = AuditType.ToString(),
                 TableName = TableName,
                 PrimaryKey = JsonSerializer.Serialize(KeyValues),
-                OldValues = OldValues.Count == 0 ? null : JsonSerializer.Serialize(OldValues),
-                NewValues = NewValues.Count == 0 ? null : JsonSerializer.Serialize(NewValues),
-                AffectedColumns = ChangedColumns.Count == 0 ? null : JsonSerializer.Serialize(ChangedColumns)
+                OldValues = OldValues.Count is 0 ? null : JsonSerializer.Serialize(OldValues),
+                NewValues = NewValues.Count is 0 ? null : JsonSerializer.Serialize(NewValues),
+                AffectedColumns = ChangedColumns.Count is 0 ? null : JsonSerializer.Serialize(ChangedColumns)
             };
         }
     }

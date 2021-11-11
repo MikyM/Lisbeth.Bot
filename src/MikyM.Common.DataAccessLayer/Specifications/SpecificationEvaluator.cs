@@ -53,25 +53,7 @@ namespace MikyM.Common.DataAccessLayer.Specifications
         {
             query = GetQuery(query, (ISpecification<T>)specification, paginationFilter);
 
-            if (specification.MembersToExpand is not null)
-            {
-                return specification.MapperConfiguration is null
-                    ? query.ProjectTo<TResult>(specification.MembersToExpand.ToArray())
-                    : query.ProjectTo<TResult>(specification.MapperConfiguration,
-                        specification.MembersToExpand.ToArray());
-            }
-
-            if (specification.StringMembersToExpand is not null)
-            {
-                return specification.MapperConfiguration is null
-                    ? query.ProjectTo<TResult>(null, specification.StringMembersToExpand.ToArray())
-                    : query.ProjectTo<TResult>(specification.MapperConfiguration, null,
-                        specification.StringMembersToExpand.ToArray());
-            }
-
-            return specification.MapperConfiguration is not null
-                ? query.ProjectTo<TResult>(specification.MapperConfiguration)
-                : query.ProjectTo<TResult>();
+            return ProjectionEvaluator.Instance.GetQuery(query, specification);
         }
 
         public virtual IQueryable<T> GetQuery<T>(IQueryable<T> query, ISpecification<T> specification,
