@@ -76,7 +76,7 @@ namespace MikyM.Common.DataAccessLayer.Specifications
         public virtual IQueryable<T> GetQuery<T>(IQueryable<T> query, ISpecification<T> specification,
             bool evaluateCriteriaOnly = false) where T : class
         {
-            query = !specification.CacheEnabled ? query.NotCacheable() : query.Cacheable();
+            if (specification.IsCacheEnabled.HasValue) query = !specification.IsCacheEnabled.Value ? query.NotCacheable() : query.Cacheable();
 
             return (evaluateCriteriaOnly ? _evaluators.Where(x => x.IsCriteriaEvaluator) : _evaluators)
                 .Aggregate(query, (current, evaluator) => evaluator.GetQuery(current, specification));

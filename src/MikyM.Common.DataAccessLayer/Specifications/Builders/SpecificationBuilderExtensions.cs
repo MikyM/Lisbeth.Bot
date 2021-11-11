@@ -167,15 +167,14 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Builders
             return specificationBuilder;
         }
 
+
         /// <summary>
-        ///     Disables caching.
+        ///     Explicitly enables or disables caching for this query.
         /// </summary>
-        /// <param name="specificationName"></param>
-        /// <param name="args">Any arguments used in defining the specification</param>
-        public static ICacheSpecificationBuilder<T> DisablesCache<T>(
-            this ISpecificationBuilder<T> specificationBuilder) where T : class
+        public static ICacheSpecificationBuilder<T> WithCaching<T>(
+            this ISpecificationBuilder<T> specificationBuilder, bool withCaching = true) where T : class
         {
-            specificationBuilder.Specification.CacheEnabled = false;
+            specificationBuilder.Specification.IsCacheEnabled = withCaching;
 
             return new CacheSpecificationBuilder<T>(specificationBuilder.Specification);
         }

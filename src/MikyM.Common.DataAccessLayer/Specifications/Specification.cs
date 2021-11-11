@@ -109,8 +109,7 @@ namespace MikyM.Common.DataAccessLayer.Specifications
         public int? Skip { get; internal set; }
 
         public Func<IEnumerable<T>, IEnumerable<T>>? PostProcessingAction { get; internal set; }
-        public string? CacheKey { get; internal set; }
-        public bool CacheEnabled { get; internal set; } = true;
+        public bool? IsCacheEnabled { get; internal set; }
         public bool IsPagingEnabled { get; internal set; }
         public bool AsNoTracking { get; internal set; } = true;
         public bool AsSplitQuery { get; internal set; }
@@ -176,9 +175,9 @@ namespace MikyM.Common.DataAccessLayer.Specifications
             return this;
         }
 
-        protected Specification<T> DisableCache(int limit)
+        protected Specification<T> WithCaching(bool withCaching = true)
         {
-            CacheEnabled = false;
+            this.Query.WithCaching(withCaching);
             return this;
         }
 

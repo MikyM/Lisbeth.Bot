@@ -105,11 +105,11 @@ namespace MikyM.Common.DataAccessLayer.Specifications
         Func<IEnumerable<T>, IEnumerable<T>>? PostProcessingAction { get; }
 
         /// <summary>
-        ///     Return whether or not the results should be cached.
+        ///     Whether or not the results should be cached, setting this will override default caching settings for this query.
+        ///     Defaults to null - no override.
         /// </summary>
-        bool CacheEnabled { get; }
+        bool? IsCacheEnabled { get; }
 
-        string? CacheKey { get; }
         bool IsPagingEnabled { get; }
 
         /// <summary>
