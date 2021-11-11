@@ -15,11 +15,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using AutoMapper.QueryableExtensions;
 using MikyM.Common.DataAccessLayer.Specifications.Evaluators;
+using System.Collections.Generic;
+using System.Linq;
+using EFCoreSecondLevelCacheInterceptor;
 
 namespace MikyM.Common.DataAccessLayer.Specifications
 {
@@ -52,12 +52,32 @@ namespace MikyM.Common.DataAccessLayer.Specifications
         {
             query = GetQuery(query, (ISpecification<T>)specification);
 
-            return query.ProjectTo<TResult>();
+            if (specification.MembersToExpand is not null)
+            {
+                return specification.MapperConfiguration is null
+                    ? query.ProjectTo<TResult>(specification.MembersToExpand.ToArray())
+                    : query.ProjectTo<TResult>(specification.MapperConfiguration,
+                        specification.MembersToExpand.ToArray());
+            }
+
+            if (specification.StringMembersToExpand is not null)
+            {
+                return specification.MapperConfiguration is null
+                    ? query.ProjectTo<TResult>(null, specification.StringMembersToExpand.ToArray())
+                    : query.ProjectTo<TResult>(specification.MapperConfiguration, null,
+                        specification.StringMembersToExpand.ToArray());
+            }
+
+            return specification.MapperConfiguration is not null
+                ? query.ProjectTo<TResult>(specification.MapperConfiguration)
+                : query.ProjectTo<TResult>();
         }
 
         public virtual IQueryable<T> GetQuery<T>(IQueryable<T> query, ISpecification<T> specification,
             bool evaluateCriteriaOnly = false) where T : class
         {
+            query = !specification.CacheEnabled ? query.NotCacheable() : query.Cacheable();
+
             return (evaluateCriteriaOnly ? _evaluators.Where(x => x.IsCriteriaEvaluator) : _evaluators)
                 .Aggregate(query, (current, evaluator) => evaluator.GetQuery(current, specification));
         }

@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using AutoMapper;
 using MikyM.Common.DataAccessLayer.Specifications.Builders;
 using MikyM.Common.DataAccessLayer.Specifications.Evaluators;
 using MikyM.Common.DataAccessLayer.Specifications.Helpers;
@@ -50,8 +51,11 @@ namespace MikyM.Common.DataAccessLayer.Specifications
         {
             return Evaluator.Evaluate(entities, this);
         }
-        
-        public new Func<IEnumerable<TResult>, IEnumerable<TResult>>? PostProcessingAction { get; internal set; } = null;
+
+        public MapperConfiguration? MapperConfiguration { get; }
+        public IEnumerable<Expression<Func<TResult, object>>>? MembersToExpand { get; }
+        public IEnumerable<string>? StringMembersToExpand { get; }
+        public new Func<IEnumerable<TResult>, IEnumerable<TResult>>? PostProcessingAction { get; internal set; }
     }
 
     /// <inheritdoc cref="ISpecification{T}" />
@@ -80,21 +84,25 @@ namespace MikyM.Common.DataAccessLayer.Specifications
             return Evaluator.Evaluate(entities, this);
         }
 
-        public IEnumerable<Expression<Func<T, bool>>> WhereExpressions { get; } = new List<Expression<Func<T, bool>>>();
+        public IEnumerable<Expression<Func<T, bool>>>? WhereExpressions { get; internal set; }
 
-        public IEnumerable<(Expression<Func<T, object>> KeySelector, OrderTypeEnum OrderType)>
-            OrderExpressions { get; } = new List<(Expression<Func<T, object>> KeySelector, OrderTypeEnum OrderType)>();
+        public IEnumerable<(Expression<Func<T, object>> KeySelector, OrderTypeEnum OrderType)>? OrderExpressions
+        {
+            get;
+            internal set;
+        }
 
-        public IEnumerable<IncludeExpressionInfo> IncludeExpressions { get; } = new List<IncludeExpressionInfo>();
+        public IEnumerable<IncludeExpressionInfo>? IncludeExpressions { get; internal set; }
 
         public Expression<Func<T, object>>? GroupByExpression { get; internal set; }
 
-        public IEnumerable<string> IncludeStrings { get; } = new List<string>();
+        public IEnumerable<string>? IncludeStrings { get; internal set; }
 
-        public IEnumerable<(Expression<Func<T, string>> Selector, string SearchTerm, int SearchGroup)> SearchCriterias
+        public IEnumerable<(Expression<Func<T, string>> Selector, string SearchTerm, int SearchGroup)>? SearchCriterias
         {
             get;
-        } = new List<(Expression<Func<T, string>> Selector, string SearchTerm, int SearchGroup)>();
+            internal set;
+        }
 
         public int? Take { get; internal set; }
 
@@ -102,7 +110,7 @@ namespace MikyM.Common.DataAccessLayer.Specifications
 
         public Func<IEnumerable<T>, IEnumerable<T>>? PostProcessingAction { get; internal set; }
         public string? CacheKey { get; internal set; }
-        public bool CacheEnabled { get; internal set; }
+        public bool CacheEnabled { get; internal set; } = true;
         public bool IsPagingEnabled { get; internal set; }
         public bool AsNoTracking { get; internal set; } = true;
         public bool AsSplitQuery { get; internal set; }

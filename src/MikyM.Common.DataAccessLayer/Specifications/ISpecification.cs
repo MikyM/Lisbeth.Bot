@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using AutoMapper;
 using MikyM.Common.DataAccessLayer.Specifications.Helpers;
 
 namespace MikyM.Common.DataAccessLayer.Specifications
@@ -30,6 +31,12 @@ namespace MikyM.Common.DataAccessLayer.Specifications
     /// <typeparam name="TResult">The type of the result to project results to with Automapper's ProjectTo.</typeparam>
     public interface ISpecification<T, TResult> : ISpecification<T> where T : class
     {
+        MapperConfiguration? MapperConfiguration { get; }
+
+        IEnumerable<Expression<Func<TResult, object>>>? MembersToExpand { get; }
+
+        IEnumerable<string>? StringMembersToExpand { get; }
+
         /// <summary>
         ///     The transform function to apply to the result of the query encapsulated by the
         ///     <see cref="ISpecification{T, TResult}" />.
@@ -46,7 +53,7 @@ namespace MikyM.Common.DataAccessLayer.Specifications
         /// <summary>
         ///     The collection of predicates to filter on.
         /// </summary>
-        IEnumerable<Expression<Func<T, bool>>> WhereExpressions { get; }
+        IEnumerable<Expression<Func<T, bool>>>? WhereExpressions { get; }
 
         /// <summary>
         ///     The collection of predicates to group by.

@@ -29,6 +29,7 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Builders
             this ISpecificationBuilder<T> specificationBuilder,
             Expression<Func<T, bool>> criteria) where T : class
         {
+            specificationBuilder.Specification.WhereExpressions ??= new List<Expression<Func<T, bool>>>();
             ((List<Expression<Func<T, bool>>>)specificationBuilder.Specification.WhereExpressions).Add(criteria);
 
             return specificationBuilder;
@@ -47,6 +48,8 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Builders
             this ISpecificationBuilder<T> specificationBuilder,
             Expression<Func<T, object?>> orderExpression) where T : class
         {
+            specificationBuilder.Specification.OrderExpressions ??=
+                new List<(Expression<Func<T, object>> KeySelector, OrderTypeEnum OrderType)>();
             ((List<(Expression<Func<T, object?>> OrderExpression, OrderTypeEnum OrderType)>) specificationBuilder
                     .Specification.OrderExpressions)
                 .Add((orderExpression, OrderTypeEnum.OrderBy));
@@ -58,6 +61,8 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Builders
             this ISpecificationBuilder<T> specificationBuilder,
             Expression<Func<T, object?>> orderExpression) where T : class
         {
+            specificationBuilder.Specification.OrderExpressions ??=
+                new List<(Expression<Func<T, object>> KeySelector, OrderTypeEnum OrderType)>();
             ((List<(Expression<Func<T, object?>> OrderExpression, OrderTypeEnum OrderType)>) specificationBuilder
                     .Specification.OrderExpressions)
                 .Add((orderExpression, OrderTypeEnum.OrderByDescending));
@@ -71,6 +76,7 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Builders
         {
             var info = new IncludeExpressionInfo(includeExpression, typeof(T), typeof(TProperty));
 
+            specificationBuilder.Specification.IncludeExpressions ??= new List<IncludeExpressionInfo>();
             ((List<IncludeExpressionInfo>) specificationBuilder.Specification.IncludeExpressions).Add(info);
 
             return new IncludableSpecificationBuilder<T, TProperty>(specificationBuilder.Specification);
@@ -80,6 +86,7 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Builders
             this ISpecificationBuilder<T> specificationBuilder,
             string includeString) where T : class
         {
+            specificationBuilder.Specification.IncludeStrings ??= new List<string>(); 
             ((List<string>) specificationBuilder.Specification.IncludeStrings).Add(includeString);
             return specificationBuilder;
         }
@@ -91,9 +98,10 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Builders
             string searchTerm,
             int searchGroup = 1) where T : class
         {
-            ((List<(Expression<Func<T, string>> Selector, string SearchTerm, int SearchGroup)>) specificationBuilder
-                    .Specification.SearchCriterias)
-                .Add((selector, searchTerm, searchGroup));
+            specificationBuilder.Specification.SearchCriterias ??=
+                new List<(Expression<Func<T, string>> Selector, string SearchTerm, int SearchGroup)>();
+            ((List<(Expression<Func<T, string>> Selector, string SearchTerm, int SearchGroup)>)specificationBuilder
+                .Specification.SearchCriterias).Add((selector, searchTerm, searchGroup));
 
             return specificationBuilder;
         }
@@ -160,21 +168,14 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Builders
         }
 
         /// <summary>
-        ///     Must be called after specifying criteria
+        ///     Disables caching.
         /// </summary>
         /// <param name="specificationName"></param>
         /// <param name="args">Any arguments used in defining the specification</param>
-        public static ICacheSpecificationBuilder<T> EnableCache<T>(
-            this ISpecificationBuilder<T> specificationBuilder,
-            string specificationName, params object[] args) where T : class
+        public static ICacheSpecificationBuilder<T> DisablesCache<T>(
+            this ISpecificationBuilder<T> specificationBuilder) where T : class
         {
-            if (string.IsNullOrEmpty(specificationName))
-                throw new ArgumentException($"Required input {specificationName} was null or empty.",
-                    specificationName);
-
-            specificationBuilder.Specification.CacheKey = $"{specificationName}-{string.Join("-", args)}";
-
-            specificationBuilder.Specification.CacheEnabled = true;
+            specificationBuilder.Specification.CacheEnabled = false;
 
             return new CacheSpecificationBuilder<T>(specificationBuilder.Specification);
         }

@@ -33,6 +33,7 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Builders
             var info = new IncludeExpressionInfo(thenIncludeExpression, typeof(TEntity), typeof(TProperty),
                 typeof(TPreviousProperty));
 
+            previousBuilder.Specification.IncludeExpressions ??= new List<IncludeExpressionInfo>();
             ((List<IncludeExpressionInfo>) previousBuilder.Specification.IncludeExpressions).Add(info);
 
             var includeBuilder = new IncludableSpecificationBuilder<TEntity, TProperty>(previousBuilder.Specification);
@@ -49,6 +50,7 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Builders
             var info = new IncludeExpressionInfo(thenIncludeExpression, typeof(TEntity), typeof(TProperty),
                 typeof(TPreviousProperty));
 
+            previousBuilder.Specification.IncludeExpressions ??= new List<IncludeExpressionInfo>();
             ((List<IncludeExpressionInfo>) previousBuilder.Specification.IncludeExpressions).Add(info);
 
             var includeBuilder = new IncludableSpecificationBuilder<TEntity, TProperty>(previousBuilder.Specification);

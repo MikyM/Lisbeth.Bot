@@ -25,9 +25,4 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators
 
         IQueryable<T> GetQuery<T>(IQueryable<T> query, ISpecification<T> specification) where T : class;
     }
-
-    public interface IEvaluator<TResult> : IEvaluator
-    {
-        IQueryable<T> GetQuery<T>(IQueryable<T> query, ISpecification<T, TResult> specification) where T : class;
-    }
 }

@@ -12,7 +12,6 @@
     <PackageReference Include="AspNetCoreRateLimit" Version="4.0.1" />
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="7.2.0" />
     <PackageReference Include="EasyCaching.InMemory" Version="1.4.1" />
-    <PackageReference Include="EFCoreSecondLevelCacheInterceptor" Version="3.2.0" />
     <PackageReference Include="Hangfire.AspNetCore" Version="1.7.27" />
     <PackageReference Include="HangFire.Autofac" Version="2.3.1" />
     <PackageReference Include="Hangfire.PostgreSql" Version="1.8.6" />

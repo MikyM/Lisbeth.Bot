@@ -28,6 +28,8 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Builders
             this IOrderedSpecificationBuilder<T> orderedBuilder,
             Expression<Func<T, object?>> orderExpression) where T : class
         {
+            orderedBuilder.Specification.OrderExpressions ??=
+                new List<(Expression<Func<T, object>> KeySelector, OrderTypeEnum OrderType)>();
             ((List<(Expression<Func<T, object?>> OrderExpression, OrderTypeEnum OrderType)>) orderedBuilder
                     .Specification.OrderExpressions)
                 .Add((orderExpression, OrderTypeEnum.ThenBy));
@@ -39,6 +41,8 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Builders
             this IOrderedSpecificationBuilder<T> orderedBuilder,
             Expression<Func<T, object?>> orderExpression) where T : class
         {
+            orderedBuilder.Specification.OrderExpressions ??=
+                new List<(Expression<Func<T, object>> KeySelector, OrderTypeEnum OrderType)>();
             ((List<(Expression<Func<T, object?>> OrderExpression, OrderTypeEnum OrderType)>) orderedBuilder
                     .Specification.OrderExpressions)
                 .Add((orderExpression, OrderTypeEnum.ThenByDescending));
