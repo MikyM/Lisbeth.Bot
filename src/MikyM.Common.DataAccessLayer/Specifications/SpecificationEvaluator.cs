@@ -36,7 +36,7 @@ namespace MikyM.Common.DataAccessLayer.Specifications
                 WhereEvaluator.Instance, SearchEvaluator.Instance, IncludeEvaluator.Instance,
                 OrderEvaluator.Instance, PaginationEvaluator.Instance, AsNoTrackingEvaluator.Instance,
                 AsSplitQueryEvaluator.Instance, AsNoTrackingWithIdentityResolutionEvaluator.Instance,
-                GroupByEvaluator.Instance
+                GroupByEvaluator.Instance, CachingEvaluator.Instance
             });
         }
 
@@ -59,8 +59,6 @@ namespace MikyM.Common.DataAccessLayer.Specifications
         public virtual IQueryable<T> GetQuery<T>(IQueryable<T> query, ISpecification<T> specification,
             PaginationFilter? paginationFilter = null, bool evaluateCriteriaOnly = false) where T : class
         {
-            if (specification.IsCacheEnabled.HasValue) query = !specification.IsCacheEnabled.Value ? query.NotCacheable() : query.Cacheable();
-
             if (paginationFilter is not null && specification.PaginationFilter is null) ((Specification<T>)specification).PaginationFilter = paginationFilter;
             
             return (evaluateCriteriaOnly ? _evaluators.Where(x => x.IsCriteriaEvaluator) : _evaluators)
