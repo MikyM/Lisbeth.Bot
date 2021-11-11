@@ -32,7 +32,7 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators
 
         public IQueryable<T> GetQuery<T>(IQueryable<T> query, ISpecification<T> specification) where T : class
         {
-            if (specification.AsNoTrackingWithIdentityResolution) query = query.AsNoTrackingWithIdentityResolution();
+            if (specification.IsAsNoTrackingWithIdentityResolution) query = query.AsNoTrackingWithIdentityResolution();
 
             return query;
         }
