@@ -83,7 +83,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             else if (req.Id.HasValue)
             {
                 var tag = await _tagService.GetAsync<Tag>(req.Id.Value);
-                if (!tag.IsSuccess) return Result<DiscordEmbed>.FromError(tag);
+                if (!tag.IsDefined()) return Result<DiscordEmbed>.FromError(tag);
                 guild = await _discord.Client.GetGuildAsync(tag.Entity.GuildId);
             }
 
@@ -114,7 +114,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             else if (req.Id.HasValue)
             {
                 var tag = await _tagService.GetAsync<Tag>(req.Id.Value);
-                if (!tag.IsSuccess) return Result<(DiscordEmbed? Embed, string Text)>.FromError(tag);
+                if (!tag.IsDefined()) return Result<(DiscordEmbed? Embed, string Text)>.FromError(tag);
                 guild = await _discord.Client.GetGuildAsync(tag.Entity.GuildId);
             }
 
@@ -145,7 +145,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             else if (req.Id.HasValue)
             {
                 var tag = await _tagService.GetAsync<Tag>(req.Id.Value);
-                if (!tag.IsSuccess) return Result<(DiscordEmbed? Embed, string Text)>.FromError(tag);
+                if (!tag.IsDefined()) return Result<(DiscordEmbed? Embed, string Text)>.FromError(tag);
                 guild = await _discord.Client.GetGuildAsync(tag.Entity.GuildId);
             }
 
@@ -178,7 +178,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             else if (req.Id.HasValue)
             {
                 var tag = await _tagService.GetAsync<Tag>(req.Id.Value);
-                if (!tag.IsSuccess) return Result<DiscordEmbed>.FromError(tag);
+                if (!tag.IsDefined()) return Result<DiscordEmbed>.FromError(tag);
                 guild = await _discord.Client.GetGuildAsync(tag.Entity.GuildId);
             }
 
@@ -215,7 +215,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     partial = await _tagService.GetSingleBySpecAsync<Tag>(
                         new Specification<Tag>(x => x.Name == req.Name));
 
-                if (!partial.IsSuccess) return Result<(DiscordEmbed? Embed, string Text)>.FromError(partial);
+                if (!partial.IsDefined()) return Result<(DiscordEmbed? Embed, string Text)>.FromError(partial);
 
                 tag = partial.Entity;
             }
@@ -224,7 +224,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 var guildCfg =
                     await _guildService.GetSingleBySpecAsync<Guild>(
                         new ActiveGuildByDiscordIdWithTagsSpecifications(guild.Id));
-                if (!guildCfg.IsSuccess)
+                if (!guildCfg.IsDefined())
                     return Result<(DiscordEmbed? Embed, string Text)>.FromError(guildCfg);
                 if (requestingUser.Guild.Id != guild.Id) return new DiscordNotAuthorizedError();
 
@@ -257,7 +257,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             var guildCfg =
                 await _guildService.GetSingleBySpecAsync<Guild>(
                     new ActiveGuildByDiscordIdWithTagsSpecifications(req.GuildId));
-            if (!guildCfg.IsSuccess)
+            if (!guildCfg.IsDefined())
                 return Result<DiscordEmbed>.FromError(guildCfg);
 
             if (!creator.IsModerator())
@@ -284,7 +284,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             var guildCfg =
                 await _guildService.GetSingleBySpecAsync<Guild>(
                     new ActiveGuildByDiscordIdWithTagsSpecifications(guild.Id));
-            if (!guildCfg.IsSuccess)
+            if (!guildCfg.IsDefined())
                 return Result<DiscordEmbed>.FromError(guildCfg);
 
             if (!requestingUser.IsModerator())
@@ -316,7 +316,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     partial = await _tagService.GetSingleBySpecAsync<Tag>(
                         new Specification<Tag>(x => x.Name == req.Name));
 
-                if (!partial.IsSuccess) return Result<(DiscordEmbed? Embed, string Text)>.FromError(partial);
+                if (!partial.IsDefined()) return Result<(DiscordEmbed? Embed, string Text)>.FromError(partial);
 
                 tag = partial.Entity;
             }
@@ -325,7 +325,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 var guildCfg =
                     await _guildService.GetSingleBySpecAsync<Guild>(
                         new ActiveGuildByDiscordIdWithTagsSpecifications(guild.Id));
-                if (!guildCfg.IsSuccess)
+                if (!guildCfg.IsDefined())
                     return Result<(DiscordEmbed? Embed, string Text)>.FromError(guildCfg);
 
                 if (requestingUser.Guild.Id != guild.Id) return new DiscordNotAuthorizedError();
@@ -355,7 +355,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             var guildCfg =
                 await _guildService.GetSingleBySpecAsync<Guild>(
                     new ActiveGuildByDiscordIdWithTagsSpecifications(guild.Id));
-            if (!guildCfg.IsSuccess)
+            if (!guildCfg.IsDefined())
                 return Result<DiscordEmbed>.FromError(guildCfg);
 
             if (!requestingUser.IsModerator())

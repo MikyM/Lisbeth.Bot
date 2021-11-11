@@ -91,7 +91,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     throw new ArgumentOutOfRangeException(nameof(actionType), actionType, null);
             }
 
-            if (result.IsSuccess)
+            if (result.IsDefined())
                 await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
                     .AddEmbed(result.Entity)
                     .AsEphemeral(true));

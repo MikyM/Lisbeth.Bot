@@ -48,7 +48,7 @@ namespace Lisbeth.Bot.Application.Services.Database
             var res = await base.GetSingleBySpecAsync<Ticket>(
                 new TicketBaseGetSpecifications(null, null, guildId, channelId, null, false, 1));
 
-            if (!res.IsSuccess) return Result.FromSuccess();
+            if (!res.IsDefined()) return Result.FromSuccess();
 
             var req = new TicketCloseReqDto(res.Entity.Id, res.Entity.UserId, res.Entity.GuildId, res.Entity.ChannelId,
                 requestedOnBehalfOfId);
@@ -64,7 +64,7 @@ namespace Lisbeth.Bot.Application.Services.Database
             var res = await base.GetSingleBySpecAsync<Ticket>(new TicketBaseGetSpecifications(req.Id, req.OwnerId,
                 req.GuildId, req.ChannelId, req.GuildSpecificId));
 
-            if (!res.IsSuccess) return Result<Ticket>.FromError(res);
+            if (!res.IsDefined()) return Result<Ticket>.FromError(res);
 
             base.BeginUpdate(res.Entity);
             res.Entity.ClosedById = req.RequestedOnBehalfOfId;
@@ -98,7 +98,7 @@ namespace Lisbeth.Bot.Application.Services.Database
             var res = await base.GetSingleBySpecAsync<Ticket>(
                 new TicketBaseGetSpecifications(null, req.RequestedOnBehalfOfId, req.GuildId));
 
-            if (res.IsSuccess) return new InvalidOperationError("User already has an opened ticket in this guild");
+            if (res.IsDefined()) return new InvalidOperationError("User already has an opened ticket in this guild");
 
             var id = await base.AddAsync(req, true);
 
@@ -128,7 +128,7 @@ namespace Lisbeth.Bot.Application.Services.Database
             var res = await base.GetSingleBySpecAsync<Ticket>(new TicketBaseGetSpecifications(req.Id, req.OwnerId,
                 req.GuildId, req.ChannelId, req.GuildSpecificId, true));
 
-            if (!res.IsSuccess) return Result<Ticket>.FromError(res);
+            if (!res.IsDefined()) return Result<Ticket>.FromError(res);
 
             base.BeginUpdate(res.Entity);
             res.Entity.ReopenedById = req.RequestedOnBehalfOfId;
@@ -178,7 +178,7 @@ namespace Lisbeth.Bot.Application.Services.Database
 
             var isPrivateRes = await IsTicketPrivateAsync(ticket, guild);
 
-            if (isPrivateRes.IsSuccess && isPrivateRes.Entity == ticket.IsPrivate) return Result.FromSuccess();
+            if (isPrivateRes.IsDefined() && isPrivateRes.Entity == ticket.IsPrivate) return Result.FromSuccess();
 
             ticket.IsPrivate = isPrivateRes.Entity;
 

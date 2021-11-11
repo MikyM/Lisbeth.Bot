@@ -58,7 +58,7 @@ namespace Lisbeth.Bot.Application.Services.Database
         {
             var result = await base.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(req.GuildId));
-            if (!result.IsSuccess) return Result<Guild>.FromError(new NotFoundError());
+            if (!result.IsDefined()) return Result<Guild>.FromError(new NotFoundError());
             if (result.Entity.TicketingConfig is not null && result.Entity.TicketingConfig.IsDisabled)
                 return await EnableConfigAsync(req.GuildId, GuildConfigType.Ticketing, shouldSave);
             if (result.Entity.TicketingConfig is not null && !result.Entity.TicketingConfig.IsDisabled)
@@ -73,7 +73,7 @@ namespace Lisbeth.Bot.Application.Services.Database
         {
             var result = await base.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithModerationSpecifications(req.GuildId));
-            if (!result.IsSuccess) throw new NotFoundException("Guild doesn't exist in the database");
+            if (!result.IsDefined()) throw new NotFoundException("Guild doesn't exist in the database");
             if (result.Entity.ModerationConfig is not null && result.Entity.ModerationConfig.IsDisabled)
                 return await EnableConfigAsync(req.GuildId, GuildConfigType.Moderation, shouldSave);
             if (result.Entity.ModerationConfig is not null && !result.Entity.ModerationConfig.IsDisabled)
@@ -92,7 +92,7 @@ namespace Lisbeth.Bot.Application.Services.Database
                 case GuildConfigType.Ticketing:
                     result = await base.GetSingleBySpecAsync<Guild>(
                         new ActiveGuildByDiscordIdWithTicketingSpecifications(guildId));
-                    if (!result.IsSuccess || result.Entity.TicketingConfig is null)
+                    if (!result.IsDefined() || result.Entity.TicketingConfig is null)
                         return Result.FromError(new NotFoundError());
                     if (result.Entity.IsDisabled)
                         return Result.FromError(new DisabledEntityError(nameof(result.Entity.TicketingConfig)));
@@ -102,7 +102,7 @@ namespace Lisbeth.Bot.Application.Services.Database
                 case GuildConfigType.Moderation:
                     result = await base.GetSingleBySpecAsync<Guild>(
                         new ActiveGuildByDiscordIdWithModerationSpecifications(guildId));
-                    if (!result.IsSuccess || result.Entity.ModerationConfig is null)
+                    if (!result.IsDefined() || result.Entity.ModerationConfig is null)
                         return Result.FromError(new NotFoundError());
                     if (result.Entity.IsDisabled)
                         return Result.FromError(new DisabledEntityError(nameof(result.Entity.ModerationConfig)));
@@ -124,7 +124,7 @@ namespace Lisbeth.Bot.Application.Services.Database
                 case GuildConfigType.Ticketing:
                     result = await base.GetSingleBySpecAsync<Guild>(
                         new ActiveGuildByDiscordIdWithTicketingSpecifications(guildId));
-                    if (!result.IsSuccess || result.Entity.TicketingConfig is null)
+                    if (!result.IsDefined() || result.Entity.TicketingConfig is null)
                         return Result<Guild>.FromError(new NotFoundError());
                     if (!result.Entity.IsDisabled)
                         return Result<Guild>.FromError(new DisabledEntityError(nameof(result.Entity.TicketingConfig)));
@@ -137,7 +137,7 @@ namespace Lisbeth.Bot.Application.Services.Database
                 case GuildConfigType.Moderation:
                     result = await base.GetSingleBySpecAsync<Guild>(
                         new ActiveGuildByDiscordIdWithModerationSpecifications(guildId));
-                    if (!result.IsSuccess || result.Entity.ModerationConfig is null)
+                    if (!result.IsDefined() || result.Entity.ModerationConfig is null)
                         return Result<Guild>.FromError(new NotFoundError());
                     if (!result.Entity.IsDisabled)
                         return Result<Guild>.FromError(new DisabledEntityError(nameof(result.Entity.ModerationConfig)));
@@ -158,7 +158,7 @@ namespace Lisbeth.Bot.Application.Services.Database
         {
             var result = await base.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(req.GuildId));
-            if (!result.IsSuccess || result.Entity.TicketingConfig is null)
+            if (!result.IsDefined() || result.Entity.TicketingConfig is null)
                 return Result.FromError(new NotFoundError());
             if (result.Entity.TicketingConfig.IsDisabled)
                 return Result.FromError(new DisabledEntityError(nameof(result.Entity.TicketingConfig)));
@@ -178,7 +178,7 @@ namespace Lisbeth.Bot.Application.Services.Database
         {
             var result = await base.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(req.GuildId));
-            if (!result.IsSuccess || result.Entity.TicketingConfig is null)
+            if (!result.IsDefined() || result.Entity.TicketingConfig is null)
                 return Result.FromError(new NotFoundError());
             if (result.Entity.TicketingConfig.IsDisabled)
                 return Result.FromError(new DisabledEntityError(nameof(result.Entity.TicketingConfig)));
@@ -199,7 +199,7 @@ namespace Lisbeth.Bot.Application.Services.Database
         {
             var result = await base.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(req.GuildId));
-            if (!result.IsSuccess || result.Entity.ModerationConfig is null)
+            if (!result.IsDefined() || result.Entity.ModerationConfig is null)
                 return Result.FromError(new NotFoundError());
             if (result.Entity.ModerationConfig.IsDisabled)
                 return Result.FromError(new DisabledEntityError(nameof(result.Entity.ModerationConfig)));

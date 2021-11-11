@@ -144,7 +144,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                             {
                                 case ReminderType.Single:
                                     var res = await _reminderEmbedConfiguratorService!.ConfigureAsync(ctx, name);
-                                    if (res.IsSuccess)
+                                    if (res.IsDefined())
                                         await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(res.Entity));
                                     else
                                         await ctx.EditResponseAsync(
@@ -154,7 +154,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                                 case ReminderType.Recurring:
                                     var resRec =
                                         await _recurringReminderEmbedConfiguratorService!.ConfigureAsync(ctx, name);
-                                    if (resRec.IsSuccess)
+                                    if (resRec.IsDefined())
                                         await ctx.EditResponseAsync(
                                             new DiscordWebhookBuilder().AddEmbed(resRec.Entity));
                                     else
@@ -179,7 +179,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     break;
             }
 
-            if (result.IsSuccess) await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(result.Entity));
+            if (result.IsDefined()) await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(result.Entity));
             else
                 await ctx.EditResponseAsync(
                     new DiscordWebhookBuilder().AddEmbed(GetUnsuccessfulResultEmbed(result, ctx.Client)));

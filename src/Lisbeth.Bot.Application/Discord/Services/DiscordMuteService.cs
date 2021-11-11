@@ -97,7 +97,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (req.Id.HasValue)
             {
                 var result = await _muteService.GetAsync<Mute>(req.Id.Value);
-                if (!result.IsSuccess) return Result<DiscordEmbed>.FromError(new NotFoundError());
+                if (!result.IsDefined()) return Result<DiscordEmbed>.FromError(new NotFoundError());
                 req.GuildId = result.Entity.GuildId;
                 req.TargetUserId = result.Entity.UserId;
             }
@@ -144,7 +144,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (req.Id.HasValue)
             {
                 var result = await _muteService.GetAsync<Mute>(req.Id.Value);
-                if (!result.IsSuccess) return Result<DiscordEmbed>.FromError(new NotFoundError());
+                if (!result.IsDefined()) return Result<DiscordEmbed>.FromError(new NotFoundError());
                 var mute = result.Entity;
                 req.GuildId = mute.GuildId;
                 req.TargetUserId = mute.UserId;
@@ -195,7 +195,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 var res = await _muteService.GetBySpecAsync<Mute>(
                     new ActiveExpiredMutesInActiveGuildsSpecifications());
 
-                if (!res.IsSuccess || res.Entity.Count == 0) return Result.FromSuccess();
+                if (!res.IsDefined() || res.Entity.Count == 0) return Result.FromSuccess();
 
                 foreach (var mute in res.Entity)
                 {
@@ -228,7 +228,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 await _guildService.GetSingleBySpecAsync<Guild>(
                     new Specification<Guild>(x => x.GuildId == guild.Id && !x.IsDisabled));
 
-            if (!result.IsSuccess)
+            if (!result.IsDefined())
                 return Result<DiscordEmbed>.FromError(new DiscordNotFoundError(DiscordEntityType.Guild));
 
             var guildCfg = result.Entity;
@@ -384,7 +384,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 await _guildService.GetSingleBySpecAsync<Guild>(
                     new Specification<Guild>(x => x.GuildId == guild.Id && !x.IsDisabled));
 
-            if (!result.IsSuccess)
+            if (!result.IsDefined())
                 return Result<DiscordEmbed>.FromError(new DiscordNotFoundError(DiscordEntityType.Guild));
 
             var guildCfg = result.Entity;
@@ -408,7 +408,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             var res = await _muteService.DisableAsync(req);
 
-            if (res.IsSuccess)
+            if (!res.IsDefined())
             {
                 if (isMuted)
                 {
@@ -472,7 +472,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 await _guildService.GetSingleBySpecAsync<Guild>(
                     new Specification<Guild>(x => x.GuildId == guild.Id && !x.IsDisabled));
 
-            if (!result.IsSuccess)
+            if (!result.IsDefined())
                 return Result<DiscordEmbed>.FromError(new DiscordNotFoundError(DiscordEntityType.Guild));
 
             var guildCfg = result.Entity;
@@ -497,7 +497,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             var embed = new DiscordEmbedBuilder();
             embed.WithColor(0x18315C);
 
-            if (res.IsSuccess)
+            if (res.IsDefined())
             {
                 var mute = res.Entity;
                 DiscordUser? mutingMod = null;

@@ -74,7 +74,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             var entityResult = await _service.GetSingleBySpecAsync<T>(
                 new ActiveWithEmbedCfgByIdOrNameSpecifications<T>(isValidId ? id : null, idOrName, ctx.Guild.Id));
 
-            if (!entityResult.IsSuccess) return Result<DiscordEmbed>.FromError(new NotFoundError());
+            if (!entityResult.IsDefined()) return Result<DiscordEmbed>.FromError(new NotFoundError());
             if (entityResult.Entity.GuildId != ctx.Guild.Id)
                 return Result<DiscordEmbed>.FromError(new DiscordNotAuthorizedError());
             var member = await ctx.Guild.GetMemberAsync(ctx.User.Id);
@@ -176,7 +176,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     _ => new Result<DiscordEmbedBuilder>()
                 };
 
-                if (result.IsSuccess)
+                if (result.IsDefined())
                 {
                     resultEmbed = result.Entity;
                 }

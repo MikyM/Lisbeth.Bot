@@ -67,7 +67,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 var res = await _banService.GetBySpecAsync<Ban>(
                     new ActiveExpiredBansInActiveGuildsSpecifications());
 
-                if (!res.IsSuccess) return Result.FromSuccess();
+                if (!res.IsDefined()) return Result.FromSuccess();
 
                 foreach (var ban in res.Entity)
                 {
@@ -128,7 +128,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (req.Id.HasValue)
             {
                 var res = await _banService.GetAsync<Ban>(req.Id.Value);
-                if (!res.IsSuccess) return Result<DiscordEmbed>.FromError(res);
+                if (!res.IsDefined()) return Result<DiscordEmbed>.FromError(res);
                 req.GuildId = res.Entity.GuildId;
                 req.TargetUserId = res.Entity.UserId;
             }
@@ -168,7 +168,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     {
                         var res = await _banService.GetAsync<Ban>(req.Id ?? throw new InvalidOperationException());
 
-                        if (res.IsSuccess)
+                        if (res.IsDefined())
                             target = await _discord.Client.GetUserAsync(res.Entity.UserId);
                         else
                             return Result<DiscordEmbed>.FromError(res);
@@ -193,7 +193,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (req.Id.HasValue)
             {
                 var ban = await _banService.GetAsync<Ban>(req.Id.Value);
-                if (!ban.IsSuccess) return Result<DiscordEmbed>.FromError(ban);
+                if (!ban.IsDefined()) return Result<DiscordEmbed>.FromError(ban);
                 req.GuildId = ban.Entity.GuildId;
                 req.TargetUserId = ban.Entity.UserId;
                 req.AppliedById = ban.Entity.AppliedById;
@@ -236,7 +236,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     {
                         var res = await _banService.GetAsync<Ban>(req.Id ?? throw new InvalidOperationException());
 
-                        if (res.IsSuccess)
+                        if (res.IsDefined())
                             target = await _discord.Client.GetUserAsync(res.Entity.UserId);
                         else
                             return Result<DiscordEmbed>.FromError(res);
@@ -283,7 +283,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 await _guildService.GetSingleBySpecAsync<Guild>(
                     new ActiveGuildByDiscordIdWithModerationSpecifications(guild.Id));
 
-            if (!guildCfg.IsSuccess)
+            if (!guildCfg.IsDefined())
                 return Result<DiscordEmbed>.FromError(guildCfg);
 
             if (guildCfg.Entity.ModerationConfig is null)
@@ -400,7 +400,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 await _guildService.GetSingleBySpecAsync<Guild>(
                     new ActiveGuildByDiscordIdWithModerationSpecifications(guild.Id));
 
-            if (!result.IsSuccess)
+            if (!result.IsDefined())
                 return Result<DiscordEmbed>.FromError(result);
 
             var guildCfg = result.Entity;
@@ -435,11 +435,13 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             var res = await _banService.DisableAsync(req);
 
+            if (!res.IsDefined()) return Result<DiscordEmbed>.FromError(res);
+
             if (ban is null)
             {
                 embed.WithFooter($"Case ID: unknown  | Member ID: {target.Id}");
 
-                if (res.IsSuccess)
+                if (res.IsDefined())
                 {
                     embed.WithFooter($"Case ID: {res.Entity.Id}  | Member ID: {target.Id}");
                     await _banService.CommitAsync();
@@ -494,7 +496,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 await _guildService.GetSingleBySpecAsync<Guild>(
                     new ActiveGuildByDiscordIdWithModerationSpecifications(guild.Id));
 
-            if (!result.IsSuccess)
+            if (!result.IsDefined())
                 return Result<DiscordEmbed>.FromError(result);
 
             var guildCfg = result.Entity;
@@ -531,7 +533,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             var embed = new DiscordEmbedBuilder();
             embed.WithColor(0x18315C);
 
-            if (res.IsSuccess)
+            if (res.IsDefined())
             {
                 DiscordUser? banningMod = null;
                 try

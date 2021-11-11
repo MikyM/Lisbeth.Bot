@@ -59,7 +59,7 @@ namespace Lisbeth.Bot.Application.Services.Database
                     x.Name == req.Name && x.GuildId == req.GuildId));
             else throw new ArgumentException("Invalid tag Id/Name was provided.");
 
-            if (!tag.IsSuccess) return Result.FromError(tag);
+            if (!tag.IsDefined()) return Result.FromError(tag);
             if (tag.Entity.IsDisabled)
                 return new ArgumentError(nameof(tag.Entity),
                     "Can't update embed config for a disabled tag, enable the tag first.");
@@ -85,7 +85,7 @@ namespace Lisbeth.Bot.Application.Services.Database
                     x.Name == req.Name && x.GuildId == req.GuildId));
             else throw new ArgumentException("Invalid tag Id/Name was provided.");
 
-            if (!tag.IsSuccess) return Result.FromError(tag);
+            if (!tag.IsDefined()) return Result.FromError(tag);
             if (tag.Entity.IsDisabled) return Result.FromError(new DisabledEntityError(nameof(tag.Entity)));
 
             base.BeginUpdate(tag.Entity);

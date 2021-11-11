@@ -41,7 +41,7 @@ namespace Lisbeth.Bot.Application.Services.Database
         {
             var result = await base.GetAsync<RecurringReminder>(reminderId);
 
-            if (!result.IsSuccess) return Result.FromError(result);
+            if (!result.IsDefined()) return Result.FromError(result);
 
             result.Entity.HangfireId = hangfireId;
 
@@ -54,7 +54,7 @@ namespace Lisbeth.Bot.Application.Services.Database
         {
             var result = await base.GetSingleBySpecAsync<RecurringReminder>(
                 new ActiveRecurringReminderByNameOrIdAndGuildSpec(req.Name, req.GuildId, req.ReminderId));
-            if (!result.IsSuccess) return Result.FromError(result);
+            if (!result.IsDefined()) return Result.FromError(result);
 
             base.BeginUpdate(result.Entity);
             result.Entity.CronExpression = req.CronExpression;

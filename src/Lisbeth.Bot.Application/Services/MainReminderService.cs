@@ -145,7 +145,7 @@ namespace Lisbeth.Bot.Application.Services
             {
                 var result = await _reminderService.GetSingleBySpecAsync<Reminder>(
                     new ActiveReminderByNameOrIdAndGuildSpec(req.Name, req.GuildId, req.ReminderId));
-                if (!result.IsSuccess) return Result<ReminderResDto>.FromError(result);
+                if (!result.IsDefined()) return Result<ReminderResDto>.FromError(result);
 
                 DateTime setFor;
                 if (!string.IsNullOrWhiteSpace(req.TimeSpanExpression))
@@ -182,7 +182,7 @@ namespace Lisbeth.Bot.Application.Services
 
             var partial = await _recurringReminderService.GetSingleBySpecAsync<RecurringReminder>(
                 new ActiveRecurringReminderByNameOrIdAndGuildSpec(req.Name, req.GuildId, req.ReminderId));
-            if (!partial.IsSuccess) return Result<ReminderResDto>.FromError(partial);
+            if (!partial.IsDefined()) return Result<ReminderResDto>.FromError(partial);
 
             string jobName = $"{partial.Entity.GuildId}_{partial.Entity.Name}";
 
@@ -205,7 +205,7 @@ namespace Lisbeth.Bot.Application.Services
                 case ReminderType.Single:
                     var singleResult = await _reminderService.GetSingleBySpecAsync<Reminder>(
                         new ActiveReminderByNameOrIdAndGuildSpec(req.Name, req.GuildId, req.ReminderId));
-                    if (!singleResult.IsSuccess) return Result<ReminderResDto>.FromError(singleResult);
+                    if (!singleResult.IsDefined()) return Result<ReminderResDto>.FromError(singleResult);
 
                     bool res = BackgroundJob.Delete(singleResult.Entity.HangfireId);
 
@@ -218,7 +218,7 @@ namespace Lisbeth.Bot.Application.Services
                 case ReminderType.Recurring:
                     var recurringResult = await _recurringReminderService.GetSingleBySpecAsync<RecurringReminder>(
                         new ActiveRecurringReminderByNameOrIdAndGuildSpec(req.Name, req.GuildId, req.ReminderId));
-                    if (!recurringResult.IsSuccess) return Result<ReminderResDto>.FromError(recurringResult);
+                    if (!recurringResult.IsDefined()) return Result<ReminderResDto>.FromError(recurringResult);
 
                     RecurringJob.RemoveIfExists(recurringResult.Entity.HangfireId);
 

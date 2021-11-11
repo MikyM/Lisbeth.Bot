@@ -58,7 +58,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             var res = await _guildService.GetSingleBySpecAsync<Guild>(
                 new Specification<Guild>(x => x.GuildId == args.Guild.Id && !x.IsDisabled));
 
-            if (!res.IsSuccess || res.Entity.ModerationConfig is null) return Result.FromSuccess();
+            if (!res.IsDefined() || res.Entity.ModerationConfig is null) return Result.FromSuccess();
             if (!args.Guild.Channels.TryGetValue(res.Entity.ModerationConfig.MemberEventsLogChannelId,
                     out var logChannel)) return Result.FromSuccess();
 
@@ -118,7 +118,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 new ActiveGuildByDiscordIdWithModerationSpecifications(args.Guild.Id));
 
 
-            if (!result.IsSuccess || result.Entity.ModerationConfig?.BaseMemberWelcomeMessage is null)
+            if (!result.IsDefined() || result.Entity.ModerationConfig?.BaseMemberWelcomeMessage is null)
                 return Result.FromSuccess();
 
             var embed = new DiscordEmbedBuilder();
@@ -151,7 +151,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             var res = await _muteService.GetSingleBySpecAsync<Mute>(
                 new ActiveMutesByGuildAndUserSpecifications(args.Guild.Id, args.Member.Id));
 
-            if (!res.IsSuccess || res.Entity.Guild?.ModerationConfig is null)
+            if (!res.IsDefined() || res.Entity.Guild?.ModerationConfig is null)
                 return Result.FromSuccess(); // no mod config enabled so we don't care
 
             if (!args.Guild.Roles.TryGetValue(res.Entity.Guild.ModerationConfig.MuteRoleId, out var role))

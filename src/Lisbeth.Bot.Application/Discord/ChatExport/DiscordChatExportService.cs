@@ -68,7 +68,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
             if (req.Id.HasValue)
             {
                 var ticketResult = await _ticketService.GetAsync<Ticket>(req.Id.Value);
-                if (!ticketResult.IsSuccess)
+                if (!ticketResult.IsDefined())
                     return new NotFoundError("Opened ticket with given params doesn't exist in the database.");
 
                 ticket = ticketResult.Entity;
@@ -80,7 +80,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
             {
                 var res = await _ticketService.GetSingleBySpecAsync<Ticket>(
                     new TicketBaseGetSpecifications(null, req.OwnerId, req.GuildId, null, null, false, 1));
-                if (!res.IsSuccess)
+                if (!res.IsDefined())
                     return new NotFoundError("Opened ticket with given params doesn't exist in the database.");
 
                 ticket = res.Entity;
@@ -93,7 +93,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
                 var res = await _ticketService.GetSingleBySpecAsync<Ticket>(
                     new TicketBaseGetSpecifications(null, null, req.GuildId, null, req.GuildSpecificId.Value, false,
                         1));
-                if (!res.IsSuccess)
+                if (!res.IsDefined())
                     return new NotFoundError("Opened ticket with given params doesn't exist in the database.");
 
                 ticket = res.Entity;
@@ -105,7 +105,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
             {
                 var res = await _ticketService.GetSingleBySpecAsync<Ticket>(
                     new TicketBaseGetSpecifications(null, null, null, req.ChannelId, null, false, 1));
-                if (!res.IsSuccess)
+                if (!res.IsDefined())
                     return new NotFoundError("Opened ticket with given params doesn't exist in the database.");
 
                 ticket = res.Entity;
@@ -172,7 +172,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
                     await _guildService.GetSingleBySpecAsync<Guild>(
                         new Specification<Guild>(x => x.GuildId == guild.Id && !x.IsDisabled));
 
-                if (!resGuild.IsSuccess) return new NotFoundError("Guild doesn't exist in database.");
+                if (!resGuild.IsDefined()) return new NotFoundError("Guild doesn't exist in database.");
 
                 if (resGuild.Entity.TicketingConfig is null)
                     return new DisabledEntityError("Guild doesn't have ticketing enabled.");
@@ -184,7 +184,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport
                     var res = await _ticketService.GetSingleBySpecAsync<Ticket>(
                         new TicketBaseGetSpecifications(null, null, guild.Id, target.Id, null, false, 1, true));
 
-                    if (!res.IsSuccess) return new NotFoundError("Ticket doesn't exist in database.");
+                    if (!res.IsDefined()) return new NotFoundError("Ticket doesn't exist in database.");
 
                     ticket = res.Entity;
                 }

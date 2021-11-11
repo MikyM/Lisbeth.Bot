@@ -42,7 +42,7 @@ namespace Lisbeth.Bot.Application.Services.Database
         {
             var result = await base.GetAsync<Reminder>(reminderId);
 
-            if (!result.IsSuccess) return Result.FromError(result);
+            if (!result.IsDefined()) return Result.FromError(result);
 
             result.Entity.HangfireId = hangfireId;
 
@@ -56,7 +56,7 @@ namespace Lisbeth.Bot.Application.Services.Database
             var result =
                 await base.GetSingleBySpecAsync<Reminder>(
                     new ActiveReminderByNameOrIdAndGuildSpec(req.Name, req.GuildId, req.ReminderId));
-            if (!result.IsSuccess) return Result.FromError(result);
+            if (!result.IsDefined()) return Result.FromError(result);
 
             base.BeginUpdate(result.Entity);
             var isValid =

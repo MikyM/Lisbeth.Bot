@@ -61,10 +61,11 @@ namespace Lisbeth.Bot.Application.Discord.Services
         {
             var result = await _guildService.GetSingleBySpecAsync<Guild>(new GuildByIdSpec(args.Guild.Id));
 
-            if (!result.IsSuccess)
+            if (!result.IsDefined())
             {
                 await _guildService.AddAsync(new Guild { GuildId = args.Guild.Id, UserId = args.Guild.OwnerId }, true);
                 var embedResult = await _embedConfigService.GetAsync<EmbedConfig>(1);
+                if (!embedResult.IsDefined()) return Result.FromError(embedResult);
                 await args.Guild.Owner.SendMessageAsync(_embedProvider.ConfigureEmbed(embedResult.Entity).Build());
             }
             else
@@ -74,6 +75,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 await _guildService.CommitAsync();
 
                 var embedResult = await _embedConfigService.GetAsync<EmbedConfig>(2);
+                if (!embedResult.IsDefined()) return Result.FromError(embedResult);
                 await args.Guild.Owner.SendMessageAsync(_embedProvider.ConfigureEmbed(embedResult.Entity).Build());
             }
 
@@ -84,7 +86,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
         {
             var result = await _guildService.GetSingleBySpecAsync<Guild>(new GuildByIdSpec(args.Guild.Id));
 
-            if (result.IsSuccess) await _guildService.DisableAsync(result.Entity, true);
+            if (result.IsDefined()) await _guildService.DisableAsync(result.Entity, true);
 
             return Result.FromSuccess();
         }
@@ -207,7 +209,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             var guildResult = await _guildService.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithModerationSpecifications(req.GuildId));
 
-            if (!guildResult.IsSuccess || guildResult.Entity.ModerationConfig is null)
+            if (!guildResult.IsDefined() || guildResult.Entity.ModerationConfig is null)
                 return Result<int>.FromError(new NotFoundError());
             if (guildResult.Entity.ModerationConfig.IsDisabled)
                 return Result<int>.FromError(new DisabledEntityError(nameof(guildResult.Entity.ModerationConfig)));
@@ -228,7 +230,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             var guildResult = await _guildService.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithModerationSpecifications(req.GuildId));
 
-            if (!guildResult.IsSuccess || guildResult.Entity.ModerationConfig is null)
+            if (!guildResult.IsDefined() || guildResult.Entity.ModerationConfig is null)
                 return Result<int>.FromError(new NotFoundError());
             if (guildResult.Entity.ModerationConfig.IsDisabled)
                 return Result<int>.FromError(new DisabledEntityError(nameof(guildResult.Entity.ModerationConfig)));
@@ -261,7 +263,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             req.ClosedCategoryId = closedCat.Id;
             req.LogChannelId = ticketLogs.Id;
             var res = await _guildService.AddConfigAsync(req, true);
-            if (!res.IsSuccess) return Result<DiscordEmbed>.FromError(new InvalidOperationError());
+            if (!res.IsDefined()) return Result<DiscordEmbed>.FromError(new InvalidOperationError());
 
             var embed = new DiscordEmbedBuilder();
             embed.WithColor(new DiscordColor(res.Entity.EmbedHexColor));
@@ -309,7 +311,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             req.ModerationLogChannelId = moderationChannelLog.Id;
             req.MuteRoleId = mutedRole.Id;
             var res = await _guildService.AddConfigAsync(req, true);
-            if (!res.IsSuccess) return Result<DiscordEmbed>.FromError(new InvalidOperationError());
+            if (!res.IsDefined()) return Result<DiscordEmbed>.FromError(new InvalidOperationError());
 
             var embed = new DiscordEmbedBuilder();
             embed.WithColor(new DiscordColor(res.Entity.EmbedHexColor));
@@ -345,7 +347,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 case GuildConfigType.Ticketing:
                     guildResult = await _guildService.GetSingleBySpecAsync<Guild>(
                         new ActiveGuildByDiscordIdWithTicketingSpecifications(discordGuild.Id));
-                    if (!guildResult.IsSuccess || guildResult.Entity.TicketingConfig is null)
+                    if (!guildResult.IsDefined() || guildResult.Entity.TicketingConfig is null)
                         return Result<DiscordEmbed>.FromError(new NotFoundError());
                     if (guildResult.Entity.TicketingConfig.IsDisabled)
                         return Result<DiscordEmbed>.FromError(
@@ -423,7 +425,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     guildResult = await _guildService.GetSingleBySpecAsync<Guild>(
                         new ActiveGuildByDiscordIdWithModerationSpecifications(discordGuild.Id));
 
-                    if (!guildResult.IsSuccess || guildResult.Entity.ModerationConfig is null)
+                    if (!guildResult.IsDefined() || guildResult.Entity.ModerationConfig is null)
                         return Result<DiscordEmbed>.FromError(new NotFoundError());
                     if (guildResult.Entity.ModerationConfig.IsDisabled)
                         return Result<DiscordEmbed>.FromError(
@@ -570,7 +572,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             switch (type)
             {
                 case GuildConfigType.Ticketing:
-                    if (!guildResult.IsSuccess || guildResult.Entity.TicketingConfig is null)
+                    if (!guildResult.IsDefined() || guildResult.Entity.TicketingConfig is null)
                         return Result<DiscordEmbed>.FromError(new NotFoundError());
                     if (guildResult.Entity.TicketingConfig.IsDisabled)
                         return Result<DiscordEmbed>.FromError(new InvalidOperationError());
@@ -578,7 +580,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     await _guildService.DisableConfigAsync(discordGuild.Id, GuildConfigType.Ticketing, true);
                     break;
                 case GuildConfigType.Moderation:
-                    if (!guildResult.IsSuccess || guildResult.Entity.ModerationConfig is null)
+                    if (!guildResult.IsDefined() || guildResult.Entity.ModerationConfig is null)
                         return Result<DiscordEmbed>.FromError(new NotFoundError());
                     if (guildResult.Entity.ModerationConfig.IsDisabled)
                         return Result<DiscordEmbed>.FromError(new InvalidOperationError());

@@ -43,7 +43,7 @@ namespace Lisbeth.Bot.Application.Services
             var ban = await _banService.GetSingleBySpecAsync<Ban>(
                 new BanBaseGetSpecifications(null, targetId, guildId));
 
-            if (!ban.IsSuccess) return;
+            if (!ban.IsDefined()) return;
 
             await _banService.AddOrExtendAsync(new BanReqDto(targetId, guildId, requestedOnBehalfOfId,
                 DateTime.MaxValue));
@@ -56,7 +56,7 @@ namespace Lisbeth.Bot.Application.Services
             var ban = await _banService.GetSingleBySpecAsync<Ban>(
                 new BanBaseGetSpecifications(null, targetId, guildId));
 
-            if (!ban.IsSuccess) return;
+            if (!ban.IsDefined()) return;
 
             await _banService.DisableAsync(new BanDisableReqDto(targetId, guildId, requestedOnBehalfOfId));
         }

@@ -75,7 +75,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (!ctx.Member.IsAdmin()) throw new DiscordNotAuthorizedException();
 
             var guildResult = await _guildService.GetSingleBySpecAsync<Guild>(new ActiveGuildByIdSpec(ctx.Guild.Id));
-            if (!guildResult.IsSuccess) return Result<DiscordEmbed>.FromError(guildResult);
+            if (!guildResult.IsDefined()) return Result<DiscordEmbed>.FromError(guildResult);
 
             var intr = _discord.Client.GetInteractivity();
             int loopCount = 0;
@@ -122,7 +122,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
                 var result = await AddNewOptionAsync(ctx, intr, resultEmbed, roleMenu);
 
-                if (!result.IsSuccess)
+                if (!result.IsDefined())
                 {
                     await ctx.EditResponseAsync(
                         new DiscordWebhookBuilder().AddEmbed(
@@ -180,7 +180,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             else if (req.Id.HasValue)
             {
                 var result = await _roleMenuService.GetAsync<RoleMenu>(req.Id.Value);
-                if (!result.IsSuccess) return Result<(DiscordWebhookBuilder? Builder, string Text)>.FromError(result);
+                if (!result.IsDefined()) return Result<(DiscordWebhookBuilder? Builder, string Text)>.FromError(result);
                 guild = await _discord.Client.GetGuildAsync(result.Entity.GuildId);
             }
 
@@ -212,7 +212,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             else if (req.Id.HasValue)
             {
                 var result = await _roleMenuService.GetAsync<RoleMenu>(req.Id.Value);
-                if (!result.IsSuccess) return Result<(DiscordWebhookBuilder? Builder, string Text)>.FromError(result);
+                if (!result.IsDefined()) return Result<(DiscordWebhookBuilder? Builder, string Text)>.FromError(result);
                 guild = await _discord.Client.GetGuildAsync(result.Entity.GuildId);
             }
 
@@ -275,24 +275,18 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (requestingUser is null) throw new ArgumentNullException(nameof(requestingUser));
             if (req is null) throw new ArgumentNullException(nameof(req));
 
-            RoleMenu? roleMenu;
+            Result<RoleMenu> partial;
             if (requestingUser.IsBotOwner(_discord.Client))
             {
                 if (req.Id.HasValue)
                 {
-                    var partial = await _roleMenuService.GetAsync<RoleMenu>(req.Id.Value);
-                    if (!partial.IsSuccess)
-                        return Result<(DiscordWebhookBuilder? Builder, string Text)>.FromError(partial);
-                    roleMenu = partial.Entity;
+                    partial = await _roleMenuService.GetAsync<RoleMenu>(req.Id.Value);
                 }
                 else
                 {
-                    var partial =
+                    partial =
                         await _roleMenuService.GetSingleBySpecAsync<RoleMenu>(
                             new Specification<RoleMenu>(x => x.Name == req.Name));
-                    if (!partial.IsSuccess)
-                        return Result<(DiscordWebhookBuilder? Builder, string Text)>.FromError(partial);
-                    roleMenu = partial.Entity;
                 }
             }
             else
@@ -300,7 +294,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 var guildResult =
                     await _guildService.GetSingleBySpecAsync<Guild>(
                         new ActiveGuildByIdSpec(guild.Id));
-                if (!guildResult.IsSuccess)
+                if (!guildResult.IsDefined())
                     return Result<(DiscordWebhookBuilder? Builder, string Text)>.FromError(guildResult);
 
                 if (requestingUser.Guild.Id != guild.Id)
@@ -309,26 +303,27 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
                 if (req.Id.HasValue)
                 {
-                    var partial = await _roleMenuService.GetSingleBySpecAsync<RoleMenu>(
+                    partial = await _roleMenuService.GetSingleBySpecAsync<RoleMenu>(
                         new RoleMenuByIdWithOptionsSpec(req.Id.Value));
-                    roleMenu = partial.Entity;
                 }
                 else
                 {
-                    var partial = await _roleMenuService.GetSingleBySpecAsync<RoleMenu>(
+                    partial = await _roleMenuService.GetSingleBySpecAsync<RoleMenu>(
                         new RoleMenuByNameAndGuildWithOptionsSpec(req.Name,
                             req.GuildId ?? throw new ArgumentNullException()));
-                    roleMenu = partial.Entity;
                 }
             }
 
-            if (roleMenu.IsDisabled && !requestingUser.IsBotOwner(_discord.Client))
+            if (!partial.IsDefined())
+                return Result<(DiscordWebhookBuilder? Builder, string Text)>.FromError(partial);
+
+            if (partial.Entity.IsDisabled && !requestingUser.IsBotOwner(_discord.Client))
                 return Result<(DiscordWebhookBuilder? Builder, string Text)>.FromError(
-                    new DisabledEntityError(nameof(roleMenu)));
+                    new DisabledEntityError(nameof(partial.Entity)));
 
             var builder = new DiscordWebhookBuilder();
 
-            List<DiscordSelectComponentOption> options = (roleMenu.RoleMenuOptions ?? throw new ArgumentNullException())
+            List<DiscordSelectComponentOption> options = (partial.Entity.RoleMenuOptions ?? throw new ArgumentNullException())
                 .Select(option =>
                     new DiscordSelectComponentOption(option.Name, option.CustomSelectOptionValueId,
                         string.IsNullOrWhiteSpace(option.Description) ? null : option.Description, false,
@@ -337,14 +332,14 @@ namespace Lisbeth.Bot.Application.Discord.Services
                             : DiscordEmoji.FromName(_discord.Client, option.Emoji))))
                 .ToList();
 
-            var select = new DiscordSelectComponent(roleMenu.CustomSelectComponentId, "Choose a role!", options);
+            var select = new DiscordSelectComponent(partial.Entity.CustomSelectComponentId, "Choose a role!", options);
 
             builder.AddComponents(select);
 
-            if (roleMenu.EmbedConfig is null) return (null, roleMenu.Text ?? throw new ArgumentNullException());
+            if (partial.Entity.EmbedConfig is null) return (null, partial.Entity.Text ?? throw new ArgumentNullException());
 
-            var embed = _embedProvider.ConfigureEmbed(roleMenu.EmbedConfig).Build();
-            return (builder.AddEmbed(embed), roleMenu.Text ?? throw new ArgumentNullException());
+            var embed = _embedProvider.ConfigureEmbed(partial.Entity.EmbedConfig).Build();
+            return (builder.AddEmbed(embed), partial.Entity.Text ?? throw new ArgumentNullException());
         }
 
         private async Task<Result<(DiscordWebhookBuilder? Builder, string Text)>> SendAsync(DiscordGuild guild,
@@ -377,7 +372,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 var guildResult =
                     await _guildService.GetSingleBySpecAsync<Guild>(
                         new ActiveGuildByIdSpec(guild.Id));
-                if (!guildResult.IsSuccess)
+                if (!guildResult.IsDefined())
                     return Result<(DiscordWebhookBuilder? Builder, string Text)>.FromError(guildResult);
 
                 if (requestingUser.Guild.Id != guild.Id)

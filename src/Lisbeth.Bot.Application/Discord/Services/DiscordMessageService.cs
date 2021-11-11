@@ -249,7 +249,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             var res = await _guildService.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithModerationSpecifications(args.Guild.Id));
 
-            if (!res.IsSuccess) throw new ArgumentException();
+            if (!res.IsDefined()) throw new ArgumentException();
 
             var guild = res.Entity;
 
@@ -313,7 +313,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             var res = await _guildService.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithModerationSpecifications(args.Guild.Id));
 
-            if (!res.IsSuccess) throw new ArgumentException();
+            if (!res.IsDefined()) throw new ArgumentException();
 
             var guild = res.Entity;
 
@@ -391,7 +391,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             var res = await _guildService.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithModerationSpecifications(args.Guild.Id));
 
-            if (!res.IsSuccess) throw new ArgumentException();
+            if (!res.IsDefined()) throw new ArgumentException();
 
             var guild = res.Entity;
 

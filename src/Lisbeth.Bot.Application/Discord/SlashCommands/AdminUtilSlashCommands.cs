@@ -57,6 +57,9 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder().AsEphemeral(bool.Parse(shouldEph)));
             var res = await _service!.GetAnyAsync<AuditLog>();
+
+            if (!res.IsDefined()) throw new InvalidOperationException();
+
             string botRes = res.Entity.Aggregate("",
                 (current, resp) =>
                     current +

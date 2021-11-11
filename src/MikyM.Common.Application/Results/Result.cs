@@ -21,8 +21,6 @@ using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
 using MikyM.Common.Application.Results.Errors;
 
-#pragma warning disable SA1402
-
 namespace MikyM.Common.Application.Results
 {
     /// <inheritdoc />
@@ -48,6 +46,22 @@ namespace MikyM.Common.Application.Results
         {
             this.Error = error ?? inner?.Error;
             this.Inner = inner;
+        }
+
+        /// <inheritdoc />
+        [MemberNotNullWhen(true, nameof(Inner))]
+        public bool TryGetInner(out IResult? inner)
+        {
+            inner = this.Inner;
+            return inner is not null;
+        }
+
+        /// <inheritdoc />
+        [MemberNotNullWhen(true, nameof(Error))]
+        public bool TryGetError(out IResultError? error)
+        {
+            error = this.Error;
+            return error is not null;
         }
 
         /// <summary>
@@ -104,13 +118,13 @@ namespace MikyM.Common.Application.Results
 
     /// <inheritdoc />
     [PublicAPI]
-    public readonly struct Result<TEntity> : IResult
+    public readonly struct Result<TEntity> : IResult<TEntity>
     {
         /// <summary>
         /// Gets the entity returned by the result.
         /// </summary>
         [AllowNull]
-        public TEntity Entity { get; }
+        public TEntity? Entity { get; }
 
         /// <inheritdoc />
         [MemberNotNullWhen(false, nameof(Error))]
@@ -135,12 +149,36 @@ namespace MikyM.Common.Application.Results
             this.Entity = entity;
         }
 
+        /// <inheritdoc />
+        [MemberNotNullWhen(true, nameof(Entity))]
+        public bool TryGetEntity(out TEntity? entity)
+        {
+            entity = this.Entity;
+            return entity is not null;
+        }
+
+        /// <inheritdoc />
+        [MemberNotNullWhen(true, nameof(Inner))]
+        public bool TryGetInner(out IResult? inner)
+        {
+            inner = this.Inner;
+            return inner is not null;
+        }
+
+        /// <inheritdoc />
+        [MemberNotNullWhen(true, nameof(Error))]
+        public bool TryGetError(out IResultError? error)
+        {
+            error = this.Error;
+            return error is not null;
+        }
+
         /// <summary>
         /// Determines whether the result contains a defined value; that is, it has a value, and the value is not null.
         /// </summary>
         /// <returns>true if the result contains a defined value; otherwise, false.</returns>
         [MemberNotNullWhen(true, nameof(Entity))]
-        public bool IsDefined() => this.IsSuccess && this.Entity is not null;
+        public bool IsDefined() => this.IsDefined() && this.Entity is not null;
 
         /// <summary>
         /// Creates a new successful result.

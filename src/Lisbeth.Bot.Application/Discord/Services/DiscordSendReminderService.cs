@@ -72,7 +72,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 case ReminderType.Single:
                     var rem = await _reminderService.GetSingleBySpecAsync<Reminder>(
                         new ActiveReminderByIdWithEmbedSpec(reminderId));
-                    if (!rem.IsSuccess || rem.Entity.Guild?.ReminderChannelId is null)
+                    if (!rem.IsDefined() || rem.Entity.Guild?.ReminderChannelId is null)
                         return Result.FromError(new NotFoundError());
                     guild = rem.Entity.Guild;
                     embedConfig = rem.Entity.EmbedConfig;
@@ -83,7 +83,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 case ReminderType.Recurring:
                     var recRem = await _recurringReminderService.GetSingleBySpecAsync<RecurringReminder>(
                         new ActiveRecurringReminderByIdWithEmbedSpec(reminderId));
-                    if (!recRem.IsSuccess || recRem.Entity.Guild?.ReminderChannelId is null)
+                    if (!recRem.IsDefined() || recRem.Entity.Guild?.ReminderChannelId is null)
                         return Result.FromError(new NotFoundError());
                     guild = recRem.Entity.Guild;
                     embedConfig = recRem.Entity.EmbedConfig;

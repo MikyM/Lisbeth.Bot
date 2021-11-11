@@ -52,7 +52,7 @@ namespace Lisbeth.Bot.Application.Services
             var result = await _guildService.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithModerationSpecifications(guildId));
 
-            if (!result.IsSuccess || result.Entity.ModerationConfig is null)
+            if (!result.IsDefined() || result.Entity.ModerationConfig is null)
                 return Result.FromError(new NotFoundError());
 
             bool wasMuted = rolesBefore.Any(x => x.Id == result.Entity.ModerationConfig.MuteRoleId);

@@ -45,7 +45,7 @@ namespace Lisbeth.Bot.Application.Services.Database
             var result = await base.GetSingleBySpecAsync<Ban>(new Specification<Ban>(x =>
                 x.UserId == req.TargetUserId && x.GuildId == req.GuildId && !x.IsDisabled));
 
-            if (!result.IsSuccess)
+            if (!result.IsDefined())
             {
                 var partial = await base.AddAsync(req, shouldSave);
                 return Result<(long Id, Ban? FoundEntity)>.FromSuccess((partial.Entity, null));
@@ -72,7 +72,7 @@ namespace Lisbeth.Bot.Application.Services.Database
             var result = await base.GetSingleBySpecAsync<Ban>(
                 new Specification<Ban>(x =>
                     x.UserId == entry.TargetUserId && x.GuildId == entry.GuildId && !x.IsDisabled));
-            if (!result.IsSuccess) return Result<Ban>.FromError(new NotFoundError(), result);
+            if (!result.IsDefined()) return Result<Ban>.FromError(new NotFoundError(), result);
 
             base.BeginUpdate(result.Entity);
             result.Entity.IsDisabled = true;

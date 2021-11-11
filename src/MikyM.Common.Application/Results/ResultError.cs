@@ -17,8 +17,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-#pragma warning disable CS1591
-
 namespace MikyM.Common.Application.Results
 {
     /// <summary>

@@ -49,7 +49,7 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
 
             var result = await _discordMuteService!.MuteAsync(ctx, muteReq);
 
-            if (result.IsSuccess)
+            if (result.IsDefined())
                 await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
                     .AddEmbed(result.Entity)
                     .AsEphemeral(true));
@@ -72,7 +72,7 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
 
             var result = await _discordMuteService!.UnmuteAsync(ctx, muteDisableReq);
 
-            if (result.IsSuccess)
+            if (result.IsDefined())
                 await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
                     .AddEmbed(result.Entity)
                     .AsEphemeral(true));
@@ -95,7 +95,7 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
 
             var result = await _discordMuteService!.GetSpecificUserGuildMuteAsync(ctx, muteGetReq);
 
-            if (result.IsSuccess)
+            if (result.IsDefined())
                 await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
                     .AddEmbed(result.Entity)
                     .AsEphemeral(true));
@@ -123,7 +123,7 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
 
             var result = await _discordMuteService!.MuteAsync(ctx, muteReq);
 
-            if (result.IsSuccess)
+            if (result.IsDefined())
                 await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
                     .AddEmbed(result.Entity)
                     .AsEphemeral(true));
@@ -156,7 +156,7 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
 
             await ctx.Channel.DeleteMessagesAsync(msgsToDel);
 
-            if (result.IsSuccess)
+            if (result.IsDefined())
                 await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
                     .AddEmbed(result.Entity)
                     .AsEphemeral(true));

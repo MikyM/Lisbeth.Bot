@@ -42,7 +42,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             var res = await _guildService!.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(ctx.Guild.Id));
 
-            if (!res.IsSuccess) throw new ArgumentException("Guild not found in database");
+            if (!res.IsDefined()) throw new ArgumentException("Guild not found in database");
 
             var member = (DiscordMember)user;
 
@@ -203,7 +203,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             }
 
             if (!result.HasValue) return;
-            if (result.Value.IsSuccess)
+            if (result.Value.IsDefined())
                 await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(result.Value.Entity));
             else
                 await ctx.EditResponseAsync(
@@ -224,7 +224,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
 
             var res = await _guildService!.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(ctx.Guild.Id));
-            if (!res.IsSuccess) throw new ArgumentException("Guild not found in database");
+            if (!res.IsDefined()) throw new ArgumentException("Guild not found in database");
 
             var guild = res.Entity;
 

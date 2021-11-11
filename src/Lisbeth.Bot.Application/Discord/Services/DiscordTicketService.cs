@@ -95,7 +95,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             var res = await GetTicketByBaseRequestAsync(req);
 
-            if (!res.IsSuccess) return Result<DiscordMessageBuilder>.FromError(res);
+            if (!res.IsDefined()) return Result<DiscordMessageBuilder>.FromError(res);
 
             return await CloseTicketAsync(res.Entity.Guild, res.Entity.Channel, res.Entity.RequestingMember, req);
         }
@@ -115,7 +115,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             var res = await GetTicketByBaseRequestAsync(req);
 
-            if (!res.IsSuccess) return Result<DiscordMessageBuilder>.FromError(res);
+            if (!res.IsDefined()) return Result<DiscordMessageBuilder>.FromError(res);
 
             return await ReopenTicketAsync(res.Entity.Guild, res.Entity.Channel, res.Entity.RequestingMember, req);
         }
@@ -138,7 +138,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             var res = await GetTicketByBaseRequestAsync(req);
 
-            if (!res.IsSuccess) return Result<DiscordEmbed>.FromError(res);
+            if (!res.IsDefined()) return Result<DiscordEmbed>.FromError(res);
 
             try
             {
@@ -196,7 +196,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             var res = await GetTicketByBaseRequestAsync(req);
 
-            if (!res.IsSuccess) return Result<DiscordEmbed>.FromError(res);
+            if (!res.IsDefined()) return Result<DiscordEmbed>.FromError(res);
 
             try
             {
@@ -232,7 +232,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     var res = await _guildService.GetSingleBySpecAsync<Guild>(
                         new ActiveGuildByDiscordIdWithTicketingAndInactiveTicketsSpecifications(guildId));
 
-                    if (!res.IsSuccess) continue;
+                    if (!res.IsDefined()) continue;
 
                     if (res.Entity.TicketingConfig?.CleanAfter is null) continue;
                     if (res.Entity.Tickets?.Count == 0) continue;
@@ -287,7 +287,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                     var res = await _guildService.GetSingleBySpecAsync<Guild>(
                         new ActiveGuildByDiscordIdWithTicketingAndTicketsSpecifications(guildId));
 
-                    if (!res.IsSuccess) continue;
+                    if (!res.IsDefined()) continue;
 
                     if (res.Entity.TicketingConfig?.CloseAfter is null) continue;
                     if (res.Entity.Tickets?.Count == 0) continue;
@@ -349,7 +349,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             var res = await _guildService.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(ctx.Guild.Id));
 
-            if (!res.IsSuccess) return Result<DiscordMessageBuilder>.FromError(res);
+            if (!res.IsDefined()) return Result<DiscordMessageBuilder>.FromError(res);
             if (res.Entity.TicketingConfig is null)
                 return new DisabledEntityError("Guild doesn't have ticketing configured");
 
@@ -391,7 +391,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 await _guildService.GetSingleBySpecAsync<Guild>(
                     new ActiveGuildByDiscordIdWithTicketingSpecifications(guild.Id));
 
-            if (!guildRes.IsSuccess) return Result<DiscordMessageBuilder>.FromError(guildRes);
+            if (!guildRes.IsDefined()) return Result<DiscordMessageBuilder>.FromError(guildRes);
 
             if (guildRes.Entity.TicketingConfig is null)
                 return new DisabledEntityError($"Guild with Id:{guild.Id} doesn't have ticketing enabled.");
@@ -405,7 +405,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             var ticketRes = await _ticketService.OpenAsync(req);
 
-            if (!ticketRes.IsSuccess)
+            if (!ticketRes.IsDefined())
             {
                 var failEmbed = new DiscordEmbedBuilder();
                 failEmbed.WithColor(new DiscordColor(guildCfg.EmbedHexColor));
@@ -537,7 +537,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 await _guildService.GetSingleBySpecAsync<Guild>(
                     new ActiveGuildByDiscordIdWithTicketingSpecifications(guild.Id));
 
-            if (!guildRes.IsSuccess) return Result<DiscordMessageBuilder>.FromError(guildRes);
+            if (!guildRes.IsDefined()) return Result<DiscordMessageBuilder>.FromError(guildRes);
 
             if (guildRes.Entity.TicketingConfig is null)
                 return new DisabledEntityError($"Guild with Id:{guild.Id} doesn't have ticketing enabled.");
@@ -547,7 +547,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             var res = await _ticketService.GetSingleBySpecAsync<Ticket>(
                 new TicketBaseGetSpecifications(req.Id, req.OwnerId, req.GuildId, req.ChannelId, req.GuildSpecificId));
 
-            if (!res.IsSuccess) return new NotFoundError($"Ticket with channel Id: {target.Id} doesn't exist.");
+            if (!res.IsDefined()) return new NotFoundError($"Ticket with channel Id: {target.Id} doesn't exist.");
 
             var ticket = res.Entity;
 
@@ -652,7 +652,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 await _guildService.GetSingleBySpecAsync<Guild>(
                     new ActiveGuildByDiscordIdWithTicketingSpecifications(guild.Id));
 
-            if (!guildRes.IsSuccess) return Result<DiscordMessageBuilder>.FromError(guildRes);
+            if (!guildRes.IsDefined()) return Result<DiscordMessageBuilder>.FromError(guildRes);
 
             if (guildRes.Entity.TicketingConfig is null)
                 return new DisabledEntityError($"Guild with Id:{guild.Id} doesn't have ticketing enabled.");
@@ -663,7 +663,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 new TicketBaseGetSpecifications(req.Id, req.OwnerId, req.GuildId, req.ChannelId, req.GuildSpecificId,
                     true));
 
-            if (!res.IsSuccess) return new NotFoundError($"Ticket with channel Id: {target.Id} doesn't exist.");
+            if (!res.IsDefined()) return new NotFoundError($"Ticket with channel Id: {target.Id} doesn't exist.");
 
             var ticket = res.Entity;
 
@@ -752,7 +752,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 await _guildService.GetSingleBySpecAsync<Guild>(
                     new ActiveGuildByDiscordIdWithTicketingSpecifications(guild.Id));
 
-            if (!guildRes.IsSuccess) return Result<DiscordEmbed>.FromError(guildRes);
+            if (!guildRes.IsDefined()) return Result<DiscordEmbed>.FromError(guildRes);
 
             if (guildRes.Entity.TicketingConfig is null)
                 return new DisabledEntityError($"Guild with Id:{guild.Id} doesn't have ticketing enabled.");
@@ -763,7 +763,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 new TicketBaseGetSpecifications(req.Id, req.OwnerId, req.GuildId, req.ChannelId, req.GuildSpecificId));
 
 
-            if (!res.IsSuccess) return new NotFoundError($"Ticket with channel Id: {req.ChannelId} doesn't exist.");
+            if (!res.IsDefined()) return new NotFoundError($"Ticket with channel Id: {req.ChannelId} doesn't exist.");
 
             var ticket = res.Entity;
 
@@ -839,7 +839,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
                 await _guildService.GetSingleBySpecAsync<Guild>(
                     new ActiveGuildByDiscordIdWithTicketingSpecifications(guild.Id));
 
-            if (!guildRes.IsSuccess) return Result<DiscordEmbed>.FromError(guildRes);
+            if (!guildRes.IsDefined()) return Result<DiscordEmbed>.FromError(guildRes);
 
             if (guildRes.Entity.TicketingConfig is null)
                 return new DisabledEntityError($"Guild with Id:{guild.Id} doesn't have ticketing enabled.");
@@ -849,7 +849,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             var res = await _ticketService.GetSingleBySpecAsync<Ticket>(
                 new TicketBaseGetSpecifications(req.Id, req.OwnerId, req.GuildId, req.ChannelId, req.GuildSpecificId));
 
-            if (!res.IsSuccess) return new NotFoundError($"Ticket with channel Id: {req.ChannelId} doesn't exist.");
+            if (!res.IsDefined()) return new NotFoundError($"Ticket with channel Id: {req.ChannelId} doesn't exist.");
 
             var ticket = res.Entity;
 
@@ -920,7 +920,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             if (req.Id.HasValue)
             {
                 var res = await _ticketService.GetAsync<Ticket>(req.Id.Value);
-                if (!res.IsSuccess)
+                if (!res.IsDefined())
                     return Result<(Ticket Ticket, DiscordMember RequestingMember, DiscordGuild Guild, DiscordChannel
                         Channel)>.FromError(res);
 
@@ -932,7 +932,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             {
                 var res = await _ticketService.GetSingleBySpecAsync<Ticket>(
                     new TicketBaseGetSpecifications(null, req.OwnerId, req.GuildId, null, null, false, 1));
-                if (!res.IsSuccess)
+                if (!res.IsDefined())
                     return Result<(Ticket Ticket, DiscordMember RequestingMember, DiscordGuild Guild, DiscordChannel
                         Channel)>.FromError(res);
 
@@ -944,7 +944,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             {
                 var res = await _ticketService.GetSingleBySpecAsync<Ticket>(
                     new TicketBaseGetSpecifications(null, null, req.GuildId, null, req.GuildSpecificId, false, 1));
-                if (!res.IsSuccess)
+                if (!res.IsDefined())
                     return Result<(Ticket Ticket, DiscordMember RequestingMember, DiscordGuild Guild, DiscordChannel
                         Channel)>.FromError(res);
 
@@ -966,7 +966,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
                 var res = await _ticketService.GetSingleBySpecAsync<Ticket>(
                     new TicketBaseGetSpecifications(null, null, null, req.ChannelId.Value, null, false, 1));
-                if (!res.IsSuccess)
+                if (!res.IsDefined())
                     return Result<(Ticket Ticket, DiscordMember RequestingMember, DiscordGuild Guild, DiscordChannel
                         Channel)>.FromError(res);
 

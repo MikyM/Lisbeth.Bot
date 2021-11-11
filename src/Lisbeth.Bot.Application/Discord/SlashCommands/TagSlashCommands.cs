@@ -157,7 +157,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
 
             if (partial.HasValue)
             {
-                if (partial.Value.IsSuccess)
+                if (partial.Value.IsDefined())
                     await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(partial.Value.Entity));
                 else
                     await ctx.EditResponseAsync(
@@ -165,7 +165,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             }
             else if (result.HasValue)
             {
-                if (!result.Value.IsSuccess)
+                if (!result.Value.IsDefined())
                 {
                     await ctx.EditResponseAsync(
                         new DiscordWebhookBuilder().AddEmbed(GetUnsuccessfulResultEmbed(result, ctx.Client)));

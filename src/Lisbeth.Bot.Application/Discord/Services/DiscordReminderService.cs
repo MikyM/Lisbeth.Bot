@@ -116,13 +116,13 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             var result = await _guildService.GetSingleBySpecAsync<Guild>(new ActiveGuildByIdSpec(req.GuildId));
 
-            if (!result.IsSuccess) return Result<DiscordEmbed>.FromError(result);
+            if (!result.IsDefined()) return Result<DiscordEmbed>.FromError(result);
 
             if (req.ChannelId.HasValue && !requestingMember.IsModerator()) return Result<DiscordEmbed>.FromError(new DiscordNotAuthorizedError("Only moderators can set specific channel reminders."));
 
             var res = await _reminderService.SetNewReminderAsync(req);
 
-            if (!res.IsSuccess) return Result<DiscordEmbed>.FromError(res);
+            if (!res.IsDefined()) return Result<DiscordEmbed>.FromError(res);
 
             var embed = new DiscordEmbedBuilder().WithColor(new DiscordColor(result.Entity.EmbedHexColor))
                 .WithAuthor("Lisbeth reminder service")
@@ -148,9 +148,11 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             var result = await _guildService.GetSingleBySpecAsync<Guild>(new ActiveGuildByIdSpec(req.GuildId));
 
-            if (!result.IsSuccess) return Result<DiscordEmbed>.FromError(result);
+            if (!result.IsDefined()) return Result<DiscordEmbed>.FromError(result);
 
             var res = await _reminderService.DisableReminderAsync(req);
+
+            if (!res.IsDefined()) return Result<DiscordEmbed>.FromError(res);
 
             var embed = new DiscordEmbedBuilder().WithColor(new DiscordColor(result.Entity.EmbedHexColor))
                 .WithAuthor("Lisbeth reminder service")
@@ -174,9 +176,11 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             var result = await _guildService.GetSingleBySpecAsync<Guild>(new ActiveGuildByIdSpec(req.GuildId));
 
-            if (!result.IsSuccess) return Result<DiscordEmbed>.FromError(result);
+            if (!result.IsDefined()) return Result<DiscordEmbed>.FromError(result);
 
             var res = await _reminderService.RescheduleReminderAsync(req);
+
+            if (!res.IsDefined()) return Result<DiscordEmbed>.FromError(res);
 
             var embed = new DiscordEmbedBuilder().WithColor(new DiscordColor(result.Entity.EmbedHexColor))
                 .WithAuthor("Lisbeth reminder service")

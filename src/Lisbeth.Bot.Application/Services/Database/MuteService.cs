@@ -46,7 +46,7 @@ namespace Lisbeth.Bot.Application.Services.Database
 
             var result = await base.GetSingleBySpecAsync<Mute>(new Specification<Mute>(x =>
                 x.UserId == req.TargetUserId && x.GuildId == req.GuildId && !x.IsDisabled && !x.Guild.IsDisabled));
-            if (!result.IsSuccess)
+            if (!result.IsDefined())
             {
                 var partial = await base.AddAsync(req, shouldSave);
                 return Result<(long Id, Mute? FoundEntity)>.FromSuccess((partial.Entity, null));
@@ -77,7 +77,7 @@ namespace Lisbeth.Bot.Application.Services.Database
             var result =
                 await base.GetSingleBySpecAsync<Mute>(
                     new ActiveExpiredMutePerGuildSpec(entry.TargetUserId.Value, entry.GuildId.Value));
-            if (!result.IsSuccess) return Result<Mute>.FromError(new NotFoundError());
+            if (!result.IsDefined()) return Result<Mute>.FromError(new NotFoundError());
 
             var entity = result.Entity;
 
