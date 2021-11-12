@@ -15,8 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
@@ -28,6 +26,8 @@ using Lisbeth.Bot.Application.Validation.Tag;
 using Lisbeth.Bot.Domain.DTOs.Request.Tag;
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.Application.Results;
+using System;
+using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands
 {
@@ -35,8 +35,8 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
     [SlashModuleLifespan(SlashModuleLifespan.Transient)]
     public class TagSlashCommands : ExtendedApplicationCommandModule
     {
-        public IDiscordTagService? _discordTagService { private get; set; }
-        public IDiscordEmbedConfiguratorService<Tag>? _discordEmbedTagConfiguratorService { private get; set; }
+        public IDiscordTagService? DiscordTagService { private get; set; }
+        public IDiscordEmbedConfiguratorService<Tag>? DiscordEmbedTagConfiguratorService { private get; set; }
 
         [SlashCommand("tag", "Allows working with tags.")]
         public async Task TagCommand(InteractionContext ctx,
@@ -73,7 +73,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     var getValidator = new TagGetReqValidator(ctx.Client);
                     await getValidator.ValidateAndThrowAsync(getReq);
 
-                    result = await _discordTagService!.GetAsync(ctx, getReq);
+                    result = await this.DiscordTagService!.GetAsync(ctx, getReq);
                     break;
                 case TagActionType.Add:
                     if (string.IsNullOrWhiteSpace(idOrName))
@@ -90,7 +90,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     var addValidator = new TagAddReqValidator(ctx.Client);
                     await addValidator.ValidateAndThrowAsync(addReq);
 
-                    partial = await _discordTagService!.AddAsync(ctx, addReq);
+                    partial = await this.DiscordTagService!.AddAsync(ctx, addReq);
 
                     break;
                 case TagActionType.Edit:
@@ -109,7 +109,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     var editValidator = new TagEditReqValidator(ctx.Client);
                     await editValidator.ValidateAndThrowAsync(editReq);
 
-                    partial = await _discordTagService!.EditAsync(ctx, editReq);
+                    partial = await this.DiscordTagService!.EditAsync(ctx, editReq);
                     break;
                 case TagActionType.Remove:
                     if (!isId && string.IsNullOrWhiteSpace(idOrName))
@@ -126,10 +126,10 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     var disableValidator = new TagDisableReqValidator(ctx.Client);
                     await disableValidator.ValidateAndThrowAsync(removeReq);
 
-                    partial = await _discordTagService!.DisableAsync(ctx, removeReq);
+                    partial = await this.DiscordTagService!.DisableAsync(ctx, removeReq);
                     break;
                 case TagActionType.ConfigureEmbed:
-                    partial = await _discordEmbedTagConfiguratorService!.ConfigureAsync(ctx, idOrName);
+                    partial = await this.DiscordEmbedTagConfiguratorService!.ConfigureAsync(ctx, idOrName);
                     break;
                 case TagActionType.Send:
                     if (!isId && string.IsNullOrWhiteSpace(idOrName))
@@ -149,7 +149,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     var sendValidator = new TagSendReqValidator(ctx.Client);
                     await sendValidator.ValidateAndThrowAsync(sendReq);
 
-                    result = await _discordTagService!.SendAsync(ctx, sendReq);
+                    result = await this.DiscordTagService!.SendAsync(ctx, sendReq);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(action), action, null);

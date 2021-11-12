@@ -15,8 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
@@ -28,6 +26,8 @@ using Lisbeth.Bot.Application.Validation.RoleMenu;
 using Lisbeth.Bot.Domain.DTOs.Request.RoleMenu;
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.Application.Results;
+using System;
+using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands
 {
@@ -35,8 +35,8 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
     [SlashModuleLifespan(SlashModuleLifespan.Transient)]
     public class RoleMenuSlashCommands : ExtendedApplicationCommandModule
     {
-        public IDiscordRoleMenuService? _discordRoleMenuService { private get; set; }
-        public IDiscordEmbedConfiguratorService<RoleMenu>? _discordEmbedConfiguratorService { private get; set; }
+        public IDiscordRoleMenuService? DiscordRoleMenuService { private get; set; }
+        public IDiscordEmbedConfiguratorService<RoleMenu>? DiscordEmbedConfiguratorService { private get; set; }
 
         [SlashCommand("role-menu", "Allows working with role menus.")]
         public async Task RoleMenuCommand(InteractionContext ctx,
@@ -73,7 +73,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     var getValidator = new RoleMenuGetReqValidator(ctx.Client);
                     await getValidator.ValidateAndThrowAsync(getReq);
 
-                    result = await _discordRoleMenuService!.GetAsync(ctx, getReq);
+                    result = await this.DiscordRoleMenuService!.GetAsync(ctx, getReq);
                     break;
                 case RoleMenuActionType.Add:
                     if (string.IsNullOrWhiteSpace(idOrName))
@@ -90,7 +90,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     var addValidator = new RoleMenuAddReqValidator(ctx.Client);
                     await addValidator.ValidateAndThrowAsync(addReq);
 
-                    partial = await _discordRoleMenuService!.CreateRoleMenuAsync(ctx, addReq);
+                    partial = await this.DiscordRoleMenuService!.CreateRoleMenuAsync(ctx, addReq);
                     break;
                 case RoleMenuActionType.Edit:
                     if (!isId && string.IsNullOrWhiteSpace(idOrName))
@@ -128,7 +128,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     //partial = await _discordRoleMenuService.DisableAsync(ctx, removeReq);
                     break;
                 case RoleMenuActionType.ConfigureEmbed:
-                    partial = await _discordEmbedConfiguratorService!.ConfigureAsync(ctx, idOrName);
+                    partial = await this.DiscordEmbedConfiguratorService!.ConfigureAsync(ctx, idOrName);
                     break;
                 case RoleMenuActionType.Send:
                     if (!isId && string.IsNullOrWhiteSpace(idOrName))
@@ -148,7 +148,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     var sendValidator = new RoleMenuSendReqValidator(ctx.Client);
                     await sendValidator.ValidateAndThrowAsync(sendReq);
 
-                    result = await _discordRoleMenuService!.SendAsync(ctx, sendReq);
+                    result = await this.DiscordRoleMenuService!.SendAsync(ctx, sendReq);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(action), action, null);

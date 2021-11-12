@@ -38,9 +38,8 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
     [UsedImplicitly]
     public partial class MuteApplicationCommands : ExtendedApplicationCommandModule
     {
-        // ReSharper disable once InconsistentNaming
-        public IDiscordMuteService? _discordMuteService { private get; set; }
-        public IDiscordMessageService? _discordMessageService { private get; set; }
+        public IDiscordMuteService? DiscordMuteService { private get; set; }
+        public IDiscordMessageService? DiscordMessageService { private get; set; }
 
         [SlashRequireUserPermissions(Permissions.BanMembers)]
         [SlashCommand("mute", "A command that allows mute actions.")]
@@ -69,21 +68,21 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
                     var muteReqValidator = new MuteReqValidator(ctx.Client);
                     await muteReqValidator.ValidateAndThrowAsync(muteReq);
 
-                    result = await _discordMuteService!.MuteAsync(ctx, muteReq);
+                    result = await this.DiscordMuteService!.MuteAsync(ctx, muteReq);
                     break;
                 case MuteActionType.Remove:
                     var muteDisableReq = new MuteDisableReqDto(user.Id, ctx.Guild.Id, ctx.User.Id);
                     var muteDisableReqValidator = new MuteDisableReqValidator(ctx.Client);
                     await muteDisableReqValidator.ValidateAndThrowAsync(muteDisableReq);
 
-                    result = await _discordMuteService!.UnmuteAsync(ctx, muteDisableReq);
+                    result = await this.DiscordMuteService!.UnmuteAsync(ctx, muteDisableReq);
                     break;
                 case MuteActionType.Get:
                     var muteGetReq = new MuteGetReqDto(ctx.User.Id, null, user.Id, ctx.Guild.Id);
                     var muteGetReqValidator = new MuteGetReqValidator(ctx.Client);
                     await muteGetReqValidator.ValidateAndThrowAsync(muteGetReq);
 
-                    result = await _discordMuteService!.GetSpecificUserGuildMuteAsync(ctx, muteGetReq);
+                    result = await this.DiscordMuteService!.GetSpecificUserGuildMuteAsync(ctx, muteGetReq);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(actionType), actionType, null);

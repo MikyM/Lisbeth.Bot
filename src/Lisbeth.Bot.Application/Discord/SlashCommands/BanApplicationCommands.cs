@@ -37,8 +37,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
     public class BanApplicationCommands : ExtendedApplicationCommandModule
     {
         [UsedImplicitly]
-        // ReSharper disable once InconsistentNaming
-        public IDiscordBanService? _discordBanService { private get; set; }
+        public IDiscordBanService? DiscordBanService { private get; set; }
 
         [SlashRequireUserPermissions(Permissions.BanMembers)]
         [SlashCommand("ban", "A command that allows banning a user.")]
@@ -70,7 +69,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     var banReqValidator = new BanReqValidator(ctx.Client);
                     await banReqValidator.ValidateAndThrowAsync(banReq);
 
-                    result = await _discordBanService!.BanAsync(ctx, banReq);
+                    result = await this.DiscordBanService!.BanAsync(ctx, banReq);
                     break;
                 case BanActionType.Remove:
                     if (id == "") throw new ArgumentException("You must supply an Id of the user to unban.");
@@ -79,13 +78,13 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     var banDisableReqValidator = new BanDisableReqValidator(ctx.Client);
                     await banDisableReqValidator.ValidateAndThrowAsync(banDisableReq);
 
-                    result = await _discordBanService!.UnbanAsync(ctx, banDisableReq);
+                    result = await this.DiscordBanService!.UnbanAsync(ctx, banDisableReq);
                     break;
                 case BanActionType.Get:
                     var banGetReq = new BanGetReqDto(ctx.User.Id, null, validId, ctx.Guild.Id);
                     var banGetReqValidator = new BanGetReqValidator(ctx.Client);
                     await banGetReqValidator.ValidateAndThrowAsync(banGetReq);
-                    result = await _discordBanService!.GetSpecificUserGuildBanAsync(ctx, banGetReq);
+                    result = await this.DiscordBanService!.GetSpecificUserGuildBanAsync(ctx, banGetReq);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(actionType), actionType, null);

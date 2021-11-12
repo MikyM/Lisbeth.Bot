@@ -45,9 +45,9 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
     [UsedImplicitly]
     public class AdminUtilSlashCommands : ApplicationCommandModule
     {
-        [UsedImplicitly] public LisbethBotDbContext? _ctx { private get; set; }
+        [UsedImplicitly] public LisbethBotDbContext? Ctx { private get; set; }
 
-        [UsedImplicitly] public IReadOnlyService<AuditLog, LisbethBotDbContext>? _service { private get; set; }
+        [UsedImplicitly] public IReadOnlyService<AuditLog, LisbethBotDbContext>? Service { private get; set; }
 
         [SlashRequireOwner]
         [SlashCommand("audit", "Gets last 10 audit logs.")]
@@ -56,7 +56,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder().AsEphemeral(bool.Parse(shouldEph)));
-            var res = await _service!.GetAllAsync<AuditLog>();
+            var res = await this.Service!.GetAllAsync<AuditLog>();
 
             if (!res.IsDefined()) throw new InvalidOperationException();
 
@@ -79,8 +79,8 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             var dat = new List<Dictionary<string, string?>>();
             int i;
 
-            using var cmd = _ctx!.Database.GetDbConnection().CreateCommand();
-            await _ctx.Database.OpenConnectionAsync();
+            using var cmd = this.Ctx!.Database.GetDbConnection().CreateCommand();
+            await this.Ctx.Database.OpenConnectionAsync();
 
             cmd.CommandText = query;
             using var rdr = await cmd.ExecuteReaderAsync();

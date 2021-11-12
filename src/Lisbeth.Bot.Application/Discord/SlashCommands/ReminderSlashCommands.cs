@@ -15,12 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
@@ -35,6 +29,12 @@ using Lisbeth.Bot.Domain.Entities;
 using Lisbeth.Bot.Domain.Enums;
 using MikyM.Common.Application.Results;
 using NCrontab;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands
 {
@@ -42,10 +42,10 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
     [SlashModuleLifespan(SlashModuleLifespan.Transient)]
     public class ReminderSlashCommands : ExtendedApplicationCommandModule
     {
-        public IDiscordReminderService? _reminderService { private get; set; }
-        public IDiscordEmbedConfiguratorService<Reminder>? _reminderEmbedConfiguratorService { private get; set; }
+        public IDiscordReminderService? ReminderService { private get; set; }
+        public IDiscordEmbedConfiguratorService<Reminder>? ReminderEmbedConfiguratorService { private get; set; }
 
-        public IDiscordEmbedConfiguratorService<RecurringReminder>? _recurringReminderEmbedConfiguratorService
+        public IDiscordEmbedConfiguratorService<RecurringReminder>? RecurringReminderEmbedConfiguratorService
         {
             private get;
             set;
@@ -129,7 +129,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                                 mentionList, ctx.Guild.Id, ctx.Member.Id, channel?.Id);
                             var setReqValidator = new SetReminderReqValidator(ctx.Client);
                             await setReqValidator.ValidateAndThrowAsync(setReq);
-                            result = await _reminderService!.SetNewReminderAsync(ctx, setReq);
+                            result = await this.ReminderService!.SetNewReminderAsync(ctx, setReq);
                             break;
                         case ReminderActionType.Reschedule:
                             var rescheduleReq = new RescheduleReminderReqDto(name, isValidCron ? time : null,
@@ -137,13 +137,13 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                                 ctx.Member.Id, name.IsDigitsOnly() ? long.Parse(name) : null);
                             var rescheduleReqValidator = new RescheduleReminderReqValidator(ctx.Client);
                             await rescheduleReqValidator.ValidateAndThrowAsync(rescheduleReq);
-                            result = await _reminderService!.RescheduleReminderAsync(ctx, rescheduleReq);
+                            result = await this.ReminderService!.RescheduleReminderAsync(ctx, rescheduleReq);
                             break;
                         case ReminderActionType.ConfigureEmbed:
                             switch (reminderType)
                             {
                                 case ReminderType.Single:
-                                    var res = await _reminderEmbedConfiguratorService!.ConfigureAsync(ctx, name);
+                                    var res = await this.ReminderEmbedConfiguratorService!.ConfigureAsync(ctx, name);
                                     if (res.IsDefined())
                                         await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(res.Entity));
                                     else
@@ -153,7 +153,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                                     return;
                                 case ReminderType.Recurring:
                                     var resRec =
-                                        await _recurringReminderEmbedConfiguratorService!.ConfigureAsync(ctx, name);
+                                        await this.RecurringReminderEmbedConfiguratorService!.ConfigureAsync(ctx, name);
                                     if (resRec.IsDefined())
                                         await ctx.EditResponseAsync(
                                             new DiscordWebhookBuilder().AddEmbed(resRec.Entity));
@@ -170,7 +170,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                                 name.IsDigitsOnly() ? long.Parse(name) : null);
                             var disableReqValidator = new DisableReminderReqValidator(ctx.Client);
                             await disableReqValidator.ValidateAndThrowAsync(disableReq);
-                            result = await _reminderService!.DisableReminderAsync(ctx, disableReq);
+                            result = await this.ReminderService!.DisableReminderAsync(ctx, disableReq);
                             break;
                         default:
                             throw new ArgumentOutOfRangeException(nameof(actionType), actionType, null);

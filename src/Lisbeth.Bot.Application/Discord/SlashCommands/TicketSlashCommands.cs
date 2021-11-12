@@ -29,15 +29,13 @@ using Lisbeth.Bot.Application.Validation.Ticket;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 using MikyM.Common.Application.Results;
 
-// ReSharper disable InconsistentNaming
-
 namespace Lisbeth.Bot.Application.Discord.SlashCommands
 {
     [SlashModuleLifespan(SlashModuleLifespan.Transient)]
     [UsedImplicitly]
     public class TicketSlashCommands : ExtendedApplicationCommandModule
     {
-        public IDiscordTicketService? _discordTicketService { private get; set; }
+        public IDiscordTicketService? DiscordTicketService { private get; set; }
 
         [UsedImplicitly]
         [SlashRequireUserPermissions(Permissions.BanMembers)]
@@ -60,14 +58,14 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     var addReq = new TicketAddReqDto(null, null, ctx.Guild.Id, ctx.Channel.Id, ctx.User.Id, target.Id);
                     var addReqValidator = new TicketAddReqValidator(ctx.Client);
                     await addReqValidator.ValidateAndThrowAsync(addReq);
-                    result = await _discordTicketService!.AddToTicketAsync(ctx, addReq);
+                    result = await this.DiscordTicketService!.AddToTicketAsync(ctx, addReq);
                     break;
                 case TicketActionType.Remove:
                     var removeReq = new TicketRemoveReqDto(null, null, ctx.Guild.Id, ctx.Channel.Id, ctx.User.Id,
                         target.Id);
                     var removeReqValidator = new TicketRemoveReqValidator(ctx.Client);
                     await removeReqValidator.ValidateAndThrowAsync(removeReq);
-                    result = await _discordTicketService!.RemoveFromTicketAsync(ctx, removeReq);
+                    result = await this.DiscordTicketService!.RemoveFromTicketAsync(ctx, removeReq);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(action), action, null);
