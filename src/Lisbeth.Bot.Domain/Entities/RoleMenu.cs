@@ -19,21 +19,20 @@ using System;
 using System.Collections.Generic;
 using Lisbeth.Bot.Domain.Entities.Base;
 
-namespace Lisbeth.Bot.Domain.Entities
+namespace Lisbeth.Bot.Domain.Entities;
+
+public class RoleMenu : EmbedConfigEntity
 {
-    public class RoleMenu : EmbedConfigEntity
+    private readonly HashSet<RoleMenuOption> roleMenuOptions = new();
+    public string? Text { get; set; }
+    public string? CustomSelectComponentId { get; set; }
+    public IReadOnlyCollection<RoleMenuOption>? RoleMenuOptions => roleMenuOptions;
+
+    public Guild? Guild { get; set; }
+
+    public void AddRoleMenuOption(RoleMenuOption roleMenuOption)
     {
-        private readonly HashSet<RoleMenuOption> roleMenuOptions = new();
-        public string? Text { get; set; }
-        public string? CustomSelectComponentId { get; set; }
-        public IReadOnlyCollection<RoleMenuOption>? RoleMenuOptions => roleMenuOptions;
-
-        public Guild? Guild { get; set; }
-
-        public void AddRoleMenuOption(RoleMenuOption roleMenuOption)
-        {
-            if (roleMenuOption is null) throw new ArgumentNullException(nameof(roleMenuOption));
-            roleMenuOptions.Add(roleMenuOption);
-        }
+        if (roleMenuOption is null) throw new ArgumentNullException(nameof(roleMenuOption));
+        roleMenuOptions.Add(roleMenuOption);
     }
 }

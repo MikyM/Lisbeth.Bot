@@ -21,27 +21,26 @@ using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using MikyM.Common.Application.Results;
 
-namespace Lisbeth.Bot.Application.Discord.SlashCommands.Base
+namespace Lisbeth.Bot.Application.Discord.SlashCommands.Base;
+
+public class ExtendedApplicationCommandModule : ApplicationCommandModule
 {
-    public class ExtendedApplicationCommandModule : ApplicationCommandModule
+    protected DiscordEmbed GetUnsuccessfulResultEmbed(IResult result, DiscordClient discord)
     {
-        protected DiscordEmbed GetUnsuccessfulResultEmbed(IResult result, DiscordClient discord)
-        {
-            return GetUnsuccessfulResultEmbed(
-                result.Error ?? throw new InvalidOperationException("Given result does not contain an error"), discord);
-        }
+        return GetUnsuccessfulResultEmbed(
+            result.Error ?? throw new InvalidOperationException("Given result does not contain an error"), discord);
+    }
 
-        protected DiscordEmbed GetUnsuccessfulResultEmbed(IResultError error, DiscordClient discord)
-        {
-            return GetUnsuccessfulResultEmbed(error.Message, discord);
-        }
+    protected DiscordEmbed GetUnsuccessfulResultEmbed(IResultError error, DiscordClient discord)
+    {
+        return GetUnsuccessfulResultEmbed(error.Message, discord);
+    }
 
-        protected DiscordEmbed GetUnsuccessfulResultEmbed(string error, DiscordClient discord)
-        {
-            return new DiscordEmbedBuilder().WithColor(new DiscordColor(170, 1, 20))
-                .WithAuthor($"{DiscordEmoji.FromName(discord, ":x:")} Operation errored")
-                .AddField("Message", error)
-                .Build();
-        }
+    protected DiscordEmbed GetUnsuccessfulResultEmbed(string error, DiscordClient discord)
+    {
+        return new DiscordEmbedBuilder().WithColor(new DiscordColor(170, 1, 20))
+            .WithAuthor($"{DiscordEmoji.FromName(discord, ":x:")} Operation errored")
+            .AddField("Message", error)
+            .Build();
     }
 }

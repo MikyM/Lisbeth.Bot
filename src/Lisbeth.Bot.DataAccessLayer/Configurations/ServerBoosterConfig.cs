@@ -19,30 +19,29 @@ using Lisbeth.Bot.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Lisbeth.Bot.DataAccessLayer.Configurations
+namespace Lisbeth.Bot.DataAccessLayer.Configurations;
+
+public class ServerBoosterConfig : IEntityTypeConfiguration<ServerBooster>
 {
-    public class ServerBoosterConfig : IEntityTypeConfiguration<ServerBooster>
+    public void Configure(EntityTypeBuilder<ServerBooster> builder)
     {
-        public void Configure(EntityTypeBuilder<ServerBooster> builder)
-        {
-            builder.ToTable("server_booster");
+        builder.ToTable("server_booster");
 
-            builder.Property(x => x.Id).HasColumnName("id").HasColumnType("bigint").ValueGeneratedOnAdd().IsRequired();
-            builder.Property(x => x.IsDisabled).HasColumnName("is_disabled").HasColumnType("boolean").IsRequired();
-            builder.Property(x => x.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz")
-                .ValueGeneratedOnAdd().IsRequired();
-            builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz").IsRequired();
+        builder.Property(x => x.Id).HasColumnName("id").HasColumnType("bigint").ValueGeneratedOnAdd().IsRequired();
+        builder.Property(x => x.IsDisabled).HasColumnName("is_disabled").HasColumnType("boolean").IsRequired();
+        builder.Property(x => x.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz")
+            .ValueGeneratedOnAdd().IsRequired();
+        builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz").IsRequired();
 
-            builder.Property(x => x.GuildId).HasColumnName("guild_id").HasColumnType("bigint").ValueGeneratedOnAdd()
-                .IsRequired();
-            builder.Property(x => x.UserId).HasColumnName("user_id").HasColumnType("bigint").ValueGeneratedOnAdd()
-                .IsRequired();
-            builder.Property(x => x.BoostCount).HasColumnName("boost_count").HasColumnType("int").IsRequired();
-            builder.Property(x => x.BoostingSince).HasColumnName("boosting_since").HasColumnType("timestamptz")
-                .IsRequired();
+        builder.Property(x => x.GuildId).HasColumnName("guild_id").HasColumnType("bigint").ValueGeneratedOnAdd()
+            .IsRequired();
+        builder.Property(x => x.UserId).HasColumnName("user_id").HasColumnType("bigint").ValueGeneratedOnAdd()
+            .IsRequired();
+        builder.Property(x => x.BoostCount).HasColumnName("boost_count").HasColumnType("int").IsRequired();
+        builder.Property(x => x.BoostingSince).HasColumnName("boosting_since").HasColumnType("timestamptz")
+            .IsRequired();
 
-            builder.Metadata.FindNavigation(nameof(ServerBooster.GuildServerBoosters))
-                .SetPropertyAccessMode(PropertyAccessMode.Field);
-        }
+        builder.Metadata.FindNavigation(nameof(ServerBooster.GuildServerBoosters))
+            .SetPropertyAccessMode(PropertyAccessMode.Field);
     }
 }

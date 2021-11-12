@@ -23,39 +23,38 @@ using Lisbeth.Bot.Application.Helpers;
 using Lisbeth.Bot.Application.Services.Interfaces;
 using MikyM.Discord.Events;
 
-namespace Lisbeth.Bot.Application.Discord.EventHandlers
+namespace Lisbeth.Bot.Application.Discord.EventHandlers;
+
+[UsedImplicitly]
+public class MuteEventHandlers : IDiscordGuildMemberEventsSubscriber
 {
-    [UsedImplicitly]
-    public class MuteEventHandlers : IDiscordGuildMemberEventsSubscriber
+    private readonly IAsyncExecutor _asyncExecutor;
+
+    public MuteEventHandlers(IAsyncExecutor asyncExecutor)
     {
-        private readonly IAsyncExecutor _asyncExecutor;
+        _asyncExecutor = asyncExecutor;
+    }
 
-        public MuteEventHandlers(IAsyncExecutor asyncExecutor)
-        {
-            _asyncExecutor = asyncExecutor;
-        }
+    public Task DiscordOnGuildMemberAdded(DiscordClient sender, GuildMemberAddEventArgs args)
+    {
+        return Task.CompletedTask;
+    }
 
-        public Task DiscordOnGuildMemberAdded(DiscordClient sender, GuildMemberAddEventArgs args)
-        {
-            return Task.CompletedTask;
-        }
+    public Task DiscordOnGuildMemberRemoved(DiscordClient sender, GuildMemberRemoveEventArgs args)
+    {
+        return Task.CompletedTask;
+    }
 
-        public Task DiscordOnGuildMemberRemoved(DiscordClient sender, GuildMemberRemoveEventArgs args)
-        {
-            return Task.CompletedTask;
-        }
+    public Task DiscordOnGuildMemberUpdated(DiscordClient sender, GuildMemberUpdateEventArgs args)
+    {
+        _ = _asyncExecutor.ExecuteAsync<IMuteCheckService>(x =>
+            x.CheckForNonBotMuteActionAsync(args.Member.Id, args.Guild.Id, sender.CurrentUser.Id, args.RolesBefore,
+                args.RolesAfter));
+        return Task.CompletedTask;
+    }
 
-        public Task DiscordOnGuildMemberUpdated(DiscordClient sender, GuildMemberUpdateEventArgs args)
-        {
-            _ = _asyncExecutor.ExecuteAsync<IMuteCheckService>(x =>
-                x.CheckForNonBotMuteActionAsync(args.Member.Id, args.Guild.Id, sender.CurrentUser.Id, args.RolesBefore,
-                    args.RolesAfter));
-            return Task.CompletedTask;
-        }
-
-        public Task DiscordOnGuildMembersChunked(DiscordClient sender, GuildMembersChunkEventArgs args)
-        {
-            return Task.CompletedTask;
-        }
+    public Task DiscordOnGuildMembersChunked(DiscordClient sender, GuildMembersChunkEventArgs args)
+    {
+        return Task.CompletedTask;
     }
 }

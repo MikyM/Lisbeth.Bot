@@ -21,12 +21,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-namespace MikyM.Discord
+namespace MikyM.Discord;
+
+/// <summary>
+///     Implements configuration for optional extensions.
+/// </summary>
+public interface IDiscordExtensionConfiguration
 {
-    /// <summary>
-    ///     Implements configuration for optional extensions.
-    /// </summary>
-    public interface IDiscordExtensionConfiguration
-    {
-    }
 }

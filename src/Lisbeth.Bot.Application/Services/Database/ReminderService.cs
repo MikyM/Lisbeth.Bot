@@ -29,46 +29,45 @@ using MikyM.Common.Application.Results;
 using MikyM.Common.Application.Services;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
 
-namespace Lisbeth.Bot.Application.Services.Database
+namespace Lisbeth.Bot.Application.Services.Database;
+
+[UsedImplicitly]
+public class ReminderService : CrudService<Reminder, LisbethBotDbContext>, IReminderService
 {
-    [UsedImplicitly]
-    public class ReminderService : CrudService<Reminder, LisbethBotDbContext>, IReminderService
+    public ReminderService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
     {
-        public ReminderService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
-        {
-        }
+    }
 
-        public async Task<Result> SetHangfireIdAsync(long reminderId, string hangfireId, bool shouldSave = false)
-        {
-            var result = await base.GetAsync<Reminder>(reminderId);
+    public async Task<Result> SetHangfireIdAsync(long reminderId, string hangfireId, bool shouldSave = false)
+    {
+        var result = await base.GetAsync<Reminder>(reminderId);
 
-            if (!result.IsDefined()) return Result.FromError(result);
+        if (!result.IsDefined()) return Result.FromError(result);
 
-            result.Entity.HangfireId = hangfireId;
+        result.Entity.HangfireId = hangfireId;
 
-            if (shouldSave) await base.CommitAsync();
+        if (shouldSave) await base.CommitAsync();
 
-            return Result.FromSuccess();
-        }
+        return Result.FromSuccess();
+    }
 
-        public async Task<Result> RescheduleAsync(RescheduleReminderReqDto req, bool shouldSave = false)
-        {
-            var result =
-                await base.GetSingleBySpecAsync<Reminder>(
-                    new ActiveReminderByNameOrIdAndGuildSpec(req.Name, req.GuildId, req.ReminderId));
-            if (!result.IsDefined()) return Result.FromError(result);
+    public async Task<Result> RescheduleAsync(RescheduleReminderReqDto req, bool shouldSave = false)
+    {
+        var result =
+            await base.GetSingleBySpecAsync<Reminder>(
+                new ActiveReminderByNameOrIdAndGuildSpec(req.Name, req.GuildId, req.ReminderId));
+        if (!result.IsDefined()) return Result.FromError(result);
 
-            base.BeginUpdate(result.Entity);
-            var isValid =
-                (req.TimeSpanExpression ?? throw new InvalidOperationException()).TryParseToDurationAndNextOccurrence(
-                    out var occurrence, out _);
-            result.Entity.SetFor = req.SetFor ??
-                                   (isValid ? occurrence : throw new ArgumentException(nameof(req.TimeSpanExpression)));
-            result.Entity.LastEditById = req.RequestedOnBehalfOfId;
+        base.BeginUpdate(result.Entity);
+        var isValid =
+            (req.TimeSpanExpression ?? throw new InvalidOperationException()).TryParseToDurationAndNextOccurrence(
+                out var occurrence, out _);
+        result.Entity.SetFor = req.SetFor ??
+                               (isValid ? occurrence : throw new ArgumentException(nameof(req.TimeSpanExpression)));
+        result.Entity.LastEditById = req.RequestedOnBehalfOfId;
 
-            if (shouldSave) await base.CommitAsync();
+        if (shouldSave) await base.CommitAsync();
 
-            return Result.FromSuccess();
-        }
+        return Result.FromSuccess();
     }
 }

@@ -17,14 +17,13 @@
 
 using Lisbeth.Bot.Domain.DTOs.Request.Base;
 
-namespace Lisbeth.Bot.Domain.DTOs.Request.Ticket.Base
+namespace Lisbeth.Bot.Domain.DTOs.Request.Ticket.Base;
+
+public class BaseTicketGetReqDto : BaseAuthReqDto
 {
-    public class BaseTicketGetReqDto : BaseAuthReqDto
-    {
-        public long? Id { get; set; }
-        public ulong? OwnerId { get; set; }
-        public ulong? GuildId { get; set; }
-        public ulong? ChannelId { get; set; }
-        public long? GuildSpecificId { get; set; }
-    }
+    public long? Id { get; set; }
+    public ulong? OwnerId { get; set; }
+    public ulong? GuildId { get; set; }
+    public ulong? ChannelId { get; set; }
+    public long? GuildSpecificId { get; set; }
 }

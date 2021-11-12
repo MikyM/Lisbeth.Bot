@@ -21,14 +21,13 @@ using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.Application.Results;
 
-namespace Lisbeth.Bot.Application.Discord.ChatExport
-{
-    public interface IDiscordChatExportService
-    {
-        public Task<Result<DiscordEmbed>> ExportToHtmlAsync(DiscordInteraction intr);
-        public Task<Result<DiscordEmbed>> ExportToHtmlAsync(TicketExportReqDto req);
+namespace Lisbeth.Bot.Application.Discord.ChatExport;
 
-        public Task<Result<DiscordEmbed>> ExportToHtmlAsync(DiscordGuild guild, DiscordChannel target,
-            DiscordMember requestingMember, DiscordUser? owner = null, Ticket? ticket = null);
-    }
+public interface IDiscordChatExportService
+{
+    public Task<Result<DiscordEmbed>> ExportToHtmlAsync(DiscordInteraction intr);
+    public Task<Result<DiscordEmbed>> ExportToHtmlAsync(TicketExportReqDto req);
+
+    public Task<Result<DiscordEmbed>> ExportToHtmlAsync(DiscordGuild guild, DiscordChannel target,
+        DiscordMember requestingMember, DiscordUser? owner = null, Ticket? ticket = null);
 }

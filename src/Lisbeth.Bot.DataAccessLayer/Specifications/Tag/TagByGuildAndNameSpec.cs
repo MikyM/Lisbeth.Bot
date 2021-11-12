@@ -17,14 +17,13 @@
 
 using MikyM.Common.DataAccessLayer.Specifications;
 
-namespace Lisbeth.Bot.DataAccessLayer.Specifications.Tag
+namespace Lisbeth.Bot.DataAccessLayer.Specifications.Tag;
+
+public class TagByGuildAndNameSpec : Specification<Domain.Entities.Tag>
 {
-    public class TagByGuildAndNameSpec : Specification<Domain.Entities.Tag>
+    public TagByGuildAndNameSpec(string name, ulong guildId)
     {
-        public TagByGuildAndNameSpec(string name, ulong guildId)
-        {
-            Where(x => x.Name == name);
-            Where(x => x.GuildId == guildId);
-        }
+        Where(x => x.Name == name);
+        Where(x => x.GuildId == guildId);
     }
 }

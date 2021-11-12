@@ -23,13 +23,12 @@ using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.Application.Services;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
 
-namespace Lisbeth.Bot.Application.Services.Database
+namespace Lisbeth.Bot.Application.Services.Database;
+
+[UsedImplicitly]
+public class RoleMenuService : CrudService<RoleMenu, LisbethBotDbContext>, IRoleMenuService
 {
-    [UsedImplicitly]
-    public class RoleMenuService : CrudService<RoleMenu, LisbethBotDbContext>, IRoleMenuService
+    public RoleMenuService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
     {
-        public RoleMenuService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
-        {
-        }
     }
 }

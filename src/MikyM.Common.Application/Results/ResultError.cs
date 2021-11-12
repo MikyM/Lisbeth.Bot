@@ -17,10 +17,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-namespace MikyM.Common.Application.Results
-{
-    /// <summary>
-    /// Acts as a base class for result errors.
-    /// </summary>
-    public abstract record ResultError(string Message) : IResultError;
-}
+namespace MikyM.Common.Application.Results;
+
+/// <summary>
+/// Acts as a base class for result errors.
+/// </summary>
+public abstract record ResultError(string Message) : IResultError;

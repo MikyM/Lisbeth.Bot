@@ -18,9 +18,8 @@
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.DataAccessLayer.Repositories;
 
-namespace Lisbeth.Bot.DataAccessLayer.Repositories.Interfaces
+namespace Lisbeth.Bot.DataAccessLayer.Repositories.Interfaces;
+
+public interface IRoleMenuRepository : IRepository<RoleMenu>
 {
-    public interface IRoleMenuRepository : IRepository<RoleMenu>
-    {
-    }
 }

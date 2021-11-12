@@ -17,14 +17,13 @@
 
 using Lisbeth.Bot.Domain.DTOs.Request.Base;
 
-namespace Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig
+namespace Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig;
+
+public class ModerationConfigRepairReqDto : BaseAuthWithGuildReqDto
 {
-    public class ModerationConfigRepairReqDto : BaseAuthWithGuildReqDto
-    {
-        public ulong? MemberEventsLogChannelId { get; set; }
-        public ulong? MessageDeletedEventsLogChannelId { get; set; }
-        public ulong? MessageUpdatedEventsLogChannelId { get; set; }
-        public ulong? ModerationLogChannelId { get; set; }
-        public ulong? MuteRoleId { get; set; }
-    }
+    public ulong? MemberEventsLogChannelId { get; set; }
+    public ulong? MessageDeletedEventsLogChannelId { get; set; }
+    public ulong? MessageUpdatedEventsLogChannelId { get; set; }
+    public ulong? ModerationLogChannelId { get; set; }
+    public ulong? MuteRoleId { get; set; }
 }

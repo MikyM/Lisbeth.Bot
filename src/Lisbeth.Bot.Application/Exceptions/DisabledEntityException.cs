@@ -17,22 +17,21 @@
 
 using System;
 
-namespace Lisbeth.Bot.Application.Exceptions
+namespace Lisbeth.Bot.Application.Exceptions;
+
+public class DisabledEntityException : Exception
 {
-    public class DisabledEntityException : Exception
+    public DisabledEntityException()
     {
-        public DisabledEntityException()
-        {
-        }
+    }
 
-        public DisabledEntityException(string message)
-            : base(message)
-        {
-        }
+    public DisabledEntityException(string message)
+        : base(message)
+    {
+    }
 
-        public DisabledEntityException(string message, Exception inner)
-            : base(message, inner)
-        {
-        }
+    public DisabledEntityException(string message, Exception inner)
+        : base(message, inner)
+    {
     }
 }

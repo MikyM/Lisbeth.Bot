@@ -18,23 +18,22 @@
 using System;
 using Lisbeth.Bot.Domain.DTOs.Request.Base;
 
-namespace Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig
+namespace Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
+
+public class TicketingConfigReqDto : BaseAuthWithGuildReqDto
 {
-    public class TicketingConfigReqDto : BaseAuthWithGuildReqDto
-    {
-        public TimeSpan? CleanAfter { get; set; }
-        public TimeSpan? CloseAfter { get; set; }
-        public string ClosedNamePrefix { get; set; } = "closed";
-        public string OpenedNamePrefix { get; set; } = "ticket";
+    public TimeSpan? CleanAfter { get; set; }
+    public TimeSpan? CloseAfter { get; set; }
+    public string ClosedNamePrefix { get; set; } = "closed";
+    public string OpenedNamePrefix { get; set; } = "ticket";
 
-        public string BaseWelcomeMessage { get; set; } =
-            "@ownerMention@ please be patient, support will be with you shortly!";
+    public string BaseWelcomeMessage { get; set; } =
+        "@ownerMention@ please be patient, support will be with you shortly!";
 
-        public string BaseCenterMessage { get; set; } =
-            "\n\nClick on the button below to create a private ticket between the staff members and you. Explain your issue, and a staff member will be here to help you shortly after. Please note it may take up to 48 hours for an answer.";
+    public string BaseCenterMessage { get; set; } =
+        "\n\nClick on the button below to create a private ticket between the staff members and you. Explain your issue, and a staff member will be here to help you shortly after. Please note it may take up to 48 hours for an answer.";
 
-        public ulong LogChannelId { get; set; }
-        public ulong ClosedCategoryId { get; set; }
-        public ulong OpenedCategoryId { get; set; }
-    }
+    public ulong LogChannelId { get; set; }
+    public ulong ClosedCategoryId { get; set; }
+    public ulong OpenedCategoryId { get; set; }
 }

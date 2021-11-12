@@ -17,9 +17,8 @@
 
 using Lisbeth.Bot.Domain.DTOs.Request.Base;
 
-namespace Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig
+namespace Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig;
+
+public class ModerationConfigDisableReqDto : BaseAuthWithGuildReqDto
 {
-    public class ModerationConfigDisableReqDto : BaseAuthWithGuildReqDto
-    {
-    }
 }

@@ -20,10 +20,9 @@ using IdGen;
 using MikyM.Common.Domain;
 using MikyM.Common.Domain.Entities;
 
-namespace Lisbeth.Bot.Domain.Entities.Base
+namespace Lisbeth.Bot.Domain.Entities.Base;
+
+public class SnowflakeEntity : AggregateRootEntity
 {
-    public class SnowflakeEntity : AggregateRootEntity
-    {
-        public override long Id { get; protected set; } = ContainerProvider.Container.Resolve<IdGenerator>().CreateId();
-    }
+    public override long Id { get; protected set; } = ContainerProvider.Container.Resolve<IdGenerator>().CreateId();
 }

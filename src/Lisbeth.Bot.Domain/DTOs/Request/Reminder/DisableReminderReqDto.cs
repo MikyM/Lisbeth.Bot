@@ -18,24 +18,23 @@
 using Lisbeth.Bot.Domain.DTOs.Request.Base;
 using Lisbeth.Bot.Domain.Enums;
 
-namespace Lisbeth.Bot.Domain.DTOs.Request.Reminder
+namespace Lisbeth.Bot.Domain.DTOs.Request.Reminder;
+
+public class DisableReminderReqDto : BaseAuthWithGuildReqDto
 {
-    public class DisableReminderReqDto : BaseAuthWithGuildReqDto
+    public DisableReminderReqDto()
     {
-        public DisableReminderReqDto()
-        {
-        }
-
-        public DisableReminderReqDto(ReminderType type, string name, ulong guildId, ulong requestedOnBehalfOfId,
-            long? reminderId = null) : base(guildId, requestedOnBehalfOfId)
-        {
-            Type = type;
-            Name = name;
-            ReminderId = reminderId;
-        }
-
-        public ReminderType Type { get; set; }
-        public string? Name { get; set; }
-        public long? ReminderId { get; set; }
     }
+
+    public DisableReminderReqDto(ReminderType type, string name, ulong guildId, ulong requestedOnBehalfOfId,
+        long? reminderId = null) : base(guildId, requestedOnBehalfOfId)
+    {
+        Type = type;
+        Name = name;
+        ReminderId = reminderId;
+    }
+
+    public ReminderType Type { get; set; }
+    public string? Name { get; set; }
+    public long? ReminderId { get; set; }
 }

@@ -23,13 +23,12 @@ using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.Application.Services;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
 
-namespace Lisbeth.Bot.Application.Services.Database
+namespace Lisbeth.Bot.Application.Services.Database;
+
+[UsedImplicitly]
+public class EmbedConfigService : CrudService<EmbedConfig, LisbethBotDbContext>, IEmbedConfigService
 {
-    [UsedImplicitly]
-    public class EmbedConfigService : CrudService<EmbedConfig, LisbethBotDbContext>, IEmbedConfigService
+    public EmbedConfigService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
     {
-        public EmbedConfigService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
-        {
-        }
     }
 }

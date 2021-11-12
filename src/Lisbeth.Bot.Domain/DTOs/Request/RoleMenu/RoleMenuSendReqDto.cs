@@ -15,10 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Lisbeth.Bot.Domain.DTOs.Request.RoleMenu
+namespace Lisbeth.Bot.Domain.DTOs.Request.RoleMenu;
+
+public class RoleMenuSendReqDto : RoleMenuGetReqDto
 {
-    public class RoleMenuSendReqDto : RoleMenuGetReqDto
-    {
-        public ulong ChannelId { get; set; }
-    }
+    public ulong ChannelId { get; set; }
 }

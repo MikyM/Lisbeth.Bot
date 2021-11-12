@@ -25,66 +25,65 @@ using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Domain.DTOs.Request;
 
 // ReSharper disable once CheckNamespace
-namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
+namespace Lisbeth.Bot.Application.Discord.ApplicationCommands;
+
+[SlashModuleLifespan(SlashModuleLifespan.Transient)]
+[UsedImplicitly]
+public partial class PruneApplicationCommands : ApplicationCommandModule
 {
-    [SlashModuleLifespan(SlashModuleLifespan.Transient)]
+    [UsedImplicitly] public IDiscordMessageService? DiscordMessageService { private get; set; }
+
     [UsedImplicitly]
-    public partial class PruneApplicationCommands : ApplicationCommandModule
+    [SlashRequireUserPermissions(Permissions.ManageMessages)]
+    [SlashCommand("prune", "A command that allows banning a user.")]
+    public async Task PruneCommand(InteractionContext ctx,
+        [Option("count", "Number of messages to prune")]
+        long count,
+        [Option("user", "User to target prune at")]
+        DiscordUser? user = null,
+        [Option("id", "message id to prune to")]
+        long id = 0,
+        [Option("reason", "Reason for ban")] string reason = "No reason provided")
     {
-        [UsedImplicitly] public IDiscordMessageService? DiscordMessageService { private get; set; }
+        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
+            new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
-        [UsedImplicitly]
-        [SlashRequireUserPermissions(Permissions.ManageMessages)]
-        [SlashCommand("prune", "A command that allows banning a user.")]
-        public async Task PruneCommand(InteractionContext ctx,
-            [Option("count", "Number of messages to prune")]
-            long count,
-            [Option("user", "User to target prune at")]
-            DiscordUser? user = null,
-            [Option("id", "message id to prune to")]
-            long id = 0,
-            [Option("reason", "Reason for ban")] string reason = "No reason provided")
+        if (count > 99) count = 99;
+
+        DiscordEmbed embed;
+        switch (user)
         {
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
-                new DiscordInteractionResponseBuilder().AsEphemeral(true));
+            case null:
+                switch (id)
+                {
+                    case 0:
+                        var reqNoUsNoMsgId = new PruneReqDto((int)count + 1);
+                        embed = await this.DiscordMessageService!.PruneAsync(reqNoUsNoMsgId, 0, ctx);
+                        break;
+                    default:
+                        var reqNoUsWithMsgId = new PruneReqDto((int)count, (ulong)id);
+                        embed = await this.DiscordMessageService!.PruneAsync(reqNoUsWithMsgId, 0, ctx);
+                        break;
+                }
 
-            if (count > 99) count = 99;
+                break;
+            default:
+                switch (id)
+                {
+                    case 0:
+                        var reqWithUsNoMsgId = new PruneReqDto((int)count, null, user.Id);
+                        embed = await this.DiscordMessageService!.PruneAsync(reqWithUsNoMsgId, 0, ctx);
+                        break;
+                    default:
+                        var reqWithUsWithMsgId = new PruneReqDto((int)count, (ulong)id, user.Id);
+                        embed = await this.DiscordMessageService!.PruneAsync(reqWithUsWithMsgId, 0, ctx);
+                        break;
+                }
 
-            DiscordEmbed embed;
-            switch (user)
-            {
-                case null:
-                    switch (id)
-                    {
-                        case 0:
-                            var reqNoUsNoMsgId = new PruneReqDto((int)count + 1);
-                            embed = await this.DiscordMessageService!.PruneAsync(reqNoUsNoMsgId, 0, ctx);
-                            break;
-                        default:
-                            var reqNoUsWithMsgId = new PruneReqDto((int)count, (ulong)id);
-                            embed = await this.DiscordMessageService!.PruneAsync(reqNoUsWithMsgId, 0, ctx);
-                            break;
-                    }
-
-                    break;
-                default:
-                    switch (id)
-                    {
-                        case 0:
-                            var reqWithUsNoMsgId = new PruneReqDto((int)count, null, user.Id);
-                            embed = await this.DiscordMessageService!.PruneAsync(reqWithUsNoMsgId, 0, ctx);
-                            break;
-                        default:
-                            var reqWithUsWithMsgId = new PruneReqDto((int)count, (ulong)id, user.Id);
-                            embed = await this.DiscordMessageService!.PruneAsync(reqWithUsWithMsgId, 0, ctx);
-                            break;
-                    }
-
-                    break;
-            }
-
-            await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(embed)
-                .AsEphemeral(true));
+                break;
         }
+
+        await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(embed)
+            .AsEphemeral(true));
     }
 }

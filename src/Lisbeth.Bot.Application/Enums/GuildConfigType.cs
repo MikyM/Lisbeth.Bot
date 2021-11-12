@@ -15,11 +15,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Lisbeth.Bot.Application.Enums
+namespace Lisbeth.Bot.Application.Enums;
+
+public enum GuildConfigType
 {
-    public enum GuildConfigType
-    {
-        Ticketing,
-        Moderation
-    }
+    Ticketing,
+    Moderation
 }

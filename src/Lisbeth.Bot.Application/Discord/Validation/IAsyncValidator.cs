@@ -17,10 +17,9 @@
 
 using System.Threading.Tasks;
 
-namespace Lisbeth.Bot.Application.Discord.Validation
+namespace Lisbeth.Bot.Application.Discord.Validation;
+
+public interface IAsyncValidator
 {
-    public interface IAsyncValidator
-    {
-        Task<bool> IsValidAsync();
-    }
+    Task<bool> IsValidAsync();
 }

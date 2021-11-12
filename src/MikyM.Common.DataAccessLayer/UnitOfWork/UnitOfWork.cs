@@ -25,97 +25,96 @@ using MikyM.Common.DataAccessLayer.Helpers;
 using MikyM.Common.DataAccessLayer.Repositories;
 using MikyM.Common.DataAccessLayer.Specifications.Evaluators;
 
-namespace MikyM.Common.DataAccessLayer.UnitOfWork
+namespace MikyM.Common.DataAccessLayer.UnitOfWork;
+
+public sealed class UnitOfWork<TContext> : IUnitOfWork<TContext> where TContext : DbContext
 {
-    public sealed class UnitOfWork<TContext> : IUnitOfWork<TContext> where TContext : DbContext
+    private readonly ISpecificationEvaluator _specificationEvaluator;
+
+    // To detect redundant calls
+    private bool _disposed;
+    // ReSharper disable once InconsistentNaming
+    private Dictionary<string, IBaseRepository>? _repositories;
+    private IDbContextTransaction? _transaction;
+
+    public UnitOfWork(TContext context, ISpecificationEvaluator specificationEvaluator)
     {
-        private readonly ISpecificationEvaluator _specificationEvaluator;
+        Context = context;
+        _specificationEvaluator = specificationEvaluator;
+    }
 
-        // To detect redundant calls
-        private bool _disposed;
-        // ReSharper disable once InconsistentNaming
-        private Dictionary<string, IBaseRepository>? _repositories;
-        private IDbContextTransaction? _transaction;
+    public TContext Context { get; }
 
-        public UnitOfWork(TContext context, ISpecificationEvaluator specificationEvaluator)
+    public async Task UseTransaction()
+    {
+        _transaction ??= await Context.Database.BeginTransactionAsync();
+    }
+
+    public TRepository? GetRepository<TRepository>() where TRepository : IBaseRepository
+    {
+        _repositories ??= new Dictionary<string, IBaseRepository>();
+
+        var type = typeof(TRepository);
+        string name = type.FullName ?? throw new ArgumentNullException();
+
+        if (_repositories.TryGetValue(name, out var repository)) return (TRepository) repository;
+
+        var concrete =
+            UoFCache.CachedTypes.FirstOrDefault(x => type.IsAssignableFrom(x) && !x.IsAbstract && !x.IsInterface);
+
+        if (concrete is not null)
         {
-            Context = context;
-            _specificationEvaluator = specificationEvaluator;
-        }
+            string? concreteName = concrete.FullName ?? throw new ArgumentNullException();
 
-        public TContext Context { get; }
+            if (_repositories.TryGetValue(concreteName, out var concreteRepo)) return (TRepository) concreteRepo;
 
-        public async Task UseTransaction()
-        {
-            _transaction ??= await Context.Database.BeginTransactionAsync();
-        }
-
-        public TRepository? GetRepository<TRepository>() where TRepository : IBaseRepository
-        {
-            _repositories ??= new Dictionary<string, IBaseRepository>();
-
-            var type = typeof(TRepository);
-            string name = type.FullName ?? throw new ArgumentNullException();
-
-            if (_repositories.TryGetValue(name, out var repository)) return (TRepository) repository;
-
-            var concrete =
-                UoFCache.CachedTypes.FirstOrDefault(x => type.IsAssignableFrom(x) && !x.IsAbstract && !x.IsInterface);
-
-            if (concrete is not null)
-            {
-                string? concreteName = concrete.FullName ?? throw new ArgumentNullException();
-
-                if (_repositories.TryGetValue(concreteName, out var concreteRepo)) return (TRepository) concreteRepo;
-
-                if (_repositories.TryAdd(concreteName,
+            if (_repositories.TryAdd(concreteName,
                     (TRepository) Activator.CreateInstance(concrete, Context, _specificationEvaluator)! ?? throw new InvalidOperationException()))
-                    return (TRepository) _repositories[concreteName];
-                throw new ArgumentException(
-                    $"Concrete repository of type {concreteName} couldn't be added to and/or retrieved from cache.");
-            }
-
-            if (_repositories.TryAdd(name,
-                (TRepository) Activator.CreateInstance(type, Context, _specificationEvaluator)! ?? throw new InvalidOperationException()))
-                return (TRepository) _repositories[name]!;
-
+                return (TRepository) _repositories[concreteName];
             throw new ArgumentException(
-                $"Concrete repository of type {name} couldn't be added to and/or retrieved from cache.");
+                $"Concrete repository of type {concreteName} couldn't be added to and/or retrieved from cache.");
         }
 
-        public async Task RollbackAsync()
+        if (_repositories.TryAdd(name,
+                (TRepository) Activator.CreateInstance(type, Context, _specificationEvaluator)! ?? throw new InvalidOperationException()))
+            return (TRepository) _repositories[name]!;
+
+        throw new ArgumentException(
+            $"Concrete repository of type {name} couldn't be added to and/or retrieved from cache.");
+    }
+
+    public async Task RollbackAsync()
+    {
+        if (_transaction is not null) await _transaction.RollbackAsync();
+    }
+
+    public async Task<int> CommitAsync()
+    {
+        int result = await Context.SaveChangesAsync();
+        if (_transaction is not null) await _transaction.CommitAsync();
+        return result;
+    }
+
+    // Public implementation of Dispose pattern callable by consumers.
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    // Protected implementation of Dispose pattern.
+    private void Dispose(bool disposing)
+    {
+        if (_disposed) return;
+
+        if (disposing)
         {
-            if (_transaction is not null) await _transaction.RollbackAsync();
+            Context?.Dispose();
+            _transaction?.Dispose();
         }
 
-        public async Task<int> CommitAsync()
-        {
-            int result = await Context.SaveChangesAsync();
-            if (_transaction is not null) await _transaction.CommitAsync();
-            return result;
-        }
+        _repositories = null;
 
-        // Public implementation of Dispose pattern callable by consumers.
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        // Protected implementation of Dispose pattern.
-        private void Dispose(bool disposing)
-        {
-            if (_disposed) return;
-
-            if (disposing)
-            {
-                Context?.Dispose();
-                _transaction?.Dispose();
-            }
-
-            _repositories = null;
-
-            _disposed = true;
-        }
+        _disposed = true;
     }
 }

@@ -24,26 +24,25 @@ using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Domain.Entities;
 
-namespace Lisbeth.Bot.Application.Discord.SlashCommands
+namespace Lisbeth.Bot.Application.Discord.SlashCommands;
+
+[UsedImplicitly]
+[SlashModuleLifespan(SlashModuleLifespan.Transient)]
+public class EmbedConfigSlashCommands : ApplicationCommandModule
 {
-    [UsedImplicitly]
-    [SlashModuleLifespan(SlashModuleLifespan.Transient)]
-    public class EmbedConfigSlashCommands : ApplicationCommandModule
+    public IDiscordEmbedConfiguratorService<Tag>? EmbedConfigService { private get; set; }
+
+    [SlashCommand("test", "something")]
+    public async Task EmbedConfigCommand(InteractionContext ctx,
+        [Option("target", "The id of a reminder, tag or role menu to create embed for,")]
+        string id)
     {
-        public IDiscordEmbedConfiguratorService<Tag>? EmbedConfigService { private get; set; }
+        if (!long.TryParse(id, out long parsedId)) throw new ArgumentException(nameof(id));
 
-        [SlashCommand("test", "something")]
-        public async Task EmbedConfigCommand(InteractionContext ctx,
-            [Option("target", "The id of a reminder, tag or role menu to create embed for,")]
-            string id)
-        {
-            if (!long.TryParse(id, out long parsedId)) throw new ArgumentException(nameof(id));
+        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+        var result = await this.EmbedConfigService!.ConfigureAsync(ctx, parsedId.ToString());
 
-            var result = await this.EmbedConfigService!.ConfigureAsync(ctx, parsedId.ToString());
-
-            await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(result.Entity));
-        }
+        await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(result.Entity));
     }
 }

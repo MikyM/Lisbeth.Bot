@@ -17,12 +17,11 @@
 
 using MikyM.Common.Application.Results;
 
-namespace Lisbeth.Bot.Application.Results
-{
-    /// <summary>
-    ///     Represents a perform an action due to authorization.
-    /// </summary>
-    /// <param name="Message">The custom message to provide.</param>
-    public record DiscordNotAuthorizedError
-        (string Message = "Action not authorized.") : ResultError(Message);
-}
+namespace Lisbeth.Bot.Application.Results;
+
+/// <summary>
+///     Represents a perform an action due to authorization.
+/// </summary>
+/// <param name="Message">The custom message to provide.</param>
+public record DiscordNotAuthorizedError
+    (string Message = "Action not authorized.") : ResultError(Message);

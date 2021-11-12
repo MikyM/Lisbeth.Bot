@@ -29,153 +29,152 @@ using MikyM.Common.Application.Results;
 using System;
 using System.Threading.Tasks;
 
-namespace Lisbeth.Bot.Application.Discord.SlashCommands
+namespace Lisbeth.Bot.Application.Discord.SlashCommands;
+
+[UsedImplicitly]
+[SlashModuleLifespan(SlashModuleLifespan.Transient)]
+public class TagSlashCommands : ExtendedApplicationCommandModule
 {
-    [UsedImplicitly]
-    [SlashModuleLifespan(SlashModuleLifespan.Transient)]
-    public class TagSlashCommands : ExtendedApplicationCommandModule
+    [UsedImplicitly] public IDiscordTagService? DiscordTagService { private get; set; }
+    [UsedImplicitly] public IDiscordEmbedConfiguratorService<Tag>? DiscordEmbedTagConfiguratorService { private get; set; }
+
+    [SlashCommand("tag", "Allows working with tags.")]
+    public async Task TagCommand(InteractionContext ctx,
+        [Option("action", "Type of action to perform")]
+        TagActionType action,
+        [Option("channel", "Channel to send the tag to.")]
+        DiscordChannel? channel = null,
+        [Option("id", "Type of action to perform")]
+        string idOrName = "",
+        [Option("text", "Base text for the tag.")]
+        string text = "")
     {
-        [UsedImplicitly] public IDiscordTagService? DiscordTagService { private get; set; }
-        [UsedImplicitly] public IDiscordEmbedConfiguratorService<Tag>? DiscordEmbedTagConfiguratorService { private get; set; }
+        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
-        [SlashCommand("tag", "Allows working with tags.")]
-        public async Task TagCommand(InteractionContext ctx,
-            [Option("action", "Type of action to perform")]
-            TagActionType action,
-            [Option("channel", "Channel to send the tag to.")]
-            DiscordChannel? channel = null,
-            [Option("id", "Type of action to perform")]
-            string idOrName = "",
-            [Option("text", "Base text for the tag.")]
-            string text = "")
+        bool isId = long.TryParse(idOrName, out long id);
+
+        Result<(DiscordEmbed? Embed, string Text)>? result = null;
+        Result<DiscordEmbed>? partial = null;
+
+        switch (action)
         {
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+            case TagActionType.Get:
+                if (!isId && string.IsNullOrWhiteSpace(idOrName))
+                    throw new ArgumentException("You must supply a valid Id or name");
 
-            bool isId = long.TryParse(idOrName, out long id);
-
-            Result<(DiscordEmbed? Embed, string Text)>? result = null;
-            Result<DiscordEmbed>? partial = null;
-
-            switch (action)
-            {
-                case TagActionType.Get:
-                    if (!isId && string.IsNullOrWhiteSpace(idOrName))
-                        throw new ArgumentException("You must supply a valid Id or name");
-
-                    var getReq = new TagGetReqDto
-                    {
-                        GuildId = ctx.Guild.Id,
-                        Id = isId ? id : null,
-                        Name = isId ? null : idOrName,
-                        RequestedOnBehalfOfId = ctx.User.Id
-                    };
-
-                    var getValidator = new TagGetReqValidator(ctx.Client);
-                    await getValidator.ValidateAndThrowAsync(getReq);
-
-                    result = await this.DiscordTagService!.GetAsync(ctx, getReq);
-                    break;
-                case TagActionType.Add:
-                    if (string.IsNullOrWhiteSpace(idOrName))
-                        throw new ArgumentException("You must supply name.");
-
-                    var addReq = new TagAddReqDto
-                    {
-                        GuildId = ctx.Guild.Id,
-                        Name = idOrName,
-                        RequestedOnBehalfOfId = ctx.User.Id,
-                        Text = text
-                    };
-
-                    var addValidator = new TagAddReqValidator(ctx.Client);
-                    await addValidator.ValidateAndThrowAsync(addReq);
-
-                    partial = await this.DiscordTagService!.AddAsync(ctx, addReq);
-
-                    break;
-                case TagActionType.Edit:
-                    if (!isId && string.IsNullOrWhiteSpace(idOrName))
-                        throw new ArgumentException("You must supply a valid Id or name");
-
-                    var editReq = new TagEditReqDto
-                    {
-                        GuildId = ctx.Guild.Id,
-                        Id = isId ? id : null,
-                        Name = isId ? null : idOrName,
-                        RequestedOnBehalfOfId = ctx.User.Id,
-                        Text = text
-                    };
-
-                    var editValidator = new TagEditReqValidator(ctx.Client);
-                    await editValidator.ValidateAndThrowAsync(editReq);
-
-                    partial = await this.DiscordTagService!.EditAsync(ctx, editReq);
-                    break;
-                case TagActionType.Remove:
-                    if (!isId && string.IsNullOrWhiteSpace(idOrName))
-                        throw new ArgumentException("You must supply a valid Id or name");
-
-                    var removeReq = new TagDisableReqDto
-                    {
-                        GuildId = ctx.Guild.Id,
-                        Id = isId ? id : null,
-                        Name = isId ? null : idOrName,
-                        RequestedOnBehalfOfId = ctx.User.Id
-                    };
-
-                    var disableValidator = new TagDisableReqValidator(ctx.Client);
-                    await disableValidator.ValidateAndThrowAsync(removeReq);
-
-                    partial = await this.DiscordTagService!.DisableAsync(ctx, removeReq);
-                    break;
-                case TagActionType.ConfigureEmbed:
-                    partial = await this.DiscordEmbedTagConfiguratorService!.ConfigureAsync(ctx, idOrName);
-                    break;
-                case TagActionType.Send:
-                    if (!isId && string.IsNullOrWhiteSpace(idOrName))
-                        throw new ArgumentException("You must supply a valid Id or name");
-                    if (channel is null)
-                        throw new ArgumentException("You must supply a channel to send a tag");
-
-                    var sendReq = new TagSendReqDto
-                    {
-                        GuildId = ctx.Guild.Id,
-                        Id = isId ? id : null,
-                        Name = isId ? null : idOrName,
-                        RequestedOnBehalfOfId = ctx.User.Id,
-                        ChannelId = channel.Id
-                    };
-
-                    var sendValidator = new TagSendReqValidator(ctx.Client);
-                    await sendValidator.ValidateAndThrowAsync(sendReq);
-
-                    result = await this.DiscordTagService!.SendAsync(ctx, sendReq);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(action), action, null);
-            }
-
-            if (partial.HasValue)
-            {
-                if (partial.Value.IsDefined())
-                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(partial.Value.Entity));
-                else
-                    await ctx.EditResponseAsync(
-                        new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(partial, ctx.Client)));
-            }
-            else if (result.HasValue)
-            {
-                if (!result.Value.IsDefined())
+                var getReq = new TagGetReqDto
                 {
-                    await ctx.EditResponseAsync(
-                        new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(result, ctx.Client)));
-                }
-                else
+                    GuildId = ctx.Guild.Id,
+                    Id = isId ? id : null,
+                    Name = isId ? null : idOrName,
+                    RequestedOnBehalfOfId = ctx.User.Id
+                };
+
+                var getValidator = new TagGetReqValidator(ctx.Client);
+                await getValidator.ValidateAndThrowAsync(getReq);
+
+                result = await this.DiscordTagService!.GetAsync(ctx, getReq);
+                break;
+            case TagActionType.Add:
+                if (string.IsNullOrWhiteSpace(idOrName))
+                    throw new ArgumentException("You must supply name.");
+
+                var addReq = new TagAddReqDto
                 {
-                    if (result.Value.Entity.Embed is not null)
-                        await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(result.Value.Entity.Embed));
-                    else await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent(result.Value.Entity.Text));
-                }
+                    GuildId = ctx.Guild.Id,
+                    Name = idOrName,
+                    RequestedOnBehalfOfId = ctx.User.Id,
+                    Text = text
+                };
+
+                var addValidator = new TagAddReqValidator(ctx.Client);
+                await addValidator.ValidateAndThrowAsync(addReq);
+
+                partial = await this.DiscordTagService!.AddAsync(ctx, addReq);
+
+                break;
+            case TagActionType.Edit:
+                if (!isId && string.IsNullOrWhiteSpace(idOrName))
+                    throw new ArgumentException("You must supply a valid Id or name");
+
+                var editReq = new TagEditReqDto
+                {
+                    GuildId = ctx.Guild.Id,
+                    Id = isId ? id : null,
+                    Name = isId ? null : idOrName,
+                    RequestedOnBehalfOfId = ctx.User.Id,
+                    Text = text
+                };
+
+                var editValidator = new TagEditReqValidator(ctx.Client);
+                await editValidator.ValidateAndThrowAsync(editReq);
+
+                partial = await this.DiscordTagService!.EditAsync(ctx, editReq);
+                break;
+            case TagActionType.Remove:
+                if (!isId && string.IsNullOrWhiteSpace(idOrName))
+                    throw new ArgumentException("You must supply a valid Id or name");
+
+                var removeReq = new TagDisableReqDto
+                {
+                    GuildId = ctx.Guild.Id,
+                    Id = isId ? id : null,
+                    Name = isId ? null : idOrName,
+                    RequestedOnBehalfOfId = ctx.User.Id
+                };
+
+                var disableValidator = new TagDisableReqValidator(ctx.Client);
+                await disableValidator.ValidateAndThrowAsync(removeReq);
+
+                partial = await this.DiscordTagService!.DisableAsync(ctx, removeReq);
+                break;
+            case TagActionType.ConfigureEmbed:
+                partial = await this.DiscordEmbedTagConfiguratorService!.ConfigureAsync(ctx, idOrName);
+                break;
+            case TagActionType.Send:
+                if (!isId && string.IsNullOrWhiteSpace(idOrName))
+                    throw new ArgumentException("You must supply a valid Id or name");
+                if (channel is null)
+                    throw new ArgumentException("You must supply a channel to send a tag");
+
+                var sendReq = new TagSendReqDto
+                {
+                    GuildId = ctx.Guild.Id,
+                    Id = isId ? id : null,
+                    Name = isId ? null : idOrName,
+                    RequestedOnBehalfOfId = ctx.User.Id,
+                    ChannelId = channel.Id
+                };
+
+                var sendValidator = new TagSendReqValidator(ctx.Client);
+                await sendValidator.ValidateAndThrowAsync(sendReq);
+
+                result = await this.DiscordTagService!.SendAsync(ctx, sendReq);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(action), action, null);
+        }
+
+        if (partial.HasValue)
+        {
+            if (partial.Value.IsDefined())
+                await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(partial.Value.Entity));
+            else
+                await ctx.EditResponseAsync(
+                    new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(partial, ctx.Client)));
+        }
+        else if (result.HasValue)
+        {
+            if (!result.Value.IsDefined())
+            {
+                await ctx.EditResponseAsync(
+                    new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(result, ctx.Client)));
+            }
+            else
+            {
+                if (result.Value.Entity.Embed is not null)
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(result.Value.Entity.Embed));
+                else await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent(result.Value.Entity.Text));
             }
         }
     }

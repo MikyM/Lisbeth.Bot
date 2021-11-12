@@ -20,17 +20,16 @@ using System;
 using JetBrains.Annotations;
 using MikyM.Common.Application.Results.Errors.Bases;
 
-namespace MikyM.Common.Application.Results.Errors
-{
-    /// <summary>
-    /// Represents an error arising from an argument being outside of an expected range.
-    /// </summary>
-    /// <param name="Name">The name of the argument.</param>
-    /// <param name="message">The error message.</param>
-    /// <remarks>Used in place of <see cref="ArgumentOutOfRangeException"/>.</remarks>
-    public record ArgumentOutOfRangeError
-    (
-        [InvokerParameterName] string Name,
-        string message = "Value was outside of the expected range"
-    ) : ArgumentError(Name, message);
-}
+namespace MikyM.Common.Application.Results.Errors;
+
+/// <summary>
+/// Represents an error arising from an argument being outside of an expected range.
+/// </summary>
+/// <param name="Name">The name of the argument.</param>
+/// <param name="message">The error message.</param>
+/// <remarks>Used in place of <see cref="ArgumentOutOfRangeException"/>.</remarks>
+public record ArgumentOutOfRangeError
+(
+    [InvokerParameterName] string Name,
+    string message = "Value was outside of the expected range"
+) : ArgumentError(Name, message);

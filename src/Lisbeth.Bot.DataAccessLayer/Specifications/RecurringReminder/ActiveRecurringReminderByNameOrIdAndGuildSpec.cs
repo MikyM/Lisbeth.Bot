@@ -17,30 +17,29 @@
 
 using MikyM.Common.DataAccessLayer.Specifications;
 
-namespace Lisbeth.Bot.DataAccessLayer.Specifications.RecurringReminder
+namespace Lisbeth.Bot.DataAccessLayer.Specifications.RecurringReminder;
+
+public class ActiveRecurringReminderByNameOrIdAndGuildSpec : Specification<Domain.Entities.RecurringReminder>
 {
-    public class ActiveRecurringReminderByNameOrIdAndGuildSpec : Specification<Domain.Entities.RecurringReminder>
+    public ActiveRecurringReminderByNameOrIdAndGuildSpec(long id) : this("", null, id)
     {
-        public ActiveRecurringReminderByNameOrIdAndGuildSpec(long id) : this("", null, id)
-        {
-        }
+    }
 
-        public ActiveRecurringReminderByNameOrIdAndGuildSpec(string name, ulong guildId) : this(name, guildId, null)
-        {
-        }
+    public ActiveRecurringReminderByNameOrIdAndGuildSpec(string name, ulong guildId) : this(name, guildId, null)
+    {
+    }
 
-        public ActiveRecurringReminderByNameOrIdAndGuildSpec(string name, ulong? guildId, long? id)
+    public ActiveRecurringReminderByNameOrIdAndGuildSpec(string name, ulong? guildId, long? id)
+    {
+        Where(x => !x.IsDisabled);
+        if (id.HasValue)
         {
-            Where(x => !x.IsDisabled);
-            if (id.HasValue)
-            {
-                Where(x => x.Id == id);
-            }
-            else
-            {
-                Where(x => x.GuildId == guildId);
-                Where(x => x.Name == name);
-            }
+            Where(x => x.Id == id);
+        }
+        else
+        {
+            Where(x => x.GuildId == guildId);
+            Where(x => x.Name == name);
         }
     }
 }

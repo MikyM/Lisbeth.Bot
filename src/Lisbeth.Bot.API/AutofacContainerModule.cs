@@ -36,64 +36,63 @@ using MikyM.Common.DataAccessLayer;
 using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Common.DataAccessLayer.Specifications.Evaluators;
 
-namespace Lisbeth.Bot.API
+namespace Lisbeth.Bot.API;
+
+public class AutofacContainerModule : Module
 {
-    public class AutofacContainerModule : Module
+    protected override void Load(ContainerBuilder builder)
     {
-        protected override void Load(ContainerBuilder builder)
+        base.Load(builder);
+        // automapper
+
+        builder.AddDataAccessLayer();
+        builder.AddApplicationLayer();
+
+        // bulk register custom services - follow naming convention
+        builder.RegisterAssemblyTypes(typeof(MuteService).Assembly).Where(t => t.Name.EndsWith("Service"))
+            .AsImplementedInterfaces().InstancePerLifetimeScope();
+        // bulk register custom repositories - follow naming convention
+        builder.RegisterAssemblyTypes(typeof(MuteRepository).Assembly).Where(t => t.Name.EndsWith("Repository"))
+            .AsImplementedInterfaces().InstancePerLifetimeScope();
+
+        // pagination stuff
+        builder.RegisterType<HttpContextAccessor>().As<IHttpContextAccessor>().SingleInstance();
+        builder.Register(x =>
         {
-            base.Load(builder);
-            // automapper
+            var accessor = x.Resolve<IHttpContextAccessor>();
+            var request = accessor?.HttpContext?.Request;
+            var uri = string.Concat(request?.Scheme, "://", request?.Host.ToUriComponent());
+            return new UriService(uri);
+        }).As<IUriService>().SingleInstance();
 
-            builder.AddDataAccessLayer();
-            builder.AddApplicationLayer();
+        builder.RegisterType<AsyncExecutor>().As<IAsyncExecutor>().SingleInstance();
 
-            // bulk register custom services - follow naming convention
-            builder.RegisterAssemblyTypes(typeof(MuteService).Assembly).Where(t => t.Name.EndsWith("Service"))
-                .AsImplementedInterfaces().InstancePerLifetimeScope();
-            // bulk register custom repositories - follow naming convention
-            builder.RegisterAssemblyTypes(typeof(MuteRepository).Assembly).Where(t => t.Name.EndsWith("Repository"))
-                .AsImplementedInterfaces().InstancePerLifetimeScope();
+        // Register Entity Framework
+        builder.Register(x =>
+        {
+            var optionsBuilder = new DbContextOptionsBuilder<LisbethBotDbContext>();
+            //optionsBuilder.UseInMemoryDatabase("testdb");
+            optionsBuilder.AddInterceptors(x.Resolve<SecondLevelCacheInterceptor>());
+            optionsBuilder.EnableSensitiveDataLogging();
+            optionsBuilder.UseLoggerFactory(x.Resolve<ILoggerFactory>());
+            optionsBuilder.UseNpgsql(
+                "User ID=lisbethbot;Password=lisbethbot;Host=localhost;Port=5438;Database=lisbeth_bot_test;");
+            return new LisbethBotDbContext(optionsBuilder.Options);
+        }).AsSelf().InstancePerLifetimeScope();
 
-            // pagination stuff
-            builder.RegisterType<HttpContextAccessor>().As<IHttpContextAccessor>().SingleInstance();
-            builder.Register(x =>
-            {
-                var accessor = x.Resolve<IHttpContextAccessor>();
-                var request = accessor?.HttpContext?.Request;
-                var uri = string.Concat(request?.Scheme, "://", request?.Host.ToUriComponent());
-                return new UriService(uri);
-            }).As<IUriService>().SingleInstance();
+        builder.Register(_ =>
+        {
+            var epoch = new DateTime(2021, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            var structure = new IdStructure(45, 2, 16);
+            var options = new IdGeneratorOptions(structure, new DefaultTimeSource(epoch),
+                SequenceOverflowStrategy.SpinWait);
+            return new IdGenerator(0, options);
+        }).AsSelf().SingleInstance();
 
-            builder.RegisterType<AsyncExecutor>().As<IAsyncExecutor>().SingleInstance();
-
-            // Register Entity Framework
-            builder.Register(x =>
-            {
-                var optionsBuilder = new DbContextOptionsBuilder<LisbethBotDbContext>();
-                //optionsBuilder.UseInMemoryDatabase("testdb");
-                optionsBuilder.AddInterceptors(x.Resolve<SecondLevelCacheInterceptor>());
-                optionsBuilder.EnableSensitiveDataLogging();
-                optionsBuilder.UseLoggerFactory(x.Resolve<ILoggerFactory>());
-                optionsBuilder.UseNpgsql(
-                    "User ID=lisbethbot;Password=lisbethbot;Host=localhost;Port=5438;Database=lisbeth_bot_test;");
-                return new LisbethBotDbContext(optionsBuilder.Options);
-            }).AsSelf().InstancePerLifetimeScope();
-
-            builder.Register(_ =>
-            {
-                var epoch = new DateTime(2021, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-                var structure = new IdStructure(45, 2, 16);
-                var options = new IdGeneratorOptions(structure, new DefaultTimeSource(epoch),
-                    SequenceOverflowStrategy.SpinWait);
-                return new IdGenerator(0, options);
-            }).AsSelf().SingleInstance();
-
-            builder.RegisterType<DiscordEmbedProvider>().As<IDiscordEmbedProvider>().SingleInstance();
-            builder.RegisterType<SpecificationEvaluator>().As<ISpecificationEvaluator>().UsingConstructor()
-                .SingleInstance();
-            builder.RegisterGeneric(typeof(DiscordEmbedConfiguratorService<>))
-                .As(typeof(IDiscordEmbedConfiguratorService<>)).InstancePerLifetimeScope();
-        }
+        builder.RegisterType<DiscordEmbedProvider>().As<IDiscordEmbedProvider>().SingleInstance();
+        builder.RegisterType<SpecificationEvaluator>().As<ISpecificationEvaluator>().UsingConstructor()
+            .SingleInstance();
+        builder.RegisterGeneric(typeof(DiscordEmbedConfiguratorService<>))
+            .As(typeof(IDiscordEmbedConfiguratorService<>)).InstancePerLifetimeScope();
     }
 }

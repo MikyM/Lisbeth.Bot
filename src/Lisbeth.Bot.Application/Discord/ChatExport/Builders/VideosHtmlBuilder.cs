@@ -21,35 +21,34 @@ using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.ChatExport.Models;
 
-namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders
+namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders;
+
+public class VideosHtmlBuilder : IAsyncHtmlBuilder
 {
-    public class VideosHtmlBuilder : IAsyncHtmlBuilder
+    public VideosHtmlBuilder(IReadOnlyList<DiscordAttachment> videos)
     {
-        public VideosHtmlBuilder(IReadOnlyList<DiscordAttachment> videos)
+        Videos ??= videos ?? throw new ArgumentNullException(nameof(videos));
+    }
+
+    public IReadOnlyList<DiscordAttachment> Videos { get; private set; }
+
+    public async Task<string> BuildAsync()
+    {
+        if (Videos.Count == 0 || Videos is null) return "";
+        string videosHtml = "";
+        foreach (var attachment in Videos)
         {
-            Videos ??= videos ?? throw new ArgumentNullException(nameof(videos));
+            HtmlVideo video = new HtmlVideo(attachment.Url);
+            videosHtml += await video.BuildAsync();
         }
 
-        public IReadOnlyList<DiscordAttachment> Videos { get; private set; }
+        return $"<div class=\"videos-wrapper\">{videosHtml}</div>";
+    }
 
-        public async Task<string> BuildAsync()
-        {
-            if (Videos.Count == 0 || Videos is null) return "";
-            string videosHtml = "";
-            foreach (var attachment in Videos)
-            {
-                HtmlVideo video = new HtmlVideo(attachment.Url);
-                videosHtml += await video.BuildAsync();
-            }
+    public VideosHtmlBuilder WithVideos(IReadOnlyList<DiscordAttachment> videos)
+    {
+        Videos ??= videos ?? throw new ArgumentNullException(nameof(videos));
 
-            return $"<div class=\"videos-wrapper\">{videosHtml}</div>";
-        }
-
-        public VideosHtmlBuilder WithVideos(IReadOnlyList<DiscordAttachment> videos)
-        {
-            Videos ??= videos ?? throw new ArgumentNullException(nameof(videos));
-
-            return this;
-        }
+        return this;
     }
 }

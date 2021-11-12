@@ -21,19 +21,18 @@ using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Domain.DTOs.Request.Tag;
 using MikyM.Common.Application.Results;
 
-namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
+namespace Lisbeth.Bot.Application.Discord.Services.Interfaces;
+
+public interface IDiscordTagService
 {
-    public interface IDiscordTagService
-    {
-        Task<Result<DiscordEmbed>> AddAsync(TagAddReqDto req);
-        Task<Result<DiscordEmbed>> AddAsync(InteractionContext ctx, TagAddReqDto req);
-        Task<Result<DiscordEmbed>> EditAsync(TagEditReqDto req);
-        Task<Result<DiscordEmbed>> EditAsync(InteractionContext ctx, TagEditReqDto req);
-        Task<Result<(DiscordEmbed? Embed, string Text)>> GetAsync(TagGetReqDto req);
-        Task<Result<(DiscordEmbed? Embed, string Text)>> GetAsync(InteractionContext ctx, TagGetReqDto req);
-        Task<Result<(DiscordEmbed? Embed, string Text)>> SendAsync(TagSendReqDto req);
-        Task<Result<(DiscordEmbed? Embed, string Text)>> SendAsync(InteractionContext ctx, TagSendReqDto req);
-        Task<Result<DiscordEmbed>> DisableAsync(TagDisableReqDto req);
-        Task<Result<DiscordEmbed>> DisableAsync(InteractionContext ctx, TagDisableReqDto req);
-    }
+    Task<Result<DiscordEmbed>> AddAsync(TagAddReqDto req);
+    Task<Result<DiscordEmbed>> AddAsync(InteractionContext ctx, TagAddReqDto req);
+    Task<Result<DiscordEmbed>> EditAsync(TagEditReqDto req);
+    Task<Result<DiscordEmbed>> EditAsync(InteractionContext ctx, TagEditReqDto req);
+    Task<Result<(DiscordEmbed? Embed, string Text)>> GetAsync(TagGetReqDto req);
+    Task<Result<(DiscordEmbed? Embed, string Text)>> GetAsync(InteractionContext ctx, TagGetReqDto req);
+    Task<Result<(DiscordEmbed? Embed, string Text)>> SendAsync(TagSendReqDto req);
+    Task<Result<(DiscordEmbed? Embed, string Text)>> SendAsync(InteractionContext ctx, TagSendReqDto req);
+    Task<Result<DiscordEmbed>> DisableAsync(TagDisableReqDto req);
+    Task<Result<DiscordEmbed>> DisableAsync(InteractionContext ctx, TagDisableReqDto req);
 }

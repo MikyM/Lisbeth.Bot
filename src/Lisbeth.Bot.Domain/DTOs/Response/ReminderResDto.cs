@@ -18,25 +18,24 @@
 using System;
 using System.Collections.Generic;
 
-namespace Lisbeth.Bot.Domain.DTOs.Response
+namespace Lisbeth.Bot.Domain.DTOs.Response;
+
+public class ReminderResDto
 {
-    public class ReminderResDto
+    public ReminderResDto()
     {
-        public ReminderResDto()
-        {
-        }
-
-        public ReminderResDto(long id, string? name, DateTime nextOccurrence, List<string>? mentions)
-        {
-            Id = id;
-            Name = name;
-            NextOccurrence = nextOccurrence;
-            Mentions = mentions;
-        }
-
-        public long Id { get; set; }
-        public string? Name { get; set; }
-        public DateTime NextOccurrence { get; set; }
-        public List<string>? Mentions { get; set; }
     }
+
+    public ReminderResDto(long id, string? name, DateTime nextOccurrence, List<string>? mentions)
+    {
+        Id = id;
+        Name = name;
+        NextOccurrence = nextOccurrence;
+        Mentions = mentions;
+    }
+
+    public long Id { get; set; }
+    public string? Name { get; set; }
+    public DateTime NextOccurrence { get; set; }
+    public List<string>? Mentions { get; set; }
 }

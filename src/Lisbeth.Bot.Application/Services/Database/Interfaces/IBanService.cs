@@ -22,11 +22,10 @@ using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.Application.Interfaces;
 using MikyM.Common.Application.Results;
 
-namespace Lisbeth.Bot.Application.Services.Database.Interfaces
+namespace Lisbeth.Bot.Application.Services.Database.Interfaces;
+
+public interface IBanService : ICrudService<Ban, LisbethBotDbContext>
 {
-    public interface IBanService : ICrudService<Ban, LisbethBotDbContext>
-    {
-        Task<Result<(long Id, Ban? FoundEntity)>> AddOrExtendAsync(BanReqDto req, bool shouldSave = false);
-        Task<Result<Ban>> DisableAsync(BanDisableReqDto entry, bool shouldSave = false);
-    }
+    Task<Result<(long Id, Ban? FoundEntity)>> AddOrExtendAsync(BanReqDto req, bool shouldSave = false);
+    Task<Result<Ban>> DisableAsync(BanDisableReqDto entry, bool shouldSave = false);
 }

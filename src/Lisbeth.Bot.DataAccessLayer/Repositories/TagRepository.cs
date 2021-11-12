@@ -21,12 +21,11 @@ using Microsoft.EntityFrameworkCore;
 using MikyM.Common.DataAccessLayer.Repositories;
 using MikyM.Common.DataAccessLayer.Specifications.Evaluators;
 
-namespace Lisbeth.Bot.DataAccessLayer.Repositories
+namespace Lisbeth.Bot.DataAccessLayer.Repositories;
+
+public class TagRepository : Repository<Tag>, ITagRepository
 {
-    public class TagRepository : Repository<Tag>, ITagRepository
+    public TagRepository(DbContext context, ISpecificationEvaluator evaluator) : base(context, evaluator)
     {
-        public TagRepository(DbContext context, ISpecificationEvaluator evaluator) : base(context, evaluator)
-        {
-        }
     }
 }

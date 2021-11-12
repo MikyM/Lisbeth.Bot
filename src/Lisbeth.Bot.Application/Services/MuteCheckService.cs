@@ -29,47 +29,46 @@ using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.Application.Results;
 using MikyM.Common.Application.Results.Errors;
 
-namespace Lisbeth.Bot.Application.Services
+namespace Lisbeth.Bot.Application.Services;
+
+[UsedImplicitly]
+public class MuteCheckService : IMuteCheckService
 {
-    [UsedImplicitly]
-    public class MuteCheckService : IMuteCheckService
+    private readonly IGuildService _guildService;
+    private readonly IMuteService _muteService;
+
+    public MuteCheckService(IMuteService muteService, IGuildService guildService)
     {
-        private readonly IGuildService _guildService;
-        private readonly IMuteService _muteService;
+        _muteService = muteService;
+        _guildService = guildService;
+    }
 
-        public MuteCheckService(IMuteService muteService, IGuildService guildService)
+    public async Task<Result> CheckForNonBotMuteActionAsync(ulong targetId, ulong guildId,
+        ulong requestedOnBehalfOfId,
+        IReadOnlyList<DiscordRole> rolesBefore, IReadOnlyList<DiscordRole> rolesAfter)
+    {
+        await Task.Delay(1000);
+
+        var result = await _guildService.GetSingleBySpecAsync<Guild>(
+            new ActiveGuildByDiscordIdWithModerationSpecifications(guildId));
+
+        if (!result.IsDefined() || result.Entity.ModerationConfig is null)
+            return Result.FromError(new NotFoundError());
+
+        bool wasMuted = rolesBefore.Any(x => x.Id == result.Entity.ModerationConfig.MuteRoleId);
+        bool isMuted = rolesAfter.Any(x => x.Id == result.Entity.ModerationConfig.MuteRoleId);
+
+        switch (wasMuted)
         {
-            _muteService = muteService;
-            _guildService = guildService;
+            case true when !isMuted:
+                await _muteService.DisableAsync(new MuteDisableReqDto(targetId, guildId, requestedOnBehalfOfId));
+                break;
+            case false when isMuted:
+                await _muteService.AddOrExtendAsync(new MuteReqDto(targetId, guildId, requestedOnBehalfOfId,
+                    DateTime.MaxValue));
+                break;
         }
 
-        public async Task<Result> CheckForNonBotMuteActionAsync(ulong targetId, ulong guildId,
-            ulong requestedOnBehalfOfId,
-            IReadOnlyList<DiscordRole> rolesBefore, IReadOnlyList<DiscordRole> rolesAfter)
-        {
-            await Task.Delay(1000);
-
-            var result = await _guildService.GetSingleBySpecAsync<Guild>(
-                new ActiveGuildByDiscordIdWithModerationSpecifications(guildId));
-
-            if (!result.IsDefined() || result.Entity.ModerationConfig is null)
-                return Result.FromError(new NotFoundError());
-
-            bool wasMuted = rolesBefore.Any(x => x.Id == result.Entity.ModerationConfig.MuteRoleId);
-            bool isMuted = rolesAfter.Any(x => x.Id == result.Entity.ModerationConfig.MuteRoleId);
-
-            switch (wasMuted)
-            {
-                case true when !isMuted:
-                    await _muteService.DisableAsync(new MuteDisableReqDto(targetId, guildId, requestedOnBehalfOfId));
-                    break;
-                case false when isMuted:
-                    await _muteService.AddOrExtendAsync(new MuteReqDto(targetId, guildId, requestedOnBehalfOfId,
-                        DateTime.MaxValue));
-                    break;
-            }
-
-            return Result.FromSuccess();
-        }
+        return Result.FromSuccess();
     }
 }

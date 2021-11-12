@@ -20,46 +20,45 @@ using Lisbeth.Bot.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Lisbeth.Bot.DataAccessLayer.Configurations
+namespace Lisbeth.Bot.DataAccessLayer.Configurations;
+
+public class ModerationConfigConfig : IEntityTypeConfiguration<ModerationConfig>
 {
-    public class ModerationConfigConfig : IEntityTypeConfiguration<ModerationConfig>
+    public void Configure(EntityTypeBuilder<ModerationConfig> builder)
     {
-        public void Configure(EntityTypeBuilder<ModerationConfig> builder)
-        {
-            builder.ToTable("moderation_config");
+        builder.ToTable("moderation_config");
 
-            builder.Property(x => x.Id).HasColumnName("id").HasColumnType("bigint")
-                .ValueGeneratedOnAdd().IsRequired();
-            builder.Property(x => x.IsDisabled).HasColumnName("is_disabled").HasColumnType("boolean")
-                .IsRequired();
-            builder.Property(x => x.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz")
-                .ValueGeneratedOnAdd().IsRequired();
-            builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz")
-                .IsRequired();
+        builder.Property(x => x.Id).HasColumnName("id").HasColumnType("bigint")
+            .ValueGeneratedOnAdd().IsRequired();
+        builder.Property(x => x.IsDisabled).HasColumnName("is_disabled").HasColumnType("boolean")
+            .IsRequired();
+        builder.Property(x => x.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz")
+            .ValueGeneratedOnAdd().IsRequired();
+        builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz")
+            .IsRequired();
 
-            builder.Property(x => x.GuildId).HasColumnName("guild_id").HasColumnType("bigint")
-                .ValueGeneratedOnAdd().IsRequired();
-            builder.Property(x => x.MemberEventsLogChannelId)
-                .HasColumnName("member_events_log_channel_id").HasColumnType("bigint").IsRequired();
-            builder.Property(x => x.MessageDeletedEventsLogChannelId)
-                .HasColumnName("message_deleted_events_log_channel_id").HasColumnType("bigint").IsRequired();
-            builder.Property(x => x.ModerationLogChannelId)
-                .HasColumnName("moderation_log_channel_id").HasColumnType("bigint").IsRequired();
-            builder.Property(x => x.MessageUpdatedEventsLogChannelId)
-                .HasColumnName("message_updated_events_log_channel_id").HasColumnType("bigint").IsRequired();
-            builder.Property(x => x.MuteRoleId).HasColumnName("mute_role_id")
-                .HasColumnType("bigint").IsRequired();
-            builder.Property(x => x.BaseMemberWelcomeMessage).HasColumnName("member_welcome_message")
-                .HasColumnType("text");
-            builder.Property(x => x.MemberWelcomeEmbedConfigId)
-                .HasColumnName("member_welcome_embed_config_id")
-                .HasColumnType("bigint");
+        builder.Property(x => x.GuildId).HasColumnName("guild_id").HasColumnType("bigint")
+            .ValueGeneratedOnAdd().IsRequired();
+        builder.Property(x => x.MemberEventsLogChannelId)
+            .HasColumnName("member_events_log_channel_id").HasColumnType("bigint").IsRequired();
+        builder.Property(x => x.MessageDeletedEventsLogChannelId)
+            .HasColumnName("message_deleted_events_log_channel_id").HasColumnType("bigint").IsRequired();
+        builder.Property(x => x.ModerationLogChannelId)
+            .HasColumnName("moderation_log_channel_id").HasColumnType("bigint").IsRequired();
+        builder.Property(x => x.MessageUpdatedEventsLogChannelId)
+            .HasColumnName("message_updated_events_log_channel_id").HasColumnType("bigint").IsRequired();
+        builder.Property(x => x.MuteRoleId).HasColumnName("mute_role_id")
+            .HasColumnType("bigint").IsRequired();
+        builder.Property(x => x.BaseMemberWelcomeMessage).HasColumnName("member_welcome_message")
+            .HasColumnType("text");
+        builder.Property(x => x.MemberWelcomeEmbedConfigId)
+            .HasColumnName("member_welcome_embed_config_id")
+            .HasColumnType("bigint");
 
-            builder.HasOne(x => x.MemberWelcomeEmbedConfig)
-                .WithOne(x => x.ModerationConfig)
-                .HasForeignKey<ModerationConfig>(x => x.MemberWelcomeEmbedConfigId)
-                .HasPrincipalKey<EmbedConfig>(x => x.Id)
-                .IsRequired(false);
-        }
+        builder.HasOne(x => x.MemberWelcomeEmbedConfig)
+            .WithOne(x => x.ModerationConfig)
+            .HasForeignKey<ModerationConfig>(x => x.MemberWelcomeEmbedConfigId)
+            .HasPrincipalKey<EmbedConfig>(x => x.Id)
+            .IsRequired(false);
     }
 }

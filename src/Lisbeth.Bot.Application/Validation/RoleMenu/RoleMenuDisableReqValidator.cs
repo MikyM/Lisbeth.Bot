@@ -21,27 +21,26 @@ using Lisbeth.Bot.Application.Validation.ReusablePropertyValidation;
 using Lisbeth.Bot.Domain.DTOs.Request.RoleMenu;
 using MikyM.Discord.Interfaces;
 
-namespace Lisbeth.Bot.Application.Validation.RoleMenu
+namespace Lisbeth.Bot.Application.Validation.RoleMenu;
+
+public class RoleMenuDisableReqValidator : AbstractValidator<RoleMenuDisableReqDto>
 {
-    public class RoleMenuDisableReqValidator : AbstractValidator<RoleMenuDisableReqDto>
+    public RoleMenuDisableReqValidator(IDiscordService discordService) : this(discordService.Client)
     {
-        public RoleMenuDisableReqValidator(IDiscordService discordService) : this(discordService.Client)
-        {
-        }
+    }
 
-        public RoleMenuDisableReqValidator(DiscordClient discord)
-        {
-            CascadeMode = CascadeMode.Stop;
+    public RoleMenuDisableReqValidator(DiscordClient discord)
+    {
+        CascadeMode = CascadeMode.Stop;
 
-            RuleFor(x => x.Id).NotEmpty().When(x => x.Name is not null && !x.GuildId.HasValue);
-            RuleFor(x => x.Name).NotEmpty().When(x => !x.Id.HasValue);
-            RuleFor(x => x.GuildId)
-                .NotEmpty()
-                .When(x => !x.Id.HasValue)
-                .DependentRules(x => x.SetAsyncValidator(new DiscordGuildIdValidator<RoleMenuDisableReqDto>(discord)));
-            RuleFor(x => x.RequestedOnBehalfOfId)
-                .NotEmpty()
-                .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<RoleMenuDisableReqDto>(discord)));
-        }
+        RuleFor(x => x.Id).NotEmpty().When(x => x.Name is not null && !x.GuildId.HasValue);
+        RuleFor(x => x.Name).NotEmpty().When(x => !x.Id.HasValue);
+        RuleFor(x => x.GuildId)
+            .NotEmpty()
+            .When(x => !x.Id.HasValue)
+            .DependentRules(x => x.SetAsyncValidator(new DiscordGuildIdValidator<RoleMenuDisableReqDto>(discord)));
+        RuleFor(x => x.RequestedOnBehalfOfId)
+            .NotEmpty()
+            .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<RoleMenuDisableReqDto>(discord)));
     }
 }

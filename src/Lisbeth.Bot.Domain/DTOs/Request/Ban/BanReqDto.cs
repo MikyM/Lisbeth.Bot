@@ -17,38 +17,37 @@
 
 using System;
 
-namespace Lisbeth.Bot.Domain.DTOs.Request.Ban
+namespace Lisbeth.Bot.Domain.DTOs.Request.Ban;
+
+public class BanReqDto
 {
-    public class BanReqDto
+    public BanReqDto()
     {
-        public BanReqDto()
-        {
-        }
-
-        public BanReqDto(ulong targetUserId, ulong guildId, ulong requestedOnBehalfOfId, DateTime appliedUntil) : this(
-            targetUserId, guildId, requestedOnBehalfOfId, appliedUntil, null)
-        {
-            TargetUserId = targetUserId;
-            GuildId = guildId;
-            AppliedUntil = appliedUntil;
-            RequestedOnBehalfOfId = requestedOnBehalfOfId;
-        }
-
-        public BanReqDto(ulong targetUserId, ulong guildId, ulong requestedOnBehalfOfId, DateTime appliedUntil,
-            string? reason)
-        {
-            TargetUserId = targetUserId;
-            GuildId = guildId;
-            AppliedUntil = appliedUntil;
-            RequestedOnBehalfOfId = requestedOnBehalfOfId;
-            Reason = reason;
-        }
-
-        public ulong TargetUserId { get; set; }
-        public ulong GuildId { get; set; }
-
-        public DateTime AppliedUntil { get; set; }
-        public ulong RequestedOnBehalfOfId { get; set; }
-        public string? Reason { get; set; }
     }
+
+    public BanReqDto(ulong targetUserId, ulong guildId, ulong requestedOnBehalfOfId, DateTime appliedUntil) : this(
+        targetUserId, guildId, requestedOnBehalfOfId, appliedUntil, null)
+    {
+        TargetUserId = targetUserId;
+        GuildId = guildId;
+        AppliedUntil = appliedUntil;
+        RequestedOnBehalfOfId = requestedOnBehalfOfId;
+    }
+
+    public BanReqDto(ulong targetUserId, ulong guildId, ulong requestedOnBehalfOfId, DateTime appliedUntil,
+        string? reason)
+    {
+        TargetUserId = targetUserId;
+        GuildId = guildId;
+        AppliedUntil = appliedUntil;
+        RequestedOnBehalfOfId = requestedOnBehalfOfId;
+        Reason = reason;
+    }
+
+    public ulong TargetUserId { get; set; }
+    public ulong GuildId { get; set; }
+
+    public DateTime AppliedUntil { get; set; }
+    public ulong RequestedOnBehalfOfId { get; set; }
+    public string? Reason { get; set; }
 }

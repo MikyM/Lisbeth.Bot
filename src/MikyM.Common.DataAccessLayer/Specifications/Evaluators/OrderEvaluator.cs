@@ -22,66 +22,65 @@ using System.Linq.Expressions;
 using MikyM.Common.DataAccessLayer.Specifications.Exceptions;
 using MikyM.Common.DataAccessLayer.Specifications.Helpers;
 
-namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators
+namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators;
+
+public class OrderEvaluator : IEvaluator, IInMemoryEvaluator
 {
-    public class OrderEvaluator : IEvaluator, IInMemoryEvaluator
+    private OrderEvaluator()
     {
-        private OrderEvaluator()
-        {
-        }
+    }
 
-        public static OrderEvaluator Instance { get; } = new();
+    public static OrderEvaluator Instance { get; } = new();
 
-        public bool IsCriteriaEvaluator { get; } = false;
+    public bool IsCriteriaEvaluator { get; } = false;
 
-        public IQueryable<T> GetQuery<T>(IQueryable<T> query, ISpecification<T> specification) where T : class
-        {
-            if (specification.OrderExpressions is null) return query;
-            if (specification.OrderExpressions.Count(x =>
+    public IQueryable<T> GetQuery<T>(IQueryable<T> query, ISpecification<T> specification) where T : class
+    {
+        if (specification.OrderExpressions is null) return query;
+        if (specification.OrderExpressions.Count(x =>
                 x.OrderType is OrderTypeEnum.OrderBy or OrderTypeEnum.OrderByDescending) > 1)
-                throw new DuplicateOrderChainException();
+            throw new DuplicateOrderChainException();
 
-            IOrderedQueryable<T>? orderedQuery =
-                specification.OrderExpressions
-                    .Aggregate<(Expression<Func<T, object>> KeySelector, OrderTypeEnum OrderType), IOrderedQueryable<T>
-                        ?>(null, (current, orderExpression) => orderExpression.OrderType switch
-                    {
-                        OrderTypeEnum.OrderBy => query.OrderBy(orderExpression.KeySelector),
-                        OrderTypeEnum.OrderByDescending => query.OrderByDescending(orderExpression.KeySelector),
-                        OrderTypeEnum.ThenBy => current?.ThenBy(orderExpression.KeySelector),
-                        OrderTypeEnum.ThenByDescending => current?.ThenByDescending(orderExpression.KeySelector),
-                        _ => current
-                    });
+        IOrderedQueryable<T>? orderedQuery =
+            specification.OrderExpressions
+                .Aggregate<(Expression<Func<T, object>> KeySelector, OrderTypeEnum OrderType), IOrderedQueryable<T>
+                    ?>(null, (current, orderExpression) => orderExpression.OrderType switch
+                {
+                    OrderTypeEnum.OrderBy => query.OrderBy(orderExpression.KeySelector),
+                    OrderTypeEnum.OrderByDescending => query.OrderByDescending(orderExpression.KeySelector),
+                    OrderTypeEnum.ThenBy => current?.ThenBy(orderExpression.KeySelector),
+                    OrderTypeEnum.ThenByDescending => current?.ThenByDescending(orderExpression.KeySelector),
+                    _ => current
+                });
 
-            if (orderedQuery is not null) query = orderedQuery;
+        if (orderedQuery is not null) query = orderedQuery;
 
-            return query;
-        }
+        return query;
+    }
 
-        public IEnumerable<T> Evaluate<T>(IEnumerable<T> query, ISpecification<T> specification) where T : class
-        {
-            if (specification.OrderExpressions is null) return query;
-            if (specification.OrderExpressions.Count(x =>
+    public IEnumerable<T> Evaluate<T>(IEnumerable<T> query, ISpecification<T> specification) where T : class
+    {
+        if (specification.OrderExpressions is null) return query;
+        if (specification.OrderExpressions.Count(x =>
                 x.OrderType is OrderTypeEnum.OrderBy or OrderTypeEnum.OrderByDescending) > 1)
-                throw new DuplicateOrderChainException();
+            throw new DuplicateOrderChainException();
 
-            IOrderedEnumerable<T>? orderedQuery =
-                specification.OrderExpressions
-                    .Aggregate<(Expression<Func<T, object>> KeySelector, OrderTypeEnum OrderType), IOrderedEnumerable<T>
-                        ?>(null, (current, orderExpression) => orderExpression.OrderType switch
-                    {
-                        OrderTypeEnum.OrderBy => query.OrderBy(orderExpression.KeySelector.Compile()),
-                        OrderTypeEnum.OrderByDescending => query.OrderByDescending(
-                            orderExpression.KeySelector.Compile()),
-                        OrderTypeEnum.ThenBy => current?.ThenBy(orderExpression.KeySelector.Compile()),
-                        OrderTypeEnum.ThenByDescending => current?.ThenByDescending(
-                            orderExpression.KeySelector.Compile()),
-                        _ => current
-                    });
+        IOrderedEnumerable<T>? orderedQuery =
+            specification.OrderExpressions
+                .Aggregate<(Expression<Func<T, object>> KeySelector, OrderTypeEnum OrderType), IOrderedEnumerable<T>
+                    ?>(null, (current, orderExpression) => orderExpression.OrderType switch
+                {
+                    OrderTypeEnum.OrderBy => query.OrderBy(orderExpression.KeySelector.Compile()),
+                    OrderTypeEnum.OrderByDescending => query.OrderByDescending(
+                        orderExpression.KeySelector.Compile()),
+                    OrderTypeEnum.ThenBy => current?.ThenBy(orderExpression.KeySelector.Compile()),
+                    OrderTypeEnum.ThenByDescending => current?.ThenByDescending(
+                        orderExpression.KeySelector.Compile()),
+                    _ => current
+                });
 
-            if (orderedQuery is not null) query = orderedQuery;
+        if (orderedQuery is not null) query = orderedQuery;
 
-            return query;
-        }
+        return query;
     }
 }

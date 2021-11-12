@@ -17,14 +17,13 @@
 
 using MikyM.Common.DataAccessLayer.Specifications;
 
-namespace Lisbeth.Bot.DataAccessLayer.Specifications.Reminder
+namespace Lisbeth.Bot.DataAccessLayer.Specifications.Reminder;
+
+public class ActiveRemindersPerUserSpec : Specification<Domain.Entities.Reminder>
 {
-    public class ActiveRemindersPerUserSpec : Specification<Domain.Entities.Reminder>
+    public ActiveRemindersPerUserSpec(ulong userId)
     {
-        public ActiveRemindersPerUserSpec(ulong userId)
-        {
-            Where(x => x.CreatorId == userId);
-            Where(x => !x.IsDisabled);
-        }
+        Where(x => x.CreatorId == userId);
+        Where(x => !x.IsDisabled);
     }
 }

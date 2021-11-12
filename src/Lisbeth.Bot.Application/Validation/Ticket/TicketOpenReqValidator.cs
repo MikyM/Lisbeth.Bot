@@ -22,24 +22,23 @@ using Lisbeth.Bot.Application.Validation.ReusablePropertyValidation;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 using MikyM.Discord.Interfaces;
 
-namespace Lisbeth.Bot.Application.Validation.Ticket
+namespace Lisbeth.Bot.Application.Validation.Ticket;
+
+public class TicketOpenReqValidator : AbstractValidator<TicketOpenReqDto>
 {
-    public class TicketOpenReqValidator : AbstractValidator<TicketOpenReqDto>
+    public TicketOpenReqValidator(IDiscordService discordService) : this(discordService.Client)
     {
-        public TicketOpenReqValidator(IDiscordService discordService) : this(discordService.Client)
-        {
-        }
+    }
 
-        public TicketOpenReqValidator(DiscordClient discord)
-        {
-            CascadeMode = CascadeMode.Stop;
+    public TicketOpenReqValidator(DiscordClient discord)
+    {
+        CascadeMode = CascadeMode.Stop;
 
-            RuleFor(x => x.GuildId)
-                .NotEmpty()
-                .DependentRules(x => x.SetAsyncValidator(new DiscordGuildIdValidator<TicketOpenReqDto>(discord)));
-            RuleFor(x => x.RequestedOnBehalfOfId)
-                .NotEmpty()
-                .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<TicketOpenReqDto>(discord)));
-        }
+        RuleFor(x => x.GuildId)
+            .NotEmpty()
+            .DependentRules(x => x.SetAsyncValidator(new DiscordGuildIdValidator<TicketOpenReqDto>(discord)));
+        RuleFor(x => x.RequestedOnBehalfOfId)
+            .NotEmpty()
+            .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<TicketOpenReqDto>(discord)));
     }
 }

@@ -20,27 +20,26 @@ using MikyM.Common.Domain.Entities;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace MikyM.Common.DataAccessLayer.Repositories
+namespace MikyM.Common.DataAccessLayer.Repositories;
+
+public interface IReadOnlyRepository<TEntity> : IBaseRepository where TEntity : AggregateRootEntity
 {
-    public interface IReadOnlyRepository<TEntity> : IBaseRepository where TEntity : AggregateRootEntity
-    {
-        ValueTask<TEntity?> GetAsync(params object[] keyValues);
+    ValueTask<TEntity?> GetAsync(params object[] keyValues);
 
-        Task<TEntity?> GetSingleBySpecAsync(ISpecification<TEntity> specification);
+    Task<TEntity?> GetSingleBySpecAsync(ISpecification<TEntity> specification);
 
-        Task<TProjectTo?> GetSingleBySpecAsync<TProjectTo>(ISpecification<TEntity, TProjectTo> specification)
-            where TProjectTo : class;
+    Task<TProjectTo?> GetSingleBySpecAsync<TProjectTo>(ISpecification<TEntity, TProjectTo> specification)
+        where TProjectTo : class;
 
-        Task<IReadOnlyList<TEntity>> GetBySpecAsync(ISpecification<TEntity> specification);
+    Task<IReadOnlyList<TEntity>> GetBySpecAsync(ISpecification<TEntity> specification);
 
-        Task<IReadOnlyList<TProjectTo>> GetBySpecAsync<TProjectTo>(ISpecification<TEntity, TProjectTo> specification)
-            where TProjectTo : class;
+    Task<IReadOnlyList<TProjectTo>> GetBySpecAsync<TProjectTo>(ISpecification<TEntity, TProjectTo> specification)
+        where TProjectTo : class;
 
-        Task<IReadOnlyList<TEntity>> GetAllAsync();
+    Task<IReadOnlyList<TEntity>> GetAllAsync();
 
-        Task<IReadOnlyList<TProjectTo>> GetAllAsync<TProjectTo>(
-            ISpecification<TEntity, TProjectTo>? specification = null) where TProjectTo : class;
+    Task<IReadOnlyList<TProjectTo>> GetAllAsync<TProjectTo>(
+        ISpecification<TEntity, TProjectTo>? specification = null) where TProjectTo : class;
         
-        Task<long> LongCountAsync(ISpecification<TEntity>? specification = null);
-    }
+    Task<long> LongCountAsync(ISpecification<TEntity>? specification = null);
 }

@@ -15,15 +15,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Lisbeth.Bot.Domain.Entities.Base
+namespace Lisbeth.Bot.Domain.Entities.Base;
+
+public class EmbedConfigEntity : SnowflakeEntity
 {
-    public class EmbedConfigEntity : SnowflakeEntity
-    {
-        public long? EmbedConfigId { get; set; }
-        public EmbedConfig? EmbedConfig { get; set; }
-        public ulong CreatorId { get; set; }
-        public ulong LastEditById { get; set; }
-        public ulong GuildId { get; set; }
-        public string? Name { get; set; }
-    }
+    public long? EmbedConfigId { get; set; }
+    public EmbedConfig? EmbedConfig { get; set; }
+    public ulong CreatorId { get; set; }
+    public ulong LastEditById { get; set; }
+    public ulong GuildId { get; set; }
+    public string? Name { get; set; }
 }

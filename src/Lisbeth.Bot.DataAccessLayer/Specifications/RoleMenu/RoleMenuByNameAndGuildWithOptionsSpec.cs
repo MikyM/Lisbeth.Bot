@@ -17,15 +17,14 @@
 
 using MikyM.Common.DataAccessLayer.Specifications;
 
-namespace Lisbeth.Bot.DataAccessLayer.Specifications.RoleMenu
+namespace Lisbeth.Bot.DataAccessLayer.Specifications.RoleMenu;
+
+public class RoleMenuByNameAndGuildWithOptionsSpec : Specification<Domain.Entities.RoleMenu>
 {
-    public class RoleMenuByNameAndGuildWithOptionsSpec : Specification<Domain.Entities.RoleMenu>
+    public RoleMenuByNameAndGuildWithOptionsSpec(string name, ulong guildId)
     {
-        public RoleMenuByNameAndGuildWithOptionsSpec(string name, ulong guildId)
-        {
-            Where(x => x.GuildId == guildId);
-            Where(x => x.Name == name);
-            Include(x => x.RoleMenuOptions);
-        }
+        Where(x => x.GuildId == guildId);
+        Where(x => x.Name == name);
+        Include(x => x.RoleMenuOptions);
     }
 }

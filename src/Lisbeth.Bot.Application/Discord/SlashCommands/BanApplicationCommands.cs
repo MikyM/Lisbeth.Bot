@@ -30,73 +30,72 @@ using Lisbeth.Bot.Application.Validation.Ban;
 using Lisbeth.Bot.Domain.DTOs.Request.Ban;
 using MikyM.Common.Application.Results;
 
-namespace Lisbeth.Bot.Application.Discord.SlashCommands
+namespace Lisbeth.Bot.Application.Discord.SlashCommands;
+
+[SlashModuleLifespan(SlashModuleLifespan.Transient)]
+[UsedImplicitly]
+public class BanApplicationCommands : ExtendedApplicationCommandModule
 {
-    [SlashModuleLifespan(SlashModuleLifespan.Transient)]
-    [UsedImplicitly]
-    public class BanApplicationCommands : ExtendedApplicationCommandModule
+    [UsedImplicitly] public IDiscordBanService? DiscordBanService { private get; set; }
+
+    [SlashRequireUserPermissions(Permissions.BanMembers)]
+    [SlashCommand("ban", "A command that allows banning a user.")]
+    public async Task BanCommand(InteractionContext ctx,
+        [Option("action", "Action type")] BanActionType actionType,
+        [Option("user", "User to ban")] DiscordUser? user = null, [Option("id", "User Id to ban")] string id = "",
+        [Option("length", "For how long should the user be banned")]
+        string length = "perm", [Option("reason", "Reason for ban")] string reason = "No reason provided")
     {
-        [UsedImplicitly] public IDiscordBanService? DiscordBanService { private get; set; }
+        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
+            new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
-        [SlashRequireUserPermissions(Permissions.BanMembers)]
-        [SlashCommand("ban", "A command that allows banning a user.")]
-        public async Task BanCommand(InteractionContext ctx,
-            [Option("action", "Action type")] BanActionType actionType,
-            [Option("user", "User to ban")] DiscordUser? user = null, [Option("id", "User Id to ban")] string id = "",
-            [Option("length", "For how long should the user be banned")]
-            string length = "perm", [Option("reason", "Reason for ban")] string reason = "No reason provided")
+        Result<DiscordEmbed> result;
+
+        if (user is null && id == "") throw new ArgumentException("You must supply either a user or a user Id");
+
+        var validId = user?.Id ?? ulong.Parse(id);
+
+        switch (actionType)
         {
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
-                new DiscordInteractionResponseBuilder().AsEphemeral(true));
+            case BanActionType.Add:
 
-            Result<DiscordEmbed> result;
+                bool isValid = length.TryParseToDurationAndNextOccurrence(out var occurrence, out _);
 
-            if (user is null && id == "") throw new ArgumentException("You must supply either a user or a user Id");
+                if (!isValid)
+                    throw new ArgumentException($"Parameter {nameof(length)} can't be parsed to a known duration.");
 
-            var validId = user?.Id ?? ulong.Parse(id);
+                var banReq = new BanReqDto(validId, ctx.Guild.Id, ctx.User.Id, occurrence, reason);
+                var banReqValidator = new BanReqValidator(ctx.Client);
+                await banReqValidator.ValidateAndThrowAsync(banReq);
 
-            switch (actionType)
-            {
-                case BanActionType.Add:
+                result = await this.DiscordBanService!.BanAsync(ctx, banReq);
+                break;
+            case BanActionType.Remove:
+                if (id == "") throw new ArgumentException("You must supply an Id of the user to unban.");
 
-                    bool isValid = length.TryParseToDurationAndNextOccurrence(out var occurrence, out _);
+                var banDisableReq = new BanDisableReqDto(validId, ctx.Guild.Id, ctx.User.Id);
+                var banDisableReqValidator = new BanDisableReqValidator(ctx.Client);
+                await banDisableReqValidator.ValidateAndThrowAsync(banDisableReq);
 
-                    if (!isValid)
-                        throw new ArgumentException($"Parameter {nameof(length)} can't be parsed to a known duration.");
-
-                    var banReq = new BanReqDto(validId, ctx.Guild.Id, ctx.User.Id, occurrence, reason);
-                    var banReqValidator = new BanReqValidator(ctx.Client);
-                    await banReqValidator.ValidateAndThrowAsync(banReq);
-
-                    result = await this.DiscordBanService!.BanAsync(ctx, banReq);
-                    break;
-                case BanActionType.Remove:
-                    if (id == "") throw new ArgumentException("You must supply an Id of the user to unban.");
-
-                    var banDisableReq = new BanDisableReqDto(validId, ctx.Guild.Id, ctx.User.Id);
-                    var banDisableReqValidator = new BanDisableReqValidator(ctx.Client);
-                    await banDisableReqValidator.ValidateAndThrowAsync(banDisableReq);
-
-                    result = await this.DiscordBanService!.UnbanAsync(ctx, banDisableReq);
-                    break;
-                case BanActionType.Get:
-                    var banGetReq = new BanGetReqDto(ctx.User.Id, null, validId, ctx.Guild.Id);
-                    var banGetReqValidator = new BanGetReqValidator(ctx.Client);
-                    await banGetReqValidator.ValidateAndThrowAsync(banGetReq);
-                    result = await this.DiscordBanService!.GetSpecificUserGuildBanAsync(ctx, banGetReq);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(actionType), actionType, null);
-            }
-
-            if (result.IsDefined())
-                await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
-                    .AddEmbed(result.Entity)
-                    .AsEphemeral(true));
-            else
-                await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
-                    .AddEmbed(base.GetUnsuccessfulResultEmbed(result, ctx.Client))
-                    .AsEphemeral(true));
+                result = await this.DiscordBanService!.UnbanAsync(ctx, banDisableReq);
+                break;
+            case BanActionType.Get:
+                var banGetReq = new BanGetReqDto(ctx.User.Id, null, validId, ctx.Guild.Id);
+                var banGetReqValidator = new BanGetReqValidator(ctx.Client);
+                await banGetReqValidator.ValidateAndThrowAsync(banGetReq);
+                result = await this.DiscordBanService!.GetSpecificUserGuildBanAsync(ctx, banGetReq);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(actionType), actionType, null);
         }
+
+        if (result.IsDefined())
+            await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                .AddEmbed(result.Entity)
+                .AsEphemeral(true));
+        else
+            await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                .AddEmbed(base.GetUnsuccessfulResultEmbed(result, ctx.Client))
+                .AsEphemeral(true));
     }
 }

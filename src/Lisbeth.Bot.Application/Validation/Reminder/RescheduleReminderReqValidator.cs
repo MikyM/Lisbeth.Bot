@@ -23,37 +23,36 @@ using Lisbeth.Bot.Application.Validation.ReusablePropertyValidation;
 using Lisbeth.Bot.Domain.DTOs.Request.Reminder;
 using MikyM.Discord.Interfaces;
 
-namespace Lisbeth.Bot.Application.Validation.Reminder
-{
-    public class RescheduleReminderReqValidator : AbstractValidator<RescheduleReminderReqDto>
-    {
-        public RescheduleReminderReqValidator(IDiscordService discordService) : this(discordService.Client)
-        {
-        }
+namespace Lisbeth.Bot.Application.Validation.Reminder;
 
-        public RescheduleReminderReqValidator(DiscordClient discord)
-        {
-            RuleFor(x => x.RequestedOnBehalfOfId)
-                .NotEmpty()
-                .DependentRules(x =>
-                    x.SetAsyncValidator(new DiscordUserIdValidator<RescheduleReminderReqDto>(discord)));
-            RuleFor(x => x.GuildId)
-                .NotEmpty()
-                .DependentRules(
-                    x => x.SetAsyncValidator(new DiscordGuildIdValidator<RescheduleReminderReqDto>(discord)));
-            RuleFor(x => x.Name).NotEmpty();
-            RuleFor(x => x.CronExpression)
-                .NotEmpty()
-                .When(x => !x.SetFor.HasValue && string.IsNullOrWhiteSpace(x.TimeSpanExpression));
-            RuleFor(x => x.SetFor)
-                .NotEmpty()
-                .When(x => string.IsNullOrWhiteSpace(x.TimeSpanExpression) &&
-                           string.IsNullOrWhiteSpace(x.CronExpression))
-                .DependentRules(x => x.InclusiveBetween(DateTime.UtcNow, DateTime.UtcNow.AddYears(1)));
-            RuleFor(x => x.TimeSpanExpression)
-                .NotEmpty()
-                .When(x => !x.SetFor.HasValue && string.IsNullOrWhiteSpace(x.CronExpression))
-                .DependentRules(x => x.Must(y => y!.TryParseToDurationAndNextOccurrence(out _, out _)));
-        }
+public class RescheduleReminderReqValidator : AbstractValidator<RescheduleReminderReqDto>
+{
+    public RescheduleReminderReqValidator(IDiscordService discordService) : this(discordService.Client)
+    {
+    }
+
+    public RescheduleReminderReqValidator(DiscordClient discord)
+    {
+        RuleFor(x => x.RequestedOnBehalfOfId)
+            .NotEmpty()
+            .DependentRules(x =>
+                x.SetAsyncValidator(new DiscordUserIdValidator<RescheduleReminderReqDto>(discord)));
+        RuleFor(x => x.GuildId)
+            .NotEmpty()
+            .DependentRules(
+                x => x.SetAsyncValidator(new DiscordGuildIdValidator<RescheduleReminderReqDto>(discord)));
+        RuleFor(x => x.Name).NotEmpty();
+        RuleFor(x => x.CronExpression)
+            .NotEmpty()
+            .When(x => !x.SetFor.HasValue && string.IsNullOrWhiteSpace(x.TimeSpanExpression));
+        RuleFor(x => x.SetFor)
+            .NotEmpty()
+            .When(x => string.IsNullOrWhiteSpace(x.TimeSpanExpression) &&
+                       string.IsNullOrWhiteSpace(x.CronExpression))
+            .DependentRules(x => x.InclusiveBetween(DateTime.UtcNow, DateTime.UtcNow.AddYears(1)));
+        RuleFor(x => x.TimeSpanExpression)
+            .NotEmpty()
+            .When(x => !x.SetFor.HasValue && string.IsNullOrWhiteSpace(x.CronExpression))
+            .DependentRules(x => x.Must(y => y!.TryParseToDurationAndNextOccurrence(out _, out _)));
     }
 }

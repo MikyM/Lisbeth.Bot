@@ -29,56 +29,55 @@ using Lisbeth.Bot.Application.Validation.Ticket;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 using MikyM.Common.Application.Results;
 
-namespace Lisbeth.Bot.Application.Discord.SlashCommands
+namespace Lisbeth.Bot.Application.Discord.SlashCommands;
+
+[SlashModuleLifespan(SlashModuleLifespan.Transient)]
+[UsedImplicitly]
+public class TicketSlashCommands : ExtendedApplicationCommandModule
 {
-    [SlashModuleLifespan(SlashModuleLifespan.Transient)]
+    [UsedImplicitly] public IDiscordTicketService? DiscordTicketService { private get; set; }
+
     [UsedImplicitly]
-    public class TicketSlashCommands : ExtendedApplicationCommandModule
+    [SlashRequireUserPermissions(Permissions.BanMembers)]
+    [SlashCommand("ticket", "A command that allows managing tickets")]
+    public async Task TicketHandlerCommand(InteractionContext ctx,
+        [Option("action", "Type of action to perform")]
+        TicketActionType action,
+        [Option("target", "A user or a role to add")]
+        SnowflakeObject target)
     {
-        [UsedImplicitly] public IDiscordTicketService? DiscordTicketService { private get; set; }
+        if (target is null) throw new ArgumentNullException(nameof(target));
 
-        [UsedImplicitly]
-        [SlashRequireUserPermissions(Permissions.BanMembers)]
-        [SlashCommand("ticket", "A command that allows managing tickets")]
-        public async Task TicketHandlerCommand(InteractionContext ctx,
-            [Option("action", "Type of action to perform")]
-            TicketActionType action,
-            [Option("target", "A user or a role to add")]
-            SnowflakeObject target)
+        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
+            new DiscordInteractionResponseBuilder().AsEphemeral(true));
+
+        Result<DiscordEmbed> result;
+        switch (action)
         {
-            if (target is null) throw new ArgumentNullException(nameof(target));
-
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
-                new DiscordInteractionResponseBuilder().AsEphemeral(true));
-
-            Result<DiscordEmbed> result;
-            switch (action)
-            {
-                case TicketActionType.Add:
-                    var addReq = new TicketAddReqDto(null, null, ctx.Guild.Id, ctx.Channel.Id, ctx.User.Id, target.Id);
-                    var addReqValidator = new TicketAddReqValidator(ctx.Client);
-                    await addReqValidator.ValidateAndThrowAsync(addReq);
-                    result = await this.DiscordTicketService!.AddToTicketAsync(ctx, addReq);
-                    break;
-                case TicketActionType.Remove:
-                    var removeReq = new TicketRemoveReqDto(null, null, ctx.Guild.Id, ctx.Channel.Id, ctx.User.Id,
-                        target.Id);
-                    var removeReqValidator = new TicketRemoveReqValidator(ctx.Client);
-                    await removeReqValidator.ValidateAndThrowAsync(removeReq);
-                    result = await this.DiscordTicketService!.RemoveFromTicketAsync(ctx, removeReq);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(action), action, null);
-            }
-
-            if (result.IsDefined())
-                await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
-                    .AddEmbed(result.Entity)
-                    .AsEphemeral(true));
-            else
-                await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
-                    .AddEmbed(GetUnsuccessfulResultEmbed(result, ctx.Client))
-                    .AsEphemeral(true));
+            case TicketActionType.Add:
+                var addReq = new TicketAddReqDto(null, null, ctx.Guild.Id, ctx.Channel.Id, ctx.User.Id, target.Id);
+                var addReqValidator = new TicketAddReqValidator(ctx.Client);
+                await addReqValidator.ValidateAndThrowAsync(addReq);
+                result = await this.DiscordTicketService!.AddToTicketAsync(ctx, addReq);
+                break;
+            case TicketActionType.Remove:
+                var removeReq = new TicketRemoveReqDto(null, null, ctx.Guild.Id, ctx.Channel.Id, ctx.User.Id,
+                    target.Id);
+                var removeReqValidator = new TicketRemoveReqValidator(ctx.Client);
+                await removeReqValidator.ValidateAndThrowAsync(removeReq);
+                result = await this.DiscordTicketService!.RemoveFromTicketAsync(ctx, removeReq);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(action), action, null);
         }
+
+        if (result.IsDefined())
+            await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                .AddEmbed(result.Entity)
+                .AsEphemeral(true));
+        else
+            await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                .AddEmbed(GetUnsuccessfulResultEmbed(result, ctx.Client))
+                .AsEphemeral(true));
     }
 }

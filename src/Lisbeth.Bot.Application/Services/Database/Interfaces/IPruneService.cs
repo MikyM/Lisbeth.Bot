@@ -19,9 +19,8 @@ using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.Application.Interfaces;
 
-namespace Lisbeth.Bot.Application.Services.Database.Interfaces
+namespace Lisbeth.Bot.Application.Services.Database.Interfaces;
+
+public interface IPruneService : ICrudService<Prune, LisbethBotDbContext>
 {
-    public interface IPruneService : ICrudService<Prune, LisbethBotDbContext>
-    {
-    }
 }

@@ -21,22 +21,21 @@ using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 using MikyM.Common.Application.Results;
 
-namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
+namespace Lisbeth.Bot.Application.Discord.Services.Interfaces;
+
+public interface IDiscordTicketService
 {
-    public interface IDiscordTicketService
-    {
-        Task<Result<DiscordMessageBuilder>> CloseTicketAsync(TicketCloseReqDto req);
-        Task<Result<DiscordMessageBuilder>> CloseTicketAsync(DiscordInteraction intr, TicketCloseReqDto req);
-        Task<Result<DiscordMessageBuilder>> OpenTicketAsync(TicketOpenReqDto req);
-        Task<Result<DiscordMessageBuilder>> OpenTicketAsync(DiscordInteraction intr, TicketOpenReqDto req);
-        Task<Result<DiscordMessageBuilder>> ReopenTicketAsync(TicketReopenReqDto req);
-        Task<Result<DiscordMessageBuilder>> ReopenTicketAsync(DiscordInteraction intr, TicketReopenReqDto req);
-        Task<Result<DiscordEmbed>> AddToTicketAsync(TicketAddReqDto req);
-        Task<Result<DiscordEmbed>> AddToTicketAsync(InteractionContext intr, TicketAddReqDto req);
-        Task<Result<DiscordEmbed>> RemoveFromTicketAsync(TicketRemoveReqDto req);
-        Task<Result<DiscordEmbed>> RemoveFromTicketAsync(InteractionContext intr, TicketRemoveReqDto req);
-        Task<Result> CleanClosedTicketsAsync();
-        Task<Result> CloseInactiveTicketsAsync();
-        Task<Result<DiscordMessageBuilder>> GetTicketCenterEmbedAsync(InteractionContext ctx);
-    }
+    Task<Result<DiscordMessageBuilder>> CloseTicketAsync(TicketCloseReqDto req);
+    Task<Result<DiscordMessageBuilder>> CloseTicketAsync(DiscordInteraction intr, TicketCloseReqDto req);
+    Task<Result<DiscordMessageBuilder>> OpenTicketAsync(TicketOpenReqDto req);
+    Task<Result<DiscordMessageBuilder>> OpenTicketAsync(DiscordInteraction intr, TicketOpenReqDto req);
+    Task<Result<DiscordMessageBuilder>> ReopenTicketAsync(TicketReopenReqDto req);
+    Task<Result<DiscordMessageBuilder>> ReopenTicketAsync(DiscordInteraction intr, TicketReopenReqDto req);
+    Task<Result<DiscordEmbed>> AddToTicketAsync(TicketAddReqDto req);
+    Task<Result<DiscordEmbed>> AddToTicketAsync(InteractionContext intr, TicketAddReqDto req);
+    Task<Result<DiscordEmbed>> RemoveFromTicketAsync(TicketRemoveReqDto req);
+    Task<Result<DiscordEmbed>> RemoveFromTicketAsync(InteractionContext intr, TicketRemoveReqDto req);
+    Task<Result> CleanClosedTicketsAsync();
+    Task<Result> CloseInactiveTicketsAsync();
+    Task<Result<DiscordMessageBuilder>> GetTicketCenterEmbedAsync(InteractionContext ctx);
 }

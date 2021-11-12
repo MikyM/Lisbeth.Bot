@@ -21,20 +21,19 @@ using Lisbeth.Bot.Application.Validation.ReusablePropertyValidation;
 using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
 using MikyM.Discord.Interfaces;
 
-namespace Lisbeth.Bot.Application.Validation.TicketingConfig
-{
-    public class TicketingConfigReqValidator : AbstractValidator<TicketingConfigReqDto>
-    {
-        public TicketingConfigReqValidator(IDiscordService discord) : this(discord.Client)
-        {
-        }
+namespace Lisbeth.Bot.Application.Validation.TicketingConfig;
 
-        public TicketingConfigReqValidator(DiscordClient client)
-        {
-            RuleFor(x => x.GuildId)
-                .SetAsyncValidator(new DiscordGuildIdValidator<TicketingConfigReqDto>(client));
-            RuleFor(x => x.RequestedOnBehalfOfId)
-                .SetAsyncValidator(new DiscordUserIdValidator<TicketingConfigReqDto>(client));
-        }
+public class TicketingConfigReqValidator : AbstractValidator<TicketingConfigReqDto>
+{
+    public TicketingConfigReqValidator(IDiscordService discord) : this(discord.Client)
+    {
+    }
+
+    public TicketingConfigReqValidator(DiscordClient client)
+    {
+        RuleFor(x => x.GuildId)
+            .SetAsyncValidator(new DiscordGuildIdValidator<TicketingConfigReqDto>(client));
+        RuleFor(x => x.RequestedOnBehalfOfId)
+            .SetAsyncValidator(new DiscordUserIdValidator<TicketingConfigReqDto>(client));
     }
 }

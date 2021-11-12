@@ -17,21 +17,20 @@
 
 using MikyM.Common.Application.Results;
 
-namespace Lisbeth.Bot.Application.Results
+namespace Lisbeth.Bot.Application.Results;
+
+/// <summary>
+///     Represents a failure to find something that was searched for from Discord services.
+/// </summary>
+public record ArgumentError : ResultError
 {
     /// <summary>
     ///     Represents a failure to find something that was searched for from Discord services.
     /// </summary>
-    public record ArgumentError : ResultError
+    /// <param name="name">Argument name.</param>
+    /// <param name="message">Custom message.</param>
+    public ArgumentError(string? name = null, string? message = null) : base(message ??
+                                                                             $"Given {(name is null ? "argument" : $"{name}")} is not valid.")
     {
-        /// <summary>
-        ///     Represents a failure to find something that was searched for from Discord services.
-        /// </summary>
-        /// <param name="name">Argument name.</param>
-        /// <param name="message">Custom message.</param>
-        public ArgumentError(string? name = null, string? message = null) : base(message ??
-                                                                                 $"Given {(name is null ? "argument" : $"{name}")} is not valid.")
-        {
-        }
     }
 }

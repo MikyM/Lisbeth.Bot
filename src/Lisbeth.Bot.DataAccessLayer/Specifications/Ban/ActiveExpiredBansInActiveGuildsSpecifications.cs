@@ -19,16 +19,15 @@
 using System;
 using MikyM.Common.DataAccessLayer.Specifications;
 
-namespace Lisbeth.Bot.DataAccessLayer.Specifications.Ban
+namespace Lisbeth.Bot.DataAccessLayer.Specifications.Ban;
+
+public class ActiveExpiredBansInActiveGuildsSpecifications : Specification<Domain.Entities.Ban>
 {
-    public class ActiveExpiredBansInActiveGuildsSpecifications : Specification<Domain.Entities.Ban>
+    public ActiveExpiredBansInActiveGuildsSpecifications()
     {
-        public ActiveExpiredBansInActiveGuildsSpecifications()
-        {
-            Where(x => !x.IsDisabled);
-            Where(x => !x.Guild.IsDisabled);
-            Where(x => x.AppliedUntil.Value.ToUniversalTime() <= DateTime.UtcNow);
-            OrderBy(x => x.Guild.Id);
-        }
+        Where(x => !x.IsDisabled);
+        Where(x => !x.Guild.IsDisabled);
+        Where(x => x.AppliedUntil.Value.ToUniversalTime() <= DateTime.UtcNow);
+        OrderBy(x => x.Guild.Id);
     }
 }

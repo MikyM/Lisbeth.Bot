@@ -19,18 +19,17 @@
 using System;
 using MikyM.Common.DataAccessLayer.Specifications;
 
-namespace Lisbeth.Bot.DataAccessLayer.Specifications.Mute
+namespace Lisbeth.Bot.DataAccessLayer.Specifications.Mute;
+
+public class ActiveMutesByGuildAndUserSpecifications : Specification<Domain.Entities.Mute>
 {
-    public class ActiveMutesByGuildAndUserSpecifications : Specification<Domain.Entities.Mute>
+    public ActiveMutesByGuildAndUserSpecifications(ulong guildId, ulong userId)
     {
-        public ActiveMutesByGuildAndUserSpecifications(ulong guildId, ulong userId)
-        {
-            Where(x => !x.IsDisabled);
-            Where(x => !x.Guild.IsDisabled);
-            Where(x => x.Guild.GuildId == guildId);
-            Where(x => x.AppliedUntil > DateTime.UtcNow);
-            Where(x => x.UserId == userId);
-            Include(x => x.Guild);
-        }
+        Where(x => !x.IsDisabled);
+        Where(x => !x.Guild.IsDisabled);
+        Where(x => x.Guild.GuildId == guildId);
+        Where(x => x.AppliedUntil > DateTime.UtcNow);
+        Where(x => x.UserId == userId);
+        Include(x => x.Guild);
     }
 }

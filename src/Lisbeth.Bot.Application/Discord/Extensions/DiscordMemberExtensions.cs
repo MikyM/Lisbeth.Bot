@@ -20,62 +20,61 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 
-namespace Lisbeth.Bot.Application.Discord.Extensions
+namespace Lisbeth.Bot.Application.Discord.Extensions;
+
+public static class DiscordMemberExtensions
 {
-    public static class DiscordMemberExtensions
+    public static string GetFullUsername(this DiscordMember member)
     {
-        public static string GetFullUsername(this DiscordMember member)
-        {
-            return member.Username + "#" + member.Discriminator;
-        }
+        return member.Username + "#" + member.Discriminator;
+    }
 
-        public static string GetFullDisplayName(this DiscordMember member)
-        {
-            return member.DisplayName + "#" + member.Discriminator;
-        }
+    public static string GetFullDisplayName(this DiscordMember member)
+    {
+        return member.DisplayName + "#" + member.Discriminator;
+    }
 
-        public static async Task<bool> Mute(this DiscordMember member, ulong roleId)
-        {
-            if (member.Permissions.HasPermission(Permissions.BanMembers))
-                return false;
+    public static async Task<bool> Mute(this DiscordMember member, ulong roleId)
+    {
+        if (member.Permissions.HasPermission(Permissions.BanMembers))
+            return false;
 
-            DiscordRole mutedRole = member.Guild.Roles.FirstOrDefault(x => x.Key == roleId).Value;
-            await member.GrantRoleAsync(mutedRole);
+        DiscordRole mutedRole = member.Guild.Roles.FirstOrDefault(x => x.Key == roleId).Value;
+        await member.GrantRoleAsync(mutedRole);
 
-            return true;
-        }
+        return true;
+    }
 
-        public static async Task<bool> Unmute(this DiscordMember member, ulong roleId)
-        {
-            if (member.Permissions.HasPermission(Permissions.BanMembers))
-                return false;
+    public static async Task<bool> Unmute(this DiscordMember member, ulong roleId)
+    {
+        if (member.Permissions.HasPermission(Permissions.BanMembers))
+            return false;
 
-            DiscordRole mutedRole = member.Guild.Roles.FirstOrDefault(x => x.Key == roleId).Value;
-            await member.RevokeRoleAsync(mutedRole);
+        DiscordRole mutedRole = member.Guild.Roles.FirstOrDefault(x => x.Key == roleId).Value;
+        await member.RevokeRoleAsync(mutedRole);
 
-            return true;
-        }
+        return true;
+    }
 
-        public static bool IsModerator(this DiscordMember member)
-        {
-            return member.Roles.Any(x =>
-                       x.Permissions.HasPermission(Permissions.BanMembers)) ||
-                   member.Permissions.HasPermission(Permissions.BanMembers) ||
-                   member.Permissions.HasPermission(Permissions.All) ||
-                   member.IsOwner;
-        }
+    public static bool IsModerator(this DiscordMember member)
+    {
+        return member.Roles.Any(x =>
+                   x.Permissions.HasPermission(Permissions.BanMembers)) ||
+               member.Permissions.HasPermission(Permissions.BanMembers) ||
+               member.Permissions.HasPermission(Permissions.All) ||
+               member.IsOwner;
+    }
 
-        public static bool IsAdmin(this DiscordMember member)
-        {
-            return member.Roles.Any(x =>
-                       x.Permissions.HasPermission(Permissions.Administrator)) ||
-                   member.Permissions.HasPermission(Permissions.All) ||
-                   member.IsOwner;
-        }
+    public static bool IsAdmin(this DiscordMember member)
+    {
+        return member.Roles.Any(x =>
+                   x.Permissions.HasPermission(Permissions.Administrator)) ||
+               member.Permissions.HasPermission(Permissions.All) ||
+               member.IsOwner;
+    }
 
-        public static bool IsBotOwner(this DiscordMember member, DiscordClient client)
-        {
-            return client.CurrentApplication.Owners.Any(x => x.Id == member.Id);
-        }
+    public static bool IsBotOwner(this DiscordMember member, DiscordClient client)
+    {
+        return client.CurrentApplication.Owners.Any(x => x.Id == member.Id);
     }
 }

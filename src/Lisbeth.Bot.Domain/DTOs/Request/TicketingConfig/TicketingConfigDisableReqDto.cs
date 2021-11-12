@@ -17,9 +17,8 @@
 
 using Lisbeth.Bot.Domain.DTOs.Request.Base;
 
-namespace Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig
+namespace Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
+
+public class TicketingConfigDisableReqDto : BaseAuthWithGuildReqDto
 {
-    public class TicketingConfigDisableReqDto : BaseAuthWithGuildReqDto
-    {
-    }
 }

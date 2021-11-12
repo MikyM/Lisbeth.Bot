@@ -18,19 +18,18 @@
 using System;
 using Hangfire.States;
 
-namespace Lisbeth.Bot.Application.Hangfire
+namespace Lisbeth.Bot.Application.Hangfire;
+
+public sealed class ScheduledEnqueuedState : ScheduledState
 {
-    public sealed class ScheduledEnqueuedState : ScheduledState
+    public ScheduledEnqueuedState(TimeSpan enqueueIn) : this(DateTime.UtcNow.Add(enqueueIn))
     {
-        public ScheduledEnqueuedState(TimeSpan enqueueIn) : this(DateTime.UtcNow.Add(enqueueIn))
-        {
-        }
-
-        public ScheduledEnqueuedState(DateTime enqueuedAt, string? queue = null) : base(enqueuedAt.ToUniversalTime())
-        {
-            Queue = queue?.Trim();
-        }
-
-        public string? Queue { get; }
     }
+
+    public ScheduledEnqueuedState(DateTime enqueuedAt, string? queue = null) : base(enqueuedAt.ToUniversalTime())
+    {
+        Queue = queue?.Trim();
+    }
+
+    public string? Queue { get; }
 }

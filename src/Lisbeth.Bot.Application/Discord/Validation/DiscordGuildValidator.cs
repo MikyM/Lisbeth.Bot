@@ -20,41 +20,40 @@ using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus.Entities;
 
-namespace Lisbeth.Bot.Application.Discord.Validation
+namespace Lisbeth.Bot.Application.Discord.Validation;
+
+public class DiscordGuildValidator<TDiscordType> : IDiscordGuildValidator<TDiscordType> where TDiscordType : class
 {
-    public class DiscordGuildValidator<TDiscordType> : IDiscordGuildValidator<TDiscordType> where TDiscordType : class
+    private readonly DiscordGuild _guild;
+
+    public DiscordGuildValidator(DiscordGuild guild, ulong objectId)
     {
-        private readonly DiscordGuild _guild;
+        _guild = guild;
+        ObjectId = objectId;
+    }
 
-        public DiscordGuildValidator(DiscordGuild guild, ulong objectId)
+    public ulong ObjectId { get; }
+    public TDiscordType? RetrievedObject { get; private set; }
+    public Exception? Exception { get; private set; }
+
+    public async Task<bool> IsValidAsync()
+    {
+        try
         {
-            _guild = guild;
-            ObjectId = objectId;
+            RetrievedObject = RetrievedObject switch
+            {
+                DiscordMember => await _guild.GetMemberAsync(ObjectId) as TDiscordType,
+                DiscordChannel => _guild.Channels.FirstOrDefault(x => x.Key == ObjectId) as TDiscordType,
+                DiscordRole => _guild.Roles.FirstOrDefault(x => x.Key == ObjectId) as TDiscordType,
+                _ => throw new ArgumentOutOfRangeException()
+            };
+        }
+        catch (Exception ex)
+        {
+            Exception = ex;
+            return false;
         }
 
-        public ulong ObjectId { get; }
-        public TDiscordType? RetrievedObject { get; private set; }
-        public Exception? Exception { get; private set; }
-
-        public async Task<bool> IsValidAsync()
-        {
-            try
-            {
-                RetrievedObject = RetrievedObject switch
-                {
-                    DiscordMember => await _guild.GetMemberAsync(ObjectId) as TDiscordType,
-                    DiscordChannel => _guild.Channels.FirstOrDefault(x => x.Key == ObjectId) as TDiscordType,
-                    DiscordRole => _guild.Roles.FirstOrDefault(x => x.Key == ObjectId) as TDiscordType,
-                    _ => throw new ArgumentOutOfRangeException()
-                };
-            }
-            catch (Exception ex)
-            {
-                Exception = ex;
-                return false;
-            }
-
-            return true;
-        }
+        return true;
     }
 }

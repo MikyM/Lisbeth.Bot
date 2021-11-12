@@ -17,20 +17,19 @@
 
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket.Base;
 
-namespace Lisbeth.Bot.Domain.DTOs.Request.Ticket
-{
-    public class TicketCloseReqDto : BaseTicketGetReqDto
-    {
-        public TicketCloseReqDto(long? id, ulong? ownerId, ulong? guildId, ulong? channelId,
-            ulong requestedOnBehalfOfId)
-        {
-            Id = id;
-            OwnerId = ownerId;
-            GuildId = guildId;
-            ChannelId = channelId;
-            RequestedOnBehalfOfId = requestedOnBehalfOfId;
-        }
+namespace Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 
-        public ulong? ClosedMessageId { get; set; }
+public class TicketCloseReqDto : BaseTicketGetReqDto
+{
+    public TicketCloseReqDto(long? id, ulong? ownerId, ulong? guildId, ulong? channelId,
+        ulong requestedOnBehalfOfId)
+    {
+        Id = id;
+        OwnerId = ownerId;
+        GuildId = guildId;
+        ChannelId = channelId;
+        RequestedOnBehalfOfId = requestedOnBehalfOfId;
     }
+
+    public ulong? ClosedMessageId { get; set; }
 }

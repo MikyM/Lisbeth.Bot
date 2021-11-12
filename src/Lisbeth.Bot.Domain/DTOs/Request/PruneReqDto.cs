@@ -15,26 +15,25 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Lisbeth.Bot.Domain.DTOs.Request
-{
-    public class PruneReqDto
-    {
-        public PruneReqDto(int count, ulong? messageId = null, ulong? targetAuthorId = null, ulong? channelId = null,
-            ulong? guildId = null, ulong? requestedOnBehalfOfId = null)
-        {
-            Count = count;
-            MessageId = messageId;
-            TargetAuthorId = targetAuthorId;
-            ChannelId = channelId;
-            GuildId = guildId;
-            RequestedOnBehalfOfId = requestedOnBehalfOfId;
-        }
+namespace Lisbeth.Bot.Domain.DTOs.Request;
 
-        public int Count { get; set; } = 100;
-        public ulong? TargetAuthorId { get; set; }
-        public ulong? MessageId { get; set; }
-        public ulong? ChannelId { get; set; }
-        public ulong? GuildId { get; set; }
-        public ulong? RequestedOnBehalfOfId { get; set; }
+public class PruneReqDto
+{
+    public PruneReqDto(int count, ulong? messageId = null, ulong? targetAuthorId = null, ulong? channelId = null,
+        ulong? guildId = null, ulong? requestedOnBehalfOfId = null)
+    {
+        Count = count;
+        MessageId = messageId;
+        TargetAuthorId = targetAuthorId;
+        ChannelId = channelId;
+        GuildId = guildId;
+        RequestedOnBehalfOfId = requestedOnBehalfOfId;
     }
+
+    public int Count { get; set; } = 100;
+    public ulong? TargetAuthorId { get; set; }
+    public ulong? MessageId { get; set; }
+    public ulong? ChannelId { get; set; }
+    public ulong? GuildId { get; set; }
+    public ulong? RequestedOnBehalfOfId { get; set; }
 }

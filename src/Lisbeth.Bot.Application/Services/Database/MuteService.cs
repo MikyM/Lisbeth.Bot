@@ -30,65 +30,64 @@ using MikyM.Common.Application.Services;
 using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
 
-namespace Lisbeth.Bot.Application.Services.Database
+namespace Lisbeth.Bot.Application.Services.Database;
+
+[UsedImplicitly]
+public class MuteService : CrudService<Mute, LisbethBotDbContext>, IMuteService
 {
-    [UsedImplicitly]
-    public class MuteService : CrudService<Mute, LisbethBotDbContext>, IMuteService
+    public MuteService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
     {
-        public MuteService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
+    }
+
+    public async Task<Result<(long Id, Mute? FoundEntity)>> AddOrExtendAsync(MuteReqDto req,
+        bool shouldSave = false)
+    {
+        if (req is null) throw new ArgumentNullException(nameof(req));
+
+        var result = await base.GetSingleBySpecAsync<Mute>(new Specification<Mute>(x =>
+            x.UserId == req.TargetUserId && x.GuildId == req.GuildId && !x.IsDisabled && !x.Guild.IsDisabled));
+        if (!result.IsDefined())
         {
+            var partial = await base.AddAsync(req, shouldSave);
+            return Result<(long Id, Mute? FoundEntity)>.FromSuccess((partial.Entity, null));
         }
 
-        public async Task<Result<(long Id, Mute? FoundEntity)>> AddOrExtendAsync(MuteReqDto req,
-            bool shouldSave = false)
-        {
-            if (req is null) throw new ArgumentNullException(nameof(req));
+        var entity = result.Entity;
 
-            var result = await base.GetSingleBySpecAsync<Mute>(new Specification<Mute>(x =>
-                x.UserId == req.TargetUserId && x.GuildId == req.GuildId && !x.IsDisabled && !x.Guild.IsDisabled));
-            if (!result.IsDefined())
-            {
-                var partial = await base.AddAsync(req, shouldSave);
-                return Result<(long Id, Mute? FoundEntity)>.FromSuccess((partial.Entity, null));
-            }
+        if (entity.AppliedUntil > req.AppliedUntil) return (entity.Id, entity);
 
-            var entity = result.Entity;
+        var shallowCopy = entity.ShallowCopy();
 
-            if (entity.AppliedUntil > req.AppliedUntil) return (entity.Id, entity);
+        base.BeginUpdate(entity);
+        entity.AppliedById = req.RequestedOnBehalfOfId;
+        entity.AppliedUntil = req.AppliedUntil;
+        entity.Reason = req.Reason;
 
-            var shallowCopy = entity.ShallowCopy();
+        if (shouldSave) await base.CommitAsync();
 
-            base.BeginUpdate(entity);
-            entity.AppliedById = req.RequestedOnBehalfOfId;
-            entity.AppliedUntil = req.AppliedUntil;
-            entity.Reason = req.Reason;
+        return (entity.Id, shallowCopy);
+    }
 
-            if (shouldSave) await base.CommitAsync();
+    public async Task<Result<Mute>> DisableAsync(MuteDisableReqDto entry, bool shouldSave = false)
+    {
+        if (entry is null) throw new ArgumentNullException(nameof(entry));
 
-            return (entity.Id, shallowCopy);
-        }
+        if (!entry.TargetUserId.HasValue || !entry.GuildId.HasValue) throw new InvalidOperationException();
 
-        public async Task<Result<Mute>> DisableAsync(MuteDisableReqDto entry, bool shouldSave = false)
-        {
-            if (entry is null) throw new ArgumentNullException(nameof(entry));
+        var result =
+            await base.GetSingleBySpecAsync<Mute>(
+                new ActiveExpiredMutePerGuildSpec(entry.TargetUserId.Value, entry.GuildId.Value));
+        if (!result.IsDefined()) return Result<Mute>.FromError(new NotFoundError());
 
-            if (!entry.TargetUserId.HasValue || !entry.GuildId.HasValue) throw new InvalidOperationException();
+        var entity = result.Entity;
 
-            var result =
-                await base.GetSingleBySpecAsync<Mute>(
-                    new ActiveExpiredMutePerGuildSpec(entry.TargetUserId.Value, entry.GuildId.Value));
-            if (!result.IsDefined()) return Result<Mute>.FromError(new NotFoundError());
+        base.BeginUpdate(entity);
+        entity.IsDisabled = true;
+        entity.LiftedOn = DateTime.UtcNow;
+        entity.LiftedById = entry.RequestedOnBehalfOfId;
 
-            var entity = result.Entity;
+        if (shouldSave) await base.CommitAsync();
 
-            base.BeginUpdate(entity);
-            entity.IsDisabled = true;
-            entity.LiftedOn = DateTime.UtcNow;
-            entity.LiftedById = entry.RequestedOnBehalfOfId;
-
-            if (shouldSave) await base.CommitAsync();
-
-            return entity;
-        }
+        return entity;
     }
 }

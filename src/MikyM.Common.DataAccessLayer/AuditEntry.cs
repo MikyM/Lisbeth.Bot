@@ -20,36 +20,35 @@ using System.Text.Json;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using MikyM.Common.Domain.Entities;
 
-namespace MikyM.Common.DataAccessLayer
+namespace MikyM.Common.DataAccessLayer;
+
+public class AuditEntry
 {
-    public class AuditEntry
+    public AuditEntry(EntityEntry entry)
     {
-        public AuditEntry(EntityEntry entry)
-        {
-            Entry = entry;
-        }
+        Entry = entry;
+    }
 
-        public EntityEntry Entry { get; }
-        public string? UserId { get; set; }
-        public string? TableName { get; set; }
-        public Dictionary<string, object> KeyValues { get; } = new();
-        public Dictionary<string, object> OldValues { get; } = new();
-        public Dictionary<string, object> NewValues { get; } = new();
-        public AuditType AuditType { get; set; }
-        public List<string> ChangedColumns { get; } = new();
+    public EntityEntry Entry { get; }
+    public string? UserId { get; set; }
+    public string? TableName { get; set; }
+    public Dictionary<string, object> KeyValues { get; } = new();
+    public Dictionary<string, object> OldValues { get; } = new();
+    public Dictionary<string, object> NewValues { get; } = new();
+    public AuditType AuditType { get; set; }
+    public List<string> ChangedColumns { get; } = new();
 
-        public AuditLog ToAudit()
+    public AuditLog ToAudit()
+    {
+        return new AuditLog
         {
-            return new AuditLog
-            {
-                UserId = UserId,
-                Type = AuditType.ToString(),
-                TableName = TableName,
-                PrimaryKey = JsonSerializer.Serialize(KeyValues),
-                OldValues = OldValues.Count is 0 ? null : JsonSerializer.Serialize(OldValues),
-                NewValues = NewValues.Count is 0 ? null : JsonSerializer.Serialize(NewValues),
-                AffectedColumns = ChangedColumns.Count is 0 ? null : JsonSerializer.Serialize(ChangedColumns)
-            };
-        }
+            UserId = UserId,
+            Type = AuditType.ToString(),
+            TableName = TableName,
+            PrimaryKey = JsonSerializer.Serialize(KeyValues),
+            OldValues = OldValues.Count is 0 ? null : JsonSerializer.Serialize(OldValues),
+            NewValues = NewValues.Count is 0 ? null : JsonSerializer.Serialize(NewValues),
+            AffectedColumns = ChangedColumns.Count is 0 ? null : JsonSerializer.Serialize(ChangedColumns)
+        };
     }
 }

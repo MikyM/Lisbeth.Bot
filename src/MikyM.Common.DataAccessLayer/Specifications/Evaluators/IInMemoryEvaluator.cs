@@ -17,10 +17,9 @@
 
 using System.Collections.Generic;
 
-namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators
+namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators;
+
+public interface IInMemoryEvaluator
 {
-    public interface IInMemoryEvaluator
-    {
-        IEnumerable<T> Evaluate<T>(IEnumerable<T> query, ISpecification<T> specification) where T : class;
-    }
+    IEnumerable<T> Evaluate<T>(IEnumerable<T> query, ISpecification<T> specification) where T : class;
 }

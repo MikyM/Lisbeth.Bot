@@ -21,12 +21,11 @@ using Microsoft.EntityFrameworkCore;
 using MikyM.Common.DataAccessLayer.Repositories;
 using MikyM.Common.DataAccessLayer.Specifications.Evaluators;
 
-namespace Lisbeth.Bot.DataAccessLayer.Repositories
+namespace Lisbeth.Bot.DataAccessLayer.Repositories;
+
+public class EmbedConfigRepository : Repository<EmbedConfig>, IEmbedConfigRepository
 {
-    public class EmbedConfigRepository : Repository<EmbedConfig>, IEmbedConfigRepository
+    public EmbedConfigRepository(DbContext context, ISpecificationEvaluator evaluator) : base(context, evaluator)
     {
-        public EmbedConfigRepository(DbContext context, ISpecificationEvaluator evaluator) : base(context, evaluator)
-        {
-        }
     }
 }

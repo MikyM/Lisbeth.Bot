@@ -23,29 +23,28 @@ using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Buttons;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Selects;
 using MikyM.Discord.Events;
 
-namespace Lisbeth.Bot.Application.Discord.EventHandlers
-{
-    [UsedImplicitly]
-    public class EmbedConfigEventHandler : IDiscordMiscEventsSubscriber
-    {
-        public async Task DiscordOnComponentInteractionCreated(DiscordClient sender,
-            ComponentInteractionCreateEventArgs args)
-        {
-            switch (args.Id)
-            {
-                case nameof(EmbedConfigSelect.EmbedConfigMainSelect):
-                case nameof(EmbedConfigButton.EmbedConfigConfirmButton):
-                case nameof(EmbedConfigButton.EmbedConfigAbortButton):
-                case nameof(EmbedConfigButton.EmbedConfigFinalButton):
-                case nameof(EmbedConfigButton.EmbedConfigContinueButton):
-                    await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
-                    break;
-            }
-        }
+namespace Lisbeth.Bot.Application.Discord.EventHandlers;
 
-        public Task DiscordOnClientErrored(DiscordClient sender, ClientErrorEventArgs args)
+[UsedImplicitly]
+public class EmbedConfigEventHandler : IDiscordMiscEventsSubscriber
+{
+    public async Task DiscordOnComponentInteractionCreated(DiscordClient sender,
+        ComponentInteractionCreateEventArgs args)
+    {
+        switch (args.Id)
         {
-            return Task.CompletedTask;
+            case nameof(EmbedConfigSelect.EmbedConfigMainSelect):
+            case nameof(EmbedConfigButton.EmbedConfigConfirmButton):
+            case nameof(EmbedConfigButton.EmbedConfigAbortButton):
+            case nameof(EmbedConfigButton.EmbedConfigFinalButton):
+            case nameof(EmbedConfigButton.EmbedConfigContinueButton):
+                await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+                break;
         }
+    }
+
+    public Task DiscordOnClientErrored(DiscordClient sender, ClientErrorEventArgs args)
+    {
+        return Task.CompletedTask;
     }
 }

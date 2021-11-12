@@ -17,12 +17,11 @@
 
 using System.Linq;
 
-namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators
-{
-    public interface IEvaluator
-    {
-        bool IsCriteriaEvaluator { get; }
+namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators;
 
-        IQueryable<T> GetQuery<T>(IQueryable<T> query, ISpecification<T> specification) where T : class;
-    }
+public interface IEvaluator
+{
+    bool IsCriteriaEvaluator { get; }
+
+    IQueryable<T> GetQuery<T>(IQueryable<T> query, ISpecification<T> specification) where T : class;
 }

@@ -18,28 +18,27 @@
 using Lisbeth.Bot.Application.Enums;
 using MikyM.Common.Application.Results;
 
-namespace Lisbeth.Bot.Application.Results
+namespace Lisbeth.Bot.Application.Results;
+
+/// <summary>
+///     Represents a failure to find something that was searched for from Discord services.
+/// </summary>
+/// <param name="message">The custom message to provide.</param>
+public record DiscordNotFoundError : ResultError
 {
     /// <summary>
     ///     Represents a failure to find something that was searched for from Discord services.
     /// </summary>
     /// <param name="message">The custom message to provide.</param>
-    public record DiscordNotFoundError : ResultError
+    public DiscordNotFoundError(string message = "The searched-for Discord entity was not found.") : base(message)
     {
-        /// <summary>
-        ///     Represents a failure to find something that was searched for from Discord services.
-        /// </summary>
-        /// <param name="message">The custom message to provide.</param>
-        public DiscordNotFoundError(string message = "The searched-for Discord entity was not found.") : base(message)
-        {
-        }
+    }
 
-        /// <summary>
-        ///     Represents a failure to find something that was searched for from Discord services.
-        /// </summary>
-        /// <param name="type">The type of Discord entity that was not found.</param>
-        public DiscordNotFoundError(DiscordEntityType type) : base($"The searched-for Discord {type} was not found.")
-        {
-        }
+    /// <summary>
+    ///     Represents a failure to find something that was searched for from Discord services.
+    /// </summary>
+    /// <param name="type">The type of Discord entity that was not found.</param>
+    public DiscordNotFoundError(DiscordEntityType type) : base($"The searched-for Discord {type} was not found.")
+    {
     }
 }

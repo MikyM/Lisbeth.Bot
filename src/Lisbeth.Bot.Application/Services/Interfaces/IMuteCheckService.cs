@@ -20,11 +20,10 @@ using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using MikyM.Common.Application.Results;
 
-namespace Lisbeth.Bot.Application.Services.Interfaces
+namespace Lisbeth.Bot.Application.Services.Interfaces;
+
+public interface IMuteCheckService
 {
-    public interface IMuteCheckService
-    {
-        Task<Result> CheckForNonBotMuteActionAsync(ulong targetId, ulong guildId, ulong requestedOnBehalfOfId,
-            IReadOnlyList<DiscordRole> rolesBefore, IReadOnlyList<DiscordRole> rolesAfter);
-    }
+    Task<Result> CheckForNonBotMuteActionAsync(ulong targetId, ulong guildId, ulong requestedOnBehalfOfId,
+        IReadOnlyList<DiscordRole> rolesBefore, IReadOnlyList<DiscordRole> rolesAfter);
 }

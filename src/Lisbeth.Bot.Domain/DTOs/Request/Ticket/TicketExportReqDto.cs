@@ -17,19 +17,18 @@
 
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket.Base;
 
-namespace Lisbeth.Bot.Domain.DTOs.Request.Ticket
+namespace Lisbeth.Bot.Domain.DTOs.Request.Ticket;
+
+public class TicketExportReqDto : BaseTicketGetReqDto
 {
-    public class TicketExportReqDto : BaseTicketGetReqDto
+    public TicketExportReqDto(long? id, ulong? guildId, ulong? ownerId, ulong? channelId, long? guildSpecificId,
+        ulong requestedOnBehalfOfId)
     {
-        public TicketExportReqDto(long? id, ulong? guildId, ulong? ownerId, ulong? channelId, long? guildSpecificId,
-            ulong requestedOnBehalfOfId)
-        {
-            Id = id;
-            GuildId = guildId;
-            OwnerId = ownerId;
-            ChannelId = channelId;
-            GuildSpecificId = guildSpecificId;
-            RequestedOnBehalfOfId = requestedOnBehalfOfId;
-        }
+        Id = id;
+        GuildId = guildId;
+        OwnerId = ownerId;
+        ChannelId = channelId;
+        GuildSpecificId = guildSpecificId;
+        RequestedOnBehalfOfId = requestedOnBehalfOfId;
     }
 }

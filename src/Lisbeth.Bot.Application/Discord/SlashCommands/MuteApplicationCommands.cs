@@ -32,70 +32,69 @@ using Lisbeth.Bot.Domain.DTOs.Request.Mute;
 using MikyM.Common.Application.Results;
 
 // ReSharper disable once CheckNamespace
-namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
+namespace Lisbeth.Bot.Application.Discord.ApplicationCommands;
+
+[SlashModuleLifespan(SlashModuleLifespan.Transient)]
+[UsedImplicitly]
+public partial class MuteApplicationCommands : ExtendedApplicationCommandModule
 {
-    [SlashModuleLifespan(SlashModuleLifespan.Transient)]
+    [UsedImplicitly] public IDiscordMuteService? DiscordMuteService { private get; set; }
+    [UsedImplicitly] public IDiscordMessageService? DiscordMessageService { private get; set; }
+
+    [SlashRequireUserPermissions(Permissions.BanMembers)]
+    [SlashCommand("mute", "A command that allows mute actions.")]
     [UsedImplicitly]
-    public partial class MuteApplicationCommands : ExtendedApplicationCommandModule
+    public async Task MuteCommand(InteractionContext ctx,
+        [Option("action", "Action type")] MuteActionType actionType,
+        [Option("user", "User to mute")] DiscordUser user,
+        [Option("length", "For how long should the user be muted")]
+        string length = "perm",
+        [Option("reason", "Reason for mute")] string reason = "No reason provided")
     {
-        [UsedImplicitly] public IDiscordMuteService? DiscordMuteService { private get; set; }
-        [UsedImplicitly] public IDiscordMessageService? DiscordMessageService { private get; set; }
+        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
+            new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
-        [SlashRequireUserPermissions(Permissions.BanMembers)]
-        [SlashCommand("mute", "A command that allows mute actions.")]
-        [UsedImplicitly]
-        public async Task MuteCommand(InteractionContext ctx,
-            [Option("action", "Action type")] MuteActionType actionType,
-            [Option("user", "User to mute")] DiscordUser user,
-            [Option("length", "For how long should the user be muted")]
-            string length = "perm",
-            [Option("reason", "Reason for mute")] string reason = "No reason provided")
+        Result<DiscordEmbed> result;
+
+        switch (actionType)
         {
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
-                new DiscordInteractionResponseBuilder().AsEphemeral(true));
+            case MuteActionType.Add:
+                bool isValid = length.TryParseToDurationAndNextOccurrence(out var occurrence, out _);
+                if (!isValid)
+                    throw new ArgumentException($"Parameter {nameof(length)} can't be parsed to a known duration.");
+                if (length is "") throw new ArgumentException($"Parameter {nameof(length)} can't be empty.");
 
-            Result<DiscordEmbed> result;
+                var muteReq = new MuteReqDto(user.Id, ctx.Guild.Id, ctx.User.Id, occurrence, reason);
+                var muteReqValidator = new MuteReqValidator(ctx.Client);
+                await muteReqValidator.ValidateAndThrowAsync(muteReq);
 
-            switch (actionType)
-            {
-                case MuteActionType.Add:
-                    bool isValid = length.TryParseToDurationAndNextOccurrence(out var occurrence, out _);
-                    if (!isValid)
-                        throw new ArgumentException($"Parameter {nameof(length)} can't be parsed to a known duration.");
-                    if (length is "") throw new ArgumentException($"Parameter {nameof(length)} can't be empty.");
+                result = await this.DiscordMuteService!.MuteAsync(ctx, muteReq);
+                break;
+            case MuteActionType.Remove:
+                var muteDisableReq = new MuteDisableReqDto(user.Id, ctx.Guild.Id, ctx.User.Id);
+                var muteDisableReqValidator = new MuteDisableReqValidator(ctx.Client);
+                await muteDisableReqValidator.ValidateAndThrowAsync(muteDisableReq);
 
-                    var muteReq = new MuteReqDto(user.Id, ctx.Guild.Id, ctx.User.Id, occurrence, reason);
-                    var muteReqValidator = new MuteReqValidator(ctx.Client);
-                    await muteReqValidator.ValidateAndThrowAsync(muteReq);
+                result = await this.DiscordMuteService!.UnmuteAsync(ctx, muteDisableReq);
+                break;
+            case MuteActionType.Get:
+                var muteGetReq = new MuteGetReqDto(ctx.User.Id, null, user.Id, ctx.Guild.Id);
+                var muteGetReqValidator = new MuteGetReqValidator(ctx.Client);
+                await muteGetReqValidator.ValidateAndThrowAsync(muteGetReq);
 
-                    result = await this.DiscordMuteService!.MuteAsync(ctx, muteReq);
-                    break;
-                case MuteActionType.Remove:
-                    var muteDisableReq = new MuteDisableReqDto(user.Id, ctx.Guild.Id, ctx.User.Id);
-                    var muteDisableReqValidator = new MuteDisableReqValidator(ctx.Client);
-                    await muteDisableReqValidator.ValidateAndThrowAsync(muteDisableReq);
-
-                    result = await this.DiscordMuteService!.UnmuteAsync(ctx, muteDisableReq);
-                    break;
-                case MuteActionType.Get:
-                    var muteGetReq = new MuteGetReqDto(ctx.User.Id, null, user.Id, ctx.Guild.Id);
-                    var muteGetReqValidator = new MuteGetReqValidator(ctx.Client);
-                    await muteGetReqValidator.ValidateAndThrowAsync(muteGetReq);
-
-                    result = await this.DiscordMuteService!.GetSpecificUserGuildMuteAsync(ctx, muteGetReq);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(actionType), actionType, null);
-            }
-
-            if (result.IsDefined())
-                await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
-                    .AddEmbed(result.Entity)
-                    .AsEphemeral(true));
-            else
-                await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
-                    .AddEmbed(GetUnsuccessfulResultEmbed(result, ctx.Client))
-                    .AsEphemeral(true));
+                result = await this.DiscordMuteService!.GetSpecificUserGuildMuteAsync(ctx, muteGetReq);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(actionType), actionType, null);
         }
+
+        if (result.IsDefined())
+            await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                .AddEmbed(result.Entity)
+                .AsEphemeral(true));
+        else
+            await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                .AddEmbed(GetUnsuccessfulResultEmbed(result, ctx.Client))
+                .AsEphemeral(true));
     }
 }

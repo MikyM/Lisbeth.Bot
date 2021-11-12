@@ -17,19 +17,18 @@
 
 using Autofac;
 
-namespace MikyM.Common.Domain
+namespace MikyM.Common.Domain;
+
+/// <summary>
+///     Autofac container provider for use ONLY under special circumstances when you must use the service locator
+///     anti-pattern.
+///     For everything else use normal DI.
+/// </summary>
+public static class ContainerProvider
 {
     /// <summary>
-    ///     Autofac container provider for use ONLY under special circumstances when you must use the service locator
-    ///     anti-pattern.
+    ///     Autofac container for use ONLY under special circumstances when you must use the service locator anti-pattern.
     ///     For everything else use normal DI.
     /// </summary>
-    public static class ContainerProvider
-    {
-        /// <summary>
-        ///     Autofac container for use ONLY under special circumstances when you must use the service locator anti-pattern.
-        ///     For everything else use normal DI.
-        /// </summary>
-        public static ILifetimeScope Container { get; set; }
-    }
+    public static ILifetimeScope Container { get; set; }
 }

@@ -20,33 +20,32 @@ using Microsoft.EntityFrameworkCore;
 using MikyM.Common.DataAccessLayer.Specifications.Extensions;
 using MikyM.Common.DataAccessLayer.Specifications.Helpers;
 
-namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators
+namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators;
+
+public class IncludeEvaluator : IEvaluator
 {
-    public class IncludeEvaluator : IEvaluator
+    private IncludeEvaluator()
     {
-        private IncludeEvaluator()
-        {
-        }
+    }
 
-        public static IncludeEvaluator Instance { get; } = new();
+    public static IncludeEvaluator Instance { get; } = new();
 
-        public bool IsCriteriaEvaluator { get; } = false;
+    public bool IsCriteriaEvaluator { get; } = false;
 
-        public IQueryable<T> GetQuery<T>(IQueryable<T> query, ISpecification<T> specification) where T : class
-        {
-            if (specification.IncludeStrings is null) return query;
+    public IQueryable<T> GetQuery<T>(IQueryable<T> query, ISpecification<T> specification) where T : class
+    {
+        if (specification.IncludeStrings is null) return query;
 
-            query = specification.IncludeStrings.Aggregate(query,
-                (current, includeString) => current.Include(includeString));
+        query = specification.IncludeStrings.Aggregate(query,
+            (current, includeString) => current.Include(includeString));
 
-            if (specification.IncludeExpressions is null) return query;
+        if (specification.IncludeExpressions is null) return query;
 
-            foreach (var includeInfo in specification.IncludeExpressions)
-                if (includeInfo.Type == IncludeTypeEnum.Include)
-                    query = query.Include(includeInfo);
-                else if (includeInfo.Type == IncludeTypeEnum.ThenInclude) query = query.ThenInclude(includeInfo);
+        foreach (var includeInfo in specification.IncludeExpressions)
+            if (includeInfo.Type == IncludeTypeEnum.Include)
+                query = query.Include(includeInfo);
+            else if (includeInfo.Type == IncludeTypeEnum.ThenInclude) query = query.ThenInclude(includeInfo);
 
-            return query;
-        }
+        return query;
     }
 }

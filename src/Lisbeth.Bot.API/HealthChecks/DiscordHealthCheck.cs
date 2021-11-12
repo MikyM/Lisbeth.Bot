@@ -23,35 +23,34 @@ using JetBrains.Annotations;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using MikyM.Discord.Interfaces;
 
-namespace Lisbeth.Bot.API.HealthChecks
+namespace Lisbeth.Bot.API.HealthChecks;
+
+[UsedImplicitly]
+public class DiscordHealthCheck : IHealthCheck
 {
-    [UsedImplicitly]
-    public class DiscordHealthCheck : IHealthCheck
+    private readonly IDiscordService _discord;
+
+    public DiscordHealthCheck(IDiscordService discord)
     {
-        private readonly IDiscordService _discord;
+        _discord = discord;
+    }
 
-        public DiscordHealthCheck(IDiscordService discord)
+    public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context,
+        CancellationToken cancellationToken = new())
+    {
+        GatewayInfo info;
+
+        try
         {
-            _discord = discord;
+            info = await _discord.Client.GetGatewayInfoAsync();
+        }
+        catch (Exception)
+        {
+            return HealthCheckResult.Unhealthy();
         }
 
-        public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context,
-            CancellationToken cancellationToken = new())
-        {
-            GatewayInfo info;
+        if (info is null) return HealthCheckResult.Unhealthy();
 
-            try
-            {
-                info = await _discord.Client.GetGatewayInfoAsync();
-            }
-            catch (Exception)
-            {
-                return HealthCheckResult.Unhealthy();
-            }
-
-            if (info is null) return HealthCheckResult.Unhealthy();
-
-            return _discord.Client.Ping > 300 ? HealthCheckResult.Degraded() : HealthCheckResult.Healthy();
-        }
+        return _discord.Client.Ping > 300 ? HealthCheckResult.Degraded() : HealthCheckResult.Healthy();
     }
 }

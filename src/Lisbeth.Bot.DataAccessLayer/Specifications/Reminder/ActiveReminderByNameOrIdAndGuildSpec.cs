@@ -17,30 +17,29 @@
 
 using MikyM.Common.DataAccessLayer.Specifications;
 
-namespace Lisbeth.Bot.DataAccessLayer.Specifications.Reminder
+namespace Lisbeth.Bot.DataAccessLayer.Specifications.Reminder;
+
+public class ActiveReminderByNameOrIdAndGuildSpec : Specification<Domain.Entities.Reminder>
 {
-    public class ActiveReminderByNameOrIdAndGuildSpec : Specification<Domain.Entities.Reminder>
+    public ActiveReminderByNameOrIdAndGuildSpec(long id) : this("", null, id)
     {
-        public ActiveReminderByNameOrIdAndGuildSpec(long id) : this("", null, id)
-        {
-        }
+    }
 
-        public ActiveReminderByNameOrIdAndGuildSpec(string name, ulong guildId) : this(name, guildId, null)
-        {
-        }
+    public ActiveReminderByNameOrIdAndGuildSpec(string name, ulong guildId) : this(name, guildId, null)
+    {
+    }
 
-        public ActiveReminderByNameOrIdAndGuildSpec(string name, ulong? guildId, long? id)
+    public ActiveReminderByNameOrIdAndGuildSpec(string name, ulong? guildId, long? id)
+    {
+        Where(x => !x.IsDisabled);
+        if (id.HasValue)
         {
-            Where(x => !x.IsDisabled);
-            if (id.HasValue)
-            {
-                Where(x => x.Id == id);
-            }
-            else
-            {
-                Where(x => x.GuildId == guildId);
-                Where(x => x.Name == name);
-            }
+            Where(x => x.Id == id);
+        }
+        else
+        {
+            Where(x => x.GuildId == guildId);
+            Where(x => x.Name == name);
         }
     }
 }

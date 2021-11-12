@@ -21,13 +21,12 @@ using Microsoft.EntityFrameworkCore;
 using MikyM.Common.DataAccessLayer.Repositories;
 using MikyM.Common.DataAccessLayer.Specifications.Evaluators;
 
-namespace Lisbeth.Bot.DataAccessLayer.Repositories
+namespace Lisbeth.Bot.DataAccessLayer.Repositories;
+
+public class GuildRepository : Repository<Guild>, IGuildRepository
 {
-    public class GuildRepository : Repository<Guild>, IGuildRepository
+    public GuildRepository(DbContext context, ISpecificationEvaluator specificationEvaluator) : base(context,
+        specificationEvaluator)
     {
-        public GuildRepository(DbContext context, ISpecificationEvaluator specificationEvaluator) : base(context,
-            specificationEvaluator)
-        {
-        }
     }
 }

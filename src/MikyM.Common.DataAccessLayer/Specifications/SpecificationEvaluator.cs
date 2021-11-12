@@ -19,45 +19,44 @@ using MikyM.Common.DataAccessLayer.Specifications.Evaluators;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MikyM.Common.DataAccessLayer.Specifications
+namespace MikyM.Common.DataAccessLayer.Specifications;
+
+/// <inheritdoc cref="ISpecificationEvaluator" />
+public class SpecificationEvaluator : ISpecificationEvaluator
 {
-    /// <inheritdoc cref="ISpecificationEvaluator" />
-    public class SpecificationEvaluator : ISpecificationEvaluator
+    private readonly List<IEvaluator> _evaluators = new();
+
+    public SpecificationEvaluator()
     {
-        private readonly List<IEvaluator> _evaluators = new();
-
-        public SpecificationEvaluator()
+        _evaluators.AddRange(new IEvaluator[]
         {
-            _evaluators.AddRange(new IEvaluator[]
-            {
-                WhereEvaluator.Instance, SearchEvaluator.Instance, IncludeEvaluator.Instance,
-                OrderEvaluator.Instance, PaginationEvaluator.Instance, AsNoTrackingEvaluator.Instance,
-                AsSplitQueryEvaluator.Instance, AsNoTrackingWithIdentityResolutionEvaluator.Instance,
-                GroupByEvaluator.Instance, CachingEvaluator.Instance
-            });
-        }
+            WhereEvaluator.Instance, SearchEvaluator.Instance, IncludeEvaluator.Instance,
+            OrderEvaluator.Instance, PaginationEvaluator.Instance, AsNoTrackingEvaluator.Instance,
+            AsSplitQueryEvaluator.Instance, AsNoTrackingWithIdentityResolutionEvaluator.Instance,
+            GroupByEvaluator.Instance, CachingEvaluator.Instance
+        });
+    }
 
-        public SpecificationEvaluator(IEnumerable<IEvaluator> evaluators)
-        {
-            _evaluators.AddRange(evaluators);
-        }
+    public SpecificationEvaluator(IEnumerable<IEvaluator> evaluators)
+    {
+        _evaluators.AddRange(evaluators);
+    }
 
-        // Will use singleton for default configuration. Yet, it can be instantiated if necessary, with default or provided evaluators.
-        public static SpecificationEvaluator Default { get; } = new();
+    // Will use singleton for default configuration. Yet, it can be instantiated if necessary, with default or provided evaluators.
+    public static SpecificationEvaluator Default { get; } = new();
 
-        public virtual IQueryable<TResult> GetQuery<T, TResult>(IQueryable<T> query,
-            ISpecification<T, TResult> specification) where T : class where TResult : class
-        {
-            query = GetQuery(query, (ISpecification<T>)specification);
+    public virtual IQueryable<TResult> GetQuery<T, TResult>(IQueryable<T> query,
+        ISpecification<T, TResult> specification) where T : class where TResult : class
+    {
+        query = GetQuery(query, (ISpecification<T>)specification);
 
-            return ProjectionEvaluator.Instance.GetQuery(query, specification);
-        }
+        return ProjectionEvaluator.Instance.GetQuery(query, specification);
+    }
 
-        public virtual IQueryable<T> GetQuery<T>(IQueryable<T> query, ISpecification<T> specification,
-            bool evaluateCriteriaOnly = false) where T : class
-        {
-            return (evaluateCriteriaOnly ? _evaluators.Where(x => x.IsCriteriaEvaluator) : _evaluators).Aggregate(query,
-                (current, evaluator) => evaluator.GetQuery(current, specification));
-        }
+    public virtual IQueryable<T> GetQuery<T>(IQueryable<T> query, ISpecification<T> specification,
+        bool evaluateCriteriaOnly = false) where T : class
+    {
+        return (evaluateCriteriaOnly ? _evaluators.Where(x => x.IsCriteriaEvaluator) : _evaluators).Aggregate(query,
+            (current, evaluator) => evaluator.GetQuery(current, specification));
     }
 }

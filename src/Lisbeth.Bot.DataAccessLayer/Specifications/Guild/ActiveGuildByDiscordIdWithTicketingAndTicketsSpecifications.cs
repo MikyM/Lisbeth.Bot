@@ -19,16 +19,15 @@
 using System.Linq;
 using MikyM.Common.DataAccessLayer.Specifications;
 
-namespace Lisbeth.Bot.DataAccessLayer.Specifications.Guild
+namespace Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
+
+public class ActiveGuildByDiscordIdWithTicketingAndTicketsSpecifications : Specification<Domain.Entities.Guild>
 {
-    public class ActiveGuildByDiscordIdWithTicketingAndTicketsSpecifications : Specification<Domain.Entities.Guild>
+    public ActiveGuildByDiscordIdWithTicketingAndTicketsSpecifications(ulong discordGuildId)
     {
-        public ActiveGuildByDiscordIdWithTicketingAndTicketsSpecifications(ulong discordGuildId)
-        {
-            Where(x => !x.IsDisabled);
-            Where(x => x.GuildId == discordGuildId);
-            Include(x => x.TicketingConfig);
-            Include(x => x.Tickets.Where(y => !y.IsDisabled));
-        }
+        Where(x => !x.IsDisabled);
+        Where(x => x.GuildId == discordGuildId);
+        Include(x => x.TicketingConfig);
+        Include(x => x.Tickets.Where(y => !y.IsDisabled));
     }
 }

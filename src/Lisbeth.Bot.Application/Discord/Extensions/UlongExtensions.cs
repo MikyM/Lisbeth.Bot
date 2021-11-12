@@ -22,19 +22,18 @@ using DSharpPlus.Entities;
 using MikyM.Common.Domain;
 using MikyM.Discord.Interfaces;
 
-namespace Lisbeth.Bot.Application.Discord.Extensions
-{
-    public static class UlongExtensions
-    {
-        public static bool IsBotsMember(this ulong guildId)
-        {
-            return ContainerProvider.Container.Resolve<IDiscordService>().Client.Guilds.Any(x => x.Key == guildId);
-        }
+namespace Lisbeth.Bot.Application.Discord.Extensions;
 
-        public static bool TryGetGuildFromCache(this ulong guildId, out DiscordGuild? guild)
-        {
-            return ContainerProvider.Container.Resolve<IDiscordService>()
-                .Client.Guilds.TryGetValue(guildId, out guild);
-        }
+public static class UlongExtensions
+{
+    public static bool IsBotsMember(this ulong guildId)
+    {
+        return ContainerProvider.Container.Resolve<IDiscordService>().Client.Guilds.Any(x => x.Key == guildId);
+    }
+
+    public static bool TryGetGuildFromCache(this ulong guildId, out DiscordGuild? guild)
+    {
+        return ContainerProvider.Container.Resolve<IDiscordService>()
+            .Client.Guilds.TryGetValue(guildId, out guild);
     }
 }

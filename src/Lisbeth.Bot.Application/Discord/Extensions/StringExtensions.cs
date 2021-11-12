@@ -17,41 +17,40 @@
 
 using System.Text.RegularExpressions;
 
-namespace Lisbeth.Bot.Application.Discord.Extensions
+namespace Lisbeth.Bot.Application.Discord.Extensions;
+
+public static class StringExtensions
 {
-    public static class StringExtensions
+    public static bool TryParseRoleMention(this string value, out ulong roleId)
     {
-        public static bool TryParseRoleMention(this string value, out ulong roleId)
-        {
-            var res = Regex.Match(value, @"(?<=\\<@&)[0-9]{17,18}(?=\\>)");
+        var res = Regex.Match(value, @"(?<=\\<@&)[0-9]{17,18}(?=\\>)");
 
-            roleId = res.Success ? ulong.Parse(res.Value) : 0;
+        roleId = res.Success ? ulong.Parse(res.Value) : 0;
 
-            return res.Success;
-        }
+        return res.Success;
+    }
 
-        public static bool TryParseUserMention(this string value, out ulong roleId)
-        {
-            var res = Regex.Match(value, @"(?<=\<@!|\<@)[0-9]{17,18}(?=\>)");
+    public static bool TryParseUserMention(this string value, out ulong roleId)
+    {
+        var res = Regex.Match(value, @"(?<=\<@!|\<@)[0-9]{17,18}(?=\>)");
 
-            roleId = res.Success ? ulong.Parse(res.Value) : 0;
+        roleId = res.Success ? ulong.Parse(res.Value) : 0;
 
-            return res.Success;
-        }
+        return res.Success;
+    }
 
-        public static bool TryParseChannelMention(this string value, out ulong roleId)
-        {
-            var res = Regex.Match(value, @"(?<=\<#)[0-9]{17,18}(?=\>)");
+    public static bool TryParseChannelMention(this string value, out ulong roleId)
+    {
+        var res = Regex.Match(value, @"(?<=\<#)[0-9]{17,18}(?=\>)");
 
-            roleId = res.Success ? ulong.Parse(res.Value) : 0;
+        roleId = res.Success ? ulong.Parse(res.Value) : 0;
 
-            return res.Success;
-        }
+        return res.Success;
+    }
 
-        public static bool TryParseDiscordMention(this string value, out ulong mentionId)
-        {
-            return TryParseUserMention(value, out mentionId) || TryParseChannelMention(value, out mentionId) ||
-                   TryParseRoleMention(value, out mentionId);
-        }
+    public static bool TryParseDiscordMention(this string value, out ulong mentionId)
+    {
+        return TryParseUserMention(value, out mentionId) || TryParseChannelMention(value, out mentionId) ||
+               TryParseRoleMention(value, out mentionId);
     }
 }

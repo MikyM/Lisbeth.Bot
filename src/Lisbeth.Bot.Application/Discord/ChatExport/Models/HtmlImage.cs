@@ -11,52 +11,51 @@ using Imgur.API.Endpoints;
 using Imgur.API.Models;
 using MikyM.Common.Domain;
 
-namespace Lisbeth.Bot.Application.Discord.ChatExport.Models
+namespace Lisbeth.Bot.Application.Discord.ChatExport.Models;
+
+public class HtmlImage
 {
-    public class HtmlImage
+    public HtmlImage(string discordLink)
     {
-        public HtmlImage(string discordLink)
+        DiscordLink ??= discordLink ?? throw new ArgumentNullException(nameof(discordLink));
+    }
+
+    public string DiscordLink { get; }
+    public static List<string> SupportedTypes { get; } = new() { "png", "bmp", "jpg", "jpeg", "gif", "tif" };
+
+    public async Task<string> GetImgurLink()
+    {
+        if (SupportedTypes.All(x => x != DiscordLink.Split('.').Last().Split('?').First())) return "";
+
+        var httpClientFactory = ContainerProvider.Container.Resolve<IHttpClientFactory>();
+
+        ApiClient apiClient = new ApiClient(Environment.GetEnvironmentVariable("IMGUR_KEY"));
+        IImage imageUpload;
+        using HttpClient httpClient = httpClientFactory.CreateClient();
+        using HttpClient imgurHttpClient = httpClientFactory.CreateClient();
+        using HttpRequestMessage req = new HttpRequestMessage(HttpMethod.Get, DiscordLink);
+        using HttpResponseMessage response = await httpClient.SendAsync(req);
+        Stream stream = await response.Content.ReadAsStreamAsync();
+        try
         {
-            DiscordLink ??= discordLink ?? throw new ArgumentNullException(nameof(discordLink));
+            ImageEndpoint imageEndpoint = new ImageEndpoint(apiClient, imgurHttpClient);
+            imageUpload = await imageEndpoint.UploadImageAsync(stream);
+        }
+        catch (ImgurException)
+        {
+            return "";
         }
 
-        public string DiscordLink { get; }
-        public static List<string> SupportedTypes { get; } = new() { "png", "bmp", "jpg", "jpeg", "gif", "tif" };
+        return imageUpload.Link;
+    }
 
-        public async Task<string> GetImgurLink()
+    public async Task<string> BuildAsync()
+    {
+        string link = await GetImgurLink();
+        return link switch
         {
-            if (SupportedTypes.All(x => x != DiscordLink.Split('.').Last().Split('?').First())) return "";
-
-            var httpClientFactory = ContainerProvider.Container.Resolve<IHttpClientFactory>();
-
-            ApiClient apiClient = new ApiClient(Environment.GetEnvironmentVariable("IMGUR_KEY"));
-            IImage imageUpload;
-            using HttpClient httpClient = httpClientFactory.CreateClient();
-            using HttpClient imgurHttpClient = httpClientFactory.CreateClient();
-            using HttpRequestMessage req = new HttpRequestMessage(HttpMethod.Get, DiscordLink);
-            using HttpResponseMessage response = await httpClient.SendAsync(req);
-            Stream stream = await response.Content.ReadAsStreamAsync();
-            try
-            {
-                ImageEndpoint imageEndpoint = new ImageEndpoint(apiClient, imgurHttpClient);
-                imageUpload = await imageEndpoint.UploadImageAsync(stream);
-            }
-            catch (ImgurException)
-            {
-                return "";
-            }
-
-            return imageUpload.Link;
-        }
-
-        public async Task<string> BuildAsync()
-        {
-            string link = await GetImgurLink();
-            return link switch
-            {
-                "" => "",
-                _ => $"<img class=\"image\" src=\"{link}\"/>"
-            };
-        }
+            "" => "",
+            _ => $"<img class=\"image\" src=\"{link}\"/>"
+        };
     }
 }

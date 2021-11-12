@@ -23,13 +23,12 @@
 
 using DSharpPlus;
 
-namespace MikyM.Discord.Interfaces
+namespace MikyM.Discord.Interfaces;
+
+public interface IDiscordService
 {
-    public interface IDiscordService
-    {
-        /// <summary>
-        ///     The underlying <see cref="DiscordClient" />.
-        /// </summary>
-        public DiscordClient Client { get; }
-    }
+    /// <summary>
+    ///     The underlying <see cref="DiscordClient" />.
+    /// </summary>
+    public DiscordClient Client { get; }
 }

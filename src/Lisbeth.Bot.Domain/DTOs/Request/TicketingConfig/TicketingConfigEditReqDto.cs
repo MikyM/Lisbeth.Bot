@@ -18,13 +18,12 @@
 using System;
 using Lisbeth.Bot.Domain.DTOs.Request.Base;
 
-namespace Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig
+namespace Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
+
+public class TicketingConfigEditReqDto : BaseAuthWithGuildReqDto
 {
-    public class TicketingConfigEditReqDto : BaseAuthWithGuildReqDto
-    {
-        public TimeSpan? CleanAfter { get; set; }
-        public TimeSpan? CloseAfter { get; set; }
-        public string OpenedNamePrefix { get; set; } = "ticket";
-        public string ClosedNamePrefix { get; set; } = "closed";
-    }
+    public TimeSpan? CleanAfter { get; set; }
+    public TimeSpan? CloseAfter { get; set; }
+    public string OpenedNamePrefix { get; set; } = "ticket";
+    public string ClosedNamePrefix { get; set; } = "closed";
 }

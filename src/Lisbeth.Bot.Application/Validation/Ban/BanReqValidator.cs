@@ -23,26 +23,25 @@ using Lisbeth.Bot.Application.Validation.ReusablePropertyValidation;
 using Lisbeth.Bot.Domain.DTOs.Request.Ban;
 using MikyM.Discord.Interfaces;
 
-namespace Lisbeth.Bot.Application.Validation.Ban
+namespace Lisbeth.Bot.Application.Validation.Ban;
+
+public class BanReqValidator : AbstractValidator<BanReqDto>
 {
-    public class BanReqValidator : AbstractValidator<BanReqDto>
+    public BanReqValidator(IDiscordService discordService) : this(discordService.Client)
     {
-        public BanReqValidator(IDiscordService discordService) : this(discordService.Client)
-        {
-        }
+    }
 
-        public BanReqValidator(DiscordClient discord)
-        {
-            CascadeMode = CascadeMode.Stop;
+    public BanReqValidator(DiscordClient discord)
+    {
+        CascadeMode = CascadeMode.Stop;
 
-            RuleFor(x => x.GuildId).NotEmpty();
-            RuleFor(x => x.TargetUserId)
-                .NotEmpty()
-                .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<BanReqDto>(discord)));
-            RuleFor(x => x.RequestedOnBehalfOfId)
-                .NotEmpty()
-                .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<BanReqDto>(discord)));
-            RuleFor(x => x.AppliedUntil).NotEmpty().Must(x => x.ToUniversalTime() > DateTime.UtcNow);
-        }
+        RuleFor(x => x.GuildId).NotEmpty();
+        RuleFor(x => x.TargetUserId)
+            .NotEmpty()
+            .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<BanReqDto>(discord)));
+        RuleFor(x => x.RequestedOnBehalfOfId)
+            .NotEmpty()
+            .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<BanReqDto>(discord)));
+        RuleFor(x => x.AppliedUntil).NotEmpty().Must(x => x.ToUniversalTime() > DateTime.UtcNow);
     }
 }

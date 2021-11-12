@@ -19,18 +19,17 @@ using System.Linq;
 using DSharpPlus;
 using DSharpPlus.Entities;
 
-namespace Lisbeth.Bot.Application.Discord.Extensions
-{
-    public static class DiscordUserExtensions
-    {
-        public static string GetFullUsername(this DiscordUser user)
-        {
-            return user.Username + "#" + user.Discriminator;
-        }
+namespace Lisbeth.Bot.Application.Discord.Extensions;
 
-        public static bool IsBotOwner(this DiscordUser user, DiscordClient client)
-        {
-            return client.CurrentApplication.Owners.Any(x => x.Id == user.Id);
-        }
+public static class DiscordUserExtensions
+{
+    public static string GetFullUsername(this DiscordUser user)
+    {
+        return user.Username + "#" + user.Discriminator;
+    }
+
+    public static bool IsBotOwner(this DiscordUser user, DiscordClient client)
+    {
+        return client.CurrentApplication.Owners.Any(x => x.Id == user.Id);
     }
 }

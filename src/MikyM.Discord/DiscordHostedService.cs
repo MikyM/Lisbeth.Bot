@@ -31,52 +31,51 @@ using MikyM.Discord.Services;
 using MikyM.Discord.Util;
 using OpenTracing;
 
-namespace MikyM.Discord
+namespace MikyM.Discord;
+
+/// <summary>
+///     Brings a <see cref="IDiscordService" /> online.
+/// </summary>
+[UsedImplicitly]
+public class DiscordHostedService : IHostedService
 {
-    /// <summary>
-    ///     Brings a <see cref="IDiscordService" /> online.
-    /// </summary>
-    [UsedImplicitly]
-    public class DiscordHostedService : IHostedService
+    private readonly IDiscordService _discordClient;
+
+    private readonly ILogger<DiscordHostedService> _logger;
+
+    private readonly ITracer _tracer;
+
+    public DiscordHostedService(
+        IDiscordService discordClient,
+        ITracer tracer,
+        ILogger<DiscordHostedService> logger)
     {
-        private readonly IDiscordService _discordClient;
+        _discordClient = discordClient;
+        _tracer = tracer;
+        _logger = logger;
+    }
 
-        private readonly ILogger<DiscordHostedService> _logger;
+    public async Task StartAsync(CancellationToken cancellationToken)
+    {
+        ((DiscordService) _discordClient).Initialize();
 
-        private readonly ITracer _tracer;
-
-        public DiscordHostedService(
-            IDiscordService discordClient,
-            ITracer tracer,
-            ILogger<DiscordHostedService> logger)
+        using (_tracer.BuildSpan(nameof(_discordClient.Client.ConnectAsync)).StartActive(true))
         {
-            _discordClient = discordClient;
-            _tracer = tracer;
-            _logger = logger;
-        }
+            _logger.LogInformation("Connecting to Discord API...");
+            await _discordClient.Client.ConnectAsync();
+            _logger.LogInformation("Connected");
 
-        public async Task StartAsync(CancellationToken cancellationToken)
-        {
-            ((DiscordService) _discordClient).Initialize();
-
-            using (_tracer.BuildSpan(nameof(_discordClient.Client.ConnectAsync)).StartActive(true))
+            if (WaitForDownloadCompletionHelper.ShouldWait)
             {
-                _logger.LogInformation("Connecting to Discord API...");
-                await _discordClient.Client.ConnectAsync();
-                _logger.LogInformation("Connected");
-
-                if (WaitForDownloadCompletionHelper.ShouldWait)
-                {
-                    _logger.LogInformation("Waiting for discord's guild download completion.");
-                    await WaitForDownloadCompletionHelper.ReadyToOperateEvent.WaitAsync();
-                    _logger.LogInformation("Discord fully operational.");
-                }
+                _logger.LogInformation("Waiting for discord's guild download completion.");
+                await WaitForDownloadCompletionHelper.ReadyToOperateEvent.WaitAsync();
+                _logger.LogInformation("Discord fully operational.");
             }
         }
+    }
 
-        public async Task StopAsync(CancellationToken cancellationToken)
-        {
-            await _discordClient.Client.DisconnectAsync();
-        }
+    public async Task StopAsync(CancellationToken cancellationToken)
+    {
+        await _discordClient.Client.DisconnectAsync();
     }
 }

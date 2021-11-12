@@ -22,28 +22,27 @@ using MikyM.Common.Domain.Entities;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace MikyM.Common.Application.Interfaces
+namespace MikyM.Common.Application.Interfaces;
+
+public interface IReadOnlyService<TEntity, TContext> : IServiceBase<TContext>
+    where TEntity : AggregateRootEntity where TContext : DbContext
 {
-    public interface IReadOnlyService<TEntity, TContext> : IServiceBase<TContext>
-        where TEntity : AggregateRootEntity where TContext : DbContext
-    {
-        Task<Result<TGetResult>> GetAsync<TGetResult>(long id) where TGetResult : class;
+    Task<Result<TGetResult>> GetAsync<TGetResult>(long id) where TGetResult : class;
 
-        Task<Result<TGetResult>> GetSingleBySpecAsync<TGetResult>(ISpecification<TEntity> specification)
-            where TGetResult : class;
+    Task<Result<TGetResult>> GetSingleBySpecAsync<TGetResult>(ISpecification<TEntity> specification)
+        where TGetResult : class;
 
-        Task<Result<TGetProjectedResult>> GetSingleBySpecAsync<TGetProjectedResult>(
-            ISpecification<TEntity, TGetProjectedResult> specification) where TGetProjectedResult : class;
+    Task<Result<TGetProjectedResult>> GetSingleBySpecAsync<TGetProjectedResult>(
+        ISpecification<TEntity, TGetProjectedResult> specification) where TGetProjectedResult : class;
 
-        Task<Result<IReadOnlyList<TGetResult>>> GetBySpecAsync<TGetResult>(ISpecification<TEntity> specification)
-            where TGetResult : class;
+    Task<Result<IReadOnlyList<TGetResult>>> GetBySpecAsync<TGetResult>(ISpecification<TEntity> specification)
+        where TGetResult : class;
 
-        Task<Result<IReadOnlyList<TGetProjectedResult>>> GetBySpecAsync<TGetProjectedResult>(
-            ISpecification<TEntity, TGetProjectedResult> specification) where TGetProjectedResult : class;
+    Task<Result<IReadOnlyList<TGetProjectedResult>>> GetBySpecAsync<TGetProjectedResult>(
+        ISpecification<TEntity, TGetProjectedResult> specification) where TGetProjectedResult : class;
 
-        Task<Result<IReadOnlyList<TGetResult>>> GetAllAsync<TGetResult>(bool shouldProject = false)
-            where TGetResult : class;
+    Task<Result<IReadOnlyList<TGetResult>>> GetAllAsync<TGetResult>(bool shouldProject = false)
+        where TGetResult : class;
 
-        Task<Result<long>> LongCountAsync(ISpecification<TEntity>? specification = null);
-    }
+    Task<Result<long>> LongCountAsync(ISpecification<TEntity>? specification = null);
 }

@@ -31,89 +31,88 @@ using MikyM.Discord.Interfaces;
 using MikyM.Discord.Services;
 using MikyM.Discord.Util;
 
-namespace MikyM.Discord
+namespace MikyM.Discord;
+
+[UsedImplicitly]
+public static partial class DiscordServiceCollectionExtensions
 {
+    /// <summary>
+    ///     Registers a <see cref="IDiscordService" /> with <see cref="DiscordConfiguration" />.
+    /// </summary>
+    /// <param name="services">The <see cref="IServiceCollection" />.</param>
+    /// <param name="configure">The <see cref="DiscordConfiguration" />.</param>
+    /// <param name="autoRegisterSubscribers">
+    ///     If true, classes with subscriber attributes will get registered as event
+    ///     subscribers automatically. This is the default.
+    /// </param>
+    /// <returns>The <see cref="IServiceCollection" />.</returns>
     [UsedImplicitly]
-    public static partial class DiscordServiceCollectionExtensions
+    public static IServiceCollection AddDiscord(
+        this IServiceCollection services,
+        Action<DiscordConfiguration> configure,
+        bool autoRegisterSubscribers = true
+    )
     {
-        /// <summary>
-        ///     Registers a <see cref="IDiscordService" /> with <see cref="DiscordConfiguration" />.
-        /// </summary>
-        /// <param name="services">The <see cref="IServiceCollection" />.</param>
-        /// <param name="configure">The <see cref="DiscordConfiguration" />.</param>
-        /// <param name="autoRegisterSubscribers">
-        ///     If true, classes with subscriber attributes will get registered as event
-        ///     subscribers automatically. This is the default.
-        /// </param>
-        /// <returns>The <see cref="IServiceCollection" />.</returns>
-        [UsedImplicitly]
-        public static IServiceCollection AddDiscord(
-            this IServiceCollection services,
-            Action<DiscordConfiguration> configure,
-            bool autoRegisterSubscribers = true
-        )
-        {
-            services.Configure(configure);
+        services.Configure(configure);
 
-            services.TryAddSingleton<IDiscordService, DiscordService>();
+        services.TryAddSingleton<IDiscordService, DiscordService>();
 
-            if (!autoRegisterSubscribers)
-                return services;
-
-            foreach (var type in AssemblyTypeHelper.GetTypesWith<DiscordChannelEventsSubscriberAttribute>())
-                services.AddDiscordChannelEventsSubscriber(type);
-
-            foreach (var type in AssemblyTypeHelper.GetTypesWith<DiscordGuildBanEventsSubscriberAttribute>())
-                services.AddDiscordGuildBanEventsSubscriber(type);
-
-            foreach (var type in AssemblyTypeHelper.GetTypesWith<DiscordGuildEventsSubscriberAttribute>())
-                services.AddDiscordGuildEventsSubscriber(type);
-
-            foreach (var type in AssemblyTypeHelper.GetTypesWith<DiscordGuildMemberEventsSubscriberAttribute>())
-                services.AddDiscordGuildMemberEventsSubscriber(type);
-
-            foreach (var type in AssemblyTypeHelper.GetTypesWith<DiscordGuildRoleEventsSubscriberAttribute>())
-                services.AddDiscordGuildRoleEventsSubscriber(type);
-
-            foreach (var type in AssemblyTypeHelper.GetTypesWith<DiscordInviteEventsSubscriberAttribute>())
-                services.AddDiscordInviteEventsSubscriber(type);
-
-            foreach (var type in AssemblyTypeHelper.GetTypesWith<DiscordMessageEventsSubscriberAttribute>())
-                services.AddDiscordMessageEventsSubscriber(type);
-
-            foreach (var type in AssemblyTypeHelper.GetTypesWith<DiscordMessageReactionEventsSubscriberAttribute>())
-                services.AddDiscordMessageReactionAddedEventsSubscriber(type);
-
-            foreach (var type in AssemblyTypeHelper.GetTypesWith<DiscordMiscEventsSubscriberAttribute>())
-                services.AddDiscordMiscEventsSubscriber(type);
-
-            foreach (var type in AssemblyTypeHelper.GetTypesWith<DiscordPresenceUserEventsSubscriberAttribute>())
-                services.AddDiscordPresenceUserEventsSubscriber(type);
-
-            foreach (var type in AssemblyTypeHelper.GetTypesWith<DiscordVoiceEventsSubscriberAttribute>())
-                services.AddDiscordVoiceEventsSubscriber(type);
-
-            foreach (var type in AssemblyTypeHelper.GetTypesWith<DiscordWebSocketEventSubscriberAttribute>())
-                services.AddDiscordWebSocketEventSubscriber(type);
-
+        if (!autoRegisterSubscribers)
             return services;
-        }
 
-        /// <summary>
-        ///     Registers a <see cref="DiscordHostedService" />.
-        /// </summary>
-        /// <param name="services">The <see cref="IServiceCollection" />.</param>
-        /// <param name="shouldWaitForGuildDownloadCompletion">Whether library should wait for GuildDownloadCompleted event to be dispatched before continuing</param>
-        /// <returns>The <see cref="IServiceCollection" />.</returns>
-        [UsedImplicitly]
-        public static IServiceCollection AddDiscordHostedService(
-            this IServiceCollection services,
-            bool shouldWaitForGuildDownloadCompletion = false
-        )
-        {
-            WaitForDownloadCompletionHelper.ShouldWait = shouldWaitForGuildDownloadCompletion;
-            if (shouldWaitForGuildDownloadCompletion) services.AddDiscordGuildEventsSubscriber<ReadyToOperateHandler>();
-            return services.AddHostedService<DiscordHostedService>();
-        }
+        foreach (var type in AssemblyTypeHelper.GetTypesWith<DiscordChannelEventsSubscriberAttribute>())
+            services.AddDiscordChannelEventsSubscriber(type);
+
+        foreach (var type in AssemblyTypeHelper.GetTypesWith<DiscordGuildBanEventsSubscriberAttribute>())
+            services.AddDiscordGuildBanEventsSubscriber(type);
+
+        foreach (var type in AssemblyTypeHelper.GetTypesWith<DiscordGuildEventsSubscriberAttribute>())
+            services.AddDiscordGuildEventsSubscriber(type);
+
+        foreach (var type in AssemblyTypeHelper.GetTypesWith<DiscordGuildMemberEventsSubscriberAttribute>())
+            services.AddDiscordGuildMemberEventsSubscriber(type);
+
+        foreach (var type in AssemblyTypeHelper.GetTypesWith<DiscordGuildRoleEventsSubscriberAttribute>())
+            services.AddDiscordGuildRoleEventsSubscriber(type);
+
+        foreach (var type in AssemblyTypeHelper.GetTypesWith<DiscordInviteEventsSubscriberAttribute>())
+            services.AddDiscordInviteEventsSubscriber(type);
+
+        foreach (var type in AssemblyTypeHelper.GetTypesWith<DiscordMessageEventsSubscriberAttribute>())
+            services.AddDiscordMessageEventsSubscriber(type);
+
+        foreach (var type in AssemblyTypeHelper.GetTypesWith<DiscordMessageReactionEventsSubscriberAttribute>())
+            services.AddDiscordMessageReactionAddedEventsSubscriber(type);
+
+        foreach (var type in AssemblyTypeHelper.GetTypesWith<DiscordMiscEventsSubscriberAttribute>())
+            services.AddDiscordMiscEventsSubscriber(type);
+
+        foreach (var type in AssemblyTypeHelper.GetTypesWith<DiscordPresenceUserEventsSubscriberAttribute>())
+            services.AddDiscordPresenceUserEventsSubscriber(type);
+
+        foreach (var type in AssemblyTypeHelper.GetTypesWith<DiscordVoiceEventsSubscriberAttribute>())
+            services.AddDiscordVoiceEventsSubscriber(type);
+
+        foreach (var type in AssemblyTypeHelper.GetTypesWith<DiscordWebSocketEventSubscriberAttribute>())
+            services.AddDiscordWebSocketEventSubscriber(type);
+
+        return services;
+    }
+
+    /// <summary>
+    ///     Registers a <see cref="DiscordHostedService" />.
+    /// </summary>
+    /// <param name="services">The <see cref="IServiceCollection" />.</param>
+    /// <param name="shouldWaitForGuildDownloadCompletion">Whether library should wait for GuildDownloadCompleted event to be dispatched before continuing</param>
+    /// <returns>The <see cref="IServiceCollection" />.</returns>
+    [UsedImplicitly]
+    public static IServiceCollection AddDiscordHostedService(
+        this IServiceCollection services,
+        bool shouldWaitForGuildDownloadCompletion = false
+    )
+    {
+        WaitForDownloadCompletionHelper.ShouldWait = shouldWaitForGuildDownloadCompletion;
+        if (shouldWaitForGuildDownloadCompletion) services.AddDiscordGuildEventsSubscriber<ReadyToOperateHandler>();
+        return services.AddHostedService<DiscordHostedService>();
     }
 }

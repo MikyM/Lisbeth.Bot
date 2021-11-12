@@ -21,23 +21,22 @@ using Lisbeth.Bot.Application.Validation.ReusablePropertyValidation;
 using Lisbeth.Bot.Domain.DTOs.Request.Reminder;
 using MikyM.Discord.Interfaces;
 
-namespace Lisbeth.Bot.Application.Validation.Reminder
-{
-    public class DisableReminderReqValidator : AbstractValidator<DisableReminderReqDto>
-    {
-        public DisableReminderReqValidator(IDiscordService discordService) : this(discordService.Client)
-        {
-        }
+namespace Lisbeth.Bot.Application.Validation.Reminder;
 
-        public DisableReminderReqValidator(DiscordClient discord)
-        {
-            RuleFor(x => x.Type).NotEmpty();
-            RuleFor(x => x.RequestedOnBehalfOfId).NotEmpty().DependentRules(x =>
-                x.SetAsyncValidator(new DiscordUserIdValidator<DisableReminderReqDto>(discord)));
-            RuleFor(x => x.GuildId).NotEmpty().DependentRules(x =>
-                x.SetAsyncValidator(new DiscordGuildIdValidator<DisableReminderReqDto>(discord)));
-            RuleFor(x => x.Name).NotEmpty().When(x => x.ReminderId is null);
-            RuleFor(x => x.ReminderId).NotEmpty().When(x => x.Name is null or "");
-        }
+public class DisableReminderReqValidator : AbstractValidator<DisableReminderReqDto>
+{
+    public DisableReminderReqValidator(IDiscordService discordService) : this(discordService.Client)
+    {
+    }
+
+    public DisableReminderReqValidator(DiscordClient discord)
+    {
+        RuleFor(x => x.Type).NotEmpty();
+        RuleFor(x => x.RequestedOnBehalfOfId).NotEmpty().DependentRules(x =>
+            x.SetAsyncValidator(new DiscordUserIdValidator<DisableReminderReqDto>(discord)));
+        RuleFor(x => x.GuildId).NotEmpty().DependentRules(x =>
+            x.SetAsyncValidator(new DiscordGuildIdValidator<DisableReminderReqDto>(discord)));
+        RuleFor(x => x.Name).NotEmpty().When(x => x.ReminderId is null);
+        RuleFor(x => x.ReminderId).NotEmpty().When(x => x.Name is null or "");
     }
 }

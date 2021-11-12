@@ -18,27 +18,26 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators
+namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators;
+
+public class WhereEvaluator : IEvaluator, IInMemoryEvaluator
 {
-    public class WhereEvaluator : IEvaluator, IInMemoryEvaluator
+    private WhereEvaluator()
     {
-        private WhereEvaluator()
-        {
-        }
+    }
 
-        public static WhereEvaluator Instance { get; } = new();
+    public static WhereEvaluator Instance { get; } = new();
 
-        public bool IsCriteriaEvaluator { get; } = true;
+    public bool IsCriteriaEvaluator { get; } = true;
 
-        public IQueryable<T> GetQuery<T>(IQueryable<T> query, ISpecification<T> specification) where T : class
-        {
-            return specification.WhereExpressions?.Aggregate(query, (current, criteria) => current.Where(criteria)) ?? query;
-        }
+    public IQueryable<T> GetQuery<T>(IQueryable<T> query, ISpecification<T> specification) where T : class
+    {
+        return specification.WhereExpressions?.Aggregate(query, (current, criteria) => current.Where(criteria)) ?? query;
+    }
 
-        public IEnumerable<T> Evaluate<T>(IEnumerable<T> query, ISpecification<T> specification) where T : class
-        {
-            return specification.WhereExpressions?.Aggregate(query,
-                (current, criteria) => current.Where(criteria.Compile())) ?? query;
-        }
+    public IEnumerable<T> Evaluate<T>(IEnumerable<T> query, ISpecification<T> specification) where T : class
+    {
+        return specification.WhereExpressions?.Aggregate(query,
+            (current, criteria) => current.Where(criteria.Compile())) ?? query;
     }
 }

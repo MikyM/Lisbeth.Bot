@@ -19,25 +19,24 @@ using System;
 using System.Collections.Generic;
 using Lisbeth.Bot.Domain.Entities.Base;
 
-namespace Lisbeth.Bot.Domain.Entities
-{
-    public sealed class Ticket : SnowflakeEntity
-    {
-        public ulong UserId { get; set; }
-        public ulong ChannelId { get; set; }
-        public long GuildSpecificId { get; set; }
-        public DateTime? ReopenedOn { get; set; }
-        public DateTime? ClosedOn { get; set; }
-        public ulong? ClosedById { get; set; }
-        public ulong? ReopenedById { get; set; }
-        public ulong MessageOpenId { get; set; }
-        public ulong? MessageCloseId { get; set; }
-        public ulong? MessageReopenId { get; set; }
-        public List<ulong>? AddedUserIds { get; set; }
-        public List<ulong>? AddedRoleIds { get; set; }
-        public bool IsPrivate { get; set; }
+namespace Lisbeth.Bot.Domain.Entities;
 
-        public Guild? Guild { get; set; }
-        public ulong GuildId { get; set; }
-    }
+public sealed class Ticket : SnowflakeEntity
+{
+    public ulong UserId { get; set; }
+    public ulong ChannelId { get; set; }
+    public long GuildSpecificId { get; set; }
+    public DateTime? ReopenedOn { get; set; }
+    public DateTime? ClosedOn { get; set; }
+    public ulong? ClosedById { get; set; }
+    public ulong? ReopenedById { get; set; }
+    public ulong MessageOpenId { get; set; }
+    public ulong? MessageCloseId { get; set; }
+    public ulong? MessageReopenId { get; set; }
+    public List<ulong>? AddedUserIds { get; set; }
+    public List<ulong>? AddedRoleIds { get; set; }
+    public bool IsPrivate { get; set; }
+
+    public Guild? Guild { get; set; }
+    public ulong GuildId { get; set; }
 }

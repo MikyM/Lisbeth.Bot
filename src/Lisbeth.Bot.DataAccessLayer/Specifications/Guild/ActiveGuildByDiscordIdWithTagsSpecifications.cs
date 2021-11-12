@@ -19,15 +19,14 @@
 using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Common.DataAccessLayer.Specifications.Builders;
 
-namespace Lisbeth.Bot.DataAccessLayer.Specifications.Guild
+namespace Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
+
+public class ActiveGuildByDiscordIdWithTagsSpecifications : Specification<Domain.Entities.Guild>
 {
-    public class ActiveGuildByDiscordIdWithTagsSpecifications : Specification<Domain.Entities.Guild>
+    public ActiveGuildByDiscordIdWithTagsSpecifications(ulong discordGuildId)
     {
-        public ActiveGuildByDiscordIdWithTagsSpecifications(ulong discordGuildId)
-        {
-            Where(x => !x.IsDisabled);
-            Where(x => x.GuildId == discordGuildId);
-            IncludeWithChildren(x => x.Tags).ThenInclude(x => x.EmbedConfig);
-        }
+        Where(x => !x.IsDisabled);
+        Where(x => x.GuildId == discordGuildId);
+        IncludeWithChildren(x => x.Tags).ThenInclude(x => x.EmbedConfig);
     }
 }

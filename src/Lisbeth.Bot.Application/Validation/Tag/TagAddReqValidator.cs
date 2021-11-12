@@ -21,25 +21,24 @@ using Lisbeth.Bot.Application.Validation.ReusablePropertyValidation;
 using Lisbeth.Bot.Domain.DTOs.Request.Tag;
 using MikyM.Discord.Interfaces;
 
-namespace Lisbeth.Bot.Application.Validation.Tag
+namespace Lisbeth.Bot.Application.Validation.Tag;
+
+public class TagAddReqValidator : AbstractValidator<TagAddReqDto>
 {
-    public class TagAddReqValidator : AbstractValidator<TagAddReqDto>
+    public TagAddReqValidator(IDiscordService discordService) : this(discordService.Client)
     {
-        public TagAddReqValidator(IDiscordService discordService) : this(discordService.Client)
-        {
-        }
+    }
 
-        public TagAddReqValidator(DiscordClient discord)
-        {
-            CascadeMode = CascadeMode.Stop;
+    public TagAddReqValidator(DiscordClient discord)
+    {
+        CascadeMode = CascadeMode.Stop;
 
-            RuleFor(x => x.Name).NotEmpty();
-            RuleFor(x => x.GuildId).NotEmpty().DependentRules(x =>
-                x.SetAsyncValidator(new DiscordGuildIdValidator<TagAddReqDto>(discord)));
-            RuleFor(x => x.RequestedOnBehalfOfId).NotEmpty()
-                .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<TagAddReqDto>(discord)));
-            RuleFor(x => x.Text).NotEmpty().When(x => x.EmbedConfig is null);
-            RuleFor(x => x.EmbedConfig).NotEmpty().When(x => x.Text is null or "");
-        }
+        RuleFor(x => x.Name).NotEmpty();
+        RuleFor(x => x.GuildId).NotEmpty().DependentRules(x =>
+            x.SetAsyncValidator(new DiscordGuildIdValidator<TagAddReqDto>(discord)));
+        RuleFor(x => x.RequestedOnBehalfOfId).NotEmpty()
+            .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<TagAddReqDto>(discord)));
+        RuleFor(x => x.Text).NotEmpty().When(x => x.EmbedConfig is null);
+        RuleFor(x => x.EmbedConfig).NotEmpty().When(x => x.Text is null or "");
     }
 }

@@ -19,28 +19,27 @@ using Lisbeth.Bot.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Lisbeth.Bot.DataAccessLayer.Configurations
+namespace Lisbeth.Bot.DataAccessLayer.Configurations;
+
+public class PruneConfig : IEntityTypeConfiguration<Prune>
 {
-    public class PruneConfig : IEntityTypeConfiguration<Prune>
+    public void Configure(EntityTypeBuilder<Prune> builder)
     {
-        public void Configure(EntityTypeBuilder<Prune> builder)
-        {
-            builder.ToTable("prune");
+        builder.ToTable("prune");
 
-            builder.Property(x => x.Id).HasColumnName("id").HasColumnType("bigint").ValueGeneratedOnAdd().IsRequired();
-            builder.Property(x => x.IsDisabled).HasColumnName("is_disabled").HasColumnType("boolean").IsRequired();
-            builder.Property(x => x.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz")
-                .ValueGeneratedOnAdd().IsRequired();
-            builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz").IsRequired();
+        builder.Property(x => x.Id).HasColumnName("id").HasColumnType("bigint").ValueGeneratedOnAdd().IsRequired();
+        builder.Property(x => x.IsDisabled).HasColumnName("is_disabled").HasColumnType("boolean").IsRequired();
+        builder.Property(x => x.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz")
+            .ValueGeneratedOnAdd().IsRequired();
+        builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz").IsRequired();
 
-            builder.Property(x => x.GuildId).HasColumnName("guild_id").HasColumnType("bigint").ValueGeneratedOnAdd()
-                .IsRequired();
-            builder.Property(x => x.UserId).HasColumnName("user_id").HasColumnType("bigint").ValueGeneratedOnAdd()
-                .IsRequired();
-            builder.Property(x => x.Count).HasColumnName("count").HasColumnType("int").IsRequired();
-            builder.Property(x => x.ChannelId).HasColumnName("channel_id").HasColumnType("bigint").IsRequired();
-            builder.Property(x => x.ModeratorId).HasColumnName("moderator_id").HasColumnType("bigint").IsRequired();
-            builder.Property(x => x.Messages).HasColumnName("messages").HasColumnType("text");
-        }
+        builder.Property(x => x.GuildId).HasColumnName("guild_id").HasColumnType("bigint").ValueGeneratedOnAdd()
+            .IsRequired();
+        builder.Property(x => x.UserId).HasColumnName("user_id").HasColumnType("bigint").ValueGeneratedOnAdd()
+            .IsRequired();
+        builder.Property(x => x.Count).HasColumnName("count").HasColumnType("int").IsRequired();
+        builder.Property(x => x.ChannelId).HasColumnName("channel_id").HasColumnType("bigint").IsRequired();
+        builder.Property(x => x.ModeratorId).HasColumnName("moderator_id").HasColumnType("bigint").IsRequired();
+        builder.Property(x => x.Messages).HasColumnName("messages").HasColumnType("text");
     }
 }

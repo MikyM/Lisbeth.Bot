@@ -19,44 +19,43 @@ using Lisbeth.Bot.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Lisbeth.Bot.DataAccessLayer.Configurations
+namespace Lisbeth.Bot.DataAccessLayer.Configurations;
+
+public class RoleMenuOptionConfig : IEntityTypeConfiguration<RoleMenuOption>
 {
-    public class RoleMenuOptionConfig : IEntityTypeConfiguration<RoleMenuOption>
+    public void Configure(EntityTypeBuilder<RoleMenuOption> builder)
     {
-        public void Configure(EntityTypeBuilder<RoleMenuOption> builder)
-        {
-            builder.ToTable("role_menu_option");
+        builder.ToTable("role_menu_option");
 
-            builder.Property(x => x.Id).HasColumnName("id").HasColumnType("bigint").ValueGeneratedOnAdd().IsRequired();
-            builder.Property(x => x.IsDisabled).HasColumnName("is_disabled").HasColumnType("boolean").IsRequired();
-            builder.Property(x => x.CreatedAt)
-                .HasColumnName("created_at")
-                .HasColumnType("timestamptz")
-                .ValueGeneratedOnAdd()
-                .IsRequired();
-            builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz").IsRequired();
+        builder.Property(x => x.Id).HasColumnName("id").HasColumnType("bigint").ValueGeneratedOnAdd().IsRequired();
+        builder.Property(x => x.IsDisabled).HasColumnName("is_disabled").HasColumnType("boolean").IsRequired();
+        builder.Property(x => x.CreatedAt)
+            .HasColumnName("created_at")
+            .HasColumnType("timestamptz")
+            .ValueGeneratedOnAdd()
+            .IsRequired();
+        builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz").IsRequired();
 
-            builder.Property(x => x.Name)
-                .HasColumnName("name")
-                .HasColumnType("varchar(100)")
-                .HasMaxLength(100)
-                .IsRequired();
-            builder.Property(x => x.RoleMenuId).HasColumnName("role_menu_id").HasColumnType("bigint").IsRequired();
-            builder.Property(x => x.Description)
-                .HasColumnName("description")
-                .HasColumnType("varchar(256)")
-                .HasMaxLength(256)
-                .IsRequired();
-            builder.Property(x => x.Emoji)
-                .HasColumnName("emoji")
-                .HasColumnType("varchar(100)")
-                .HasMaxLength(100)
-                .IsRequired();
-            builder.Property(x => x.CustomSelectOptionValueId)
-                .HasColumnName("custom_select_option_value_id")
-                .HasColumnType("varchar(120)")
-                .HasMaxLength(120)
-                .IsRequired();
-        }
+        builder.Property(x => x.Name)
+            .HasColumnName("name")
+            .HasColumnType("varchar(100)")
+            .HasMaxLength(100)
+            .IsRequired();
+        builder.Property(x => x.RoleMenuId).HasColumnName("role_menu_id").HasColumnType("bigint").IsRequired();
+        builder.Property(x => x.Description)
+            .HasColumnName("description")
+            .HasColumnType("varchar(256)")
+            .HasMaxLength(256)
+            .IsRequired();
+        builder.Property(x => x.Emoji)
+            .HasColumnName("emoji")
+            .HasColumnType("varchar(100)")
+            .HasMaxLength(100)
+            .IsRequired();
+        builder.Property(x => x.CustomSelectOptionValueId)
+            .HasColumnName("custom_select_option_value_id")
+            .HasColumnType("varchar(120)")
+            .HasMaxLength(120)
+            .IsRequired();
     }
 }

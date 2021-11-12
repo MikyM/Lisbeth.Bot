@@ -17,16 +17,15 @@
 
 using MikyM.Common.DataAccessLayer.Specifications;
 
-namespace Lisbeth.Bot.DataAccessLayer.Specifications.RecurringReminder
+namespace Lisbeth.Bot.DataAccessLayer.Specifications.RecurringReminder;
+
+public class ActiveRecurringReminderByIdWithEmbedSpec : Specification<Domain.Entities.RecurringReminder>
 {
-    public class ActiveRecurringReminderByIdWithEmbedSpec : Specification<Domain.Entities.RecurringReminder>
+    public ActiveRecurringReminderByIdWithEmbedSpec(long id)
     {
-        public ActiveRecurringReminderByIdWithEmbedSpec(long id)
-        {
-            Where(x => x.Id == id);
-            Where(x => !x.IsDisabled);
-            Include(x => x.Guild);
-            Include(x => x.EmbedConfig);
-        }
+        Where(x => x.Id == id);
+        Where(x => !x.IsDisabled);
+        Include(x => x.Guild);
+        Include(x => x.EmbedConfig);
     }
 }

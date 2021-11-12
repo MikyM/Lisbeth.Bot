@@ -20,13 +20,12 @@ using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.DataAccessLayer.Repositories;
 using MikyM.Common.DataAccessLayer.Specifications.Evaluators;
 
-namespace Lisbeth.Bot.DataAccessLayer.Repositories
+namespace Lisbeth.Bot.DataAccessLayer.Repositories;
+
+public class TicketRepository : Repository<Ticket>, ITicketRepository
 {
-    public class TicketRepository : Repository<Ticket>, ITicketRepository
+    public TicketRepository(LisbethBotDbContext context, ISpecificationEvaluator evaluator) : base(context,
+        evaluator)
     {
-        public TicketRepository(LisbethBotDbContext context, ISpecificationEvaluator evaluator) : base(context,
-            evaluator)
-        {
-        }
     }
 }

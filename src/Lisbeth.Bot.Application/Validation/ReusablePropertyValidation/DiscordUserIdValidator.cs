@@ -15,67 +15,57 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using Emzi0767.Utilities;
 using FluentValidation;
 using FluentValidation.Validators;
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
+namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation;
+
+public sealed class DiscordUserIdValidator<T> : IAsyncPropertyValidator<T, ulong>
 {
-    public sealed class DiscordUserIdValidator<T> : IAsyncPropertyValidator<T, ulong>
+    private readonly DiscordClient _discord;
+    private bool _suppressMemberCheck;
+    private bool _doesGuildExist = true;
+    private object? _guildId;
+
+    public DiscordUserIdValidator(DiscordClient discord, bool suppressMemberCheck = false)
     {
-        private readonly DiscordClient _discord;
-        private readonly bool _suppressMemberCheck;
-        private bool _doesGuildExist = true;
-        private object? _guildId;
+        _discord = discord;
+        _suppressMemberCheck = suppressMemberCheck;
+    }
 
-        public DiscordUserIdValidator(DiscordClient discord, bool suppressMemberCheck = false)
-        {
-            _discord = discord;
-            _suppressMemberCheck = suppressMemberCheck;
-        }
+    public async Task<bool> IsValidAsync(ValidationContext<T> context, ulong value, CancellationToken cancellation)
+    {
+        if (_discord.CurrentApplication.Owners.Any(x => x.Id == value)) _suppressMemberCheck = true;
 
-        public async Task<bool> IsValidAsync(ValidationContext<T> context, ulong value, CancellationToken cancellation)
+        var data = context.InstanceToValidate.ToDictionary();
+        if (!_suppressMemberCheck && data.TryGetValue("GuildId", out _guildId))
         {
-            var data = context.InstanceToValidate.ToDictionary();
-            if (!_suppressMemberCheck && data.TryGetValue("GuildId", out _guildId))
+            DiscordGuild guild;
+            try
             {
-                DiscordGuild guild;
-                try
-                {
-                    guild = await _discord.GetGuildAsync((ulong)_guildId);
-                    if (guild is null)
-                    {
-                        _doesGuildExist = false;
-                        return false;
-                    }
-                }
-                catch (Exception)
+                guild = await _discord.GetGuildAsync((ulong)_guildId);
+                if (guild is null)
                 {
                     _doesGuildExist = false;
                     return false;
                 }
-
-                try
-                {
-                    var user = await guild.GetMemberAsync(value);
-                    if (user is null) return false;
-                }
-                catch (Exception)
-                {
-                    return false;
-                }
-
-                return true;
+            }
+            catch (Exception)
+            {
+                _doesGuildExist = false;
+                return false;
             }
 
             try
             {
-                var user = await _discord.GetUserAsync(value);
+                var user = await guild.GetMemberAsync(value);
                 if (user is null) return false;
             }
             catch (Exception)
@@ -86,17 +76,29 @@ namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
             return true;
         }
 
-        public string GetDefaultMessageTemplate(string errorCode)
+        try
         {
-            if (!_doesGuildExist)
-                return "'{PropertyName}' is not a valid Discord Id or a discord guild with given Id doesn't exist.";
-
-            return _guildId is not null
-                ? "'{PropertyName}' is not a valid Discord Id or a discord member with given Id doesn't exist / isn't guilds member."
-                : "'{PropertyName}' is not a valid Discord Id or a discord user with given Id doesn't exist.";
+            var user = await _discord.GetUserAsync(value);
+            if (user is null) return false;
+        }
+        catch (Exception)
+        {
+            return false;
         }
 
-
-        public string Name => "DiscordIdPropertyValidator";
+        return true;
     }
+
+    public string GetDefaultMessageTemplate(string errorCode)
+    {
+        if (!_doesGuildExist)
+            return "'{PropertyName}' is not a valid Discord Id or a discord guild with given Id doesn't exist.";
+
+        return _guildId is not null
+            ? "'{PropertyName}' is not a valid Discord Id or a discord member with given Id doesn't exist / isn't guilds member."
+            : "'{PropertyName}' is not a valid Discord Id or a discord user with given Id doesn't exist.";
+    }
+
+
+    public string Name => "DiscordIdPropertyValidator";
 }

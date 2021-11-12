@@ -22,32 +22,31 @@ using Hangfire;
 using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Serilog;
 
-namespace Lisbeth.Bot.API.Helpers
+namespace Lisbeth.Bot.API.Helpers;
+
+public static class RecurringJobHelper
 {
-    public static class RecurringJobHelper
+    public static List<string> JobIds { get; } = new();
+
+    public static void ScheduleAutomaticUnmute()
     {
-        public static List<string> JobIds { get; } = new();
+        RecurringJob.AddOrUpdate<IDiscordMuteService>("unmute", x => x.UnmuteCheckAsync(), Cron.Minutely,
+            TimeZoneInfo.Utc, "moderation");
+        JobIds.Add("unmute");
+    }
 
-        public static void ScheduleAutomaticUnmute()
-        {
-            RecurringJob.AddOrUpdate<IDiscordMuteService>("unmute", x => x.UnmuteCheckAsync(), Cron.Minutely,
-                TimeZoneInfo.Utc, "moderation");
-            JobIds.Add("unmute");
-        }
+    public static void ScheduleAutomaticUnban()
+    {
+        RecurringJob.AddOrUpdate<IDiscordBanService>("unban", x => x.UnbanCheckAsync(), Cron.Minutely,
+            TimeZoneInfo.Utc, "moderation");
+        JobIds.Add("unban");
+    }
 
-        public static void ScheduleAutomaticUnban()
-        {
-            RecurringJob.AddOrUpdate<IDiscordBanService>("unban", x => x.UnbanCheckAsync(), Cron.Minutely,
-                TimeZoneInfo.Utc, "moderation");
-            JobIds.Add("unban");
-        }
-
-        public static async Task ScheduleAllDefinedAfterDelayAsync()
-        {
-            await Task.Delay(10000);
-            ScheduleAutomaticUnban();
-            ScheduleAutomaticUnmute();
-            Log.Logger.Information("Recurring jobs scheduled.");
-        }
+    public static async Task ScheduleAllDefinedAfterDelayAsync()
+    {
+        await Task.Delay(10000);
+        ScheduleAutomaticUnban();
+        ScheduleAutomaticUnmute();
+        Log.Logger.Information("Recurring jobs scheduled.");
     }
 }

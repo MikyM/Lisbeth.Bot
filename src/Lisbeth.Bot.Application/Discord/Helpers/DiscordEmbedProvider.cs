@@ -23,81 +23,80 @@ using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.Application.Results;
 using MikyM.Discord.Interfaces;
 
-namespace Lisbeth.Bot.Application.Discord.Helpers
+namespace Lisbeth.Bot.Application.Discord.Helpers;
+
+public interface IDiscordEmbedProvider
 {
-    public interface IDiscordEmbedProvider
+    DiscordEmbedBuilder ConfigureEmbed(EmbedConfig config);
+    DiscordEmbed GetUnsuccessfulResultEmbed(IResult result);
+    DiscordEmbed GetUnsuccessfulResultEmbed(IResultError error);
+    DiscordEmbed GetUnsuccessfulResultEmbed(string error);
+}
+
+[UsedImplicitly]
+public class DiscordEmbedProvider : IDiscordEmbedProvider
+{
+    private readonly IDiscordService _discord;
+
+    public DiscordEmbedProvider(IDiscordService discord)
     {
-        DiscordEmbedBuilder ConfigureEmbed(EmbedConfig config);
-        DiscordEmbed GetUnsuccessfulResultEmbed(IResult result);
-        DiscordEmbed GetUnsuccessfulResultEmbed(IResultError error);
-        DiscordEmbed GetUnsuccessfulResultEmbed(string error);
+        _discord = discord;
     }
 
-    [UsedImplicitly]
-    public class DiscordEmbedProvider : IDiscordEmbedProvider
+    public DiscordEmbedBuilder ConfigureEmbed(EmbedConfig config)
     {
-        private readonly IDiscordService _discord;
+        if (config is null) throw new ArgumentNullException(nameof(config));
 
-        public DiscordEmbedProvider(IDiscordService discord)
-        {
-            _discord = discord;
-        }
+        var builder = new DiscordEmbedBuilder();
 
-        public DiscordEmbedBuilder ConfigureEmbed(EmbedConfig config)
-        {
-            if (config is null) throw new ArgumentNullException(nameof(config));
+        if (!string.IsNullOrWhiteSpace(config.Author)) builder.WithAuthor(config.Author);
+        else if (!string.IsNullOrWhiteSpace(config.Author) && !string.IsNullOrWhiteSpace(config.AuthorImageUrl))
+            builder.WithAuthor(config.Author, null, config.AuthorImageUrl);
 
-            var builder = new DiscordEmbedBuilder();
+        if (!string.IsNullOrWhiteSpace(config.Footer)) builder.WithFooter(config.Footer);
+        else if (!string.IsNullOrWhiteSpace(config.Footer) && !string.IsNullOrWhiteSpace(config.FooterImageUrl))
+            builder.WithFooter(config.Footer, config.FooterImageUrl);
 
-            if (!string.IsNullOrWhiteSpace(config.Author)) builder.WithAuthor(config.Author);
-            else if (!string.IsNullOrWhiteSpace(config.Author) && !string.IsNullOrWhiteSpace(config.AuthorImageUrl))
-                builder.WithAuthor(config.Author, null, config.AuthorImageUrl);
+        if (!string.IsNullOrWhiteSpace(config.Description)) builder.WithDescription(config.Description);
 
-            if (!string.IsNullOrWhiteSpace(config.Footer)) builder.WithFooter(config.Footer);
-            else if (!string.IsNullOrWhiteSpace(config.Footer) && !string.IsNullOrWhiteSpace(config.FooterImageUrl))
-                builder.WithFooter(config.Footer, config.FooterImageUrl);
+        if (!string.IsNullOrWhiteSpace(config.ImageUrl)) builder.WithImageUrl(config.ImageUrl);
 
-            if (!string.IsNullOrWhiteSpace(config.Description)) builder.WithDescription(config.Description);
+        if (!string.IsNullOrWhiteSpace(config.HexColor)) builder.WithColor(new DiscordColor(config.HexColor));
 
-            if (!string.IsNullOrWhiteSpace(config.ImageUrl)) builder.WithImageUrl(config.ImageUrl);
+        if (config.Timestamp is not null) builder.WithTimestamp(config.Timestamp);
 
-            if (!string.IsNullOrWhiteSpace(config.HexColor)) builder.WithColor(new DiscordColor(config.HexColor));
+        if (!string.IsNullOrWhiteSpace(config.Title)) builder.WithTitle(config.Title);
 
-            if (config.Timestamp is not null) builder.WithTimestamp(config.Timestamp);
+        if (!string.IsNullOrWhiteSpace(config.Thumbnail))
+            builder.WithThumbnail(config.Thumbnail, config.ThumbnailHeight ?? throw new InvalidOperationException(),
+                config.ThumbnailWidth ?? throw new InvalidOperationException());
 
-            if (!string.IsNullOrWhiteSpace(config.Title)) builder.WithTitle(config.Title);
+        if (config.Fields is null || config.Fields.Count == 0) return builder;
 
-            if (!string.IsNullOrWhiteSpace(config.Thumbnail))
-                builder.WithThumbnail(config.Thumbnail, config.ThumbnailHeight ?? throw new InvalidOperationException(),
-                    config.ThumbnailWidth ?? throw new InvalidOperationException());
+        foreach (var field in config.Fields.Where(field =>
+                     !string.IsNullOrWhiteSpace(field.Text) && !string.IsNullOrWhiteSpace(field.Title)))
+            builder.AddField(field.Title, field.Text);
 
-            if (config.Fields is null || config.Fields.Count == 0) return builder;
+        return builder;
+    }
 
-            foreach (var field in config.Fields.Where(field =>
-                         !string.IsNullOrWhiteSpace(field.Text) && !string.IsNullOrWhiteSpace(field.Title)))
-                builder.AddField(field.Title, field.Text);
+    public DiscordEmbed GetUnsuccessfulResultEmbed(IResult result)
+    {
+        return GetUnsuccessfulResultEmbed(result.Error ??
+                                          throw new InvalidOperationException(
+                                              "Given result does not contain an error"));
+    }
 
-            return builder;
-        }
+    public DiscordEmbed GetUnsuccessfulResultEmbed(IResultError error)
+    {
+        return GetUnsuccessfulResultEmbed(error.Message);
+    }
 
-        public DiscordEmbed GetUnsuccessfulResultEmbed(IResult result)
-        {
-            return GetUnsuccessfulResultEmbed(result.Error ??
-                                              throw new InvalidOperationException(
-                                                  "Given result does not contain an error"));
-        }
-
-        public DiscordEmbed GetUnsuccessfulResultEmbed(IResultError error)
-        {
-            return GetUnsuccessfulResultEmbed(error.Message);
-        }
-
-        public DiscordEmbed GetUnsuccessfulResultEmbed(string error)
-        {
-            return new DiscordEmbedBuilder().WithColor(new DiscordColor(170, 1, 20))
-                .WithAuthor($"{DiscordEmoji.FromName(_discord.Client, ":x:")} Operation errored")
-                .AddField("Message", error)
-                .Build();
-        }
+    public DiscordEmbed GetUnsuccessfulResultEmbed(string error)
+    {
+        return new DiscordEmbedBuilder().WithColor(new DiscordColor(170, 1, 20))
+            .WithAuthor($"{DiscordEmoji.FromName(_discord.Client, ":x:")} Operation errored")
+            .AddField("Message", error)
+            .Build();
     }
 }

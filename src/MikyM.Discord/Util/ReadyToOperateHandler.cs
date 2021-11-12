@@ -20,54 +20,53 @@ using DSharpPlus;
 using DSharpPlus.EventArgs;
 using MikyM.Discord.Events;
 
-namespace MikyM.Discord.Util
+namespace MikyM.Discord.Util;
+
+public class ReadyToOperateHandler : IDiscordGuildEventsSubscriber
 {
-    public class ReadyToOperateHandler : IDiscordGuildEventsSubscriber
+    public Task DiscordOnGuildCreated(DiscordClient sender, GuildCreateEventArgs args)
     {
-        public Task DiscordOnGuildCreated(DiscordClient sender, GuildCreateEventArgs args)
-        {
-            return Task.CompletedTask;
-        }
+        return Task.CompletedTask;
+    }
 
-        public Task DiscordOnGuildAvailable(DiscordClient sender, GuildCreateEventArgs args)
-        {
-            return Task.CompletedTask;
-        }
+    public Task DiscordOnGuildAvailable(DiscordClient sender, GuildCreateEventArgs args)
+    {
+        return Task.CompletedTask;
+    }
 
-        public Task DiscordOnGuildUpdated(DiscordClient sender, GuildUpdateEventArgs args)
-        {
-            return Task.CompletedTask;
-        }
+    public Task DiscordOnGuildUpdated(DiscordClient sender, GuildUpdateEventArgs args)
+    {
+        return Task.CompletedTask;
+    }
 
-        public Task DiscordOnGuildDeleted(DiscordClient sender, GuildDeleteEventArgs args)
-        {
-            return Task.CompletedTask;
-        }
+    public Task DiscordOnGuildDeleted(DiscordClient sender, GuildDeleteEventArgs args)
+    {
+        return Task.CompletedTask;
+    }
 
-        public Task DiscordOnGuildUnavailable(DiscordClient sender, GuildDeleteEventArgs args)
-        {
-            return Task.CompletedTask;
-        }
+    public Task DiscordOnGuildUnavailable(DiscordClient sender, GuildDeleteEventArgs args)
+    {
+        return Task.CompletedTask;
+    }
 
-        public async Task DiscordOnGuildDownloadCompleted(DiscordClient sender, GuildDownloadCompletedEventArgs args)
-        {
-            if (!WaitForDownloadCompletionHelper.ReadyToOperateEvent.IsSet)
-                await WaitForDownloadCompletionHelper.ReadyToOperateEvent.SetAsync();
-        }
+    public async Task DiscordOnGuildDownloadCompleted(DiscordClient sender, GuildDownloadCompletedEventArgs args)
+    {
+        if (!WaitForDownloadCompletionHelper.ReadyToOperateEvent.IsSet)
+            await WaitForDownloadCompletionHelper.ReadyToOperateEvent.SetAsync();
+    }
 
-        public Task DiscordOnGuildEmojisUpdated(DiscordClient sender, GuildEmojisUpdateEventArgs args)
-        {
-            return Task.CompletedTask;
-        }
+    public Task DiscordOnGuildEmojisUpdated(DiscordClient sender, GuildEmojisUpdateEventArgs args)
+    {
+        return Task.CompletedTask;
+    }
 
-        public Task DiscordOnGuildStickersUpdated(DiscordClient sender, GuildStickersUpdateEventArgs args)
-        {
-            return Task.CompletedTask;
-        }
+    public Task DiscordOnGuildStickersUpdated(DiscordClient sender, GuildStickersUpdateEventArgs args)
+    {
+        return Task.CompletedTask;
+    }
 
-        public Task DiscordOnGuildIntegrationsUpdated(DiscordClient sender, GuildIntegrationsUpdateEventArgs args)
-        {
-            return Task.CompletedTask;
-        }
+    public Task DiscordOnGuildIntegrationsUpdated(DiscordClient sender, GuildIntegrationsUpdateEventArgs args)
+    {
+        return Task.CompletedTask;
     }
 }

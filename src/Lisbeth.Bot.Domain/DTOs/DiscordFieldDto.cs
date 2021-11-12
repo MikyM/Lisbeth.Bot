@@ -15,11 +15,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Lisbeth.Bot.Domain.DTOs
+namespace Lisbeth.Bot.Domain.DTOs;
+
+public class DiscordFieldDto
 {
-    public class DiscordFieldDto
-    {
-        public string? Title { get; set; }
-        public string? Text { get; set; }
-    }
+    public string? Title { get; set; }
+    public string? Text { get; set; }
 }

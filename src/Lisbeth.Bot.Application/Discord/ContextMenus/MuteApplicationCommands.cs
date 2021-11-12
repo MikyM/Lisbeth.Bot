@@ -28,144 +28,143 @@ using Lisbeth.Bot.Application.Validation.Mute;
 using Lisbeth.Bot.Domain.DTOs.Request.Mute;
 
 // ReSharper disable once CheckNamespace
-namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
+namespace Lisbeth.Bot.Application.Discord.ApplicationCommands;
+
+// menus for mutes
+public partial class MuteApplicationCommands
 {
-    // menus for mutes
-    public partial class MuteApplicationCommands
+    #region user menus
+
+    [UsedImplicitly]
+    [SlashRequireUserPermissions(Permissions.BanMembers)]
+    [ContextMenu(ApplicationCommandType.UserContextMenu, "Mute user")]
+    public async Task MuteUserMenu(ContextMenuContext ctx)
     {
-        #region user menus
+        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
-        [UsedImplicitly]
-        [SlashRequireUserPermissions(Permissions.BanMembers)]
-        [ContextMenu(ApplicationCommandType.UserContextMenu, "Mute user")]
-        public async Task MuteUserMenu(ContextMenuContext ctx)
-        {
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+        var muteReq = new MuteReqDto(ctx.TargetUser.Id, ctx.Guild.Id, ctx.User.Id, DateTime.MaxValue,
+            "No reason provided - muted via user context menu");
+        var muteReqValidator = new MuteReqValidator(ctx.Client);
+        await muteReqValidator.ValidateAndThrowAsync(muteReq);
 
-            var muteReq = new MuteReqDto(ctx.TargetUser.Id, ctx.Guild.Id, ctx.User.Id, DateTime.MaxValue,
-                "No reason provided - muted via user context menu");
-            var muteReqValidator = new MuteReqValidator(ctx.Client);
-            await muteReqValidator.ValidateAndThrowAsync(muteReq);
+        var result = await DiscordMuteService!.MuteAsync(ctx, muteReq);
 
-            var result = await DiscordMuteService!.MuteAsync(ctx, muteReq);
-
-            if (result.IsDefined())
-                await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
-                    .AddEmbed(result.Entity)
-                    .AsEphemeral(true));
-            else
-                await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
-                    .AddEmbed(GetUnsuccessfulResultEmbed(result, ctx.Client))
-                    .AsEphemeral(true));
-        }
-
-        [UsedImplicitly]
-        [SlashRequireUserPermissions(Permissions.BanMembers)]
-        [ContextMenu(ApplicationCommandType.UserContextMenu, "Unmute user")]
-        public async Task UnmuteUserMenu(ContextMenuContext ctx)
-        {
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
-
-            var muteDisableReq = new MuteDisableReqDto(ctx.TargetUser.Id, ctx.Guild.Id, ctx.User.Id);
-            var muteDisableReqValidator = new MuteDisableReqValidator(ctx.Client);
-            await muteDisableReqValidator.ValidateAndThrowAsync(muteDisableReq);
-
-            var result = await DiscordMuteService!.UnmuteAsync(ctx, muteDisableReq);
-
-            if (result.IsDefined())
-                await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
-                    .AddEmbed(result.Entity)
-                    .AsEphemeral(true));
-            else
-                await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
-                    .AddEmbed(GetUnsuccessfulResultEmbed(result, ctx.Client))
-                    .AsEphemeral(true));
-        }
-
-        [UsedImplicitly]
-        [SlashRequireUserPermissions(Permissions.BanMembers)]
-        [ContextMenu(ApplicationCommandType.UserContextMenu, "Get mute info")]
-        public async Task GetMuteUserMenu(ContextMenuContext ctx)
-        {
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
-
-            var muteGetReq = new MuteGetReqDto(ctx.User.Id, null, ctx.TargetUser.Id, ctx.Guild.Id);
-            var muteGetReqValidator = new MuteGetReqValidator(ctx.Client);
-            await muteGetReqValidator.ValidateAndThrowAsync(muteGetReq);
-
-            var result = await DiscordMuteService!.GetSpecificUserGuildMuteAsync(ctx, muteGetReq);
-
-            if (result.IsDefined())
-                await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
-                    .AddEmbed(result.Entity)
-                    .AsEphemeral(true));
-            else
-                await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
-                    .AddEmbed(GetUnsuccessfulResultEmbed(result, ctx.Client))
-                    .AsEphemeral(true));
-        }
-
-        #endregion
-
-        #region message menus
-
-        [UsedImplicitly]
-        [SlashRequireUserPermissions(Permissions.BanMembers)]
-        [ContextMenu(ApplicationCommandType.MessageContextMenu, "Mute author")]
-        public async Task MuteAuthorMessageMenu(ContextMenuContext ctx)
-        {
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
-
-            var muteReq = new MuteReqDto(ctx.TargetMessage.Author.Id, ctx.Guild.Id, ctx.User.Id, DateTime.MaxValue,
-                "No reason provided - muted via user context menu");
-            var muteReqValidator = new MuteReqValidator(ctx.Client);
-            await muteReqValidator.ValidateAndThrowAsync(muteReq);
-
-            var result = await DiscordMuteService!.MuteAsync(ctx, muteReq);
-
-            if (result.IsDefined())
-                await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
-                    .AddEmbed(result.Entity)
-                    .AsEphemeral(true));
-            else
-                await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
-                    .AddEmbed(GetUnsuccessfulResultEmbed(result, ctx.Client))
-                    .AsEphemeral(true));
-        }
-
-        [UsedImplicitly]
-        [SlashRequireUserPermissions(Permissions.BanMembers)]
-        [ContextMenu(ApplicationCommandType.MessageContextMenu, "Mute author and prune")]
-        public async Task MuteAuthorWithWipeMessageMenu(ContextMenuContext ctx)
-        {
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
-
-            var muteReq = new MuteReqDto(ctx.TargetMessage.Author.Id, ctx.Guild.Id, ctx.User.Id, DateTime.MaxValue,
-                "No reason provided - muted via user context menu");
-            var muteReqValidator = new MuteReqValidator(ctx.Client);
-            await muteReqValidator.ValidateAndThrowAsync(muteReq);
-
-            var result = await DiscordMuteService!.MuteAsync(ctx, muteReq);
-
-            //await _discordMessageService.PruneAsync()
-
-            var msgs = await ctx.Channel.GetMessagesAsync();
-
-            var msgsToDel = msgs.Where(x => x.Author.Id == ctx.TargetMessage.Author.Id)
-                .OrderByDescending(x => x.Timestamp).Take(10);
-
-            await ctx.Channel.DeleteMessagesAsync(msgsToDel);
-
-            if (result.IsDefined())
-                await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
-                    .AddEmbed(result.Entity)
-                    .AsEphemeral(true));
-            else
-                await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
-                    .AddEmbed(GetUnsuccessfulResultEmbed(result, ctx.Client))
-                    .AsEphemeral(true));
-        }
-
-        #endregion
+        if (result.IsDefined())
+            await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                .AddEmbed(result.Entity)
+                .AsEphemeral(true));
+        else
+            await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                .AddEmbed(GetUnsuccessfulResultEmbed(result, ctx.Client))
+                .AsEphemeral(true));
     }
+
+    [UsedImplicitly]
+    [SlashRequireUserPermissions(Permissions.BanMembers)]
+    [ContextMenu(ApplicationCommandType.UserContextMenu, "Unmute user")]
+    public async Task UnmuteUserMenu(ContextMenuContext ctx)
+    {
+        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+
+        var muteDisableReq = new MuteDisableReqDto(ctx.TargetUser.Id, ctx.Guild.Id, ctx.User.Id);
+        var muteDisableReqValidator = new MuteDisableReqValidator(ctx.Client);
+        await muteDisableReqValidator.ValidateAndThrowAsync(muteDisableReq);
+
+        var result = await DiscordMuteService!.UnmuteAsync(ctx, muteDisableReq);
+
+        if (result.IsDefined())
+            await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                .AddEmbed(result.Entity)
+                .AsEphemeral(true));
+        else
+            await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                .AddEmbed(GetUnsuccessfulResultEmbed(result, ctx.Client))
+                .AsEphemeral(true));
+    }
+
+    [UsedImplicitly]
+    [SlashRequireUserPermissions(Permissions.BanMembers)]
+    [ContextMenu(ApplicationCommandType.UserContextMenu, "Get mute info")]
+    public async Task GetMuteUserMenu(ContextMenuContext ctx)
+    {
+        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+
+        var muteGetReq = new MuteGetReqDto(ctx.User.Id, null, ctx.TargetUser.Id, ctx.Guild.Id);
+        var muteGetReqValidator = new MuteGetReqValidator(ctx.Client);
+        await muteGetReqValidator.ValidateAndThrowAsync(muteGetReq);
+
+        var result = await DiscordMuteService!.GetSpecificUserGuildMuteAsync(ctx, muteGetReq);
+
+        if (result.IsDefined())
+            await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                .AddEmbed(result.Entity)
+                .AsEphemeral(true));
+        else
+            await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                .AddEmbed(GetUnsuccessfulResultEmbed(result, ctx.Client))
+                .AsEphemeral(true));
+    }
+
+    #endregion
+
+    #region message menus
+
+    [UsedImplicitly]
+    [SlashRequireUserPermissions(Permissions.BanMembers)]
+    [ContextMenu(ApplicationCommandType.MessageContextMenu, "Mute author")]
+    public async Task MuteAuthorMessageMenu(ContextMenuContext ctx)
+    {
+        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+
+        var muteReq = new MuteReqDto(ctx.TargetMessage.Author.Id, ctx.Guild.Id, ctx.User.Id, DateTime.MaxValue,
+            "No reason provided - muted via user context menu");
+        var muteReqValidator = new MuteReqValidator(ctx.Client);
+        await muteReqValidator.ValidateAndThrowAsync(muteReq);
+
+        var result = await DiscordMuteService!.MuteAsync(ctx, muteReq);
+
+        if (result.IsDefined())
+            await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                .AddEmbed(result.Entity)
+                .AsEphemeral(true));
+        else
+            await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                .AddEmbed(GetUnsuccessfulResultEmbed(result, ctx.Client))
+                .AsEphemeral(true));
+    }
+
+    [UsedImplicitly]
+    [SlashRequireUserPermissions(Permissions.BanMembers)]
+    [ContextMenu(ApplicationCommandType.MessageContextMenu, "Mute author and prune")]
+    public async Task MuteAuthorWithWipeMessageMenu(ContextMenuContext ctx)
+    {
+        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+
+        var muteReq = new MuteReqDto(ctx.TargetMessage.Author.Id, ctx.Guild.Id, ctx.User.Id, DateTime.MaxValue,
+            "No reason provided - muted via user context menu");
+        var muteReqValidator = new MuteReqValidator(ctx.Client);
+        await muteReqValidator.ValidateAndThrowAsync(muteReq);
+
+        var result = await DiscordMuteService!.MuteAsync(ctx, muteReq);
+
+        //await _discordMessageService.PruneAsync()
+
+        var msgs = await ctx.Channel.GetMessagesAsync();
+
+        var msgsToDel = msgs.Where(x => x.Author.Id == ctx.TargetMessage.Author.Id)
+            .OrderByDescending(x => x.Timestamp).Take(10);
+
+        await ctx.Channel.DeleteMessagesAsync(msgsToDel);
+
+        if (result.IsDefined())
+            await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                .AddEmbed(result.Entity)
+                .AsEphemeral(true));
+        else
+            await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                .AddEmbed(GetUnsuccessfulResultEmbed(result, ctx.Client))
+                .AsEphemeral(true));
+    }
+
+    #endregion
 }

@@ -20,27 +20,26 @@ using System.Linq.Expressions;
 using Hangfire;
 using JetBrains.Annotations;
 
-namespace Lisbeth.Bot.Application.Hangfire
+namespace Lisbeth.Bot.Application.Hangfire;
+
+[UsedImplicitly]
+public static class HangfireExtensions
 {
-    [UsedImplicitly]
-    public static class HangfireExtensions
+    public static string Schedule([global::Hangfire.Annotations.NotNull] this IBackgroundJobClient client,
+        [global::Hangfire.Annotations.NotNull] [global::Hangfire.Annotations.InstantHandle]
+        Expression<Action> methodCall, DateTime enqueueAt, string queue)
     {
-        public static string Schedule([global::Hangfire.Annotations.NotNull] this IBackgroundJobClient client,
-            [global::Hangfire.Annotations.NotNull] [global::Hangfire.Annotations.InstantHandle]
-            Expression<Action> methodCall, DateTime enqueueAt, string queue)
-        {
-            if (client is null) throw new ArgumentNullException(nameof(client));
+        if (client is null) throw new ArgumentNullException(nameof(client));
 
-            return client.Create(methodCall, new ScheduledEnqueuedState(enqueueAt, queue));
-        }
+        return client.Create(methodCall, new ScheduledEnqueuedState(enqueueAt, queue));
+    }
 
-        public static string Schedule<T>([global::Hangfire.Annotations.NotNull] this IBackgroundJobClient client,
-            [global::Hangfire.Annotations.NotNull] [global::Hangfire.Annotations.InstantHandle]
-            Expression<Action<T>> methodCall, DateTime enqueueAt, string queue)
-        {
-            if (client is null) throw new ArgumentNullException(nameof(client));
+    public static string Schedule<T>([global::Hangfire.Annotations.NotNull] this IBackgroundJobClient client,
+        [global::Hangfire.Annotations.NotNull] [global::Hangfire.Annotations.InstantHandle]
+        Expression<Action<T>> methodCall, DateTime enqueueAt, string queue)
+    {
+        if (client is null) throw new ArgumentNullException(nameof(client));
 
-            return client.Create(methodCall, new ScheduledEnqueuedState(enqueueAt, queue));
-        }
+        return client.Create(methodCall, new ScheduledEnqueuedState(enqueueAt, queue));
     }
 }

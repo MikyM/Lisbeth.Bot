@@ -21,35 +21,34 @@ using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.ChatExport.Models;
 
-namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders
+namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders;
+
+public class ImagesHtmlBuilder : IAsyncHtmlBuilder
 {
-    public class ImagesHtmlBuilder : IAsyncHtmlBuilder
+    public ImagesHtmlBuilder(IReadOnlyList<DiscordAttachment> images)
     {
-        public ImagesHtmlBuilder(IReadOnlyList<DiscordAttachment> images)
+        Images ??= images ?? throw new ArgumentNullException(nameof(images));
+    }
+
+    public IReadOnlyList<DiscordAttachment> Images { get; private set; }
+
+    public async Task<string> BuildAsync()
+    {
+        if (Images.Count == 0 || Images is null) return "";
+        string imagesHtml = "";
+        foreach (var attachment in Images)
         {
-            Images ??= images ?? throw new ArgumentNullException(nameof(images));
+            HtmlImage image = new HtmlImage(attachment.Url);
+            imagesHtml += await image.BuildAsync();
         }
 
-        public IReadOnlyList<DiscordAttachment> Images { get; private set; }
+        return $"<div class=\"images-wrapper\">{imagesHtml}</div>";
+    }
 
-        public async Task<string> BuildAsync()
-        {
-            if (Images.Count == 0 || Images is null) return "";
-            string imagesHtml = "";
-            foreach (var attachment in Images)
-            {
-                HtmlImage image = new HtmlImage(attachment.Url);
-                imagesHtml += await image.BuildAsync();
-            }
+    public ImagesHtmlBuilder WithImages(IReadOnlyList<DiscordAttachment> images)
+    {
+        Images ??= images ?? throw new ArgumentNullException(nameof(images));
 
-            return $"<div class=\"images-wrapper\">{imagesHtml}</div>";
-        }
-
-        public ImagesHtmlBuilder WithImages(IReadOnlyList<DiscordAttachment> images)
-        {
-            Images ??= images ?? throw new ArgumentNullException(nameof(images));
-
-            return this;
-        }
+        return this;
     }
 }

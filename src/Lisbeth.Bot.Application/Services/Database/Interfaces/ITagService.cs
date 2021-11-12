@@ -22,12 +22,11 @@ using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.Application.Interfaces;
 using MikyM.Common.Application.Results;
 
-namespace Lisbeth.Bot.Application.Services.Database.Interfaces
+namespace Lisbeth.Bot.Application.Services.Database.Interfaces;
+
+public interface ITagService : ICrudService<Tag, LisbethBotDbContext>
 {
-    public interface ITagService : ICrudService<Tag, LisbethBotDbContext>
-    {
-        Task<Result> AddAsync(TagAddReqDto req, bool shouldSave = false);
-        Task<Result> UpdateTagEmbedConfigAsync(TagEditReqDto req, bool shouldSave = false);
-        Task<Result> DisableAsync(TagDisableReqDto req, bool shouldSave = false);
-    }
+    Task<Result> AddAsync(TagAddReqDto req, bool shouldSave = false);
+    Task<Result> UpdateTagEmbedConfigAsync(TagEditReqDto req, bool shouldSave = false);
+    Task<Result> DisableAsync(TagDisableReqDto req, bool shouldSave = false);
 }

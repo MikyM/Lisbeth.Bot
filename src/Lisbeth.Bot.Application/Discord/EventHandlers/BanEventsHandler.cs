@@ -23,30 +23,29 @@ using Lisbeth.Bot.Application.Helpers;
 using Lisbeth.Bot.Application.Services.Interfaces;
 using MikyM.Discord.Events;
 
-namespace Lisbeth.Bot.Application.Discord.EventHandlers
+namespace Lisbeth.Bot.Application.Discord.EventHandlers;
+
+[UsedImplicitly]
+public class BanEventsHandler : IDiscordGuildBanEventsSubscriber
 {
-    [UsedImplicitly]
-    public class BanEventsHandler : IDiscordGuildBanEventsSubscriber
+    private readonly IAsyncExecutor _asyncExecutor;
+
+    public BanEventsHandler(IAsyncExecutor asyncExecutor)
     {
-        private readonly IAsyncExecutor _asyncExecutor;
+        _asyncExecutor = asyncExecutor;
+    }
 
-        public BanEventsHandler(IAsyncExecutor asyncExecutor)
-        {
-            _asyncExecutor = asyncExecutor;
-        }
+    public Task DiscordOnGuildBanAdded(DiscordClient sender, GuildBanAddEventArgs args)
+    {
+        _ = _asyncExecutor.ExecuteAsync<IBanCheckService>(x =>
+            x.CheckForNonBotBanAsync(args.Member.Id, args.Guild.Id, sender.CurrentUser.Id));
+        return Task.CompletedTask;
+    }
 
-        public Task DiscordOnGuildBanAdded(DiscordClient sender, GuildBanAddEventArgs args)
-        {
-            _ = _asyncExecutor.ExecuteAsync<IBanCheckService>(x =>
-                x.CheckForNonBotBanAsync(args.Member.Id, args.Guild.Id, sender.CurrentUser.Id));
-            return Task.CompletedTask;
-        }
-
-        public Task DiscordOnGuildBanRemoved(DiscordClient sender, GuildBanRemoveEventArgs args)
-        {
-            _ = _asyncExecutor.ExecuteAsync<IBanCheckService>(x =>
-                x.CheckForNonBotUnbanAsync(args.Member.Id, args.Guild.Id, sender.CurrentUser.Id));
-            return Task.CompletedTask;
-        }
+    public Task DiscordOnGuildBanRemoved(DiscordClient sender, GuildBanRemoveEventArgs args)
+    {
+        _ = _asyncExecutor.ExecuteAsync<IBanCheckService>(x =>
+            x.CheckForNonBotUnbanAsync(args.Member.Id, args.Guild.Id, sender.CurrentUser.Id));
+        return Task.CompletedTask;
     }
 }

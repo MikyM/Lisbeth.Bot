@@ -18,9 +18,8 @@
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.DataAccessLayer.Repositories;
 
-namespace Lisbeth.Bot.DataAccessLayer.Repositories.Interfaces
+namespace Lisbeth.Bot.DataAccessLayer.Repositories.Interfaces;
+
+public interface IEmbedConfigRepository : IRepository<EmbedConfig>
 {
-    public interface IEmbedConfigRepository : IRepository<EmbedConfig>
-    {
-    }
 }

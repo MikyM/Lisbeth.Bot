@@ -20,34 +20,33 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using MikyM.Common.DataAccessLayer.Specifications.Helpers;
 
-namespace MikyM.Common.DataAccessLayer.Specifications.Builders
+namespace MikyM.Common.DataAccessLayer.Specifications.Builders;
+
+public static class OrderedBuilderExtensions
 {
-    public static class OrderedBuilderExtensions
+    public static IOrderedSpecificationBuilder<T> ThenBy<T>(
+        this IOrderedSpecificationBuilder<T> orderedBuilder,
+        Expression<Func<T, object?>> orderExpression) where T : class
     {
-        public static IOrderedSpecificationBuilder<T> ThenBy<T>(
-            this IOrderedSpecificationBuilder<T> orderedBuilder,
-            Expression<Func<T, object?>> orderExpression) where T : class
-        {
-            orderedBuilder.Specification.OrderExpressions ??=
-                new List<(Expression<Func<T, object>> KeySelector, OrderTypeEnum OrderType)>();
-            ((List<(Expression<Func<T, object?>> OrderExpression, OrderTypeEnum OrderType)>) orderedBuilder
-                    .Specification.OrderExpressions)
-                .Add((orderExpression, OrderTypeEnum.ThenBy));
+        orderedBuilder.Specification.OrderExpressions ??=
+            new List<(Expression<Func<T, object>> KeySelector, OrderTypeEnum OrderType)>();
+        ((List<(Expression<Func<T, object?>> OrderExpression, OrderTypeEnum OrderType)>) orderedBuilder
+                .Specification.OrderExpressions)
+            .Add((orderExpression, OrderTypeEnum.ThenBy));
 
-            return orderedBuilder;
-        }
+        return orderedBuilder;
+    }
 
-        public static IOrderedSpecificationBuilder<T> ThenByDescending<T>(
-            this IOrderedSpecificationBuilder<T> orderedBuilder,
-            Expression<Func<T, object?>> orderExpression) where T : class
-        {
-            orderedBuilder.Specification.OrderExpressions ??=
-                new List<(Expression<Func<T, object>> KeySelector, OrderTypeEnum OrderType)>();
-            ((List<(Expression<Func<T, object?>> OrderExpression, OrderTypeEnum OrderType)>) orderedBuilder
-                    .Specification.OrderExpressions)
-                .Add((orderExpression, OrderTypeEnum.ThenByDescending));
+    public static IOrderedSpecificationBuilder<T> ThenByDescending<T>(
+        this IOrderedSpecificationBuilder<T> orderedBuilder,
+        Expression<Func<T, object?>> orderExpression) where T : class
+    {
+        orderedBuilder.Specification.OrderExpressions ??=
+            new List<(Expression<Func<T, object>> KeySelector, OrderTypeEnum OrderType)>();
+        ((List<(Expression<Func<T, object?>> OrderExpression, OrderTypeEnum OrderType)>) orderedBuilder
+                .Specification.OrderExpressions)
+            .Add((orderExpression, OrderTypeEnum.ThenByDescending));
 
-            return orderedBuilder;
-        }
+        return orderedBuilder;
     }
 }

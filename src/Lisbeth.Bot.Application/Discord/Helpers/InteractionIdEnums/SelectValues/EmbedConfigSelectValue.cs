@@ -15,19 +15,18 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.SelectValues
+namespace Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.SelectValues;
+
+public enum EmbedConfigSelectValue
 {
-    public enum EmbedConfigSelectValue
-    {
-        EmbedConfigSetAuthorValue,
-        EmbedConfigSetFooterValue,
-        EmbedConfigSetDescValue,
-        EmbedConfigSetFieldValue,
-        EmbedConfigDeleteFieldValue,
-        EmbedConfigSetImageValue,
-        EmbedConfigSetColorValue,
-        EmbedConfigSetTitleValue,
-        EmbedConfigSetTimestampValue,
-        EmbedConfigSetThumbnailValue
-    }
+    EmbedConfigSetAuthorValue,
+    EmbedConfigSetFooterValue,
+    EmbedConfigSetDescValue,
+    EmbedConfigSetFieldValue,
+    EmbedConfigDeleteFieldValue,
+    EmbedConfigSetImageValue,
+    EmbedConfigSetColorValue,
+    EmbedConfigSetTitleValue,
+    EmbedConfigSetTimestampValue,
+    EmbedConfigSetThumbnailValue
 }

@@ -31,94 +31,93 @@ using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
 using Lisbeth.Bot.Domain.Entities;
 
-namespace Lisbeth.Bot.API
+namespace Lisbeth.Bot.API;
+
+public class AutoMapperProfile : Profile
 {
-    public class AutoMapperProfile : Profile
+    public AutoMapperProfile()
     {
-        public AutoMapperProfile()
-        {
-            CreateMap<MuteReqDto, Mute>()
-                .ForMember(dest => dest.UserId, source => source.MapFrom(x => x.TargetUserId))
-                .ForMember(dest => dest.AppliedById, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
-            CreateMap<MuteDisableReqDto, Mute>()
-                .ForMember(dest => dest.UserId, source => source.MapFrom(x => x.TargetUserId))
-                .ForMember(dest => dest.AppliedById, source => source.MapFrom(x => x.RequestedOnBehalfOfId))
-                .ForMember(dest => dest.GuildId, source => source.MapFrom(x => x.GuildId));
-            CreateMap<BanReqDto, Ban>()
-                .ForMember(dest => dest.UserId, source => source.MapFrom(x => x.TargetUserId))
-                .ForMember(dest => dest.AppliedById, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
-            CreateMap<BanDisableReqDto, Ban>()
-                .ForMember(dest => dest.UserId, source => source.MapFrom(x => x.TargetUserId))
-                .ForMember(dest => dest.AppliedById, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
-            CreateMap<PruneReqDto, Prune>()
-                .ForMember(dest => dest.UserId, source => source.MapFrom(x => x.TargetAuthorId))
-                .ForMember(dest => dest.ModeratorId, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
-            CreateMap<GuildGetReqDto, Guild>();
-            CreateMap<TicketExportReqDto, Ticket>();
-            CreateMap<TicketOpenReqDto, Ticket>()
-                .ForMember(dest => dest.UserId, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
-            CreateMap<TicketingConfig, TicketingConfig>();
-            CreateMap<ModerationConfig, ModerationConfig>();
-            CreateMap<TagAddReqDto, Tag>()
-                .ForMember(dest => dest.CreatorId, source => source.MapFrom(x => x.RequestedOnBehalfOfId))
-                .ForMember(dest => dest.LastEditById, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
-            CreateMap<EmbedConfigDto, EmbedConfig>();
-            CreateMap<TagEditReqDto, Tag>()
-                .ForMember(dest => dest.LastEditById, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
-            CreateMap<TagDisableReqDto, Tag>()
-                .ForMember(dest => dest.LastEditById, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
+        CreateMap<MuteReqDto, Mute>()
+            .ForMember(dest => dest.UserId, source => source.MapFrom(x => x.TargetUserId))
+            .ForMember(dest => dest.AppliedById, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
+        CreateMap<MuteDisableReqDto, Mute>()
+            .ForMember(dest => dest.UserId, source => source.MapFrom(x => x.TargetUserId))
+            .ForMember(dest => dest.AppliedById, source => source.MapFrom(x => x.RequestedOnBehalfOfId))
+            .ForMember(dest => dest.GuildId, source => source.MapFrom(x => x.GuildId));
+        CreateMap<BanReqDto, Ban>()
+            .ForMember(dest => dest.UserId, source => source.MapFrom(x => x.TargetUserId))
+            .ForMember(dest => dest.AppliedById, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
+        CreateMap<BanDisableReqDto, Ban>()
+            .ForMember(dest => dest.UserId, source => source.MapFrom(x => x.TargetUserId))
+            .ForMember(dest => dest.AppliedById, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
+        CreateMap<PruneReqDto, Prune>()
+            .ForMember(dest => dest.UserId, source => source.MapFrom(x => x.TargetAuthorId))
+            .ForMember(dest => dest.ModeratorId, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
+        CreateMap<GuildGetReqDto, Guild>();
+        CreateMap<TicketExportReqDto, Ticket>();
+        CreateMap<TicketOpenReqDto, Ticket>()
+            .ForMember(dest => dest.UserId, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
+        CreateMap<TicketingConfig, TicketingConfig>();
+        CreateMap<ModerationConfig, ModerationConfig>();
+        CreateMap<TagAddReqDto, Tag>()
+            .ForMember(dest => dest.CreatorId, source => source.MapFrom(x => x.RequestedOnBehalfOfId))
+            .ForMember(dest => dest.LastEditById, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
+        CreateMap<EmbedConfigDto, EmbedConfig>();
+        CreateMap<TagEditReqDto, Tag>()
+            .ForMember(dest => dest.LastEditById, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
+        CreateMap<TagDisableReqDto, Tag>()
+            .ForMember(dest => dest.LastEditById, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
 
-            CreateMap<RoleMenuOptionReqDto, RoleMenuOption>();
-            CreateMap<RoleMenuAddReqDto, RoleMenu>();
-            CreateMap<DiscordFieldDto, DiscordField>();
-            CreateMap<EmbedConfigDto, EmbedConfig>();
+        CreateMap<RoleMenuOptionReqDto, RoleMenuOption>();
+        CreateMap<RoleMenuAddReqDto, RoleMenu>();
+        CreateMap<DiscordFieldDto, DiscordField>();
+        CreateMap<EmbedConfigDto, EmbedConfig>();
 
-            CreateMap<ModerationConfigReqDto, ModerationConfig>();
-            CreateMap<ModerationConfigDisableReqDto, ModerationConfig>();
-            //CreateMap<ModerationConfigEditReqDto, ModerationConfig>();
-            CreateMap<ModerationConfigRepairReqDto, ModerationConfig>();
+        CreateMap<ModerationConfigReqDto, ModerationConfig>();
+        CreateMap<ModerationConfigDisableReqDto, ModerationConfig>();
+        //CreateMap<ModerationConfigEditReqDto, ModerationConfig>();
+        CreateMap<ModerationConfigRepairReqDto, ModerationConfig>();
 
-            CreateMap<TicketingConfigReqDto, TicketingConfig>();
-            CreateMap<TicketingConfigDisableReqDto, TicketingConfig>();
-            //CreateMap<ModerationConfigEditReqDto, ModerationConfig>();
-            CreateMap<TicketingConfigRepairReqDto, TicketingConfig>();
+        CreateMap<TicketingConfigReqDto, TicketingConfig>();
+        CreateMap<TicketingConfigDisableReqDto, TicketingConfig>();
+        //CreateMap<ModerationConfigEditReqDto, ModerationConfig>();
+        CreateMap<TicketingConfigRepairReqDto, TicketingConfig>();
 
-            CreateMap<DiscordEmbed, EmbedConfig>()
-                .ForMember(dest => dest.Author, source => source.MapFrom(x => x.Author.Name))
-                .ForMember(dest => dest.AuthorImageUrl, source => source.MapFrom(x => x.Author.IconUrl))
-                .ForMember(dest => dest.AuthorUrl, source => source.MapFrom(x => x.Author.Url))
-                .ForMember(dest => dest.Footer, source => source.MapFrom(x => x.Footer.Text))
-                .ForMember(dest => dest.FooterImageUrl, source => source.MapFrom(x => x.Footer.IconUrl))
-                .ForMember(dest => dest.Description, source => source.MapFrom(x => x.Description))
-                .ForMember(dest => dest.ImageUrl, source => source.MapFrom(x => x.Image.Url))
-                .ForMember(dest => dest.Fields,
-                    source => source.MapFrom(x =>
-                        x.Fields.Select(y => new DiscordField { Text = y.Value, Title = y.Name })))
-                .ForMember(dest => dest.Title, source => source.MapFrom(x => x.Title))
-                .ForMember(dest => dest.Timestamp, source => source.PreCondition(x => x.Timestamp.HasValue))
-                .ForMember(dest => dest.Timestamp, source => source.MapFrom(x => x.Timestamp!.Value.DateTime))
-                .ForMember(dest => dest.HexColor, source => source.PreCondition(x => x.Color.HasValue))
-                .ForMember(dest => dest.HexColor, source => source.MapFrom(x => x.Color.Value.ToString()))
-                .ForMember(dest => dest.Thumbnail, source => source.PreCondition(x => x.Thumbnail is not null))
-                .ForMember(dest => dest.Thumbnail, source => source.MapFrom(x => x.Thumbnail.Url.ToString()))
-                .ForMember(dest => dest.ThumbnailHeight, source => source.PreCondition(x => x.Thumbnail is not null))
-                .ForMember(dest => dest.ThumbnailHeight, source => source.MapFrom(x => x.Thumbnail.Height))
-                .ForMember(dest => dest.ThumbnailWidth, source => source.PreCondition(x => x.Thumbnail is not null))
-                .ForMember(dest => dest.ThumbnailWidth, source => source.MapFrom(x => x.Thumbnail.Width))
-                .ForMember(dest => dest.Id, source => source.Ignore());
+        CreateMap<DiscordEmbed, EmbedConfig>()
+            .ForMember(dest => dest.Author, source => source.MapFrom(x => x.Author.Name))
+            .ForMember(dest => dest.AuthorImageUrl, source => source.MapFrom(x => x.Author.IconUrl))
+            .ForMember(dest => dest.AuthorUrl, source => source.MapFrom(x => x.Author.Url))
+            .ForMember(dest => dest.Footer, source => source.MapFrom(x => x.Footer.Text))
+            .ForMember(dest => dest.FooterImageUrl, source => source.MapFrom(x => x.Footer.IconUrl))
+            .ForMember(dest => dest.Description, source => source.MapFrom(x => x.Description))
+            .ForMember(dest => dest.ImageUrl, source => source.MapFrom(x => x.Image.Url))
+            .ForMember(dest => dest.Fields,
+                source => source.MapFrom(x =>
+                    x.Fields.Select(y => new DiscordField { Text = y.Value, Title = y.Name })))
+            .ForMember(dest => dest.Title, source => source.MapFrom(x => x.Title))
+            .ForMember(dest => dest.Timestamp, source => source.PreCondition(x => x.Timestamp.HasValue))
+            .ForMember(dest => dest.Timestamp, source => source.MapFrom(x => x.Timestamp!.Value.DateTime))
+            .ForMember(dest => dest.HexColor, source => source.PreCondition(x => x.Color.HasValue))
+            .ForMember(dest => dest.HexColor, source => source.MapFrom(x => x.Color.Value.ToString()))
+            .ForMember(dest => dest.Thumbnail, source => source.PreCondition(x => x.Thumbnail is not null))
+            .ForMember(dest => dest.Thumbnail, source => source.MapFrom(x => x.Thumbnail.Url.ToString()))
+            .ForMember(dest => dest.ThumbnailHeight, source => source.PreCondition(x => x.Thumbnail is not null))
+            .ForMember(dest => dest.ThumbnailHeight, source => source.MapFrom(x => x.Thumbnail.Height))
+            .ForMember(dest => dest.ThumbnailWidth, source => source.PreCondition(x => x.Thumbnail is not null))
+            .ForMember(dest => dest.ThumbnailWidth, source => source.MapFrom(x => x.Thumbnail.Width))
+            .ForMember(dest => dest.Id, source => source.Ignore());
 
-            CreateMap<RoleMenuAddReqDto, RoleMenu>()
-                .ForMember(dest => dest.CreatorId, source => source.MapFrom(x => x.RequestedOnBehalfOfId))
-                .ForMember(dest => dest.LastEditById, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
-            CreateMap<RoleMenuOptionReqDto, RoleMenuOption>();
+        CreateMap<RoleMenuAddReqDto, RoleMenu>()
+            .ForMember(dest => dest.CreatorId, source => source.MapFrom(x => x.RequestedOnBehalfOfId))
+            .ForMember(dest => dest.LastEditById, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
+        CreateMap<RoleMenuOptionReqDto, RoleMenuOption>();
 
-            CreateMap<SetReminderReqDto, Reminder>()
-                .ForMember(dest => dest.CreatorId, source => source.MapFrom(x => x.RequestedOnBehalfOfId))
-                .ForMember(dest => dest.LastEditById, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
+        CreateMap<SetReminderReqDto, Reminder>()
+            .ForMember(dest => dest.CreatorId, source => source.MapFrom(x => x.RequestedOnBehalfOfId))
+            .ForMember(dest => dest.LastEditById, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
 
-            CreateMap<SetReminderReqDto, RecurringReminder>()
-                .ForMember(dest => dest.CreatorId, source => source.MapFrom(x => x.RequestedOnBehalfOfId))
-                .ForMember(dest => dest.LastEditById, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
-        }
+        CreateMap<SetReminderReqDto, RecurringReminder>()
+            .ForMember(dest => dest.CreatorId, source => source.MapFrom(x => x.RequestedOnBehalfOfId))
+            .ForMember(dest => dest.LastEditById, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
     }
 }

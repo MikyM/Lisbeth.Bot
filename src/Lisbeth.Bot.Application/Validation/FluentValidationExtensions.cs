@@ -19,15 +19,14 @@
 using System;
 using FluentValidation;
 
-namespace Lisbeth.Bot.Application.Validation
+namespace Lisbeth.Bot.Application.Validation;
+
+public static class FluentValidationExtensions
 {
-    public static class FluentValidationExtensions
+    public static IRuleBuilderOptions<T, TProperty> DependentRules<T, TProperty>(
+        this IRuleBuilderOptions<T, TProperty> currentRule,
+        Action<IRuleBuilderOptions<T, TProperty>> action)
     {
-        public static IRuleBuilderOptions<T, TProperty> DependentRules<T, TProperty>(
-            this IRuleBuilderOptions<T, TProperty> currentRule,
-            Action<IRuleBuilderOptions<T, TProperty>> action)
-        {
-            return currentRule.DependentRules(() => action(currentRule));
-        }
+        return currentRule.DependentRules(() => action(currentRule));
     }
 }

@@ -18,17 +18,16 @@
 using System.Collections.Generic;
 using Lisbeth.Bot.Domain.Entities.Base;
 
-namespace Lisbeth.Bot.Domain.Entities
-{
-    public class RecurringReminder : EmbedConfigEntity
-    {
-        public string? CronExpression { get; set; }
-        public string? HangfireId { get; set; }
-        public ulong? ChannelId { get; set; }
-        public string? Text { get; set; }
-        public List<string>? Mentions { get; set; }
-        public bool IsGuildReminder { get; set; }
+namespace Lisbeth.Bot.Domain.Entities;
 
-        public Guild? Guild { get; set; }
-    }
+public class RecurringReminder : EmbedConfigEntity
+{
+    public string? CronExpression { get; set; }
+    public string? HangfireId { get; set; }
+    public ulong? ChannelId { get; set; }
+    public string? Text { get; set; }
+    public List<string>? Mentions { get; set; }
+    public bool IsGuildReminder { get; set; }
+
+    public Guild? Guild { get; set; }
 }

@@ -15,17 +15,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Lisbeth.Bot.Domain.DTOs.Request.Guild
-{
-    public class GuildGetReqDto
-    {
-        public GuildGetReqDto(ulong? guildId, ulong? inviterId)
-        {
-            GuildId = guildId;
-            InviterId = inviterId;
-        }
+namespace Lisbeth.Bot.Domain.DTOs.Request.Guild;
 
-        public ulong? GuildId { get; set; }
-        public ulong? InviterId { get; set; }
+public class GuildGetReqDto
+{
+    public GuildGetReqDto(ulong? guildId, ulong? inviterId)
+    {
+        GuildId = guildId;
+        InviterId = inviterId;
     }
+
+    public ulong? GuildId { get; set; }
+    public ulong? InviterId { get; set; }
 }

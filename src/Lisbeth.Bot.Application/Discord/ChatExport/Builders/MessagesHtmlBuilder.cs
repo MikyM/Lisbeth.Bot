@@ -21,29 +21,28 @@ using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.ChatExport.Models;
 
-namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders
+namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders;
+
+public class MessagesHtmlBuilder : IAsyncHtmlBuilder
 {
-    public class MessagesHtmlBuilder : IAsyncHtmlBuilder
+    public MessagesHtmlBuilder(List<DiscordMessage> messages)
     {
-        public MessagesHtmlBuilder(List<DiscordMessage> messages)
+        Messages ??= messages ?? throw new ArgumentNullException(nameof(messages));
+    }
+
+    public List<DiscordMessage> Messages { get; }
+
+    public async Task<string> BuildAsync()
+    {
+        if (Messages is null || Messages.Count == 0) return "";
+        string messagesHtml = "";
+        foreach (var msg in Messages)
         {
-            Messages ??= messages ?? throw new ArgumentNullException(nameof(messages));
+            if (msg.Author.IsBot) continue;
+            HtmlMessage message = new HtmlMessage(msg);
+            messagesHtml += await message.Build();
         }
 
-        public List<DiscordMessage> Messages { get; }
-
-        public async Task<string> BuildAsync()
-        {
-            if (Messages is null || Messages.Count == 0) return "";
-            string messagesHtml = "";
-            foreach (var msg in Messages)
-            {
-                if (msg.Author.IsBot) continue;
-                HtmlMessage message = new HtmlMessage(msg);
-                messagesHtml += await message.Build();
-            }
-
-            return $"<div id=\"messages-wrapper\">{messagesHtml}</div>";
-        }
+        return $"<div id=\"messages-wrapper\">{messagesHtml}</div>";
     }
 }

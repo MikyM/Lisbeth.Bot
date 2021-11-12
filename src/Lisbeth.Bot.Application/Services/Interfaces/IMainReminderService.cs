@@ -20,12 +20,11 @@ using Lisbeth.Bot.Domain.DTOs.Request.Reminder;
 using Lisbeth.Bot.Domain.DTOs.Response;
 using MikyM.Common.Application.Results;
 
-namespace Lisbeth.Bot.Application.Services.Interfaces
+namespace Lisbeth.Bot.Application.Services.Interfaces;
+
+public interface IMainReminderService
 {
-    public interface IMainReminderService
-    {
-        Task<Result<ReminderResDto>> SetNewReminderAsync(SetReminderReqDto req);
-        Task<Result<ReminderResDto>> RescheduleReminderAsync(RescheduleReminderReqDto req);
-        Task<Result<ReminderResDto>> DisableReminderAsync(DisableReminderReqDto req);
-    }
+    Task<Result<ReminderResDto>> SetNewReminderAsync(SetReminderReqDto req);
+    Task<Result<ReminderResDto>> RescheduleReminderAsync(RescheduleReminderReqDto req);
+    Task<Result<ReminderResDto>> DisableReminderAsync(DisableReminderReqDto req);
 }

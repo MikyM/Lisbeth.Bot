@@ -19,23 +19,22 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using MikyM.Common.Domain.Entities;
 
-namespace MikyM.Common.DataAccessLayer.Repositories
+namespace MikyM.Common.DataAccessLayer.Repositories;
+
+public interface IRepository<TEntity> : IReadOnlyRepository<TEntity> where TEntity : AggregateRootEntity
 {
-    public interface IRepository<TEntity> : IReadOnlyRepository<TEntity> where TEntity : AggregateRootEntity
-    {
-        void Add(TEntity entity);
-        void AddRange(IEnumerable<TEntity> entities);
-        void AddOrUpdate(TEntity entity);
-        void AddOrUpdateRange(IEnumerable<TEntity> entities);
-        void BeginUpdate(TEntity entity);
-        void BeginUpdateRange(IEnumerable<TEntity> entities);
-        void Delete(TEntity entity);
-        void Delete(long id);
-        void DeleteRange(IEnumerable<TEntity> entities);
-        void DeleteRange(IEnumerable<long> ids);
-        void Disable(TEntity entity);
-        Task DisableAsync(long id);
-        void DisableRange(IEnumerable<TEntity> entities);
-        Task DisableRangeAsync(IEnumerable<long> ids);
-    }
+    void Add(TEntity entity);
+    void AddRange(IEnumerable<TEntity> entities);
+    void AddOrUpdate(TEntity entity);
+    void AddOrUpdateRange(IEnumerable<TEntity> entities);
+    void BeginUpdate(TEntity entity);
+    void BeginUpdateRange(IEnumerable<TEntity> entities);
+    void Delete(TEntity entity);
+    void Delete(long id);
+    void DeleteRange(IEnumerable<TEntity> entities);
+    void DeleteRange(IEnumerable<long> ids);
+    void Disable(TEntity entity);
+    Task DisableAsync(long id);
+    void DisableRange(IEnumerable<TEntity> entities);
+    Task DisableRangeAsync(IEnumerable<long> ids);
 }

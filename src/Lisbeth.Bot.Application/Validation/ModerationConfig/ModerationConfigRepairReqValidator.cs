@@ -21,20 +21,19 @@ using Lisbeth.Bot.Application.Validation.ReusablePropertyValidation;
 using Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig;
 using MikyM.Discord.Interfaces;
 
-namespace Lisbeth.Bot.Application.Validation.ModerationConfig
-{
-    public class ModerationConfigRepairReqValidator : AbstractValidator<ModerationConfigRepairReqDto>
-    {
-        public ModerationConfigRepairReqValidator(IDiscordService discord) : this(discord.Client)
-        {
-        }
+namespace Lisbeth.Bot.Application.Validation.ModerationConfig;
 
-        public ModerationConfigRepairReqValidator(DiscordClient client)
-        {
-            RuleFor(x => x.GuildId)
-                .SetAsyncValidator(new DiscordGuildIdValidator<ModerationConfigRepairReqDto>(client));
-            RuleFor(x => x.RequestedOnBehalfOfId)
-                .SetAsyncValidator(new DiscordUserIdValidator<ModerationConfigRepairReqDto>(client));
-        }
+public class ModerationConfigRepairReqValidator : AbstractValidator<ModerationConfigRepairReqDto>
+{
+    public ModerationConfigRepairReqValidator(IDiscordService discord) : this(discord.Client)
+    {
+    }
+
+    public ModerationConfigRepairReqValidator(DiscordClient client)
+    {
+        RuleFor(x => x.GuildId)
+            .SetAsyncValidator(new DiscordGuildIdValidator<ModerationConfigRepairReqDto>(client));
+        RuleFor(x => x.RequestedOnBehalfOfId)
+            .SetAsyncValidator(new DiscordUserIdValidator<ModerationConfigRepairReqDto>(client));
     }
 }

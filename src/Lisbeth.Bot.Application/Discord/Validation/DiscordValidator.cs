@@ -20,41 +20,40 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 
-namespace Lisbeth.Bot.Application.Discord.Validation
+namespace Lisbeth.Bot.Application.Discord.Validation;
+
+public class DiscordValidator<TDiscordType> : IDiscordValidator<TDiscordType> where TDiscordType : class
 {
-    public class DiscordValidator<TDiscordType> : IDiscordValidator<TDiscordType> where TDiscordType : class
+    private readonly DiscordClient _client;
+
+    public DiscordValidator(DiscordClient client, ulong objectId)
     {
-        private readonly DiscordClient _client;
+        ObjectId = objectId;
+        _client = client;
+    }
 
-        public DiscordValidator(DiscordClient client, ulong objectId)
+    public ulong ObjectId { get; }
+    public TDiscordType? RetrievedObject { get; private set; }
+    public Exception? Exception { get; private set; }
+
+    public async Task<bool> IsValidAsync()
+    {
+        try
         {
-            ObjectId = objectId;
-            _client = client;
+            RetrievedObject = RetrievedObject switch
+            {
+                DiscordGuild => await _client.GetGuildAsync(ObjectId) as TDiscordType,
+                DiscordChannel => await _client.GetChannelAsync(ObjectId) as TDiscordType,
+                DiscordUser => await _client.GetUserAsync(ObjectId) as TDiscordType,
+                _ => throw new ArgumentOutOfRangeException()
+            };
+        }
+        catch (Exception ex)
+        {
+            Exception = ex;
+            return false;
         }
 
-        public ulong ObjectId { get; }
-        public TDiscordType? RetrievedObject { get; private set; }
-        public Exception? Exception { get; private set; }
-
-        public async Task<bool> IsValidAsync()
-        {
-            try
-            {
-                RetrievedObject = RetrievedObject switch
-                {
-                    DiscordGuild => await _client.GetGuildAsync(ObjectId) as TDiscordType,
-                    DiscordChannel => await _client.GetChannelAsync(ObjectId) as TDiscordType,
-                    DiscordUser => await _client.GetUserAsync(ObjectId) as TDiscordType,
-                    _ => throw new ArgumentOutOfRangeException()
-                };
-            }
-            catch (Exception ex)
-            {
-                Exception = ex;
-                return false;
-            }
-
-            return true;
-        }
+        return true;
     }
 }

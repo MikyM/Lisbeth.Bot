@@ -18,38 +18,37 @@
 using System.Linq;
 using AutoMapper.QueryableExtensions;
 
-namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators
+namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators;
+
+public class ProjectionEvaluator : IProjectionEvaluator
 {
-    public class ProjectionEvaluator : IProjectionEvaluator
+    public static ProjectionEvaluator Instance { get; } = new();
+
+    public ProjectionEvaluator()
     {
-        public static ProjectionEvaluator Instance { get; } = new();
-
-        public ProjectionEvaluator()
-        {
             
-        }
+    }
 
-        public IQueryable<TResult> GetQuery<T, TResult>(IQueryable<T> query, ISpecification<T, TResult> specification) where T : class where TResult : class
+    public IQueryable<TResult> GetQuery<T, TResult>(IQueryable<T> query, ISpecification<T, TResult> specification) where T : class where TResult : class
+    {
+        if (specification.MembersToExpand is not null)
         {
-            if (specification.MembersToExpand is not null)
-            {
-                return specification.MapperConfiguration is null
-                    ? query.ProjectTo<TResult>(specification.MembersToExpand.ToArray())
-                    : query.ProjectTo<TResult>(specification.MapperConfiguration,
-                        specification.MembersToExpand.ToArray());
-            }
-
-            if (specification.StringMembersToExpand is not null)
-            {
-                return specification.MapperConfiguration is null
-                    ? query.ProjectTo<TResult>(null, specification.StringMembersToExpand.ToArray())
-                    : query.ProjectTo<TResult>(specification.MapperConfiguration, null,
-                        specification.StringMembersToExpand.ToArray());
-            }
-
-            return specification.MapperConfiguration is not null
-                ? query.ProjectTo<TResult>(specification.MapperConfiguration)
-                : query.ProjectTo<TResult>();
+            return specification.MapperConfiguration is null
+                ? query.ProjectTo<TResult>(specification.MembersToExpand.ToArray())
+                : query.ProjectTo<TResult>(specification.MapperConfiguration,
+                    specification.MembersToExpand.ToArray());
         }
+
+        if (specification.StringMembersToExpand is not null)
+        {
+            return specification.MapperConfiguration is null
+                ? query.ProjectTo<TResult>(null, specification.StringMembersToExpand.ToArray())
+                : query.ProjectTo<TResult>(specification.MapperConfiguration, null,
+                    specification.StringMembersToExpand.ToArray());
+        }
+
+        return specification.MapperConfiguration is not null
+            ? query.ProjectTo<TResult>(specification.MapperConfiguration)
+            : query.ProjectTo<TResult>();
     }
 }

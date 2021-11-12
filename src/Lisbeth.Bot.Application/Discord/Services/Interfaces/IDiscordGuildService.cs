@@ -23,25 +23,24 @@ using Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
 using MikyM.Common.Application.Results;
 
-namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
+namespace Lisbeth.Bot.Application.Discord.Services.Interfaces;
+
+public interface IDiscordGuildService
 {
-    public interface IDiscordGuildService
-    {
-        Task<Result> HandleGuildCreateAsync(GuildCreateEventArgs args);
-        Task<Result> HandleGuildDeleteAsync(GuildDeleteEventArgs args);
-        Task<Result<DiscordEmbed>> CreateModuleAsync(ModerationConfigReqDto req);
-        Task<Result<DiscordEmbed>> CreateModuleAsync(InteractionContext ctx, ModerationConfigReqDto req);
-        Task<Result<DiscordEmbed>> CreateModuleAsync(InteractionContext ctx, TicketingConfigReqDto req);
-        Task<Result<DiscordEmbed>> CreateModuleAsync(TicketingConfigReqDto req);
-        Task<Result<DiscordEmbed>> DisableModuleAsync(ModerationConfigDisableReqDto req);
-        Task<Result<DiscordEmbed>> DisableModuleAsync(TicketingConfigDisableReqDto req);
-        Task<Result<DiscordEmbed>> DisableModuleAsync(InteractionContext ctx, ModerationConfigDisableReqDto req);
-        Task<Result<DiscordEmbed>> DisableModuleAsync(InteractionContext ctx, TicketingConfigDisableReqDto req);
-        Task<Result<DiscordEmbed>> RepairConfigAsync(ModerationConfigRepairReqDto req);
-        Task<Result<DiscordEmbed>> RepairConfigAsync(TicketingConfigRepairReqDto req);
-        Task<Result<DiscordEmbed>> RepairConfigAsync(InteractionContext ctx, ModerationConfigRepairReqDto req);
-        Task<Result<DiscordEmbed>> RepairConfigAsync(InteractionContext ctx, TicketingConfigRepairReqDto req);
-        Task<Result<int>> CreateOverwritesForMutedRoleAsync(CreateMuteOverwritesReqDto req);
-        Task<Result<int>> CreateOverwritesForMutedRoleAsync(InteractionContext ctx, CreateMuteOverwritesReqDto req);
-    }
+    Task<Result> HandleGuildCreateAsync(GuildCreateEventArgs args);
+    Task<Result> HandleGuildDeleteAsync(GuildDeleteEventArgs args);
+    Task<Result<DiscordEmbed>> CreateModuleAsync(ModerationConfigReqDto req);
+    Task<Result<DiscordEmbed>> CreateModuleAsync(InteractionContext ctx, ModerationConfigReqDto req);
+    Task<Result<DiscordEmbed>> CreateModuleAsync(InteractionContext ctx, TicketingConfigReqDto req);
+    Task<Result<DiscordEmbed>> CreateModuleAsync(TicketingConfigReqDto req);
+    Task<Result<DiscordEmbed>> DisableModuleAsync(ModerationConfigDisableReqDto req);
+    Task<Result<DiscordEmbed>> DisableModuleAsync(TicketingConfigDisableReqDto req);
+    Task<Result<DiscordEmbed>> DisableModuleAsync(InteractionContext ctx, ModerationConfigDisableReqDto req);
+    Task<Result<DiscordEmbed>> DisableModuleAsync(InteractionContext ctx, TicketingConfigDisableReqDto req);
+    Task<Result<DiscordEmbed>> RepairConfigAsync(ModerationConfigRepairReqDto req);
+    Task<Result<DiscordEmbed>> RepairConfigAsync(TicketingConfigRepairReqDto req);
+    Task<Result<DiscordEmbed>> RepairConfigAsync(InteractionContext ctx, ModerationConfigRepairReqDto req);
+    Task<Result<DiscordEmbed>> RepairConfigAsync(InteractionContext ctx, TicketingConfigRepairReqDto req);
+    Task<Result<int>> CreateOverwritesForMutedRoleAsync(CreateMuteOverwritesReqDto req);
+    Task<Result<int>> CreateOverwritesForMutedRoleAsync(InteractionContext ctx, CreateMuteOverwritesReqDto req);
 }

@@ -21,10 +21,9 @@ using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Domain.Entities.Base;
 using MikyM.Common.Application.Results;
 
-namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
+namespace Lisbeth.Bot.Application.Discord.Services.Interfaces;
+
+public interface IDiscordEmbedConfiguratorService<T> where T : EmbedConfigEntity
 {
-    public interface IDiscordEmbedConfiguratorService<T> where T : EmbedConfigEntity
-    {
-        Task<Result<DiscordEmbed>> ConfigureAsync(InteractionContext ctx, string idOrName);
-    }
+    Task<Result<DiscordEmbed>> ConfigureAsync(InteractionContext ctx, string idOrName);
 }

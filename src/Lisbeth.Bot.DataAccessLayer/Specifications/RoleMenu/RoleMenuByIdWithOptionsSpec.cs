@@ -17,14 +17,13 @@
 
 using MikyM.Common.DataAccessLayer.Specifications;
 
-namespace Lisbeth.Bot.DataAccessLayer.Specifications.RoleMenu
+namespace Lisbeth.Bot.DataAccessLayer.Specifications.RoleMenu;
+
+public class RoleMenuByIdWithOptionsSpec : Specification<Domain.Entities.RoleMenu>
 {
-    public class RoleMenuByIdWithOptionsSpec : Specification<Domain.Entities.RoleMenu>
+    public RoleMenuByIdWithOptionsSpec(long id)
     {
-        public RoleMenuByIdWithOptionsSpec(long id)
-        {
-            Where(x => x.Id == id);
-            Include(x => x.RoleMenuOptions);
-        }
+        Where(x => x.Id == id);
+        Include(x => x.RoleMenuOptions);
     }
 }

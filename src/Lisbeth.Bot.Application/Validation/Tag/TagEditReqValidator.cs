@@ -21,29 +21,28 @@ using Lisbeth.Bot.Application.Validation.ReusablePropertyValidation;
 using Lisbeth.Bot.Domain.DTOs.Request.Tag;
 using MikyM.Discord.Interfaces;
 
-namespace Lisbeth.Bot.Application.Validation.Tag
+namespace Lisbeth.Bot.Application.Validation.Tag;
+
+public class TagEditReqValidator : AbstractValidator<TagEditReqDto>
 {
-    public class TagEditReqValidator : AbstractValidator<TagEditReqDto>
+    public TagEditReqValidator(IDiscordService discordService) : this(discordService.Client)
     {
-        public TagEditReqValidator(IDiscordService discordService) : this(discordService.Client)
-        {
-        }
+    }
 
-        public TagEditReqValidator(DiscordClient discord)
-        {
-            CascadeMode = CascadeMode.Stop;
+    public TagEditReqValidator(DiscordClient discord)
+    {
+        CascadeMode = CascadeMode.Stop;
 
-            RuleFor(x => x.Id).NotEmpty().When(x => x.Name is not null && !x.GuildId.HasValue);
-            RuleFor(x => x.Name).NotEmpty().When(x => !x.Id.HasValue);
-            RuleFor(x => x.GuildId)
-                .NotEmpty()
-                .When(x => !x.Id.HasValue)
-                .DependentRules(x => x.SetAsyncValidator(new DiscordGuildIdValidator<TagEditReqDto>(discord)));
-            RuleFor(x => x.RequestedOnBehalfOfId)
-                .NotEmpty()
-                .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<TagEditReqDto>(discord)));
-            RuleFor(x => x.Text).NotEmpty().When(x => x.EmbedConfig is null);
-            RuleFor(x => x.EmbedConfig).NotEmpty().When(x => x.Text is null or "");
-        }
+        RuleFor(x => x.Id).NotEmpty().When(x => x.Name is not null && !x.GuildId.HasValue);
+        RuleFor(x => x.Name).NotEmpty().When(x => !x.Id.HasValue);
+        RuleFor(x => x.GuildId)
+            .NotEmpty()
+            .When(x => !x.Id.HasValue)
+            .DependentRules(x => x.SetAsyncValidator(new DiscordGuildIdValidator<TagEditReqDto>(discord)));
+        RuleFor(x => x.RequestedOnBehalfOfId)
+            .NotEmpty()
+            .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<TagEditReqDto>(discord)));
+        RuleFor(x => x.Text).NotEmpty().When(x => x.EmbedConfig is null);
+        RuleFor(x => x.EmbedConfig).NotEmpty().When(x => x.Text is null or "");
     }
 }

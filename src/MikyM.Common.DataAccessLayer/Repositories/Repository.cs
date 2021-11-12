@@ -24,49 +24,60 @@ using MikyM.Common.DataAccessLayer.Helpers;
 using MikyM.Common.DataAccessLayer.Specifications.Evaluators;
 using MikyM.Common.Domain.Entities;
 
-namespace MikyM.Common.DataAccessLayer.Repositories
+namespace MikyM.Common.DataAccessLayer.Repositories;
+
+public class Repository<TEntity> : ReadOnlyRepository<TEntity>, IRepository<TEntity>
+    where TEntity : AggregateRootEntity
 {
-    public class Repository<TEntity> : ReadOnlyRepository<TEntity>, IRepository<TEntity>
-        where TEntity : AggregateRootEntity
+    public Repository(DbContext context, ISpecificationEvaluator specificationEvaluator) : base(context,
+        specificationEvaluator)
     {
-        public Repository(DbContext context, ISpecificationEvaluator specificationEvaluator) : base(context,
-            specificationEvaluator)
-        {
-        }
+    }
 
-        public virtual void Add(TEntity entity)
-        {
-            Context.Set<TEntity>().Add(entity);
-        }
+    public virtual void Add(TEntity entity)
+    {
+        Context.Set<TEntity>().Add(entity);
+    }
 
-        public virtual void AddRange(IEnumerable<TEntity> entities)
-        {
-            Context.Set<TEntity>().AddRange(entities);
-        }
+    public virtual void AddRange(IEnumerable<TEntity> entities)
+    {
+        Context.Set<TEntity>().AddRange(entities);
+    }
 
-        public virtual void AddOrUpdate(TEntity entity)
+    public virtual void AddOrUpdate(TEntity entity)
+    {
+        var local = Context.Set<TEntity>().Local.FirstOrDefault(entry => entry.Id.Equals(entity.Id));
+
+        if (local is not null) Context.Entry(local).State = EntityState.Detached;
+
+        Context.Set<TEntity>().Update(entity);
+    }
+
+    public virtual void AddOrUpdateRange(IEnumerable<TEntity> entities)
+    {
+        var aggregateRootEntities = entities.ToList();
+        foreach (var entity in aggregateRootEntities)
         {
             var local = Context.Set<TEntity>().Local.FirstOrDefault(entry => entry.Id.Equals(entity.Id));
 
             if (local is not null) Context.Entry(local).State = EntityState.Detached;
-
-            Context.Set<TEntity>().Update(entity);
         }
 
-        public virtual void AddOrUpdateRange(IEnumerable<TEntity> entities)
-        {
-            var aggregateRootEntities = entities.ToList();
-            foreach (var entity in aggregateRootEntities)
-            {
-                var local = Context.Set<TEntity>().Local.FirstOrDefault(entry => entry.Id.Equals(entity.Id));
+        Context.Set<TEntity>().UpdateRange(aggregateRootEntities);
+    }
 
-                if (local is not null) Context.Entry(local).State = EntityState.Detached;
-            }
+    public virtual void BeginUpdate(TEntity entity)
+    {
+        var local = Context.Set<TEntity>().Local.FirstOrDefault(entry => entry.Id.Equals(entity.Id));
 
-            Context.Set<TEntity>().UpdateRange(aggregateRootEntities);
-        }
+        if (local is not null) Context.Entry(local).State = EntityState.Detached;
 
-        public virtual void BeginUpdate(TEntity entity)
+        Context.Attach(entity);
+    }
+
+    public virtual void BeginUpdateRange(IEnumerable<TEntity> entities)
+    {
+        foreach (var entity in entities)
         {
             var local = Context.Set<TEntity>().Local.FirstOrDefault(entry => entry.Id.Equals(entity.Id));
 
@@ -74,70 +85,58 @@ namespace MikyM.Common.DataAccessLayer.Repositories
 
             Context.Attach(entity);
         }
+    }
 
-        public virtual void BeginUpdateRange(IEnumerable<TEntity> entities)
-        {
-            foreach (var entity in entities)
-            {
-                var local = Context.Set<TEntity>().Local.FirstOrDefault(entry => entry.Id.Equals(entity.Id));
+    public virtual void Delete(TEntity entity)
+    {
+        Context.Set<TEntity>().Remove(entity);
+    }
 
-                if (local is not null) Context.Entry(local).State = EntityState.Detached;
+    public virtual void Delete(long id)
+    {
+        var entity = Context.FindTracked<TEntity>(id) ?? (TEntity) Activator.CreateInstance(typeof(TEntity), id)!;
+        Context.Set<TEntity>().Remove(entity);
+    }
 
-                Context.Attach(entity);
-            }
-        }
+    public virtual void DeleteRange(IEnumerable<TEntity> entities)
+    {
+        Context.Set<TEntity>().RemoveRange(entities);
+    }
 
-        public virtual void Delete(TEntity entity)
-        {
-            Context.Set<TEntity>().Remove(entity);
-        }
+    public virtual void DeleteRange(IEnumerable<long> ids)
+    {
+        var entities = ids.Select(id =>
+                Context.FindTracked<TEntity>(id) ?? (TEntity) Activator.CreateInstance(typeof(TEntity), id)!)
+            .ToList();
+        Context.Set<TEntity>().RemoveRange(entities);
+    }
 
-        public virtual void Delete(long id)
-        {
-            var entity = Context.FindTracked<TEntity>(id) ?? (TEntity) Activator.CreateInstance(typeof(TEntity), id)!;
-            Context.Set<TEntity>().Remove(entity);
-        }
+    public virtual void Disable(TEntity entity)
+    {
+        BeginUpdate(entity);
+        entity.IsDisabled = true;
+    }
 
-        public virtual void DeleteRange(IEnumerable<TEntity> entities)
-        {
-            Context.Set<TEntity>().RemoveRange(entities);
-        }
+    public virtual async Task DisableAsync(long id)
+    {
+        var entity = await GetAsync(id);
+        BeginUpdate(entity ?? throw new InvalidOperationException());
+        entity.IsDisabled = true;
+    }
 
-        public virtual void DeleteRange(IEnumerable<long> ids)
-        {
-            var entities = ids.Select(id =>
-                    Context.FindTracked<TEntity>(id) ?? (TEntity) Activator.CreateInstance(typeof(TEntity), id)!)
-                .ToList();
-            Context.Set<TEntity>().RemoveRange(entities);
-        }
+    public virtual void DisableRange(IEnumerable<TEntity> entities)
+    {
+        var aggregateRootEntities = entities.ToList();
+        BeginUpdateRange(aggregateRootEntities);
+        foreach (var entity in aggregateRootEntities) entity.IsDisabled = true;
+    }
 
-        public virtual void Disable(TEntity entity)
-        {
-            BeginUpdate(entity);
-            entity.IsDisabled = true;
-        }
-
-        public virtual async Task DisableAsync(long id)
-        {
-            var entity = await GetAsync(id);
-            BeginUpdate(entity ?? throw new InvalidOperationException());
-            entity.IsDisabled = true;
-        }
-
-        public virtual void DisableRange(IEnumerable<TEntity> entities)
-        {
-            var aggregateRootEntities = entities.ToList();
-            BeginUpdateRange(aggregateRootEntities);
-            foreach (var entity in aggregateRootEntities) entity.IsDisabled = true;
-        }
-
-        public virtual async Task DisableRangeAsync(IEnumerable<long> ids)
-        {
-            var entities = await Context.Set<TEntity>()
-                .Join(ids, ent => ent.Id, id => id, (ent, id) => ent)
-                .ToListAsync();
-            BeginUpdateRange(entities);
-            entities.ForEach(ent => ent.IsDisabled = true);
-        }
+    public virtual async Task DisableRangeAsync(IEnumerable<long> ids)
+    {
+        var entities = await Context.Set<TEntity>()
+            .Join(ids, ent => ent.Id, id => id, (ent, id) => ent)
+            .ToListAsync();
+        BeginUpdateRange(entities);
+        entities.ForEach(ent => ent.IsDisabled = true);
     }
 }

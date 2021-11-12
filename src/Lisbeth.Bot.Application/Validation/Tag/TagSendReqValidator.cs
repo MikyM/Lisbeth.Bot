@@ -21,30 +21,29 @@ using Lisbeth.Bot.Application.Validation.ReusablePropertyValidation;
 using Lisbeth.Bot.Domain.DTOs.Request.Tag;
 using MikyM.Discord.Interfaces;
 
-namespace Lisbeth.Bot.Application.Validation.Tag
+namespace Lisbeth.Bot.Application.Validation.Tag;
+
+public class TagSendReqValidator : AbstractValidator<TagSendReqDto>
 {
-    public class TagSendReqValidator : AbstractValidator<TagSendReqDto>
+    public TagSendReqValidator(IDiscordService discordService) : this(discordService.Client)
     {
-        public TagSendReqValidator(IDiscordService discordService) : this(discordService.Client)
-        {
-        }
+    }
 
-        public TagSendReqValidator(DiscordClient discord)
-        {
-            CascadeMode = CascadeMode.Stop;
+    public TagSendReqValidator(DiscordClient discord)
+    {
+        CascadeMode = CascadeMode.Stop;
 
-            RuleFor(x => x.Id).NotEmpty().When(x => x.Name is not null && !x.GuildId.HasValue);
-            RuleFor(x => x.Name).NotEmpty().When(x => !x.Id.HasValue);
-            RuleFor(x => x.GuildId)
-                .NotEmpty()
-                .When(x => !x.Id.HasValue)
-                .DependentRules(x => x.SetAsyncValidator(new DiscordGuildIdValidator<TagSendReqDto>(discord)));
-            RuleFor(x => x.RequestedOnBehalfOfId)
-                .NotEmpty()
-                .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<TagSendReqDto>(discord)));
-            RuleFor(x => x.ChannelId)
-                .NotEmpty()
-                .DependentRules(x => x.SetAsyncValidator(new DiscordChannelIdValidator<TagSendReqDto>(discord)));
-        }
+        RuleFor(x => x.Id).NotEmpty().When(x => x.Name is not null && !x.GuildId.HasValue);
+        RuleFor(x => x.Name).NotEmpty().When(x => !x.Id.HasValue);
+        RuleFor(x => x.GuildId)
+            .NotEmpty()
+            .When(x => !x.Id.HasValue)
+            .DependentRules(x => x.SetAsyncValidator(new DiscordGuildIdValidator<TagSendReqDto>(discord)));
+        RuleFor(x => x.RequestedOnBehalfOfId)
+            .NotEmpty()
+            .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<TagSendReqDto>(discord)));
+        RuleFor(x => x.ChannelId)
+            .NotEmpty()
+            .DependentRules(x => x.SetAsyncValidator(new DiscordChannelIdValidator<TagSendReqDto>(discord)));
     }
 }

@@ -36,82 +36,81 @@ using MikyM.Common.Application.Results;
 using MikyM.Common.Application.Results.Errors;
 using MikyM.Discord.Interfaces;
 
-namespace Lisbeth.Bot.Application.Discord.Services
+namespace Lisbeth.Bot.Application.Discord.Services;
+
+[UsedImplicitly]
+public class DiscordSendReminderService : IDiscordSendReminderService
 {
-    [UsedImplicitly]
-    public class DiscordSendReminderService : IDiscordSendReminderService
+    private readonly IDiscordService _discord;
+    private readonly IDiscordEmbedProvider _embedProvider;
+    private readonly IRecurringReminderService _recurringReminderService;
+    private readonly IReminderService _reminderService;
+
+    public DiscordSendReminderService(IReminderService reminderService,
+        IRecurringReminderService recurringReminderService, IDiscordService discord,
+        IDiscordEmbedProvider embedProvider)
     {
-        private readonly IDiscordService _discord;
-        private readonly IDiscordEmbedProvider _embedProvider;
-        private readonly IRecurringReminderService _recurringReminderService;
-        private readonly IReminderService _reminderService;
+        _reminderService = reminderService;
+        _recurringReminderService = recurringReminderService;
+        _discord = discord;
+        _embedProvider = embedProvider;
+    }
 
-        public DiscordSendReminderService(IReminderService reminderService,
-            IRecurringReminderService recurringReminderService, IDiscordService discord,
-            IDiscordEmbedProvider embedProvider)
+    [Queue("reminder")]
+    [PreserveOriginalQueue]
+    public async Task<Result> SendReminderAsync(long reminderId, ReminderType type)
+    {
+        Guild guild;
+        EmbedConfig? embedConfig;
+        string? text;
+        List<string>? mentions;
+        DiscordChannel channel;
+        ulong? channelId;
+
+        switch (type)
         {
-            _reminderService = reminderService;
-            _recurringReminderService = recurringReminderService;
-            _discord = discord;
-            _embedProvider = embedProvider;
+            case ReminderType.Single:
+                var rem = await _reminderService.GetSingleBySpecAsync<Reminder>(
+                    new ActiveReminderByIdWithEmbedSpec(reminderId));
+                if (!rem.IsDefined() || rem.Entity.Guild?.ReminderChannelId is null)
+                    return Result.FromError(new NotFoundError());
+                guild = rem.Entity.Guild;
+                embedConfig = rem.Entity.EmbedConfig;
+                text = rem.Entity.Text;
+                mentions = rem.Entity.Mentions;
+                channelId = rem.Entity.ChannelId;
+                break;
+            case ReminderType.Recurring:
+                var recRem = await _recurringReminderService.GetSingleBySpecAsync<RecurringReminder>(
+                    new ActiveRecurringReminderByIdWithEmbedSpec(reminderId));
+                if (!recRem.IsDefined() || recRem.Entity.Guild?.ReminderChannelId is null)
+                    return Result.FromError(new NotFoundError());
+                guild = recRem.Entity.Guild;
+                embedConfig = recRem.Entity.EmbedConfig;
+                text = recRem.Entity.Text;
+                mentions = recRem.Entity.Mentions;
+                channelId = recRem.Entity.ChannelId;
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(type), type, null);
         }
 
-        [Queue("reminder")]
-        [PreserveOriginalQueue]
-        public async Task<Result> SendReminderAsync(long reminderId, ReminderType type)
+        try
         {
-            Guild guild;
-            EmbedConfig? embedConfig;
-            string? text;
-            List<string>? mentions;
-            DiscordChannel channel;
-            ulong? channelId;
-
-            switch (type)
-            {
-                case ReminderType.Single:
-                    var rem = await _reminderService.GetSingleBySpecAsync<Reminder>(
-                        new ActiveReminderByIdWithEmbedSpec(reminderId));
-                    if (!rem.IsDefined() || rem.Entity.Guild?.ReminderChannelId is null)
-                        return Result.FromError(new NotFoundError());
-                    guild = rem.Entity.Guild;
-                    embedConfig = rem.Entity.EmbedConfig;
-                    text = rem.Entity.Text;
-                    mentions = rem.Entity.Mentions;
-                    channelId = rem.Entity.ChannelId;
-                    break;
-                case ReminderType.Recurring:
-                    var recRem = await _recurringReminderService.GetSingleBySpecAsync<RecurringReminder>(
-                        new ActiveRecurringReminderByIdWithEmbedSpec(reminderId));
-                    if (!recRem.IsDefined() || recRem.Entity.Guild?.ReminderChannelId is null)
-                        return Result.FromError(new NotFoundError());
-                    guild = recRem.Entity.Guild;
-                    embedConfig = recRem.Entity.EmbedConfig;
-                    text = recRem.Entity.Text;
-                    mentions = recRem.Entity.Mentions;
-                    channelId = recRem.Entity.ChannelId;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
-            }
-
-            try
-            {
-                channel = channelId.HasValue ? await _discord.Client.GetChannelAsync(channelId.Value) : await _discord.Client.GetChannelAsync(guild.ReminderChannelId.Value);
-            }
-            catch (Exception)
-            {
-                // ignore
-                return Result.FromError(new DiscordNotFoundError(DiscordEntityType.Channel));
-            }
-
-            if (embedConfig is not null)
-                await channel.SendMessageAsync(string.Join(' ', mentions ?? throw new InvalidOperationException()),
-                    _embedProvider.ConfigureEmbed(embedConfig).Build());
-            else
-                await channel.SendMessageAsync(string.Join(' ', mentions ?? throw new InvalidOperationException()) + "\n\n" + text);
-
-            return Result.FromSuccess();
+            channel = channelId.HasValue ? await _discord.Client.GetChannelAsync(channelId.Value) : await _discord.Client.GetChannelAsync(guild.ReminderChannelId.Value);
         }
+        catch (Exception)
+        {
+            // ignore
+            return Result.FromError(new DiscordNotFoundError(DiscordEntityType.Channel));
+        }
+
+        if (embedConfig is not null)
+            await channel.SendMessageAsync(string.Join(' ', mentions ?? throw new InvalidOperationException()),
+                _embedProvider.ConfigureEmbed(embedConfig).Build());
+        else
+            await channel.SendMessageAsync(string.Join(' ', mentions ?? throw new InvalidOperationException()) + "\n\n" + text);
+
+        return Result.FromSuccess();
     }
 }

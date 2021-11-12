@@ -21,9 +21,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-namespace MikyM.Discord
+namespace MikyM.Discord;
+
+public class DiscordExtensionsConfiguration : IDiscordExtensionConfiguration
 {
-    public class DiscordExtensionsConfiguration : IDiscordExtensionConfiguration
-    {
-    }
 }

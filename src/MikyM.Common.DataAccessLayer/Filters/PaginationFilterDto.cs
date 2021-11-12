@@ -15,11 +15,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace MikyM.Common.DataAccessLayer.Filters
+namespace MikyM.Common.DataAccessLayer.Filters;
+
+public class PaginationFilterDto
 {
-    public class PaginationFilterDto
-    {
-        public int PageNumber { get; set; }
-        public int PageSize { get; set; }
-    }
+    public int PageNumber { get; set; }
+    public int PageSize { get; set; }
 }

@@ -19,10 +19,9 @@ using System.Threading.Tasks;
 using Lisbeth.Bot.Domain.Enums;
 using MikyM.Common.Application.Results;
 
-namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
+namespace Lisbeth.Bot.Application.Discord.Services.Interfaces;
+
+public interface IDiscordSendReminderService
 {
-    public interface IDiscordSendReminderService
-    {
-        Task<Result> SendReminderAsync(long reminderId, ReminderType type);
-    }
+    Task<Result> SendReminderAsync(long reminderId, ReminderType type);
 }

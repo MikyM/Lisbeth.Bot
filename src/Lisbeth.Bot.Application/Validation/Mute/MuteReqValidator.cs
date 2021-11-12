@@ -23,26 +23,25 @@ using Lisbeth.Bot.Application.Validation.ReusablePropertyValidation;
 using Lisbeth.Bot.Domain.DTOs.Request.Mute;
 using MikyM.Discord.Interfaces;
 
-namespace Lisbeth.Bot.Application.Validation.Mute
+namespace Lisbeth.Bot.Application.Validation.Mute;
+
+public class MuteReqValidator : AbstractValidator<MuteReqDto>
 {
-    public class MuteReqValidator : AbstractValidator<MuteReqDto>
+    public MuteReqValidator(IDiscordService discordService) : this(discordService.Client)
     {
-        public MuteReqValidator(IDiscordService discordService) : this(discordService.Client)
-        {
-        }
+    }
 
-        public MuteReqValidator(DiscordClient discord)
-        {
-            CascadeMode = CascadeMode.Stop;
+    public MuteReqValidator(DiscordClient discord)
+    {
+        CascadeMode = CascadeMode.Stop;
 
-            RuleFor(x => x.GuildId).NotEmpty();
-            RuleFor(x => x.TargetUserId)
-                .NotEmpty()
-                .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<MuteReqDto>(discord)));
-            RuleFor(x => x.RequestedOnBehalfOfId)
-                .NotEmpty()
-                .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<MuteReqDto>(discord)));
-            RuleFor(x => x.AppliedUntil).NotEmpty().Must(x => x.ToUniversalTime() > DateTime.UtcNow);
-        }
+        RuleFor(x => x.GuildId).NotEmpty();
+        RuleFor(x => x.TargetUserId)
+            .NotEmpty()
+            .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<MuteReqDto>(discord)));
+        RuleFor(x => x.RequestedOnBehalfOfId)
+            .NotEmpty()
+            .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<MuteReqDto>(discord)));
+        RuleFor(x => x.AppliedUntil).NotEmpty().Must(x => x.ToUniversalTime() > DateTime.UtcNow);
     }
 }

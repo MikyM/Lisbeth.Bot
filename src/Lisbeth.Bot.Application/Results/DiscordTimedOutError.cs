@@ -17,10 +17,9 @@
 
 using MikyM.Common.Application.Results;
 
-namespace Lisbeth.Bot.Application.Results
-{
-    /// <summary>
-    ///     Represents a perform an action due to authorization.
-    /// </summary>
-    public record DiscordTimedOutError(string Message = "Interaction timed out.") : ResultError(Message);
-}
+namespace Lisbeth.Bot.Application.Results;
+
+/// <summary>
+///     Represents a perform an action due to authorization.
+/// </summary>
+public record DiscordTimedOutError(string Message = "Interaction timed out.") : ResultError(Message);

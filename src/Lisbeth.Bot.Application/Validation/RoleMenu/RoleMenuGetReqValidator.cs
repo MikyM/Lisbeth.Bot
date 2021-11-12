@@ -21,27 +21,26 @@ using Lisbeth.Bot.Application.Validation.ReusablePropertyValidation;
 using Lisbeth.Bot.Domain.DTOs.Request.RoleMenu;
 using MikyM.Discord.Interfaces;
 
-namespace Lisbeth.Bot.Application.Validation.RoleMenu
+namespace Lisbeth.Bot.Application.Validation.RoleMenu;
+
+public class RoleMenuGetReqValidator : AbstractValidator<RoleMenuGetReqDto>
 {
-    public class RoleMenuGetReqValidator : AbstractValidator<RoleMenuGetReqDto>
+    public RoleMenuGetReqValidator(IDiscordService discordService) : this(discordService.Client)
     {
-        public RoleMenuGetReqValidator(IDiscordService discordService) : this(discordService.Client)
-        {
-        }
+    }
 
-        public RoleMenuGetReqValidator(DiscordClient discord)
-        {
-            CascadeMode = CascadeMode.Stop;
+    public RoleMenuGetReqValidator(DiscordClient discord)
+    {
+        CascadeMode = CascadeMode.Stop;
 
-            RuleFor(x => x.Id).NotEmpty().When(x => x.Name is not null && !x.GuildId.HasValue);
-            RuleFor(x => x.Name).NotEmpty().When(x => !x.Id.HasValue);
-            RuleFor(x => x.GuildId)
-                .NotEmpty()
-                .When(x => !x.Id.HasValue)
-                .DependentRules(x => x.SetAsyncValidator(new DiscordGuildIdValidator<RoleMenuGetReqDto>(discord)));
-            RuleFor(x => x.RequestedOnBehalfOfId)
-                .NotEmpty()
-                .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<RoleMenuGetReqDto>(discord)));
-        }
+        RuleFor(x => x.Id).NotEmpty().When(x => x.Name is not null && !x.GuildId.HasValue);
+        RuleFor(x => x.Name).NotEmpty().When(x => !x.Id.HasValue);
+        RuleFor(x => x.GuildId)
+            .NotEmpty()
+            .When(x => !x.Id.HasValue)
+            .DependentRules(x => x.SetAsyncValidator(new DiscordGuildIdValidator<RoleMenuGetReqDto>(discord)));
+        RuleFor(x => x.RequestedOnBehalfOfId)
+            .NotEmpty()
+            .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<RoleMenuGetReqDto>(discord)));
     }
 }

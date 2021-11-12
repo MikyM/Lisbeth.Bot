@@ -17,23 +17,22 @@
 
 using System.Linq;
 
-namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators
+namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators;
+
+public class AsSplitQueryEvaluator : IEvaluator
 {
-    public class AsSplitQueryEvaluator : IEvaluator
+    private AsSplitQueryEvaluator()
     {
-        private AsSplitQueryEvaluator()
-        {
-        }
+    }
 
-        public static AsSplitQueryEvaluator Instance { get; } = new();
+    public static AsSplitQueryEvaluator Instance { get; } = new();
 
-        public bool IsCriteriaEvaluator { get; } = true;
+    public bool IsCriteriaEvaluator { get; } = true;
 
-        public IQueryable<T> GetQuery<T>(IQueryable<T> query, ISpecification<T> specification) where T : class
-        {
-            //if (specification.AsSplitQuery) query = query.AsSplitQuery();
+    public IQueryable<T> GetQuery<T>(IQueryable<T> query, ISpecification<T> specification) where T : class
+    {
+        //if (specification.AsSplitQuery) query = query.AsSplitQuery();
 
-            return query;
-        }
+        return query;
     }
 }

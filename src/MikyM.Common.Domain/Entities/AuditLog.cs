@@ -15,25 +15,24 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace MikyM.Common.Domain.Entities
-{
-    public enum AuditType
-    {
-        None = 0,
-        Create = 1,
-        Update = 2,
-        Disable = 3,
-        Delete = 4
-    }
+namespace MikyM.Common.Domain.Entities;
 
-    public class AuditLog : EnvironmentSpecificEntity
-    {
-        public string UserId { get; set; }
-        public string Type { get; set; }
-        public string TableName { get; set; }
-        public string OldValues { get; set; }
-        public string NewValues { get; set; }
-        public string AffectedColumns { get; set; }
-        public string PrimaryKey { get; set; }
-    }
+public enum AuditType
+{
+    None = 0,
+    Create = 1,
+    Update = 2,
+    Disable = 3,
+    Delete = 4
+}
+
+public class AuditLog : EnvironmentSpecificEntity
+{
+    public string UserId { get; set; }
+    public string Type { get; set; }
+    public string TableName { get; set; }
+    public string OldValues { get; set; }
+    public string NewValues { get; set; }
+    public string AffectedColumns { get; set; }
+    public string PrimaryKey { get; set; }
 }

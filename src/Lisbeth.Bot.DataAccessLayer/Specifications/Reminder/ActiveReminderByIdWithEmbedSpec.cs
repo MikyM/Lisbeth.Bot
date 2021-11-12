@@ -17,16 +17,15 @@
 
 using MikyM.Common.DataAccessLayer.Specifications;
 
-namespace Lisbeth.Bot.DataAccessLayer.Specifications.Reminder
+namespace Lisbeth.Bot.DataAccessLayer.Specifications.Reminder;
+
+public class ActiveReminderByIdWithEmbedSpec : Specification<Domain.Entities.Reminder>
 {
-    public class ActiveReminderByIdWithEmbedSpec : Specification<Domain.Entities.Reminder>
+    public ActiveReminderByIdWithEmbedSpec(long id)
     {
-        public ActiveReminderByIdWithEmbedSpec(long id)
-        {
-            Where(x => x.Id == id);
-            Where(x => !x.IsDisabled);
-            Include(x => x.Guild);
-            Include(x => x.EmbedConfig);
-        }
+        Where(x => x.Id == id);
+        Where(x => !x.IsDisabled);
+        Include(x => x.Guild);
+        Include(x => x.EmbedConfig);
     }
 }

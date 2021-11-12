@@ -17,30 +17,29 @@
 
 using MikyM.Common.DataAccessLayer.Specifications;
 
-namespace Lisbeth.Bot.DataAccessLayer.Specifications.Ticket
+namespace Lisbeth.Bot.DataAccessLayer.Specifications.Ticket;
+
+public class TicketBaseGetSpecifications : Specification<Domain.Entities.Ticket>
 {
-    public class TicketBaseGetSpecifications : Specification<Domain.Entities.Ticket>
+    public TicketBaseGetSpecifications(long? id = null, ulong? userId = null, ulong? guildId = null,
+        ulong? channelId = null, long? guildSpecificId = null, bool isDisabled = false, int limit = 0,
+        bool takeAny = false)
     {
-        public TicketBaseGetSpecifications(long? id = null, ulong? userId = null, ulong? guildId = null,
-            ulong? channelId = null, long? guildSpecificId = null, bool isDisabled = false, int limit = 0,
-            bool takeAny = false)
-        {
-            if (id is not null)
-                Where(x => x.Id == id);
-            if (userId is not null)
-                Where(x => x.UserId == userId);
-            if (guildId is not null)
-                Where(x => x.GuildId == guildId);
-            if (channelId is not null)
-                Where(x => x.ChannelId == channelId);
-            if (guildSpecificId is not null)
-                Where(x => x.GuildSpecificId == guildSpecificId);
+        if (id is not null)
+            Where(x => x.Id == id);
+        if (userId is not null)
+            Where(x => x.UserId == userId);
+        if (guildId is not null)
+            Where(x => x.GuildId == guildId);
+        if (channelId is not null)
+            Where(x => x.ChannelId == channelId);
+        if (guildSpecificId is not null)
+            Where(x => x.GuildSpecificId == guildSpecificId);
 
-            if (!takeAny) Where(x => x.IsDisabled == isDisabled);
+        if (!takeAny) Where(x => x.IsDisabled == isDisabled);
 
-            OrderByDescending(x => x.CreatedAt);
+        OrderByDescending(x => x.CreatedAt);
 
-            ApplyTake(limit);
-        }
+        ApplyTake(limit);
     }
 }

@@ -17,21 +17,20 @@
 
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket.Base;
 
-namespace Lisbeth.Bot.Domain.DTOs.Request.Ticket
-{
-    public class TicketAddReqDto : BaseTicketGetReqDto
-    {
-        public TicketAddReqDto(long? id, ulong? ownerId, ulong? guildId, ulong? channelId, ulong requestedOnBehalfOfId,
-            ulong snowflakeId)
-        {
-            Id = id;
-            OwnerId = ownerId;
-            GuildId = guildId;
-            ChannelId = channelId;
-            RequestedOnBehalfOfId = requestedOnBehalfOfId;
-            SnowflakeId = snowflakeId;
-        }
+namespace Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 
-        public ulong SnowflakeId { get; set; }
+public class TicketAddReqDto : BaseTicketGetReqDto
+{
+    public TicketAddReqDto(long? id, ulong? ownerId, ulong? guildId, ulong? channelId, ulong requestedOnBehalfOfId,
+        ulong snowflakeId)
+    {
+        Id = id;
+        OwnerId = ownerId;
+        GuildId = guildId;
+        ChannelId = channelId;
+        RequestedOnBehalfOfId = requestedOnBehalfOfId;
+        SnowflakeId = snowflakeId;
     }
+
+    public ulong SnowflakeId { get; set; }
 }

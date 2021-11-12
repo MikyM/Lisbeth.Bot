@@ -22,50 +22,49 @@ using Microsoft.EntityFrameworkCore;
 using MikyM.Common.Application.Interfaces;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
 
-namespace MikyM.Common.Application.Services
+namespace MikyM.Common.Application.Services;
+
+public abstract class ServiceBase<TContext> : IServiceBase<TContext> where TContext : DbContext
 {
-    public abstract class ServiceBase<TContext> : IServiceBase<TContext> where TContext : DbContext
+    protected readonly IMapper Mapper;
+    protected readonly IUnitOfWork<TContext> UnitOfWork;
+    private bool _disposed;
+
+    protected ServiceBase(IMapper mapper, IUnitOfWork<TContext> uof)
     {
-        protected readonly IMapper Mapper;
-        protected readonly IUnitOfWork<TContext> UnitOfWork;
-        private bool _disposed;
+        Mapper = mapper;
+        UnitOfWork = uof;
+    }
 
-        protected ServiceBase(IMapper mapper, IUnitOfWork<TContext> uof)
-        {
-            Mapper = mapper;
-            UnitOfWork = uof;
-        }
+    public virtual async Task<int> CommitAsync()
+    {
+        return await UnitOfWork.CommitAsync();
+    }
 
-        public virtual async Task<int> CommitAsync()
-        {
-            return await UnitOfWork.CommitAsync();
-        }
+    public virtual async Task RollbackAsync()
+    {
+        await UnitOfWork.RollbackAsync();
+    }
 
-        public virtual async Task RollbackAsync()
-        {
-            await UnitOfWork.RollbackAsync();
-        }
+    public virtual async Task BeginTransactionAsync()
+    {
+        await UnitOfWork.UseTransaction();
+    }
 
-        public virtual async Task BeginTransactionAsync()
-        {
-            await UnitOfWork.UseTransaction();
-        }
+    // Public implementation of Dispose pattern callable by consumers.
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
 
-        // Public implementation of Dispose pattern callable by consumers.
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
+    // Protected implementation of Dispose pattern.
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_disposed) return;
 
-        // Protected implementation of Dispose pattern.
-        protected virtual void Dispose(bool disposing)
-        {
-            if (_disposed) return;
+        if (disposing) UnitOfWork?.Dispose();
 
-            if (disposing) UnitOfWork?.Dispose();
-
-            _disposed = true;
-        }
+        _disposed = true;
     }
 }

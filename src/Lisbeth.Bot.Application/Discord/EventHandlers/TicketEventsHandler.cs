@@ -31,93 +31,92 @@ using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 using Microsoft.Extensions.Logging;
 using MikyM.Discord.Events;
 
-namespace Lisbeth.Bot.Application.Discord.EventHandlers
+namespace Lisbeth.Bot.Application.Discord.EventHandlers;
+
+[UsedImplicitly]
+public class TicketEventsHandler : IDiscordMiscEventsSubscriber, IDiscordChannelEventsSubscriber
 {
-    [UsedImplicitly]
-    public class TicketEventsHandler : IDiscordMiscEventsSubscriber, IDiscordChannelEventsSubscriber
+    private readonly IAsyncExecutor _asyncExecutor;
+    private readonly ILogger<TicketEventsHandler> _logger;
+
+    public TicketEventsHandler(IAsyncExecutor asyncExecutor, ILogger<TicketEventsHandler> logger)
     {
-        private readonly IAsyncExecutor _asyncExecutor;
-        private readonly ILogger<TicketEventsHandler> _logger;
+        _asyncExecutor = asyncExecutor;
+        _logger = logger;
+    }
 
-        public TicketEventsHandler(IAsyncExecutor asyncExecutor, ILogger<TicketEventsHandler> logger)
+    public Task DiscordOnChannelCreated(DiscordClient sender, ChannelCreateEventArgs args)
+    {
+        return Task.CompletedTask;
+    }
+
+    public Task DiscordOnChannelUpdated(DiscordClient sender, ChannelUpdateEventArgs args)
+    {
+        return Task.CompletedTask;
+    }
+
+    public Task DiscordOnChannelDeleted(DiscordClient sender, ChannelDeleteEventArgs args)
+    {
+        _ = _asyncExecutor.ExecuteAsync<ITicketService>(async x =>
+            await x.CheckForDeletedTicketChannelAsync(args.Channel.Id, args.Guild.Id, sender.CurrentUser.Id));
+        return Task.CompletedTask;
+    }
+
+    public Task DiscordOnDmChannelDeleted(DiscordClient sender, DmChannelDeleteEventArgs args)
+    {
+        return Task.CompletedTask;
+    }
+
+    public Task DiscordOnChannelPinsUpdated(DiscordClient sender, ChannelPinsUpdateEventArgs args)
+    {
+        return Task.CompletedTask;
+    }
+
+    public async Task DiscordOnComponentInteractionCreated(DiscordClient sender,
+        ComponentInteractionCreateEventArgs args)
+    {
+        switch (args.Id)
         {
-            _asyncExecutor = asyncExecutor;
-            _logger = logger;
-        }
+            case nameof(TicketButton.TicketCloseButton):
+                await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+                var closeReq = new TicketCloseReqDto(null, null, args.Guild.Id, args.Channel.Id, args.User.Id);
+                _ = _asyncExecutor.ExecuteAsync<IDiscordTicketService>(async x =>
+                    await x.CloseTicketAsync(args.Interaction, closeReq));
+                break;
+            case nameof(TicketButton.TicketOpenButton):
+                await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
+                    new DiscordInteractionResponseBuilder().AsEphemeral(true));
+                var openReq = new TicketOpenReqDto
+                    { GuildId = args.Guild.Id, RequestedOnBehalfOfId = args.User.Id };
+                _ = _asyncExecutor.ExecuteAsync<IDiscordTicketService>(async x =>
+                    await x.OpenTicketAsync(args.Interaction, openReq));
+                break;
+            case nameof(TicketSelect.TicketCloseMessageSelect):
+                await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+                switch (args.Values[0])
+                {
+                    case nameof(TicketSelectValue.TicketReopenValue):
+                        var req = new TicketReopenReqDto
+                        {
+                            GuildId = args.Guild.Id, ChannelId = args.Channel.Id,
+                            RequestedOnBehalfOfId = args.User.Id
+                        };
+                        _ = _asyncExecutor.ExecuteAsync<IDiscordTicketService>(async x =>
+                            await x.ReopenTicketAsync(args.Interaction, req));
+                        break;
+                    case nameof(TicketSelectValue.TicketTranscriptValue):
+                        _ = _asyncExecutor.ExecuteAsync<IDiscordChatExportService>(async x =>
+                            await x.ExportToHtmlAsync(args.Interaction));
+                        break;
+                }
 
-        public Task DiscordOnChannelCreated(DiscordClient sender, ChannelCreateEventArgs args)
-        {
-            return Task.CompletedTask;
+                break;
         }
+    }
 
-        public Task DiscordOnChannelUpdated(DiscordClient sender, ChannelUpdateEventArgs args)
-        {
-            return Task.CompletedTask;
-        }
-
-        public Task DiscordOnChannelDeleted(DiscordClient sender, ChannelDeleteEventArgs args)
-        {
-            _ = _asyncExecutor.ExecuteAsync<ITicketService>(async x =>
-                await x.CheckForDeletedTicketChannelAsync(args.Channel.Id, args.Guild.Id, sender.CurrentUser.Id));
-            return Task.CompletedTask;
-        }
-
-        public Task DiscordOnDmChannelDeleted(DiscordClient sender, DmChannelDeleteEventArgs args)
-        {
-            return Task.CompletedTask;
-        }
-
-        public Task DiscordOnChannelPinsUpdated(DiscordClient sender, ChannelPinsUpdateEventArgs args)
-        {
-            return Task.CompletedTask;
-        }
-
-        public async Task DiscordOnComponentInteractionCreated(DiscordClient sender,
-            ComponentInteractionCreateEventArgs args)
-        {
-            switch (args.Id)
-            {
-                case nameof(TicketButton.TicketCloseButton):
-                    await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
-                    var closeReq = new TicketCloseReqDto(null, null, args.Guild.Id, args.Channel.Id, args.User.Id);
-                    _ = _asyncExecutor.ExecuteAsync<IDiscordTicketService>(async x =>
-                        await x.CloseTicketAsync(args.Interaction, closeReq));
-                    break;
-                case nameof(TicketButton.TicketOpenButton):
-                    await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
-                        new DiscordInteractionResponseBuilder().AsEphemeral(true));
-                    var openReq = new TicketOpenReqDto
-                        { GuildId = args.Guild.Id, RequestedOnBehalfOfId = args.User.Id };
-                    _ = _asyncExecutor.ExecuteAsync<IDiscordTicketService>(async x =>
-                        await x.OpenTicketAsync(args.Interaction, openReq));
-                    break;
-                case nameof(TicketSelect.TicketCloseMessageSelect):
-                    await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
-                    switch (args.Values[0])
-                    {
-                        case nameof(TicketSelectValue.TicketReopenValue):
-                            var req = new TicketReopenReqDto
-                            {
-                                GuildId = args.Guild.Id, ChannelId = args.Channel.Id,
-                                RequestedOnBehalfOfId = args.User.Id
-                            };
-                            _ = _asyncExecutor.ExecuteAsync<IDiscordTicketService>(async x =>
-                                await x.ReopenTicketAsync(args.Interaction, req));
-                            break;
-                        case nameof(TicketSelectValue.TicketTranscriptValue):
-                            _ = _asyncExecutor.ExecuteAsync<IDiscordChatExportService>(async x =>
-                                await x.ExportToHtmlAsync(args.Interaction));
-                            break;
-                    }
-
-                    break;
-            }
-        }
-
-        public Task DiscordOnClientErrored(DiscordClient sender, ClientErrorEventArgs args)
-        {
-            //_logger.LogError(args.Exception.GetFullMessage());
-            return Task.CompletedTask;
-        }
+    public Task DiscordOnClientErrored(DiscordClient sender, ClientErrorEventArgs args)
+    {
+        //_logger.LogError(args.Exception.GetFullMessage());
+        return Task.CompletedTask;
     }
 }

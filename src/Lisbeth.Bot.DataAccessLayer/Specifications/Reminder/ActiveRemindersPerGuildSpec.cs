@@ -17,14 +17,13 @@
 
 using MikyM.Common.DataAccessLayer.Specifications;
 
-namespace Lisbeth.Bot.DataAccessLayer.Specifications.Reminder
+namespace Lisbeth.Bot.DataAccessLayer.Specifications.Reminder;
+
+public class ActiveRemindersPerGuildSpec : Specification<Domain.Entities.Reminder>
 {
-    public class ActiveRemindersPerGuildSpec : Specification<Domain.Entities.Reminder>
+    public ActiveRemindersPerGuildSpec(ulong guildId)
     {
-        public ActiveRemindersPerGuildSpec(ulong guildId)
-        {
-            Where(x => x.GuildId == guildId);
-            Where(x => !x.IsDisabled);
-        }
+        Where(x => x.GuildId == guildId);
+        Where(x => !x.IsDisabled);
     }
 }

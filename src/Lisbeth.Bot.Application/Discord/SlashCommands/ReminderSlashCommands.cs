@@ -36,170 +36,169 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace Lisbeth.Bot.Application.Discord.SlashCommands
+namespace Lisbeth.Bot.Application.Discord.SlashCommands;
+
+[UsedImplicitly]
+[SlashModuleLifespan(SlashModuleLifespan.Transient)]
+public class ReminderSlashCommands : ExtendedApplicationCommandModule
 {
+    [UsedImplicitly] public IDiscordReminderService? ReminderService { private get; set; }
+    [UsedImplicitly] public IDiscordEmbedConfiguratorService<Reminder>? ReminderEmbedConfiguratorService { private get; set; }
+
     [UsedImplicitly]
-    [SlashModuleLifespan(SlashModuleLifespan.Transient)]
-    public class ReminderSlashCommands : ExtendedApplicationCommandModule
+    public IDiscordEmbedConfiguratorService<RecurringReminder>? RecurringReminderEmbedConfiguratorService
     {
-        [UsedImplicitly] public IDiscordReminderService? ReminderService { private get; set; }
-        [UsedImplicitly] public IDiscordEmbedConfiguratorService<Reminder>? ReminderEmbedConfiguratorService { private get; set; }
+        private get;
+        set;
+    }
 
-        [UsedImplicitly]
-        public IDiscordEmbedConfiguratorService<RecurringReminder>? RecurringReminderEmbedConfiguratorService
+    [UsedImplicitly]
+    [SlashCommand("reminder", "Single reminder command")]
+    public async Task SingleReminderCommand(InteractionContext ctx,
+        [Option("action", "Action to perform")]
+        ReminderActionType actionType,
+        [Option("reminder-type", "Type of the reminder")]
+        ReminderType reminderType,
+        [Option("text", "What to remind about")]
+        string text = "default",
+        [Option("for-time", "Datetime, cron expression or string a representation")]
+        string time = "",
+        [Option("mentions", "Role, channel or user mentions - defaults to creator mention")]
+        string mentions = "",
+        [Option("name-or-id", "Reminder's name")]
+        string name = "",
+        [Option("channel", "Channel to send the message to")]
+        DiscordChannel? channel = null)
+    {
+        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+        Result<DiscordEmbed> result;
+
+        bool isValidDateTime = DateTime.TryParseExact(time, "dd/MM/yyyy hh:mm tt", DateTimeFormatInfo.InvariantInfo,
+            DateTimeStyles.None, out DateTime parsedDateTime);
+        bool isValidTime = DateTime.TryParseExact(time, "hh:mm tt", DateTimeFormatInfo.InvariantInfo,
+            DateTimeStyles.None, out DateTime parsedTime);
+        bool isValidStringRep = time.TryParseToDurationAndNextOccurrence(out _, out _);
+        bool isValidCron = true;
+        string exMessage = "";
+
+        try
         {
-            private get;
-            set;
+            CrontabSchedule.Parse(time);
         }
-
-        [UsedImplicitly]
-        [SlashCommand("reminder", "Single reminder command")]
-        public async Task SingleReminderCommand(InteractionContext ctx,
-            [Option("action", "Action to perform")]
-            ReminderActionType actionType,
-            [Option("reminder-type", "Type of the reminder")]
-            ReminderType reminderType,
-            [Option("text", "What to remind about")]
-            string text = "default",
-            [Option("for-time", "Datetime, cron expression or string a representation")]
-            string time = "",
-            [Option("mentions", "Role, channel or user mentions - defaults to creator mention")]
-            string mentions = "",
-            [Option("name-or-id", "Reminder's name")]
-            string name = "",
-            [Option("channel", "Channel to send the message to")]
-            DiscordChannel? channel = null)
+        catch (Exception ex)
         {
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
-            Result<DiscordEmbed> result;
-
-            bool isValidDateTime = DateTime.TryParseExact(time, "dd/MM/yyyy hh:mm tt", DateTimeFormatInfo.InvariantInfo,
-                DateTimeStyles.None, out DateTime parsedDateTime);
-            bool isValidTime = DateTime.TryParseExact(time, "hh:mm tt", DateTimeFormatInfo.InvariantInfo,
-                DateTimeStyles.None, out DateTime parsedTime);
-            bool isValidStringRep = time.TryParseToDurationAndNextOccurrence(out _, out _);
-            bool isValidCron = true;
-            string exMessage = "";
-
+            exMessage = ex.Message;
             try
             {
-                CrontabSchedule.Parse(time);
+                CrontabSchedule.Parse(time, new CrontabSchedule.ParseOptions{IncludingSeconds = true});
             }
-            catch (Exception ex)
+            catch (Exception inner)
             {
-                exMessage = ex.Message;
-                try
-                {
-                    CrontabSchedule.Parse(time, new CrontabSchedule.ParseOptions{IncludingSeconds = true});
-                }
-                catch (Exception inner)
-                {
-                    isValidCron = false;
-                    exMessage = exMessage + "Error while trying to parse including seconds: " + inner.Message;
-                }
+                isValidCron = false;
+                exMessage = exMessage + "Error while trying to parse including seconds: " + inner.Message;
             }
+        }
             
-            if (mentions.Length > 500) throw new ArgumentException(nameof(mentions));
+        if (mentions.Length > 500) throw new ArgumentException(nameof(mentions));
 
-            var mentionList = mentions is ""
-                ? new List<string> { ctx.Member.Mention }
-                : Regex.Matches(mentions, @"\<[^<>]*\>").Select(m => m.Value).ToList();
-            mentionList.RemoveAll(string.IsNullOrWhiteSpace);
+        var mentionList = mentions is ""
+            ? new List<string> { ctx.Member.Mention }
+            : Regex.Matches(mentions, @"\<[^<>]*\>").Select(m => m.Value).ToList();
+        mentionList.RemoveAll(string.IsNullOrWhiteSpace);
 
-            switch (actionType)
-            {
-                case ReminderActionType.Set or ReminderActionType.Reschedule
-                    when !isValidCron && !isValidDateTime && !isValidStringRep && !isValidTime:
-                    throw new ArgumentException("Couldn't parse given time representation", nameof(time));
-                case ReminderActionType.Set or ReminderActionType.Reschedule when reminderType is ReminderType.Single &&
-                    isValidCron && !isValidDateTime && !isValidStringRep && !isValidTime:
-                    throw new ArgumentException("Single reminders can't take a cron expression as an argument",
-                        nameof(time));
-                case ReminderActionType.Set or ReminderActionType.Reschedule
-                    when reminderType is ReminderType.Recurring && !isValidCron && (isValidDateTime || isValidStringRep || isValidTime):
-                    throw new ArgumentException($"Recurring reminders only accepts a valid cron expression as an argument. \n {exMessage}",
-                        nameof(time));
-                default:
-                    switch (actionType)
-                    {
-                        case ReminderActionType.Set:
-                            if (reminderType is ReminderType.Single && name is "") name = $"{ctx.Guild.Id}_{ctx.User.Id}_{DateTime.UtcNow}";
-
-                            var setReq = new SetReminderReqDto(name, isValidCron && !isValidDateTime && !isValidTime ? time : null,
-                                isValidDateTime ? parsedDateTime : isValidTime ? DateTime.UtcNow.Date.Add(parsedTime.TimeOfDay) : null, isValidStringRep ? time : null, text,
-                                mentionList, ctx.Guild.Id, ctx.Member.Id, channel?.Id);
-                            var setReqValidator = new SetReminderReqValidator(ctx.Client);
-                            await setReqValidator.ValidateAndThrowAsync(setReq);
-                            result = await this.ReminderService!.SetNewReminderAsync(ctx, setReq);
-                            break;
-                        case ReminderActionType.Reschedule:
-                            var rescheduleReq = new RescheduleReminderReqDto(name, isValidCron ? time : null,
-                                isValidDateTime ? parsedDateTime : null, isValidStringRep ? time : null, ctx.Guild.Id,
-                                ctx.Member.Id, name.IsDigitsOnly() ? long.Parse(name) : null);
-                            var rescheduleReqValidator = new RescheduleReminderReqValidator(ctx.Client);
-                            await rescheduleReqValidator.ValidateAndThrowAsync(rescheduleReq);
-                            result = await this.ReminderService!.RescheduleReminderAsync(ctx, rescheduleReq);
-                            break;
-                        case ReminderActionType.ConfigureEmbed:
-                            switch (reminderType)
-                            {
-                                case ReminderType.Single:
-                                    var res = await this.ReminderEmbedConfiguratorService!.ConfigureAsync(ctx, name);
-                                    if (res.IsDefined())
-                                        await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(res.Entity));
-                                    else
-                                        await ctx.EditResponseAsync(
-                                            new DiscordWebhookBuilder().AddEmbed(
-                                                GetUnsuccessfulResultEmbed(res, ctx.Client)));
-                                    return;
-                                case ReminderType.Recurring:
-                                    var resRec =
-                                        await this.RecurringReminderEmbedConfiguratorService!.ConfigureAsync(ctx, name);
-                                    if (resRec.IsDefined())
-                                        await ctx.EditResponseAsync(
-                                            new DiscordWebhookBuilder().AddEmbed(resRec.Entity));
-                                    else
-                                        await ctx.EditResponseAsync(
-                                            new DiscordWebhookBuilder().AddEmbed(
-                                                GetUnsuccessfulResultEmbed(resRec, ctx.Client)));
-                                    return;
-                                default:
-                                    throw new ArgumentOutOfRangeException(nameof(reminderType), reminderType, null);
-                            }
-                        case ReminderActionType.Disable:
-                            var disableReq = new DisableReminderReqDto(reminderType, name, ctx.Guild.Id, ctx.Member.Id,
-                                name.IsDigitsOnly() ? long.Parse(name) : null);
-                            var disableReqValidator = new DisableReminderReqValidator(ctx.Client);
-                            await disableReqValidator.ValidateAndThrowAsync(disableReq);
-                            result = await this.ReminderService!.DisableReminderAsync(ctx, disableReq);
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(actionType), actionType, null);
-                    }
-
-                    break;
-            }
-
-            if (result.IsDefined()) await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(result.Entity));
-            else
-                await ctx.EditResponseAsync(
-                    new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(result, ctx.Client)));
-        }
-
-        [UsedImplicitly]
-        [SlashCommand("cron-help", "Single reminder command")]
-        public async Task SingleReminderCommand(InteractionContext ctx,
-            [Option("cron-expression", "Crone to parse")]
-            string cron)
+        switch (actionType)
         {
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+            case ReminderActionType.Set or ReminderActionType.Reschedule
+                when !isValidCron && !isValidDateTime && !isValidStringRep && !isValidTime:
+                throw new ArgumentException("Couldn't parse given time representation", nameof(time));
+            case ReminderActionType.Set or ReminderActionType.Reschedule when reminderType is ReminderType.Single &&
+                                                                              isValidCron && !isValidDateTime && !isValidStringRep && !isValidTime:
+                throw new ArgumentException("Single reminders can't take a cron expression as an argument",
+                    nameof(time));
+            case ReminderActionType.Set or ReminderActionType.Reschedule
+                when reminderType is ReminderType.Recurring && !isValidCron && (isValidDateTime || isValidStringRep || isValidTime):
+                throw new ArgumentException($"Recurring reminders only accepts a valid cron expression as an argument. \n {exMessage}",
+                    nameof(time));
+            default:
+                switch (actionType)
+                {
+                    case ReminderActionType.Set:
+                        if (reminderType is ReminderType.Single && name is "") name = $"{ctx.Guild.Id}_{ctx.User.Id}_{DateTime.UtcNow}";
 
-            var schedule = CrontabSchedule.TryParse(cron);
-            var scheduleOpt = CrontabSchedule.TryParse(cron, new CrontabSchedule.ParseOptions { IncludingSeconds = true });
-            var scheduleOptN = CrontabSchedule.TryParse(cron, new CrontabSchedule.ParseOptions { IncludingSeconds = false });
+                        var setReq = new SetReminderReqDto(name, isValidCron && !isValidDateTime && !isValidTime ? time : null,
+                            isValidDateTime ? parsedDateTime : isValidTime ? DateTime.UtcNow.Date.Add(parsedTime.TimeOfDay) : null, isValidStringRep ? time : null, text,
+                            mentionList, ctx.Guild.Id, ctx.Member.Id, channel?.Id);
+                        var setReqValidator = new SetReminderReqValidator(ctx.Client);
+                        await setReqValidator.ValidateAndThrowAsync(setReq);
+                        result = await this.ReminderService!.SetNewReminderAsync(ctx, setReq);
+                        break;
+                    case ReminderActionType.Reschedule:
+                        var rescheduleReq = new RescheduleReminderReqDto(name, isValidCron ? time : null,
+                            isValidDateTime ? parsedDateTime : null, isValidStringRep ? time : null, ctx.Guild.Id,
+                            ctx.Member.Id, name.IsDigitsOnly() ? long.Parse(name) : null);
+                        var rescheduleReqValidator = new RescheduleReminderReqValidator(ctx.Client);
+                        await rescheduleReqValidator.ValidateAndThrowAsync(rescheduleReq);
+                        result = await this.ReminderService!.RescheduleReminderAsync(ctx, rescheduleReq);
+                        break;
+                    case ReminderActionType.ConfigureEmbed:
+                        switch (reminderType)
+                        {
+                            case ReminderType.Single:
+                                var res = await this.ReminderEmbedConfiguratorService!.ConfigureAsync(ctx, name);
+                                if (res.IsDefined())
+                                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(res.Entity));
+                                else
+                                    await ctx.EditResponseAsync(
+                                        new DiscordWebhookBuilder().AddEmbed(
+                                            GetUnsuccessfulResultEmbed(res, ctx.Client)));
+                                return;
+                            case ReminderType.Recurring:
+                                var resRec =
+                                    await this.RecurringReminderEmbedConfiguratorService!.ConfigureAsync(ctx, name);
+                                if (resRec.IsDefined())
+                                    await ctx.EditResponseAsync(
+                                        new DiscordWebhookBuilder().AddEmbed(resRec.Entity));
+                                else
+                                    await ctx.EditResponseAsync(
+                                        new DiscordWebhookBuilder().AddEmbed(
+                                            GetUnsuccessfulResultEmbed(resRec, ctx.Client)));
+                                return;
+                            default:
+                                throw new ArgumentOutOfRangeException(nameof(reminderType), reminderType, null);
+                        }
+                    case ReminderActionType.Disable:
+                        var disableReq = new DisableReminderReqDto(reminderType, name, ctx.Guild.Id, ctx.Member.Id,
+                            name.IsDigitsOnly() ? long.Parse(name) : null);
+                        var disableReqValidator = new DisableReminderReqValidator(ctx.Client);
+                        await disableReqValidator.ValidateAndThrowAsync(disableReq);
+                        result = await this.ReminderService!.DisableReminderAsync(ctx, disableReq);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(actionType), actionType, null);
+                }
 
-            await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent(
-                $"Schedule: {(schedule is null ? "null" : $"{schedule.GetNextOccurrence(DateTime.UtcNow)}")} \n\n Schedule: {(scheduleOpt is null ? "null" : $"{scheduleOpt.GetNextOccurrence(DateTime.UtcNow)}")} \n\n Schedule: {(scheduleOptN is null ? "null" : $"{scheduleOptN.GetNextOccurrence(DateTime.UtcNow)}")}"));
+                break;
         }
+
+        if (result.IsDefined()) await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(result.Entity));
+        else
+            await ctx.EditResponseAsync(
+                new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(result, ctx.Client)));
+    }
+
+    [UsedImplicitly]
+    [SlashCommand("cron-help", "Single reminder command")]
+    public async Task SingleReminderCommand(InteractionContext ctx,
+        [Option("cron-expression", "Crone to parse")]
+        string cron)
+    {
+        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+
+        var schedule = CrontabSchedule.TryParse(cron);
+        var scheduleOpt = CrontabSchedule.TryParse(cron, new CrontabSchedule.ParseOptions { IncludingSeconds = true });
+        var scheduleOptN = CrontabSchedule.TryParse(cron, new CrontabSchedule.ParseOptions { IncludingSeconds = false });
+
+        await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent(
+            $"Schedule: {(schedule is null ? "null" : $"{schedule.GetNextOccurrence(DateTime.UtcNow)}")} \n\n Schedule: {(scheduleOpt is null ? "null" : $"{scheduleOpt.GetNextOccurrence(DateTime.UtcNow)}")} \n\n Schedule: {(scheduleOptN is null ? "null" : $"{scheduleOptN.GetNextOccurrence(DateTime.UtcNow)}")}"));
     }
 }

@@ -19,23 +19,22 @@ using System;
 using System.Linq;
 using MikyM.Common.DataAccessLayer.Specifications.Extensions;
 
-namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators
+namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators;
+
+public class SearchEvaluator : IEvaluator
 {
-    public class SearchEvaluator : IEvaluator
+    private SearchEvaluator()
     {
-        private SearchEvaluator()
-        {
-        }
+    }
 
-        public static SearchEvaluator Instance { get; } = new();
+    public static SearchEvaluator Instance { get; } = new();
 
-        public bool IsCriteriaEvaluator { get; } = true;
+    public bool IsCriteriaEvaluator { get; } = true;
 
-        public IQueryable<T> GetQuery<T>(IQueryable<T> query, ISpecification<T> specification) where T : class
-        {
-            return (specification.SearchCriterias ?? throw new InvalidOperationException()).GroupBy(x => x.SearchGroup)
-                .Select(searchCriteria => searchCriteria.Select(x => (x.Selector, x.SearchTerm)))
-                .Aggregate(query, (current, criterias) => current.Search(criterias));
-        }
+    public IQueryable<T> GetQuery<T>(IQueryable<T> query, ISpecification<T> specification) where T : class
+    {
+        return (specification.SearchCriterias ?? throw new InvalidOperationException()).GroupBy(x => x.SearchGroup)
+            .Select(searchCriteria => searchCriteria.Select(x => (x.Selector, x.SearchTerm)))
+            .Aggregate(query, (current, criterias) => current.Search(criterias));
     }
 }

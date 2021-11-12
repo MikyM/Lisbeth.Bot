@@ -17,10 +17,9 @@
 
 using MikyM.Common.Application.Results;
 
-namespace Lisbeth.Bot.Application.Results
-{
-    /// <summary>
-    ///     Represents a generic discord error.
-    /// </summary>
-    public record DiscordError(string Message = "Discord errored.") : ResultError(Message);
-}
+namespace Lisbeth.Bot.Application.Results;
+
+/// <summary>
+///     Represents a generic discord error.
+/// </summary>
+public record DiscordError(string Message = "Discord errored.") : ResultError(Message);

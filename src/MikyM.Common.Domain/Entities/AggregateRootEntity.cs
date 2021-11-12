@@ -15,9 +15,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace MikyM.Common.Domain.Entities
+namespace MikyM.Common.Domain.Entities;
+
+public class AggregateRootEntity : Entity
 {
-    public class AggregateRootEntity : Entity
-    {
-    }
 }

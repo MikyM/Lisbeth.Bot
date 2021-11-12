@@ -18,13 +18,12 @@
 using System.Collections.Generic;
 using Lisbeth.Bot.Domain.DTOs.Request.Base;
 
-namespace Lisbeth.Bot.Domain.DTOs.Request.RoleMenu
+namespace Lisbeth.Bot.Domain.DTOs.Request.RoleMenu;
+
+public class RoleMenuAddReqDto : BaseAuthWithGuildReqDto
 {
-    public class RoleMenuAddReqDto : BaseAuthWithGuildReqDto
-    {
-        public string? Text { get; set; }
-        public string? Name { get; set; }
-        public List<RoleMenuOptionReqDto>? RoleMenuOptions { get; set; }
-        public EmbedConfigDto? EmbedConfig { get; set; }
-    }
+    public string? Text { get; set; }
+    public string? Name { get; set; }
+    public List<RoleMenuOptionReqDto>? RoleMenuOptions { get; set; }
+    public EmbedConfigDto? EmbedConfig { get; set; }
 }

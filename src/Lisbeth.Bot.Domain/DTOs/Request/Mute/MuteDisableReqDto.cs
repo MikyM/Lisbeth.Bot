@@ -17,25 +17,24 @@
 
 using System;
 
-namespace Lisbeth.Bot.Domain.DTOs.Request.Mute
+namespace Lisbeth.Bot.Domain.DTOs.Request.Mute;
+
+public class MuteDisableReqDto
 {
-    public class MuteDisableReqDto
+    public MuteDisableReqDto()
     {
-        public MuteDisableReqDto()
-        {
-        }
-
-        public MuteDisableReqDto(ulong? targetUserId, ulong? guildId, ulong requestedOnBehalfOfId)
-        {
-            TargetUserId = targetUserId;
-            GuildId = guildId;
-            RequestedOnBehalfOfId = requestedOnBehalfOfId;
-        }
-
-        public long? Id { get; set; }
-        public ulong? TargetUserId { get; set; }
-        public ulong? GuildId { get; set; }
-        public DateTime LiftedOn { get; set; } = DateTime.UtcNow;
-        public ulong RequestedOnBehalfOfId { get; set; }
     }
+
+    public MuteDisableReqDto(ulong? targetUserId, ulong? guildId, ulong requestedOnBehalfOfId)
+    {
+        TargetUserId = targetUserId;
+        GuildId = guildId;
+        RequestedOnBehalfOfId = requestedOnBehalfOfId;
+    }
+
+    public long? Id { get; set; }
+    public ulong? TargetUserId { get; set; }
+    public ulong? GuildId { get; set; }
+    public DateTime LiftedOn { get; set; } = DateTime.UtcNow;
+    public ulong RequestedOnBehalfOfId { get; set; }
 }

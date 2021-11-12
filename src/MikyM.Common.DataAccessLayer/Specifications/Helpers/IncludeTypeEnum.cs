@@ -15,11 +15,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace MikyM.Common.DataAccessLayer.Specifications.Helpers
+namespace MikyM.Common.DataAccessLayer.Specifications.Helpers;
+
+public enum IncludeTypeEnum
 {
-    public enum IncludeTypeEnum
-    {
-        Include = 1,
-        ThenInclude = 2
-    }
+    Include = 1,
+    ThenInclude = 2
 }

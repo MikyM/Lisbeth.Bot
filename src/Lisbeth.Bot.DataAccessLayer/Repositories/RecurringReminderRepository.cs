@@ -21,13 +21,12 @@ using Microsoft.EntityFrameworkCore;
 using MikyM.Common.DataAccessLayer.Repositories;
 using MikyM.Common.DataAccessLayer.Specifications.Evaluators;
 
-namespace Lisbeth.Bot.DataAccessLayer.Repositories
+namespace Lisbeth.Bot.DataAccessLayer.Repositories;
+
+public class RecurringReminderRepository : Repository<RecurringReminder>, IRecurringReminderRepository
 {
-    public class RecurringReminderRepository : Repository<RecurringReminder>, IRecurringReminderRepository
+    public RecurringReminderRepository(DbContext context, ISpecificationEvaluator evaluator) : base(context,
+        evaluator)
     {
-        public RecurringReminderRepository(DbContext context, ISpecificationEvaluator evaluator) : base(context,
-            evaluator)
-        {
-        }
     }
 }

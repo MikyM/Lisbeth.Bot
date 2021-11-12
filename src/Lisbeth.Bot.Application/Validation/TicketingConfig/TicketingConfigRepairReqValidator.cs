@@ -21,20 +21,19 @@ using Lisbeth.Bot.Application.Validation.ReusablePropertyValidation;
 using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
 using MikyM.Discord.Interfaces;
 
-namespace Lisbeth.Bot.Application.Validation.TicketingConfig
-{
-    public class TicketingConfigRepairReqValidator : AbstractValidator<TicketingConfigRepairReqDto>
-    {
-        public TicketingConfigRepairReqValidator(IDiscordService discord) : this(discord.Client)
-        {
-        }
+namespace Lisbeth.Bot.Application.Validation.TicketingConfig;
 
-        public TicketingConfigRepairReqValidator(DiscordClient client)
-        {
-            RuleFor(x => x.GuildId)
-                .SetAsyncValidator(new DiscordGuildIdValidator<TicketingConfigRepairReqDto>(client));
-            RuleFor(x => x.RequestedOnBehalfOfId)
-                .SetAsyncValidator(new DiscordUserIdValidator<TicketingConfigRepairReqDto>(client));
-        }
+public class TicketingConfigRepairReqValidator : AbstractValidator<TicketingConfigRepairReqDto>
+{
+    public TicketingConfigRepairReqValidator(IDiscordService discord) : this(discord.Client)
+    {
+    }
+
+    public TicketingConfigRepairReqValidator(DiscordClient client)
+    {
+        RuleFor(x => x.GuildId)
+            .SetAsyncValidator(new DiscordGuildIdValidator<TicketingConfigRepairReqDto>(client));
+        RuleFor(x => x.RequestedOnBehalfOfId)
+            .SetAsyncValidator(new DiscordUserIdValidator<TicketingConfigRepairReqDto>(client));
     }
 }

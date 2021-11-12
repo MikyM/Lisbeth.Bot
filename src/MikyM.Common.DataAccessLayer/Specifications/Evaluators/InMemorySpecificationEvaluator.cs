@@ -19,43 +19,42 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators
+namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators;
+
+public class InMemorySpecificationEvaluator : IInMemorySpecificationEvaluator
 {
-    public class InMemorySpecificationEvaluator : IInMemorySpecificationEvaluator
+    private readonly List<IInMemoryEvaluator> _evaluators = new();
+
+    public InMemorySpecificationEvaluator()
     {
-        private readonly List<IInMemoryEvaluator> _evaluators = new();
-
-        public InMemorySpecificationEvaluator()
+        _evaluators.AddRange(new IInMemoryEvaluator[]
         {
-            _evaluators.AddRange(new IInMemoryEvaluator[]
-            {
-                WhereEvaluator.Instance,
-                OrderEvaluator.Instance,
-                PaginationEvaluator.Instance,
-                GroupByEvaluator.Instance
-            });
-        }
+            WhereEvaluator.Instance,
+            OrderEvaluator.Instance,
+            PaginationEvaluator.Instance,
+            GroupByEvaluator.Instance
+        });
+    }
 
-        public InMemorySpecificationEvaluator(IEnumerable<IInMemoryEvaluator> evaluators)
-        {
-            _evaluators.AddRange(evaluators);
-        }
+    public InMemorySpecificationEvaluator(IEnumerable<IInMemoryEvaluator> evaluators)
+    {
+        _evaluators.AddRange(evaluators);
+    }
 
-        // Will use singleton for default configuration. Yet, it can be instantiated if necessary, with default or provided evaluators.
-        public static InMemorySpecificationEvaluator Default { get; } = new();
+    // Will use singleton for default configuration. Yet, it can be instantiated if necessary, with default or provided evaluators.
+    public static InMemorySpecificationEvaluator Default { get; } = new();
 
-        public virtual IEnumerable<T> Evaluate<T>(IEnumerable<T> source, ISpecification<T> specification)
-            where T : class
-        {
-            if ((specification.SearchCriterias ?? throw new InvalidOperationException()).Any())
-                throw new NotSupportedException(
-                    "The specification contains Search expressions and can't be evaluated with in-memory evaluator.");
+    public virtual IEnumerable<T> Evaluate<T>(IEnumerable<T> source, ISpecification<T> specification)
+        where T : class
+    {
+        if ((specification.SearchCriterias ?? throw new InvalidOperationException()).Any())
+            throw new NotSupportedException(
+                "The specification contains Search expressions and can't be evaluated with in-memory evaluator.");
 
-            source = _evaluators.Aggregate(source, (current, evaluator) => evaluator.Evaluate(current, specification));
+        source = _evaluators.Aggregate(source, (current, evaluator) => evaluator.Evaluate(current, specification));
 
-            return specification.PostProcessingAction is null
-                ? source
-                : specification.PostProcessingAction(source);
-        }
+        return specification.PostProcessingAction is null
+            ? source
+            : specification.PostProcessingAction(source);
     }
 }

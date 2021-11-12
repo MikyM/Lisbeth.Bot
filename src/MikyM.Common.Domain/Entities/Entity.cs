@@ -17,95 +17,94 @@
 
 using System;
 
-namespace MikyM.Common.Domain.Entities
-{
-    public abstract class Entity : Entity<long>
-    {
-        protected Entity()
-        {
-        }
+namespace MikyM.Common.Domain.Entities;
 
-        protected Entity(long id)
-            : base(id)
-        {
-        }
+public abstract class Entity : Entity<long>
+{
+    protected Entity()
+    {
     }
 
-    public abstract class Entity<TId>
+    protected Entity(long id)
+        : base(id)
     {
-        protected Entity()
-        {
-            CreatedAt ??= DateTime.UtcNow;
-            UpdatedAt ??= CreatedAt;
-        }
+    }
+}
 
-        protected Entity(TId id)
-        {
-            CreatedAt ??= DateTime.UtcNow;
-            UpdatedAt ??= CreatedAt;
-            Id = id;
-        }
+public abstract class Entity<TId>
+{
+    protected Entity()
+    {
+        CreatedAt ??= DateTime.UtcNow;
+        UpdatedAt ??= CreatedAt;
+    }
 
-        public virtual TId Id { get; protected set; }
-        public virtual DateTime? CreatedAt { get; set; }
-        public virtual DateTime? UpdatedAt { get; set; }
-        public virtual bool IsDisabled { get; set; }
+    protected Entity(TId id)
+    {
+        CreatedAt ??= DateTime.UtcNow;
+        UpdatedAt ??= CreatedAt;
+        Id = id;
+    }
 
-        public override string ToString()
-        {
-            return Id.ToString();
-        }
+    public virtual TId Id { get; protected set; }
+    public virtual DateTime? CreatedAt { get; set; }
+    public virtual DateTime? UpdatedAt { get; set; }
+    public virtual bool IsDisabled { get; set; }
 
-        public override bool Equals(object obj)
-        {
-            if (obj is not Entity<TId> other)
-                return false;
+    public override string ToString()
+    {
+        return Id.ToString();
+    }
 
-            if (ReferenceEquals(this, other))
-                return true;
+    public override bool Equals(object obj)
+    {
+        if (obj is not Entity<TId> other)
+            return false;
 
-            if (GetUnproxiedType(this) != GetUnproxiedType(other))
-                return false;
+        if (ReferenceEquals(this, other))
+            return true;
 
-            if (Id.Equals(default) || other.Id.Equals(default))
-                return false;
+        if (GetUnproxiedType(this) != GetUnproxiedType(other))
+            return false;
 
-            return Id.Equals(other.Id);
-        }
+        if (Id.Equals(default) || other.Id.Equals(default))
+            return false;
 
-        public static bool operator ==(Entity<TId> a, Entity<TId> b)
-        {
-            if (a  is null && b  is null)
-                return true;
+        return Id.Equals(other.Id);
+    }
 
-            if (a  is null || b  is null)
-                return false;
+    public static bool operator ==(Entity<TId> a, Entity<TId> b)
+    {
+        if (a  is null && b  is null)
+            return true;
 
-            return a.Equals(b);
-        }
+        if (a  is null || b  is null)
+            return false;
 
-        public static bool operator !=(Entity<TId> a, Entity<TId> b)
-        {
-            return !(a == b);
-        }
+        return a.Equals(b);
+    }
 
-        public override int GetHashCode()
-        {
-            return (GetUnproxiedType(this).ToString() + Id).GetHashCode();
-        }
+    public static bool operator !=(Entity<TId> a, Entity<TId> b)
+    {
+        return !(a == b);
+    }
 
-        internal static Type GetUnproxiedType(object obj)
-        {
-            const string EFCoreProxyPrefix = "Castle.Proxies.";
-            const string NHibernateProxyPostfix = "Proxy";
+    public override int GetHashCode()
+    {
+        return (GetUnproxiedType(this).ToString() + Id).GetHashCode();
+    }
 
-            Type type = obj.GetType();
-            string typeString = type.ToString();
+    internal static Type GetUnproxiedType(object obj)
+    {
+        const string EFCoreProxyPrefix = "Castle.Proxies.";
+        const string NHibernateProxyPostfix = "Proxy";
 
-            if (typeString.Contains(EFCoreProxyPrefix) || typeString.EndsWith(NHibernateProxyPostfix))
-                return type.BaseType;
+        Type type = obj.GetType();
+        string typeString = type.ToString();
 
-            return type;
-        }
+        if (typeString.Contains(EFCoreProxyPrefix) || typeString.EndsWith(NHibernateProxyPostfix))
+            return type.BaseType;
+
+        return type;
     }
 }

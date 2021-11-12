@@ -24,60 +24,47 @@ using Emzi0767.Utilities;
 using FluentValidation;
 using FluentValidation.Validators;
 
-namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
+namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation;
+
+public sealed class DiscordChannelIdValidator<T> : IAsyncPropertyValidator<T, ulong>
 {
-    public sealed class DiscordChannelIdValidator<T> : IAsyncPropertyValidator<T, ulong>
+    private readonly DiscordClient _discord;
+    private readonly bool _suppressGuildCheck;
+    private bool _doesGuildExist = true;
+    private object? _guildId;
+
+    public DiscordChannelIdValidator(DiscordClient discord, bool suppressGuildCheck = false)
     {
-        private readonly DiscordClient _discord;
-        private readonly bool _suppressGuildCheck;
-        private bool _doesGuildExist = true;
-        private object? _guildId;
+        _discord = discord;
+        _suppressGuildCheck = suppressGuildCheck;
+    }
 
-        public DiscordChannelIdValidator(DiscordClient discord, bool suppressGuildCheck = false)
+    public async Task<bool> IsValidAsync(ValidationContext<T> context, ulong value, CancellationToken cancellation)
+    {
+        var data = context.InstanceToValidate.ToDictionary();
+        if (data.TryGetValue("GuildId", out _guildId))
         {
-            _discord = discord;
-            _suppressGuildCheck = suppressGuildCheck;
-        }
-
-        public async Task<bool> IsValidAsync(ValidationContext<T> context, ulong value, CancellationToken cancellation)
-        {
-            var data = context.InstanceToValidate.ToDictionary();
-            if (data.TryGetValue("GuildId", out _guildId))
+            DiscordGuild guild;
+            try
             {
-                DiscordGuild guild;
-                try
-                {
-                    guild = await _discord.GetGuildAsync((ulong)_guildId);
-                    if (guild is null)
-                    {
-                        _doesGuildExist = false;
-                        return false;
-                    }
-                }
-                catch (Exception)
+                guild = await _discord.GetGuildAsync((ulong)_guildId);
+                if (guild is null)
                 {
                     _doesGuildExist = false;
                     return false;
                 }
-
-                try
-                {
-                    var channel = await _discord.GetChannelAsync(value);
-                    if (channel is null) return false;
-                    if (!_suppressGuildCheck && channel.Guild.Id != guild.Id) return false;
-                }
-                catch (Exception)
-                {
-                    return false;
-                }
-
-                return true;
+            }
+            catch (Exception)
+            {
+                _doesGuildExist = false;
+                return false;
             }
 
             try
             {
-                var channel = _discord.GetChannelAsync(value);
+                var channel = await _discord.GetChannelAsync(value);
                 if (channel is null) return false;
+                if (!_suppressGuildCheck && channel.Guild.Id != guild.Id) return false;
             }
             catch (Exception)
             {
@@ -87,13 +74,25 @@ namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
             return true;
         }
 
-        public string GetDefaultMessageTemplate(string errorCode)
+        try
         {
-            return _doesGuildExist
-                ? "'{PropertyName}' is not a valid Discord Id or a discord channel with given Id doesn't exist."
-                : "'{PropertyName}' is not a valid Discord Id or a discord guild with given Id doesn't exist.";
+            var channel = _discord.GetChannelAsync(value);
+            if (channel is null) return false;
+        }
+        catch (Exception)
+        {
+            return false;
         }
 
-        public string Name => "DiscordChannelIdValidator";
+        return true;
     }
+
+    public string GetDefaultMessageTemplate(string errorCode)
+    {
+        return _doesGuildExist
+            ? "'{PropertyName}' is not a valid Discord Id or a discord channel with given Id doesn't exist."
+            : "'{PropertyName}' is not a valid Discord Id or a discord guild with given Id doesn't exist.";
+    }
+
+    public string Name => "DiscordChannelIdValidator";
 }

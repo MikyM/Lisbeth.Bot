@@ -19,36 +19,35 @@
 using Hangfire.Client;
 using Hangfire.States;
 
-namespace Lisbeth.Bot.Application.Hangfire
+namespace Lisbeth.Bot.Application.Hangfire;
+
+public sealed class QueueFilter : IClientFilter, IElectStateFilter
 {
-    public sealed class QueueFilter : IClientFilter, IElectStateFilter
+    public const string QueueParameterName = "Queue";
+
+    public void OnCreating(CreatingContext filterContext)
     {
-        public const string QueueParameterName = "Queue";
+        // not needed
+    }
 
-        public void OnCreating(CreatingContext filterContext)
+    public void OnCreated(CreatedContext filterContext)
+    {
+        string? queue = filterContext.InitialState switch
         {
-            // not needed
-        }
+            EnqueuedState enqueuedState => enqueuedState.Queue,
+            ScheduledEnqueuedState scheduledEnqueuedState => scheduledEnqueuedState.Queue,
+            _ => null
+        };
 
-        public void OnCreated(CreatedContext filterContext)
-        {
-            string? queue = filterContext.InitialState switch
-            {
-                EnqueuedState enqueuedState => enqueuedState.Queue,
-                ScheduledEnqueuedState scheduledEnqueuedState => scheduledEnqueuedState.Queue,
-                _ => null
-            };
+        if (!string.IsNullOrWhiteSpace(queue)) filterContext.SetJobParameter(QueueParameterName, queue);
+    }
 
-            if (!string.IsNullOrWhiteSpace(queue)) filterContext.SetJobParameter(QueueParameterName, queue);
-        }
+    public void OnStateElection(ElectStateContext context)
+    {
+        if (context.CandidateState.Name != EnqueuedState.StateName) return;
 
-        public void OnStateElection(ElectStateContext context)
-        {
-            if (context.CandidateState.Name != EnqueuedState.StateName) return;
+        string queue = context.GetJobParameter<string>(QueueParameterName.Trim());
 
-            string queue = context.GetJobParameter<string>(QueueParameterName.Trim());
-
-            if (!string.IsNullOrWhiteSpace(queue)) context.CandidateState = new EnqueuedState(queue);
-        }
+        if (!string.IsNullOrWhiteSpace(queue)) context.CandidateState = new EnqueuedState(queue);
     }
 }

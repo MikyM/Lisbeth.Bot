@@ -4,23 +4,22 @@ using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
-namespace Lisbeth.Bot.API.Helpers
+namespace Lisbeth.Bot.API.Helpers;
+
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
+public class RestrictDomainAttribute : Attribute, IAuthorizationFilter
 {
-    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
-    public class RestrictDomainAttribute : Attribute, IAuthorizationFilter
+    public RestrictDomainAttribute(params string[] allowedHosts)
     {
-        public RestrictDomainAttribute(params string[] allowedHosts)
-        {
-            AllowedHosts = allowedHosts;
-        }
+        AllowedHosts = allowedHosts;
+    }
 
-        public IEnumerable<string> AllowedHosts { get; }
+    public IEnumerable<string> AllowedHosts { get; }
 
-        public void OnAuthorization(AuthorizationFilterContext context)
-        {
-            string host = context.HttpContext.Request.Host.Host;
-            if (!AllowedHosts.Contains(host, StringComparer.OrdinalIgnoreCase))
-                context.Result = new UnauthorizedResult();
-        }
+    public void OnAuthorization(AuthorizationFilterContext context)
+    {
+        string host = context.HttpContext.Request.Host.Host;
+        if (!AllowedHosts.Contains(host, StringComparer.OrdinalIgnoreCase))
+            context.Result = new UnauthorizedResult();
     }
 }

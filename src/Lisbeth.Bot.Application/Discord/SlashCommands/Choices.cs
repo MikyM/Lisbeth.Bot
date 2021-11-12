@@ -17,68 +17,67 @@
 
 using DSharpPlus.SlashCommands;
 
-namespace Lisbeth.Bot.Application.Discord.SlashCommands
+namespace Lisbeth.Bot.Application.Discord.SlashCommands;
+
+public enum BanActionType
 {
-    public enum BanActionType
-    {
-        [ChoiceName("add")] Add,
-        [ChoiceName("remove")] Remove,
-        [ChoiceName("get")] Get
-    }
+    [ChoiceName("add")] Add,
+    [ChoiceName("remove")] Remove,
+    [ChoiceName("get")] Get
+}
 
-    public enum MuteActionType
-    {
-        [ChoiceName("add")] Add,
-        [ChoiceName("remove")] Remove,
-        [ChoiceName("get")] Get
-    }
+public enum MuteActionType
+{
+    [ChoiceName("add")] Add,
+    [ChoiceName("remove")] Remove,
+    [ChoiceName("get")] Get
+}
 
-    public enum PruneActionType
-    {
-        [ChoiceName("add")] Add,
-        [ChoiceName("remove")] Remove,
-        [ChoiceName("get")] Get
-    }
+public enum PruneActionType
+{
+    [ChoiceName("add")] Add,
+    [ChoiceName("remove")] Remove,
+    [ChoiceName("get")] Get
+}
 
-    public enum TicketActionType
-    {
-        [ChoiceName("add")] Add,
-        [ChoiceName("remove")] Remove
-    }
+public enum TicketActionType
+{
+    [ChoiceName("add")] Add,
+    [ChoiceName("remove")] Remove
+}
 
-    public enum ReminderActionType
-    {
-        [ChoiceName("add")] Set,
-        [ChoiceName("reschedule")] Reschedule,
-        [ChoiceName("configure-embed")] ConfigureEmbed,
-        [ChoiceName("remove")] Disable
-    }
+public enum ReminderActionType
+{
+    [ChoiceName("add")] Set,
+    [ChoiceName("reschedule")] Reschedule,
+    [ChoiceName("configure-embed")] ConfigureEmbed,
+    [ChoiceName("remove")] Disable
+}
 
-    public enum TagActionType
-    {
-        [ChoiceName("get")] Get,
-        [ChoiceName("send")] Send,
-        [ChoiceName("add")] Add,
-        [ChoiceName("edit")] Edit,
-        [ChoiceName("configure-embed")] ConfigureEmbed,
-        [ChoiceName("remove")] Remove
-    }
+public enum TagActionType
+{
+    [ChoiceName("get")] Get,
+    [ChoiceName("send")] Send,
+    [ChoiceName("add")] Add,
+    [ChoiceName("edit")] Edit,
+    [ChoiceName("configure-embed")] ConfigureEmbed,
+    [ChoiceName("remove")] Remove
+}
 
-    public enum RoleMenuActionType
-    {
-        [ChoiceName("get")] Get,
-        [ChoiceName("send")] Send,
-        [ChoiceName("add")] Add,
-        [ChoiceName("edit")] Edit,
-        [ChoiceName("configure-embed")] ConfigureEmbed,
-        [ChoiceName("remove")] Remove
-    }
+public enum RoleMenuActionType
+{
+    [ChoiceName("get")] Get,
+    [ChoiceName("send")] Send,
+    [ChoiceName("add")] Add,
+    [ChoiceName("edit")] Edit,
+    [ChoiceName("configure-embed")] ConfigureEmbed,
+    [ChoiceName("remove")] Remove
+}
 
-    public enum ModuleActionType
-    {
-        [ChoiceName("enable")] Enable,
-        [ChoiceName("repair")] Repair,
-        [ChoiceName("edit")] Edit,
-        [ChoiceName("disable")] Disable
-    }
+public enum ModuleActionType
+{
+    [ChoiceName("enable")] Enable,
+    [ChoiceName("repair")] Repair,
+    [ChoiceName("edit")] Edit,
+    [ChoiceName("disable")] Disable
 }

@@ -21,29 +21,28 @@ using Lisbeth.Bot.Application.Validation.ReusablePropertyValidation;
 using Lisbeth.Bot.Domain.DTOs.Request.RoleMenu;
 using MikyM.Discord.Interfaces;
 
-namespace Lisbeth.Bot.Application.Validation.RoleMenu
+namespace Lisbeth.Bot.Application.Validation.RoleMenu;
+
+public class RoleMenuAddReqValidator : AbstractValidator<RoleMenuAddReqDto>
 {
-    public class RoleMenuAddReqValidator : AbstractValidator<RoleMenuAddReqDto>
+    public RoleMenuAddReqValidator(IDiscordService discordService) : this(discordService.Client)
     {
-        public RoleMenuAddReqValidator(IDiscordService discordService) : this(discordService.Client)
-        {
-        }
+    }
 
-        public RoleMenuAddReqValidator(DiscordClient discord)
-        {
-            CascadeMode = CascadeMode.Stop;
+    public RoleMenuAddReqValidator(DiscordClient discord)
+    {
+        CascadeMode = CascadeMode.Stop;
 
-            RuleFor(x => x.Name).NotEmpty();
-            RuleFor(x => x.GuildId).NotEmpty().DependentRules(x =>
-                x.SetAsyncValidator(new DiscordGuildIdValidator<RoleMenuAddReqDto>(discord)));
-            RuleFor(x => x.RequestedOnBehalfOfId).NotEmpty()
-                .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<RoleMenuAddReqDto>(discord)));
-            RuleFor(x => x.Text).NotEmpty().When(x => x.EmbedConfig is null);
-            RuleFor(x => x.EmbedConfig).NotEmpty().When(x => x.Text is null or "");
+        RuleFor(x => x.Name).NotEmpty();
+        RuleFor(x => x.GuildId).NotEmpty().DependentRules(x =>
+            x.SetAsyncValidator(new DiscordGuildIdValidator<RoleMenuAddReqDto>(discord)));
+        RuleFor(x => x.RequestedOnBehalfOfId).NotEmpty()
+            .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<RoleMenuAddReqDto>(discord)));
+        RuleFor(x => x.Text).NotEmpty().When(x => x.EmbedConfig is null);
+        RuleFor(x => x.EmbedConfig).NotEmpty().When(x => x.Text is null or "");
 
-            RuleFor(x => x.RoleMenuOptions).NotEmpty();
-            RuleForEach(x => x.RoleMenuOptions).NotEmpty()
-                .Must(x => !string.IsNullOrWhiteSpace(x.Name));
-        }
+        RuleFor(x => x.RoleMenuOptions).NotEmpty();
+        RuleForEach(x => x.RoleMenuOptions).NotEmpty()
+            .Must(x => !string.IsNullOrWhiteSpace(x.Name));
     }
 }

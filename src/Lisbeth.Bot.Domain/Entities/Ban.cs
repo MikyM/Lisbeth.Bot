@@ -18,23 +18,22 @@
 using System;
 using Lisbeth.Bot.Domain.Entities.Base;
 
-namespace Lisbeth.Bot.Domain.Entities
+namespace Lisbeth.Bot.Domain.Entities;
+
+public sealed class Ban : SnowflakeEntity
 {
-    public sealed class Ban : SnowflakeEntity
+    public ulong GuildId { get; set; }
+    public ulong UserId { get; set; }
+    public DateTime? LiftedOn { get; set; }
+    public DateTime? AppliedUntil { get; set; }
+    public ulong AppliedById { get; set; }
+    public ulong LiftedById { get; set; }
+    public string? Reason { get; set; } = "";
+
+    public Guild? Guild { get; set; }
+
+    public Ban ShallowCopy()
     {
-        public ulong GuildId { get; set; }
-        public ulong UserId { get; set; }
-        public DateTime? LiftedOn { get; set; }
-        public DateTime? AppliedUntil { get; set; }
-        public ulong AppliedById { get; set; }
-        public ulong LiftedById { get; set; }
-        public string? Reason { get; set; } = "";
-
-        public Guild? Guild { get; set; }
-
-        public Ban ShallowCopy()
-        {
-            return (Ban)MemberwiseClone();
-        }
+        return (Ban)MemberwiseClone();
     }
 }

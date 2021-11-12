@@ -17,10 +17,9 @@
 
 using Lisbeth.Bot.Domain.DTOs.Request.Base;
 
-namespace Lisbeth.Bot.Domain.DTOs.Request.Ticket
+namespace Lisbeth.Bot.Domain.DTOs.Request.Ticket;
+
+public class TicketOpenReqDto : BaseAuthWithGuildReqDto
 {
-    public class TicketOpenReqDto : BaseAuthWithGuildReqDto
-    {
-        public long? GuildSpecificId { get; set; }
-    }
+    public long? GuildSpecificId { get; set; }
 }

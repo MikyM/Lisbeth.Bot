@@ -16,9 +16,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-namespace MikyM.Common.DataAccessLayer.Specifications
+namespace MikyM.Common.DataAccessLayer.Specifications;
+
+public interface ISingleResultSpecification<T> : ISpecification<T>, ISingleResultSpecification where T : class
 {
-    public interface ISingleResultSpecification<T> : ISpecification<T>, ISingleResultSpecification where T : class
-    {
-    }
 }

@@ -15,10 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Lisbeth.Bot.Domain.DTOs.Request.Tag
+namespace Lisbeth.Bot.Domain.DTOs.Request.Tag;
+
+public class TagSendReqDto : TagGetReqDto
 {
-    public class TagSendReqDto : TagGetReqDto
-    {
-        public ulong ChannelId { get; set; }
-    }
+    public ulong ChannelId { get; set; }
 }

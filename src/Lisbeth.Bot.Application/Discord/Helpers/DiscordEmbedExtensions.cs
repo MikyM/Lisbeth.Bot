@@ -18,15 +18,14 @@
 using System.Linq;
 using DSharpPlus.Entities;
 
-namespace Lisbeth.Bot.Application.Discord.Helpers
+namespace Lisbeth.Bot.Application.Discord.Helpers;
+
+public static class DiscordEmbedExtensions
 {
-    public static class DiscordEmbedExtensions
+    public static bool IsValid(this DiscordEmbedBuilder value)
     {
-        public static bool IsValid(this DiscordEmbedBuilder value)
-        {
-            return !(value.Author?.Name.Length + value.Footer?.Text.Length + value.Description?.Length +
-                value.Title?.Length +
-                value.Fields?.Sum(x => x.Value.Length + x.Name.Length) > 6000);
-        }
+        return !(value.Author?.Name.Length + value.Footer?.Text.Length + value.Description?.Length +
+            value.Title?.Length +
+            value.Fields?.Sum(x => x.Value.Length + x.Name.Length) > 6000);
     }
 }

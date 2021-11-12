@@ -22,40 +22,39 @@ using DSharpPlus;
 using FluentValidation;
 using FluentValidation.Validators;
 
-namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
+namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation;
+
+public sealed class DiscordGuildIdValidator<T> : IAsyncPropertyValidator<T, ulong>
 {
-    public sealed class DiscordGuildIdValidator<T> : IAsyncPropertyValidator<T, ulong>
+    private readonly DiscordClient _discord;
+    private readonly bool _suppressCacheCheck;
+
+    public DiscordGuildIdValidator(DiscordClient discord, bool suppressCacheCheck = false)
     {
-        private readonly DiscordClient _discord;
-        private readonly bool _suppressCacheCheck;
-
-        public DiscordGuildIdValidator(DiscordClient discord, bool suppressCacheCheck = false)
-        {
-            _discord = discord;
-            _suppressCacheCheck = suppressCacheCheck;
-        }
-
-        public async Task<bool> IsValidAsync(ValidationContext<T> context, ulong value, CancellationToken cancellation)
-        {
-            try
-            {
-                var result = await _discord.GetGuildAsync(value);
-                if (result is null) return false;
-                if (!_suppressCacheCheck && !_discord.Guilds.TryGetValue(value, out _)) return false;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        public string GetDefaultMessageTemplate(string errorCode)
-        {
-            return "'{PropertyName}' is not a valid Discord Id or a discord guild with given Id doesn't exist.";
-        }
-
-        public string Name => "DiscordGuildIdValidator";
+        _discord = discord;
+        _suppressCacheCheck = suppressCacheCheck;
     }
+
+    public async Task<bool> IsValidAsync(ValidationContext<T> context, ulong value, CancellationToken cancellation)
+    {
+        try
+        {
+            var result = await _discord.GetGuildAsync(value);
+            if (result is null) return false;
+            if (!_suppressCacheCheck && !_discord.Guilds.TryGetValue(value, out _)) return false;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    public string GetDefaultMessageTemplate(string errorCode)
+    {
+        return "'{PropertyName}' is not a valid Discord Id or a discord guild with given Id doesn't exist.";
+    }
+
+    public string Name => "DiscordGuildIdValidator";
 }

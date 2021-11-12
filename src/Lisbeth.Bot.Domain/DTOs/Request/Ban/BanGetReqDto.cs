@@ -17,31 +17,30 @@
 
 using System;
 
-namespace Lisbeth.Bot.Domain.DTOs.Request.Ban
-{
-    public class BanGetReqDto
-    {
-        public BanGetReqDto(ulong requestedOnBehalfOfId, long? id = null, ulong? targetUserId = null,
-            ulong? guildId = null, ulong? appliedById = null, DateTime? liftedOn = null, DateTime? appliedOn = null,
-            ulong? liftedById = null)
-        {
-            Id = id;
-            TargetUserId = targetUserId;
-            GuildId = guildId;
-            AppliedById = appliedById;
-            LiftedOn = liftedOn;
-            AppliedOn = appliedOn;
-            LiftedById = liftedById;
-            RequestedOnBehalfOfId = requestedOnBehalfOfId;
-        }
+namespace Lisbeth.Bot.Domain.DTOs.Request.Ban;
 
-        public long? Id { get; set; }
-        public ulong? TargetUserId { get; set; }
-        public ulong? GuildId { get; set; }
-        public ulong? AppliedById { get; set; }
-        public DateTime? LiftedOn { get; set; }
-        public DateTime? AppliedOn { get; set; }
-        public ulong? LiftedById { get; set; }
-        public ulong RequestedOnBehalfOfId { get; set; }
+public class BanGetReqDto
+{
+    public BanGetReqDto(ulong requestedOnBehalfOfId, long? id = null, ulong? targetUserId = null,
+        ulong? guildId = null, ulong? appliedById = null, DateTime? liftedOn = null, DateTime? appliedOn = null,
+        ulong? liftedById = null)
+    {
+        Id = id;
+        TargetUserId = targetUserId;
+        GuildId = guildId;
+        AppliedById = appliedById;
+        LiftedOn = liftedOn;
+        AppliedOn = appliedOn;
+        LiftedById = liftedById;
+        RequestedOnBehalfOfId = requestedOnBehalfOfId;
     }
+
+    public long? Id { get; set; }
+    public ulong? TargetUserId { get; set; }
+    public ulong? GuildId { get; set; }
+    public ulong? AppliedById { get; set; }
+    public DateTime? LiftedOn { get; set; }
+    public DateTime? AppliedOn { get; set; }
+    public ulong? LiftedById { get; set; }
+    public ulong RequestedOnBehalfOfId { get; set; }
 }

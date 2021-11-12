@@ -18,9 +18,8 @@
 using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.DataAccessLayer.Repositories;
 
-namespace Lisbeth.Bot.DataAccessLayer.Repositories.Interfaces
+namespace Lisbeth.Bot.DataAccessLayer.Repositories.Interfaces;
+
+public interface IGuildRepository : IRepository<Guild>
 {
-    public interface IGuildRepository : IRepository<Guild>
-    {
-    }
 }

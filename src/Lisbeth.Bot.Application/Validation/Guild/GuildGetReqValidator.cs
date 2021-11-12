@@ -19,9 +19,8 @@
 using FluentValidation;
 using Lisbeth.Bot.Domain.DTOs.Request.Guild;
 
-namespace Lisbeth.Bot.Application.Validation.Guild
+namespace Lisbeth.Bot.Application.Validation.Guild;
+
+public class GuildGetReqValidator : AbstractValidator<GuildGetReqDto>
 {
-    public class GuildGetReqValidator : AbstractValidator<GuildGetReqDto>
-    {
-    }
 }

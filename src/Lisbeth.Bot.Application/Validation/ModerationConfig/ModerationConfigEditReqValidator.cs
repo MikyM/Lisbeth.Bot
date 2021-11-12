@@ -15,9 +15,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Lisbeth.Bot.Application.Validation.ModerationConfig
+namespace Lisbeth.Bot.Application.Validation.ModerationConfig;
+
+public class ModerationConfigEditReqValidator
 {
-    public class ModerationConfigEditReqValidator
-    {
-    }
 }

@@ -21,16 +21,15 @@ using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Domain.DTOs.Request.Ban;
 using MikyM.Common.Application.Results;
 
-namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
+namespace Lisbeth.Bot.Application.Discord.Services.Interfaces;
+
+public interface IDiscordBanService
 {
-    public interface IDiscordBanService
-    {
-        Task<Result<DiscordEmbed>> BanAsync(BanReqDto req);
-        Task<Result<DiscordEmbed>> BanAsync(InteractionContext ctx, BanReqDto req);
-        Task<Result<DiscordEmbed>> UnbanAsync(BanDisableReqDto req);
-        Task<Result<DiscordEmbed>> UnbanAsync(InteractionContext ctx, BanDisableReqDto req);
-        Task<Result<DiscordEmbed>> GetSpecificUserGuildBanAsync(BanGetReqDto req);
-        Task<Result<DiscordEmbed>> GetSpecificUserGuildBanAsync(InteractionContext ctx, BanGetReqDto req);
-        Task<Result> UnbanCheckAsync();
-    }
+    Task<Result<DiscordEmbed>> BanAsync(BanReqDto req);
+    Task<Result<DiscordEmbed>> BanAsync(InteractionContext ctx, BanReqDto req);
+    Task<Result<DiscordEmbed>> UnbanAsync(BanDisableReqDto req);
+    Task<Result<DiscordEmbed>> UnbanAsync(InteractionContext ctx, BanDisableReqDto req);
+    Task<Result<DiscordEmbed>> GetSpecificUserGuildBanAsync(BanGetReqDto req);
+    Task<Result<DiscordEmbed>> GetSpecificUserGuildBanAsync(InteractionContext ctx, BanGetReqDto req);
+    Task<Result> UnbanCheckAsync();
 }

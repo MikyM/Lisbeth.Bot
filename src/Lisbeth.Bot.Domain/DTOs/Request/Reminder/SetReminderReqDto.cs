@@ -19,33 +19,32 @@ using System;
 using System.Collections.Generic;
 using Lisbeth.Bot.Domain.DTOs.Request.Base;
 
-namespace Lisbeth.Bot.Domain.DTOs.Request.Reminder
+namespace Lisbeth.Bot.Domain.DTOs.Request.Reminder;
+
+public class SetReminderReqDto : BaseAuthWithGuildReqDto
 {
-    public class SetReminderReqDto : BaseAuthWithGuildReqDto
+    public SetReminderReqDto()
     {
-        public SetReminderReqDto()
-        {
-        }
-
-        public SetReminderReqDto(string name, string? cronExpression, DateTime? setFor, string? timeSpanExpression,
-            string text, List<string> mentions, ulong guildId, ulong requestedOnBehalfOfId, ulong? channelId = null) : base(guildId,
-            requestedOnBehalfOfId)
-        {
-            Name = name;
-            CronExpression = cronExpression;
-            SetFor = setFor;
-            TimeSpanExpression = timeSpanExpression;
-            Text = text;
-            Mentions = mentions;
-            ChannelId = channelId;
-        }
-
-        public string? Name { get; set; }
-        public string? CronExpression { get; set; }
-        public DateTime? SetFor { get; set; }
-        public string? TimeSpanExpression { get; set; }
-        public string? Text { get; set; }
-        public ulong? ChannelId { get; set; }
-        public List<string>? Mentions { get; set; }
     }
+
+    public SetReminderReqDto(string name, string? cronExpression, DateTime? setFor, string? timeSpanExpression,
+        string text, List<string> mentions, ulong guildId, ulong requestedOnBehalfOfId, ulong? channelId = null) : base(guildId,
+        requestedOnBehalfOfId)
+    {
+        Name = name;
+        CronExpression = cronExpression;
+        SetFor = setFor;
+        TimeSpanExpression = timeSpanExpression;
+        Text = text;
+        Mentions = mentions;
+        ChannelId = channelId;
+    }
+
+    public string? Name { get; set; }
+    public string? CronExpression { get; set; }
+    public DateTime? SetFor { get; set; }
+    public string? TimeSpanExpression { get; set; }
+    public string? Text { get; set; }
+    public ulong? ChannelId { get; set; }
+    public List<string>? Mentions { get; set; }
 }

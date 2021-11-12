@@ -22,11 +22,10 @@ using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.Application.Interfaces;
 using MikyM.Common.Application.Results;
 
-namespace Lisbeth.Bot.Application.Services.Database.Interfaces
+namespace Lisbeth.Bot.Application.Services.Database.Interfaces;
+
+public interface IReminderService : ICrudService<Reminder, LisbethBotDbContext>
 {
-    public interface IReminderService : ICrudService<Reminder, LisbethBotDbContext>
-    {
-        Task<Result> SetHangfireIdAsync(long reminderId, string hangfireId, bool shouldSave = false);
-        Task<Result> RescheduleAsync(RescheduleReminderReqDto req, bool shouldSave = false);
-    }
+    Task<Result> SetHangfireIdAsync(long reminderId, string hangfireId, bool shouldSave = false);
+    Task<Result> RescheduleAsync(RescheduleReminderReqDto req, bool shouldSave = false);
 }

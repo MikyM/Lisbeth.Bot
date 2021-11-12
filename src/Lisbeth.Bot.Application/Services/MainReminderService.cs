@@ -35,205 +35,204 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Lisbeth.Bot.Application.Services
+namespace Lisbeth.Bot.Application.Services;
+
+[UsedImplicitly]
+public class MainReminderService : IMainReminderService
 {
-    [UsedImplicitly]
-    public class MainReminderService : IMainReminderService
+    private readonly IBackgroundJobClient _backgroundJobClient;
+    private readonly IRecurringReminderService _recurringReminderService;
+    private readonly IReminderService _reminderService;
+
+    public MainReminderService(IReminderService reminderService, IRecurringReminderService recurringReminderService,
+        IBackgroundJobClient backgroundJobClient)
     {
-        private readonly IBackgroundJobClient _backgroundJobClient;
-        private readonly IRecurringReminderService _recurringReminderService;
-        private readonly IReminderService _reminderService;
+        _reminderService = reminderService;
+        _recurringReminderService = recurringReminderService;
+        _backgroundJobClient = backgroundJobClient;
+    }
 
-        public MainReminderService(IReminderService reminderService, IRecurringReminderService recurringReminderService,
-            IBackgroundJobClient backgroundJobClient)
+    public async Task<Result<ReminderResDto>> SetNewReminderAsync(SetReminderReqDto req)
+    {
+        if (req is null) throw new ArgumentNullException(nameof(req));
+
+        var reUser =
+            await _reminderService.LongCountAsync(new ActiveRemindersPerUserSpec(req.RequestedOnBehalfOfId));
+        var recUser = await _recurringReminderService.LongCountAsync(
+            new ActiveRecurringRemindersPerUserSpec(req.RequestedOnBehalfOfId));
+        long remindersPerUser = reUser.Entity + recUser.Entity;
+
+        var reGuild = await _recurringReminderService.LongCountAsync(
+            new ActiveRecurringRemindersPerGuildSpec(req.RequestedOnBehalfOfId));
+        var recGuild =
+            await _reminderService.LongCountAsync(new ActiveRemindersPerGuildSpec(req.RequestedOnBehalfOfId));
+        long remindersPerGuild = recGuild.Entity + reGuild.Entity;
+
+        if (recGuild.Entity >= 20)
+            return new ArgumentError(nameof(recGuild.Entity),
+                "A guild can have up to 20 active recurring reminders");
+        if (remindersPerUser >= 10)
+            return new ArgumentError(nameof(recGuild.Entity), "A user can have up to 10 active reminders");
+        if (remindersPerGuild >= 200)
+            return new ArgumentError(nameof(recGuild.Entity), "A guild can have up to 200 active reminders");
+
+        if (req.SetFor.HasValue ||
+            !string.IsNullOrWhiteSpace(req.TimeSpanExpression)) // handle single reminder as first option
         {
-            _reminderService = reminderService;
-            _recurringReminderService = recurringReminderService;
-            _backgroundJobClient = backgroundJobClient;
+            DateTime setFor;
+            if (!string.IsNullOrWhiteSpace(req.TimeSpanExpression))
+            {
+                var isValid = req.TimeSpanExpression.TryParseToDurationAndNextOccurrence(out var occurrence, out _);
+                if (!isValid) return new ArgumentError(nameof(req.TimeSpanExpression));
+                setFor = occurrence;
+            }
+            else
+            {
+                setFor = req.SetFor ?? throw new InvalidOperationException();
+            }
+
+            if (string.IsNullOrWhiteSpace(req.Name))
+                req.Name = $"{req.GuildId}_{req.RequestedOnBehalfOfId}_{DateTime.UtcNow}";
+
+            var partial = await _reminderService.AddAsync(req, true);
+            string hangfireId = _backgroundJobClient.Schedule<IDiscordSendReminderService>(
+                x => x.SendReminderAsync(partial.Entity, ReminderType.Single), setFor.ToUniversalTime(),
+                "reminder");
+            await _reminderService.SetHangfireIdAsync(partial.Entity, hangfireId, true);
+
+            return new ReminderResDto(partial.Entity, req.Name, setFor, req.Mentions);
         }
 
-        public async Task<Result<ReminderResDto>> SetNewReminderAsync(SetReminderReqDto req)
+        if (string.IsNullOrWhiteSpace(req.CronExpression)) throw new InvalidOperationException();
         {
-            if (req is null) throw new ArgumentNullException(nameof(req));
-
-            var reUser =
-                await _reminderService.LongCountAsync(new ActiveRemindersPerUserSpec(req.RequestedOnBehalfOfId));
-            var recUser = await _recurringReminderService.LongCountAsync(
-                new ActiveRecurringRemindersPerUserSpec(req.RequestedOnBehalfOfId));
-            long remindersPerUser = reUser.Entity + recUser.Entity;
-
-            var reGuild = await _recurringReminderService.LongCountAsync(
-                new ActiveRecurringRemindersPerGuildSpec(req.RequestedOnBehalfOfId));
-            var recGuild =
-                await _reminderService.LongCountAsync(new ActiveRemindersPerGuildSpec(req.RequestedOnBehalfOfId));
-            long remindersPerGuild = recGuild.Entity + reGuild.Entity;
-
-            if (recGuild.Entity >= 20)
+            var parsed = CrontabSchedule.TryParse(req.CronExpression);
+            var parsedWithSeconds = CrontabSchedule.TryParse(req.CronExpression,
+                new CrontabSchedule.ParseOptions { IncludingSeconds = true });
+            if (parsed is null && parsedWithSeconds is null)
+                return Result<ReminderResDto>.FromError(new ArgumentError(nameof(recGuild.Entity),
+                    "Invalid cron expression"));
+            if (parsed is not null &&
+                parsed.GetNextOccurrences(DateTime.UtcNow, DateTime.UtcNow.AddHours(1)).Count() > 12 ||
+                parsedWithSeconds is not null && parsedWithSeconds
+                    .GetNextOccurrences(DateTime.UtcNow, DateTime.UtcNow.AddHours(1))
+                    .Count() > 12)
                 return new ArgumentError(nameof(recGuild.Entity),
-                    "A guild can have up to 20 active recurring reminders");
-            if (remindersPerUser >= 10)
-                return new ArgumentError(nameof(recGuild.Entity), "A user can have up to 10 active reminders");
-            if (remindersPerGuild >= 200)
-                return new ArgumentError(nameof(recGuild.Entity), "A guild can have up to 200 active reminders");
-
-            if (req.SetFor.HasValue ||
-                !string.IsNullOrWhiteSpace(req.TimeSpanExpression)) // handle single reminder as first option
-            {
-                DateTime setFor;
-                if (!string.IsNullOrWhiteSpace(req.TimeSpanExpression))
-                {
-                    var isValid = req.TimeSpanExpression.TryParseToDurationAndNextOccurrence(out var occurrence, out _);
-                    if (!isValid) return new ArgumentError(nameof(req.TimeSpanExpression));
-                    setFor = occurrence;
-                }
-                else
-                {
-                    setFor = req.SetFor ?? throw new InvalidOperationException();
-                }
-
-                if (string.IsNullOrWhiteSpace(req.Name))
-                    req.Name = $"{req.GuildId}_{req.RequestedOnBehalfOfId}_{DateTime.UtcNow}";
-
-                var partial = await _reminderService.AddAsync(req, true);
-                string hangfireId = _backgroundJobClient.Schedule<IDiscordSendReminderService>(
-                    x => x.SendReminderAsync(partial.Entity, ReminderType.Single), setFor.ToUniversalTime(),
-                    "reminder");
-                await _reminderService.SetHangfireIdAsync(partial.Entity, hangfireId, true);
-
-                return new ReminderResDto(partial.Entity, req.Name, setFor, req.Mentions);
-            }
-
-            if (string.IsNullOrWhiteSpace(req.CronExpression)) throw new InvalidOperationException();
-            {
-                var parsed = CrontabSchedule.TryParse(req.CronExpression);
-                var parsedWithSeconds = CrontabSchedule.TryParse(req.CronExpression,
-                    new CrontabSchedule.ParseOptions { IncludingSeconds = true });
-                if (parsed is null && parsedWithSeconds is null)
-                    return Result<ReminderResDto>.FromError(new ArgumentError(nameof(recGuild.Entity),
-                        "Invalid cron expression"));
-                if (parsed is not null &&
-                    parsed.GetNextOccurrences(DateTime.UtcNow, DateTime.UtcNow.AddHours(1)).Count() > 12 ||
-                    parsedWithSeconds is not null && parsedWithSeconds
-                        .GetNextOccurrences(DateTime.UtcNow, DateTime.UtcNow.AddHours(1))
-                        .Count() > 12)
-                    return new ArgumentError(nameof(recGuild.Entity),
-                        "Cron expressions with more than 12 occurrences per hour (more frequent than every 5 minutes) are not allowed");
-
-                var count = await _recurringReminderService.LongCountAsync(
-                    new ActiveRecurringRemindersPerGuildByNameSpec(req.GuildId, req.Name));
-                if (count.Entity != 0)
-                    return new ArgumentError(nameof(recGuild.Entity),
-                        $"This guild already has a recurring reminder with name: {req.Name}");
-
-                string jobName = $"{req.GuildId}_{req.Name}";
-
-                var partial = await _recurringReminderService.AddAsync(req, true);
-                RecurringJob.AddOrUpdate<IDiscordSendReminderService>(jobName,
-                    x => x.SendReminderAsync(partial.Entity, ReminderType.Recurring), req.CronExpression,
-                    TimeZoneInfo.Utc, "reminder");
-                await _recurringReminderService.SetHangfireIdAsync(partial.Entity, jobName, true);
-
-                return new ReminderResDto(partial.Entity, req.Name,
-                    parsed?.GetNextOccurrence(DateTime.UtcNow).ToUniversalTime() ??
-                    parsedWithSeconds?.GetNextOccurrence(DateTime.UtcNow).ToUniversalTime() ??
-                    throw new InvalidOperationException(), req.Mentions);
-            }
-
-        }
-
-        public async Task<Result<ReminderResDto>> RescheduleReminderAsync(RescheduleReminderReqDto req)
-        {
-            if (req is null) throw new ArgumentNullException(nameof(req));
-
-            if (req.SetFor.HasValue || !string.IsNullOrWhiteSpace(req.TimeSpanExpression)) // handle single reminder
-            {
-                var result = await _reminderService.GetSingleBySpecAsync<Reminder>(
-                    new ActiveReminderByNameOrIdAndGuildSpec(req.Name, req.GuildId, req.ReminderId));
-                if (!result.IsDefined()) return Result<ReminderResDto>.FromError(result);
-
-                DateTime setFor;
-                if (!string.IsNullOrWhiteSpace(req.TimeSpanExpression))
-                {
-                    var isValid = req.TimeSpanExpression.TryParseToDurationAndNextOccurrence(out var occurrence, out _);
-                    if (!isValid) throw new ArgumentException(nameof(req.TimeSpanExpression));
-                    setFor = occurrence;
-                }
-                else
-                {
-                    setFor = req.SetFor ?? throw new InvalidOperationException();
-                }
-
-                bool res = BackgroundJob.Delete(result.Entity.HangfireId);
-
-                if (!res) return new HangfireError("Hangfire failed to delete the job");
-
-                string hangfireId = _backgroundJobClient.Schedule<IDiscordSendReminderService>(
-                    x => x.SendReminderAsync(result.Entity.Id, ReminderType.Single), setFor.ToUniversalTime(),
-                    "reminder");
-
-                req.NewHangfireId = long.Parse(hangfireId);
-                await _reminderService.RescheduleAsync(req, true);
-
-                return new ReminderResDto(result.Entity.Id, result.Entity.Name, setFor, result.Entity.Mentions);
-            }
-
-            if (string.IsNullOrWhiteSpace(req.CronExpression)) throw new InvalidOperationException();
-
-            var parsed = CrontabSchedule.TryParse(req.TimeSpanExpression);
-            if (parsed is null) return new ArgumentError(nameof(req.CronExpression), "Invalid cron expression");
-            if (parsed.GetNextOccurrences(DateTime.UtcNow, DateTime.UtcNow.AddHours(1)).Count() > 12)
-                return new ArgumentError(nameof(req.CronExpression),
                     "Cron expressions with more than 12 occurrences per hour (more frequent than every 5 minutes) are not allowed");
 
-            var partial = await _recurringReminderService.GetSingleBySpecAsync<RecurringReminder>(
-                new ActiveRecurringReminderByNameOrIdAndGuildSpec(req.Name, req.GuildId, req.ReminderId));
-            if (!partial.IsDefined()) return Result<ReminderResDto>.FromError(partial);
+            var count = await _recurringReminderService.LongCountAsync(
+                new ActiveRecurringRemindersPerGuildByNameSpec(req.GuildId, req.Name));
+            if (count.Entity != 0)
+                return new ArgumentError(nameof(recGuild.Entity),
+                    $"This guild already has a recurring reminder with name: {req.Name}");
 
-            string jobName = $"{partial.Entity.GuildId}_{partial.Entity.Name}";
+            string jobName = $"{req.GuildId}_{req.Name}";
 
+            var partial = await _recurringReminderService.AddAsync(req, true);
             RecurringJob.AddOrUpdate<IDiscordSendReminderService>(jobName,
-                x => x.SendReminderAsync(partial.Entity.Id, ReminderType.Recurring), req.CronExpression,
+                x => x.SendReminderAsync(partial.Entity, ReminderType.Recurring), req.CronExpression,
                 TimeZoneInfo.Utc, "reminder");
+            await _recurringReminderService.SetHangfireIdAsync(partial.Entity, jobName, true);
 
-            await _recurringReminderService.RescheduleAsync(req, true);
-
-            return new ReminderResDto(partial.Entity.Id, partial.Entity.Name, parsed.GetNextOccurrence(DateTime.UtcNow),
-                partial.Entity.Mentions);
+            return new ReminderResDto(partial.Entity, req.Name,
+                parsed?.GetNextOccurrence(DateTime.UtcNow).ToUniversalTime() ??
+                parsedWithSeconds?.GetNextOccurrence(DateTime.UtcNow).ToUniversalTime() ??
+                throw new InvalidOperationException(), req.Mentions);
         }
 
-        public async Task<Result<ReminderResDto>> DisableReminderAsync(DisableReminderReqDto req)
+    }
+
+    public async Task<Result<ReminderResDto>> RescheduleReminderAsync(RescheduleReminderReqDto req)
+    {
+        if (req is null) throw new ArgumentNullException(nameof(req));
+
+        if (req.SetFor.HasValue || !string.IsNullOrWhiteSpace(req.TimeSpanExpression)) // handle single reminder
         {
-            if (req is null) throw new ArgumentNullException(nameof(req));
+            var result = await _reminderService.GetSingleBySpecAsync<Reminder>(
+                new ActiveReminderByNameOrIdAndGuildSpec(req.Name, req.GuildId, req.ReminderId));
+            if (!result.IsDefined()) return Result<ReminderResDto>.FromError(result);
 
-            switch (req.Type)
+            DateTime setFor;
+            if (!string.IsNullOrWhiteSpace(req.TimeSpanExpression))
             {
-                case ReminderType.Single:
-                    var singleResult = await _reminderService.GetSingleBySpecAsync<Reminder>(
-                        new ActiveReminderByNameOrIdAndGuildSpec(req.Name, req.GuildId, req.ReminderId));
-                    if (!singleResult.IsDefined()) return Result<ReminderResDto>.FromError(singleResult);
-
-                    bool res = BackgroundJob.Delete(singleResult.Entity.HangfireId);
-
-                    if (!res) throw new Exception("Hangfire failed to delete a scheduled job");
-
-                    await _reminderService.DisableAsync(req, true);
-
-                    return new ReminderResDto(singleResult.Entity.Id, singleResult.Entity.Name, DateTime.MinValue,
-                        singleResult.Entity.Mentions);
-                case ReminderType.Recurring:
-                    var recurringResult = await _recurringReminderService.GetSingleBySpecAsync<RecurringReminder>(
-                        new ActiveRecurringReminderByNameOrIdAndGuildSpec(req.Name, req.GuildId, req.ReminderId));
-                    if (!recurringResult.IsDefined()) return Result<ReminderResDto>.FromError(recurringResult);
-
-                    RecurringJob.RemoveIfExists(recurringResult.Entity.HangfireId);
-
-                    await _recurringReminderService.DisableAsync(req, true);
-
-                    return new ReminderResDto(recurringResult.Entity.Id, recurringResult.Entity.Name, DateTime.MinValue,
-                        recurringResult.Entity.Mentions);
-                default:
-                    throw new ArgumentOutOfRangeException();
+                var isValid = req.TimeSpanExpression.TryParseToDurationAndNextOccurrence(out var occurrence, out _);
+                if (!isValid) throw new ArgumentException(nameof(req.TimeSpanExpression));
+                setFor = occurrence;
             }
+            else
+            {
+                setFor = req.SetFor ?? throw new InvalidOperationException();
+            }
+
+            bool res = BackgroundJob.Delete(result.Entity.HangfireId);
+
+            if (!res) return new HangfireError("Hangfire failed to delete the job");
+
+            string hangfireId = _backgroundJobClient.Schedule<IDiscordSendReminderService>(
+                x => x.SendReminderAsync(result.Entity.Id, ReminderType.Single), setFor.ToUniversalTime(),
+                "reminder");
+
+            req.NewHangfireId = long.Parse(hangfireId);
+            await _reminderService.RescheduleAsync(req, true);
+
+            return new ReminderResDto(result.Entity.Id, result.Entity.Name, setFor, result.Entity.Mentions);
+        }
+
+        if (string.IsNullOrWhiteSpace(req.CronExpression)) throw new InvalidOperationException();
+
+        var parsed = CrontabSchedule.TryParse(req.TimeSpanExpression);
+        if (parsed is null) return new ArgumentError(nameof(req.CronExpression), "Invalid cron expression");
+        if (parsed.GetNextOccurrences(DateTime.UtcNow, DateTime.UtcNow.AddHours(1)).Count() > 12)
+            return new ArgumentError(nameof(req.CronExpression),
+                "Cron expressions with more than 12 occurrences per hour (more frequent than every 5 minutes) are not allowed");
+
+        var partial = await _recurringReminderService.GetSingleBySpecAsync<RecurringReminder>(
+            new ActiveRecurringReminderByNameOrIdAndGuildSpec(req.Name, req.GuildId, req.ReminderId));
+        if (!partial.IsDefined()) return Result<ReminderResDto>.FromError(partial);
+
+        string jobName = $"{partial.Entity.GuildId}_{partial.Entity.Name}";
+
+        RecurringJob.AddOrUpdate<IDiscordSendReminderService>(jobName,
+            x => x.SendReminderAsync(partial.Entity.Id, ReminderType.Recurring), req.CronExpression,
+            TimeZoneInfo.Utc, "reminder");
+
+        await _recurringReminderService.RescheduleAsync(req, true);
+
+        return new ReminderResDto(partial.Entity.Id, partial.Entity.Name, parsed.GetNextOccurrence(DateTime.UtcNow),
+            partial.Entity.Mentions);
+    }
+
+    public async Task<Result<ReminderResDto>> DisableReminderAsync(DisableReminderReqDto req)
+    {
+        if (req is null) throw new ArgumentNullException(nameof(req));
+
+        switch (req.Type)
+        {
+            case ReminderType.Single:
+                var singleResult = await _reminderService.GetSingleBySpecAsync<Reminder>(
+                    new ActiveReminderByNameOrIdAndGuildSpec(req.Name, req.GuildId, req.ReminderId));
+                if (!singleResult.IsDefined()) return Result<ReminderResDto>.FromError(singleResult);
+
+                bool res = BackgroundJob.Delete(singleResult.Entity.HangfireId);
+
+                if (!res) throw new Exception("Hangfire failed to delete a scheduled job");
+
+                await _reminderService.DisableAsync(req, true);
+
+                return new ReminderResDto(singleResult.Entity.Id, singleResult.Entity.Name, DateTime.MinValue,
+                    singleResult.Entity.Mentions);
+            case ReminderType.Recurring:
+                var recurringResult = await _recurringReminderService.GetSingleBySpecAsync<RecurringReminder>(
+                    new ActiveRecurringReminderByNameOrIdAndGuildSpec(req.Name, req.GuildId, req.ReminderId));
+                if (!recurringResult.IsDefined()) return Result<ReminderResDto>.FromError(recurringResult);
+
+                RecurringJob.RemoveIfExists(recurringResult.Entity.HangfireId);
+
+                await _recurringReminderService.DisableAsync(req, true);
+
+                return new ReminderResDto(recurringResult.Entity.Id, recurringResult.Entity.Name, DateTime.MinValue,
+                    recurringResult.Entity.Mentions);
+            default:
+                throw new ArgumentOutOfRangeException();
         }
     }
 }

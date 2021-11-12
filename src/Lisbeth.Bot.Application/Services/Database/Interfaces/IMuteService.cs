@@ -22,11 +22,10 @@ using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.Application.Interfaces;
 using MikyM.Common.Application.Results;
 
-namespace Lisbeth.Bot.Application.Services.Database.Interfaces
+namespace Lisbeth.Bot.Application.Services.Database.Interfaces;
+
+public interface IMuteService : ICrudService<Mute, LisbethBotDbContext>
 {
-    public interface IMuteService : ICrudService<Mute, LisbethBotDbContext>
-    {
-        Task<Result<(long Id, Mute? FoundEntity)>> AddOrExtendAsync(MuteReqDto req, bool shouldSave = false);
-        Task<Result<Mute>> DisableAsync(MuteDisableReqDto entry, bool shouldSave = false);
-    }
+    Task<Result<(long Id, Mute? FoundEntity)>> AddOrExtendAsync(MuteReqDto req, bool shouldSave = false);
+    Task<Result<Mute>> DisableAsync(MuteDisableReqDto entry, bool shouldSave = false);
 }

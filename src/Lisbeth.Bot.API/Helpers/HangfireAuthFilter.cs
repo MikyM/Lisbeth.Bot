@@ -18,14 +18,13 @@
 
 using Hangfire.Dashboard;
 
-namespace Lisbeth.Bot.API.Helpers
+namespace Lisbeth.Bot.API.Helpers;
+
+public class HangfireAuthFilter : IDashboardAuthorizationFilter
 {
-    public class HangfireAuthFilter : IDashboardAuthorizationFilter
+    public bool Authorize(DashboardContext context)
     {
-        public bool Authorize(DashboardContext context)
-        {
-            var httpContext = context.GetHttpContext();
-            return httpContext.User.Identity is { IsAuthenticated: true };
-        }
+        var httpContext = context.GetHttpContext();
+        return httpContext.User.Identity is { IsAuthenticated: true };
     }
 }

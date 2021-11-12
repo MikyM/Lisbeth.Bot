@@ -22,43 +22,42 @@ using Lisbeth.Bot.Application.Validation.ReusablePropertyValidation;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 using MikyM.Discord.Interfaces;
 
-namespace Lisbeth.Bot.Application.Validation.Ticket
+namespace Lisbeth.Bot.Application.Validation.Ticket;
+
+public class TicketExportReqValidator : AbstractValidator<TicketExportReqDto>
 {
-    public class TicketExportReqValidator : AbstractValidator<TicketExportReqDto>
+    public TicketExportReqValidator(IDiscordService discordService) : this(discordService.Client)
     {
-        public TicketExportReqValidator(IDiscordService discordService) : this(discordService.Client)
-        {
-        }
+    }
 
-        public TicketExportReqValidator(DiscordClient discord)
-        {
-            CascadeMode = CascadeMode.Stop;
+    public TicketExportReqValidator(DiscordClient discord)
+    {
+        CascadeMode = CascadeMode.Stop;
 
-            RuleFor(x => x.Id)
-                .NotEmpty()
-                .When(x => !x.GuildId.HasValue || !x.ChannelId.HasValue || !x.GuildSpecificId.HasValue ||
-                           !x.OwnerId.HasValue);
-            RuleFor(x => x.GuildId)
-                .NotEmpty()
-                .When(x => !x.Id.HasValue && !x.ChannelId.HasValue &&
-                           (x.GuildSpecificId.HasValue || x.OwnerId.HasValue))
-                .DependentRules(x => x.SetAsyncValidator(new DiscordGuildIdValidator<TicketExportReqDto>(discord)));
-            RuleFor(x => x.ChannelId)
-                .NotEmpty()
-                .When(x => !x.Id.HasValue && !x.GuildId.HasValue && x.GuildSpecificId.HasValue && x.OwnerId.HasValue)
-                .DependentRules(x => x.SetAsyncValidator(new DiscordChannelIdValidator<TicketExportReqDto>(discord)));
-            RuleFor(x => x.OwnerId)
-                .NotEmpty()
-                .When(x => !x.Id.HasValue && x.GuildId.HasValue && !x.GuildSpecificId.HasValue && !x.ChannelId.HasValue)
-                .DependentRules(x => x.SetAsyncValidator(new DiscordChannelIdValidator<TicketExportReqDto>(discord)));
-            RuleFor(x => x.GuildSpecificId)
-                .NotEmpty()
-                .When(x => !x.Id.HasValue && x.GuildId.HasValue && !x.GuildSpecificId.HasValue &&
-                           !x.ChannelId.HasValue);
+        RuleFor(x => x.Id)
+            .NotEmpty()
+            .When(x => !x.GuildId.HasValue || !x.ChannelId.HasValue || !x.GuildSpecificId.HasValue ||
+                       !x.OwnerId.HasValue);
+        RuleFor(x => x.GuildId)
+            .NotEmpty()
+            .When(x => !x.Id.HasValue && !x.ChannelId.HasValue &&
+                       (x.GuildSpecificId.HasValue || x.OwnerId.HasValue))
+            .DependentRules(x => x.SetAsyncValidator(new DiscordGuildIdValidator<TicketExportReqDto>(discord)));
+        RuleFor(x => x.ChannelId)
+            .NotEmpty()
+            .When(x => !x.Id.HasValue && !x.GuildId.HasValue && x.GuildSpecificId.HasValue && x.OwnerId.HasValue)
+            .DependentRules(x => x.SetAsyncValidator(new DiscordChannelIdValidator<TicketExportReqDto>(discord)));
+        RuleFor(x => x.OwnerId)
+            .NotEmpty()
+            .When(x => !x.Id.HasValue && x.GuildId.HasValue && !x.GuildSpecificId.HasValue && !x.ChannelId.HasValue)
+            .DependentRules(x => x.SetAsyncValidator(new DiscordChannelIdValidator<TicketExportReqDto>(discord)));
+        RuleFor(x => x.GuildSpecificId)
+            .NotEmpty()
+            .When(x => !x.Id.HasValue && x.GuildId.HasValue && !x.GuildSpecificId.HasValue &&
+                       !x.ChannelId.HasValue);
 
-            RuleFor(x => x.RequestedOnBehalfOfId)
-                .NotEmpty()
-                .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<TicketExportReqDto>(discord)));
-        }
+        RuleFor(x => x.RequestedOnBehalfOfId)
+            .NotEmpty()
+            .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<TicketExportReqDto>(discord)));
     }
 }

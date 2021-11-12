@@ -25,18 +25,17 @@ using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.Application.Interfaces;
 using MikyM.Common.Application.Results;
 
-namespace Lisbeth.Bot.Application.Services.Database.Interfaces
+namespace Lisbeth.Bot.Application.Services.Database.Interfaces;
+
+public interface IGuildService : ICrudService<Guild, LisbethBotDbContext>
 {
-    public interface IGuildService : ICrudService<Guild, LisbethBotDbContext>
-    {
-        Task<Result<Guild>> AddConfigAsync(ModerationConfigReqDto req, bool shouldSave = false);
-        Task<Result<Guild>> AddConfigAsync(TicketingConfigReqDto req, bool shouldSave = false);
-        Task<Result> DisableConfigAsync(ulong guildId, GuildConfigType type, bool shouldSave = false);
-        Task<Result<Guild>> EnableConfigAsync(ulong guildId, GuildConfigType type, bool shouldSave = false);
-        Task<Result> RepairModuleConfigAsync(TicketingConfigRepairReqDto req, bool shouldSave = false);
-        Task<Result> RepairModuleConfigAsync(ModerationConfigRepairReqDto req, bool shouldSave = false);
-        Task<Result> EditTicketingConfigAsync(TicketingConfigEditReqDto req, bool shouldSave = false);
-        Task<Result> EditModerationConfigAsync(ulong guildId, bool shouldSave = false);
-        Task<Result> AddRoleMenuAsync(RoleMenuAddReqDto req, bool shouldSave = false);
-    }
+    Task<Result<Guild>> AddConfigAsync(ModerationConfigReqDto req, bool shouldSave = false);
+    Task<Result<Guild>> AddConfigAsync(TicketingConfigReqDto req, bool shouldSave = false);
+    Task<Result> DisableConfigAsync(ulong guildId, GuildConfigType type, bool shouldSave = false);
+    Task<Result<Guild>> EnableConfigAsync(ulong guildId, GuildConfigType type, bool shouldSave = false);
+    Task<Result> RepairModuleConfigAsync(TicketingConfigRepairReqDto req, bool shouldSave = false);
+    Task<Result> RepairModuleConfigAsync(ModerationConfigRepairReqDto req, bool shouldSave = false);
+    Task<Result> EditTicketingConfigAsync(TicketingConfigEditReqDto req, bool shouldSave = false);
+    Task<Result> EditModerationConfigAsync(ulong guildId, bool shouldSave = false);
+    Task<Result> AddRoleMenuAsync(RoleMenuAddReqDto req, bool shouldSave = false);
 }

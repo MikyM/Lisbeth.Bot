@@ -21,33 +21,32 @@ using Lisbeth.Bot.Application.Validation.ReusablePropertyValidation;
 using Lisbeth.Bot.Domain.DTOs.Request;
 using MikyM.Discord.Interfaces;
 
-namespace Lisbeth.Bot.Application.Validation.Prune
+namespace Lisbeth.Bot.Application.Validation.Prune;
+
+public class PruneReqValidator : AbstractValidator<PruneReqDto>
 {
-    public class PruneReqValidator : AbstractValidator<PruneReqDto>
+    public PruneReqValidator(IDiscordService discordService) : this(discordService.Client)
     {
-        public PruneReqValidator(IDiscordService discordService) : this(discordService.Client)
-        {
-        }
+    }
 
-        public PruneReqValidator(DiscordClient discord)
-        {
-            CascadeMode = CascadeMode.Stop;
+    public PruneReqValidator(DiscordClient discord)
+    {
+        CascadeMode = CascadeMode.Stop;
 
-            RuleFor(x => x.GuildId)
-                .NotEmpty()
-                .DependentRules(x => x.SetAsyncValidator(new DiscordGuildIdValidator<PruneReqDto>(discord)));
-            RuleFor(x => x.ChannelId)
-                .NotEmpty()
-                .DependentRules(x => x.SetAsyncValidator(new DiscordChannelIdValidator<PruneReqDto>(discord)));
-            RuleFor(x => x.TargetAuthorId)
-                .SetAsyncValidator(new DiscordUserIdValidator<PruneReqDto>(discord));
-            RuleFor(x => x.MessageId)
-                .SetAsyncValidator(new DiscordUserIdValidator<PruneReqDto>(discord));
-            RuleFor(x => x.RequestedOnBehalfOfId)
-                .NotEmpty()
-                .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<PruneReqDto>(discord)));
-            RuleFor(x => x.Count)
-                .InclusiveBetween(1, 99);
-        }
+        RuleFor(x => x.GuildId)
+            .NotEmpty()
+            .DependentRules(x => x.SetAsyncValidator(new DiscordGuildIdValidator<PruneReqDto>(discord)));
+        RuleFor(x => x.ChannelId)
+            .NotEmpty()
+            .DependentRules(x => x.SetAsyncValidator(new DiscordChannelIdValidator<PruneReqDto>(discord)));
+        RuleFor(x => x.TargetAuthorId)
+            .SetAsyncValidator(new DiscordUserIdValidator<PruneReqDto>(discord));
+        RuleFor(x => x.MessageId)
+            .SetAsyncValidator(new DiscordUserIdValidator<PruneReqDto>(discord));
+        RuleFor(x => x.RequestedOnBehalfOfId)
+            .NotEmpty()
+            .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<PruneReqDto>(discord)));
+        RuleFor(x => x.Count)
+            .InclusiveBetween(1, 99);
     }
 }

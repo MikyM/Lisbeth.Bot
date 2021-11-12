@@ -17,11 +17,10 @@
 
 using Emzi0767.Utilities;
 
-namespace MikyM.Discord.Util
+namespace MikyM.Discord.Util;
+
+public static class WaitForDownloadCompletionHelper
 {
-    public static class WaitForDownloadCompletionHelper
-    {
-        public static bool ShouldWait { get; set; }
-        public static readonly AsyncManualResetEvent ReadyToOperateEvent = new (false);
-    }
+    public static bool ShouldWait { get; set; }
+    public static readonly AsyncManualResetEvent ReadyToOperateEvent = new (false);
 }

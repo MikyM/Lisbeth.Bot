@@ -18,23 +18,22 @@
 using Lisbeth.Bot.Domain.Entities.Base;
 using MikyM.Common.DataAccessLayer.Specifications;
 
-namespace Lisbeth.Bot.DataAccessLayer.Specifications.EmbedConfig
-{
-    public class ActiveWithEmbedCfgByIdOrNameSpecifications<T> : Specification<T> where T : EmbedConfigEntity
-    {
-        public ActiveWithEmbedCfgByIdOrNameSpecifications(long? id, string name, ulong? guildId = null)
-        {
-            Include(x => x.EmbedConfig);
+namespace Lisbeth.Bot.DataAccessLayer.Specifications.EmbedConfig;
 
-            if (id.HasValue)
-            {
-                Where(x => x.Id == id);
-            }
-            else
-            {
-                Where(x => x.Name == name);
-                Where(x => x.GuildId == guildId);
-            }
+public class ActiveWithEmbedCfgByIdOrNameSpecifications<T> : Specification<T> where T : EmbedConfigEntity
+{
+    public ActiveWithEmbedCfgByIdOrNameSpecifications(long? id, string name, ulong? guildId = null)
+    {
+        Include(x => x.EmbedConfig);
+
+        if (id.HasValue)
+        {
+            Where(x => x.Id == id);
+        }
+        else
+        {
+            Where(x => x.Name == name);
+            Where(x => x.GuildId == guildId);
         }
     }
 }

@@ -17,12 +17,11 @@
 
 using System;
 
-namespace Lisbeth.Bot.Application.Discord.Validation
+namespace Lisbeth.Bot.Application.Discord.Validation;
+
+public interface IDiscordValidator<TDiscordType> : IAsyncValidator where TDiscordType : class
 {
-    public interface IDiscordValidator<TDiscordType> : IAsyncValidator where TDiscordType : class
-    {
-        ulong ObjectId { get; }
-        TDiscordType? RetrievedObject { get; }
-        Exception? Exception { get; }
-    }
+    ulong ObjectId { get; }
+    TDiscordType? RetrievedObject { get; }
+    Exception? Exception { get; }
 }

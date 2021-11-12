@@ -20,18 +20,17 @@ using System.Collections.Generic;
 using System.Linq;
 using MikyM.Common.DataAccessLayer.Repositories;
 
-namespace MikyM.Common.DataAccessLayer.Helpers
-{
-    public static class UoFCache
-    {
-        static UoFCache()
-        {
-            CachedTypes ??= AppDomain.CurrentDomain.GetAssemblies()
-                .SelectMany(x => x.GetTypes()
-                    .Where(t => t.GetInterface(nameof(IBaseRepository)) is not null))
-                .ToList();
-        }
+namespace MikyM.Common.DataAccessLayer.Helpers;
 
-        public static IEnumerable<Type> CachedTypes { get; }
+public static class UoFCache
+{
+    static UoFCache()
+    {
+        CachedTypes ??= AppDomain.CurrentDomain.GetAssemblies()
+            .SelectMany(x => x.GetTypes()
+                .Where(t => t.GetInterface(nameof(IBaseRepository)) is not null))
+            .ToList();
     }
+
+    public static IEnumerable<Type> CachedTypes { get; }
 }

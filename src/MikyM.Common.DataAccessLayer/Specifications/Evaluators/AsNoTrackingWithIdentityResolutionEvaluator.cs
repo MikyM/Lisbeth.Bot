@@ -18,23 +18,22 @@
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 
-namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators
+namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators;
+
+public class AsNoTrackingWithIdentityResolutionEvaluator : IEvaluator
 {
-    public class AsNoTrackingWithIdentityResolutionEvaluator : IEvaluator
+    private AsNoTrackingWithIdentityResolutionEvaluator()
     {
-        private AsNoTrackingWithIdentityResolutionEvaluator()
-        {
-        }
+    }
 
-        public static AsNoTrackingWithIdentityResolutionEvaluator Instance { get; } = new();
+    public static AsNoTrackingWithIdentityResolutionEvaluator Instance { get; } = new();
 
-        public bool IsCriteriaEvaluator { get; } = true;
+    public bool IsCriteriaEvaluator { get; } = true;
 
-        public IQueryable<T> GetQuery<T>(IQueryable<T> query, ISpecification<T> specification) where T : class
-        {
-            if (specification.IsAsNoTrackingWithIdentityResolution) query = query.AsNoTrackingWithIdentityResolution();
+    public IQueryable<T> GetQuery<T>(IQueryable<T> query, ISpecification<T> specification) where T : class
+    {
+        if (specification.IsAsNoTrackingWithIdentityResolution) query = query.AsNoTrackingWithIdentityResolution();
 
-            return query;
-        }
+        return query;
     }
 }

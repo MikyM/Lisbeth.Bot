@@ -23,43 +23,42 @@ using Lisbeth.Bot.Application.Validation.ReusablePropertyValidation;
 using Lisbeth.Bot.Domain.DTOs.Request.Mute;
 using MikyM.Discord.Interfaces;
 
-namespace Lisbeth.Bot.Application.Validation.Mute
+namespace Lisbeth.Bot.Application.Validation.Mute;
+
+public class MuteGetReqValidator : AbstractValidator<MuteGetReqDto>
 {
-    public class MuteGetReqValidator : AbstractValidator<MuteGetReqDto>
+    public MuteGetReqValidator(IDiscordService discordService) : this(discordService.Client)
     {
-        public MuteGetReqValidator(IDiscordService discordService) : this(discordService.Client)
-        {
-        }
+    }
 
-        public MuteGetReqValidator(DiscordClient discord)
-        {
-            CascadeMode = CascadeMode.Stop;
+    public MuteGetReqValidator(DiscordClient discord)
+    {
+        CascadeMode = CascadeMode.Stop;
 
-            RuleFor(x => x.Id).NotEmpty().When(x => !x.GuildId.HasValue || !x.TargetUserId.HasValue);
+        RuleFor(x => x.Id).NotEmpty().When(x => !x.GuildId.HasValue || !x.TargetUserId.HasValue);
 
-            RuleFor(x => x.GuildId)
-                .NotEmpty()
-                .When(x => !x.Id.HasValue && x.TargetUserId.HasValue)
-                .DependentRules(x => x.SetAsyncValidator(new DiscordGuildIdValidator<MuteGetReqDto>(discord)));
-            RuleFor(x => x.TargetUserId)
-                .NotEmpty()
-                .When(x => x.Id.HasValue && x.GuildId.HasValue)
-                .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<MuteGetReqDto>(discord)));
+        RuleFor(x => x.GuildId)
+            .NotEmpty()
+            .When(x => !x.Id.HasValue && x.TargetUserId.HasValue)
+            .DependentRules(x => x.SetAsyncValidator(new DiscordGuildIdValidator<MuteGetReqDto>(discord)));
+        RuleFor(x => x.TargetUserId)
+            .NotEmpty()
+            .When(x => x.Id.HasValue && x.GuildId.HasValue)
+            .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<MuteGetReqDto>(discord)));
 
-            RuleFor(x => x.RequestedOnBehalfOfId)
-                .NotEmpty()
-                .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<MuteGetReqDto>(discord)));
+        RuleFor(x => x.RequestedOnBehalfOfId)
+            .NotEmpty()
+            .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<MuteGetReqDto>(discord)));
 
-            RuleFor(x => x.AppliedById)
-                .SetAsyncValidator(new DiscordUserIdValidator<MuteGetReqDto>(discord, true))
-                .When(x => x.AppliedById.HasValue);
-            RuleFor(x => x.LiftedById)
-                .SetAsyncValidator(new DiscordUserIdValidator<MuteGetReqDto>(discord, true))
-                .When(x => x.LiftedById.HasValue);
+        RuleFor(x => x.AppliedById)
+            .SetAsyncValidator(new DiscordUserIdValidator<MuteGetReqDto>(discord, true))
+            .When(x => x.AppliedById.HasValue);
+        RuleFor(x => x.LiftedById)
+            .SetAsyncValidator(new DiscordUserIdValidator<MuteGetReqDto>(discord, true))
+            .When(x => x.LiftedById.HasValue);
 
-            // ReSharper disable once PossibleInvalidOperationException
-            RuleFor(x => x.AppliedOn).Must(x => x!.Value <= DateTime.UtcNow).When(x => x.AppliedOn.HasValue);
-            RuleFor(x => x.LiftedOn).Must(x => x!.Value <= DateTime.UtcNow).When(x => x.LiftedOn.HasValue);
-        }
+        // ReSharper disable once PossibleInvalidOperationException
+        RuleFor(x => x.AppliedOn).Must(x => x!.Value <= DateTime.UtcNow).When(x => x.AppliedOn.HasValue);
+        RuleFor(x => x.LiftedOn).Must(x => x!.Value <= DateTime.UtcNow).When(x => x.LiftedOn.HasValue);
     }
 }

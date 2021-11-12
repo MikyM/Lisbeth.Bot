@@ -15,13 +15,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace MikyM.Common.DataAccessLayer.Specifications.Helpers
+namespace MikyM.Common.DataAccessLayer.Specifications.Helpers;
+
+public enum OrderTypeEnum
 {
-    public enum OrderTypeEnum
-    {
-        OrderBy = 1,
-        OrderByDescending = 2,
-        ThenBy = 3,
-        ThenByDescending = 4
-    }
+    OrderBy = 1,
+    OrderByDescending = 2,
+    ThenBy = 3,
+    ThenByDescending = 4
 }

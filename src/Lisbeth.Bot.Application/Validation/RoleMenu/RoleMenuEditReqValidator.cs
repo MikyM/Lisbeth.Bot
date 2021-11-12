@@ -21,29 +21,28 @@ using Lisbeth.Bot.Application.Validation.ReusablePropertyValidation;
 using Lisbeth.Bot.Domain.DTOs.Request.RoleMenu;
 using MikyM.Discord.Interfaces;
 
-namespace Lisbeth.Bot.Application.Validation.RoleMenu
+namespace Lisbeth.Bot.Application.Validation.RoleMenu;
+
+public class RoleMenuEditReqValidator : AbstractValidator<RoleMenuEditReqDto>
 {
-    public class RoleMenuEditReqValidator : AbstractValidator<RoleMenuEditReqDto>
+    public RoleMenuEditReqValidator(IDiscordService discordService) : this(discordService.Client)
     {
-        public RoleMenuEditReqValidator(IDiscordService discordService) : this(discordService.Client)
-        {
-        }
+    }
 
-        public RoleMenuEditReqValidator(DiscordClient discord)
-        {
-            CascadeMode = CascadeMode.Stop;
+    public RoleMenuEditReqValidator(DiscordClient discord)
+    {
+        CascadeMode = CascadeMode.Stop;
 
-            RuleFor(x => x.Id).NotEmpty().When(x => x.Name is not null && !x.GuildId.HasValue);
-            RuleFor(x => x.Name).NotEmpty().When(x => !x.Id.HasValue);
-            RuleFor(x => x.GuildId)
-                .NotEmpty()
-                .When(x => !x.Id.HasValue)
-                .DependentRules(x => x.SetAsyncValidator(new DiscordGuildIdValidator<RoleMenuEditReqDto>(discord)));
-            RuleFor(x => x.RequestedOnBehalfOfId)
-                .NotEmpty()
-                .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<RoleMenuEditReqDto>(discord)));
-            RuleFor(x => x.Text).NotEmpty().When(x => x.EmbedConfig is null);
-            RuleFor(x => x.EmbedConfig).NotEmpty().When(x => x.Text is null or "");
-        }
+        RuleFor(x => x.Id).NotEmpty().When(x => x.Name is not null && !x.GuildId.HasValue);
+        RuleFor(x => x.Name).NotEmpty().When(x => !x.Id.HasValue);
+        RuleFor(x => x.GuildId)
+            .NotEmpty()
+            .When(x => !x.Id.HasValue)
+            .DependentRules(x => x.SetAsyncValidator(new DiscordGuildIdValidator<RoleMenuEditReqDto>(discord)));
+        RuleFor(x => x.RequestedOnBehalfOfId)
+            .NotEmpty()
+            .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<RoleMenuEditReqDto>(discord)));
+        RuleFor(x => x.Text).NotEmpty().When(x => x.EmbedConfig is null);
+        RuleFor(x => x.EmbedConfig).NotEmpty().When(x => x.Text is null or "");
     }
 }

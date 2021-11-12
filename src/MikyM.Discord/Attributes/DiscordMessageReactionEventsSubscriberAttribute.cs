@@ -24,13 +24,12 @@
 using System;
 using MikyM.Discord.Events;
 
-namespace MikyM.Discord.Attributes
+namespace MikyM.Discord.Attributes;
+
+/// <summary>
+///     Marks this class as a receiver of <see cref="IDiscordMessageReactionEventsSubscriber" /> events.
+/// </summary>
+[AttributeUsage(AttributeTargets.Class)]
+public sealed class DiscordMessageReactionEventsSubscriberAttribute : Attribute
 {
-    /// <summary>
-    ///     Marks this class as a receiver of <see cref="IDiscordMessageReactionEventsSubscriber" /> events.
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Class)]
-    public sealed class DiscordMessageReactionEventsSubscriberAttribute : Attribute
-    {
-    }
 }

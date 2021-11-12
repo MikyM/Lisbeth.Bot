@@ -16,11 +16,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace MikyM.Common.Application.Results.Errors
-{
-    /// <summary>
-    /// Represents a failure to find something that was searched for.
-    /// </summary>
-    /// <param name="Message">The custom message to provide.</param>
-    public record NotFoundError(string Message = "The searched-for entity was not found.") : ResultError(Message);
-}
+namespace MikyM.Common.Application.Results.Errors;
+
+/// <summary>
+/// Represents a failure to find something that was searched for.
+/// </summary>
+/// <param name="Message">The custom message to provide.</param>
+public record NotFoundError(string Message = "The searched-for entity was not found.") : ResultError(Message);

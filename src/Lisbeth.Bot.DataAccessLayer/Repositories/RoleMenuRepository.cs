@@ -21,12 +21,11 @@ using Microsoft.EntityFrameworkCore;
 using MikyM.Common.DataAccessLayer.Repositories;
 using MikyM.Common.DataAccessLayer.Specifications.Evaluators;
 
-namespace Lisbeth.Bot.DataAccessLayer.Repositories
+namespace Lisbeth.Bot.DataAccessLayer.Repositories;
+
+public class RoleMenuRepository : Repository<RoleMenu>, IRoleMenuRepository
 {
-    public class RoleMenuRepository : Repository<RoleMenu>, IRoleMenuRepository
+    public RoleMenuRepository(DbContext context, ISpecificationEvaluator evaluator) : base(context, evaluator)
     {
-        public RoleMenuRepository(DbContext context, ISpecificationEvaluator evaluator) : base(context, evaluator)
-        {
-        }
     }
 }

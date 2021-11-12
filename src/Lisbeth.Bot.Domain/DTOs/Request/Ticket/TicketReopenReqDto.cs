@@ -17,10 +17,9 @@
 
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket.Base;
 
-namespace Lisbeth.Bot.Domain.DTOs.Request.Ticket
+namespace Lisbeth.Bot.Domain.DTOs.Request.Ticket;
+
+public class TicketReopenReqDto : BaseTicketGetReqDto
 {
-    public class TicketReopenReqDto : BaseTicketGetReqDto
-    {
-        public ulong? ReopenMessageId { get; set; }
-    }
+    public ulong? ReopenMessageId { get; set; }
 }

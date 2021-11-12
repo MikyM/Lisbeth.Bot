@@ -19,28 +19,27 @@ using Hangfire.Common;
 using Hangfire.States;
 using Hangfire.Storage;
 
-namespace Lisbeth.Bot.Application.Hangfire
+namespace Lisbeth.Bot.Application.Hangfire;
+
+public class PreserveOriginalQueueAttribute : JobFilterAttribute, IApplyStateFilter
 {
-    public class PreserveOriginalQueueAttribute : JobFilterAttribute, IApplyStateFilter
+    public void OnStateApplied(ApplyStateContext context, IWriteOnlyTransaction transaction)
     {
-        public void OnStateApplied(ApplyStateContext context, IWriteOnlyTransaction transaction)
-        {
-            if (context.NewState is not EnqueuedState enqueuedState) return;
+        if (context.NewState is not EnqueuedState enqueuedState) return;
 
-            var originalQueue =
-                SerializationHelper.Deserialize<string>(
-                    context.Connection.GetJobParameter(context.BackgroundJob.Id, "OriginalQueue"));
+        var originalQueue =
+            SerializationHelper.Deserialize<string>(
+                context.Connection.GetJobParameter(context.BackgroundJob.Id, "OriginalQueue"));
 
-            if (originalQueue is not null)
-                enqueuedState.Queue = originalQueue;
-            else
-                context.Connection.SetJobParameter(context.BackgroundJob.Id, "OriginalQueue",
-                    SerializationHelper.Serialize(enqueuedState.Queue));
-        }
+        if (originalQueue is not null)
+            enqueuedState.Queue = originalQueue;
+        else
+            context.Connection.SetJobParameter(context.BackgroundJob.Id, "OriginalQueue",
+                SerializationHelper.Serialize(enqueuedState.Queue));
+    }
 
-        public void OnStateUnapplied(ApplyStateContext context, IWriteOnlyTransaction transaction)
-        {
-            // not needed
-        }
+    public void OnStateUnapplied(ApplyStateContext context, IWriteOnlyTransaction transaction)
+    {
+        // not needed
     }
 }

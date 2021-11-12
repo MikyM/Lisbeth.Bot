@@ -15,14 +15,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Lisbeth.Bot.Application.Enums
+namespace Lisbeth.Bot.Application.Enums;
+
+public enum DiscordEntityType
 {
-    public enum DiscordEntityType
-    {
-        Guild,
-        Channel,
-        Member,
-        User,
-        Role
-    }
+    Guild,
+    Channel,
+    Member,
+    User,
+    Role
 }

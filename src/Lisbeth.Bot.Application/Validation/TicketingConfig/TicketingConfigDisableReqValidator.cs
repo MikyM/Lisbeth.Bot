@@ -21,20 +21,19 @@ using Lisbeth.Bot.Application.Validation.ReusablePropertyValidation;
 using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
 using MikyM.Discord.Interfaces;
 
-namespace Lisbeth.Bot.Application.Validation.TicketingConfig
-{
-    public class TicketingConfigDisableReqValidator : AbstractValidator<TicketingConfigDisableReqDto>
-    {
-        public TicketingConfigDisableReqValidator(IDiscordService discord) : this(discord.Client)
-        {
-        }
+namespace Lisbeth.Bot.Application.Validation.TicketingConfig;
 
-        public TicketingConfigDisableReqValidator(DiscordClient client)
-        {
-            RuleFor(x => x.GuildId)
-                .SetAsyncValidator(new DiscordGuildIdValidator<TicketingConfigDisableReqDto>(client));
-            RuleFor(x => x.RequestedOnBehalfOfId)
-                .SetAsyncValidator(new DiscordUserIdValidator<TicketingConfigDisableReqDto>(client));
-        }
+public class TicketingConfigDisableReqValidator : AbstractValidator<TicketingConfigDisableReqDto>
+{
+    public TicketingConfigDisableReqValidator(IDiscordService discord) : this(discord.Client)
+    {
+    }
+
+    public TicketingConfigDisableReqValidator(DiscordClient client)
+    {
+        RuleFor(x => x.GuildId)
+            .SetAsyncValidator(new DiscordGuildIdValidator<TicketingConfigDisableReqDto>(client));
+        RuleFor(x => x.RequestedOnBehalfOfId)
+            .SetAsyncValidator(new DiscordUserIdValidator<TicketingConfigDisableReqDto>(client));
     }
 }

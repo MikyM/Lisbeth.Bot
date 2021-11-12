@@ -19,16 +19,15 @@
 using System;
 using MikyM.Common.DataAccessLayer.Specifications;
 
-namespace Lisbeth.Bot.DataAccessLayer.Specifications.Mute
+namespace Lisbeth.Bot.DataAccessLayer.Specifications.Mute;
+
+public class ActiveExpiredMutesInActiveGuildsSpecifications : Specification<Domain.Entities.Mute>
 {
-    public class ActiveExpiredMutesInActiveGuildsSpecifications : Specification<Domain.Entities.Mute>
+    public ActiveExpiredMutesInActiveGuildsSpecifications()
     {
-        public ActiveExpiredMutesInActiveGuildsSpecifications()
-        {
-            Where(x => !x.IsDisabled);
-            Where(x => !x.Guild.IsDisabled);
-            Where(x => x.AppliedUntil.Value.ToUniversalTime() <= DateTime.UtcNow);
-            OrderBy(x => x.Guild.Id);
-        }
+        Where(x => !x.IsDisabled);
+        Where(x => !x.Guild.IsDisabled);
+        Where(x => x.AppliedUntil.Value.ToUniversalTime() <= DateTime.UtcNow);
+        OrderBy(x => x.Guild.Id);
     }
 }

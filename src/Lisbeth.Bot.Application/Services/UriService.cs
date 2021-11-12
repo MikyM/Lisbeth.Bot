@@ -22,37 +22,36 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebUtilities;
 using MikyM.Common.DataAccessLayer.Filters;
 
-namespace Lisbeth.Bot.Application.Services
+namespace Lisbeth.Bot.Application.Services;
+
+public class UriService : IUriService
 {
-    public class UriService : IUriService
+    private readonly string _baseUri;
+
+    public UriService(string baseUri)
     {
-        private readonly string _baseUri;
+        _baseUri = baseUri;
+    }
 
-        public UriService(string baseUri)
+    public Uri GetPageUri(PaginationFilter filter, string route, IQueryCollection? queryParams = null)
+    {
+        var endpointUri = string.Concat(_baseUri, route);
+
+        if (queryParams is not null)
         {
-            _baseUri = baseUri;
+            var query = queryParams.Where(x =>
+                !string.Equals(x.Key.ToLower(), "pagesize", StringComparison.InvariantCultureIgnoreCase) &&
+                !string.Equals(x.Key.ToLower(), "pagenumber", StringComparison.InvariantCultureIgnoreCase));
+
+            endpointUri = query.Aggregate(endpointUri,
+                (currentOuter, param) => param.Value.Aggregate(currentOuter,
+                    (currentInner, multiParam) =>
+                        QueryHelpers.AddQueryString(currentInner, param.Key, multiParam)));
         }
 
-        public Uri GetPageUri(PaginationFilter filter, string route, IQueryCollection? queryParams = null)
-        {
-            var endpointUri = string.Concat(_baseUri, route);
+        endpointUri = QueryHelpers.AddQueryString(endpointUri, "pageNumber", filter.PageNumber.ToString());
+        endpointUri = QueryHelpers.AddQueryString(endpointUri, "pageSize", filter.PageSize.ToString());
 
-            if (queryParams is not null)
-            {
-                var query = queryParams.Where(x =>
-                    !string.Equals(x.Key.ToLower(), "pagesize", StringComparison.InvariantCultureIgnoreCase) &&
-                    !string.Equals(x.Key.ToLower(), "pagenumber", StringComparison.InvariantCultureIgnoreCase));
-
-                endpointUri = query.Aggregate(endpointUri,
-                    (currentOuter, param) => param.Value.Aggregate(currentOuter,
-                        (currentInner, multiParam) =>
-                            QueryHelpers.AddQueryString(currentInner, param.Key, multiParam)));
-            }
-
-            endpointUri = QueryHelpers.AddQueryString(endpointUri, "pageNumber", filter.PageNumber.ToString());
-            endpointUri = QueryHelpers.AddQueryString(endpointUri, "pageSize", filter.PageSize.ToString());
-
-            return new Uri(endpointUri);
-        }
+        return new Uri(endpointUri);
     }
 }

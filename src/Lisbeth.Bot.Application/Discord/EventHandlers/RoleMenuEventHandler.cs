@@ -23,36 +23,35 @@ using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Application.Helpers;
 using MikyM.Discord.Events;
 
-namespace Lisbeth.Bot.Application.Discord.EventHandlers
+namespace Lisbeth.Bot.Application.Discord.EventHandlers;
+
+public class RoleMenuEventHandler : IDiscordMiscEventsSubscriber
 {
-    public class RoleMenuEventHandler : IDiscordMiscEventsSubscriber
+    private readonly IAsyncExecutor _asyncExecutor;
+
+    public RoleMenuEventHandler(IAsyncExecutor asyncExecutor)
     {
-        private readonly IAsyncExecutor _asyncExecutor;
+        _asyncExecutor = asyncExecutor;
+    }
 
-        public RoleMenuEventHandler(IAsyncExecutor asyncExecutor)
+    public async Task DiscordOnComponentInteractionCreated(DiscordClient sender,
+        ComponentInteractionCreateEventArgs args)
+    {
+        switch (args.Id)
         {
-            _asyncExecutor = asyncExecutor;
+            case nameof(RoleMenuButton.RoleMenuFinalizeButton):
+            case nameof(RoleMenuButton.RoleMenuAddOptionButton):
+                await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+                break;
         }
 
-        public async Task DiscordOnComponentInteractionCreated(DiscordClient sender,
-            ComponentInteractionCreateEventArgs args)
-        {
-            switch (args.Id)
-            {
-                case nameof(RoleMenuButton.RoleMenuFinalizeButton):
-                case nameof(RoleMenuButton.RoleMenuAddOptionButton):
-                    await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
-                    break;
-            }
+        if (args.Id.Contains("role_menu_"))
+            _ = _asyncExecutor.ExecuteAsync<IDiscordRoleMenuService>(async x =>
+                await x.HandleOptionSelectionAsync(args));
+    }
 
-            if (args.Id.Contains("role_menu_"))
-                _ = _asyncExecutor.ExecuteAsync<IDiscordRoleMenuService>(async x =>
-                    await x.HandleOptionSelectionAsync(args));
-        }
-
-        public Task DiscordOnClientErrored(DiscordClient sender, ClientErrorEventArgs args)
-        {
-            return Task.CompletedTask;
-        }
+    public Task DiscordOnClientErrored(DiscordClient sender, ClientErrorEventArgs args)
+    {
+        return Task.CompletedTask;
     }
 }

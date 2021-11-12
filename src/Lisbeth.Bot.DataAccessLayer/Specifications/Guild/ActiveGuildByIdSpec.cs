@@ -18,14 +18,13 @@
 
 using MikyM.Common.DataAccessLayer.Specifications;
 
-namespace Lisbeth.Bot.DataAccessLayer.Specifications.Guild
+namespace Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
+
+public class ActiveGuildByIdSpec : Specification<Domain.Entities.Guild>
 {
-    public class ActiveGuildByIdSpec : Specification<Domain.Entities.Guild>
+    public ActiveGuildByIdSpec(ulong guildId)
     {
-        public ActiveGuildByIdSpec(ulong guildId)
-        {
-            Where(x => x.GuildId == guildId);
-            Where(x => !x.IsDisabled);
-        }
+        Where(x => x.GuildId == guildId);
+        Where(x => !x.IsDisabled);
     }
 }

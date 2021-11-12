@@ -15,15 +15,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace MikyM.Common.DataAccessLayer.Specifications.Builders
-{
-    public class OrderedSpecificationBuilder<T> : IOrderedSpecificationBuilder<T> where T : class
-    {
-        public OrderedSpecificationBuilder(Specification<T> specification)
-        {
-            Specification = specification;
-        }
+namespace MikyM.Common.DataAccessLayer.Specifications.Builders;
 
-        public Specification<T> Specification { get; }
+public class OrderedSpecificationBuilder<T> : IOrderedSpecificationBuilder<T> where T : class
+{
+    public OrderedSpecificationBuilder(Specification<T> specification)
+    {
+        Specification = specification;
     }
+
+    public Specification<T> Specification { get; }
 }

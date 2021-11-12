@@ -15,14 +15,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Lisbeth.Bot.Domain.DTOs.Request.RoleMenu
+namespace Lisbeth.Bot.Domain.DTOs.Request.RoleMenu;
+
+public class RoleMenuOptionReqDto
 {
-    public class RoleMenuOptionReqDto
-    {
-        public long? RoleMenuId { get; set; }
-        public ulong RoleId { get; set; }
-        public string? Emoji { get; set; }
-        public string? Name { get; set; }
-        public string? Description { get; set; }
-    }
+    public long? RoleMenuId { get; set; }
+    public ulong RoleId { get; set; }
+    public string? Emoji { get; set; }
+    public string? Name { get; set; }
+    public string? Description { get; set; }
 }

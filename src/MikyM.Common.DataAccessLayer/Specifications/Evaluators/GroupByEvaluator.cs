@@ -18,30 +18,29 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators
+namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators;
+
+public class GroupByEvaluator : IEvaluator, IInMemoryEvaluator
 {
-    public class GroupByEvaluator : IEvaluator, IInMemoryEvaluator
+    private GroupByEvaluator()
     {
-        private GroupByEvaluator()
-        {
-        }
+    }
 
-        public static GroupByEvaluator Instance { get; } = new();
+    public static GroupByEvaluator Instance { get; } = new();
 
-        public bool IsCriteriaEvaluator { get; } = false;
+    public bool IsCriteriaEvaluator { get; } = false;
 
-        public IQueryable<T> GetQuery<T>(IQueryable<T> query, ISpecification<T> specification) where T : class
-        {
-            return specification.GroupByExpression is null
-                ? query
-                : query.GroupBy(specification.GroupByExpression).SelectMany(x => x);
-        }
+    public IQueryable<T> GetQuery<T>(IQueryable<T> query, ISpecification<T> specification) where T : class
+    {
+        return specification.GroupByExpression is null
+            ? query
+            : query.GroupBy(specification.GroupByExpression).SelectMany(x => x);
+    }
 
-        public IEnumerable<T> Evaluate<T>(IEnumerable<T> query, ISpecification<T> specification) where T : class
-        {
-            return specification.GroupByExpression is null
-                ? query
-                : query.GroupBy(specification.GroupByExpression.Compile()).SelectMany(x => x);
-        }
+    public IEnumerable<T> Evaluate<T>(IEnumerable<T> query, ISpecification<T> specification) where T : class
+    {
+        return specification.GroupByExpression is null
+            ? query
+            : query.GroupBy(specification.GroupByExpression.Compile()).SelectMany(x => x);
     }
 }

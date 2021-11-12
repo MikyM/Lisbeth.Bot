@@ -18,17 +18,16 @@
 using System;
 using MikyM.Common.DataAccessLayer.Specifications;
 
-namespace Lisbeth.Bot.DataAccessLayer.Specifications.Mute
+namespace Lisbeth.Bot.DataAccessLayer.Specifications.Mute;
+
+public class ActiveExpiredMutePerGuildSpec : Specification<Domain.Entities.Mute>
 {
-    public class ActiveExpiredMutePerGuildSpec : Specification<Domain.Entities.Mute>
+    public ActiveExpiredMutePerGuildSpec(ulong targetUserId, ulong guildId)
     {
-        public ActiveExpiredMutePerGuildSpec(ulong targetUserId, ulong guildId)
-        {
-            Where(x => !x.IsDisabled);
-            Where(x => x.GuildId == guildId);
-            Where(x => x.UserId == targetUserId);
-            Where(x => x.AppliedUntil <= DateTime.UtcNow);
-            Where(x => !x.Guild.IsDisabled);
-        }
+        Where(x => !x.IsDisabled);
+        Where(x => x.GuildId == guildId);
+        Where(x => x.UserId == targetUserId);
+        Where(x => x.AppliedUntil <= DateTime.UtcNow);
+        Where(x => !x.Guild.IsDisabled);
     }
 }

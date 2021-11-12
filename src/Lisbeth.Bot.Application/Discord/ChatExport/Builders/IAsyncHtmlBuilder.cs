@@ -17,10 +17,9 @@
 
 using System.Threading.Tasks;
 
-namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders
+namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders;
+
+public interface IAsyncHtmlBuilder
 {
-    public interface IAsyncHtmlBuilder
-    {
-        Task<string> BuildAsync();
-    }
+    Task<string> BuildAsync();
 }

@@ -17,11 +17,10 @@
 
 using System.Linq;
 
-namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators
+namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators;
+
+public interface IProjectionEvaluator
 {
-    public interface IProjectionEvaluator
-    {
-        IQueryable<TResult> GetQuery<T, TResult>(IQueryable<T> query, ISpecification<T, TResult> specification)
-            where T : class where TResult : class;
-    }
+    IQueryable<TResult> GetQuery<T, TResult>(IQueryable<T> query, ISpecification<T, TResult> specification)
+        where T : class where TResult : class;
 }

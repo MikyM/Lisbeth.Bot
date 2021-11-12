@@ -24,53 +24,52 @@ using Lisbeth.Bot.Application.Extensions;
 using Microsoft.Extensions.Logging;
 using MikyM.Discord.Extensions.SlashCommands.Events;
 
-namespace Lisbeth.Bot.Application.Discord.EventHandlers
+namespace Lisbeth.Bot.Application.Discord.EventHandlers;
+
+[UsedImplicitly]
+public class SlashCommandEventsHandler : IDiscordSlashCommandsEventsSubscriber
 {
-    [UsedImplicitly]
-    public class SlashCommandEventsHandler : IDiscordSlashCommandsEventsSubscriber
+    private readonly ILogger<SlashCommandEventsHandler> _logger;
+
+    public SlashCommandEventsHandler(ILogger<SlashCommandEventsHandler> logger)
     {
-        private readonly ILogger<SlashCommandEventsHandler> _logger;
+        _logger = logger;
+    }
 
-        public SlashCommandEventsHandler(ILogger<SlashCommandEventsHandler> logger)
-        {
-            _logger = logger;
-        }
+    public Task SlashCommandsOnContextMenuErrored(SlashCommandsExtension sender, ContextMenuErrorEventArgs args)
+    {
+        _logger.LogError(args.Exception, args.Exception.GetFullMessage());
+        var noEntryEmoji = DiscordEmoji.FromName(sender.Client, ":x:");
+        var embed = new DiscordEmbedBuilder();
+        embed.WithColor(new DiscordColor(170, 1, 20));
+        embed.WithAuthor($"{noEntryEmoji} Context menu errored");
+        embed.AddField("Type", args.Exception.GetType().ToString());
+        embed.AddField("Message", args.Exception.GetFullMessage());
+        args.Context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
+        return Task.CompletedTask;
+    }
 
-        public Task SlashCommandsOnContextMenuErrored(SlashCommandsExtension sender, ContextMenuErrorEventArgs args)
-        {
-            _logger.LogError(args.Exception, args.Exception.GetFullMessage());
-            var noEntryEmoji = DiscordEmoji.FromName(sender.Client, ":x:");
-            var embed = new DiscordEmbedBuilder();
-            embed.WithColor(new DiscordColor(170, 1, 20));
-            embed.WithAuthor($"{noEntryEmoji} Context menu errored");
-            embed.AddField("Type", args.Exception.GetType().ToString());
-            embed.AddField("Message", args.Exception.GetFullMessage());
-            args.Context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
-            return Task.CompletedTask;
-        }
+    public Task SlashCommandsOnContextMenuExecuted(SlashCommandsExtension sender, ContextMenuExecutedEventArgs args)
+    {
+        return Task.CompletedTask;
+    }
 
-        public Task SlashCommandsOnContextMenuExecuted(SlashCommandsExtension sender, ContextMenuExecutedEventArgs args)
-        {
-            return Task.CompletedTask;
-        }
+    public Task SlashCommandsOnSlashCommandErrored(SlashCommandsExtension sender, SlashCommandErrorEventArgs args)
+    {
+        _logger.LogError(args.Exception, args.Exception.GetFullMessage());
+        var noEntryEmoji = DiscordEmoji.FromName(sender.Client, ":x:");
+        var embed = new DiscordEmbedBuilder();
+        embed.WithColor(new DiscordColor(170, 1, 20));
+        embed.WithAuthor($"{noEntryEmoji} Command errored");
+        embed.AddField("Type", args.Exception.GetType().ToString());
+        embed.AddField("Message", args.Exception.GetFullMessage());
+        args.Context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
+        return Task.CompletedTask;
+    }
 
-        public Task SlashCommandsOnSlashCommandErrored(SlashCommandsExtension sender, SlashCommandErrorEventArgs args)
-        {
-            _logger.LogError(args.Exception, args.Exception.GetFullMessage());
-            var noEntryEmoji = DiscordEmoji.FromName(sender.Client, ":x:");
-            var embed = new DiscordEmbedBuilder();
-            embed.WithColor(new DiscordColor(170, 1, 20));
-            embed.WithAuthor($"{noEntryEmoji} Command errored");
-            embed.AddField("Type", args.Exception.GetType().ToString());
-            embed.AddField("Message", args.Exception.GetFullMessage());
-            args.Context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
-            return Task.CompletedTask;
-        }
-
-        public Task SlashCommandsOnSlashCommandExecuted(SlashCommandsExtension sender,
-            SlashCommandExecutedEventArgs args)
-        {
-            return Task.CompletedTask;
-        }
+    public Task SlashCommandsOnSlashCommandExecuted(SlashCommandsExtension sender,
+        SlashCommandExecutedEventArgs args)
+    {
+        return Task.CompletedTask;
     }
 }

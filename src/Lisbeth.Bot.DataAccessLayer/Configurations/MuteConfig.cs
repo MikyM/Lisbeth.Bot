@@ -19,30 +19,29 @@ using Lisbeth.Bot.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Lisbeth.Bot.DataAccessLayer.Configurations
+namespace Lisbeth.Bot.DataAccessLayer.Configurations;
+
+public class MuteConfig : IEntityTypeConfiguration<Mute>
 {
-    public class MuteConfig : IEntityTypeConfiguration<Mute>
+    public void Configure(EntityTypeBuilder<Mute> builder)
     {
-        public void Configure(EntityTypeBuilder<Mute> builder)
-        {
-            builder.ToTable("mute");
+        builder.ToTable("mute");
 
-            builder.Property(x => x.Id).HasColumnName("id").HasColumnType("bigint").ValueGeneratedOnAdd().IsRequired();
-            builder.Property(x => x.IsDisabled).HasColumnName("is_disabled").HasColumnType("boolean").IsRequired();
-            builder.Property(x => x.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz")
-                .ValueGeneratedOnAdd().IsRequired();
-            builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz").IsRequired();
+        builder.Property(x => x.Id).HasColumnName("id").HasColumnType("bigint").ValueGeneratedOnAdd().IsRequired();
+        builder.Property(x => x.IsDisabled).HasColumnName("is_disabled").HasColumnType("boolean").IsRequired();
+        builder.Property(x => x.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz")
+            .ValueGeneratedOnAdd().IsRequired();
+        builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz").IsRequired();
 
-            builder.Property(x => x.GuildId).HasColumnName("guild_id").HasColumnType("bigint").ValueGeneratedOnAdd()
-                .IsRequired();
-            builder.Property(x => x.UserId).HasColumnName("user_id").HasColumnType("bigint").ValueGeneratedOnAdd()
-                .IsRequired();
-            builder.Property(x => x.AppliedById).HasColumnName("applied_by_id").HasColumnType("bigint").IsRequired();
-            builder.Property(x => x.AppliedUntil).HasColumnName("applied_until").HasColumnType("timestamptz")
-                .IsRequired();
-            builder.Property(x => x.LiftedById).HasColumnName("lifted_by_id").HasColumnType("bigint");
-            builder.Property(x => x.LiftedOn).HasColumnName("lifted_on").HasColumnType("timestamptz");
-            builder.Property(x => x.Reason).HasColumnName("reason").HasColumnType("varchar(500)").HasMaxLength(500);
-        }
+        builder.Property(x => x.GuildId).HasColumnName("guild_id").HasColumnType("bigint").ValueGeneratedOnAdd()
+            .IsRequired();
+        builder.Property(x => x.UserId).HasColumnName("user_id").HasColumnType("bigint").ValueGeneratedOnAdd()
+            .IsRequired();
+        builder.Property(x => x.AppliedById).HasColumnName("applied_by_id").HasColumnType("bigint").IsRequired();
+        builder.Property(x => x.AppliedUntil).HasColumnName("applied_until").HasColumnType("timestamptz")
+            .IsRequired();
+        builder.Property(x => x.LiftedById).HasColumnName("lifted_by_id").HasColumnType("bigint");
+        builder.Property(x => x.LiftedOn).HasColumnName("lifted_on").HasColumnType("timestamptz");
+        builder.Property(x => x.Reason).HasColumnName("reason").HasColumnType("varchar(500)").HasMaxLength(500);
     }
 }

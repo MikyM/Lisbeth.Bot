@@ -24,41 +24,40 @@ using Lisbeth.Bot.DataAccessLayer.Specifications.Ban;
 using Lisbeth.Bot.Domain.DTOs.Request.Ban;
 using Lisbeth.Bot.Domain.Entities;
 
-namespace Lisbeth.Bot.Application.Services
+namespace Lisbeth.Bot.Application.Services;
+
+[UsedImplicitly]
+public class BanCheckService : IBanCheckService
 {
-    [UsedImplicitly]
-    public class BanCheckService : IBanCheckService
+    private readonly IBanService _banService;
+
+    public BanCheckService(IBanService banService)
     {
-        private readonly IBanService _banService;
+        _banService = banService;
+    }
 
-        public BanCheckService(IBanService banService)
-        {
-            _banService = banService;
-        }
+    public async Task CheckForNonBotBanAsync(ulong targetId, ulong guildId, ulong requestedOnBehalfOfId)
+    {
+        await Task.Delay(1000);
 
-        public async Task CheckForNonBotBanAsync(ulong targetId, ulong guildId, ulong requestedOnBehalfOfId)
-        {
-            await Task.Delay(1000);
+        var ban = await _banService.GetSingleBySpecAsync<Ban>(
+            new BanBaseGetSpecifications(null, targetId, guildId));
 
-            var ban = await _banService.GetSingleBySpecAsync<Ban>(
-                new BanBaseGetSpecifications(null, targetId, guildId));
+        if (!ban.IsDefined()) return;
 
-            if (!ban.IsDefined()) return;
+        await _banService.AddOrExtendAsync(new BanReqDto(targetId, guildId, requestedOnBehalfOfId,
+            DateTime.MaxValue));
+    }
 
-            await _banService.AddOrExtendAsync(new BanReqDto(targetId, guildId, requestedOnBehalfOfId,
-                DateTime.MaxValue));
-        }
+    public async Task CheckForNonBotUnbanAsync(ulong targetId, ulong guildId, ulong requestedOnBehalfOfId)
+    {
+        await Task.Delay(1000);
 
-        public async Task CheckForNonBotUnbanAsync(ulong targetId, ulong guildId, ulong requestedOnBehalfOfId)
-        {
-            await Task.Delay(1000);
+        var ban = await _banService.GetSingleBySpecAsync<Ban>(
+            new BanBaseGetSpecifications(null, targetId, guildId));
 
-            var ban = await _banService.GetSingleBySpecAsync<Ban>(
-                new BanBaseGetSpecifications(null, targetId, guildId));
+        if (!ban.IsDefined()) return;
 
-            if (!ban.IsDefined()) return;
-
-            await _banService.DisableAsync(new BanDisableReqDto(targetId, guildId, requestedOnBehalfOfId));
-        }
+        await _banService.DisableAsync(new BanDisableReqDto(targetId, guildId, requestedOnBehalfOfId));
     }
 }

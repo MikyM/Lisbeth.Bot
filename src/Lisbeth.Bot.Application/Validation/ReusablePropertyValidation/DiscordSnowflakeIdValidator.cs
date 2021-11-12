@@ -25,86 +25,85 @@ using Emzi0767.Utilities;
 using FluentValidation;
 using FluentValidation.Validators;
 
-namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation
+namespace Lisbeth.Bot.Application.Validation.ReusablePropertyValidation;
+
+public class DiscordSnowflakeIdValidator<T> : IAsyncPropertyValidator<T, ulong>
 {
-    public class DiscordSnowflakeIdValidator<T> : IAsyncPropertyValidator<T, ulong>
+    private readonly DiscordClient _discord;
+    private bool _channelExists = true;
+    private bool _guildExists = true;
+    private object? _guildId;
+    private bool _memberExists = true;
+    private bool _roleExists = true;
+
+    public DiscordSnowflakeIdValidator(DiscordClient discord)
     {
-        private readonly DiscordClient _discord;
-        private bool _channelExists = true;
-        private bool _guildExists = true;
-        private object? _guildId;
-        private bool _memberExists = true;
-        private bool _roleExists = true;
+        _discord = discord;
+    }
 
-        public DiscordSnowflakeIdValidator(DiscordClient discord)
+    public async Task<bool> IsValidAsync(ValidationContext<T> context, ulong value, CancellationToken cancellation)
+    {
+        var data = context.InstanceToValidate.ToDictionary();
+
+        if (!data.TryGetValue("GuildId", out _guildId)) return false;
+
+        DiscordGuild guild;
+        try
         {
-            _discord = discord;
-        }
-
-        public async Task<bool> IsValidAsync(ValidationContext<T> context, ulong value, CancellationToken cancellation)
-        {
-            var data = context.InstanceToValidate.ToDictionary();
-
-            if (!data.TryGetValue("GuildId", out _guildId)) return false;
-
-            DiscordGuild guild;
-            try
-            {
-                guild = await _discord.GetGuildAsync((ulong)_guildId);
-                if (guild is null)
-                {
-                    _guildExists = false;
-                    return false;
-                }
-            }
-            catch (Exception)
+            guild = await _discord.GetGuildAsync((ulong)_guildId);
+            if (guild is null)
             {
                 _guildExists = false;
                 return false;
             }
-
-            try
-            {
-                var user = await guild.GetMemberAsync(value);
-                if (user is null) _memberExists = false;
-            }
-            catch (Exception)
-            {
-                _memberExists = false;
-            }
-
-            try
-            {
-                var role = guild.GetRole(value);
-                if (role is null) _roleExists = false;
-            }
-            catch (Exception)
-            {
-                _roleExists = false;
-            }
-
-            try
-            {
-                var channel = await _discord.GetChannelAsync(value);
-                if (channel is null) _channelExists = false;
-                if (channel is not null && channel.Guild.Id != guild.Id) _channelExists = false;
-            }
-            catch (Exception)
-            {
-                _channelExists = false;
-            }
-
-            return _roleExists || _memberExists || _channelExists;
         }
-
-        public string GetDefaultMessageTemplate(string errorCode)
+        catch (Exception)
         {
-            return _guildExists
-                ? "'{PropertyName}' is not a valid Discord Id or a discord member or a role with given Id doesn't exist / isn't guilds part."
-                : "'{PropertyName}' is not a valid Discord Id or a discord guild does not exist.";
+            _guildExists = false;
+            return false;
         }
 
+        try
+        {
+            var user = await guild.GetMemberAsync(value);
+            if (user is null) _memberExists = false;
+        }
+        catch (Exception)
+        {
+            _memberExists = false;
+        }
 
-        public string Name => "DiscordIdPropertyValidator";
+        try
+        {
+            var role = guild.GetRole(value);
+            if (role is null) _roleExists = false;
+        }
+        catch (Exception)
+        {
+            _roleExists = false;
+        }
+
+        try
+        {
+            var channel = await _discord.GetChannelAsync(value);
+            if (channel is null) _channelExists = false;
+            if (channel is not null && channel.Guild.Id != guild.Id) _channelExists = false;
+        }
+        catch (Exception)
+        {
+            _channelExists = false;
+        }
+
+        return _roleExists || _memberExists || _channelExists;
     }
+
+    public string GetDefaultMessageTemplate(string errorCode)
+    {
+        return _guildExists
+            ? "'{PropertyName}' is not a valid Discord Id or a discord member or a role with given Id doesn't exist / isn't guilds part."
+            : "'{PropertyName}' is not a valid Discord Id or a discord guild does not exist.";
+    }
+
+
+    public string Name => "DiscordIdPropertyValidator";
 }

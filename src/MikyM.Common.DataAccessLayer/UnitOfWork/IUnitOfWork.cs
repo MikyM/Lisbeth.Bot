@@ -20,14 +20,13 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MikyM.Common.DataAccessLayer.Repositories;
 
-namespace MikyM.Common.DataAccessLayer.UnitOfWork
+namespace MikyM.Common.DataAccessLayer.UnitOfWork;
+
+public interface IUnitOfWork<TContext> : IDisposable where TContext : DbContext
 {
-    public interface IUnitOfWork<TContext> : IDisposable where TContext : DbContext
-    {
-        TContext Context { get; }
-        TRepository? GetRepository<TRepository>() where TRepository : IBaseRepository;
-        Task<int> CommitAsync();
-        Task RollbackAsync();
-        Task UseTransaction();
-    }
+    TContext Context { get; }
+    TRepository? GetRepository<TRepository>() where TRepository : IBaseRepository;
+    Task<int> CommitAsync();
+    Task RollbackAsync();
+    Task UseTransaction();
 }

@@ -15,19 +15,18 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Lisbeth.Bot.Domain.DTOs.Request.Base
+namespace Lisbeth.Bot.Domain.DTOs.Request.Base;
+
+public class BaseAuthReqDto
 {
-    public class BaseAuthReqDto
+    public BaseAuthReqDto()
     {
-        public BaseAuthReqDto()
-        {
-        }
-
-        public BaseAuthReqDto(ulong requestedOnBehalfOfId)
-        {
-            RequestedOnBehalfOfId = requestedOnBehalfOfId;
-        }
-
-        public ulong RequestedOnBehalfOfId { get; set; }
     }
+
+    public BaseAuthReqDto(ulong requestedOnBehalfOfId)
+    {
+        RequestedOnBehalfOfId = requestedOnBehalfOfId;
+    }
+
+    public ulong RequestedOnBehalfOfId { get; set; }
 }

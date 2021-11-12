@@ -24,19 +24,18 @@ using Lisbeth.Bot.Domain.Entities;
 using MikyM.Common.Application.Interfaces;
 using MikyM.Common.Application.Results;
 
-namespace Lisbeth.Bot.Application.Services.Database.Interfaces
+namespace Lisbeth.Bot.Application.Services.Database.Interfaces;
+
+public interface ITicketService : ICrudService<Ticket, LisbethBotDbContext>
 {
-    public interface ITicketService : ICrudService<Ticket, LisbethBotDbContext>
-    {
-        Task<Result<Ticket>> CloseAsync(TicketCloseReqDto req, bool shouldSave = false);
-        Task<Result<Ticket>> CloseAsync(TicketCloseReqDto req, Ticket ticket);
-        Task<Result<Ticket>> OpenAsync(TicketOpenReqDto req);
-        Task<Result<Ticket>> ReopenAsync(TicketReopenReqDto req, Ticket ticket);
-        Task<Result<Ticket>> ReopenAsync(TicketReopenReqDto req);
-        Task<Result> SetAddedUsersAsync(Ticket ticket, IEnumerable<ulong> userIds, bool shouldSave = false);
-        Task<Result> SetAddedRolesAsync(Ticket ticket, IEnumerable<ulong> roleIds, bool shouldSave = false);
-        Task<Result<bool>> IsTicketPrivateAsync(Ticket ticket, DiscordGuild guild);
-        Task<Result> CheckAndSetPrivacyAsync(Ticket ticket, DiscordGuild guild);
-        Task<Result> CheckForDeletedTicketChannelAsync(ulong channelId, ulong guildId, ulong requestedOnBehalfOfId);
-    }
+    Task<Result<Ticket>> CloseAsync(TicketCloseReqDto req, bool shouldSave = false);
+    Task<Result<Ticket>> CloseAsync(TicketCloseReqDto req, Ticket ticket);
+    Task<Result<Ticket>> OpenAsync(TicketOpenReqDto req);
+    Task<Result<Ticket>> ReopenAsync(TicketReopenReqDto req, Ticket ticket);
+    Task<Result<Ticket>> ReopenAsync(TicketReopenReqDto req);
+    Task<Result> SetAddedUsersAsync(Ticket ticket, IEnumerable<ulong> userIds, bool shouldSave = false);
+    Task<Result> SetAddedRolesAsync(Ticket ticket, IEnumerable<ulong> roleIds, bool shouldSave = false);
+    Task<Result<bool>> IsTicketPrivateAsync(Ticket ticket, DiscordGuild guild);
+    Task<Result> CheckAndSetPrivacyAsync(Ticket ticket, DiscordGuild guild);
+    Task<Result> CheckForDeletedTicketChannelAsync(ulong channelId, ulong guildId, ulong requestedOnBehalfOfId);
 }

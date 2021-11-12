@@ -15,15 +15,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace MikyM.Common.DataAccessLayer.Specifications.Builders
-{
-    public interface ISpecificationBuilder<T, TResult> : ISpecificationBuilder<T> where T : class where TResult : class
-    {
-        new Specification<T, TResult> Specification { get; }
-    }
+namespace MikyM.Common.DataAccessLayer.Specifications.Builders;
 
-    public interface ISpecificationBuilder<T> where T : class
-    {
-        Specification<T> Specification { get; }
-    }
+public interface ISpecificationBuilder<T, TResult> : ISpecificationBuilder<T> where T : class where TResult : class
+{
+    new Specification<T, TResult> Specification { get; }
+}
+
+public interface ISpecificationBuilder<T> where T : class
+{
+    Specification<T> Specification { get; }
 }

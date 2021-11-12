@@ -19,12 +19,11 @@ using System.Threading.Tasks;
 using DSharpPlus.EventArgs;
 using MikyM.Common.Application.Results;
 
-namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
+namespace Lisbeth.Bot.Application.Discord.Services.Interfaces;
+
+public interface IDiscordMemberService
 {
-    public interface IDiscordMemberService
-    {
-        Task<Result> LogMemberRemovedEventAsync(GuildMemberRemoveEventArgs args);
-        Task<Result> SendWelcomeMessageAsync(GuildMemberAddEventArgs args);
-        Task<Result> MemberMuteCheckAsync(GuildMemberAddEventArgs args);
-    }
+    Task<Result> LogMemberRemovedEventAsync(GuildMemberRemoveEventArgs args);
+    Task<Result> SendWelcomeMessageAsync(GuildMemberAddEventArgs args);
+    Task<Result> MemberMuteCheckAsync(GuildMemberAddEventArgs args);
 }

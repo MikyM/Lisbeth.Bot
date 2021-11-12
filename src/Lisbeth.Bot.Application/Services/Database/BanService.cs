@@ -29,59 +29,58 @@ using MikyM.Common.Application.Services;
 using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
 
-namespace Lisbeth.Bot.Application.Services.Database
+namespace Lisbeth.Bot.Application.Services.Database;
+
+[UsedImplicitly]
+public class BanService : CrudService<Ban, LisbethBotDbContext>, IBanService
 {
-    [UsedImplicitly]
-    public class BanService : CrudService<Ban, LisbethBotDbContext>, IBanService
+    public BanService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
     {
-        public BanService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
+    }
+
+    public async Task<Result<(long Id, Ban? FoundEntity)>> AddOrExtendAsync(BanReqDto req, bool shouldSave = false)
+    {
+        if (req is null) throw new ArgumentNullException(nameof(req));
+
+        var result = await base.GetSingleBySpecAsync<Ban>(new Specification<Ban>(x =>
+            x.UserId == req.TargetUserId && x.GuildId == req.GuildId && !x.IsDisabled));
+
+        if (!result.IsDefined())
         {
+            var partial = await base.AddAsync(req, shouldSave);
+            return Result<(long Id, Ban? FoundEntity)>.FromSuccess((partial.Entity, null));
         }
 
-        public async Task<Result<(long Id, Ban? FoundEntity)>> AddOrExtendAsync(BanReqDto req, bool shouldSave = false)
-        {
-            if (req is null) throw new ArgumentNullException(nameof(req));
+        if (result.Entity.AppliedUntil > req.AppliedUntil) return (result.Entity.Id, result.Entity);
 
-            var result = await base.GetSingleBySpecAsync<Ban>(new Specification<Ban>(x =>
-                x.UserId == req.TargetUserId && x.GuildId == req.GuildId && !x.IsDisabled));
+        var shallowCopy = result.Entity.ShallowCopy();
 
-            if (!result.IsDefined())
-            {
-                var partial = await base.AddAsync(req, shouldSave);
-                return Result<(long Id, Ban? FoundEntity)>.FromSuccess((partial.Entity, null));
-            }
+        base.BeginUpdate(result.Entity);
+        result.Entity.AppliedById = req.RequestedOnBehalfOfId;
+        result.Entity.AppliedUntil = req.AppliedUntil;
+        result.Entity.Reason = req.Reason;
 
-            if (result.Entity.AppliedUntil > req.AppliedUntil) return (result.Entity.Id, result.Entity);
+        if (shouldSave) await base.CommitAsync();
 
-            var shallowCopy = result.Entity.ShallowCopy();
+        return Result<(long Id, Ban? FoundEntity)>.FromSuccess((result.Entity.Id, shallowCopy));
+    }
 
-            base.BeginUpdate(result.Entity);
-            result.Entity.AppliedById = req.RequestedOnBehalfOfId;
-            result.Entity.AppliedUntil = req.AppliedUntil;
-            result.Entity.Reason = req.Reason;
+    public async Task<Result<Ban>> DisableAsync(BanDisableReqDto entry, bool shouldSave = false)
+    {
+        if (entry is null) throw new ArgumentNullException(nameof(entry));
 
-            if (shouldSave) await base.CommitAsync();
+        var result = await base.GetSingleBySpecAsync<Ban>(
+            new Specification<Ban>(x =>
+                x.UserId == entry.TargetUserId && x.GuildId == entry.GuildId && !x.IsDisabled));
+        if (!result.IsDefined()) return Result<Ban>.FromError(new NotFoundError(), result);
 
-            return Result<(long Id, Ban? FoundEntity)>.FromSuccess((result.Entity.Id, shallowCopy));
-        }
+        base.BeginUpdate(result.Entity);
+        result.Entity.IsDisabled = true;
+        result.Entity.LiftedOn = DateTime.UtcNow;
+        result.Entity.LiftedById = entry.RequestedOnBehalfOfId;
 
-        public async Task<Result<Ban>> DisableAsync(BanDisableReqDto entry, bool shouldSave = false)
-        {
-            if (entry is null) throw new ArgumentNullException(nameof(entry));
+        if (shouldSave) await base.CommitAsync();
 
-            var result = await base.GetSingleBySpecAsync<Ban>(
-                new Specification<Ban>(x =>
-                    x.UserId == entry.TargetUserId && x.GuildId == entry.GuildId && !x.IsDisabled));
-            if (!result.IsDefined()) return Result<Ban>.FromError(new NotFoundError(), result);
-
-            base.BeginUpdate(result.Entity);
-            result.Entity.IsDisabled = true;
-            result.Entity.LiftedOn = DateTime.UtcNow;
-            result.Entity.LiftedById = entry.RequestedOnBehalfOfId;
-
-            if (shouldSave) await base.CommitAsync();
-
-            return Result<Ban>.FromSuccess(result.Entity);
-        }
+        return Result<Ban>.FromSuccess(result.Entity);
     }
 }
