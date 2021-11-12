@@ -226,14 +226,14 @@ public class DiscordRoleMenuService : IDiscordRoleMenuService
     {
         await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
 
-        if (!long.TryParse(args.Id, out long _)) return Result.FromError(new ArgumentError(nameof(args.Id)));
+        if (!long.TryParse(args.Id, out long _)) return Result.FromError(new DiscordArgumentError(nameof(args.Id)));
 
         //var roleMenu = await _roleMenuService.GetSingleBySpecAsync<RoleMenu>(new RoleMenuByIdWithOptionsSpec(parsed));
 
         try
         {
             if (!ulong.TryParse(args.Values[0].Split('_', StringSplitOptions.RemoveEmptyEntries).Last().Trim(),
-                    out var parsedValue)) return Result.FromError(new ArgumentError(nameof(args.Values)));
+                    out var parsedValue)) return Result.FromError(new DiscordArgumentError(nameof(args.Values)));
 
             /*var option = roleMenu.RoleMenuOptions.FirstOrDefault(x => x.RoleId == parsedValue);
 
@@ -441,7 +441,7 @@ public class DiscordRoleMenuService : IDiscordRoleMenuService
 
         if (string.IsNullOrWhiteSpace(waitResult.Result.Content.Trim()))
             return Result<(DiscordEmbedBuilder Embed, RoleMenu CurrentMenu)>.FromError(
-                new ArgumentError("Response can't be empty"));
+                new DiscordArgumentError("Response can't be empty"));
 
         string name = waitResult.Result.Content.GetStringBetween("@name@", "@endName@").Trim();
         string desc = waitResult.Result.Content.GetStringBetween("@desc@", "@endDesc@").Trim();
@@ -456,7 +456,7 @@ public class DiscordRoleMenuService : IDiscordRoleMenuService
 
         if (string.IsNullOrWhiteSpace(emoji) && !DiscordEmoji.TryFromName(ctx.Client, emoji, true, out _))
             return Result<(DiscordEmbedBuilder Embed, RoleMenu CurrentMenu)>.FromError(
-                new ArgumentError("Invalid emoji provided"));
+                new DiscordArgumentError("Invalid emoji provided"));
         if (!string.IsNullOrWhiteSpace(emoji) && DiscordEmoji.TryFromName(ctx.Client, emoji, true, out _))
             newOption.Emoji = emoji;
 

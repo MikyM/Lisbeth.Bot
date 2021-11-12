@@ -55,12 +55,12 @@ public class MainReminderService : IMainReminderService
         long remindersPerGuild = recGuild.Entity + reGuild.Entity;
 
         if (recGuild.Entity >= 20)
-            return new ArgumentError(nameof(recGuild.Entity),
+            return new DiscordArgumentError(nameof(recGuild.Entity),
                 "A guild can have up to 20 active recurring reminders");
         if (remindersPerUser >= 10)
-            return new ArgumentError(nameof(recGuild.Entity), "A user can have up to 10 active reminders");
+            return new DiscordArgumentError(nameof(recGuild.Entity), "A user can have up to 10 active reminders");
         if (remindersPerGuild >= 200)
-            return new ArgumentError(nameof(recGuild.Entity), "A guild can have up to 200 active reminders");
+            return new DiscordArgumentError(nameof(recGuild.Entity), "A guild can have up to 200 active reminders");
 
         if (req.SetFor.HasValue ||
             !string.IsNullOrWhiteSpace(req.TimeSpanExpression)) // handle single reminder as first option
@@ -69,7 +69,7 @@ public class MainReminderService : IMainReminderService
             if (!string.IsNullOrWhiteSpace(req.TimeSpanExpression))
             {
                 var isValid = req.TimeSpanExpression.TryParseToDurationAndNextOccurrence(out var occurrence, out _);
-                if (!isValid) return new ArgumentError(nameof(req.TimeSpanExpression));
+                if (!isValid) return new DiscordArgumentError(nameof(req.TimeSpanExpression));
                 setFor = occurrence;
             }
             else
@@ -95,20 +95,20 @@ public class MainReminderService : IMainReminderService
             var parsedWithSeconds = CrontabSchedule.TryParse(req.CronExpression,
                 new CrontabSchedule.ParseOptions { IncludingSeconds = true });
             if (parsed is null && parsedWithSeconds is null)
-                return Result<ReminderResDto>.FromError(new ArgumentError(nameof(recGuild.Entity),
+                return Result<ReminderResDto>.FromError(new DiscordArgumentError(nameof(recGuild.Entity),
                     "Invalid cron expression"));
             if (parsed is not null &&
                 parsed.GetNextOccurrences(DateTime.UtcNow, DateTime.UtcNow.AddHours(1)).Count() > 12 ||
                 parsedWithSeconds is not null && parsedWithSeconds
                     .GetNextOccurrences(DateTime.UtcNow, DateTime.UtcNow.AddHours(1))
                     .Count() > 12)
-                return new ArgumentError(nameof(recGuild.Entity),
+                return new DiscordArgumentError(nameof(recGuild.Entity),
                     "Cron expressions with more than 12 occurrences per hour (more frequent than every 5 minutes) are not allowed");
 
             var count = await _recurringReminderService.LongCountAsync(
                 new ActiveRecurringRemindersPerGuildByNameSpec(req.GuildId, req.Name));
             if (count.Entity != 0)
-                return new ArgumentError(nameof(recGuild.Entity),
+                return new DiscordArgumentError(nameof(recGuild.Entity),
                     $"This guild already has a recurring reminder with name: {req.Name}");
 
             string jobName = $"{req.GuildId}_{req.Name}";
@@ -166,9 +166,9 @@ public class MainReminderService : IMainReminderService
         if (string.IsNullOrWhiteSpace(req.CronExpression)) throw new InvalidOperationException();
 
         var parsed = CrontabSchedule.TryParse(req.TimeSpanExpression);
-        if (parsed is null) return new ArgumentError(nameof(req.CronExpression), "Invalid cron expression");
+        if (parsed is null) return new DiscordArgumentError(nameof(req.CronExpression), "Invalid cron expression");
         if (parsed.GetNextOccurrences(DateTime.UtcNow, DateTime.UtcNow.AddHours(1)).Count() > 12)
-            return new ArgumentError(nameof(req.CronExpression),
+            return new DiscordArgumentError(nameof(req.CronExpression),
                 "Cron expressions with more than 12 occurrences per hour (more frequent than every 5 minutes) are not allowed");
 
         var partial = await _recurringReminderService.GetSingleBySpecAsync<RecurringReminder>(

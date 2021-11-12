@@ -35,7 +35,7 @@ public class TagService : CrudService<Tag, LisbethBotDbContext>, ITagService
     {
         var res = await base.LongCountAsync(new TagByGuildAndNameSpec(req.Name, req.GuildId));
         if (res.Entity != 0)
-            return new ArgumentError(nameof(req.Name), $"Guild already has a tag named {req.Name}");
+            return new DiscordArgumentError(nameof(req.Name), $"Guild already has a tag named {req.Name}");
 
         await base.AddAsync(req, shouldSave);
         return Result.FromSuccess();
@@ -53,7 +53,7 @@ public class TagService : CrudService<Tag, LisbethBotDbContext>, ITagService
 
         if (!tag.IsDefined()) return Result.FromError(tag);
         if (tag.Entity.IsDisabled)
-            return new ArgumentError(nameof(tag.Entity),
+            return new DiscordArgumentError(nameof(tag.Entity),
                 "Can't update embed config for a disabled tag, enable the tag first.");
 
         base.BeginUpdate(tag.Entity);
