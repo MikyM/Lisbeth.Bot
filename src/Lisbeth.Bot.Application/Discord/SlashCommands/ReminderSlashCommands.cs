@@ -183,7 +183,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
             if (result.IsDefined()) await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(result.Entity));
             else
                 await ctx.EditResponseAsync(
-                    new DiscordWebhookBuilder().AddEmbed(GetUnsuccessfulResultEmbed(result, ctx.Client)));
+                    new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(result, ctx.Client)));
         }
 
         [UsedImplicitly]

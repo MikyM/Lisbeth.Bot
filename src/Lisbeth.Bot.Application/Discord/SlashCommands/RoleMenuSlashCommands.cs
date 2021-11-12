@@ -160,14 +160,14 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(partial.Value.Entity));
                 else
                     await ctx.EditResponseAsync(
-                        new DiscordWebhookBuilder().AddEmbed(GetUnsuccessfulResultEmbed(partial, ctx.Client)));
+                        new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(partial, ctx.Client)));
             }
             else if (result.HasValue)
             {
                 if (!result.Value.IsDefined())
                 {
                     await ctx.EditResponseAsync(
-                        new DiscordWebhookBuilder().AddEmbed(GetUnsuccessfulResultEmbed(result, ctx.Client)));
+                        new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(result, ctx.Client)));
                 }
                 else
                 {

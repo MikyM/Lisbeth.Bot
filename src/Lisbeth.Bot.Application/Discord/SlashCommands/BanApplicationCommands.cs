@@ -95,7 +95,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
                     .AsEphemeral(true));
             else
                 await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
-                    .AddEmbed(GetUnsuccessfulResultEmbed(result, ctx.Client))
+                    .AddEmbed(base.GetUnsuccessfulResultEmbed(result, ctx.Client))
                     .AsEphemeral(true));
         }
     }
