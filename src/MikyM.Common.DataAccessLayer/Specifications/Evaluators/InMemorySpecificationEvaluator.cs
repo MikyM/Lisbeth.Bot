@@ -45,7 +45,9 @@ public class InMemorySpecificationEvaluator : IInMemorySpecificationEvaluator
     public virtual IEnumerable<T> Evaluate<T>(IEnumerable<T> source, ISpecification<T> specification)
         where T : class
     {
-        if ((specification.SearchCriterias ?? throw new InvalidOperationException()).Any())
+        if (specification.SearchCriterias is null) return source;
+
+        if (specification.SearchCriterias.Any())
             throw new NotSupportedException(
                 "The specification contains Search expressions and can't be evaluated with in-memory evaluator.");
 

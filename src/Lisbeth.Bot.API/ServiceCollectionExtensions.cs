@@ -165,7 +165,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddEFSecondLevelCache(options =>
         {
-            options.UseEasyCachingCoreProvider("InMemoryCache").DisableLogging().UseCacheKeyPrefix("EF_");
+            options.UseEasyCachingCoreProvider("InMemoryCache").DisableLogging(true).UseCacheKeyPrefix("EF_");
             options.CacheQueriesContainingTypes(
                 CacheExpirationMode.Sliding, TimeSpan.FromMinutes(30),
                 typeof(Guild)

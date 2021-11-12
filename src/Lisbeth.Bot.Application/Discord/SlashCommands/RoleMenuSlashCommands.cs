@@ -36,11 +36,11 @@ public class RoleMenuSlashCommands : ExtendedApplicationCommandModule
     public async Task RoleMenuCommand(InteractionContext ctx,
         [Option("action", "Type of action to perform")]
         RoleMenuActionType action,
-        [Option("channel", "Channel to send the tag to")]
+        [Option("channel", "Channel to send the role menu to")]
         DiscordChannel? channel = null,
-        [Option("id", "Type of action to perform")]
+        [Option("id-or-name", "Type of action to perform")]
         string idOrName = "",
-        [Option("text", "Base text for the tag")]
+        [Option("text", "Base text for the role menu")]
         string text = "")
     {
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
@@ -81,7 +81,7 @@ public class RoleMenuSlashCommands : ExtendedApplicationCommandModule
                     Text = text
                 };
 
-                var addValidator = new RoleMenuAddReqValidator(ctx.Client);
+                var addValidator = new RoleMenuDiscordAddReqValidator(ctx.Client);
                 await addValidator.ValidateAndThrowAsync(addReq);
 
                 partial = await this.DiscordRoleMenuService!.CreateRoleMenuAsync(ctx, addReq);

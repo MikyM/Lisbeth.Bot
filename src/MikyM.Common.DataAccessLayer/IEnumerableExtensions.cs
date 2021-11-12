@@ -15,26 +15,21 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using MikyM.Common.DataAccessLayer.Specifications.Extensions;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
-namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators;
+namespace MikyM.Common.DataAccessLayer;
 
-public class SearchEvaluator : IEvaluator
+// ReSharper disable once InconsistentNaming
+public static class IEnumerableExtensions
 {
-    private SearchEvaluator()
+    public static bool AnyNullable<T>([NotNullWhen(true)] this IEnumerable<T>? source, Func<T, bool> predicate)
     {
+        return source is not null && source.Any(predicate);
     }
 
-    public static SearchEvaluator Instance { get; } = new();
-
-    public bool IsCriteriaEvaluator { get; } = true;
-
-    public IQueryable<T> GetQuery<T>(IQueryable<T> query, ISpecification<T> specification) where T : class
+    public static bool AnyNullable<T>([NotNullWhen(true)] this IEnumerable<T>? source)
     {
-        if (!specification.SearchCriterias.AnyNullable()) return query;
-
-        return specification.SearchCriterias.GroupBy(x => x.SearchGroup)
-            .Select(searchCriteria => searchCriteria.Select(x => (x.Selector, x.SearchTerm)))
-            .Aggregate(query, (current, criterias) => current.Search(criterias));
+        return source is not null && source.Any();
     }
 }

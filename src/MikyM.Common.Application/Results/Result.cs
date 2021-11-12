@@ -176,7 +176,7 @@ public readonly struct Result<TEntity> : IResult<TEntity>
     /// </summary>
     /// <returns>true if the result contains a defined value; otherwise, false.</returns>
     [MemberNotNullWhen(true, nameof(Entity))]
-    public bool IsDefined() => this.IsDefined() && this.Entity is not null;
+    public bool IsDefined() => this.IsSuccess && this.Entity is not null;
 
     /// <summary>
     /// Creates a new successful result.

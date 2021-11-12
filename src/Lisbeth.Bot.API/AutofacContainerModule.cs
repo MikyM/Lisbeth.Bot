@@ -70,8 +70,8 @@ public class AutofacContainerModule : Module
             var optionsBuilder = new DbContextOptionsBuilder<LisbethBotDbContext>();
             //optionsBuilder.UseInMemoryDatabase("testdb");
             optionsBuilder.AddInterceptors(x.Resolve<SecondLevelCacheInterceptor>());
-            optionsBuilder.EnableSensitiveDataLogging();
-            optionsBuilder.UseLoggerFactory(x.Resolve<ILoggerFactory>());
+            //optionsBuilder.EnableSensitiveDataLogging();
+            //optionsBuilder.UseLoggerFactory(x.Resolve<ILoggerFactory>());
             optionsBuilder.UseNpgsql(
                 "User ID=lisbethbot;Password=lisbethbot;Host=localhost;Port=5438;Database=lisbeth_bot_test;");
             return new LisbethBotDbContext(optionsBuilder.Options);
