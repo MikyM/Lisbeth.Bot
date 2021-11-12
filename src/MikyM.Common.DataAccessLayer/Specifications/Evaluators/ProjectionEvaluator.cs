@@ -33,8 +33,8 @@ public class ProjectionEvaluator : IProjectionEvaluator
         if (specification.MembersToExpand is not null)
         {
             return specification.MapperConfiguration is null
-                ? query.ProjectTo<TResult>(specification.MembersToExpand.ToArray())
-                : query.ProjectTo<TResult>(specification.MapperConfiguration,
+                ? query.ProjectTo(specification.MembersToExpand.ToArray())
+                : query.ProjectTo(specification.MapperConfiguration,
                     specification.MembersToExpand.ToArray());
         }
 

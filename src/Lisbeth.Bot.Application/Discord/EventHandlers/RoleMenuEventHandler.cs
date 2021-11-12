@@ -43,9 +43,13 @@ public class RoleMenuEventHandler : IDiscordMiscEventsSubscriber
                 break;
         }
 
-        if (args.Id.Contains("role_menu_"))
+        if (args.Id.StartsWith("role_menu_") && !args.Id.Contains("button"))
             _ = _asyncExecutor.ExecuteAsync<IDiscordRoleMenuService>(async x =>
                 await x.HandleOptionSelectionAsync(args));
+
+        if (args.Id.StartsWith("role_menu_button"))
+            _ = _asyncExecutor.ExecuteAsync<IDiscordRoleMenuService>(async x =>
+                await x.HandleRoleMenuButtonAsync(args));
     }
 
     public Task DiscordOnClientErrored(DiscordClient sender, ClientErrorEventArgs args)

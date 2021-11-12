@@ -25,5 +25,6 @@ public class RoleMenuByIdWithOptionsSpec : Specification<Domain.Entities.RoleMen
     {
         Where(x => x.Id == id);
         Include(x => x.RoleMenuOptions);
+        Include(x => x.EmbedConfig);
     }
 }

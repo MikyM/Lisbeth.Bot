@@ -54,6 +54,12 @@ public class RoleMenuConfig : IEntityTypeConfiguration<RoleMenu>
             .HasMaxLength(120)
             .IsRequired();
 
+        builder.Property(x => x.CustomButtonId)
+            .HasColumnName("custom_button_id")
+            .HasColumnType("varchar(120)")
+            .HasMaxLength(120)
+            .IsRequired();
+
         builder.HasOne(x => x.EmbedConfig)
             .WithOne(x => x.RoleMenu)
             .HasForeignKey<RoleMenu>(x => x.EmbedConfigId)

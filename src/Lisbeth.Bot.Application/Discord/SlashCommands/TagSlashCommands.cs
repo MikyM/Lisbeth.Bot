@@ -69,7 +69,7 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
 
                 result = await this.DiscordTagService!.GetAsync(ctx, getReq);
                 break;
-            case TagActionType.Add:
+            case TagActionType.Create:
                 if (string.IsNullOrWhiteSpace(idOrName))
                     throw new ArgumentException("You must supply name.");
 

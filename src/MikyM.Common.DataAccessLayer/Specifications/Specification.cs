@@ -21,6 +21,7 @@ using MikyM.Common.DataAccessLayer.Specifications.Builders;
 using MikyM.Common.DataAccessLayer.Specifications.Helpers;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using EFCoreSecondLevelCacheInterceptor;
 
 namespace MikyM.Common.DataAccessLayer.Specifications;
 
@@ -116,6 +117,10 @@ public class Specification<T> : ISpecification<T> where T : class
         return Evaluator.Evaluate(entities, this);
     }
 
+    public TimeSpan? CacheTimeout { get; internal set; }
+
+    public CacheExpirationMode? CacheExpirationMode { get; internal set; }
+
     public IEnumerable<Expression<Func<T, bool>>>? WhereExpressions { get; internal set; }
 
     public IEnumerable<(Expression<Func<T, object>> KeySelector, OrderTypeEnum OrderType)>? OrderExpressions
@@ -177,99 +182,74 @@ public class Specification<T> : ISpecification<T> where T : class
     public bool IsAsSplitQuery { get; internal set; }
     public bool IsAsNoTrackingWithIdentityResolution { get; internal set; }
 
-    protected Specification<T> WithPostProcessingAction(Func<IEnumerable<T>, IEnumerable<T>> postProcessingAction)
+    protected ISpecificationBuilder<T> WithPostProcessingAction(Func<IEnumerable<T>, IEnumerable<T>> postProcessingAction)
     {
-        this.Query.WithPostProcessingAction(postProcessingAction);
-        return this;
+        return this.Query.WithPostProcessingAction(postProcessingAction);
     }
 
-    protected Specification<T> Include<TProperty>(Expression<Func<T, TProperty>> includeExpression)
-    {
-        this.Query.Include(includeExpression);
-        return this;
-    }
-
-    protected IIncludableSpecificationBuilder<T, TProperty> IncludeWithChildren<TProperty>(
+    protected IIncludableSpecificationBuilder<T, TProperty> Include<TProperty>(
         Expression<Func<T, TProperty>> includeExpression)
     {
         return this.Query.Include(includeExpression);
     }
 
-    protected Specification<T> Include(string includeExpression)
+    protected ISpecificationBuilder<T> OrderBy(Expression<Func<T, object?>> orderByExpression)
     {
-        this.Query.Include(includeExpression);
-        return this;
+        return this.Query.OrderBy(orderByExpression);
     }
 
-    protected Specification<T> OrderBy(Expression<Func<T, object?>> orderByExpression)
+    protected ISpecificationBuilder<T> OrderByDescending(Expression<Func<T, object?>> orderByDescendingExpression)
     {
-        this.Query.OrderBy(orderByExpression);
-        return this;
+        return this.Query.OrderByDescending(orderByDescendingExpression);
     }
 
-    protected Specification<T> OrderByDescending(Expression<Func<T, object?>> orderByDescendingExpression)
+    protected ISpecificationBuilder<T> Where(Expression<Func<T, bool>> criteria)
     {
-        this.Query.OrderByDescending(orderByDescendingExpression);
-        return this;
+        return this.Query.Where(criteria);
+ }
+
+    protected ISpecificationBuilder<T> GroupBy(Expression<Func<T, object>> criteria)
+    {
+        return this.Query.GroupBy(criteria);
     }
 
-    protected Specification<T> Where(Expression<Func<T, bool>> criteria)
+    protected ISpecificationBuilder<T> Search(Expression<Func<T, string>> selector, string searchTerm, int searchGroup = 1)
     {
-        this.Query.Where(criteria);
-        return this;
-    }
-
-    protected Specification<T> GroupBy(Expression<Func<T, object>> criteria)
-    {
-        this.Query.GroupBy(criteria);
-        return this;
-    }
-
-    protected Specification<T> Search(Expression<Func<T, string>> selector, string searchTerm, int searchGroup = 1)
-    {
-        this.Query.Search(selector, searchTerm, searchGroup);
-        return this;
+        return this.Query.Search(selector, searchTerm, searchGroup);
     }
         
-    protected Specification<T> WithPaginationFilter(PaginationFilter paginationFilter)
+    protected ISpecificationBuilder<T> WithPaginationFilter(PaginationFilter paginationFilter)
     {
-        this.Query.WithPaginationFilter(paginationFilter);
-        return this;
+        return this.Query.WithPaginationFilter(paginationFilter);
     }
 
-    protected Specification<T> ApplyTake(int take)
+    protected ISpecificationBuilder<T> ApplyTake(int take)
     {
-        this.Query.Take(take);
-        return this;
+        return this.Query.Take(take);
     }
 
-    protected Specification<T> ApplySkip(int skip)
+    protected ISpecificationBuilder<T> ApplySkip(int skip)
     {
-        this.Query.Skip(skip);
-        return this;
+        return this.Query.Skip(skip);
     }
 
-    protected Specification<T> WithCaching(bool withCaching = true)
+    protected ICacheSpecificationBuilder<T> WithCaching(bool withCaching = true)
     {
-        this.Query.WithCaching(withCaching);
-        return this;
+        return this.Query.WithCaching(withCaching); 
     }
 
-    protected Specification<T> AsTracking()
+    protected ISpecificationBuilder<T> AsTracking()
     {
-        this.Query.AsTracking();
-        return this;
+        return this.Query.AsTracking();
     }
 
-    protected Specification<T> AsSplitQuery()
+    protected ISpecificationBuilder<T> AsSplitQuery()
     {
-        this.Query.AsSplitQuery();
-        return this;
+        return this.Query.AsSplitQuery();
     }
 
-    protected Specification<T> AsNoTrackingWithIdentityResolution()
+    protected ISpecificationBuilder<T> AsNoTrackingWithIdentityResolution()
     {
-        this.Query.AsNoTrackingWithIdentityResolution();
-        return this;
+        return this.Query.AsNoTrackingWithIdentityResolution();
     }
 }

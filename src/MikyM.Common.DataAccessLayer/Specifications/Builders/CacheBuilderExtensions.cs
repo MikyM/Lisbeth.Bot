@@ -15,20 +15,23 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Lisbeth.Bot.Application.Results;
+using EFCoreSecondLevelCacheInterceptor;
 
-/// <summary>
-///     Represents a failure to find something that was searched for from Discord services.
-/// </summary>
-public record DiscordArgumentError : ResultError
+namespace MikyM.Common.DataAccessLayer.Specifications.Builders;
+
+public static class CacheBuilderExtensions
 {
-    /// <summary>
-    ///     Represents a failure to find something that was searched for from Discord services.
-    /// </summary>
-    /// <param name="name">Argument name.</param>
-    /// <param name="message">Custom message.</param>
-    public DiscordArgumentError(string? message = null, string ? name = null) : base(message ??
-                                                                             $"Given {(name is null ? "argument" : $"{name}")} is not valid.")
+    public static ICacheSpecificationBuilder<TEntity> WithExpirationMode<TEntity>(this ICacheSpecificationBuilder<TEntity> builder, CacheExpirationMode mode) where TEntity : class
     {
+        builder.Specification.CacheExpirationMode = mode;
+
+        return builder;
+    }
+
+    public static ICacheSpecificationBuilder<TEntity> WithExpirationTimeout<TEntity>(this ICacheSpecificationBuilder<TEntity> builder, TimeSpan timeout) where TEntity : class
+    {
+        builder.Specification.CacheTimeout = timeout;
+
+        return builder;
     }
 }

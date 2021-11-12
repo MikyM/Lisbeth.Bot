@@ -51,7 +51,7 @@ public class BanApplicationCommands : ExtendedApplicationCommandModule
 
         switch (actionType)
         {
-            case BanActionType.Add:
+            case BanActionType.Ban:
 
                 bool isValid = length.TryParseToDurationAndNextOccurrence(out var occurrence, out _);
 

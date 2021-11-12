@@ -52,7 +52,7 @@ public partial class MuteApplicationCommands : ExtendedApplicationCommandModule
 
         switch (actionType)
         {
-            case MuteActionType.Add:
+            case MuteActionType.Mute:
                 bool isValid = length.TryParseToDurationAndNextOccurrence(out var occurrence, out _);
                 if (!isValid)
                     throw new ArgumentException($"Parameter {nameof(length)} can't be parsed to a known duration.");

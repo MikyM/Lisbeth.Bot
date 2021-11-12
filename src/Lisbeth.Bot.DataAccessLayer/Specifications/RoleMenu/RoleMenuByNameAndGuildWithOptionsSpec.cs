@@ -26,5 +26,6 @@ public class RoleMenuByNameAndGuildWithOptionsSpec : Specification<Domain.Entiti
         Where(x => x.GuildId == guildId);
         Where(x => x.Name == name);
         Include(x => x.RoleMenuOptions);
+        Include(x => x.EmbedConfig);
     }
 }

@@ -43,17 +43,19 @@ public class RoleMenuOptionConfig : IEntityTypeConfiguration<RoleMenuOption>
         builder.Property(x => x.Description)
             .HasColumnName("description")
             .HasColumnType("varchar(256)")
-            .HasMaxLength(256)
-            .IsRequired();
+            .HasMaxLength(256);
         builder.Property(x => x.Emoji)
             .HasColumnName("emoji")
             .HasColumnType("varchar(100)")
-            .HasMaxLength(100)
-            .IsRequired();
+            .HasMaxLength(100);
         builder.Property(x => x.CustomSelectOptionValueId)
             .HasColumnName("custom_select_option_value_id")
             .HasColumnType("varchar(120)")
             .HasMaxLength(120)
+            .IsRequired();
+        builder.Property(x => x.RoleId)
+            .HasColumnName("role_id")
+            .HasColumnType("bigint")
             .IsRequired();
     }
 }

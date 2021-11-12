@@ -25,5 +25,6 @@ public class TagByGuildAndNameSpec : Specification<Domain.Entities.Tag>
     {
         Where(x => x.Name == name);
         Where(x => x.GuildId == guildId);
+        Include(x => x.EmbedConfig);
     }
 }

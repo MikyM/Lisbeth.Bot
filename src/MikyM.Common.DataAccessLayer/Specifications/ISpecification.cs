@@ -18,6 +18,7 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using AutoMapper;
+using EFCoreSecondLevelCacheInterceptor;
 using MikyM.Common.DataAccessLayer.Filters;
 using MikyM.Common.DataAccessLayer.Specifications.Helpers;
 
@@ -50,6 +51,16 @@ public interface ISpecification<T, TResult> : ISpecification<T> where T : class
 /// <typeparam name="T">The type being queried against.</typeparam>
 public interface ISpecification<T> where T : class
 {
+    /// <summary>
+    ///     Cache timeout if any.
+    /// </summary>
+    public TimeSpan? CacheTimeout { get; }
+
+    /// <summary>
+    ///     Cache expiration mode if any.
+    /// </summary>
+    public CacheExpirationMode? CacheExpirationMode { get; }
+
     /// <summary>
     ///     Pagination filter to apply.
     /// </summary>

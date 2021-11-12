@@ -21,21 +21,21 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 
 public enum BanActionType
 {
-    [ChoiceName("add")] Add,
-    [ChoiceName("remove")] Remove,
+    [ChoiceName("ban")] Ban,
+    [ChoiceName("unban")] Remove,
     [ChoiceName("get")] Get
 }
 
 public enum MuteActionType
 {
-    [ChoiceName("add")] Add,
-    [ChoiceName("remove")] Remove,
+    [ChoiceName("mute")] Mute,
+    [ChoiceName("unmute")] Remove,
     [ChoiceName("get")] Get
 }
 
 public enum PruneActionType
 {
-    [ChoiceName("add")] Add,
+    [ChoiceName("prune")] Prune,
     [ChoiceName("remove")] Remove,
     [ChoiceName("get")] Get
 }
@@ -48,7 +48,7 @@ public enum TicketActionType
 
 public enum ReminderActionType
 {
-    [ChoiceName("add")] Set,
+    [ChoiceName("set")] Set,
     [ChoiceName("reschedule")] Reschedule,
     [ChoiceName("configure-embed")] ConfigureEmbed,
     [ChoiceName("remove")] Disable
@@ -58,7 +58,7 @@ public enum TagActionType
 {
     [ChoiceName("get")] Get,
     [ChoiceName("send")] Send,
-    [ChoiceName("add")] Add,
+    [ChoiceName("create")] Create,
     [ChoiceName("edit")] Edit,
     [ChoiceName("configure-embed")] ConfigureEmbed,
     [ChoiceName("remove")] Remove
@@ -68,7 +68,7 @@ public enum RoleMenuActionType
 {
     [ChoiceName("get")] Get,
     [ChoiceName("send")] Send,
-    [ChoiceName("add")] Add,
+    [ChoiceName("create")] Create,
     [ChoiceName("edit")] Edit,
     [ChoiceName("configure-embed")] ConfigureEmbed,
     [ChoiceName("remove")] Remove

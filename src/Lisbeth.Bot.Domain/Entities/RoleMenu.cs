@@ -26,6 +26,7 @@ public class RoleMenu : EmbedConfigEntity
     private readonly HashSet<RoleMenuOption> roleMenuOptions = new();
     public string? Text { get; set; }
     public string? CustomSelectComponentId { get; set; }
+    public string? CustomButtonId { get; set; }
     public IReadOnlyCollection<RoleMenuOption>? RoleMenuOptions => roleMenuOptions;
 
     public Guild? Guild { get; set; }

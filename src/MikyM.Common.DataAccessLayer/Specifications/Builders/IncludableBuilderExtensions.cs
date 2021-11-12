@@ -35,9 +35,7 @@ public static class IncludableBuilderExtensions
         previousBuilder.Specification.IncludeExpressions ??= new List<IncludeExpressionInfo>();
         ((List<IncludeExpressionInfo>) previousBuilder.Specification.IncludeExpressions).Add(info);
 
-        var includeBuilder = new IncludableSpecificationBuilder<TEntity, TProperty>(previousBuilder.Specification);
-
-        return includeBuilder;
+        return new IncludableSpecificationBuilder<TEntity, TProperty>(previousBuilder.Specification);
     }
 
     public static IIncludableSpecificationBuilder<TEntity, TProperty> ThenInclude<TEntity, TPreviousProperty,
@@ -52,8 +50,6 @@ public static class IncludableBuilderExtensions
         previousBuilder.Specification.IncludeExpressions ??= new List<IncludeExpressionInfo>();
         ((List<IncludeExpressionInfo>) previousBuilder.Specification.IncludeExpressions).Add(info);
 
-        var includeBuilder = new IncludableSpecificationBuilder<TEntity, TProperty>(previousBuilder.Specification);
-
-        return includeBuilder;
+        return new IncludableSpecificationBuilder<TEntity, TProperty>(previousBuilder.Specification);
     }
 }

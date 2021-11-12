@@ -69,7 +69,7 @@ public class RoleMenuSlashCommands : ExtendedApplicationCommandModule
 
                 result = await this.DiscordRoleMenuService!.GetAsync(ctx, getReq);
                 break;
-            case RoleMenuActionType.Add:
+            case RoleMenuActionType.Create:
                 if (string.IsNullOrWhiteSpace(idOrName))
                     throw new ArgumentException("You must supply name.");
 
@@ -165,8 +165,7 @@ public class RoleMenuSlashCommands : ExtendedApplicationCommandModule
             }
             else
             {
-                if (result.Value.Entity.Embed is not null) await ctx.EditResponseAsync(result.Value.Entity.Embed);
-                else await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent(result.Value.Entity.Text));
+                await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("Sent"));
             }
         }
     }

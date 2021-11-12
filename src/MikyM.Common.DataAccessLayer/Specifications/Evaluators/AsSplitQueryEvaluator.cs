@@ -29,7 +29,7 @@ public class AsSplitQueryEvaluator : IEvaluator
 
     public IQueryable<T> GetQuery<T>(IQueryable<T> query, ISpecification<T> specification) where T : class
     {
-        //if (specification.AsSplitQuery) query = query.AsSplitQuery();
+        if (specification.IsAsSplitQuery) query = query.AsSplitQuery();
 
         return query;
     }

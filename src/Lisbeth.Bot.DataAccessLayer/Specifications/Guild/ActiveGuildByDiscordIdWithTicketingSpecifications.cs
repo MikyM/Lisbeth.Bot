@@ -27,7 +27,7 @@ public class ActiveGuildByDiscordIdWithTicketingSpecifications : Specification<D
     {
         Where(x => !x.IsDisabled);
         Where(x => x.GuildId == discordGuildId);
-        IncludeWithChildren(x => x.TicketingConfig).ThenInclude(x => x.CenterEmbedConfig);
-        IncludeWithChildren(x => x.TicketingConfig).ThenInclude(x => x.WelcomeEmbedConfig);
+        Include(x => x.TicketingConfig).ThenInclude(x => x.CenterEmbedConfig);
+        Include(x => x.TicketingConfig).ThenInclude(x => x.WelcomeEmbedConfig);
     }
 }
