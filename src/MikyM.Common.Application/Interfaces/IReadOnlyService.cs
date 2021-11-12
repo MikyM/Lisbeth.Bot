@@ -15,13 +15,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MikyM.Common.Application.Results;
-using MikyM.Common.DataAccessLayer.Filters;
 using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Common.Domain.Entities;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace MikyM.Common.Application.Interfaces
 {
@@ -33,13 +32,17 @@ namespace MikyM.Common.Application.Interfaces
         Task<Result<TGetResult>> GetSingleBySpecAsync<TGetResult>(ISpecification<TEntity> specification)
             where TGetResult : class;
 
+        Task<Result<TGetProjectedResult>> GetSingleBySpecAsync<TGetProjectedResult>(
+            ISpecification<TEntity, TGetProjectedResult> specification) where TGetProjectedResult : class;
+
         Task<Result<IReadOnlyList<TGetResult>>> GetBySpecAsync<TGetResult>(ISpecification<TEntity> specification)
             where TGetResult : class;
 
-        Task<Result<IReadOnlyList<TGetResult>>> GetBySpecAsync<TGetResult>(PaginationFilterDto filter,
-            ISpecification<TEntity> specification) where TGetResult : class;
+        Task<Result<IReadOnlyList<TGetProjectedResult>>> GetBySpecAsync<TGetProjectedResult>(
+            ISpecification<TEntity, TGetProjectedResult> specification) where TGetProjectedResult : class;
 
-        Task<Result<IReadOnlyList<TGetResult>>> GetAnyAsync<TGetResult>(PaginationFilterDto? filter = null) where TGetResult : class;
+        Task<Result<IReadOnlyList<TGetResult>>> GetAllAsync<TGetResult>(bool shouldProject = false)
+            where TGetResult : class;
 
         Task<Result<long>> LongCountAsync(ISpecification<TEntity>? specification = null);
     }

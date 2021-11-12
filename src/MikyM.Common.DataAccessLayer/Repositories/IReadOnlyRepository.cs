@@ -15,11 +15,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using MikyM.Common.DataAccessLayer.Filters;
 using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Common.Domain.Entities;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace MikyM.Common.DataAccessLayer.Repositories
 {
@@ -29,23 +28,19 @@ namespace MikyM.Common.DataAccessLayer.Repositories
 
         Task<TEntity?> GetSingleBySpecAsync(ISpecification<TEntity> specification);
 
-        Task<TProjectTo?> GetSingleBySpecAsync<TProjectTo>(
-            ISpecification<TEntity, TProjectTo> specification)
+        Task<TProjectTo?> GetSingleBySpecAsync<TProjectTo>(ISpecification<TEntity, TProjectTo> specification)
             where TProjectTo : class;
-
-        Task<IReadOnlyList<TEntity>> GetBySpecAsync(PaginationFilter filter,
-            ISpecification<TEntity> specification);
-
-        Task<IReadOnlyList<TProjectTo>> GetBySpecAsync<TProjectTo>(PaginationFilter filter,
-            ISpecification<TEntity, TProjectTo> specification) where TProjectTo : class;
 
         Task<IReadOnlyList<TEntity>> GetBySpecAsync(ISpecification<TEntity> specification);
 
-        Task<IReadOnlyList<TProjectTo>> GetBySpecAsync<TProjectTo>(
-            ISpecification<TEntity, TProjectTo> specification) where TProjectTo : class;
+        Task<IReadOnlyList<TProjectTo>> GetBySpecAsync<TProjectTo>(ISpecification<TEntity, TProjectTo> specification)
+            where TProjectTo : class;
 
+        Task<IReadOnlyList<TEntity>> GetAllAsync();
+
+        Task<IReadOnlyList<TProjectTo>> GetAllAsync<TProjectTo>(
+            ISpecification<TEntity, TProjectTo>? specification = null) where TProjectTo : class;
+        
         Task<long> LongCountAsync(ISpecification<TEntity>? specification = null);
-
-        Task<IReadOnlyList<TEntity>> GetAnyAsync(PaginationFilter? filter = null);
     }
 }

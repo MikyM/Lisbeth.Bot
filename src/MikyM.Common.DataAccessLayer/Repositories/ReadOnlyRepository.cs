@@ -16,7 +16,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Microsoft.EntityFrameworkCore;
-using MikyM.Common.DataAccessLayer.Filters;
 using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Common.DataAccessLayer.Specifications.Evaluators;
 using MikyM.Common.Domain.Entities;
@@ -56,14 +55,6 @@ namespace MikyM.Common.DataAccessLayer.Repositories
                 .FirstOrDefaultAsync();
         }
 
-        public virtual async Task<IReadOnlyList<TEntity>> GetBySpecAsync(ISpecification<TEntity> specification)
-        {
-            var result = await ApplySpecification(specification).ToListAsync();
-            return specification.PostProcessingAction is null
-                ? result
-                : specification.PostProcessingAction(result).ToList();
-        }
-
         public virtual async Task<IReadOnlyList<TProjectTo>> GetBySpecAsync<TProjectTo>(
             ISpecification<TEntity, TProjectTo> specification) where TProjectTo : class
         {
@@ -73,26 +64,15 @@ namespace MikyM.Common.DataAccessLayer.Repositories
                 : specification.PostProcessingAction(result).ToList();
         }
 
-        public virtual async Task<IReadOnlyList<TEntity>> GetBySpecAsync(PaginationFilter filter,
-            ISpecification<TEntity> specification)
+        public virtual async Task<IReadOnlyList<TEntity>> GetBySpecAsync(ISpecification<TEntity> specification)
         {
-            var result = await ApplySpecification(specification, filter)
+            var result = await ApplySpecification(specification)
                 .ToListAsync();
             return specification.PostProcessingAction is null
                 ? result
                 : specification.PostProcessingAction(result).ToList();
         }
-
-        public virtual async Task<IReadOnlyList<TProjectTo>> GetBySpecAsync<TProjectTo>(PaginationFilter filter,
-            ISpecification<TEntity, TProjectTo> specification) where TProjectTo : class
-        {
-            var result = await ApplySpecification(specification, filter)
-                .ToListAsync();
-            return specification.PostProcessingAction is null
-                ? result
-                : specification.PostProcessingAction(result).ToList();
-        }
-
+        
         public virtual async Task<long> LongCountAsync(ISpecification<TEntity>? specification = null)
         {
             if (specification is null) return await _context.Set<TEntity>().LongCountAsync();
@@ -101,13 +81,15 @@ namespace MikyM.Common.DataAccessLayer.Repositories
                 .LongCountAsync();
         }
 
-        public virtual async Task<IReadOnlyList<TEntity>> GetAnyAsync(PaginationFilter? filter = null)
+        public async Task<IReadOnlyList<TEntity>> GetAllAsync()
         {
-            return filter is null
-                ? await _context.Set<TEntity>().ToListAsync()
-                : await _context.Set<TEntity>().Skip((filter.PageNumber - 1) * filter.PageSize)
-                    .Take(filter.PageSize)
-                    .ToListAsync();
+            return await _context.Set<TEntity>().ToListAsync();
+        }
+
+        public async Task<IReadOnlyList<TProjectTo>> GetAllAsync<TProjectTo>(ISpecification<TEntity, TProjectTo>? specification = null) where TProjectTo : class
+        {
+            return await ApplySpecification(specification ?? new Specification<TEntity, TProjectTo>())
+                .ToListAsync();
         }
 
         /// <summary>
@@ -115,16 +97,14 @@ namespace MikyM.Common.DataAccessLayer.Repositories
         ///     <paramref name="specification" />.
         /// </summary>
         /// <param name="specification">The encapsulated query logic.</param>
-        /// <param name="paginationFilter">Pagination filter to apply if any. Note that this will NOT override an already set filter.</param>
         /// <param name="evaluateCriteriaOnly">Whether to only evaluate criteria.</param>
         /// <returns>The filtered entities as an <see cref="IQueryable{T}" />.</returns>
         protected virtual IQueryable<TEntity> ApplySpecification(ISpecification<TEntity>? specification,
-            PaginationFilter? paginationFilter = null,
             bool evaluateCriteriaOnly = false)
         {
             if (specification is null) throw new ArgumentNullException("Specification is required");
 
-            return _specificationEvaluator.GetQuery(_context.Set<TEntity>().AsQueryable(), specification, paginationFilter,
+            return _specificationEvaluator.GetQuery(_context.Set<TEntity>().AsQueryable(), specification,
                 evaluateCriteriaOnly);
         }
 
@@ -137,15 +117,13 @@ namespace MikyM.Common.DataAccessLayer.Repositories
         /// </summary>
         /// <typeparam name="TResult">The type of the value returned by the projection.</typeparam>
         /// <param name="specification">The encapsulated query logic.</param>
-        /// <param name="paginationFilter">Pagination filter to apply if any. Note that this will NOT override an already set filter.</param>
         /// <returns>The filtered projected entities as an <see cref="IQueryable{T}" />.</returns>
         protected virtual IQueryable<TResult> ApplySpecification<TResult>(
-            ISpecification<TEntity, TResult>? specification,
-            PaginationFilter? paginationFilter = null) where TResult : class
+            ISpecification<TEntity, TResult>? specification) where TResult : class
         {
             if (specification is null) throw new ArgumentNullException("Specification is required");
 
-            return _specificationEvaluator.GetQuery(_context.Set<TEntity>().AsQueryable(), specification, paginationFilter);
+            return _specificationEvaluator.GetQuery(_context.Set<TEntity>().AsQueryable(), specification);
         }
     }
 }

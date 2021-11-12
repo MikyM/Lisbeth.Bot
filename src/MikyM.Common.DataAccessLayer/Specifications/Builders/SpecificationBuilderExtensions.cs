@@ -167,8 +167,6 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Builders
             if (paginationFilter is null) throw new ArgumentNullException(nameof(paginationFilter));
 
             specificationBuilder.Specification.PaginationFilter = paginationFilter;
-            specificationBuilder.Specification.Take = paginationFilter.PageSize;
-            specificationBuilder.Specification.Skip = (paginationFilter.PageNumber - 1) * paginationFilter.PageSize;
 
             return specificationBuilder;
         }

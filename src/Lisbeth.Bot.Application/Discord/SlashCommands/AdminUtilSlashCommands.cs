@@ -16,13 +16,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
 using Autofac;
 using DSharpPlus;
 using DSharpPlus.Entities;
@@ -37,6 +30,13 @@ using Microsoft.EntityFrameworkCore;
 using MikyM.Common.Application.Interfaces;
 using MikyM.Common.Domain;
 using MikyM.Common.Domain.Entities;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands
 {
@@ -56,7 +56,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder().AsEphemeral(bool.Parse(shouldEph)));
-            var res = await _service!.GetAnyAsync<AuditLog>();
+            var res = await _service!.GetAllAsync<AuditLog>();
 
             if (!res.IsDefined()) throw new InvalidOperationException();
 
@@ -253,6 +253,6 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
         public DiscordUser User => Context.User;
         public DiscordMember Member => Context.Member;
         public DiscordClient Client => Context.Client;
-        public HttpClient Http => ContainerProvider.Container.Resolve<IHttpClientFactory>().CreateClient();
+        public static HttpClient Http => ContainerProvider.Container.Resolve<IHttpClientFactory>().CreateClient();
     }
 }

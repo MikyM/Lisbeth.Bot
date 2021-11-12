@@ -16,7 +16,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Linq;
-using MikyM.Common.DataAccessLayer.Filters;
 
 namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators
 {
@@ -32,9 +31,8 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators
         /// <typeparam name="TResult">The type of the result.</typeparam>
         /// <param name="inputQuery">The sequence of <typeparamref name="T" /></param>
         /// <param name="specification">The encapsulated query logic.</param>
-        /// <param name="paginationFilter">Pagination filter to apply if any. Note that this will NOT override an already set filter.</param>
         /// <returns>A filtered sequence of <typeparamref name="TResult" /></returns>
-        IQueryable<TResult> GetQuery<T, TResult>(IQueryable<T> inputQuery, ISpecification<T, TResult> specification, PaginationFilter? paginationFilter = null)
+        IQueryable<TResult> GetQuery<T, TResult>(IQueryable<T> inputQuery, ISpecification<T, TResult> specification)
             where T : class where TResult : class;
 
         /// <summary>
@@ -42,10 +40,9 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators
         /// </summary>
         /// <param name="inputQuery">The sequence of <typeparamref name="T" /></param>
         /// <param name="specification">The encapsulated query logic.</param>
-        /// <param name="paginationFilter">Pagination filter to apply if any. Note that this will NOT override an already set filter.</param>
         /// <param name="evaluateCriteriaOnly">Whether to only evaluate criteria.</param>
         /// <returns>A filtered sequence of <typeparamref name="T" /></returns>
-        IQueryable<T> GetQuery<T>(IQueryable<T> inputQuery, ISpecification<T> specification, PaginationFilter? paginationFilter = null,
+        IQueryable<T> GetQuery<T>(IQueryable<T> inputQuery, ISpecification<T> specification,
             bool evaluateCriteriaOnly = false) where T : class;
     }
 }

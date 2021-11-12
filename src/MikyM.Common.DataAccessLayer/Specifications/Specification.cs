@@ -15,14 +15,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Collections.Generic;
-using System.Linq.Expressions;
 using AutoMapper;
 using MikyM.Common.DataAccessLayer.Filters;
 using MikyM.Common.DataAccessLayer.Specifications.Builders;
 using MikyM.Common.DataAccessLayer.Specifications.Evaluators;
 using MikyM.Common.DataAccessLayer.Specifications.Helpers;
+using System;
+using System.Collections.Generic;
+using System.Linq.Expressions;
 
 namespace MikyM.Common.DataAccessLayer.Specifications
 {
@@ -31,17 +31,21 @@ namespace MikyM.Common.DataAccessLayer.Specifications
         class Specification<T, TResult> : Specification<T>, ISpecification<T, TResult>
         where T : class where TResult : class
     {
-        protected Specification() : this(InMemorySpecificationEvaluator.Default)
+        internal Specification() : this(InMemorySpecificationEvaluator.Default)
         {
         }
 
-        public Specification(Expression<Func<T, bool>> criteria) : this(InMemorySpecificationEvaluator.Default)
+        public Specification(PaginationFilter paginationFilter) : this(InMemorySpecificationEvaluator.Default, paginationFilter)
+        {
+        }
+
+        public Specification(Expression<Func<T, bool>> criteria, PaginationFilter? paginationFilter = null) : this(InMemorySpecificationEvaluator.Default, paginationFilter)
         {
             Where(criteria);
         }
 
-        protected Specification(IInMemorySpecificationEvaluator inMemorySpecificationEvaluator) : base(
-            inMemorySpecificationEvaluator)
+        protected Specification(IInMemorySpecificationEvaluator inMemorySpecificationEvaluator, PaginationFilter? paginationFilter = null) : base(
+            inMemorySpecificationEvaluator, paginationFilter)
         {
             Query = new SpecificationBuilder<T, TResult>(this);
         }
@@ -90,15 +94,20 @@ namespace MikyM.Common.DataAccessLayer.Specifications
         {
         }
 
-        public Specification(Expression<Func<T, bool>> criteria) : this(InMemorySpecificationEvaluator.Default)
+        public Specification(PaginationFilter paginationFilter ) : this(InMemorySpecificationEvaluator.Default, paginationFilter)
+        {
+        }
+
+        public Specification(Expression<Func<T, bool>> criteria, PaginationFilter? paginationFilter = null) : this(InMemorySpecificationEvaluator.Default, paginationFilter)
         {
             Where(criteria);
         }
 
-        protected Specification(IInMemorySpecificationEvaluator inMemorySpecificationEvaluator)
+        protected Specification(IInMemorySpecificationEvaluator inMemorySpecificationEvaluator, PaginationFilter? paginationFilter = null)
         {
-            Evaluator = inMemorySpecificationEvaluator;
-            Query = new SpecificationBuilder<T>(this);
+            this.Evaluator = inMemorySpecificationEvaluator;
+            this.Query = new SpecificationBuilder<T>(this);
+            this.PaginationFilter = paginationFilter;
         }
 
         protected IInMemorySpecificationEvaluator Evaluator { get; }
@@ -133,7 +142,35 @@ namespace MikyM.Common.DataAccessLayer.Specifications
 
         public int? Skip { get; internal set; }
 
-        public PaginationFilter? PaginationFilter { get; internal set; }
+        private PaginationFilter? _paginationFilter;
+        public PaginationFilter? PaginationFilter
+        {
+            get
+            {
+                if (this._paginationFilter is not null) return this._paginationFilter;
+                if (!this.Take.HasValue || !this.Skip.HasValue) return null;
+
+                this._paginationFilter = new PaginationFilter(this.Skip.Value / this.Take.Value + 1, this.Take.Value);
+                if (!this.IsPagingEnabled) this.IsPagingEnabled = true;
+
+                return this._paginationFilter;
+
+            }
+            internal set
+            {
+                if (value is null)
+                {
+                    this._paginationFilter = value;
+                    return;
+                }
+
+                this._paginationFilter = value;
+                this.Skip = (value.PageNumber - 1) * value.PageSize;
+                this.Take = value.PageSize;
+
+                this.IsPagingEnabled = true;
+            }
+        }
 
         public Func<IEnumerable<T>, IEnumerable<T>>? PostProcessingAction { get; internal set; }
         public bool? IsCacheEnabled { get; internal set; }

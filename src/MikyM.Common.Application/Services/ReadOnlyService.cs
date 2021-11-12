@@ -20,7 +20,6 @@ using Microsoft.EntityFrameworkCore;
 using MikyM.Common.Application.Interfaces;
 using MikyM.Common.Application.Results;
 using MikyM.Common.Application.Results.Errors;
-using MikyM.Common.DataAccessLayer.Filters;
 using MikyM.Common.DataAccessLayer.Repositories;
 using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
@@ -50,6 +49,13 @@ namespace MikyM.Common.Application.Services
             return res is null ? Result<TGetResult>.FromError(new NotFoundError()) : Result<TGetResult>.FromSuccess(Mapper.Map<TGetResult>(res));
         }
 
+        public virtual async Task<Result<TGetProjectedResult>> GetSingleBySpecAsync<TGetProjectedResult>(ISpecification<TEntity, TGetProjectedResult> specification) where TGetProjectedResult : class
+        {
+            var res = await UnitOfWork.GetRepository<ReadOnlyRepository<TEntity>>()
+                ?.GetSingleBySpecAsync(specification)!;
+            return res is null ? Result<TGetProjectedResult>.FromError(new NotFoundError()) : Result<TGetProjectedResult>.FromSuccess(res);
+        }
+
         public virtual async Task<Result<IReadOnlyList<TGetResult>>> GetBySpecAsync<TGetResult>(ISpecification<TEntity> specification) where TGetResult : class
         {
             var res = await UnitOfWork.GetRepository<ReadOnlyRepository<TEntity>>()
@@ -57,18 +63,22 @@ namespace MikyM.Common.Application.Services
             return res.Count is 0 ? Result<IReadOnlyList<TGetResult>>.FromError(new NotFoundError()) : Result<IReadOnlyList<TGetResult>>.FromSuccess(Mapper.Map<IReadOnlyList<TGetResult>>(res));
         }
 
-        public virtual async Task<Result<IReadOnlyList<TGetResult>>> GetBySpecAsync<TGetResult>(
-            PaginationFilterDto filter, ISpecification<TEntity> specification) where TGetResult : class
+        public virtual async Task<Result<IReadOnlyList<TGetProjectedResult>>> GetBySpecAsync<TGetProjectedResult>(ISpecification<TEntity, TGetProjectedResult> specification) where TGetProjectedResult : class
         {
             var res = await UnitOfWork.GetRepository<ReadOnlyRepository<TEntity>>()
-                ?.GetBySpecAsync(Mapper.Map<PaginationFilter>(filter), specification)!;
-            return res.Count is 0 ? Result<IReadOnlyList<TGetResult>>.FromError(new NotFoundError()) : Result<IReadOnlyList<TGetResult>>.FromSuccess(Mapper.Map<IReadOnlyList<TGetResult>>(res));
+                ?.GetBySpecAsync(specification)!;
+            return res.Count is 0 ? Result<IReadOnlyList<TGetProjectedResult>>.FromError(new NotFoundError()) : Result<IReadOnlyList<TGetProjectedResult>>.FromSuccess(res);
         }
 
-        public async Task<Result<IReadOnlyList<TGetResult>>> GetAnyAsync<TGetResult>(PaginationFilterDto? filter = null) where TGetResult : class
+        public virtual async Task<Result<IReadOnlyList<TGetResult>>> GetAllAsync<TGetResult>(bool shouldProject = false) where TGetResult : class
         {
-            var res = await UnitOfWork.GetRepository<ReadOnlyRepository<TEntity>>()?.GetAnyAsync(filter is null ? null : Mapper.Map<PaginationFilter>(filter))!;
-            return res.Count is 0 ? Result<IReadOnlyList<TGetResult>>.FromError(new NotFoundError()) : Result<IReadOnlyList<TGetResult>>.FromSuccess(Mapper.Map<IReadOnlyList<TGetResult>>(res));
+            IReadOnlyList<TGetResult> res;
+            if (shouldProject) res = await UnitOfWork.GetRepository<ReadOnlyRepository<TEntity>>()
+                ?.GetAllAsync<TGetResult>()!;
+            else res = Mapper.Map<IReadOnlyList<TGetResult>>(await UnitOfWork.GetRepository<ReadOnlyRepository<TEntity>>()
+                ?.GetAllAsync()!);
+
+            return res.Count is 0 ? Result<IReadOnlyList<TGetResult>>.FromError(new NotFoundError()) : Result<IReadOnlyList<TGetResult>>.FromSuccess(res);
         }
 
         public virtual async Task<Result<long>> LongCountAsync(ISpecification<TEntity>? specification = null)

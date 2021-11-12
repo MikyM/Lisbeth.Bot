@@ -15,12 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using AutoMapper.QueryableExtensions;
 using MikyM.Common.DataAccessLayer.Specifications.Evaluators;
 using System.Collections.Generic;
 using System.Linq;
-using EFCoreSecondLevelCacheInterceptor;
-using MikyM.Common.DataAccessLayer.Filters;
 
 namespace MikyM.Common.DataAccessLayer.Specifications
 {
@@ -49,20 +46,18 @@ namespace MikyM.Common.DataAccessLayer.Specifications
         public static SpecificationEvaluator Default { get; } = new();
 
         public virtual IQueryable<TResult> GetQuery<T, TResult>(IQueryable<T> query,
-            ISpecification<T, TResult> specification, PaginationFilter? paginationFilter = null) where T : class where TResult : class
+            ISpecification<T, TResult> specification) where T : class where TResult : class
         {
-            query = GetQuery(query, (ISpecification<T>)specification, paginationFilter);
+            query = GetQuery(query, (ISpecification<T>)specification);
 
             return ProjectionEvaluator.Instance.GetQuery(query, specification);
         }
 
         public virtual IQueryable<T> GetQuery<T>(IQueryable<T> query, ISpecification<T> specification,
-            PaginationFilter? paginationFilter = null, bool evaluateCriteriaOnly = false) where T : class
+            bool evaluateCriteriaOnly = false) where T : class
         {
-            if (paginationFilter is not null && specification.PaginationFilter is null) ((Specification<T>)specification).PaginationFilter = paginationFilter;
-            
-            return (evaluateCriteriaOnly ? _evaluators.Where(x => x.IsCriteriaEvaluator) : _evaluators)
-                .Aggregate(query, (current, evaluator) => evaluator.GetQuery(current, specification));
+            return (evaluateCriteriaOnly ? _evaluators.Where(x => x.IsCriteriaEvaluator) : _evaluators).Aggregate(query,
+                (current, evaluator) => evaluator.GetQuery(current, specification));
         }
     }
 }
