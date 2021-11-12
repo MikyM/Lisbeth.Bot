@@ -36,8 +36,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
     [UsedImplicitly]
     public class BanApplicationCommands : ExtendedApplicationCommandModule
     {
-        [UsedImplicitly]
-        public IDiscordBanService? DiscordBanService { private get; set; }
+        [UsedImplicitly] public IDiscordBanService? DiscordBanService { private get; set; }
 
         [SlashRequireUserPermissions(Permissions.BanMembers)]
         [SlashCommand("ban", "A command that allows banning a user.")]

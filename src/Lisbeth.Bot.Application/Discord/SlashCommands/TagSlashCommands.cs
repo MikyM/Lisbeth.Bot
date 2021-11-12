@@ -35,8 +35,8 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
     [SlashModuleLifespan(SlashModuleLifespan.Transient)]
     public class TagSlashCommands : ExtendedApplicationCommandModule
     {
-        public IDiscordTagService? DiscordTagService { private get; set; }
-        public IDiscordEmbedConfiguratorService<Tag>? DiscordEmbedTagConfiguratorService { private get; set; }
+        [UsedImplicitly] public IDiscordTagService? DiscordTagService { private get; set; }
+        [UsedImplicitly] public IDiscordEmbedConfiguratorService<Tag>? DiscordEmbedTagConfiguratorService { private get; set; }
 
         [SlashCommand("tag", "Allows working with tags.")]
         public async Task TagCommand(InteractionContext ctx,

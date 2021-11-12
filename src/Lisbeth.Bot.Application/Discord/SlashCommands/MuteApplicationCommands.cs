@@ -38,8 +38,8 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
     [UsedImplicitly]
     public partial class MuteApplicationCommands : ExtendedApplicationCommandModule
     {
-        public IDiscordMuteService? DiscordMuteService { private get; set; }
-        public IDiscordMessageService? DiscordMessageService { private get; set; }
+        [UsedImplicitly] public IDiscordMuteService? DiscordMuteService { private get; set; }
+        [UsedImplicitly] public IDiscordMessageService? DiscordMessageService { private get; set; }
 
         [SlashRequireUserPermissions(Permissions.BanMembers)]
         [SlashCommand("mute", "A command that allows mute actions.")]

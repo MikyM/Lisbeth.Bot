@@ -35,7 +35,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
     [UsedImplicitly]
     public class TicketSlashCommands : ExtendedApplicationCommandModule
     {
-        public IDiscordTicketService? DiscordTicketService { private get; set; }
+        [UsedImplicitly] public IDiscordTicketService? DiscordTicketService { private get; set; }
 
         [UsedImplicitly]
         [SlashRequireUserPermissions(Permissions.BanMembers)]

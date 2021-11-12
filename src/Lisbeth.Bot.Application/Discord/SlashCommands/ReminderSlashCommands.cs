@@ -42,9 +42,10 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
     [SlashModuleLifespan(SlashModuleLifespan.Transient)]
     public class ReminderSlashCommands : ExtendedApplicationCommandModule
     {
-        public IDiscordReminderService? ReminderService { private get; set; }
-        public IDiscordEmbedConfiguratorService<Reminder>? ReminderEmbedConfiguratorService { private get; set; }
+        [UsedImplicitly] public IDiscordReminderService? ReminderService { private get; set; }
+        [UsedImplicitly] public IDiscordEmbedConfiguratorService<Reminder>? ReminderEmbedConfiguratorService { private get; set; }
 
+        [UsedImplicitly]
         public IDiscordEmbedConfiguratorService<RecurringReminder>? RecurringReminderEmbedConfiguratorService
         {
             private get;

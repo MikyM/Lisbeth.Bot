@@ -31,8 +31,7 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands
     [UsedImplicitly]
     public partial class PruneApplicationCommands : ApplicationCommandModule
     {
-        [UsedImplicitly]
-        public IDiscordMessageService? DiscordMessageService { private get; set; }
+        [UsedImplicitly] public IDiscordMessageService? DiscordMessageService { private get; set; }
 
         [UsedImplicitly]
         [SlashRequireUserPermissions(Permissions.ManageMessages)]

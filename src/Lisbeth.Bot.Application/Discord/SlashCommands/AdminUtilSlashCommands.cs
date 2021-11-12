@@ -46,7 +46,6 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
     public class AdminUtilSlashCommands : ApplicationCommandModule
     {
         [UsedImplicitly] public LisbethBotDbContext? Ctx { private get; set; }
-
         [UsedImplicitly] public IReadOnlyService<AuditLog, LisbethBotDbContext>? Service { private get; set; }
 
         [SlashRequireOwner]

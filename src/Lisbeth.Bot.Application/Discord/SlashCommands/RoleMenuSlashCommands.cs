@@ -35,8 +35,8 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
     [SlashModuleLifespan(SlashModuleLifespan.Transient)]
     public class RoleMenuSlashCommands : ExtendedApplicationCommandModule
     {
-        public IDiscordRoleMenuService? DiscordRoleMenuService { private get; set; }
-        public IDiscordEmbedConfiguratorService<RoleMenu>? DiscordEmbedConfiguratorService { private get; set; }
+        [UsedImplicitly] public IDiscordRoleMenuService? DiscordRoleMenuService { private get; set; }
+        [UsedImplicitly] public IDiscordEmbedConfiguratorService<RoleMenu>? DiscordEmbedConfiguratorService { private get; set; }
 
         [SlashCommand("role-menu", "Allows working with role menus.")]
         public async Task RoleMenuCommand(InteractionContext ctx,

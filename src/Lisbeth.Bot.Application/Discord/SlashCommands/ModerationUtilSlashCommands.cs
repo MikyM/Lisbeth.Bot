@@ -25,9 +25,9 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands
     [SlashModuleLifespan(SlashModuleLifespan.Transient)]
     public class ModerationUtilSlashCommands : ExtendedApplicationCommandModule
     {
-        public IGuildService? GuildService { private get; set; }
-        public IDiscordGuildService? DiscordGuildService { private get; set; }
-        public IDiscordTicketService? DiscordTicketService { private get; set; }
+        [UsedImplicitly] public IGuildService? GuildService { private get; set; }
+        [UsedImplicitly] public IDiscordGuildService? DiscordGuildService { private get; set; }
+        [UsedImplicitly] public IDiscordTicketService? DiscordTicketService { private get; set; }
 
         [SlashRequireUserPermissions(Permissions.Administrator)]
         [SlashCommand("identity", "A command that allows checking information about a member.")]
