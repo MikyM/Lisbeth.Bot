@@ -28,37 +28,37 @@ namespace MikyM.Common.DataAccessLayer.Repositories
 {
     public class ReadOnlyRepository<TEntity> : IReadOnlyRepository<TEntity> where TEntity : AggregateRootEntity
     {
-        public readonly DbContext _context;
+        protected readonly DbContext Context;
         private readonly ISpecificationEvaluator _specificationEvaluator;
 
         public ReadOnlyRepository(DbContext context, ISpecificationEvaluator specificationEvaluator)
         {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
-            _specificationEvaluator = specificationEvaluator;
+            this.Context = context ?? throw new ArgumentNullException(nameof(context));
+            this._specificationEvaluator = specificationEvaluator;
         }
 
         public virtual async ValueTask<TEntity?> GetAsync(params object[] keyValues)
         {
-            return await (_context.Set<TEntity>().FindAsync(keyValues));
+            return await (this.Context.Set<TEntity>().FindAsync(keyValues));
         }
 
         public virtual async Task<TEntity?> GetSingleBySpecAsync(ISpecification<TEntity> specification)
         {
-            return await ApplySpecification(specification)
+            return await this.ApplySpecification(specification)
                 .FirstOrDefaultAsync();
         }
 
         public virtual async Task<TProjectTo?> GetSingleBySpecAsync<TProjectTo>(
             ISpecification<TEntity, TProjectTo> specification) where TProjectTo : class
         {
-            return await ApplySpecification(specification)
+            return await this.ApplySpecification(specification)
                 .FirstOrDefaultAsync();
         }
 
         public virtual async Task<IReadOnlyList<TProjectTo>> GetBySpecAsync<TProjectTo>(
             ISpecification<TEntity, TProjectTo> specification) where TProjectTo : class
         {
-            var result = await ApplySpecification(specification).ToListAsync();
+            var result = await this.ApplySpecification(specification).ToListAsync();
             return specification.PostProcessingAction is null
                 ? result
                 : specification.PostProcessingAction(result).ToList();
@@ -66,7 +66,7 @@ namespace MikyM.Common.DataAccessLayer.Repositories
 
         public virtual async Task<IReadOnlyList<TEntity>> GetBySpecAsync(ISpecification<TEntity> specification)
         {
-            var result = await ApplySpecification(specification)
+            var result = await this.ApplySpecification(specification)
                 .ToListAsync();
             return specification.PostProcessingAction is null
                 ? result
@@ -75,20 +75,20 @@ namespace MikyM.Common.DataAccessLayer.Repositories
         
         public virtual async Task<long> LongCountAsync(ISpecification<TEntity>? specification = null)
         {
-            if (specification is null) return await _context.Set<TEntity>().LongCountAsync();
+            if (specification is null) return await Context.Set<TEntity>().LongCountAsync();
 
-            return await ApplySpecification(specification)
+            return await this.ApplySpecification(specification)
                 .LongCountAsync();
         }
 
         public virtual async Task<IReadOnlyList<TEntity>> GetAllAsync()
         {
-            return await _context.Set<TEntity>().ToListAsync();
+            return await Context.Set<TEntity>().ToListAsync();
         }
 
         public virtual async Task<IReadOnlyList<TProjectTo>> GetAllAsync<TProjectTo>(ISpecification<TEntity, TProjectTo>? specification = null) where TProjectTo : class
         {
-            return await ApplySpecification(specification ?? new Specification<TEntity, TProjectTo>())
+            return await this.ApplySpecification(specification ?? new Specification<TEntity, TProjectTo>())
                 .ToListAsync();
         }
 
@@ -104,7 +104,7 @@ namespace MikyM.Common.DataAccessLayer.Repositories
         {
             if (specification is null) throw new ArgumentNullException("Specification is required");
 
-            return _specificationEvaluator.GetQuery(_context.Set<TEntity>().AsQueryable(), specification,
+            return this._specificationEvaluator.GetQuery(Context.Set<TEntity>().AsQueryable(), specification,
                 evaluateCriteriaOnly);
         }
 
@@ -123,7 +123,7 @@ namespace MikyM.Common.DataAccessLayer.Repositories
         {
             if (specification is null) throw new ArgumentNullException("Specification is required");
 
-            return _specificationEvaluator.GetQuery(_context.Set<TEntity>().AsQueryable(), specification);
+            return this._specificationEvaluator.GetQuery(Context.Set<TEntity>().AsQueryable(), specification);
         }
     }
 }

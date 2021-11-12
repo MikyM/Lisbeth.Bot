@@ -36,21 +36,21 @@ namespace MikyM.Common.DataAccessLayer.Repositories
 
         public virtual void Add(TEntity entity)
         {
-            _context.Set<TEntity>().Add(entity);
+            Context.Set<TEntity>().Add(entity);
         }
 
         public virtual void AddRange(IEnumerable<TEntity> entities)
         {
-            _context.Set<TEntity>().AddRange(entities);
+            Context.Set<TEntity>().AddRange(entities);
         }
 
         public virtual void AddOrUpdate(TEntity entity)
         {
-            var local = _context.Set<TEntity>().Local.FirstOrDefault(entry => entry.Id.Equals(entity.Id));
+            var local = Context.Set<TEntity>().Local.FirstOrDefault(entry => entry.Id.Equals(entity.Id));
 
-            if (local is not null) _context.Entry(local).State = EntityState.Detached;
+            if (local is not null) Context.Entry(local).State = EntityState.Detached;
 
-            _context.Set<TEntity>().Update(entity);
+            Context.Set<TEntity>().Update(entity);
         }
 
         public virtual void AddOrUpdateRange(IEnumerable<TEntity> entities)
@@ -58,57 +58,57 @@ namespace MikyM.Common.DataAccessLayer.Repositories
             var aggregateRootEntities = entities.ToList();
             foreach (var entity in aggregateRootEntities)
             {
-                var local = _context.Set<TEntity>().Local.FirstOrDefault(entry => entry.Id.Equals(entity.Id));
+                var local = Context.Set<TEntity>().Local.FirstOrDefault(entry => entry.Id.Equals(entity.Id));
 
-                if (local is not null) _context.Entry(local).State = EntityState.Detached;
+                if (local is not null) Context.Entry(local).State = EntityState.Detached;
             }
 
-            _context.Set<TEntity>().UpdateRange(aggregateRootEntities);
+            Context.Set<TEntity>().UpdateRange(aggregateRootEntities);
         }
 
         public virtual void BeginUpdate(TEntity entity)
         {
-            var local = _context.Set<TEntity>().Local.FirstOrDefault(entry => entry.Id.Equals(entity.Id));
+            var local = Context.Set<TEntity>().Local.FirstOrDefault(entry => entry.Id.Equals(entity.Id));
 
-            if (local is not null) _context.Entry(local).State = EntityState.Detached;
+            if (local is not null) Context.Entry(local).State = EntityState.Detached;
 
-            _context.Attach(entity);
+            Context.Attach(entity);
         }
 
         public virtual void BeginUpdateRange(IEnumerable<TEntity> entities)
         {
             foreach (var entity in entities)
             {
-                var local = _context.Set<TEntity>().Local.FirstOrDefault(entry => entry.Id.Equals(entity.Id));
+                var local = Context.Set<TEntity>().Local.FirstOrDefault(entry => entry.Id.Equals(entity.Id));
 
-                if (local is not null) _context.Entry(local).State = EntityState.Detached;
+                if (local is not null) Context.Entry(local).State = EntityState.Detached;
 
-                _context.Attach(entity);
+                Context.Attach(entity);
             }
         }
 
         public virtual void Delete(TEntity entity)
         {
-            _context.Set<TEntity>().Remove(entity);
+            Context.Set<TEntity>().Remove(entity);
         }
 
         public virtual void Delete(long id)
         {
-            var entity = _context.FindTracked<TEntity>(id) ?? (TEntity) Activator.CreateInstance(typeof(TEntity), id)!;
-            _context.Set<TEntity>().Remove(entity);
+            var entity = Context.FindTracked<TEntity>(id) ?? (TEntity) Activator.CreateInstance(typeof(TEntity), id)!;
+            Context.Set<TEntity>().Remove(entity);
         }
 
         public virtual void DeleteRange(IEnumerable<TEntity> entities)
         {
-            _context.Set<TEntity>().RemoveRange(entities);
+            Context.Set<TEntity>().RemoveRange(entities);
         }
 
         public virtual void DeleteRange(IEnumerable<long> ids)
         {
             var entities = ids.Select(id =>
-                    _context.FindTracked<TEntity>(id) ?? (TEntity) Activator.CreateInstance(typeof(TEntity), id)!)
+                    Context.FindTracked<TEntity>(id) ?? (TEntity) Activator.CreateInstance(typeof(TEntity), id)!)
                 .ToList();
-            _context.Set<TEntity>().RemoveRange(entities);
+            Context.Set<TEntity>().RemoveRange(entities);
         }
 
         public virtual void Disable(TEntity entity)
@@ -133,7 +133,7 @@ namespace MikyM.Common.DataAccessLayer.Repositories
 
         public virtual async Task DisableRangeAsync(IEnumerable<long> ids)
         {
-            var entities = await _context.Set<TEntity>()
+            var entities = await Context.Set<TEntity>()
                 .Join(ids, ent => ent.Id, id => id, (ent, id) => ent)
                 .ToListAsync();
             BeginUpdateRange(entities);
