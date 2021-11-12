@@ -81,12 +81,12 @@ namespace MikyM.Common.DataAccessLayer.Repositories
                 .LongCountAsync();
         }
 
-        public async Task<IReadOnlyList<TEntity>> GetAllAsync()
+        public virtual async Task<IReadOnlyList<TEntity>> GetAllAsync()
         {
             return await _context.Set<TEntity>().ToListAsync();
         }
 
-        public async Task<IReadOnlyList<TProjectTo>> GetAllAsync<TProjectTo>(ISpecification<TEntity, TProjectTo>? specification = null) where TProjectTo : class
+        public virtual async Task<IReadOnlyList<TProjectTo>> GetAllAsync<TProjectTo>(ISpecification<TEntity, TProjectTo>? specification = null) where TProjectTo : class
         {
             return await ApplySpecification(specification ?? new Specification<TEntity, TProjectTo>())
                 .ToListAsync();
