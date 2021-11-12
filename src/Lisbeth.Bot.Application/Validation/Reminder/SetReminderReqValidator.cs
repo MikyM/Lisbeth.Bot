@@ -15,11 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using DSharpPlus;
 using FluentValidation;
 using Lisbeth.Bot.Application.Discord.Extensions;
-using Lisbeth.Bot.Application.Extensions;
 using Lisbeth.Bot.Application.Validation.ReusablePropertyValidation;
 using Lisbeth.Bot.Domain.DTOs.Request.Reminder;
 using MikyM.Discord.Interfaces;

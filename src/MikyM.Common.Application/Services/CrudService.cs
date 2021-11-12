@@ -16,15 +16,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using AutoMapper;
-using Microsoft.EntityFrameworkCore;
-using MikyM.Common.Application.Interfaces;
-using MikyM.Common.DataAccessLayer.Repositories;
-using MikyM.Common.DataAccessLayer.UnitOfWork;
-using MikyM.Common.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using MikyM.Common.Application.Results;
 
 namespace MikyM.Common.Application.Services;

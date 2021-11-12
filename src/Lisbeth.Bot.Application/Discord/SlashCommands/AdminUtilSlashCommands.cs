@@ -21,22 +21,17 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
-using JetBrains.Annotations;
 using Lisbeth.Bot.DataAccessLayer;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.EntityFrameworkCore;
-using MikyM.Common.Application.Interfaces;
 using MikyM.Common.Domain;
 using MikyM.Common.Domain.Entities;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Net.Http;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 

@@ -15,10 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Threading.Tasks;
-using Lisbeth.Bot.Domain.Enums;
-using MikyM.Common.Application.Results;
-
 namespace Lisbeth.Bot.Application.Discord.Services.Interfaces;
 
 public interface IDiscordSendReminderService

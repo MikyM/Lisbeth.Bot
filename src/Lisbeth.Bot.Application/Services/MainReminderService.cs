@@ -16,24 +16,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Hangfire;
-using JetBrains.Annotations;
-using Lisbeth.Bot.Application.Discord.Services.Interfaces;
-using Lisbeth.Bot.Application.Extensions;
-using Lisbeth.Bot.Application.Hangfire;
-using Lisbeth.Bot.Application.Results;
-using Lisbeth.Bot.Application.Services.Database.Interfaces;
-using Lisbeth.Bot.Application.Services.Interfaces;
 using Lisbeth.Bot.DataAccessLayer.Specifications.RecurringReminder;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Reminder;
 using Lisbeth.Bot.Domain.DTOs.Request.Reminder;
-using Lisbeth.Bot.Domain.DTOs.Response;
-using Lisbeth.Bot.Domain.Entities;
-using Lisbeth.Bot.Domain.Enums;
-using MikyM.Common.Application.Results;
 using NCrontab;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Services;
 

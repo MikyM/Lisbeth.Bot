@@ -15,18 +15,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.ChatExport;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Buttons;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Selects;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.SelectValues;
-using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Application.Helpers;
-using Lisbeth.Bot.Application.Services.Database.Interfaces;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 using Microsoft.Extensions.Logging;
 using MikyM.Discord.Events;

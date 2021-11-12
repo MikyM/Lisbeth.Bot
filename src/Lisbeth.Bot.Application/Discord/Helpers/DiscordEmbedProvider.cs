@@ -15,12 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Linq;
 using DSharpPlus.Entities;
-using JetBrains.Annotations;
-using Lisbeth.Bot.Domain.Entities;
-using MikyM.Common.Application.Results;
 using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.Helpers;

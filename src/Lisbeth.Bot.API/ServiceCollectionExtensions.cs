@@ -15,9 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using AspNetCore.Authentication.ApiKey;
 using AspNetCoreRateLimit;
 using DSharpPlus;
@@ -31,9 +29,6 @@ using Lisbeth.Bot.API.HealthChecks;
 using Lisbeth.Bot.Application.Discord.ApplicationCommands;
 using Lisbeth.Bot.Application.Discord.EventHandlers;
 using Lisbeth.Bot.Application.Discord.SlashCommands;
-using Lisbeth.Bot.Application.Hangfire;
-using Lisbeth.Bot.Application.Helpers;
-using Lisbeth.Bot.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;

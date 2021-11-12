@@ -17,8 +17,6 @@
 
 using Autofac;
 using Microsoft.Extensions.DependencyInjection;
-using MikyM.Common.DataAccessLayer.Repositories;
-using MikyM.Common.DataAccessLayer.UnitOfWork;
 
 namespace MikyM.Common.DataAccessLayer;
 

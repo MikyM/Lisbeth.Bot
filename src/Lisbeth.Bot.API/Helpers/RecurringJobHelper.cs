@@ -15,11 +15,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Hangfire;
-using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Serilog;
 
 namespace Lisbeth.Bot.API.Helpers;

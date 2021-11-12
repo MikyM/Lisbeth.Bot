@@ -15,17 +15,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using Autofac;
 using EFCoreSecondLevelCacheInterceptor;
 using IdGen;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Application.Discord.Services;
-using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Application.Helpers;
 using Lisbeth.Bot.Application.Services;
 using Lisbeth.Bot.Application.Services.Database;
-using Lisbeth.Bot.Application.Services.Interfaces;
 using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.DataAccessLayer.Repositories;
 using Microsoft.AspNetCore.Http;

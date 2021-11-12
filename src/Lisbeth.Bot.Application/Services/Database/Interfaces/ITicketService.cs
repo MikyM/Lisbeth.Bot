@@ -16,13 +16,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
-using Lisbeth.Bot.Domain.Entities;
-using MikyM.Common.Application.Interfaces;
-using MikyM.Common.Application.Results;
 
 namespace Lisbeth.Bot.Application.Services.Database.Interfaces;
 

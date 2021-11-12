@@ -15,19 +15,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
 using FluentValidation;
-using JetBrains.Annotations;
-using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
 using Lisbeth.Bot.Application.Validation.Ticket;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
-using MikyM.Common.Application.Results;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 

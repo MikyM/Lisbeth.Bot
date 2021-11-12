@@ -15,14 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Microsoft.EntityFrameworkCore;
 using MikyM.Common.DataAccessLayer.Specifications;
-using MikyM.Common.DataAccessLayer.Specifications.Evaluators;
 using MikyM.Common.Domain.Entities;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace MikyM.Common.DataAccessLayer.Repositories;
 

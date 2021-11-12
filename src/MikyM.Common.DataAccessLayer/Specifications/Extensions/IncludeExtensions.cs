@@ -15,10 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Linq;
 using System.Linq.Expressions;
-using Microsoft.EntityFrameworkCore;
 using MikyM.Common.DataAccessLayer.Specifications.Helpers;
 
 namespace MikyM.Common.DataAccessLayer.Specifications.Extensions;

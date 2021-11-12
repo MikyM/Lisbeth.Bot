@@ -15,11 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Lisbeth.Bot.DataAccessLayer.Repositories.Interfaces;
-using Lisbeth.Bot.Domain.Entities;
-using MikyM.Common.DataAccessLayer.Repositories;
-using MikyM.Common.DataAccessLayer.Specifications.Evaluators;
-
 namespace Lisbeth.Bot.DataAccessLayer.Repositories;
 
 public class MuteRepository : Repository<Mute>, IMuteRepository

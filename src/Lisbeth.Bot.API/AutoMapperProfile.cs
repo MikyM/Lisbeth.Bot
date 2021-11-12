@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Linq;
 using AutoMapper;
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Domain.DTOs;
@@ -29,7 +28,6 @@ using Lisbeth.Bot.Domain.DTOs.Request.RoleMenu;
 using Lisbeth.Bot.Domain.DTOs.Request.Tag;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
-using Lisbeth.Bot.Domain.Entities;
 
 namespace Lisbeth.Bot.API;
 

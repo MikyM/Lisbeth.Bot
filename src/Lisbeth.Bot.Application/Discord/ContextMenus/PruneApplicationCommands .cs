@@ -15,12 +15,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
-using JetBrains.Annotations;
 using Lisbeth.Bot.Domain.DTOs.Request;
 
 // ReSharper disable once CheckNamespace

@@ -16,7 +16,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-using System;
 using DSharpPlus;
 using FluentValidation;
 using Lisbeth.Bot.Application.Validation.ReusablePropertyValidation;

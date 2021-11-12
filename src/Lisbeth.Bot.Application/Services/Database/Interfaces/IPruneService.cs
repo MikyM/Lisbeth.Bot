@@ -16,8 +16,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Lisbeth.Bot.DataAccessLayer;
-using Lisbeth.Bot.Domain.Entities;
-using MikyM.Common.Application.Interfaces;
 
 namespace Lisbeth.Bot.Application.Services.Database.Interfaces;
 

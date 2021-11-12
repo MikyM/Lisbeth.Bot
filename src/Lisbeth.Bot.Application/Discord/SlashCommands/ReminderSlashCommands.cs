@@ -19,22 +19,13 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using FluentValidation;
-using JetBrains.Annotations;
-using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
-using Lisbeth.Bot.Application.Extensions;
 using Lisbeth.Bot.Application.Validation.Reminder;
 using Lisbeth.Bot.Domain.DTOs.Request.Reminder;
-using Lisbeth.Bot.Domain.Entities;
-using Lisbeth.Bot.Domain.Enums;
-using MikyM.Common.Application.Results;
 using NCrontab;
-using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 

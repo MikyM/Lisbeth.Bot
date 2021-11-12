@@ -15,25 +15,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using DSharpPlus.Entities;
-using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.ChatExport.Builders;
 using Lisbeth.Bot.Application.Discord.ChatExport.Models;
-using Lisbeth.Bot.Application.Results;
-using Lisbeth.Bot.Application.Services.Database.Interfaces;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Ticket;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
-using Lisbeth.Bot.Domain.Entities;
 using Microsoft.Extensions.Logging;
-using MikyM.Common.Application.Results;
-using MikyM.Common.Application.Results.Errors;
 using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Discord.Interfaces;
 

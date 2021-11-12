@@ -1,6 +1,3 @@
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.ChatExport.Builders;
 

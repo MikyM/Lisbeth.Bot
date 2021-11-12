@@ -16,7 +16,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-using System.Linq;
 using Autofac;
 using DSharpPlus.Entities;
 using MikyM.Common.Domain;

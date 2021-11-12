@@ -3,21 +3,14 @@ using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
 using FluentValidation;
-using JetBrains.Annotations;
 using Lisbeth.Bot.Application.Discord.Extensions;
-using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
 using Lisbeth.Bot.Application.Enums;
-using Lisbeth.Bot.Application.Services.Database.Interfaces;
 using Lisbeth.Bot.Application.Validation.ModerationConfig;
 using Lisbeth.Bot.Application.Validation.TicketingConfig;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
-using Lisbeth.Bot.Domain.Entities;
-using MikyM.Common.Application.Results;
-using System;
-using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 

@@ -1,5 +1,3 @@
-using System;
-using System.Threading.Tasks;
 using DSharpPlus.Entities;
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport.Models;

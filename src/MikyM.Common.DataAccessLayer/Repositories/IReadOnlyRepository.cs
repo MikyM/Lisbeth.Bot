@@ -18,7 +18,6 @@
 using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Common.Domain.Entities;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace MikyM.Common.DataAccessLayer.Repositories;
 

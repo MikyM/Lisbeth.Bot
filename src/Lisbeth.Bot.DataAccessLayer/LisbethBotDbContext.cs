@@ -15,12 +15,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
-using Lisbeth.Bot.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
 using MikyM.Common.DataAccessLayer;
 using MikyM.Common.Domain.Entities;
 

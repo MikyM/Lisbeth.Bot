@@ -19,15 +19,9 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using FluentValidation;
-using JetBrains.Annotations;
-using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
 using Lisbeth.Bot.Application.Validation.RoleMenu;
 using Lisbeth.Bot.Domain.DTOs.Request.RoleMenu;
-using Lisbeth.Bot.Domain.Entities;
-using MikyM.Common.Application.Results;
-using System;
-using System.Threading.Tasks;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 

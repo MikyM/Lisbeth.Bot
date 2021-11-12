@@ -15,12 +15,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using Autofac;
 using AutoMapper.Contrib.Autofac.DependencyInjection;
 using AutoMapper.Extensions.ExpressionMapping;
 using Microsoft.Extensions.DependencyInjection;
-using MikyM.Common.Application.Interfaces;
 using MikyM.Common.Application.Services;
 
 namespace MikyM.Common.Application;

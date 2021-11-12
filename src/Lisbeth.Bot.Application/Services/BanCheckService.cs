@@ -15,14 +15,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Threading.Tasks;
-using JetBrains.Annotations;
-using Lisbeth.Bot.Application.Services.Database.Interfaces;
-using Lisbeth.Bot.Application.Services.Interfaces;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Ban;
 using Lisbeth.Bot.Domain.DTOs.Request.Ban;
-using Lisbeth.Bot.Domain.Entities;
 
 namespace Lisbeth.Bot.Application.Services;
 

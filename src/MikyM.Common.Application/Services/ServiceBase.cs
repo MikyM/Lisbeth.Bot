@@ -15,12 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Threading.Tasks;
 using AutoMapper;
-using Microsoft.EntityFrameworkCore;
-using MikyM.Common.Application.Interfaces;
-using MikyM.Common.DataAccessLayer.UnitOfWork;
 
 namespace MikyM.Common.Application.Services;
 

@@ -15,24 +15,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Threading.Tasks;
 using AutoMapper;
-using Hangfire.Annotations;
 using Lisbeth.Bot.Application.Enums;
 using Lisbeth.Bot.Application.Exceptions;
-using Lisbeth.Bot.Application.Results;
-using Lisbeth.Bot.Application.Services.Database.Interfaces;
 using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.RoleMenu;
 using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
-using Lisbeth.Bot.Domain.Entities;
-using MikyM.Common.Application.Interfaces;
-using MikyM.Common.Application.Results;
-using MikyM.Common.Application.Results.Errors;
-using MikyM.Common.Application.Services;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
 
 namespace Lisbeth.Bot.Application.Services.Database;
