@@ -21,6 +21,7 @@ using DSharpPlus.SlashCommands;
 using Hangfire;
 using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Enums;
+using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Mute;
 using Lisbeth.Bot.Domain.DTOs.Request.Mute;
 using Microsoft.Extensions.Logging;
@@ -252,28 +253,31 @@ public class DiscordMuteService : IDiscordMuteService
         embed.WithAuthor($"Mute | {target.GetFullDisplayName()}", null, target.AvatarUrl);
 
         bool isMuted = target.Roles.FirstOrDefault(r => r.Name == "Muted") is not null;
-        bool resMute = true;
+        Result resMute = Result.FromSuccess();
 
         if (foundEntity is null)
         {
             if (!isMuted)
-                resMute = await target.Mute(guildCfg.ModerationConfig.MuteRoleId);
+                resMute = await target.MuteAsync(guildCfg.ModerationConfig.MuteRoleId);
 
-            if (!resMute)
+            switch (resMute)
             {
-                var noEntryEmoji = DiscordEmoji.FromName(_discord.Client, ":no_entry:");
-                embed.WithColor(0x18315C);
-                embed.WithAuthor($"{noEntryEmoji} Mute denied");
-                embed.WithDescription("Can't mute other moderators.");
-            }
-            else
-            {
-                embed.AddField("User mention", target.Mention, true);
-                embed.AddField("Moderator", moderator.Mention, true);
-                embed.AddField("Length", lengthString, true);
-                embed.AddField("Muted until", req.AppliedUntil.ToString(CultureInfo.InvariantCulture), true);
-                embed.AddField("Reason", req.Reason);
-                embed.WithFooter($"Case ID: {id} | Member ID: {target.Id}");
+                case { IsSuccess: false }:
+                {
+                    var noEntryEmoji = DiscordEmoji.FromName(_discord.Client, ":no_entry:");
+                    embed.WithColor(0x18315C);
+                    embed.WithAuthor($"{noEntryEmoji} Mute denied");
+                    embed.WithDescription("Can't mute other moderators.");
+                    break;
+                }
+                case { IsSuccess: true }:
+                    embed.AddField("User mention", target.Mention, true);
+                    embed.AddField("Moderator", moderator.Mention, true);
+                    embed.AddField("Length", lengthString, true);
+                    embed.AddField("Muted until", req.AppliedUntil.ToString(CultureInfo.InvariantCulture), true);
+                    embed.AddField("Reason", req.Reason);
+                    embed.WithFooter($"Case ID: {id} | Member ID: {target.Id}");
+                    break;
             }
         }
         else
@@ -291,47 +295,53 @@ public class DiscordMuteService : IDiscordMuteService
             if (foundEntity.AppliedUntil > req.AppliedUntil)
             {
                 if (!isMuted)
-                    resMute = await target.Mute(guildCfg.ModerationConfig.MuteRoleId);
+                    resMute = await target.MuteAsync(guildCfg.ModerationConfig.MuteRoleId);
 
-                if (!resMute)
+                switch (resMute)
                 {
-                    var noEntryEmoji = DiscordEmoji.FromName(_discord.Client, ":no_entry:");
-                    embed.WithColor(0x18315C);
-                    embed.WithAuthor($"{noEntryEmoji} MuteAsync denied");
-                    embed.WithDescription("Can't mute other moderators.");
-                }
-                else
-                {
-                    embed.WithDescription(
-                        $"This user has already been muted until {foundEntity.AppliedUntil} by {(previousMod is not null ? previousMod.Mention : "a deleted user")}");
-                    embed.WithFooter($"Case ID: {id} | Member ID: {foundEntity.UserId}");
+                    case { IsSuccess: false }:
+                    {
+                        var noEntryEmoji = DiscordEmoji.FromName(_discord.Client, ":no_entry:");
+                        embed.WithColor(0x18315C);
+                        embed.WithAuthor($"{noEntryEmoji} MuteAsync denied");
+                        embed.WithDescription("Can't mute other moderators.");
+                        break;
+                    }
+                    case { IsSuccess: true }:
+                        embed.WithDescription(
+                            $"This user has already been muted until {foundEntity.AppliedUntil} by {(previousMod is not null ? previousMod.Mention : "a deleted user")}");
+                        embed.WithFooter($"Case ID: {id} | Member ID: {foundEntity.UserId}");
+                        break;
                 }
             }
             else
             {
                 if (!isMuted)
-                    resMute = await target.Mute(guildCfg.ModerationConfig.MuteRoleId);
+                    resMute = await target.MuteAsync(guildCfg.ModerationConfig.MuteRoleId);
 
-                if (!resMute)
+                switch (resMute)
                 {
-                    var noEntryEmoji = DiscordEmoji.FromName(_discord.Client, ":no_entry:");
-                    embed.WithColor(0x18315C);
-                    embed.WithAuthor($"{noEntryEmoji} MuteAsync denied");
-                    embed.WithDescription("Can't mute other moderators.");
-                }
-                else
-                {
-                    embed.WithAuthor($"Extend Mute | {target.GetFullUsername()}", null, target.AvatarUrl);
-                    embed.AddField("Previous mute until", foundEntity.AppliedUntil.ToString(), true);
-                    embed.AddField("Previous moderator",
-                        $"{(previousMod is not null ? previousMod.Mention : "Deleted user")}", true);
-                    embed.AddField("Previous reason", foundEntity.Reason, true);
-                    embed.AddField("User mention", target.Mention, true);
-                    embed.AddField("Moderator", moderator.Mention, true);
-                    embed.AddField("Length", lengthString, true);
-                    embed.AddField("Muted until", req.AppliedUntil.ToString(CultureInfo.InvariantCulture), true);
-                    embed.AddField("Reason", req.Reason);
-                    embed.WithFooter($"Case ID: {id} | Member ID: {target.Id}");
+                    case { IsSuccess: false }:
+                    {
+                        var noEntryEmoji = DiscordEmoji.FromName(_discord.Client, ":no_entry:");
+                        embed.WithColor(0x18315C);
+                        embed.WithAuthor($"{noEntryEmoji} MuteAsync denied");
+                        embed.WithDescription("Can't mute other moderators.");
+                        break;
+                    }
+                    case { IsSuccess: true }:
+                        embed.WithAuthor($"Extend Mute | {target.GetFullUsername()}", null, target.AvatarUrl);
+                        embed.AddField("Previous mute until", foundEntity.AppliedUntil.ToString(), true);
+                        embed.AddField("Previous moderator",
+                            $"{(previousMod is not null ? previousMod.Mention : "Deleted user")}", true);
+                        embed.AddField("Previous reason", foundEntity.Reason, true);
+                        embed.AddField("User mention", target.Mention, true);
+                        embed.AddField("Moderator", moderator.Mention, true);
+                        embed.AddField("Length", lengthString, true);
+                        embed.AddField("Muted until", req.AppliedUntil.ToString(CultureInfo.InvariantCulture), true);
+                        embed.AddField("Reason", req.Reason);
+                        embed.WithFooter($"Case ID: {id} | Member ID: {target.Id}");
+                        break;
                 }
             }
         }
@@ -368,8 +378,7 @@ public class DiscordMuteService : IDiscordMuteService
         DiscordChannel? channel;
 
         var result =
-            await _guildService.GetSingleBySpecAsync<Guild>(
-                new Specification<Guild>(x => x.GuildId == guild.Id && !x.IsDisabled));
+            await _guildService.GetSingleBySpecAsync<Guild>(new ActiveGuildByDiscordIdWithModerationSpecifications(guild.Id));
 
         if (!result.IsDefined())
             return Result<DiscordEmbed>.FromError(new DiscordNotFoundError(DiscordEntityType.Guild));
@@ -391,7 +400,7 @@ public class DiscordMuteService : IDiscordMuteService
         var embed = new DiscordEmbedBuilder();
         embed.WithColor(0x18315C);
 
-        bool isMuted = target.Roles.FirstOrDefault(r => r.Name == "Muted") is not null;
+        bool isMuted = target.Roles.FirstOrDefault(r => r.Id == guildCfg.ModerationConfig.MuteRoleId) is not null;
 
         var res = await _muteService.DisableAsync(req);
 
@@ -399,7 +408,7 @@ public class DiscordMuteService : IDiscordMuteService
         {
             if (isMuted)
             {
-                await target.Unmute(guildCfg.ModerationConfig.MuteRoleId);
+                await target.UnmuteAsync(guildCfg.ModerationConfig.MuteRoleId);
                 embed.WithAuthor($"Unmute | {target.GetFullUsername()}", null, target.AvatarUrl);
                 embed.AddField("Moderator", moderator.Mention, true);
                 embed.AddField("User mention", target.Mention, true);
@@ -418,7 +427,7 @@ public class DiscordMuteService : IDiscordMuteService
             await _muteService.CommitAsync();
 
             if (isMuted)
-                await target.Unmute(guildCfg.ModerationConfig.MuteRoleId);
+                await target.UnmuteAsync(guildCfg.ModerationConfig.MuteRoleId);
 
             embed.WithAuthor($"Unmute | {target.GetFullDisplayName()}", null, target.AvatarUrl);
             embed.AddField("Moderator", moderator.Mention, true);

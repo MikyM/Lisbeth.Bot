@@ -32,26 +32,26 @@ public static class DiscordMemberExtensions
         return member.DisplayName + "#" + member.Discriminator;
     }
 
-    public static async Task<bool> Mute(this DiscordMember member, ulong roleId)
+    public static async Task<Result> MuteAsync(this DiscordMember member, ulong roleId)
     {
         if (member.Permissions.HasPermission(Permissions.BanMembers))
-            return false;
+            return new DiscordNotAuthorizedError();
 
-        DiscordRole mutedRole = member.Guild.Roles.FirstOrDefault(x => x.Key == roleId).Value;
+        if (!member.Guild.Roles.TryGetValue(roleId, out var mutedRole)) return new DiscordNotFoundError();
         await member.GrantRoleAsync(mutedRole);
 
-        return true;
+        return Result.FromSuccess();
     }
 
-    public static async Task<bool> Unmute(this DiscordMember member, ulong roleId)
+    public static async Task<Result> UnmuteAsync(this DiscordMember member, ulong roleId)
     {
         if (member.Permissions.HasPermission(Permissions.BanMembers))
-            return false;
+            return new DiscordNotAuthorizedError();
 
-        DiscordRole mutedRole = member.Guild.Roles.FirstOrDefault(x => x.Key == roleId).Value;
+        if (!member.Guild.Roles.TryGetValue(roleId, out var mutedRole)) return new DiscordNotFoundError();
         await member.RevokeRoleAsync(mutedRole);
 
-        return true;
+        return Result.FromSuccess();
     }
 
     public static bool IsModerator(this DiscordMember member)

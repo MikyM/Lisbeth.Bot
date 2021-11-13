@@ -293,7 +293,9 @@ public class DiscordRoleMenuService : IDiscordRoleMenuService
 
             var availableRoles = res.Entity.RoleMenuOptions.Select(x => x.Name).ToList();
             roleLists.Add(availableRoles);
-            var possessedRoles = res.Entity.RoleMenuOptions.Where(x => member.Roles.Any(y => y.Id == x.RoleId)).Select(x => x.Name).ToList();
+            var possessedRoles = res.Entity.RoleMenuOptions.Where(x => member.Roles.Any(y => y.Id == x.RoleId))
+                .Select(x => x.Name)
+                .ToList();
             availableRoles.RemoveAll(x => possessedRoles.Contains(x));
             roleLists.Add(possessedRoles);
 
