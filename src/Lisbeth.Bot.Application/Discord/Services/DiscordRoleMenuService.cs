@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
@@ -26,14 +25,14 @@ using Lisbeth.Bot.Application.Discord.Exceptions;
 using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Buttons;
-using Lisbeth.Bot.Application.Exceptions;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.DataAccessLayer.Specifications.RoleMenu;
 using Lisbeth.Bot.Domain.DTOs.Request.RoleMenu;
 using Microsoft.Extensions.Logging;
 using MikyM.Common.DataAccessLayer;
-using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Discord.Interfaces;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace Lisbeth.Bot.Application.Discord.Services;
 
@@ -210,75 +209,138 @@ public class DiscordRoleMenuService : IDiscordRoleMenuService
         return await SendAsync(ctx.Guild, ctx.Member, ctx.ResolvedChannelMentions[0], req);
     }
 
-    public async Task<Result> HandleRoleMenuButtonAsync(ComponentInteractionCreateEventArgs args)
+    private Result<DiscordSelectComponent> GetRoleMenuSelect(RoleMenu roleMenu)
     {
-        await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
+        List<DiscordSelectComponentOption> options = new();
+        DiscordWebhookBuilder builder = new();
 
-        try
+        foreach (var option in roleMenu.RoleMenuOptions ?? throw new InvalidOperationException())
         {
-            if (!long.TryParse(args.Id.Split('_', StringSplitOptions.RemoveEmptyEntries).Last().Trim(),
-                out var parsedValue)) return Result.FromError(new DiscordArgumentError(nameof(args.Id)));
+            DiscordEmoji? emoji = null;
 
-            var result = await _roleMenuService.GetSingleBySpecAsync<RoleMenu>(new RoleMenuByIdWithOptionsSpec(parsedValue));
+            if (!string.IsNullOrWhiteSpace(option.Emoji))
+                DiscordEmoji.TryFromName(_discord.Client, option.Emoji, true, out emoji);
+            if (!string.IsNullOrWhiteSpace(option.Emoji))
+                DiscordEmoji.TryFromUnicode(_discord.Client, option.Emoji, out emoji);
 
-            if (!result.IsDefined()) return Result.FromError(result);
-
-            List<DiscordSelectComponentOption> options = new();
-            DiscordWebhookBuilder builder = new ();
-
-            foreach (var option in result.Entity.RoleMenuOptions ?? throw new InvalidOperationException())
-            {
-                DiscordEmoji? emoji = null;
-
-                if (!string.IsNullOrWhiteSpace(option.Emoji))
-                    DiscordEmoji.TryFromName(_discord.Client, option.Emoji, true, out emoji);
-                if (!string.IsNullOrWhiteSpace(option.Emoji))
-                    DiscordEmoji.TryFromUnicode(_discord.Client, option.Emoji, out emoji);
-
-                options.Add(new DiscordSelectComponentOption(option.Name, option.CustomSelectOptionValueId,
-                    option.Description, false, emoji is null ? null : new DiscordComponentEmoji(emoji)));
-            }
-
-            var select = new DiscordSelectComponent(result.Entity.CustomSelectComponentId, "Choose a role!", options);
-
-            builder.AddComponents(select);
-            builder.WithContent("Choose a role you would like to get or drop below!");
-
-            await args.Interaction.EditOriginalResponseAsync(builder);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError($"Failed to handle role menu button: {ex.GetFullMessage()}");
+            options.Add(new DiscordSelectComponentOption(option.Name, option.CustomSelectOptionValueId,
+                option.Description, false, emoji is null ? null : new DiscordComponentEmoji(emoji)));
         }
 
-        return Result.FromSuccess();
+        var select = new DiscordSelectComponent(roleMenu.CustomSelectComponentId, "Choose a role!", options, false, 0,
+            roleMenu.RoleMenuOptions.Count);
+
+        builder.AddComponents(select);
+        builder.WithContent("Select a role you would like to get or unselect it drop it!");
+
+        return select;
     }
 
     public async Task<Result> HandleOptionSelectionAsync(ComponentInteractionCreateEventArgs args)
     {
-        await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+        if (!long.TryParse(args.Id.Split('_', StringSplitOptions.RemoveEmptyEntries).Last().Trim(),
+                out var parsedRoleMenuId)) return Result.FromError(new DiscordError());
 
-        //if (!long.TryParse(args.Id, out long _)) return Result.FromError(new DiscordArgumentError(nameof(args.Id)));
+        var res = await _roleMenuService.GetSingleBySpecAsync<RoleMenu>(
+            new RoleMenuByIdAndGuildWithOptionsSpec(parsedRoleMenuId, args.Guild.Id));
 
-        //var roleMenu = await _roleMenuService.GetSingleBySpecAsync<RoleMenu>(new RoleMenuByIdWithOptionsSpec(parsed));
+        if (!res.IsDefined()) return Result.FromError(new NotFoundError());
 
         try
         {
-            if (!ulong.TryParse(args.Values[0].Split('_', StringSplitOptions.RemoveEmptyEntries).Last().Trim(),
-                    out var parsedValue)) return Result.FromError(new DiscordArgumentError(nameof(args.Values)));
-
-            /*var option = roleMenu.RoleMenuOptions.FirstOrDefault(x => x.RoleId == parsedValue);
-
-            if (option is null) return;*/
-
-            var role = args.Guild.GetRole(parsedValue); //.GetRole(option.RoleId);
-
+            var ids = new List<ulong>();
+            var grantedRoles = new List<string?>();
+            var revokedRoles = new List<string?>();
+            var roleLists = new List<List<string?>> { grantedRoles, revokedRoles };
             var member = await args.Guild.GetMemberAsync(args.User.Id);
 
-            if (member.Roles.Any(x => x.Id == role.Id))
-                await member.RevokeRoleAsync(role);
-            else
-                await member.GrantRoleAsync(role);
+            foreach (var id in args.Values)
+            {
+                if (!ulong.TryParse(id.Split('_', StringSplitOptions.RemoveEmptyEntries).Last().Trim(),
+                        out var parsedValue)) throw new InvalidOperationException("Failed to parse role Id from args values");
+
+                ids.Add(parsedValue);
+            }
+
+            foreach (var option in res.Entity.RoleMenuOptions ?? throw new InvalidOperationException("Role menu options were null"))
+            {
+                DiscordRole? role;
+                try
+                {
+                    role = args.Guild.GetRole(option.RoleId);
+                    if (role is null) continue;
+                }
+                catch
+                {
+                    continue;
+                }
+                
+                if (ids.Contains(option.RoleId))
+                {
+                    if (member.Roles.Any(x => x.Id == role.Id)) continue;
+
+                    await member.GrantRoleAsync(role);
+                    grantedRoles.Add(role.Name);
+                }
+                else
+                {
+                    if (member.Roles.All(x => x.Id != role.Id)) continue;
+
+                    await member.RevokeRoleAsync(role);
+                    revokedRoles.Add(role.Name);
+                }
+            }
+
+            var availableRoles = res.Entity.RoleMenuOptions.Select(x => x.Name).ToList();
+            roleLists.Add(availableRoles);
+            var possessedRoles = res.Entity.RoleMenuOptions.Where(x => member.Roles.Any(y => y.Id == x.RoleId)).Select(x => x.Name).ToList();
+            availableRoles.RemoveAll(x => possessedRoles.Contains(x));
+            roleLists.Add(possessedRoles);
+
+            var embed = new DiscordEmbedBuilder().WithAuthor("Lisbeth Role Menu Interaction Result")
+                .WithFooter($"Member Id: {member.Id}")
+                .WithColor(new DiscordColor("#26296e"));
+
+            for (int i = 0; i < roleLists.Count; i++)
+            {
+                if (roleLists[i].Count == 0) continue;
+
+                string joined = "";
+                for (int j = 0; j < roleLists[i].Count; j++)
+                {
+                    var toAdd = (j is 0 ? "" : "\n") + roleLists[i][j];
+
+                    if (joined.Length + toAdd.Length <= 256)
+                    {
+                        joined += toAdd;
+                        continue;
+                    }
+
+                    if (256 - joined.Length >= 5) joined += "\n...";
+                    break;
+                }
+
+                string fieldName = "";
+                switch (i)
+                {
+                    case 0:
+                        fieldName = "Granted roles";
+                        break;
+                    case 1:
+                        fieldName = "Revoked roles";
+                        break;
+                    case 2:
+                        fieldName = "Available roles";
+                        break;
+                    case 3:
+                        fieldName = "Possessed roles";
+                        break;
+                }
+                embed.AddField(fieldName, joined);
+            }
+
+            await args.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                .AddEmbed(embed.Build()).AsEphemeral(true));
         }
         catch (Exception ex)
         {
@@ -343,10 +405,7 @@ public class DiscordRoleMenuService : IDiscordRoleMenuService
 
         var builder = new DiscordWebhookBuilder();
 
-        var button = new DiscordButtonComponent(ButtonStyle.Primary, partial.Entity.CustomButtonId,
-            "Get Role Menu"/*, false, new DiscordComponentEmoji(DiscordEmoji.FromName("::"))*/);
-
-        builder.AddComponents(button);
+        builder.AddComponents(this.GetRoleMenuSelect(partial.Entity).Entity);
 
         if (partial.Entity.EmbedConfig is null)
             return (builder.WithContent(partial.Entity.Text ?? throw new ArgumentNullException()),
@@ -408,19 +467,19 @@ public class DiscordRoleMenuService : IDiscordRoleMenuService
             return new DisabledEntityError("Role menu is disabled");
 
         var builder = new DiscordWebhookBuilder();
-        var button = new DiscordButtonComponent(ButtonStyle.Primary, partial.Entity.CustomButtonId,
-            "Get Role Menu"/*, false, new DiscordComponentEmoji(DiscordEmoji.FromName("::"))*/);
 
-        builder.AddComponents(button);
+        var select = this.GetRoleMenuSelect(partial.Entity).Entity;
+
+        builder.AddComponents(select);
 
         if (partial.Entity.EmbedConfig is null)
         {
-            await target.SendMessageAsync(new DiscordMessageBuilder().WithContent(partial.Entity.Text).AddComponents(button));
+            await target.SendMessageAsync(new DiscordMessageBuilder().WithContent(partial.Entity.Text).AddComponents(select));
             return (null, partial.Entity.Text ?? throw new ArgumentNullException());
         }
 
         var embed = _embedProvider.ConfigureEmbed(partial.Entity.EmbedConfig).Build();
-        await target.SendMessageAsync(new DiscordMessageBuilder().AddEmbed(embed).AddComponents(button));
+        await target.SendMessageAsync(new DiscordMessageBuilder().AddEmbed(embed).AddComponents(select));
         return (builder.AddEmbed(embed), partial.Entity.Text ?? throw new ArgumentNullException());
     }
 

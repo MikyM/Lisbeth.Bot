@@ -22,6 +22,7 @@ using MikyM.Discord.Events;
 
 namespace Lisbeth.Bot.Application.Discord.EventHandlers;
 
+[UsedImplicitly]
 public class GuildEventsHandler : IDiscordGuildEventsSubscriber
 {
     private readonly IAsyncExecutor _asyncExecutor;

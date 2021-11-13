@@ -47,7 +47,7 @@ public class RoleMenuSlashCommands : ExtendedApplicationCommandModule
 
         bool isId = long.TryParse(idOrName, out long id);
 
-        Result<(DiscordWebhookBuilder? Embed, string Text)>? result = null;
+        Result<(DiscordWebhookBuilder? WebhookBuilder, string Text)>? result = null;
         Result<DiscordEmbed>? partial = null;
 
         switch (action)
@@ -165,7 +165,21 @@ public class RoleMenuSlashCommands : ExtendedApplicationCommandModule
             }
             else
             {
-                await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("Sent"));
+                switch (action)
+                {
+                    case RoleMenuActionType.Get:
+                    case RoleMenuActionType.Create:
+                    case RoleMenuActionType.Edit:
+                    case RoleMenuActionType.ConfigureEmbed:
+                    case RoleMenuActionType.Remove:
+                        await ctx.EditResponseAsync(result.Value.Entity.WebhookBuilder);
+                        break;
+                    case RoleMenuActionType.Send:
+                        await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("Sent"));
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(action), action, null);
+                }
             }
         }
     }

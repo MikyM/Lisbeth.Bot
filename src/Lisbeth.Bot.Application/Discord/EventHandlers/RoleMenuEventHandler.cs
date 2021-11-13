@@ -23,6 +23,7 @@ using MikyM.Discord.Events;
 
 namespace Lisbeth.Bot.Application.Discord.EventHandlers;
 
+[UsedImplicitly]
 public class RoleMenuEventHandler : IDiscordMiscEventsSubscriber
 {
     private readonly IAsyncExecutor _asyncExecutor;
@@ -43,13 +44,12 @@ public class RoleMenuEventHandler : IDiscordMiscEventsSubscriber
                 break;
         }
 
-        if (args.Id.StartsWith("role_menu_") && !args.Id.Contains("button"))
+        if (args.Id.StartsWith("role_menu_"))
+        {
+            await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
             _ = _asyncExecutor.ExecuteAsync<IDiscordRoleMenuService>(async x =>
                 await x.HandleOptionSelectionAsync(args));
-
-        if (args.Id.StartsWith("role_menu_button"))
-            _ = _asyncExecutor.ExecuteAsync<IDiscordRoleMenuService>(async x =>
-                await x.HandleRoleMenuButtonAsync(args));
+        }
     }
 
     public Task DiscordOnClientErrored(DiscordClient sender, ClientErrorEventArgs args)

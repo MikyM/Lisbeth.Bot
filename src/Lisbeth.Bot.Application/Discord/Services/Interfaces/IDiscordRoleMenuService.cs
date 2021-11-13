@@ -36,6 +36,4 @@ public interface IDiscordRoleMenuService
         RoleMenuSendReqDto req);
 
     Task<Result> HandleOptionSelectionAsync(ComponentInteractionCreateEventArgs args);
-
-    Task<Result> HandleRoleMenuButtonAsync(ComponentInteractionCreateEventArgs args);
 }
