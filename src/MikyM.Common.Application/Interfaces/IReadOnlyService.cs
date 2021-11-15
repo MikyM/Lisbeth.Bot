@@ -23,13 +23,19 @@ namespace MikyM.Common.Application.Interfaces;
 public interface IReadOnlyService<TEntity, TContext> : IServiceBase<TContext>
     where TEntity : AggregateRootEntity where TContext : DbContext
 {
-    Task<Result<TGetResult>> GetAsync<TGetResult>(long id) where TGetResult : class;
+    Task<Result<TEntity>> GetAsync(params object[] keyValues);
+
+    Task<Result<TGetResult>> GetAsync<TGetResult>(bool shouldProject = false, params object[] keyValues) where TGetResult : class;
+
+    Task<Result<TEntity>> GetSingleBySpecAsync(ISpecification<TEntity> specification);
 
     Task<Result<TGetResult>> GetSingleBySpecAsync<TGetResult>(ISpecification<TEntity> specification)
         where TGetResult : class;
 
     Task<Result<TGetProjectedResult>> GetSingleBySpecAsync<TGetProjectedResult>(
         ISpecification<TEntity, TGetProjectedResult> specification) where TGetProjectedResult : class;
+
+    Task<Result<IReadOnlyList<TEntity>>> GetBySpecAsync(ISpecification<TEntity> specification);
 
     Task<Result<IReadOnlyList<TGetResult>>> GetBySpecAsync<TGetResult>(ISpecification<TEntity> specification)
         where TGetResult : class;
@@ -39,6 +45,8 @@ public interface IReadOnlyService<TEntity, TContext> : IServiceBase<TContext>
 
     Task<Result<IReadOnlyList<TGetResult>>> GetAllAsync<TGetResult>(bool shouldProject = false)
         where TGetResult : class;
+
+    Task<Result<IReadOnlyList<TEntity>>> GetAllAsync();
 
     Task<Result<long>> LongCountAsync(ISpecification<TEntity>? specification = null);
 }

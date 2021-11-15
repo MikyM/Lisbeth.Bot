@@ -22,6 +22,7 @@ using System.Text.RegularExpressions;
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.ChatExport.Builders;
 using Lisbeth.Bot.Application.Discord.ChatExport.Models;
+using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Ticket;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 using Microsoft.Extensions.Logging;
@@ -58,7 +59,7 @@ public class DiscordChatExportService : IDiscordChatExportService
 
         if (req.Id.HasValue)
         {
-            var ticketResult = await _ticketService.GetAsync<Ticket>(req.Id.Value);
+            var ticketResult = await _ticketService.GetAsync(req.Id.Value);
             if (!ticketResult.IsDefined())
                 return new NotFoundError("Opened ticket with given params doesn't exist in the database.");
 
@@ -69,7 +70,7 @@ public class DiscordChatExportService : IDiscordChatExportService
         }
         else if (req.OwnerId.HasValue && req.GuildId.HasValue)
         {
-            var res = await _ticketService.GetSingleBySpecAsync<Ticket>(
+            var res = await _ticketService.GetSingleBySpecAsync(
                 new TicketBaseGetSpecifications(null, req.OwnerId, req.GuildId, null, null, false, 1));
             if (!res.IsDefined())
                 return new NotFoundError("Opened ticket with given params doesn't exist in the database.");
@@ -160,8 +161,7 @@ public class DiscordChatExportService : IDiscordChatExportService
             if (requestingMember is null) throw new ArgumentNullException(nameof(requestingMember));
 
             var resGuild =
-                await _guildService.GetSingleBySpecAsync<Guild>(
-                    new Specification<Guild>(x => x.GuildId == guild.Id && !x.IsDisabled));
+                await _guildService.GetSingleBySpecAsync(new ActiveGuildByIdSpec(guild.Id));
 
             if (!resGuild.IsDefined()) return new NotFoundError("Guild doesn't exist in database.");
 

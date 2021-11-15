@@ -115,7 +115,7 @@ public class DiscordBanService : IDiscordBanService
 
         if (req.Id.HasValue)
         {
-            var res = await _banService.GetAsync<Ban>(req.Id.Value);
+            var res = await _banService.GetAsync(req.Id.Value);
             if (!res.IsDefined()) return Result<DiscordEmbed>.FromError(res);
             req.GuildId = res.Entity.GuildId;
             req.TargetUserId = res.Entity.UserId;
@@ -154,7 +154,7 @@ public class DiscordBanService : IDiscordBanService
                 }
                 else
                 {
-                    var res = await _banService.GetAsync<Ban>(req.Id ?? throw new InvalidOperationException());
+                    var res = await _banService.GetAsync(req.Id ?? throw new InvalidOperationException());
 
                     if (res.IsDefined())
                         target = await _discord.Client.GetUserAsync(res.Entity.UserId);
@@ -180,7 +180,7 @@ public class DiscordBanService : IDiscordBanService
 
         if (req.Id.HasValue)
         {
-            var ban = await _banService.GetAsync<Ban>(req.Id.Value);
+            var ban = await _banService.GetAsync(req.Id.Value);
             if (!ban.IsDefined()) return Result<DiscordEmbed>.FromError(ban);
             req.GuildId = ban.Entity.GuildId;
             req.TargetUserId = ban.Entity.UserId;
@@ -222,7 +222,7 @@ public class DiscordBanService : IDiscordBanService
                 }
                 else
                 {
-                    var res = await _banService.GetAsync<Ban>(req.Id ?? throw new InvalidOperationException());
+                    var res = await _banService.GetAsync(req.Id ?? throw new InvalidOperationException());
 
                     if (res.IsDefined())
                         target = await _discord.Client.GetUserAsync(res.Entity.UserId);

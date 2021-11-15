@@ -17,8 +17,8 @@
 
 using AutoMapper;
 using Lisbeth.Bot.DataAccessLayer;
+using Lisbeth.Bot.DataAccessLayer.Specifications.Ban;
 using Lisbeth.Bot.Domain.DTOs.Request.Ban;
-using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
 
 namespace Lisbeth.Bot.Application.Services.Database;
@@ -34,8 +34,7 @@ public class BanService : CrudService<Ban, LisbethBotDbContext>, IBanService
     {
         if (req is null) throw new ArgumentNullException(nameof(req));
 
-        var result = await base.GetSingleBySpecAsync<Ban>(new Specification<Ban>(x =>
-            x.UserId == req.TargetUserId && x.GuildId == req.GuildId && !x.IsDisabled));
+        var result = await base.GetSingleBySpecAsync(new ActiveBanSpec(req.TargetUserId, req.GuildId ));
 
         if (!result.IsDefined())
         {
@@ -57,19 +56,19 @@ public class BanService : CrudService<Ban, LisbethBotDbContext>, IBanService
         return Result<(long Id, Ban? FoundEntity)>.FromSuccess((result.Entity.Id, shallowCopy));
     }
 
-    public async Task<Result<Ban>> DisableAsync(BanDisableReqDto entry, bool shouldSave = false)
+    public async Task<Result<Ban>> DisableAsync(BanDisableReqDto req, bool shouldSave = false)
     {
-        if (entry is null) throw new ArgumentNullException(nameof(entry));
+        if (req is null) throw new ArgumentNullException(nameof(req));
 
-        var result = await base.GetSingleBySpecAsync<Ban>(
-            new Specification<Ban>(x =>
-                x.UserId == entry.TargetUserId && x.GuildId == entry.GuildId && !x.IsDisabled));
+        var result = await base.GetSingleBySpecAsync(new ActiveBanSpec(
+            req.TargetUserId ?? throw new InvalidOperationException("Id was null, validate the request first"),
+            req.GuildId ?? throw new InvalidOperationException("Id was null, validate the request first")));
         if (!result.IsDefined()) return Result<Ban>.FromError(new NotFoundError(), result);
 
         base.BeginUpdate(result.Entity);
         result.Entity.IsDisabled = true;
         result.Entity.LiftedOn = DateTime.UtcNow;
-        result.Entity.LiftedById = entry.RequestedOnBehalfOfId;
+        result.Entity.LiftedById = req.RequestedOnBehalfOfId;
 
         if (shouldSave) await base.CommitAsync();
 

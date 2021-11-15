@@ -33,7 +33,7 @@ public class RecurringReminderService : CrudService<RecurringReminder, LisbethBo
 
     public async Task<Result> SetHangfireIdAsync(long reminderId, string hangfireId, bool shouldSave = false)
     {
-        var result = await base.GetAsync<RecurringReminder>(reminderId);
+        var result = await base.GetAsync(reminderId);
 
         if (!result.IsDefined()) return Result.FromError(result);
 

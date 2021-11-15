@@ -155,7 +155,7 @@ public class DiscordRoleMenuService : IDiscordRoleMenuService
         }
         else if (req.Id.HasValue)
         {
-            var result = await _roleMenuService.GetAsync<RoleMenu>(req.Id.Value);
+            var result = await _roleMenuService.GetAsync(req.Id.Value);
             if (!result.IsDefined()) return Result<(DiscordWebhookBuilder? Builder, string Text)>.FromError(result);
             guild = await _discord.Client.GetGuildAsync(result.Entity.GuildId);
         }
@@ -187,7 +187,7 @@ public class DiscordRoleMenuService : IDiscordRoleMenuService
         }
         else if (req.Id.HasValue)
         {
-            var result = await _roleMenuService.GetAsync<RoleMenu>(req.Id.Value);
+            var result = await _roleMenuService.GetAsync(req.Id.Value);
             if (!result.IsDefined()) return Result<(DiscordWebhookBuilder? Builder, string Text)>.FromError(result);
             guild = await _discord.Client.GetGuildAsync(result.Entity.GuildId);
         }
@@ -291,15 +291,12 @@ public class DiscordRoleMenuService : IDiscordRoleMenuService
                 }
             }
 
-            var availableRoles = res.Entity.RoleMenuOptions.Select(x => x.Name).ToList();
-            roleLists.Add(availableRoles);
-            var possessedRoles = res.Entity.RoleMenuOptions.Where(x => member.Roles.Any(y => y.Id == x.RoleId))
+            var availableRoles = res.Entity.RoleMenuOptions.Where(x => member.Roles.All(y => y.Id != x.RoleId))
                 .Select(x => x.Name)
                 .ToList();
-            availableRoles.RemoveAll(x => possessedRoles.Contains(x));
-            roleLists.Add(possessedRoles);
+            roleLists.Add(availableRoles);
 
-            var embed = new DiscordEmbedBuilder().WithAuthor("Lisbeth Role Menu Interaction Result")
+            var embed = new DiscordEmbedBuilder().WithAuthor("Role Menu Interaction")
                 .WithFooter($"Member Id: {member.Id}")
                 .WithColor(new DiscordColor("#26296e"));
 
@@ -322,22 +319,13 @@ public class DiscordRoleMenuService : IDiscordRoleMenuService
                     break;
                 }
 
-                string fieldName = "";
-                switch (i)
+                string fieldName = i switch
                 {
-                    case 0:
-                        fieldName = "Granted roles";
-                        break;
-                    case 1:
-                        fieldName = "Revoked roles";
-                        break;
-                    case 2:
-                        fieldName = "Available roles";
-                        break;
-                    case 3:
-                        fieldName = "Possessed roles";
-                        break;
-                }
+                    0 => "Granted roles",
+                    1 => "Revoked roles",
+                    2 => "Available roles",
+                    _ => "Default"
+                };
                 embed.AddField(fieldName, joined);
             }
 

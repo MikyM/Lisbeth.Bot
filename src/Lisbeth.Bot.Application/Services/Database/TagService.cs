@@ -33,7 +33,7 @@ public class TagService : CrudService<Tag, LisbethBotDbContext>, ITagService
 
     public async Task<Result> AddAsync(TagAddReqDto req, bool shouldSave = false)
     {
-        var res = await base.LongCountAsync(new TagByGuildAndNameSpec(req.Name, req.GuildId));
+        var res = await base.LongCountAsync(new ActiveTagByGuildAndNameSpec(req.Name, req.GuildId));
         if (res.Entity != 0)
             return new DiscordArgumentError(nameof(req.Name), $"Guild already has a tag named {req.Name}");
 
@@ -45,11 +45,12 @@ public class TagService : CrudService<Tag, LisbethBotDbContext>, ITagService
     {
         Result<Tag> tag;
         if (req.Id.HasValue)
-            tag = await base.GetAsync<Tag>(req.Id.Value);
+            tag = await base.GetAsync(req.Id.Value);
         else if (req.Name is not null && req.Name != "")
-            tag = await base.GetSingleBySpecAsync<Tag>(new Specification<Tag>(x =>
-                x.Name == req.Name && x.GuildId == req.GuildId));
-        else throw new ArgumentException("Invalid tag Id/Name was provided.");
+            tag = await base.GetSingleBySpecAsync(new ActiveTagByGuildAndNameSpec(req.Name,
+                req.GuildId ?? throw new InvalidOperationException("Guild Id was null, validate the request first.")));
+        else
+            throw new ArgumentException("Invalid tag Id/Name was provided.");
 
         if (!tag.IsDefined()) return Result.FromError(tag);
         if (tag.Entity.IsDisabled)
@@ -71,11 +72,12 @@ public class TagService : CrudService<Tag, LisbethBotDbContext>, ITagService
     {
         Result<Tag> tag;
         if (req.Id.HasValue)
-            tag = await base.GetAsync<Tag>(req.Id.Value);
+            tag = await base.GetAsync(req.Id.Value);
         else if (req.Name is not null && req.Name != "")
-            tag = await base.GetSingleBySpecAsync<Tag>(new Specification<Tag>(x =>
-                x.Name == req.Name && x.GuildId == req.GuildId));
-        else throw new ArgumentException("Invalid tag Id/Name was provided.");
+            tag = await base.GetSingleBySpecAsync(new ActiveTagByGuildAndNameSpec(req.Name,
+                req.GuildId ?? throw new InvalidOperationException("Guild Id was null, validate the request first.")));
+        else
+            throw new ArgumentException("Invalid tag Id/Name was provided.");
 
         if (!tag.IsDefined()) return Result.FromError(tag);
         if (tag.Entity.IsDisabled) return Result.FromError(new DisabledEntityError(nameof(tag.Entity)));

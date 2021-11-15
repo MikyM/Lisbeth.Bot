@@ -81,9 +81,9 @@ public class ReadOnlyRepository<TEntity> : IReadOnlyRepository<TEntity> where TE
         return await Context.Set<TEntity>().ToListAsync();
     }
 
-    public virtual async Task<IReadOnlyList<TProjectTo>> GetAllAsync<TProjectTo>(ISpecification<TEntity, TProjectTo>? specification = null) where TProjectTo : class
+    public virtual async Task<IReadOnlyList<TProjectTo>> GetAllAsync<TProjectTo>() where TProjectTo : class
     {
-        return await this.ApplySpecification(specification ?? new Specification<TEntity, TProjectTo>())
+        return await this.ApplySpecification(new Specification<TEntity, TProjectTo>())
             .ToListAsync();
     }
 

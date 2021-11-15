@@ -47,8 +47,7 @@ public class DiscordMemberService : IDiscordMemberService
     {
         if (args is null) throw new ArgumentNullException(nameof(args));
 
-        var res = await _guildService.GetSingleBySpecAsync<Guild>(
-            new Specification<Guild>(x => x.GuildId == args.Guild.Id && !x.IsDisabled));
+        var res = await _guildService.GetSingleBySpecAsync(new ActiveGuildByIdSpec(args.Guild.Id));
 
         if (!res.IsDefined() || res.Entity.ModerationConfig is null) return Result.FromSuccess();
         if (!args.Guild.Channels.TryGetValue(res.Entity.ModerationConfig.MemberEventsLogChannelId,

@@ -30,17 +30,12 @@ public
     class Specification<T, TResult> : Specification<T>, ISpecification<T, TResult>
     where T : class where TResult : class
 {
-    internal Specification() : this(InMemorySpecificationEvaluator.Default)
+    protected internal Specification() : this(InMemorySpecificationEvaluator.Default)
     {
     }
 
     public Specification(PaginationFilter paginationFilter) : this(InMemorySpecificationEvaluator.Default, paginationFilter)
     {
-    }
-
-    public Specification(Expression<Func<T, bool>> criteria, PaginationFilter? paginationFilter = null) : this(InMemorySpecificationEvaluator.Default, paginationFilter)
-    {
-        Where(criteria);
     }
 
     protected Specification(IInMemorySpecificationEvaluator inMemorySpecificationEvaluator, PaginationFilter? paginationFilter = null) : base(
@@ -95,11 +90,6 @@ public class Specification<T> : ISpecification<T> where T : class
 
     public Specification(PaginationFilter paginationFilter ) : this(InMemorySpecificationEvaluator.Default, paginationFilter)
     {
-    }
-
-    public Specification(Expression<Func<T, bool>> criteria, PaginationFilter? paginationFilter = null) : this(InMemorySpecificationEvaluator.Default, paginationFilter)
-    {
-        Where(criteria);
     }
 
     protected Specification(IInMemorySpecificationEvaluator inMemorySpecificationEvaluator, PaginationFilter? paginationFilter = null)

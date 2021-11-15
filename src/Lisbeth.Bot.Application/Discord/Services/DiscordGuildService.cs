@@ -54,7 +54,7 @@ public class DiscordGuildService : IDiscordGuildService
         if (!result.IsDefined())
         {
             await _guildService.AddAsync(new Guild { GuildId = args.Guild.Id, UserId = args.Guild.OwnerId }, true);
-            var embedResult = await _embedConfigService.GetAsync<EmbedConfig>(1);
+            var embedResult = await _embedConfigService.GetAsync(1);
             if (!embedResult.IsDefined()) return Result.FromError(embedResult);
             await args.Guild.Owner.SendMessageAsync(_embedProvider.ConfigureEmbed(embedResult.Entity).Build());
         }
@@ -64,7 +64,7 @@ public class DiscordGuildService : IDiscordGuildService
             result.Entity.IsDisabled = false;
             await _guildService.CommitAsync();
 
-            var embedResult = await _embedConfigService.GetAsync<EmbedConfig>(2);
+            var embedResult = await _embedConfigService.GetAsync(2);
             if (!embedResult.IsDefined()) return Result.FromError(embedResult);
             await args.Guild.Owner.SendMessageAsync(_embedProvider.ConfigureEmbed(embedResult.Entity).Build());
         }

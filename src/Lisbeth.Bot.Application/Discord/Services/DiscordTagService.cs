@@ -20,6 +20,7 @@ using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
+using Lisbeth.Bot.DataAccessLayer.Specifications.Tag;
 using Lisbeth.Bot.Domain.DTOs.Request.Tag;
 using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Discord.Interfaces;
@@ -72,7 +73,7 @@ public class DiscordTagService : IDiscordTagService
         }
         else if (req.Id.HasValue)
         {
-            var tag = await _tagService.GetAsync<Tag>(req.Id.Value);
+            var tag = await _tagService.GetAsync(req.Id.Value);
             if (!tag.IsDefined()) return Result<DiscordEmbed>.FromError(tag);
             guild = await _discord.Client.GetGuildAsync(tag.Entity.GuildId);
         }
@@ -103,7 +104,7 @@ public class DiscordTagService : IDiscordTagService
         }
         else if (req.Id.HasValue)
         {
-            var tag = await _tagService.GetAsync<Tag>(req.Id.Value);
+            var tag = await _tagService.GetAsync(req.Id.Value);
             if (!tag.IsDefined()) return Result<(DiscordEmbed? Embed, string Text)>.FromError(tag);
             guild = await _discord.Client.GetGuildAsync(tag.Entity.GuildId);
         }
@@ -134,7 +135,7 @@ public class DiscordTagService : IDiscordTagService
         }
         else if (req.Id.HasValue)
         {
-            var tag = await _tagService.GetAsync<Tag>(req.Id.Value);
+            var tag = await _tagService.GetAsync(req.Id.Value);
             if (!tag.IsDefined()) return Result<(DiscordEmbed? Embed, string Text)>.FromError(tag);
             guild = await _discord.Client.GetGuildAsync(tag.Entity.GuildId);
         }
@@ -167,7 +168,7 @@ public class DiscordTagService : IDiscordTagService
         }
         else if (req.Id.HasValue)
         {
-            var tag = await _tagService.GetAsync<Tag>(req.Id.Value);
+            var tag = await _tagService.GetAsync(req.Id.Value);
             if (!tag.IsDefined()) return Result<DiscordEmbed>.FromError(tag);
             guild = await _discord.Client.GetGuildAsync(tag.Entity.GuildId);
         }
@@ -200,10 +201,9 @@ public class DiscordTagService : IDiscordTagService
         if (requestingUser.IsBotOwner(_discord.Client))
         {
             Result<Tag> partial;
-            if (req.Id.HasValue) partial = await _tagService.GetAsync<Tag>(req.Id.Value);
+            if (req.Id.HasValue) partial = await _tagService.GetAsync(req.Id.Value);
             else
-                partial = await _tagService.GetSingleBySpecAsync<Tag>(
-                    new Specification<Tag>(x => x.Name == req.Name));
+                partial = await _tagService.GetSingleBySpecAsync(new TagByNameSpec(req.Name));
 
             if (!partial.IsDefined()) return Result<(DiscordEmbed? Embed, string Text)>.FromError(partial);
 
@@ -301,10 +301,9 @@ public class DiscordTagService : IDiscordTagService
         if (requestingUser.IsBotOwner(_discord.Client))
         {
             Result<Tag> partial;
-            if (req.Id.HasValue) partial = await _tagService.GetAsync<Tag>(req.Id.Value);
+            if (req.Id.HasValue) partial = await _tagService.GetAsync(req.Id.Value);
             else
-                partial = await _tagService.GetSingleBySpecAsync<Tag>(
-                    new Specification<Tag>(x => x.Name == req.Name));
+                partial = await _tagService.GetSingleBySpecAsync<Tag>(new TagByNameSpec(req.Name));
 
             if (!partial.IsDefined()) return Result<(DiscordEmbed? Embed, string Text)>.FromError(partial);
 

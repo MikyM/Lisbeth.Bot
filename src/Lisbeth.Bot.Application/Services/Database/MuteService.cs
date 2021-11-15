@@ -36,8 +36,7 @@ public class MuteService : CrudService<Mute, LisbethBotDbContext>, IMuteService
     {
         if (req is null) throw new ArgumentNullException(nameof(req));
 
-        var result = await base.GetSingleBySpecAsync<Mute>(new Specification<Mute>(x =>
-            x.UserId == req.TargetUserId && x.GuildId == req.GuildId && !x.IsDisabled && !x.Guild.IsDisabled));
+        var result = await base.GetSingleBySpecAsync(new ActiveMuteSpec(req.TargetUserId, req.GuildId));
         if (!result.IsDefined())
         {
             var partial = await base.AddAsync(req, shouldSave);

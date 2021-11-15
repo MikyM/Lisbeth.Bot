@@ -32,7 +32,7 @@ public class ReminderService : CrudService<Reminder, LisbethBotDbContext>, IRemi
 
     public async Task<Result> SetHangfireIdAsync(long reminderId, string hangfireId, bool shouldSave = false)
     {
-        var result = await base.GetAsync<Reminder>(reminderId);
+        var result = await base.GetAsync(reminderId);
 
         if (!result.IsDefined()) return Result.FromError(result);
 

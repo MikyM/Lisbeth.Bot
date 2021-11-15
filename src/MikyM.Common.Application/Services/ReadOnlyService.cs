@@ -29,17 +29,29 @@ public class ReadOnlyService<TEntity, TContext> : ServiceBase<TContext>, IReadOn
     {
     }
 
-    public virtual async Task<Result<TGetResult>> GetAsync<TGetResult>(long id) where TGetResult : class
+    public virtual async Task<Result<TGetResult>> GetAsync<TGetResult>(bool shouldProject = false, params object[] keyValues) where TGetResult : class
     {
-        var res = await this.UnitOfWork.GetRepository<ReadOnlyRepository<TEntity>>()!.GetAsync(id);
-        return res is null ? Result<TGetResult>.FromError(new NotFoundError()) : Result<TGetResult>.FromSuccess(this.Mapper.Map<TGetResult>(res));
+        var res = await this.GetAsync(keyValues);
+        return !res.IsDefined() ? Result<TGetResult>.FromError(new NotFoundError()) : Result<TGetResult>.FromSuccess(this.Mapper.Map<TGetResult>(res));
+    }
+
+    public virtual async Task<Result<TEntity>> GetAsync(params object[] keyValues)
+    {
+        var res = await this.UnitOfWork.GetRepository<ReadOnlyRepository<TEntity>>()!.GetAsync(keyValues);
+        return res is null ? Result<TEntity>.FromError(new NotFoundError()) : Result<TEntity>.FromSuccess(res);
+    }
+
+    public virtual async Task<Result<TEntity>> GetSingleBySpecAsync(ISpecification<TEntity> specification)
+    {
+        var res = await this.UnitOfWork.GetRepository<ReadOnlyRepository<TEntity>>()
+            ?.GetSingleBySpecAsync(specification)!;
+        return res is null ? Result<TEntity>.FromError(new NotFoundError()) : Result<TEntity>.FromSuccess(res);
     }
 
     public virtual async Task<Result<TGetResult>> GetSingleBySpecAsync<TGetResult>(ISpecification<TEntity> specification) where TGetResult : class
     {
-        var res = await this.UnitOfWork.GetRepository<ReadOnlyRepository<TEntity>>()
-            ?.GetSingleBySpecAsync(specification)!;
-        return res is null ? Result<TGetResult>.FromError(new NotFoundError()) : Result<TGetResult>.FromSuccess(this.Mapper.Map<TGetResult>(res));
+        var res = await this.GetSingleBySpecAsync(specification);
+        return !res.IsDefined() ? Result<TGetResult>.FromError(new NotFoundError()) : Result<TGetResult>.FromSuccess(this.Mapper.Map<TGetResult>(res));
     }
 
     public virtual async Task<Result<TGetProjectedResult>> GetSingleBySpecAsync<TGetProjectedResult>(ISpecification<TEntity, TGetProjectedResult> specification) where TGetProjectedResult : class
@@ -49,11 +61,20 @@ public class ReadOnlyService<TEntity, TContext> : ServiceBase<TContext>, IReadOn
         return res is null ? Result<TGetProjectedResult>.FromError(new NotFoundError()) : Result<TGetProjectedResult>.FromSuccess(res);
     }
 
-    public virtual async Task<Result<IReadOnlyList<TGetResult>>> GetBySpecAsync<TGetResult>(ISpecification<TEntity> specification) where TGetResult : class
+    public virtual async Task<Result<IReadOnlyList<TEntity>>> GetBySpecAsync(ISpecification<TEntity> specification)
     {
         var res = await this.UnitOfWork.GetRepository<ReadOnlyRepository<TEntity>>()
             ?.GetBySpecAsync(specification)!;
-        return res.Count is 0 ? Result<IReadOnlyList<TGetResult>>.FromError(new NotFoundError()) : Result<IReadOnlyList<TGetResult>>.FromSuccess(this.Mapper.Map<IReadOnlyList<TGetResult>>(res));
+        return res.Count is 0 ? Result<IReadOnlyList<TEntity>>.FromError(new NotFoundError()) : Result<IReadOnlyList<TEntity>>.FromSuccess(res);
+    }
+
+    public virtual async Task<Result<IReadOnlyList<TGetResult>>> GetBySpecAsync<TGetResult>(
+        ISpecification<TEntity> specification) where TGetResult : class
+    {
+        var res = await this.GetBySpecAsync(specification);
+        return !res.IsDefined()
+            ? Result<IReadOnlyList<TGetResult>>.FromError(new NotFoundError())
+            : Result<IReadOnlyList<TGetResult>>.FromSuccess(this.Mapper.Map<IReadOnlyList<TGetResult>>(res.Entity));
     }
 
     public virtual async Task<Result<IReadOnlyList<TGetProjectedResult>>> GetBySpecAsync<TGetProjectedResult>(ISpecification<TEntity, TGetProjectedResult> specification) where TGetProjectedResult : class
@@ -72,6 +93,14 @@ public class ReadOnlyService<TEntity, TContext> : ServiceBase<TContext>, IReadOn
             ?.GetAllAsync()!);
 
         return res.Count is 0 ? Result<IReadOnlyList<TGetResult>>.FromError(new NotFoundError()) : Result<IReadOnlyList<TGetResult>>.FromSuccess(res);
+    }
+
+    public virtual async Task<Result<IReadOnlyList<TEntity>>> GetAllAsync()
+    {
+        var res = await this.UnitOfWork.GetRepository<ReadOnlyRepository<TEntity>>()
+            ?.GetAllAsync<TEntity>()!;
+
+        return res.Count is 0 ? Result<IReadOnlyList<TEntity>>.FromError(new NotFoundError()) : Result<IReadOnlyList<TEntity>>.FromSuccess(res);
     }
 
     public virtual async Task<Result<long>> LongCountAsync(ISpecification<TEntity>? specification = null)

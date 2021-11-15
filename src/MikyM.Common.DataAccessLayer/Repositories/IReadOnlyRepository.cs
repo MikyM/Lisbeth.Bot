@@ -37,8 +37,7 @@ public interface IReadOnlyRepository<TEntity> : IBaseRepository where TEntity : 
 
     Task<IReadOnlyList<TEntity>> GetAllAsync();
 
-    Task<IReadOnlyList<TProjectTo>> GetAllAsync<TProjectTo>(
-        ISpecification<TEntity, TProjectTo>? specification = null) where TProjectTo : class;
+    Task<IReadOnlyList<TProjectTo>> GetAllAsync<TProjectTo>() where TProjectTo : class;
         
     Task<long> LongCountAsync(ISpecification<TEntity>? specification = null);
 }

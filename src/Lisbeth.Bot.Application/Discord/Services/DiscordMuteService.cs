@@ -84,7 +84,7 @@ public class DiscordMuteService : IDiscordMuteService
 
         if (req.Id.HasValue)
         {
-            var result = await _muteService.GetAsync<Mute>(req.Id.Value);
+            var result = await _muteService.GetAsync(req.Id.Value);
             if (!result.IsDefined()) return Result<DiscordEmbed>.FromError(new NotFoundError());
             req.GuildId = result.Entity.GuildId;
             req.TargetUserId = result.Entity.UserId;
@@ -131,7 +131,7 @@ public class DiscordMuteService : IDiscordMuteService
 
         if (req.Id.HasValue)
         {
-            var result = await _muteService.GetAsync<Mute>(req.Id.Value);
+            var result = await _muteService.GetAsync(req.Id.Value);
             if (!result.IsDefined()) return Result<DiscordEmbed>.FromError(new NotFoundError());
             var mute = result.Entity;
             req.GuildId = mute.GuildId;
@@ -213,8 +213,7 @@ public class DiscordMuteService : IDiscordMuteService
         DiscordChannel? channel;
 
         var result =
-            await _guildService.GetSingleBySpecAsync<Guild>(
-                new Specification<Guild>(x => x.GuildId == guild.Id && !x.IsDisabled));
+            await _guildService.GetSingleBySpecAsync(new ActiveGuildByIdSpec(guild.Id));
 
         if (!result.IsDefined())
             return Result<DiscordEmbed>.FromError(new DiscordNotFoundError(DiscordEntityType.Guild));
@@ -465,8 +464,7 @@ public class DiscordMuteService : IDiscordMuteService
         DiscordChannel? channel;
 
         var result =
-            await _guildService.GetSingleBySpecAsync<Guild>(
-                new Specification<Guild>(x => x.GuildId == guild.Id && !x.IsDisabled));
+            await _guildService.GetSingleBySpecAsync(new ActiveGuildByIdSpec(guild.Id));
 
         if (!result.IsDefined())
             return Result<DiscordEmbed>.FromError(new DiscordNotFoundError(DiscordEntityType.Guild));

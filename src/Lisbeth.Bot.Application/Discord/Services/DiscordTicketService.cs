@@ -908,7 +908,7 @@ public class DiscordTicketService : IDiscordTicketService
 
         if (req.Id.HasValue)
         {
-            var res = await _ticketService.GetAsync<Ticket>(req.Id.Value);
+            var res = await _ticketService.GetAsync(req.Id.Value);
             if (!res.IsDefined())
                 return Result<(Ticket Ticket, DiscordMember RequestingMember, DiscordGuild Guild, DiscordChannel
                     Channel)>.FromError(res);

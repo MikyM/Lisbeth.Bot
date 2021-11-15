@@ -93,7 +93,7 @@ public class TicketService : CrudService<Ticket, LisbethBotDbContext>, ITicketSe
 
         var id = await base.AddAsync(req, true);
 
-        return await base.GetAsync<Ticket>(id.Entity);
+        return await base.GetAsync(id.Entity);
     }
 
     public async Task<Result<Ticket>> ReopenAsync(TicketReopenReqDto req, Ticket ticket)
