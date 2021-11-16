@@ -3,7 +3,7 @@ using Lisbeth.Bot.Application.Discord.ChatExport.Builders;
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport.Models;
 
-public class HtmlMessage
+public class HtmlMessage : IAsyncHtmlBuilder
 {
     public HtmlMessage(DiscordMessage message)
     {
@@ -12,7 +12,7 @@ public class HtmlMessage
 
     public DiscordMessage Msg { get; }
 
-    public async Task<string> Build()
+    public async Task<string> BuildAsync()
     {
         string messageBot = "";
         string attachmentsHtml = "";
@@ -28,13 +28,13 @@ public class HtmlMessage
 
         if (Msg.Attachments.Count != 0)
         {
-            AttachmentsHtmlBuilder attachmentsBuilder = new AttachmentsHtmlBuilder(Msg.Attachments);
+            AttachmentsHtmlBuilder attachmentsBuilder = new (Msg.Attachments);
             attachmentsHtml = await attachmentsBuilder.BuildAsync();
         }
 
         if (Msg.Reactions.Count != 0)
         {
-            ReactionsHtmlBuilder reactionsHtmlBuilder = new ReactionsHtmlBuilder(Msg.Reactions.ToList());
+            ReactionsHtmlBuilder reactionsHtmlBuilder = new (Msg.Reactions.ToList());
             reactionsHtml = await reactionsHtmlBuilder.BuildAsync();
         }
 

@@ -15,18 +15,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
+namespace Lisbeth.Bot.Application.Enums;
 
-namespace MikyM.Common.DataAccessLayer;
-
-// ReSharper disable once InconsistentNaming
-public static class IEnumerableExtensions
+public enum ModAction
 {
-    public static bool AnyNullable<T>([NotNullWhen(true)] this IEnumerable<T>? source, Func<T, bool> predicate)
-        => source is not null && source.Any(predicate);
-
-
-    public static bool AnyNullable<T>([NotNullWhen(true)] this IEnumerable<T>? source)
-        => source is not null && source.Any();
+    Mute,
+    Unmute,
+    Ban,
+    Unban,
+    Prune
 }

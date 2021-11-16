@@ -1,14 +1,15 @@
+using Autofac.Core;
+using Lisbeth.Bot.Application.Discord.ChatExport.Builders;
+using MikyM.Common.Domain;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
-using Autofac;
-using MikyM.Common.Domain;
 using VimeoDotNet;
 using VimeoDotNet.Net;
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport.Models;
 
-public class HtmlVideo
+public class HtmlVideo : IAsyncHtmlBuilder
 {
     public HtmlVideo(string discordLink)
     {
@@ -18,17 +19,19 @@ public class HtmlVideo
     private string DiscordLink { get; }
     public static List<string> SupportedTypes { get; } = new() { "mp4", "mov", "wmv", "avi", "flv" };
 
-    public async Task<string> GetVimeoLink()
+    public async Task<string> GetVimeoLinkAsync()
     {
         if (SupportedTypes.All(x => x != DiscordLink.Split('.').Last())) return "";
 
         var client = new VimeoClient(Environment.GetEnvironmentVariable("VIMEO_KEY"));
         IUploadRequest request;
-        var httpClientFactory = ContainerProvider.Container.Resolve<IHttpClientFactory>();
+
+        if (ContainerProvider.Container.TryGetHttpClientFactory(out var httpClientFactory))
+            throw new DependencyResolutionException("Failed to resolve IHttpClientFactory in Chat Builder.");
 
         using (HttpClient httpClient = httpClientFactory.CreateClient())
         {
-            using HttpRequestMessage req = new HttpRequestMessage(HttpMethod.Get, DiscordLink);
+            using HttpRequestMessage req = new (HttpMethod.Get, DiscordLink);
             using HttpResponseMessage response = await httpClient.SendAsync(req).ConfigureAwait(false);
             Stream stream = await response.Content.ReadAsStreamAsync();
             request = await client.UploadEntireFileAsync(new BinaryContent(stream,
@@ -40,7 +43,7 @@ public class HtmlVideo
 
     public async Task<string> BuildAsync()
     {
-        string link = await GetVimeoLink();
+        string link = await GetVimeoLinkAsync();
         return link switch
         {
             "" => "",

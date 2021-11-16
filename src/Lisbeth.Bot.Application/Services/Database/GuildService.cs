@@ -62,7 +62,7 @@ public class GuildService : CrudService<Guild, LisbethBotDbContext>, IGuildServi
     public async Task<Result<Guild>> AddConfigAsync(ModerationConfigReqDto req, bool shouldSave = false)
     {
         var result = await base.GetSingleBySpecAsync<Guild>(
-            new ActiveGuildByDiscordIdWithModerationSpecifications(req.GuildId));
+            new ActiveGuildByDiscordIdWithModerationSpec(req.GuildId));
         if (!result.IsDefined()) throw new NotFoundException("Guild doesn't exist in the database");
         if (result.Entity.ModerationConfig is not null && result.Entity.ModerationConfig.IsDisabled)
             return await EnableConfigAsync(req.GuildId, GuildConfigType.Moderation, shouldSave);
@@ -91,7 +91,7 @@ public class GuildService : CrudService<Guild, LisbethBotDbContext>, IGuildServi
                 break;
             case GuildConfigType.Moderation:
                 result = await base.GetSingleBySpecAsync<Guild>(
-                    new ActiveGuildByDiscordIdWithModerationSpecifications(guildId));
+                    new ActiveGuildByDiscordIdWithModerationSpec(guildId));
                 if (!result.IsDefined() || result.Entity.ModerationConfig is null)
                     return Result.FromError(new NotFoundError());
                 if (result.Entity.IsDisabled)
@@ -126,7 +126,7 @@ public class GuildService : CrudService<Guild, LisbethBotDbContext>, IGuildServi
                 break;
             case GuildConfigType.Moderation:
                 result = await base.GetSingleBySpecAsync<Guild>(
-                    new ActiveGuildByDiscordIdWithModerationSpecifications(guildId));
+                    new ActiveGuildByDiscordIdWithModerationSpec(guildId));
                 if (!result.IsDefined() || result.Entity.ModerationConfig is null)
                     return Result<Guild>.FromError(new NotFoundError());
                 if (!result.Entity.IsDisabled)

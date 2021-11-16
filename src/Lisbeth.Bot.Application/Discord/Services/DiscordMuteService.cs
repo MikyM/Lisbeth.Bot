@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Globalization;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using Hangfire;
@@ -25,8 +24,9 @@ using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Mute;
 using Lisbeth.Bot.Domain.DTOs.Request.Mute;
 using Microsoft.Extensions.Logging;
-using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Discord.Interfaces;
+using System.Globalization;
+using Lisbeth.Bot.Application.Discord.Helpers;
 
 namespace Lisbeth.Bot.Application.Discord.Services;
 
@@ -37,14 +37,18 @@ public class DiscordMuteService : IDiscordMuteService
     private readonly IGuildService _guildService;
     private readonly ILogger<DiscordMuteService> _logger;
     private readonly IMuteService _muteService;
+    private readonly IDiscordGuildLoggerService _guildLoggerService;
+    private readonly IDiscordEmbedProvider _embedProvider;
 
-    public DiscordMuteService(IDiscordService discord, IGuildService guildService, IMuteService muteService,
-        ILogger<DiscordMuteService> logger)
+    public DiscordMuteService(IDiscordService discord, IGuildService guildService, ILogger<DiscordMuteService> logger,
+        IMuteService muteService, IDiscordGuildLoggerService guildLoggerService, IDiscordEmbedProvider embedProvider)
     {
         _discord = discord;
         _guildService = guildService;
-        _muteService = muteService;
         _logger = logger;
+        _muteService = muteService;
+        _guildLoggerService = guildLoggerService;
+        _embedProvider = embedProvider;
     }
 
     public async Task<Result<DiscordEmbed>> MuteAsync(MuteReqDto req)
@@ -141,9 +145,9 @@ public class DiscordMuteService : IDiscordMuteService
             req.AppliedOn = mute.CreatedAt;
         }
 
-        if (req.TargetUserId.HasValue && req.GuildId.HasValue)
+        if (req.TargetUserId.HasValue)
         {
-            guild = await _discord.Client.GetGuildAsync(req.GuildId.Value);
+            guild = await _discord.Client.GetGuildAsync(req.GuildId);
             target = await guild.GetMemberAsync(req.TargetUserId.Value);
         }
         else
@@ -210,8 +214,6 @@ public class DiscordMuteService : IDiscordMuteService
         if (moderator is null) throw new ArgumentNullException(nameof(moderator));
         if (req is null) throw new ArgumentNullException(nameof(req));
 
-        DiscordChannel? channel;
-
         var result =
             await _guildService.GetSingleBySpecAsync(new ActiveGuildByIdSpec(guild.Id));
 
@@ -223,14 +225,7 @@ public class DiscordMuteService : IDiscordMuteService
         if (guildCfg.ModerationConfig is null)
             return Result<DiscordEmbed>.FromError(new DisabledEntityError(nameof(guildCfg.ModerationConfig)));
 
-        try
-        {
-            channel = await _discord.Client.GetChannelAsync(guildCfg.ModerationConfig.MemberEventsLogChannelId);
-        }
-        catch (Exception)
-        {
-            return Result<DiscordEmbed>.FromError(new DiscordNotFoundError(DiscordEntityType.Channel));
-        }
+        if (!guild.Roles.TryGetValue(guildCfg.ModerationConfig.MuteRoleId, out _)) return new DiscordNotFoundError("Mute role not found.");
 
         if (req.AppliedUntil < DateTime.UtcNow)
             return Result<DiscordEmbed>.FromError(new ArgumentOutOfRangeError(nameof(req.AppliedUntil)));
@@ -238,125 +233,18 @@ public class DiscordMuteService : IDiscordMuteService
         if (!moderator.IsModerator() || target.IsModerator())
             return Result<DiscordEmbed>.FromError(new DiscordNotAuthorizedError());
 
-        TimeSpan tmspDuration = req.AppliedUntil.Subtract(DateTime.UtcNow);
-
-        string lengthString = req.AppliedUntil == DateTime.MaxValue
-            ? "Permanent"
-            : $"{tmspDuration.Days} days, {tmspDuration.Hours} hrs, {tmspDuration.Minutes} mins";
-
         var partial = await _muteService.AddOrExtendAsync(req, true);
         var (id, foundEntity) = partial.Entity;
 
-        var embed = new DiscordEmbedBuilder();
-        embed.WithColor(0x18315C);
-        embed.WithAuthor($"Mute | {target.GetFullDisplayName()}", null, target.AvatarUrl);
+        var resMute = await target.MuteAsync(guildCfg.ModerationConfig.MuteRoleId);
 
-        bool isMuted = target.Roles.FirstOrDefault(r => r.Name == "Muted") is not null;
-        Result resMute = Result.FromSuccess();
+        if (!resMute.IsSuccess) return new DiscordError("Failed to mute.");
 
-        if (foundEntity is null)
-        {
-            if (!isMuted)
-                resMute = await target.MuteAsync(guildCfg.ModerationConfig.MuteRoleId);
+        await _guildLoggerService.LogToDiscordAsync(guild, req, moderator, guildCfg.EmbedHexColor, id);
 
-            switch (resMute)
-            {
-                case { IsSuccess: false }:
-                {
-                    var noEntryEmoji = DiscordEmoji.FromName(_discord.Client, ":no_entry:");
-                    embed.WithColor(0x18315C);
-                    embed.WithAuthor($"{noEntryEmoji} Mute denied");
-                    embed.WithDescription("Can't mute other moderators.");
-                    break;
-                }
-                case { IsSuccess: true }:
-                    embed.AddField("User mention", target.Mention, true);
-                    embed.AddField("Moderator", moderator.Mention, true);
-                    embed.AddField("Length", lengthString, true);
-                    embed.AddField("Muted until", req.AppliedUntil.ToString(CultureInfo.InvariantCulture), true);
-                    embed.AddField("Reason", req.Reason);
-                    embed.WithFooter($"Case ID: {id} | Member ID: {target.Id}");
-                    break;
-            }
-        }
-        else
-        {
-            DiscordUser? previousMod;
-            try
-            {
-                previousMod = await _discord.Client.GetUserAsync(foundEntity.AppliedById);
-            }
-            catch (Exception)
-            {
-                previousMod = null;
-            }
-
-            if (foundEntity.AppliedUntil > req.AppliedUntil)
-            {
-                if (!isMuted)
-                    resMute = await target.MuteAsync(guildCfg.ModerationConfig.MuteRoleId);
-
-                switch (resMute)
-                {
-                    case { IsSuccess: false }:
-                    {
-                        var noEntryEmoji = DiscordEmoji.FromName(_discord.Client, ":no_entry:");
-                        embed.WithColor(0x18315C);
-                        embed.WithAuthor($"{noEntryEmoji} MuteAsync denied");
-                        embed.WithDescription("Can't mute other moderators.");
-                        break;
-                    }
-                    case { IsSuccess: true }:
-                        embed.WithDescription(
-                            $"This user has already been muted until {foundEntity.AppliedUntil} by {(previousMod is not null ? previousMod.Mention : "a deleted user")}");
-                        embed.WithFooter($"Case ID: {id} | Member ID: {foundEntity.UserId}");
-                        break;
-                }
-            }
-            else
-            {
-                if (!isMuted)
-                    resMute = await target.MuteAsync(guildCfg.ModerationConfig.MuteRoleId);
-
-                switch (resMute)
-                {
-                    case { IsSuccess: false }:
-                    {
-                        var noEntryEmoji = DiscordEmoji.FromName(_discord.Client, ":no_entry:");
-                        embed.WithColor(0x18315C);
-                        embed.WithAuthor($"{noEntryEmoji} MuteAsync denied");
-                        embed.WithDescription("Can't mute other moderators.");
-                        break;
-                    }
-                    case { IsSuccess: true }:
-                        embed.WithAuthor($"Extend Mute | {target.GetFullUsername()}", null, target.AvatarUrl);
-                        embed.AddField("Previous mute until", foundEntity.AppliedUntil.ToString(), true);
-                        embed.AddField("Previous moderator",
-                            $"{(previousMod is not null ? previousMod.Mention : "Deleted user")}", true);
-                        embed.AddField("Previous reason", foundEntity.Reason, true);
-                        embed.AddField("User mention", target.Mention, true);
-                        embed.AddField("Moderator", moderator.Mention, true);
-                        embed.AddField("Length", lengthString, true);
-                        embed.AddField("Muted until", req.AppliedUntil.ToString(CultureInfo.InvariantCulture), true);
-                        embed.AddField("Reason", req.Reason);
-                        embed.WithFooter($"Case ID: {id} | Member ID: {target.Id}");
-                        break;
-                }
-            }
-        }
-
-        // means we're logging to log channel and returning an embed for interaction or other purposes
-
-        try
-        {
-            if (channel is not null) await channel.SendMessageAsync(embed.Build());
-        }
-        catch (Exception)
-        {
-            return Result<DiscordEmbed>.FromError(new DiscordInvalidOperationError());
-        }
-
-        return Result<DiscordEmbed>.FromSuccess(embed.Build());
+        return Result<DiscordEmbed>.FromSuccess(_embedProvider
+            .GetEmbedResponseFrom(req, target, id, guildCfg.EmbedHexColor, foundEntity)
+            .Build());
     }
 
     private async Task<Result<DiscordEmbed>> UnmuteAsync(DiscordGuild guild, DiscordMember target,
@@ -377,7 +265,7 @@ public class DiscordMuteService : IDiscordMuteService
         DiscordChannel? channel;
 
         var result =
-            await _guildService.GetSingleBySpecAsync<Guild>(new ActiveGuildByDiscordIdWithModerationSpecifications(guild.Id));
+            await _guildService.GetSingleBySpecAsync<Guild>(new ActiveGuildByDiscordIdWithModerationSpec(guild.Id));
 
         if (!result.IsDefined())
             return Result<DiscordEmbed>.FromError(new DiscordNotFoundError(DiscordEntityType.Guild));

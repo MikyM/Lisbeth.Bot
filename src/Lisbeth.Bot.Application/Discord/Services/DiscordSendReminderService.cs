@@ -95,7 +95,7 @@ public class DiscordSendReminderService : IDiscordSendReminderService
 
         if (embedConfig is not null)
             await channel.SendMessageAsync(string.Join(' ', mentions ?? throw new InvalidOperationException()),
-                _embedProvider.ConfigureEmbed(embedConfig).Build());
+                _embedProvider.GetEmbedFromConfig(embedConfig).Build());
         else
             await channel.SendMessageAsync(string.Join(' ', mentions ?? throw new InvalidOperationException()) + "\n\n" + text);
 

@@ -15,18 +15,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+namespace Lisbeth.Bot.Domain.DTOs.Request.Base;
 
-using MikyM.Common.DataAccessLayer.Specifications;
-using MikyM.Common.DataAccessLayer.Specifications.Builders;
-
-namespace Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
-
-public class ActiveGuildByDiscordIdWithModerationSpecifications : Specification<Domain.Entities.Guild>
+public interface IBaseModAuthReq
 {
-    public ActiveGuildByDiscordIdWithModerationSpecifications(ulong discordGuildId)
-    {
-        Where(x => !x.IsDisabled);
-        Where(x => x.GuildId == discordGuildId);
-        Include(x => x.ModerationConfig).ThenInclude(x => x.MemberWelcomeEmbedConfig);
-    }
+    ulong RequestedOnBehalfOfId { get; set; }
+    ulong GuildId { get; set; }
 }

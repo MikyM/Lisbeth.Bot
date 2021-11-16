@@ -240,7 +240,7 @@ public class DiscordMessageService : IDiscordMessageService
             args.MessageBefore.Attachments.Count == args.Message.Attachments.Count) return;
 
         var res = await _guildService.GetSingleBySpecAsync<Guild>(
-            new ActiveGuildByDiscordIdWithModerationSpecifications(args.Guild.Id));
+            new ActiveGuildByDiscordIdWithModerationSpec(args.Guild.Id));
 
         if (!res.IsDefined()) throw new ArgumentException();
 
@@ -304,7 +304,7 @@ public class DiscordMessageService : IDiscordMessageService
         if (args.Message.Author.IsBot) return;
 
         var res = await _guildService.GetSingleBySpecAsync<Guild>(
-            new ActiveGuildByDiscordIdWithModerationSpecifications(args.Guild.Id));
+            new ActiveGuildByDiscordIdWithModerationSpec(args.Guild.Id));
 
         if (!res.IsDefined()) throw new ArgumentException();
 
@@ -382,7 +382,7 @@ public class DiscordMessageService : IDiscordMessageService
         if (args is null) throw new ArgumentNullException(nameof(args));
 
         var res = await _guildService.GetSingleBySpecAsync<Guild>(
-            new ActiveGuildByDiscordIdWithModerationSpecifications(args.Guild.Id));
+            new ActiveGuildByDiscordIdWithModerationSpec(args.Guild.Id));
 
         if (!res.IsDefined()) throw new ArgumentException();
 

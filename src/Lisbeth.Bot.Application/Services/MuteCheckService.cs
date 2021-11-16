@@ -41,7 +41,7 @@ public class MuteCheckService : IMuteCheckService
         await Task.Delay(1000);
 
         var result = await _guildService.GetSingleBySpecAsync<Guild>(
-            new ActiveGuildByDiscordIdWithModerationSpecifications(guildId));
+            new ActiveGuildByDiscordIdWithModerationSpec(guildId));
 
         if (!result.IsDefined() || result.Entity.ModerationConfig is null)
             return Result.FromError(new NotFoundError());

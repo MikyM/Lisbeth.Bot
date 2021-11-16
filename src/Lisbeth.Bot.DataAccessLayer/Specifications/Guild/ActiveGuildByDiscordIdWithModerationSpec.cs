@@ -15,18 +15,18 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 
-namespace MikyM.Common.DataAccessLayer;
+using MikyM.Common.DataAccessLayer.Specifications;
+using MikyM.Common.DataAccessLayer.Specifications.Builders;
 
-// ReSharper disable once InconsistentNaming
-public static class IEnumerableExtensions
+namespace Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
+
+public class ActiveGuildByDiscordIdWithModerationSpec : Specification<Domain.Entities.Guild>
 {
-    public static bool AnyNullable<T>([NotNullWhen(true)] this IEnumerable<T>? source, Func<T, bool> predicate)
-        => source is not null && source.Any(predicate);
-
-
-    public static bool AnyNullable<T>([NotNullWhen(true)] this IEnumerable<T>? source)
-        => source is not null && source.Any();
+    public ActiveGuildByDiscordIdWithModerationSpec(ulong discordGuildId)
+    {
+        Where(x => !x.IsDisabled);
+        Where(x => x.GuildId == discordGuildId);
+        Include(x => x.ModerationConfig).ThenInclude(x => x.MemberWelcomeEmbedConfig);
+    }
 }

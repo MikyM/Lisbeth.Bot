@@ -34,10 +34,10 @@ public static class DiscordMemberExtensions
 
     public static async Task<Result> MuteAsync(this DiscordMember member, ulong roleId)
     {
-        if (member.Permissions.HasPermission(Permissions.BanMembers))
+        if (member.IsModerator())
             return new DiscordNotAuthorizedError();
 
-        if (!member.Guild.Roles.TryGetValue(roleId, out var mutedRole)) return new DiscordNotFoundError();
+        if (!member.Guild.Roles.TryGetValue(roleId, out var mutedRole)) return new DiscordNotFoundError(nameof(roleId));
         await member.GrantRoleAsync(mutedRole);
 
         return Result.FromSuccess();
@@ -45,10 +45,10 @@ public static class DiscordMemberExtensions
 
     public static async Task<Result> UnmuteAsync(this DiscordMember member, ulong roleId)
     {
-        if (member.Permissions.HasPermission(Permissions.BanMembers))
+        if (member.IsModerator())
             return new DiscordNotAuthorizedError();
 
-        if (!member.Guild.Roles.TryGetValue(roleId, out var mutedRole)) return new DiscordNotFoundError();
+        if (!member.Guild.Roles.TryGetValue(roleId, out var mutedRole)) return new DiscordNotFoundError(nameof(roleId));
         await member.RevokeRoleAsync(mutedRole);
 
         return Result.FromSuccess();

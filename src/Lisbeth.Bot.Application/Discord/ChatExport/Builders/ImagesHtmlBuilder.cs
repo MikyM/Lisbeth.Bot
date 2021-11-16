@@ -23,6 +23,10 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders;
 
 public class ImagesHtmlBuilder : IAsyncHtmlBuilder
 {
+    public ImagesHtmlBuilder() : this(new List<DiscordAttachment>())
+    {
+    }
+
     public ImagesHtmlBuilder(IReadOnlyList<DiscordAttachment> images)
     {
         Images ??= images ?? throw new ArgumentNullException(nameof(images));
@@ -32,11 +36,11 @@ public class ImagesHtmlBuilder : IAsyncHtmlBuilder
 
     public async Task<string> BuildAsync()
     {
-        if (Images.Count == 0 || Images is null) return "";
+        if (Images.Count == 0) return "";
         string imagesHtml = "";
         foreach (var attachment in Images)
         {
-            HtmlImage image = new HtmlImage(attachment.Url);
+            HtmlImage image = new (attachment.Url);
             imagesHtml += await image.BuildAsync();
         }
 
@@ -45,7 +49,7 @@ public class ImagesHtmlBuilder : IAsyncHtmlBuilder
 
     public ImagesHtmlBuilder WithImages(IReadOnlyList<DiscordAttachment> images)
     {
-        Images ??= images ?? throw new ArgumentNullException(nameof(images));
+        Images = images ?? throw new ArgumentNullException();
 
         return this;
     }

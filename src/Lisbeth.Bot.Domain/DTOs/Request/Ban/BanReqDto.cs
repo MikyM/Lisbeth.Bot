@@ -16,10 +16,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using Lisbeth.Bot.Domain.DTOs.Request.Base;
 
 namespace Lisbeth.Bot.Domain.DTOs.Request.Ban;
 
-public class BanReqDto
+public class BanReqDto : BaseAuthWithGuildReqDto, IAddModReq
 {
     public BanReqDto()
     {
@@ -45,9 +46,6 @@ public class BanReqDto
     }
 
     public ulong TargetUserId { get; set; }
-    public ulong GuildId { get; set; }
-
     public DateTime AppliedUntil { get; set; }
-    public ulong RequestedOnBehalfOfId { get; set; }
     public string? Reason { get; set; }
 }

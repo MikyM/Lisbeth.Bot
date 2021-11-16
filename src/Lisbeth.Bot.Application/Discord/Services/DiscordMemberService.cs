@@ -21,7 +21,6 @@ using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Mute;
-using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.Services;
@@ -106,7 +105,7 @@ public class DiscordMemberService : IDiscordMemberService
         if (args is null) throw new ArgumentNullException(nameof(args));
 
         var result = await _guildService.GetSingleBySpecAsync<Guild>(
-            new ActiveGuildByDiscordIdWithModerationSpecifications(args.Guild.Id));
+            new ActiveGuildByDiscordIdWithModerationSpec(args.Guild.Id));
 
 
         if (!result.IsDefined() || result.Entity.ModerationConfig?.BaseMemberWelcomeMessage is null)
@@ -115,7 +114,7 @@ public class DiscordMemberService : IDiscordMemberService
         var embed = new DiscordEmbedBuilder();
         if (result.Entity.ModerationConfig.MemberWelcomeEmbedConfig is not null)
         {
-            embed = _embedProvider.ConfigureEmbed(result.Entity.ModerationConfig.MemberWelcomeEmbedConfig);
+            embed = _embedProvider.GetEmbedFromConfig(result.Entity.ModerationConfig.MemberWelcomeEmbedConfig);
         }
         else
         {

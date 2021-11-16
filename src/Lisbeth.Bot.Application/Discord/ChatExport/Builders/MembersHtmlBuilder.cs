@@ -23,6 +23,10 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders;
 
 public class MembersHtmlBuilder : IAsyncHtmlBuilder
 {
+    public MembersHtmlBuilder() : this(new List<DiscordUser>())
+    {
+    }
+
     public MembersHtmlBuilder(List<DiscordUser> users)
     {
         Users ??= users ?? throw new ArgumentNullException(nameof(users));
@@ -32,13 +36,13 @@ public class MembersHtmlBuilder : IAsyncHtmlBuilder
 
     public async Task<string> BuildAsync()
     {
-        if (Users is null || Users.Count == 0) return "";
+        if (Users.Count == 0) return "";
 
         string usersHtml = "";
         foreach (var user in Users)
         {
-            HtmlUser userModel = new HtmlUser(user);
-            usersHtml += $"<div class=\"user\">{await userModel.BuildAvatar()} {userModel.Build()}</div>";
+            HtmlUser userModel = new (user);
+            usersHtml += $"<div class=\"user\">{await userModel.BuildAvatar()} {userModel.BuildAsync()}</div>";
         }
 
         return $"<div id=\"users-wrapper\">{usersHtml}</div>";
@@ -46,7 +50,7 @@ public class MembersHtmlBuilder : IAsyncHtmlBuilder
 
     public MembersHtmlBuilder WithUsers(List<DiscordUser> users)
     {
-        Users ??= users ?? throw new ArgumentNullException(nameof(users));
+        Users = users ?? throw new ArgumentNullException(); ;
         return this;
     }
 }

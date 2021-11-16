@@ -34,7 +34,7 @@ public class BanCheckService : IBanCheckService
     {
         await Task.Delay(1000);
 
-        var ban = await _banService.GetSingleBySpecAsync<Ban>(
+        var ban = await _banService.GetSingleBySpecAsync(
             new BanBaseGetSpecifications(null, targetId, guildId));
 
         if (!ban.IsDefined()) return;
@@ -47,7 +47,7 @@ public class BanCheckService : IBanCheckService
     {
         await Task.Delay(1000);
 
-        var ban = await _banService.GetSingleBySpecAsync<Ban>(
+        var ban = await _banService.GetSingleBySpecAsync(
             new BanBaseGetSpecifications(null, targetId, guildId));
 
         if (!ban.IsDefined()) return;

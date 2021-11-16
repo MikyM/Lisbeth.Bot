@@ -23,6 +23,11 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders;
 
 public class VideosHtmlBuilder : IAsyncHtmlBuilder
 {
+    public VideosHtmlBuilder() : this(new List<DiscordAttachment>())
+    {
+        
+    }
+
     public VideosHtmlBuilder(IReadOnlyList<DiscordAttachment> videos)
     {
         Videos ??= videos ?? throw new ArgumentNullException(nameof(videos));
@@ -36,7 +41,7 @@ public class VideosHtmlBuilder : IAsyncHtmlBuilder
         string videosHtml = "";
         foreach (var attachment in Videos)
         {
-            HtmlVideo video = new HtmlVideo(attachment.Url);
+            HtmlVideo video = new(attachment.Url);
             videosHtml += await video.BuildAsync();
         }
 
@@ -45,7 +50,7 @@ public class VideosHtmlBuilder : IAsyncHtmlBuilder
 
     public VideosHtmlBuilder WithVideos(IReadOnlyList<DiscordAttachment> videos)
     {
-        Videos ??= videos ?? throw new ArgumentNullException(nameof(videos));
+        Videos = videos ?? throw new ArgumentNullException(nameof(videos));
 
         return this;
     }

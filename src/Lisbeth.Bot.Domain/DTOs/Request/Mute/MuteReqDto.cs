@@ -16,10 +16,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using Lisbeth.Bot.Domain.DTOs.Request.Base;
 
 namespace Lisbeth.Bot.Domain.DTOs.Request.Mute;
 
-public class MuteReqDto
+public class MuteReqDto : IAddModReq
 {
     public MuteReqDto()
     {

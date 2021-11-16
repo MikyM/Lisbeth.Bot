@@ -233,7 +233,7 @@ public class DiscordTagService : IDiscordTagService
             return (null, tag.Text ?? throw new ArgumentNullException());
         }
 
-        var embed = _embedProvider.ConfigureEmbed(tag.EmbedConfig).Build();
+        var embed = _embedProvider.GetEmbedFromConfig(tag.EmbedConfig).Build();
         await target.SendMessageAsync(embed);
         return (embed, tag.Text ?? throw new ArgumentNullException());
     }
@@ -330,7 +330,7 @@ public class DiscordTagService : IDiscordTagService
 
         return tag.EmbedConfig is null
             ? (null, tag.Text ?? throw new ArgumentNullException())
-            : (_embedProvider.ConfigureEmbed(tag.EmbedConfig).Build(),
+            : (_embedProvider.GetEmbedFromConfig(tag.EmbedConfig).Build(),
                 tag.Text ?? throw new ArgumentNullException());
     }
 

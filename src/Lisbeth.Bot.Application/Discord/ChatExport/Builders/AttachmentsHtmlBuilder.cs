@@ -23,7 +23,7 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders;
 
 public class AttachmentsHtmlBuilder : IAsyncHtmlBuilder
 {
-    public AttachmentsHtmlBuilder()
+    public AttachmentsHtmlBuilder() : this(new List<DiscordAttachment>())
     {
     }
 
@@ -32,11 +32,11 @@ public class AttachmentsHtmlBuilder : IAsyncHtmlBuilder
         Attachments ??= attachments ?? throw new ArgumentNullException(nameof(attachments));
     }
 
-    public IReadOnlyList<DiscordAttachment>? Attachments { get; private set; }
+    public IReadOnlyList<DiscordAttachment> Attachments { get; private set; }
 
     public async Task<string> BuildAsync()
     {
-        if (Attachments is null || Attachments.Count == 0) return "";
+        if (Attachments.Count == 0) return "";
         List<DiscordAttachment> imageAttachments = Attachments
             .Where(a => HtmlImage.SupportedTypes.Any(x => x == a.Url.Split('.').Last())).ToList();
         List<DiscordAttachment> videoAttachments = Attachments
@@ -46,13 +46,13 @@ public class AttachmentsHtmlBuilder : IAsyncHtmlBuilder
 
         if (imageAttachments.Count != 0)
         {
-            ImagesHtmlBuilder imagesBuilder = new ImagesHtmlBuilder(imageAttachments);
+            ImagesHtmlBuilder imagesBuilder = new(imageAttachments);
             imagesHtml = await imagesBuilder.BuildAsync();
         }
 
         if (videoAttachments.Count != 0)
         {
-            VideosHtmlBuilder videosBuilder = new VideosHtmlBuilder(videoAttachments);
+            VideosHtmlBuilder videosBuilder = new(videoAttachments);
             videosHtml = await videosBuilder.BuildAsync();
         }
 
@@ -61,7 +61,7 @@ public class AttachmentsHtmlBuilder : IAsyncHtmlBuilder
 
     public AttachmentsHtmlBuilder WithAttachments(IReadOnlyList<DiscordAttachment> attachments)
     {
-        Attachments ??= attachments ?? throw new ArgumentNullException(nameof(attachments));
+        Attachments = attachments ?? throw new ArgumentNullException(nameof(attachments));
 
         return this;
     }

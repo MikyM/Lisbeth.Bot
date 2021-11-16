@@ -401,7 +401,7 @@ public class DiscordRoleMenuService : IDiscordRoleMenuService
             return (builder.WithContent(partial.Entity.Text ?? throw new ArgumentNullException()),
                 partial.Entity.Text ?? throw new ArgumentNullException());
 
-        var embed = _embedProvider.ConfigureEmbed(partial.Entity.EmbedConfig).Build();
+        var embed = _embedProvider.GetEmbedFromConfig(partial.Entity.EmbedConfig).Build();
         return (builder.AddEmbed(embed), partial.Entity.Text ?? throw new ArgumentNullException());
     }
 
@@ -468,7 +468,7 @@ public class DiscordRoleMenuService : IDiscordRoleMenuService
             return (null, partial.Entity.Text ?? throw new ArgumentNullException());
         }
 
-        var embed = _embedProvider.ConfigureEmbed(partial.Entity.EmbedConfig).Build();
+        var embed = _embedProvider.GetEmbedFromConfig(partial.Entity.EmbedConfig).Build();
         await target.SendMessageAsync(new DiscordMessageBuilder().AddEmbed(embed).AddComponents(select));
         return (builder.AddEmbed(embed), partial.Entity.Text ?? throw new ArgumentNullException());
     }

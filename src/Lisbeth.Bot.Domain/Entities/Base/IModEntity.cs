@@ -15,18 +15,20 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
+using System;
 
-namespace MikyM.Common.DataAccessLayer;
-
-// ReSharper disable once InconsistentNaming
-public static class IEnumerableExtensions
+namespace Lisbeth.Bot.Domain.Entities.Base
 {
-    public static bool AnyNullable<T>([NotNullWhen(true)] this IEnumerable<T>? source, Func<T, bool> predicate)
-        => source is not null && source.Any(predicate);
-
-
-    public static bool AnyNullable<T>([NotNullWhen(true)] this IEnumerable<T>? source)
-        => source is not null && source.Any();
+    public interface IModEntity
+    {
+        long Id { get;}
+        ulong GuildId { get; set; }
+        ulong UserId { get; set; }
+        DateTime? LiftedOn { get; set; }
+        DateTime? AppliedUntil { get; set; }
+        ulong AppliedById { get; set; }
+        ulong LiftedById { get; set; }
+        string? Reason { get; set; }
+        bool IsDisabled { get; set; }
+    }
 }

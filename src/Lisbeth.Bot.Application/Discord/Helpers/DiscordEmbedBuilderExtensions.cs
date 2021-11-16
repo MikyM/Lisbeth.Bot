@@ -15,18 +15,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
+using DSharpPlus.Entities;
 
-namespace MikyM.Common.DataAccessLayer;
+namespace Lisbeth.Bot.Application.Discord.Helpers;
 
-// ReSharper disable once InconsistentNaming
-public static class IEnumerableExtensions
+public static class DiscordEmbedBuilderExtensions
 {
-    public static bool AnyNullable<T>([NotNullWhen(true)] this IEnumerable<T>? source, Func<T, bool> predicate)
-        => source is not null && source.Any(predicate);
-
-
-    public static bool AnyNullable<T>([NotNullWhen(true)] this IEnumerable<T>? source)
-        => source is not null && source.Any();
+    public static bool IsValid(this DiscordEmbedBuilder builder)
+    {
+        return !(builder.Author?.Name.Length + builder.Footer?.Text.Length + builder.Description?.Length +
+            builder.Title?.Length +
+            builder.Fields?.Sum(x => x.Value.Length + x.Name.Length) > 6000);
+    }
 }

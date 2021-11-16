@@ -1,8 +1,9 @@
 using DSharpPlus.Entities;
+using Lisbeth.Bot.Application.Discord.ChatExport.Builders;
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport.Models;
 
-public class HtmlUser
+public class HtmlUser : IAsyncHtmlBuilder
 {
     public HtmlUser(DiscordUser user)
     {
@@ -11,21 +12,15 @@ public class HtmlUser
 
     public DiscordUser User { get; }
 
-    public string Build()
+    public Task<string> BuildAsync()
     {
-        if (User is null) return "";
-
-        return $"<div class=\"user-info\">{User.Username}#{User.Discriminator} ID: {User.Id}</div>";
+        return Task.FromResult($"<div class=\"user-info\">{User.Username}#{User.Discriminator} ID: {User.Id}</div>");
     }
 
     public async Task<string> BuildAvatar()
     {
-        if (User is null) return "";
-
-        HtmlImage avatar;
-        string url;
-        avatar = new HtmlImage(User.AvatarUrl);
-        url = await avatar.GetImgurLink();
+        var avatar = new HtmlImage(User.AvatarUrl);
+        var url = await avatar.GetImgurLinkAsync();
 
         return $"<img class=\"avatar\" src={url}/>";
     }

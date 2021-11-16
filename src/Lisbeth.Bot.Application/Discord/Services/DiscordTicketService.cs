@@ -347,7 +347,7 @@ public class DiscordTicketService : IDiscordTicketService
 
         if (res.Entity.TicketingConfig.CenterEmbedConfig is not null)
         {
-            embed = _embedProvider.ConfigureEmbed(res.Entity.TicketingConfig.CenterEmbedConfig);
+            embed = _embedProvider.GetEmbedFromConfig(res.Entity.TicketingConfig.CenterEmbedConfig);
         }
         else
         {
@@ -412,7 +412,7 @@ public class DiscordTicketService : IDiscordTicketService
 
         if (guildCfg.TicketingConfig.WelcomeEmbedConfig is not null)
         {
-            embed = _embedProvider.ConfigureEmbed(guildCfg.TicketingConfig.WelcomeEmbedConfig);
+            embed = _embedProvider.GetEmbedFromConfig(guildCfg.TicketingConfig.WelcomeEmbedConfig);
             embed.WithDescription(embed.Description.Replace("@ownerMention@", owner.Mention));
         }
         else

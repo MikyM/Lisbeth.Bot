@@ -15,9 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
-using System.Globalization;
-using System.Text.RegularExpressions;
 using AutoMapper;
 using DSharpPlus;
 using DSharpPlus.Entities;
@@ -33,6 +30,9 @@ using Lisbeth.Bot.Application.Enums;
 using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.DataAccessLayer.Specifications.EmbedConfig;
 using Lisbeth.Bot.Domain.Entities.Base;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace Lisbeth.Bot.Application.Discord.Services;
 
@@ -86,7 +86,7 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
 
         if (entity.EmbedConfig is not null)
         {
-            resultEmbed = _embedProvider.ConfigureEmbed(entity.EmbedConfig);
+            resultEmbed = _embedProvider.GetEmbedFromConfig(entity.EmbedConfig);
             webhook.AddEmbed(resultEmbed.Build()).WithContent("Current embed:");
         }
 
@@ -171,7 +171,7 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
             else
             {
                 var errorMsg = await ctx.EditResponseAsync(new DiscordWebhookBuilder()
-                    .AddEmbed(_embedProvider.GetUnsuccessfulResultEmbed(result))
+                    .AddEmbed(_embedProvider.GetUnsuccessfulActionEmbed(result))
                     .AddComponents(GetContinueButton(ctx.Client)));
                 await intr.WaitForButtonAsync(errorMsg, ctx.User, TimeSpan.FromMinutes(1));
             }

@@ -1,8 +1,9 @@
 using DSharpPlus.Entities;
+using Lisbeth.Bot.Application.Discord.ChatExport.Builders;
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport.Models;
 
-public class HtmlReaction
+public class HtmlReaction : IAsyncHtmlBuilder
 {
     public HtmlReaction(DiscordEmoji emoji, int count)
     {
@@ -13,10 +14,10 @@ public class HtmlReaction
     public DiscordEmoji Emoji { get; }
     public int Count { get; }
 
-    public string Build()
+    public Task<string> BuildAsync()
     {
-        return Emoji.Name.Length is 2 or 1
+        return Task.FromResult(Emoji.Name.Length is 2 or 1
             ? $"<div class=\"reaction-wrapper\">{Emoji.Name} {Count}</div>"
-            : $"<div class=\"reaction-wrapper\"><img class=\"reaction\" src=\"{Emoji.Url}\">{Count}</div>";
+            : $"<div class=\"reaction-wrapper\"><img class=\"reaction\" src=\"{Emoji.Url}\">{Count}</div>");
     }
 }

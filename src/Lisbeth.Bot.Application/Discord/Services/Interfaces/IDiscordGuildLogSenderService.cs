@@ -15,18 +15,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 
-namespace MikyM.Common.DataAccessLayer;
+using DSharpPlus.Entities;
+using Lisbeth.Bot.Application.Enums;
 
-// ReSharper disable once InconsistentNaming
-public static class IEnumerableExtensions
+namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
 {
-    public static bool AnyNullable<T>([NotNullWhen(true)] this IEnumerable<T>? source, Func<T, bool> predicate)
-        => source is not null && source.Any(predicate);
-
-
-    public static bool AnyNullable<T>([NotNullWhen(true)] this IEnumerable<T>? source)
-        => source is not null && source.Any();
+    public interface IDiscordGuildLogSenderService
+    {
+        Task<Result> SendAsync(DiscordGuild discordGuild, DiscordLog type, DiscordEmbed embed);
+        Task<Result> SendAsync(ulong discordGuildId, DiscordLog type, DiscordEmbed embed);
+        Task<Result> SendAsync(Guild guild, DiscordLog type, DiscordEmbed embed);
+        Task<Result> SendAsync(long guildId, DiscordLog type, DiscordEmbed embed);
+    }
 }

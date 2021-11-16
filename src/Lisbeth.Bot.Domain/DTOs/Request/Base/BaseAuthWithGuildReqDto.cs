@@ -17,7 +17,7 @@
 
 namespace Lisbeth.Bot.Domain.DTOs.Request.Base;
 
-public class BaseAuthWithGuildReqDto : BaseAuthReqDto
+public class BaseAuthWithGuildReqDto : BaseAuthReqDto, IBaseModAuthReq
 {
     public BaseAuthWithGuildReqDto()
     {

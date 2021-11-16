@@ -29,7 +29,7 @@ public static class StringExtensions
     {
         if (input is null) throw new ArgumentNullException(nameof(input));
 
-        TimeSpan tmsp = new TimeSpan();
+        TimeSpan tmsp = new ();
         DateTime result;
 
         if (int.TryParse(input, out int inputInMinutes))

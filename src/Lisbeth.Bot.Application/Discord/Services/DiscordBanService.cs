@@ -120,10 +120,9 @@ public class DiscordBanService : IDiscordBanService
             req.GuildId = res.Entity.GuildId;
             req.TargetUserId = res.Entity.UserId;
         }
-
-        if (req.TargetUserId.HasValue && req.GuildId.HasValue)
+        if (req.TargetUserId.HasValue)
         {
-            guild = await _discord.Client.GetGuildAsync(req.GuildId.Value);
+            guild = await _discord.Client.GetGuildAsync(req.GuildId);
             target = await guild.GetMemberAsync(req.TargetUserId.Value);
         }
         else
@@ -189,9 +188,9 @@ public class DiscordBanService : IDiscordBanService
             req.AppliedOn = ban.Entity.CreatedAt;
         }
 
-        if (req.TargetUserId.HasValue && req.GuildId.HasValue)
+        if (req.TargetUserId.HasValue)
         {
-            guild = await _discord.Client.GetGuildAsync(req.GuildId.Value);
+            guild = await _discord.Client.GetGuildAsync(req.GuildId);
             target = await guild.GetMemberAsync(req.TargetUserId.Value);
         }
         else
@@ -269,7 +268,7 @@ public class DiscordBanService : IDiscordBanService
 
         var guildCfg =
             await _guildService.GetSingleBySpecAsync<Guild>(
-                new ActiveGuildByDiscordIdWithModerationSpecifications(guild.Id));
+                new ActiveGuildByDiscordIdWithModerationSpec(guild.Id));
 
         if (!guildCfg.IsDefined())
             return Result<DiscordEmbed>.FromError(guildCfg);
@@ -386,7 +385,7 @@ public class DiscordBanService : IDiscordBanService
 
         var result =
             await _guildService.GetSingleBySpecAsync<Guild>(
-                new ActiveGuildByDiscordIdWithModerationSpecifications(guild.Id));
+                new ActiveGuildByDiscordIdWithModerationSpec(guild.Id));
 
         if (!result.IsDefined())
             return Result<DiscordEmbed>.FromError(result);
@@ -482,7 +481,7 @@ public class DiscordBanService : IDiscordBanService
 
         var result =
             await _guildService.GetSingleBySpecAsync<Guild>(
-                new ActiveGuildByDiscordIdWithModerationSpecifications(guild.Id));
+                new ActiveGuildByDiscordIdWithModerationSpec(guild.Id));
 
         if (!result.IsDefined())
             return Result<DiscordEmbed>.FromError(result);

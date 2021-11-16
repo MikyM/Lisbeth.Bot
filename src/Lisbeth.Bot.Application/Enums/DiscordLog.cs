@@ -15,16 +15,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus.Entities;
+namespace Lisbeth.Bot.Application.Enums;
 
-namespace Lisbeth.Bot.Application.Discord.Helpers;
-
-public static class DiscordEmbedExtensions
+public enum DiscordLog
 {
-    public static bool IsValid(this DiscordEmbedBuilder value)
-    {
-        return !(value.Author?.Name.Length + value.Footer?.Text.Length + value.Description?.Length +
-            value.Title?.Length +
-            value.Fields?.Sum(x => x.Value.Length + x.Name.Length) > 6000);
-    }
+    Member,
+    MessageDeleted,
+    MessageUpdated,
+    Moderation
 }

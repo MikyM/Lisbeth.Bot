@@ -15,18 +15,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
+using System;
 
-namespace MikyM.Common.DataAccessLayer;
+namespace Lisbeth.Bot.Domain.DTOs.Request.Base;
 
-// ReSharper disable once InconsistentNaming
-public static class IEnumerableExtensions
+public interface IDisableModReq : IBaseModAuthReq
 {
-    public static bool AnyNullable<T>([NotNullWhen(true)] this IEnumerable<T>? source, Func<T, bool> predicate)
-        => source is not null && source.Any(predicate);
-
-
-    public static bool AnyNullable<T>([NotNullWhen(true)] this IEnumerable<T>? source)
-        => source is not null && source.Any();
+    public long? Id { get; set; }
+    public ulong? TargetUserId { get; set; }
+    public DateTime LiftedOn { get; set; }
 }

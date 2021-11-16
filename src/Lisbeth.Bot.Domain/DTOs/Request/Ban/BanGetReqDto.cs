@@ -16,13 +16,16 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using Lisbeth.Bot.Domain.DTOs.Request.Base;
 
 namespace Lisbeth.Bot.Domain.DTOs.Request.Ban;
 
-public class BanGetReqDto
+public class BanGetReqDto : BaseAuthWithGuildReqDto, IGetModReq
 {
     public BanGetReqDto(ulong requestedOnBehalfOfId, long? id = null, ulong? targetUserId = null,
-        ulong? guildId = null, ulong? appliedById = null, DateTime? liftedOn = null, DateTime? appliedOn = null,
+        ulong guildId = 0, ulong? appliedById = null, DateTime? liftedOn = null, DateTime? appliedOn = null,
         ulong? liftedById = null)
     {
         Id = id;
@@ -37,10 +40,13 @@ public class BanGetReqDto
 
     public long? Id { get; set; }
     public ulong? TargetUserId { get; set; }
-    public ulong? GuildId { get; set; }
     public ulong? AppliedById { get; set; }
     public DateTime? LiftedOn { get; set; }
     public DateTime? AppliedOn { get; set; }
     public ulong? LiftedById { get; set; }
-    public ulong RequestedOnBehalfOfId { get; set; }
+    
+    public override string ToString()
+    {
+        return JsonSerializer.Serialize(this, new JsonSerializerOptions {DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault, WriteIndented = true });
+    }
 }

@@ -20,7 +20,7 @@ using Lisbeth.Bot.Domain.Entities.Base;
 
 namespace Lisbeth.Bot.Domain.Entities;
 
-public sealed class Mute : SnowflakeEntity
+public sealed class Mute : SnowflakeEntity, IModEntity
 {
     public ulong GuildId { get; set; }
     public ulong UserId { get; set; }

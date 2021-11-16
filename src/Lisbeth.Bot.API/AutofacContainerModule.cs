@@ -27,7 +27,6 @@ using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.DataAccessLayer.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using MikyM.Common.Application;
 using MikyM.Common.DataAccessLayer;
 using MikyM.Common.DataAccessLayer.Specifications;
@@ -48,7 +47,7 @@ public class AutofacContainerModule : Module
         // bulk register custom services - follow naming convention
         builder.RegisterAssemblyTypes(typeof(MuteService).Assembly).Where(t => t.Name.EndsWith("Service"))
             .AsImplementedInterfaces().InstancePerLifetimeScope();
-        // bulk register custom repositories - follow naming convention
+        // bulk register custom services - follow naming convention
         builder.RegisterAssemblyTypes(typeof(MuteRepository).Assembly).Where(t => t.Name.EndsWith("Repository"))
             .AsImplementedInterfaces().InstancePerLifetimeScope();
 

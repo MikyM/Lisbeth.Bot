@@ -23,6 +23,11 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders;
 
 public class MessagesHtmlBuilder : IAsyncHtmlBuilder
 {
+    public MessagesHtmlBuilder() : this(new List<DiscordMessage>())
+    {
+        
+    }
+
     public MessagesHtmlBuilder(List<DiscordMessage> messages)
     {
         Messages ??= messages ?? throw new ArgumentNullException(nameof(messages));
@@ -32,13 +37,13 @@ public class MessagesHtmlBuilder : IAsyncHtmlBuilder
 
     public async Task<string> BuildAsync()
     {
-        if (Messages is null || Messages.Count == 0) return "";
+        if (Messages.Count == 0) return "";
         string messagesHtml = "";
         foreach (var msg in Messages)
         {
             if (msg.Author.IsBot) continue;
-            HtmlMessage message = new HtmlMessage(msg);
-            messagesHtml += await message.Build();
+            HtmlMessage message = new (msg);
+            messagesHtml += await message.BuildAsync();
         }
 
         return $"<div id=\"messages-wrapper\">{messagesHtml}</div>";

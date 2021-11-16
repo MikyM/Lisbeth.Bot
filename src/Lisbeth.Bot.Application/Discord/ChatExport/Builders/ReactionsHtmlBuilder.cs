@@ -23,6 +23,10 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders;
 
 public class ReactionsHtmlBuilder : IAsyncHtmlBuilder
 {
+    public ReactionsHtmlBuilder() : this(new List<DiscordReaction>())
+    {
+    }
+
     public ReactionsHtmlBuilder(List<DiscordReaction> reactions)
     {
         Reactions ??= reactions ?? throw new ArgumentNullException(nameof(reactions));
@@ -37,8 +41,8 @@ public class ReactionsHtmlBuilder : IAsyncHtmlBuilder
 
         foreach (var item in Reactions)
         {
-            HtmlReaction reaction = new HtmlReaction(item.Emoji, item.Count);
-            html += reaction.Build();
+            HtmlReaction reaction = new (item.Emoji, item.Count);
+            html += reaction.BuildAsync();
         }
 
         return Task.FromResult($"<div class=\"message-reactions\">{html}</div>");
@@ -46,7 +50,7 @@ public class ReactionsHtmlBuilder : IAsyncHtmlBuilder
 
     public ReactionsHtmlBuilder WithReactions(List<DiscordReaction> reactions)
     {
-        Reactions ??= reactions ?? throw new ArgumentNullException(nameof(reactions));
+        Reactions = reactions ?? throw new ArgumentNullException(nameof(reactions));
 
         return this;
     }
