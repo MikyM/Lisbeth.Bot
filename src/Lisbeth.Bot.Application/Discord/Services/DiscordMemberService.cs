@@ -17,10 +17,10 @@
 
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Mute;
+using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.Services;

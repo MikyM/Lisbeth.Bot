@@ -72,7 +72,7 @@ public partial class MuteApplicationCommands : ExtendedApplicationCommandModule
                 result = await this.DiscordMuteService!.UnmuteAsync(ctx, muteDisableReq);
                 break;
             case MuteActionType.Get:
-                var muteGetReq = new MuteGetReqDto(ctx.User.Id, null, user.Id, ctx.Guild.Id);
+                var muteGetReq = new MuteGetReqDto(ctx.User.Id, ctx.Guild.Id, null, user.Id);
                 var muteGetReqValidator = new MuteGetReqValidator(ctx.Client);
                 await muteGetReqValidator.ValidateAndThrowAsync(muteGetReq);
 

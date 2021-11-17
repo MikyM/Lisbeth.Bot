@@ -22,7 +22,6 @@ using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Application.Discord.Exceptions;
-using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Buttons;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
@@ -33,6 +32,7 @@ using MikyM.Common.DataAccessLayer;
 using MikyM.Discord.Interfaces;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using MikyM.Discord.Extensions.BaseExtensions;
 
 namespace Lisbeth.Bot.Application.Discord.Services;
 

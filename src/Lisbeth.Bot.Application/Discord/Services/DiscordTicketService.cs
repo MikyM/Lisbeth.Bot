@@ -22,7 +22,6 @@ using DSharpPlus.SlashCommands;
 using FluentValidation;
 using Lisbeth.Bot.Application.Discord.ChatExport;
 using Lisbeth.Bot.Application.Discord.Exceptions;
-using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Buttons;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Selects;
@@ -35,6 +34,8 @@ using Lisbeth.Bot.DataAccessLayer.Specifications.Ticket;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket.Base;
 using Microsoft.Extensions.Logging;
+using MikyM.Discord.EmbedBuilders.Enums;
+using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.Services;

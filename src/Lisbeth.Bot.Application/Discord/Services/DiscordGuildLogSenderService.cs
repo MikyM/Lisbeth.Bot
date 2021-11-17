@@ -18,6 +18,7 @@
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Enums;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
+using MikyM.Discord.EmbedBuilders.Enums;
 using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.Services;

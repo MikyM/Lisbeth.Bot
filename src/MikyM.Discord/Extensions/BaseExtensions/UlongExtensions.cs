@@ -16,28 +16,23 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-using Autofac.Core;
+using System.Linq;
+using DSharpPlus;
 using DSharpPlus.Entities;
-using Lisbeth.Bot.Application.Discord.Helpers;
-using MikyM.Common.Domain;
 
-namespace Lisbeth.Bot.Application.Discord.Extensions;
+namespace MikyM.Discord.Extensions.BaseExtensions;
 
 public static class UlongExtensions
 {
-    public static bool IsBotsMember(this ulong guildId)
+    public static bool IsBotsMember(this ulong guildId, DiscordClient discord)
     {
-        return (ContainerProvider.Container.TryGetDiscordService(out var discord)
-            ? discord
-            : throw new DependencyResolutionException("Failed to resolve Discord Service.")).Client.Guilds.Any(x =>
+        return discord.Guilds.Any(x =>
             x.Key == guildId);
     }
 
-    public static bool TryGetGuildFromCache(this ulong guildId, out DiscordGuild? guild)
+    public static bool TryGetGuildFromCache(this ulong guildId, DiscordClient discord, out DiscordGuild? guild)
     {
-        return (ContainerProvider.Container.TryGetDiscordService(out var discord)
-            ? discord
-            : throw new DependencyResolutionException("Failed to resolve Discord Service.")).Client.Guilds.TryGetValue(
+        return discord.Guilds.TryGetValue(
             guildId, out guild);
     }
 }

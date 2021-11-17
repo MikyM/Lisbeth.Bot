@@ -17,7 +17,7 @@
 
 using System.Text.RegularExpressions;
 
-namespace Lisbeth.Bot.Application.Discord.Extensions;
+namespace MikyM.Discord.Extensions.BaseExtensions;
 
 public static class StringExtensions
 {

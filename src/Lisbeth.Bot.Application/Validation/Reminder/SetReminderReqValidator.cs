@@ -17,9 +17,9 @@
 
 using DSharpPlus;
 using FluentValidation;
-using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Validation.ReusablePropertyValidation;
 using Lisbeth.Bot.Domain.DTOs.Request.Reminder;
+using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Validation.Reminder;

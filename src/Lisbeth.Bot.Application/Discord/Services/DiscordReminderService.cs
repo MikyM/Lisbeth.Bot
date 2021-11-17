@@ -19,9 +19,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
-using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.Domain.DTOs.Request.Reminder;
+using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.Services;

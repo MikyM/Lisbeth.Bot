@@ -85,7 +85,7 @@ public partial class MuteApplicationCommands
     {
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
-        var muteGetReq = new MuteGetReqDto(ctx.User.Id, null, ctx.TargetUser.Id, ctx.Guild.Id);
+        var muteGetReq = new MuteGetReqDto(ctx.User.Id, ctx.Guild.Id, null, ctx.TargetUser.Id);
         var muteGetReqValidator = new MuteGetReqValidator(ctx.Client);
         await muteGetReqValidator.ValidateAndThrowAsync(muteGetReq);
 

@@ -15,16 +15,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
 using DSharpPlus.Entities;
-using Lisbeth.Bot.Application.Discord.Extensions;
-using Lisbeth.Bot.Application.Enums;
 using Lisbeth.Bot.Domain.DTOs.Request.Base;
 using Lisbeth.Bot.Domain.Entities.Base;
+using MikyM.Discord.EmbedBuilders.Enums;
+using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.Interfaces;
 using System.Globalization;
-using System.Reflection;
-using ModAction = Lisbeth.Bot.Application.Enums.ModAction;
 
 namespace Lisbeth.Bot.Application.Discord.Helpers;
 

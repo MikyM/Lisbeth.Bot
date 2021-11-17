@@ -34,7 +34,7 @@ public class MuteGetReqValidator : AbstractValidator<MuteGetReqDto>
     {
         CascadeMode = CascadeMode.Stop;
 
-        RuleFor(x => x.Id).NotEmpty().When(x => !x.GuildId.HasValue || !x.TargetUserId.HasValue);
+        RuleFor(x => x.Id).NotEmpty().When(x => !x.TargetUserId.HasValue);
 
         RuleFor(x => x.GuildId)
             .NotEmpty()
@@ -42,7 +42,7 @@ public class MuteGetReqValidator : AbstractValidator<MuteGetReqDto>
             .DependentRules(x => x.SetAsyncValidator(new DiscordGuildIdValidator<MuteGetReqDto>(discord)));
         RuleFor(x => x.TargetUserId)
             .NotEmpty()
-            .When(x => x.Id.HasValue && x.GuildId.HasValue)
+            .When(x => x.Id.HasValue)
             .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<MuteGetReqDto>(discord)));
 
         RuleFor(x => x.RequestedOnBehalfOfId)

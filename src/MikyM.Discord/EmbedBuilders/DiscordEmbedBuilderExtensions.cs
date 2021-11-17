@@ -15,18 +15,24 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-
+using System.Linq;
 using DSharpPlus.Entities;
-using Lisbeth.Bot.Application.Enums;
+using MikyM.Discord.EmbedBuilders.Builders;
 using MikyM.Discord.EmbedBuilders.Enums;
 
-namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
+namespace MikyM.Discord.EmbedBuilders;
+
+public static class DiscordEmbedBuilderExtensions
 {
-    public interface IDiscordGuildLogSenderService
+    public static bool IsValid(this DiscordEmbedBuilder builder)
     {
-        Task<Result> SendAsync(DiscordGuild discordGuild, DiscordLog type, DiscordEmbed embed);
-        Task<Result> SendAsync(ulong discordGuildId, DiscordLog type, DiscordEmbed embed);
-        Task<Result> SendAsync(Guild guild, DiscordLog type, DiscordEmbed embed);
-        Task<Result> SendAsync(long guildId, DiscordLog type, DiscordEmbed embed);
+        return !(builder.Author?.Name.Length + builder.Footer?.Text.Length + builder.Description?.Length +
+            builder.Title?.Length +
+            builder.Fields?.Sum(x => x.Value.Length + x.Name.Length) > 6000);
+    }
+
+    public static IEnhancedDiscordEmbedBuilder WithEnhancement(this DiscordEmbedBuilder builder, DiscordEmbedEnhancement enhancement)
+    {
+        return new EnhancedDiscordEmbedBuilder(builder, enhancement);
     }
 }

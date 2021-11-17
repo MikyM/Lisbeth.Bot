@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30717.126
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lisbeth.Bot.API", "Lisbeth.Bot.API\Lisbeth.Bot.API.csproj", "{6E6B77F3-5EAB-4F8A-ABE0-85488E92F140}"
 EndProject
@@ -27,11 +27,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MikyM.Common.Domain", "Miky
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lisbeth.Bot.Application", "Lisbeth.Bot.Application\Lisbeth.Bot.Application.csproj", "{EF163694-A6F5-42AC-A17E-0139E6C69859}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MikyM.Discord", "MikyM.Discord\MikyM.Discord.csproj", "{8841C087-7CB4-466A-B01B-20AA6F22943E}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lisbeth.Bot.DataAccessLayer", "Lisbeth.Bot.DataAccessLayer\Lisbeth.Bot.DataAccessLayer.csproj", "{A803112D-98E9-4782-94E8-898C0E555D3C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lisbeth.Bot.Domain", "Lisbeth.Bot.Domain\Lisbeth.Bot.Domain.csproj", "{A81099ED-C60C-480E-8324-9E3F4E9397E7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MikyM.Discord", "MikyM.Discord\MikyM.Discord.csproj", "{A756A5D7-3E30-43E8-8A82-EDA062B7BC75}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Discord", "Discord", "{9B4A4D14-B8E3-4F29-9AF8-66A62754C3A7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -59,10 +61,6 @@ Global
 		{EF163694-A6F5-42AC-A17E-0139E6C69859}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EF163694-A6F5-42AC-A17E-0139E6C69859}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EF163694-A6F5-42AC-A17E-0139E6C69859}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8841C087-7CB4-466A-B01B-20AA6F22943E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8841C087-7CB4-466A-B01B-20AA6F22943E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8841C087-7CB4-466A-B01B-20AA6F22943E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8841C087-7CB4-466A-B01B-20AA6F22943E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A803112D-98E9-4782-94E8-898C0E555D3C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A803112D-98E9-4782-94E8-898C0E555D3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A803112D-98E9-4782-94E8-898C0E555D3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -71,6 +69,10 @@ Global
 		{A81099ED-C60C-480E-8324-9E3F4E9397E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A81099ED-C60C-480E-8324-9E3F4E9397E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A81099ED-C60C-480E-8324-9E3F4E9397E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A756A5D7-3E30-43E8-8A82-EDA062B7BC75}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A756A5D7-3E30-43E8-8A82-EDA062B7BC75}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A756A5D7-3E30-43E8-8A82-EDA062B7BC75}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A756A5D7-3E30-43E8-8A82-EDA062B7BC75}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -83,9 +85,9 @@ Global
 		{69A3C1C8-209A-46C3-8CD7-A79696C86CAB} = {B80166FC-BBDA-4C6F-8E77-6F7B06E1A542}
 		{E1D66F33-5B56-4CBA-BBAA-C266A7A77763} = {21CD71F0-8AAB-4DE2-87F6-747D03D7C31E}
 		{EF163694-A6F5-42AC-A17E-0139E6C69859} = {74CCF4F4-2A89-4F3E-84CA-145BD23E8B94}
-		{8841C087-7CB4-466A-B01B-20AA6F22943E} = {74CCF4F4-2A89-4F3E-84CA-145BD23E8B94}
 		{A803112D-98E9-4782-94E8-898C0E555D3C} = {B80166FC-BBDA-4C6F-8E77-6F7B06E1A542}
 		{A81099ED-C60C-480E-8324-9E3F4E9397E7} = {21CD71F0-8AAB-4DE2-87F6-747D03D7C31E}
+		{A756A5D7-3E30-43E8-8A82-EDA062B7BC75} = {9B4A4D14-B8E3-4F29-9AF8-66A62754C3A7}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3C163F40-9FA0-4EFA-8813-DB6531FE8C3D}

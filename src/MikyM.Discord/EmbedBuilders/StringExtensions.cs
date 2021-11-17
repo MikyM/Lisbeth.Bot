@@ -15,13 +15,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Lisbeth.Bot.Application.Enums;
+using System.Text.RegularExpressions;
 
-public enum DiscordEntityType
+namespace MikyM.Discord.EmbedBuilders;
+
+public static class StringExtensions
 {
-    Guild,
-    Channel,
-    Member,
-    User,
-    Role
+    private static readonly Regex SplitRegex = new (@"(?<!^)(?=[A-Z])");
+
+    public static string SplitByCapitalAndConcat(this string value)
+    {
+        return string.Join(" ", SplitRegex.Split(value));
+    }
 }

@@ -22,6 +22,7 @@ using System.Text.RegularExpressions;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Enums;
+using MikyM.Discord.EmbedBuilders.Enums;
 
 namespace Lisbeth.Bot.Application.Discord.Helpers
 {

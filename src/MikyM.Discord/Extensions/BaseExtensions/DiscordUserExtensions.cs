@@ -15,12 +15,21 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Lisbeth.Bot.Application.Enums;
+using System.Linq;
+using DSharpPlus;
+using DSharpPlus.Entities;
 
-public enum DiscordLog
+namespace MikyM.Discord.Extensions.BaseExtensions;
+
+public static class DiscordUserExtensions
 {
-    Member,
-    MessageDeleted,
-    MessageUpdated,
-    Moderation
+    public static string GetFullUsername(this DiscordUser user)
+    {
+        return user.Username + "#" + user.Discriminator;
+    }
+
+    public static bool IsBotOwner(this DiscordUser user, DiscordClient client)
+    {
+        return client.CurrentApplication.Owners.Any(x => x.Id == user.Id);
+    }
 }

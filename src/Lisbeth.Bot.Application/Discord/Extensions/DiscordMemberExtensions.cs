@@ -15,64 +15,46 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus;
 using DSharpPlus.Entities;
+using MikyM.Discord.Extensions.BaseExtensions;
 
 namespace Lisbeth.Bot.Application.Discord.Extensions;
 
 public static class DiscordMemberExtensions
 {
-    public static string GetFullUsername(this DiscordMember member)
-    {
-        return member.Username + "#" + member.Discriminator;
-    }
-
-    public static string GetFullDisplayName(this DiscordMember member)
-    {
-        return member.DisplayName + "#" + member.Discriminator;
-    }
-
     public static async Task<Result> MuteAsync(this DiscordMember member, ulong roleId)
     {
-        if (member.IsModerator())
-            return new DiscordNotAuthorizedError();
+        if (member.IsModerator()) return new DiscordNotAuthorizedError();
 
         if (!member.Guild.Roles.TryGetValue(roleId, out var mutedRole)) return new DiscordNotFoundError(nameof(roleId));
-        await member.GrantRoleAsync(mutedRole);
+
+        try
+        {
+            await member.GrantRoleAsync(mutedRole);
+        }
+        catch (Exception ex)
+        {
+            return ex;
+        }
 
         return Result.FromSuccess();
     }
 
     public static async Task<Result> UnmuteAsync(this DiscordMember member, ulong roleId)
     {
-        if (member.IsModerator())
-            return new DiscordNotAuthorizedError();
+        if (member.IsModerator()) return new DiscordNotAuthorizedError();
 
         if (!member.Guild.Roles.TryGetValue(roleId, out var mutedRole)) return new DiscordNotFoundError(nameof(roleId));
-        await member.RevokeRoleAsync(mutedRole);
+
+        try
+        {
+            await member.RevokeRoleAsync(mutedRole);
+        }
+        catch (Exception ex)
+        {
+            return ex;
+        }
 
         return Result.FromSuccess();
-    }
-
-    public static bool IsModerator(this DiscordMember member)
-    {
-        return member.Roles.Any(x =>
-                   x.Permissions.HasPermission(Permissions.BanMembers)) ||
-               member.Permissions.HasPermission(Permissions.BanMembers) ||
-               member.Permissions.HasPermission(Permissions.All) ||
-               member.IsOwner;
-    }
-
-    public static bool IsAdmin(this DiscordMember member)
-    {
-        return member.Roles.Any(x =>
-                   x.Permissions.HasPermission(Permissions.Administrator)) ||
-               member.Permissions.HasPermission(Permissions.All) ||
-               member.IsOwner;
-    }
-
-    public static bool IsBotOwner(this DiscordMember member, DiscordClient client)
-    {
-        return client.CurrentApplication.Owners.Any(x => x.Id == member.Id);
     }
 }

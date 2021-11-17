@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MikyM.Common.Domain\MikyM.Common.Domain.csproj" />
+    <ProjectReference Include="..\MikyM.Discord\MikyM.Discord.csproj" />
   </ItemGroup>
 
 </Project>

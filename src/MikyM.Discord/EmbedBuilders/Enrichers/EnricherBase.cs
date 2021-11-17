@@ -15,18 +15,21 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using MikyM.Discord.EmbedBuilders.Builders;
 
-using DSharpPlus.Entities;
-using Lisbeth.Bot.Application.Enums;
-using MikyM.Discord.EmbedBuilders.Enums;
+namespace MikyM.Discord.EmbedBuilders.Enrichers;
 
-namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
+public abstract class EnricherBase<TEntity> : IEmbedEnricher where TEntity : class
 {
-    public interface IDiscordGuildLogSenderService
+    protected long? CaseId { get; }
+    protected TEntity Entity { get; }
+
+    protected EnricherBase(TEntity enricher, long? caseId)
     {
-        Task<Result> SendAsync(DiscordGuild discordGuild, DiscordLog type, DiscordEmbed embed);
-        Task<Result> SendAsync(ulong discordGuildId, DiscordLog type, DiscordEmbed embed);
-        Task<Result> SendAsync(Guild guild, DiscordLog type, DiscordEmbed embed);
-        Task<Result> SendAsync(long guildId, DiscordLog type, DiscordEmbed embed);
+        this.CaseId = caseId;
+        this.Entity = enricher;
     }
+
+    public abstract void Enrich<TBuilder>(IEnrichedEmbedBuilder<TBuilder> embedBuilder)
+        where TBuilder : IBaseEmbedBuilder;
 }

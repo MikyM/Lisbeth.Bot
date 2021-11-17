@@ -15,18 +15,28 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-
 using DSharpPlus.Entities;
-using Lisbeth.Bot.Application.Enums;
 using MikyM.Discord.EmbedBuilders.Enums;
 
-namespace Lisbeth.Bot.Application.Discord.Services.Interfaces
+namespace MikyM.Discord.EmbedBuilders.Builders;
+
+public class ResponseEmbedBuilder : EnrichedEmbedBuilder<IResponseEmbedBuilder>, IResponseEmbedBuilder
 {
-    public interface IDiscordGuildLogSenderService
+    public DiscordResponse Response { get; }
+
+    internal ResponseEmbedBuilder(IBaseEmbedBuilder previousEmbedBuilder, DiscordResponse response) : base(previousEmbedBuilder)
     {
-        Task<Result> SendAsync(DiscordGuild discordGuild, DiscordLog type, DiscordEmbed embed);
-        Task<Result> SendAsync(ulong discordGuildId, DiscordLog type, DiscordEmbed embed);
-        Task<Result> SendAsync(Guild guild, DiscordLog type, DiscordEmbed embed);
-        Task<Result> SendAsync(long guildId, DiscordLog type, DiscordEmbed embed);
+        this.Response = response;
+    }
+
+    public override DiscordEmbed Build()
+    {
+        this.PartialBuild();
+        return this.Base.Build();
+    }
+
+    public override DiscordEmbedBuilder PartialBuild()
+    {
+        return this.Base;
     }
 }

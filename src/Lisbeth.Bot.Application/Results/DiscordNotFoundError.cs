@@ -16,6 +16,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Lisbeth.Bot.Application.Enums;
+using MikyM.Discord.EmbedBuilders.Enums;
 
 namespace Lisbeth.Bot.Application.Results;
 

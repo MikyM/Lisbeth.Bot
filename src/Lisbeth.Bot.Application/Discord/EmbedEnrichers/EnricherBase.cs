@@ -15,13 +15,23 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Lisbeth.Bot.Application.Enums;
+namespace Lisbeth.Bot.Application.Discord.EmbedEnrichers;
 
-public enum ModAction
+public abstract class EnricherBase<TEntity> : MikyM.Discord.EmbedBuilders.Enrichers.EnricherBase<TEntity> where TEntity : class
 {
-    Mute,
-    Unmute,
-    Ban,
-    Unban,
-    Prune
+    protected string HexColor { get; }
+
+    protected EnricherBase(TEntity entity, long? caseId = null, string hexColor = "#26296e") : base(entity, caseId)
+    {
+        this.HexColor = hexColor;
+    }
+
+    protected (string Name, string PastTense) GetUnderlyingNameAndPastTense(object req)
+    {
+        string type = req.GetType().Name;
+        if (type.Contains("Ban")) return ("Ban", "Banned");
+        if (type.Contains("Mute")) return ("Mute", "Muted");
+
+        throw new NotSupportedException();
+    }
 }

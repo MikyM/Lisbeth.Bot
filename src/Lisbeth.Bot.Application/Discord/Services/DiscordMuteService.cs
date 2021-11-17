@@ -19,14 +19,14 @@ using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using Hangfire;
 using Lisbeth.Bot.Application.Discord.Extensions;
-using Lisbeth.Bot.Application.Enums;
+using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Mute;
 using Lisbeth.Bot.Domain.DTOs.Request.Mute;
 using Microsoft.Extensions.Logging;
+using MikyM.Discord.Extensions.BaseExtensions;
+using MikyM.Discord.EmbedBuilders.Enums;
 using MikyM.Discord.Interfaces;
-using System.Globalization;
-using Lisbeth.Bot.Application.Discord.Helpers;
 
 namespace Lisbeth.Bot.Application.Discord.Services;
 

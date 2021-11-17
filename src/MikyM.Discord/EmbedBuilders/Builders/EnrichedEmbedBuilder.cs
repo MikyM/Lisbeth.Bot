@@ -16,15 +16,34 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using DSharpPlus.Entities;
+using MikyM.Discord.EmbedBuilders.Enrichers;
 
-namespace Lisbeth.Bot.Application.Discord.Helpers;
+namespace MikyM.Discord.EmbedBuilders.Builders;
 
-public static class DiscordEmbedBuilderExtensions
+public abstract class EnrichedEmbedBuilder<TBuilder> : IEnrichedEmbedBuilder<TBuilder> where TBuilder : IBaseEmbedBuilder
 {
-    public static bool IsValid(this DiscordEmbedBuilder builder)
+    public DiscordEmbedBuilder Base { get; }
+
+    protected EnrichedEmbedBuilder(IBaseEmbedBuilder previousEmbedBuilder)
     {
-        return !(builder.Author?.Name.Length + builder.Footer?.Text.Length + builder.Description?.Length +
-            builder.Title?.Length +
-            builder.Fields?.Sum(x => x.Value.Length + x.Name.Length) > 6000);
+        this.Base = previousEmbedBuilder.PartialBuild();
+
+    }
+
+    public virtual DiscordEmbed Build()
+    {
+        this.PartialBuild();
+        return this.Base.Build();
+    }
+
+    public virtual DiscordEmbedBuilder PartialBuild()
+    {
+        return this.Base;
+    }
+
+    public virtual IEnrichedEmbedBuilder<TBuilder> EnrichFrom<TEnricher>(TEnricher enricher) where TEnricher : IEmbedEnricher
+    {
+        enricher.Enrich(this);
+        return this;
     }
 }
