@@ -15,23 +15,21 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Lisbeth.Bot.Application.Discord.EmbedEnrichers;
+using MikyM.Discord.EmbedBuilders.Builders;
 
-public abstract class EnricherBase<TEntity> : MikyM.Discord.EmbedBuilders.Enrichers.EnricherBase<TEntity> where TEntity : class
+namespace MikyM.Discord.EmbedBuilders.Enrichers;
+
+public abstract class EmbedEnricherBase<TEntity> : IEmbedEnricher where TEntity : class
 {
-    protected string HexColor { get; }
+    protected long? CaseId { get; }
+    protected TEntity Entity { get; }
 
-    protected EnricherBase(TEntity entity, long? caseId = null, string hexColor = "#26296e") : base(entity, caseId)
+    protected EmbedEnricherBase(TEntity enricher, long? caseId)
     {
-        this.HexColor = hexColor;
+        this.CaseId = caseId;
+        this.Entity = enricher;
     }
 
-    protected (string Name, string PastTense) GetUnderlyingNameAndPastTense(object req)
-    {
-        string type = req.GetType().Name;
-        if (type.Contains("Ban")) return ("Ban", "Banned");
-        if (type.Contains("Mute")) return ("Mute", "Muted");
-
-        throw new NotSupportedException();
-    }
+    public abstract void Enrich<TBuilder>(IEnrichedEmbedBuilder<TBuilder> embedBuilder)
+        where TBuilder : IBaseEmbedBuilder;
 }

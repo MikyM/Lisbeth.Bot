@@ -31,8 +31,8 @@ public static class DiscordEmbedBuilderExtensions
             builder.Fields?.Sum(x => x.Value.Length + x.Name.Length) > 6000);
     }
 
-    public static IEnhancedDiscordEmbedBuilder WithEnhancement(this DiscordEmbedBuilder builder, DiscordEmbedEnhancement enhancement)
+    public static IEnhancedDiscordEmbedBuilder WithEnhancement(this DiscordEmbedBuilder builder)
     {
-        return new EnhancedDiscordEmbedBuilder(builder, enhancement);
+        return new EnhancedDiscordEmbedBuilder(builder);
     }
 }

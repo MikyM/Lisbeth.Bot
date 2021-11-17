@@ -26,7 +26,7 @@ namespace MikyM.Discord.EmbedBuilders.Builders;
 public class EnhancedDiscordEmbedBuilder : IEnhancedDiscordEmbedBuilder
 {
     public DiscordEmbedBuilder Base { get; }
-    public DiscordEmbedEnhancement EnhancementType { get; private set; }
+    public virtual DiscordEmbedEnhancement EnhancementType { get; private set; }
     public string? EnhancementAction { get; private set; }
     public long? CaseId { get; private set; }
     public DiscordMember? AuthorMember { get; private set; }
@@ -35,17 +35,21 @@ public class EnhancedDiscordEmbedBuilder : IEnhancedDiscordEmbedBuilder
     public string TitleTemplate { get; private set; } = @"{0} {1}{2}"; // 0 - action , 1 - type, 2 - target/caller
     public string FooterTemplate { get; private set; } = @"{0}{1}"; // 0 - caseId , 1 - snowflake info
 
-    internal EnhancedDiscordEmbedBuilder(DiscordEmbedBuilder builder, DiscordEmbedEnhancement enhancementType)
+    protected internal EnhancedDiscordEmbedBuilder(DiscordEmbedBuilder builder)
     {
         this.Base = builder ?? throw new ArgumentNullException(nameof(builder));
-        this.EnhancementType = enhancementType;
     }
 
-    public virtual IResponseEmbedBuilder AsResponse(DiscordResponse response)
+    public IResponseEmbedBuilder AsResponse()
     {
         this.EnhancementType = DiscordEmbedEnhancement.Response;
-        this.EnhancementAction = response.ToString();
-        return new ResponseEmbedBuilder(this, response);
+        return new ResponseEmbedBuilder(this);
+    }
+
+    public IEnhancedDiscordEmbedBuilder WithEnhancementAction(string action)
+    {
+        this.EnhancementAction = action;
+        return this;
     }
 
     /*protected virtual IEnhancedDiscordEmbedBuilder<TEnhancement> AsLog(DiscordLog response)
@@ -68,21 +72,21 @@ public class EnhancedDiscordEmbedBuilder : IEnhancedDiscordEmbedBuilder
 
     public IEnhancedDiscordEmbedBuilder SetAuthorTemplate(string template)
     {
-        if (!string.IsNullOrWhiteSpace(template)) throw new ArgumentException("Invalid template", nameof(template));
+        if (string.IsNullOrWhiteSpace(template)) throw new ArgumentException("Invalid template", nameof(template));
         this.FooterTemplate = template;
         return this;
     }
 
     public IEnhancedDiscordEmbedBuilder SetFooterTemplate(string template)
     {
-        if (!string.IsNullOrWhiteSpace(template)) throw new ArgumentException("Invalid template", nameof(template));
+        if (string.IsNullOrWhiteSpace(template)) throw new ArgumentException("Invalid template", nameof(template));
         this.AuthorTemplate = template;
         return this;
     }
 
     public IEnhancedDiscordEmbedBuilder SetTitleTemplate(string template)
     {
-        if (!string.IsNullOrWhiteSpace(template)) throw new ArgumentException("Invalid template", nameof(template));
+        if (string.IsNullOrWhiteSpace(template)) throw new ArgumentException("Invalid template", nameof(template));
         this.TitleTemplate = template;
         return this;
     }
@@ -93,7 +97,7 @@ public class EnhancedDiscordEmbedBuilder : IEnhancedDiscordEmbedBuilder
         return this;
     }
 
-    public virtual DiscordEmbedBuilder PartialBuild()
+    public virtual DiscordEmbedBuilder BaseBuild()
     {
         this.Base.WithAuthor(
             string.Format(this.AuthorTemplate, this.EnhancementAction?.SplitByCapitalAndConcat(),
@@ -111,8 +115,5 @@ public class EnhancedDiscordEmbedBuilder : IEnhancedDiscordEmbedBuilder
     }
 
     public virtual DiscordEmbed Build()
-    {
-        this.PartialBuild();
-        return this.Base.Build();
-    }
+        => this.BaseBuild().Build();
 }

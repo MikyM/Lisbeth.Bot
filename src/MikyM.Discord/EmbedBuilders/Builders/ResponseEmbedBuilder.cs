@@ -22,21 +22,31 @@ namespace MikyM.Discord.EmbedBuilders.Builders;
 
 public class ResponseEmbedBuilder : EnrichedEmbedBuilder<IResponseEmbedBuilder>, IResponseEmbedBuilder
 {
-    public DiscordResponse Response { get; }
+    public virtual DiscordResponse Response { get; private set; }
 
-    internal ResponseEmbedBuilder(IBaseEmbedBuilder previousEmbedBuilder, DiscordResponse response) : base(previousEmbedBuilder)
+    protected internal ResponseEmbedBuilder(IEnhancedDiscordEmbedBuilder previousEmbedBuilder) : base(previousEmbedBuilder)
+    {
+    }
+
+    public IResponseEmbedBuilder WithType(DiscordResponse response)
     {
         this.Response = response;
+        return this;
     }
 
     public override DiscordEmbed Build()
+        => this.BaseBuild().Build();
+
+    public override DiscordEmbedBuilder BaseBuild()
     {
-        this.PartialBuild();
-        return this.Base.Build();
+        if (this.Response is not 0) // if not default
+            this.Base = this.PreviousBuilder.WithEnhancementAction(this.Response.ToString()).BaseBuild();
+        return this.Base;
     }
 
-    public override DiscordEmbedBuilder PartialBuild()
+    public override ResponseEmbedBuilder EnrichFrom<TEnricher>(TEnricher enricher)
     {
-        return this.Base;
+        enricher.Enrich(this);
+        return this;
     }
 }

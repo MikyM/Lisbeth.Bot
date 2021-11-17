@@ -19,7 +19,9 @@ using MikyM.Discord.EmbedBuilders.Enums;
 
 namespace MikyM.Discord.EmbedBuilders.Builders;
 
-public interface IResponseEmbedBuilder : IBaseEmbedBuilder
+public interface IResponseEmbedBuilder : IEnrichedEmbedBuilder<IResponseEmbedBuilder>
 {
     public DiscordResponse Response { get; }
+
+    IResponseEmbedBuilder WithType(DiscordResponse response);
 }

@@ -26,7 +26,7 @@ using System.Globalization;
 
 namespace Lisbeth.Bot.Application.Discord.EmbedEnrichers;
 
-public class ModAddActionEnricher : EnricherBase<IAddModReq>
+public class ModAddActionEmbedEnricher : EmbedEnricherBase<IAddModReq>
 {
     public DiscordMember Target { get; }
     public IModEntity? Previous { get; }
@@ -35,7 +35,7 @@ public class ModAddActionEnricher : EnricherBase<IAddModReq>
         this.Previous is not null && this.Previous.AppliedUntil > this.Entity.AppliedUntil &&
         !this.Previous.IsDisabled;
 
-    public ModAddActionEnricher(IAddModReq request, DiscordMember target, long? caseId = null,
+    public ModAddActionEmbedEnricher(IAddModReq request, DiscordMember target, long? caseId = null,
         string hexColor = "#26296e", IModEntity? previous = null) : base(request, caseId, hexColor)
     {
         this.Target = target;

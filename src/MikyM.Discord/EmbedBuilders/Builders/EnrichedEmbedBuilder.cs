@@ -22,28 +22,27 @@ namespace MikyM.Discord.EmbedBuilders.Builders;
 
 public abstract class EnrichedEmbedBuilder<TBuilder> : IEnrichedEmbedBuilder<TBuilder> where TBuilder : IBaseEmbedBuilder
 {
-    public DiscordEmbedBuilder Base { get; }
+    public DiscordEmbedBuilder Base { get; protected set; }
 
-    protected EnrichedEmbedBuilder(IBaseEmbedBuilder previousEmbedBuilder)
+    public IEnhancedDiscordEmbedBuilder PreviousBuilder { get; }
+
+    protected EnrichedEmbedBuilder(IEnhancedDiscordEmbedBuilder previousEmbedBuilder)
     {
-        this.Base = previousEmbedBuilder.PartialBuild();
-
+        this.Base = previousEmbedBuilder.BaseBuild();
+        this.PreviousBuilder = previousEmbedBuilder;
     }
 
     public virtual DiscordEmbed Build()
     {
-        this.PartialBuild();
+        this.BaseBuild();
         return this.Base.Build();
     }
 
-    public virtual DiscordEmbedBuilder PartialBuild()
+    public virtual DiscordEmbedBuilder BaseBuild()
     {
         return this.Base;
     }
 
-    public virtual IEnrichedEmbedBuilder<TBuilder> EnrichFrom<TEnricher>(TEnricher enricher) where TEnricher : IEmbedEnricher
-    {
-        enricher.Enrich(this);
-        return this;
-    }
+    public abstract IEnrichedEmbedBuilder<TBuilder> EnrichFrom<TEnricher>(TEnricher enricher)
+        where TEnricher : IEmbedEnricher;
 }

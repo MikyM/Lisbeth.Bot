@@ -23,5 +23,5 @@ public interface IBaseEmbedBuilder
 {
     DiscordEmbedBuilder Base { get; }
     DiscordEmbed Build();
-    DiscordEmbedBuilder PartialBuild();
+    DiscordEmbedBuilder BaseBuild();
 }

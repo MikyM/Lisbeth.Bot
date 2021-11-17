@@ -22,4 +22,5 @@ namespace MikyM.Discord.EmbedBuilders.Builders;
 public interface IEnrichedEmbedBuilder<TBuilder> : IBaseEmbedBuilder where TBuilder : IBaseEmbedBuilder
 {
     IEnrichedEmbedBuilder<TBuilder> EnrichFrom<TEnricher>(TEnricher enricher) where TEnricher : IEmbedEnricher;
+    IEnhancedDiscordEmbedBuilder PreviousBuilder { get; }
 }

@@ -19,6 +19,7 @@ namespace MikyM.Discord.EmbedBuilders.Enums;
 
 public enum DiscordEmbedEnhancement
 {
+    None,
     Response,
     Log
 }

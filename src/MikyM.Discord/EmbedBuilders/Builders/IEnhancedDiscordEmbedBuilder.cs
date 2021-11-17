@@ -31,11 +31,12 @@ public interface IEnhancedDiscordEmbedBuilder : IBaseEmbedBuilder
     DiscordMember? AuthorMember { get; }
     SnowflakeObject? FooterSnowflake { get; }
 
-    IResponseEmbedBuilder AsResponse(DiscordResponse response);
+    IResponseEmbedBuilder AsResponse();
     IEnhancedDiscordEmbedBuilder WithCase(long caseId);
     IEnhancedDiscordEmbedBuilder WithFooterSnowflakeInfo(SnowflakeObject snowflake);
     IEnhancedDiscordEmbedBuilder WithAuthorSnowflakeInfo(DiscordMember member);
     IEnhancedDiscordEmbedBuilder SetAuthorTemplate(string template);
     IEnhancedDiscordEmbedBuilder SetFooterTemplate(string template);
     IEnhancedDiscordEmbedBuilder SetTitleTemplate(string template);
+    IEnhancedDiscordEmbedBuilder WithEnhancementAction(string action);
 }

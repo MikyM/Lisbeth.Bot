@@ -18,12 +18,14 @@
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using Hangfire;
+using Lisbeth.Bot.Application.Discord.EmbedEnrichers;
 using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Mute;
 using Lisbeth.Bot.Domain.DTOs.Request.Mute;
 using Microsoft.Extensions.Logging;
+using MikyM.Discord.EmbedBuilders;
 using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.EmbedBuilders.Enums;
 using MikyM.Discord.Interfaces;
@@ -242,8 +244,11 @@ public class DiscordMuteService : IDiscordMuteService
 
         await _guildLoggerService.LogToDiscordAsync(guild, req, moderator, guildCfg.EmbedHexColor, id);
 
-        return Result<DiscordEmbed>.FromSuccess(_embedProvider
-            .GetEmbedResponseFrom(req, target, id, guildCfg.EmbedHexColor, foundEntity)
+        return Result<DiscordEmbed>.FromSuccess(new DiscordEmbedBuilder()
+            .WithEnhancement()
+            .AsResponse()
+            .WithType(DiscordResponse.Mute)
+            .EnrichFrom(new ModAddActionEmbedEnricher(req, target, id, guildCfg.EmbedHexColor))
             .Build());
     }
 
