@@ -21,7 +21,9 @@ namespace MikyM.Discord.EmbedBuilders.Builders;
 
 public interface IBaseEmbedBuilder
 {
-    DiscordEmbedBuilder Base { get; }
+    /// <summary>
+    /// Constructs a new embed from data supplied to this builder.
+    /// </summary>
+    /// <returns>New discord embed.</returns>
     DiscordEmbed Build();
-    DiscordEmbedBuilder BaseBuild();
 }

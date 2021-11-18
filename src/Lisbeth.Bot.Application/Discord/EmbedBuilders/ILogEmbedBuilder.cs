@@ -15,22 +15,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using MikyM.Discord.EmbedBuilders.Builders;
+using MikyM.Discord.EmbedBuilders.Enums;
 
-namespace MikyM.Discord.EmbedBuilders.Enrichers;
+namespace Lisbeth.Bot.Application.Discord.EmbedBuilders;
 
-public abstract class EmbedEnricherBase<TEntity> : IEmbedEnricher where TEntity : class
+public interface ILogEmbedBuilder : IEnrichedEmbedBuilder<DiscordEmbedEnhancement>
 {
-    protected long? CaseId { get; }
-    protected TEntity Entity { get; }
+    public DiscordLog? Log { get; }
 
-    protected EmbedEnricherBase(TEntity enricher, long? caseId)
-    {
-        this.CaseId = caseId;
-        this.Entity = enricher;
-    }
-
-    public abstract void Enrich<TEnhancement>(IEnrichedEmbedBuilder<TEnhancement> embedBuilder)
-        where TEnhancement : Enum;
+    ILogEmbedBuilder WithType(DiscordLog log);
 }

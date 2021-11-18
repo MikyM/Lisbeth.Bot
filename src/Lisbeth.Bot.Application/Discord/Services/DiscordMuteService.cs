@@ -18,6 +18,7 @@
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using Hangfire;
+using Lisbeth.Bot.Application.Discord.EmbedBuilders;
 using Lisbeth.Bot.Application.Discord.EmbedEnrichers;
 using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Helpers;
@@ -245,9 +246,8 @@ public class DiscordMuteService : IDiscordMuteService
         await _guildLoggerService.LogToDiscordAsync(guild, req, moderator, guildCfg.EmbedHexColor, id);
 
         return Result<DiscordEmbed>.FromSuccess(new DiscordEmbedBuilder()
-            .WithEnhancement()
-            .AsResponse()
-            .WithType(DiscordResponse.Mute)
+            .WithEnhancement(DiscordEmbedEnhancement.Response)
+            .AsResponse(DiscordResponse.Mute)
             .EnrichFrom(new ModAddActionEmbedEnricher(req, target, id, guildCfg.EmbedHexColor))
             .Build());
     }

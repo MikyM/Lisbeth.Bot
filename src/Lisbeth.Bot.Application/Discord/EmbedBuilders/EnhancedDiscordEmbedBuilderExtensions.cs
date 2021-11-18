@@ -15,13 +15,21 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using MikyM.Discord.EmbedBuilders.Builders;
 using MikyM.Discord.EmbedBuilders.Enums;
 
-namespace MikyM.Discord.EmbedBuilders.Builders;
-
-public interface IResponseEmbedBuilder : IEnrichedEmbedBuilder<IResponseEmbedBuilder>
+namespace Lisbeth.Bot.Application.Discord.EmbedBuilders
 {
-    public DiscordResponse Response { get; }
+    public static class EnhancedDiscordEmbedBuilderExtensions
+    {
+        public static IResponseEmbedBuilder AsResponse(this EnhancedDiscordEmbedBuilder<DiscordEmbedEnhancement> builder, DiscordResponse? responseType = null)
+        {
+            return new ResponseEmbedBuilder(builder, responseType);
+        }
 
-    IResponseEmbedBuilder WithType(DiscordResponse response);
+        public static ILogEmbedBuilder AsLog(this EnhancedDiscordEmbedBuilder<DiscordEmbedEnhancement> builder, DiscordLog? logType = null)
+        {
+            return new LogEmbedBuilder(builder, logType);
+        }
+    }
 }

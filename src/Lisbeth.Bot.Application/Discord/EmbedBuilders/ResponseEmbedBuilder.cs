@@ -15,18 +15,18 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus.Entities;
+using MikyM.Discord.EmbedBuilders.Builders;
 using MikyM.Discord.EmbedBuilders.Enums;
 
-namespace MikyM.Discord.EmbedBuilders.Builders;
+namespace Lisbeth.Bot.Application.Discord.EmbedBuilders;
 
-public class ResponseEmbedBuilder : EnrichedEmbedBuilder<IResponseEmbedBuilder>, IResponseEmbedBuilder
+public class ResponseEmbedBuilder : EnrichedEmbedBuilder<DiscordEmbedEnhancement>, IResponseEmbedBuilder
 {
-    public virtual DiscordResponse Response { get; private set; }
+    public virtual DiscordResponse? Response { get; private set; }
 
-    protected internal ResponseEmbedBuilder(IEnhancedDiscordEmbedBuilder previousEmbedBuilder) : base(previousEmbedBuilder)
-    {
-    }
+    protected internal ResponseEmbedBuilder(EnhancedDiscordEmbedBuilder<DiscordEmbedEnhancement> baseEmbedBuilder,
+        DiscordResponse? response = null) : base(baseEmbedBuilder) =>
+        this.Response = response;
 
     public IResponseEmbedBuilder WithType(DiscordResponse response)
     {
@@ -34,14 +34,12 @@ public class ResponseEmbedBuilder : EnrichedEmbedBuilder<IResponseEmbedBuilder>,
         return this;
     }
 
-    public override DiscordEmbed Build()
-        => this.BaseBuild().Build();
-
-    public override DiscordEmbedBuilder BaseBuild()
+    protected override void Evaluate()
     {
-        if (this.Response is not 0) // if not default
-            this.Base = this.PreviousBuilder.WithEnhancementAction(this.Response.ToString()).BaseBuild();
-        return this.Base;
+        if (this.Response is not null or 0) // if not default
+            base.WithEnhancementAction(this.Response.Value);
+
+        this.BaseBuilder.Evaluate();
     }
 
     public override ResponseEmbedBuilder EnrichFrom<TEnricher>(TEnricher enricher)

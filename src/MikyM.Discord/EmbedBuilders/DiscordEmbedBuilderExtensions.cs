@@ -15,10 +15,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Linq;
 using DSharpPlus.Entities;
 using MikyM.Discord.EmbedBuilders.Builders;
-using MikyM.Discord.EmbedBuilders.Enums;
+using System;
+using System.Linq;
+using System.Text.Json;
 
 namespace MikyM.Discord.EmbedBuilders;
 
@@ -27,12 +28,24 @@ public static class DiscordEmbedBuilderExtensions
     public static bool IsValid(this DiscordEmbedBuilder builder)
     {
         return !(builder.Author?.Name.Length + builder.Footer?.Text.Length + builder.Description?.Length +
-            builder.Title?.Length +
-            builder.Fields?.Sum(x => x.Value.Length + x.Name.Length) > 6000);
+            builder.Title?.Length + builder.Fields?.Sum(x => x.Value.Length + x.Name.Length) > 6000);
     }
 
-    public static IEnhancedDiscordEmbedBuilder WithEnhancement(this DiscordEmbedBuilder builder)
+    public static EnhancedDiscordEmbedBuilder<TEnhancement> WithEnhancement<TEnhancement>(
+        this DiscordEmbedBuilder builder, TEnhancement? enhancementType) where TEnhancement : Enum
     {
-        return new EnhancedDiscordEmbedBuilder(builder);
+        return new EnhancedDiscordEmbedBuilder<TEnhancement>(builder, enhancementType);
+    }
+
+    public static EnhancedDiscordEmbedBuilder<TEnhancement> WithEnhancement<TEnhancement>(
+        this DiscordEmbedBuilder builder) where TEnhancement : Enum
+    {
+        return new EnhancedDiscordEmbedBuilder<TEnhancement>(builder);
+    }
+
+    internal static DiscordEmbedBuilder? DeepCopy(this DiscordEmbedBuilder builder)
+    {
+        var sr = JsonSerializer.Serialize(builder);
+        return JsonSerializer.Deserialize<DiscordEmbedBuilder>(sr);
     }
 }

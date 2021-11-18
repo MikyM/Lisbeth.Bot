@@ -17,7 +17,6 @@
 
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Helpers;
-using Lisbeth.Bot.Application.Enums;
 using Lisbeth.Bot.Domain.DTOs.Request.Base;
 using MikyM.Discord.EmbedBuilders.Enums;
 using MikyM.Discord.Extensions.BaseExtensions;

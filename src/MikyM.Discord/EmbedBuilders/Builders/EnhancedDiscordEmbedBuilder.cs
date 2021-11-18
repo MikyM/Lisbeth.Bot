@@ -16,104 +16,121 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using DSharpPlus.Entities;
-using MikyM.Discord.EmbedBuilders.Enums;
 using MikyM.Discord.Extensions.BaseExtensions;
 using System;
+using System.Runtime.CompilerServices;
 
 namespace MikyM.Discord.EmbedBuilders.Builders;
 
-// ReSharper disable once ClassWithVirtualMembersNeverInherited.Global
-public class EnhancedDiscordEmbedBuilder : IEnhancedDiscordEmbedBuilder
+public sealed class EnhancedDiscordEmbedBuilder<TEnhancement> : IEnhancedDiscordEmbedBuilder<TEnhancement>
+    where TEnhancement : Enum
 {
-    public DiscordEmbedBuilder Base { get; }
-    public virtual DiscordEmbedEnhancement EnhancementType { get; private set; }
+    internal DiscordEmbedBuilder Base { get; }
+
+    private readonly DiscordEmbedBuilder _current;
+
+    internal DiscordEmbedBuilder Current
+    {
+        get
+        {
+            this.Evaluate();
+            return _current;
+        }
+        init => this._current = value;
+    }
+
+    public TEnhancement? EnhancementType { get; private set; }
     public string? EnhancementAction { get; private set; }
     public long? CaseId { get; private set; }
     public DiscordMember? AuthorMember { get; private set; }
     public SnowflakeObject? FooterSnowflake { get; private set; }
-    public string AuthorTemplate { get; private set; } = @"{0} {1}{2}"; // 0 - action , 1 - type, 2 - target/caller
-    public string TitleTemplate { get; private set; } = @"{0} {1}{2}"; // 0 - action , 1 - type, 2 - target/caller
-    public string FooterTemplate { get; private set; } = @"{0}{1}"; // 0 - caseId , 1 - snowflake info
+    public string AuthorTemplate { get; private set; } = @"@action@ @type@@info@"; // 0 - action , 1 - type, 2 - target/caller
+    public string TitleTemplate { get; private set; } = @"@action@ @type@@info@"; // 0 - action , 1 - type, 2 - target/caller
+    public string FooterTemplate { get; private set; } = @"@caseId@@info@"; // 0 - caseId , 1 - snowflake info
 
-    protected internal EnhancedDiscordEmbedBuilder(DiscordEmbedBuilder builder)
+
+    internal EnhancedDiscordEmbedBuilder(DiscordEmbedBuilder builder, TEnhancement? enhancementType = default)
     {
-        this.Base = builder ?? throw new ArgumentNullException(nameof(builder));
+        this.Base = new DiscordEmbedBuilder(builder) ?? throw new ArgumentNullException(nameof(builder));
+        this.EnhancementType = enhancementType;
+        this._current = new DiscordEmbedBuilder(builder);
     }
 
-    public IResponseEmbedBuilder AsResponse()
+    internal EnhancedDiscordEmbedBuilder<TEnhancement> WithEnhancementAction<TEnum>(TEnum action) where TEnum : Enum
     {
-        this.EnhancementType = DiscordEmbedEnhancement.Response;
-        return new ResponseEmbedBuilder(this);
-    }
-
-    public IEnhancedDiscordEmbedBuilder WithEnhancementAction(string action)
-    {
-        this.EnhancementAction = action;
+        this.EnhancementAction = action.ToString();
         return this;
     }
 
-    /*protected virtual IEnhancedDiscordEmbedBuilder<TEnhancement> AsLog(DiscordLog response)
+    public IEnhancedDiscordEmbedBuilder<TEnhancement> AsType(TEnhancement enhancementType)
     {
-        this.EnhancementType = DiscordEmbedEnhancement.Log;
+        this.EnhancementType = enhancementType;
         return this;
-    }*/
+    }
 
-    public virtual IEnhancedDiscordEmbedBuilder WithCase(long caseId)
+    public IEnhancedDiscordEmbedBuilder<TEnhancement> WithCase(long caseId)
     {
         this.CaseId = caseId;
         return this;
     }
 
-    public virtual IEnhancedDiscordEmbedBuilder WithAuthorSnowflakeInfo(DiscordMember member)
+    public IEnhancedDiscordEmbedBuilder<TEnhancement> WithAuthorSnowflakeInfo(DiscordMember member)
     {
         this.AuthorMember = member;
         return this;
     }
 
-    public IEnhancedDiscordEmbedBuilder SetAuthorTemplate(string template)
+    public IEnhancedDiscordEmbedBuilder<TEnhancement> SetAuthorTemplate(string template)
     {
         if (string.IsNullOrWhiteSpace(template)) throw new ArgumentException("Invalid template", nameof(template));
         this.FooterTemplate = template;
         return this;
     }
 
-    public IEnhancedDiscordEmbedBuilder SetFooterTemplate(string template)
+    public IEnhancedDiscordEmbedBuilder<TEnhancement> SetFooterTemplate(string template)
     {
         if (string.IsNullOrWhiteSpace(template)) throw new ArgumentException("Invalid template", nameof(template));
         this.AuthorTemplate = template;
         return this;
     }
 
-    public IEnhancedDiscordEmbedBuilder SetTitleTemplate(string template)
+    public IEnhancedDiscordEmbedBuilder<TEnhancement> SetTitleTemplate(string template)
     {
         if (string.IsNullOrWhiteSpace(template)) throw new ArgumentException("Invalid template", nameof(template));
         this.TitleTemplate = template;
         return this;
     }
 
-    public virtual IEnhancedDiscordEmbedBuilder WithFooterSnowflakeInfo(SnowflakeObject snowflake)
+    public IEnhancedDiscordEmbedBuilder<TEnhancement> WithFooterSnowflakeInfo(SnowflakeObject snowflake)
     {
         this.FooterSnowflake = snowflake;
         return this;
     }
 
-    public virtual DiscordEmbedBuilder BaseBuild()
+    public void Evaluate()
     {
-        this.Base.WithAuthor(
-            string.Format(this.AuthorTemplate, this.EnhancementAction?.SplitByCapitalAndConcat(),
-                this.EnhancementType.ToString().SplitByCapitalAndConcat(),
-                this.AuthorMember is null ? null : $" | {this.AuthorMember.GetFullDisplayName()}"),
-            null,
-            this.AuthorMember?.AvatarUrl);
+        string author = this.AuthorTemplate
+            .Replace("@action@", this.EnhancementAction is null ? "" : this.EnhancementAction.SplitByCapitalAndConcat())
+            .Replace("@type@",
+                this.EnhancementType is null
+                    ? ""
+                    : this.EnhancementType.ToString().SplitByCapitalAndConcat());
 
-        if (this.FooterSnowflake is not null || this.CaseId.HasValue)
-            this.Base.WithFooter(
-                string.Format(this.AuthorTemplate, this.CaseId.HasValue ? $"Case Id: {this.CaseId}" : "",
-                    this.FooterSnowflake is null ? "" : $" {this.FooterSnowflake.GetType().Name.SplitByCapitalAndConcat()} Id: {this.FooterSnowflake.Id}"));
+        author = author.Replace("@info",
+            this.AuthorMember is null ? "" : $" | {this.AuthorMember.GetFullDisplayName()}");
 
-        return this.Base;
+        this.Current.WithAuthor(author, null, this.AuthorMember?.AvatarUrl);
+
+        if (this.FooterSnowflake is null && !this.CaseId.HasValue) return;
+        string footer = this.FooterTemplate.Replace("@caseId@", this.CaseId is null ? "" : this.CaseId.ToString())
+            .Replace("@info@",
+                this.FooterSnowflake is null
+                    ? ""
+                    : $"{this.FooterSnowflake.GetType().Name.SplitByCapitalAndConcat()} Id: {this.FooterSnowflake.Id}");
+
+        this.Current.WithFooter(footer);
     }
 
-    public virtual DiscordEmbed Build()
-        => this.BaseBuild().Build();
+    public DiscordEmbed Build()
+        => this.Current.Build();
 }
