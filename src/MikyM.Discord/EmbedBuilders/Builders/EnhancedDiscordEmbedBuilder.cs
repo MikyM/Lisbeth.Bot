@@ -18,29 +18,17 @@
 using DSharpPlus.Entities;
 using MikyM.Discord.Extensions.BaseExtensions;
 using System;
-using System.Runtime.CompilerServices;
 
 namespace MikyM.Discord.EmbedBuilders.Builders;
 
-public sealed class EnhancedDiscordEmbedBuilder<TEnhancement> : IEnhancedDiscordEmbedBuilder<TEnhancement>
-    where TEnhancement : Enum
+public sealed class EnhancedDiscordEmbedBuilder : IEnhancedDiscordEmbedBuilder
 {
-    internal DiscordEmbedBuilder Base { get; }
+    protected DiscordEmbedBuilder Base { get; }
 
-    private readonly DiscordEmbedBuilder _current;
+    internal DiscordEmbedBuilder Current { get; }
 
-    internal DiscordEmbedBuilder Current
-    {
-        get
-        {
-            this.Evaluate();
-            return _current;
-        }
-        init => this._current = value;
-    }
-
-    public TEnhancement? EnhancementType { get; private set; }
-    public string? EnhancementAction { get; private set; }
+    public string? Action { get; private set; }
+    public string? ActionType { get; private set; }
     public long? CaseId { get; private set; }
     public DiscordMember? AuthorMember { get; private set; }
     public SnowflakeObject? FooterSnowflake { get; private set; }
@@ -49,72 +37,72 @@ public sealed class EnhancedDiscordEmbedBuilder<TEnhancement> : IEnhancedDiscord
     public string FooterTemplate { get; private set; } = @"@caseId@@info@"; // 0 - caseId , 1 - snowflake info
 
 
-    internal EnhancedDiscordEmbedBuilder(DiscordEmbedBuilder builder, TEnhancement? enhancementType = default)
+    internal EnhancedDiscordEmbedBuilder(DiscordEmbedBuilder builder)
     {
         this.Base = new DiscordEmbedBuilder(builder) ?? throw new ArgumentNullException(nameof(builder));
-        this.EnhancementType = enhancementType;
-        this._current = new DiscordEmbedBuilder(builder);
+        this.Current = builder;
     }
 
-    internal EnhancedDiscordEmbedBuilder<TEnhancement> WithEnhancementAction<TEnum>(TEnum action) where TEnum : Enum
-    {
-        this.EnhancementAction = action.ToString();
-        return this;
-    }
 
-    public IEnhancedDiscordEmbedBuilder<TEnhancement> AsType(TEnhancement enhancementType)
-    {
-        this.EnhancementType = enhancementType;
-        return this;
-    }
-
-    public IEnhancedDiscordEmbedBuilder<TEnhancement> WithCase(long caseId)
+    public IEnhancedDiscordEmbedBuilder WithCase(long caseId)
     {
         this.CaseId = caseId;
         return this;
     }
 
-    public IEnhancedDiscordEmbedBuilder<TEnhancement> WithAuthorSnowflakeInfo(DiscordMember member)
+    public IEnhancedDiscordEmbedBuilder WithAuthorSnowflakeInfo(DiscordMember member)
     {
         this.AuthorMember = member;
         return this;
     }
 
-    public IEnhancedDiscordEmbedBuilder<TEnhancement> SetAuthorTemplate(string template)
+    public IEnhancedDiscordEmbedBuilder SetAuthorTemplate(string template)
     {
         if (string.IsNullOrWhiteSpace(template)) throw new ArgumentException("Invalid template", nameof(template));
         this.FooterTemplate = template;
         return this;
     }
 
-    public IEnhancedDiscordEmbedBuilder<TEnhancement> SetFooterTemplate(string template)
+    public IEnhancedDiscordEmbedBuilder SetFooterTemplate(string template)
     {
         if (string.IsNullOrWhiteSpace(template)) throw new ArgumentException("Invalid template", nameof(template));
         this.AuthorTemplate = template;
         return this;
     }
 
-    public IEnhancedDiscordEmbedBuilder<TEnhancement> SetTitleTemplate(string template)
+    public IEnhancedDiscordEmbedBuilder SetTitleTemplate(string template)
     {
         if (string.IsNullOrWhiteSpace(template)) throw new ArgumentException("Invalid template", nameof(template));
         this.TitleTemplate = template;
         return this;
     }
 
-    public IEnhancedDiscordEmbedBuilder<TEnhancement> WithFooterSnowflakeInfo(SnowflakeObject snowflake)
+    public IEnhancedDiscordEmbedBuilder WithFooterSnowflakeInfo(SnowflakeObject snowflake)
     {
         this.FooterSnowflake = snowflake;
+        return this;
+    }
+
+    internal EnhancedDiscordEmbedBuilder WithAction<TEnum>(TEnum action) where TEnum : Enum
+    {
+        this.Action = action.ToString();
+        return this;
+    }
+
+    internal EnhancedDiscordEmbedBuilder WithActionType<TEnum>(TEnum actionType) where TEnum : Enum
+    {
+        this.ActionType = actionType.ToString();
         return this;
     }
 
     public void Evaluate()
     {
         string author = this.AuthorTemplate
-            .Replace("@action@", this.EnhancementAction is null ? "" : this.EnhancementAction.SplitByCapitalAndConcat())
+            .Replace("@action@", this.Action is null ? "" : this.Action.SplitByCapitalAndConcat())
             .Replace("@type@",
-                this.EnhancementType is null
+                this.ActionType is null
                     ? ""
-                    : this.EnhancementType.ToString().SplitByCapitalAndConcat());
+                    : this.ActionType.SplitByCapitalAndConcat());
 
         author = author.Replace("@info",
             this.AuthorMember is null ? "" : $" | {this.AuthorMember.GetFullDisplayName()}");

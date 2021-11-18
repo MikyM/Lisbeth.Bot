@@ -31,6 +31,5 @@ public abstract class EmbedEnricherBase<TEntity> : IEmbedEnricher where TEntity 
         this.Entity = enricher;
     }
 
-    public abstract void Enrich<TEnhancement>(IEnrichedEmbedBuilder<TEnhancement> embedBuilder)
-        where TEnhancement : Enum;
+    public abstract void Enrich(IEnrichedEmbedBuilder embedBuilder);
 }

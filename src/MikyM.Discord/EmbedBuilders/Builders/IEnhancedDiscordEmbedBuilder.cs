@@ -16,27 +16,24 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using DSharpPlus.Entities;
-using System;
 
 namespace MikyM.Discord.EmbedBuilders.Builders;
 
-public interface IEnhancedDiscordEmbedBuilder<TEnhancement> : IBaseEmbedBuilder where TEnhancement : Enum
+public interface IEnhancedDiscordEmbedBuilder : IBaseEmbedBuilder
 {
-    TEnhancement? EnhancementType { get; }
-    string EnhancementAction { get; }
     string AuthorTemplate { get; }
     string TitleTemplate { get; }
     string FooterTemplate { get; }
     long? CaseId { get; }
     DiscordMember? AuthorMember { get; }
     SnowflakeObject? FooterSnowflake { get; }
-    //DiscordEmbedBuilder Current { get; }
+    string? ActionType { get; }
+    string? Action { get; }
 
-    IEnhancedDiscordEmbedBuilder<TEnhancement> WithCase(long caseId);
-    IEnhancedDiscordEmbedBuilder<TEnhancement> WithFooterSnowflakeInfo(SnowflakeObject snowflake);
-    IEnhancedDiscordEmbedBuilder<TEnhancement> WithAuthorSnowflakeInfo(DiscordMember member);
-    IEnhancedDiscordEmbedBuilder<TEnhancement> SetAuthorTemplate(string template);
-    IEnhancedDiscordEmbedBuilder<TEnhancement> SetFooterTemplate(string template);
-    IEnhancedDiscordEmbedBuilder<TEnhancement> SetTitleTemplate(string template);
-    IEnhancedDiscordEmbedBuilder<TEnhancement> AsType(TEnhancement enhancementType);
+    IEnhancedDiscordEmbedBuilder WithCase(long caseId);
+    IEnhancedDiscordEmbedBuilder WithFooterSnowflakeInfo(SnowflakeObject snowflake);
+    IEnhancedDiscordEmbedBuilder WithAuthorSnowflakeInfo(DiscordMember member);
+    IEnhancedDiscordEmbedBuilder SetAuthorTemplate(string template);
+    IEnhancedDiscordEmbedBuilder SetFooterTemplate(string template);
+    IEnhancedDiscordEmbedBuilder SetTitleTemplate(string template);
 }

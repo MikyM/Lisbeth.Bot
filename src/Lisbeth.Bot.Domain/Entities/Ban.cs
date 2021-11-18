@@ -25,7 +25,7 @@ public sealed class Ban : SnowflakeEntity, IModEntity
     public ulong GuildId { get; set; }
     public ulong UserId { get; set; }
     public DateTime? LiftedOn { get; set; }
-    public DateTime? AppliedUntil { get; set; }
+    public DateTime AppliedUntil { get; set; }
     public ulong AppliedById { get; set; }
     public ulong LiftedById { get; set; }
     public string? Reason { get; set; } = "";

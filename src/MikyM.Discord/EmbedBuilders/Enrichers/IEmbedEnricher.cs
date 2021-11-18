@@ -22,6 +22,5 @@ namespace MikyM.Discord.EmbedBuilders.Enrichers;
 
 public interface IEmbedEnricher
 {
-    void Enrich<TEnhancement>(IEnrichedEmbedBuilder<TEnhancement> embedBuilder)
-        where TEnhancement : Enum;
+    void Enrich(IEnrichedEmbedBuilder embedBuilder);
 }

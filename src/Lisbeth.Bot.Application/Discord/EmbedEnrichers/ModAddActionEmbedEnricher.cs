@@ -42,7 +42,7 @@ public class ModAddActionEmbedEnricher : EmbedEnricherBase<IAddModReq>
         this.Previous = previous;
     }
 
-    public override void Enrich<TEnhancement>(IEnrichedEmbedBuilder<TEnhancement> embedBuilder)
+    public override void Enrich(IEnrichedEmbedBuilder embedBuilder)
     {
         var (name, pastTense) = base.GetUnderlyingNameAndPastTense(this.Entity);
 
@@ -64,7 +64,7 @@ public class ModAddActionEmbedEnricher : EmbedEnricherBase<IAddModReq>
             embedBuilder.AddField($"Previous {name.ToLower()} until", this.Previous.AppliedUntil.ToString(), true);
             embedBuilder.AddField("Previous moderator",
                 $"{ExtendedFormatter.Mention(this.Previous.AppliedById, DiscordEntityType.User)}", true);
-            embedBuilder.AddField("Previous reason", this.Previous.Reason, true);
+            if (!string.IsNullOrWhiteSpace(this.Previous.Reason)) embedBuilder.AddField("Previous reason", this.Previous.Reason, true);
         }
 
         embedBuilder.AddField("User mention", this.Target.Mention, true);
@@ -78,7 +78,7 @@ public class ModAddActionEmbedEnricher : EmbedEnricherBase<IAddModReq>
 
         embedBuilder.AddField("Length", lengthString, true);
         embedBuilder.AddField($"{pastTense} until", this.Entity.AppliedUntil.ToString(CultureInfo.InvariantCulture), true);
-        embedBuilder.AddField("Reason", this.Entity.Reason);
+        if (!string.IsNullOrWhiteSpace(this.Entity.Reason)) embedBuilder.AddField("Reason", this.Entity.Reason);
         embedBuilder.WithFooter($"Case Id: {(!this.CaseId.HasValue ? "Unknown" : this.CaseId)} | Member Id: {this.Entity.TargetUserId}");
     }
 }

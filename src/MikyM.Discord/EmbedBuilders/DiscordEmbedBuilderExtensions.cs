@@ -19,7 +19,6 @@ using DSharpPlus.Entities;
 using MikyM.Discord.EmbedBuilders.Builders;
 using System;
 using System.Linq;
-using System.Text.Json;
 
 namespace MikyM.Discord.EmbedBuilders;
 
@@ -31,21 +30,8 @@ public static class DiscordEmbedBuilderExtensions
             builder.Title?.Length + builder.Fields?.Sum(x => x.Value.Length + x.Name.Length) > 6000);
     }
 
-    public static EnhancedDiscordEmbedBuilder<TEnhancement> WithEnhancement<TEnhancement>(
-        this DiscordEmbedBuilder builder, TEnhancement? enhancementType) where TEnhancement : Enum
+    public static TBuilder EnhanceWith<TBuilder>(this DiscordEmbedBuilder builder, params object[]? args) where TBuilder : IEnrichedEmbedBuilder
     {
-        return new EnhancedDiscordEmbedBuilder<TEnhancement>(builder, enhancementType);
-    }
-
-    public static EnhancedDiscordEmbedBuilder<TEnhancement> WithEnhancement<TEnhancement>(
-        this DiscordEmbedBuilder builder) where TEnhancement : Enum
-    {
-        return new EnhancedDiscordEmbedBuilder<TEnhancement>(builder);
-    }
-
-    internal static DiscordEmbedBuilder? DeepCopy(this DiscordEmbedBuilder builder)
-    {
-        var sr = JsonSerializer.Serialize(builder);
-        return JsonSerializer.Deserialize<DiscordEmbedBuilder>(sr);
+        return (TBuilder)Activator.CreateInstance(typeof(TBuilder), args)! ?? throw new InvalidOperationException();
     }
 }

@@ -20,11 +20,11 @@ using MikyM.Discord.EmbedBuilders.Enums;
 
 namespace Lisbeth.Bot.Application.Discord.EmbedBuilders;
 
-public class LogEmbedBuilder : EnrichedEmbedBuilder<DiscordEmbedEnhancement>, ILogEmbedBuilder
+public class LogEmbedBuilder : EnrichedEmbedBuilder, ILogEmbedBuilder
 {
     public virtual DiscordLog? Log { get; private set; }
 
-    protected internal LogEmbedBuilder(EnhancedDiscordEmbedBuilder<DiscordEmbedEnhancement> baseEmbedBuilder, DiscordLog? log = null) : base(baseEmbedBuilder)
+    protected internal LogEmbedBuilder(EnhancedDiscordEmbedBuilder baseEmbedBuilder, DiscordLog? log = null) : base(baseEmbedBuilder)
         => this.Log = log;
 
     public ILogEmbedBuilder WithType(DiscordLog log)
@@ -36,7 +36,10 @@ public class LogEmbedBuilder : EnrichedEmbedBuilder<DiscordEmbedEnhancement>, IL
     protected override void Evaluate()
     {
         if (this.Log is not null or 0) // if not null or default
-            base.WithEnhancementAction(this.Log.Value);
+            base.WithAction(this.Log.Value);
+        base.WithActionType(DiscordEmbedEnhancement.Log);
+
+        this.BaseBuilder.Evaluate();
     }
 
     public override LogEmbedBuilder EnrichFrom<TEnricher>(TEnricher enricher)

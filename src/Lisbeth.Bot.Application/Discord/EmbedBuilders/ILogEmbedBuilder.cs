@@ -20,7 +20,7 @@ using MikyM.Discord.EmbedBuilders.Enums;
 
 namespace Lisbeth.Bot.Application.Discord.EmbedBuilders;
 
-public interface ILogEmbedBuilder : IEnrichedEmbedBuilder<DiscordEmbedEnhancement>
+public interface ILogEmbedBuilder : IEnrichedEmbedBuilder
 {
     public DiscordLog? Log { get; }
 

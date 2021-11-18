@@ -20,11 +20,11 @@ using MikyM.Discord.EmbedBuilders.Enums;
 
 namespace Lisbeth.Bot.Application.Discord.EmbedBuilders;
 
-public class ResponseEmbedBuilder : EnrichedEmbedBuilder<DiscordEmbedEnhancement>, IResponseEmbedBuilder
+public class ResponseEmbedBuilder : EnrichedEmbedBuilder, IResponseEmbedBuilder
 {
     public virtual DiscordResponse? Response { get; private set; }
 
-    protected internal ResponseEmbedBuilder(EnhancedDiscordEmbedBuilder<DiscordEmbedEnhancement> baseEmbedBuilder,
+    protected internal ResponseEmbedBuilder(EnhancedDiscordEmbedBuilder baseEmbedBuilder,
         DiscordResponse? response = null) : base(baseEmbedBuilder) =>
         this.Response = response;
 
@@ -37,7 +37,8 @@ public class ResponseEmbedBuilder : EnrichedEmbedBuilder<DiscordEmbedEnhancement
     protected override void Evaluate()
     {
         if (this.Response is not null or 0) // if not default
-            base.WithEnhancementAction(this.Response.Value);
+            base.WithAction(this.Response.Value);
+        base.WithActionType(DiscordEmbedEnhancement.Response);
 
         this.BaseBuilder.Evaluate();
     }

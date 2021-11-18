@@ -24,14 +24,13 @@ namespace MikyM.Discord.EmbedBuilders.Builders;
 /// <summary>
 /// Constructs enriched embeds.
 /// </summary>
-public interface IEnrichedEmbedBuilder<TEnhancement> : IBaseEmbedBuilder
-    where TEnhancement : Enum
+public interface IEnrichedEmbedBuilder : IBaseEmbedBuilder
 {
     /// <summary>
     /// Enriches this embed with an embed enricher.
     /// </summary>
     /// <param name="enricher">Enricher to use.</param>
-    IEnrichedEmbedBuilder<TEnhancement> EnrichFrom<TEnricher>(TEnricher enricher)
+    IEnrichedEmbedBuilder EnrichFrom<TEnricher>(TEnricher enricher)
         where TEnricher : IEmbedEnricher;
 
     /// <summary>
@@ -39,21 +38,21 @@ public interface IEnrichedEmbedBuilder<TEnhancement> : IBaseEmbedBuilder
     /// </summary>
     /// <param name="description">Description to set.</param>
     /// <returns>This embed builder.</returns>
-    IEnrichedEmbedBuilder<TEnhancement> WithDescription(string description);
+    IEnrichedEmbedBuilder WithDescription(string description);
 
     /// <summary>
     /// Sets the embed's title url.
     /// </summary>
     /// <param name="url">Title url to set.</param>
     /// <returns>This embed builder.</returns>
-    IEnrichedEmbedBuilder<TEnhancement> WithUrl(string url);
+    IEnrichedEmbedBuilder WithUrl(string url);
 
     /// <summary>
     /// Sets the embed's title url.
     /// </summary>
     /// <param name="url">Title url to set.</param>
     /// <returns>This embed builder.</returns>
-    IEnrichedEmbedBuilder<TEnhancement> WithUrl(Uri url);
+    IEnrichedEmbedBuilder WithUrl(Uri url);
 
 
     /// <summary>
@@ -61,14 +60,14 @@ public interface IEnrichedEmbedBuilder<TEnhancement> : IBaseEmbedBuilder
     /// </summary>
     /// <param name="color">Embed color to set.</param>
     /// <returns>This embed builder.</returns>
-    IEnrichedEmbedBuilder<TEnhancement> WithColor(DiscordColor color);
+    IEnrichedEmbedBuilder WithColor(DiscordColor color);
 
     /// <summary>
     /// Sets the embed's timestamp.
     /// </summary>
     /// <param name="timestamp">Timestamp to set.</param>
     /// <returns>This embed builder.</returns>
-    IEnrichedEmbedBuilder<TEnhancement> WithTimestamp(DateTimeOffset? timestamp);
+    IEnrichedEmbedBuilder WithTimestamp(DateTimeOffset? timestamp);
 
 
     /// <summary>
@@ -76,28 +75,28 @@ public interface IEnrichedEmbedBuilder<TEnhancement> : IBaseEmbedBuilder
     /// </summary>
     /// <param name="timestamp">Timestamp to set.</param>
     /// <returns>This embed builder.</returns>
-    IEnrichedEmbedBuilder<TEnhancement> WithTimestamp(DateTime? timestamp);
+    IEnrichedEmbedBuilder WithTimestamp(DateTime? timestamp);
 
     /// <summary>
     /// Sets the embed's timestamp based on a snowflake.
     /// </summary>
     /// <param name="snowflake">Snowflake to calculate timestamp from.</param>
     /// <returns>This embed builder.</returns>
-    IEnrichedEmbedBuilder<TEnhancement> WithTimestamp(ulong snowflake);
+    IEnrichedEmbedBuilder WithTimestamp(ulong snowflake);
 
     /// <summary>
     /// Sets the embed's image url.
     /// </summary>
     /// <param name="url">Image url to set.</param>
     /// <returns>This embed builder.</returns>
-    IEnrichedEmbedBuilder<TEnhancement> WithImageUrl(string url);
+    IEnrichedEmbedBuilder WithImageUrl(string url);
 
     /// <summary>
     /// Sets the embed's image url.
     /// </summary>
     /// <param name="url">Image url to set.</param>
     /// <returns>This embed builder.</returns>
-    IEnrichedEmbedBuilder<TEnhancement> WithImageUrl(Uri url);
+    IEnrichedEmbedBuilder WithImageUrl(Uri url);
 
     /// <summary>
     /// Sets the embed's thumbnail.
@@ -106,7 +105,7 @@ public interface IEnrichedEmbedBuilder<TEnhancement> : IBaseEmbedBuilder
     /// <param name="height">The height of the thumbnail to set.</param>
     /// <param name="width">The width of the thumbnail to set.</param>
     /// <returns>This embed builder.</returns>
-    IEnrichedEmbedBuilder<TEnhancement> WithThumbnail(string url, int height = 0, int width = 0);
+    IEnrichedEmbedBuilder WithThumbnail(string url, int height = 0, int width = 0);
 
     /// <summary>
     /// Sets the embed's thumbnail.
@@ -115,7 +114,7 @@ public interface IEnrichedEmbedBuilder<TEnhancement> : IBaseEmbedBuilder
     /// <param name="height">The height of the thumbnail to set.</param>
     /// <param name="width">The width of the thumbnail to set.</param>
     /// <returns>This embed builder.</returns>
-    IEnrichedEmbedBuilder<TEnhancement> WithThumbnail(Uri url, int height = 0, int width = 0);
+    IEnrichedEmbedBuilder WithThumbnail(Uri url, int height = 0, int width = 0);
 
     /// <summary>
     /// Sets the embed's author.
@@ -124,7 +123,7 @@ public interface IEnrichedEmbedBuilder<TEnhancement> : IBaseEmbedBuilder
     /// <param name="url">Author's url.</param>
     /// <param name="iconUrl">Author icon's url.</param>
     /// <returns>This embed builder.</returns>
-    IEnrichedEmbedBuilder<TEnhancement> WithAuthor(string? name = null, string? url = null, string? iconUrl = null);
+    IEnrichedEmbedBuilder WithAuthor(string? name = null, string? url = null, string? iconUrl = null);
 
     /// <summary>
     /// Sets the embed's footer.
@@ -132,7 +131,7 @@ public interface IEnrichedEmbedBuilder<TEnhancement> : IBaseEmbedBuilder
     /// <param name="text">Footer's text.</param>
     /// <param name="iconUrl">Footer icon's url.</param>
     /// <returns>This embed builder.</returns>
-    IEnrichedEmbedBuilder<TEnhancement> WithFooter(string? text = null, string? iconUrl = null);
+    IEnrichedEmbedBuilder WithFooter(string? text = null, string? iconUrl = null);
 
     /// <summary>
     /// Adds a field to this embed.
@@ -141,14 +140,14 @@ public interface IEnrichedEmbedBuilder<TEnhancement> : IBaseEmbedBuilder
     /// <param name="value">Value of the field to add.</param>
     /// <param name="inline">Whether the field is to be inline or not.</param>
     /// <returns>This embed builder.</returns>
-    IEnrichedEmbedBuilder<TEnhancement> AddField(string name, string value, bool inline = false);
+    IEnrichedEmbedBuilder AddField(string name, string value, bool inline = false);
 
     /// <summary>
     /// Removes a field of the specified index from this embed.
     /// </summary>
     /// <param name="index">Index of the field to remove.</param>
     /// <returns>This embed builder.</returns>
-    IEnrichedEmbedBuilder<TEnhancement> RemoveFieldAt(int index);
+    IEnrichedEmbedBuilder RemoveFieldAt(int index);
 
     /// <summary>
     /// Removes fields of the specified range from this embed.
@@ -156,12 +155,12 @@ public interface IEnrichedEmbedBuilder<TEnhancement> : IBaseEmbedBuilder
     /// <param name="index">Index of the first field to remove.</param>
     /// <param name="count">Number of fields to remove.</param>
     /// <returns>This embed builder.</returns>
-    IEnrichedEmbedBuilder<TEnhancement> RemoveFieldRange(int index, int count);
+    IEnrichedEmbedBuilder RemoveFieldRange(int index, int count);
 
     /// <summary>
     /// Removes all fields from this embed.
     /// </summary>
     /// <returns>This embed builder.</returns>
-    IEnrichedEmbedBuilder<TEnhancement> ClearFields();
+    IEnrichedEmbedBuilder ClearFields();
 
 }
