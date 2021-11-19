@@ -19,7 +19,7 @@ using System.Collections.Generic;
 
 namespace MikyM.Common.DataAccessLayer.Helpers;
 
-public static class UoFCache
+internal static class UoFCache
 {
     static UoFCache()
     {
@@ -29,5 +29,5 @@ public static class UoFCache
             .ToDictionary(x => x.FullName ?? x.Name);
     }
 
-    public static Dictionary<string, Type> CachedTypes { get; }
+    internal static Dictionary<string, Type> CachedTypes { get; }
 }
