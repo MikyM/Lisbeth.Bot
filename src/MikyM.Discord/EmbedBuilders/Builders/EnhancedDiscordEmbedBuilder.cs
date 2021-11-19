@@ -23,7 +23,7 @@ namespace MikyM.Discord.EmbedBuilders.Builders;
 
 public sealed class EnhancedDiscordEmbedBuilder : IEnhancedDiscordEmbedBuilder
 {
-    private DiscordEmbedBuilder Base { get; }
+    internal DiscordEmbedBuilder Base { get; }
 
     internal DiscordEmbedBuilder Current { get; }
 
@@ -39,7 +39,7 @@ public sealed class EnhancedDiscordEmbedBuilder : IEnhancedDiscordEmbedBuilder
 
     internal EnhancedDiscordEmbedBuilder(DiscordEmbedBuilder builder)
     {
-        this.Base = builder ?? throw new ArgumentNullException(nameof(builder));
+        this.Base = new DiscordEmbedBuilder(builder) ?? throw new ArgumentNullException(nameof(builder));
         this.Current = new DiscordEmbedBuilder(builder);
     }
 
@@ -83,19 +83,19 @@ public sealed class EnhancedDiscordEmbedBuilder : IEnhancedDiscordEmbedBuilder
         return this;
     }
 
-    internal EnhancedDiscordEmbedBuilder WithAction<TEnum>(TEnum action) where TEnum : Enum
+    public IEnhancedDiscordEmbedBuilder WithAction<TEnum>(TEnum action) where TEnum : Enum
     {
         this.Action = action.ToString();
         return this;
     }
 
-    internal EnhancedDiscordEmbedBuilder WithActionType<TEnum>(TEnum actionType) where TEnum : Enum
+    public IEnhancedDiscordEmbedBuilder WithActionType<TEnum>(TEnum actionType) where TEnum : Enum
     {
         this.ActionType = actionType.ToString();
         return this;
     }
 
-    public void Evaluate()
+    internal void Evaluate()
     {
         string author = this.AuthorTemplate
             .Replace("@action@", this.Action is null ? "" : this.Action.SplitByCapitalAndConcat())
@@ -120,5 +120,8 @@ public sealed class EnhancedDiscordEmbedBuilder : IEnhancedDiscordEmbedBuilder
     }
 
     public DiscordEmbed Build()
-        => this.Current.Build();
+    {
+        this.Evaluate();
+        return this.Current.Build();
+    }
 }

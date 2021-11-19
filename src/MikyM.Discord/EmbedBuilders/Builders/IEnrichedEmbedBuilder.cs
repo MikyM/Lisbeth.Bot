@@ -34,133 +34,18 @@ public interface IEnrichedEmbedBuilder : IBaseEmbedBuilder
         where TEnricher : IEmbedEnricher;
 
     /// <summary>
-    /// Sets the embed's description.
+    /// Sets the action type.
     /// </summary>
-    /// <param name="description">Description to set.</param>
-    /// <returns>This embed builder.</returns>
-    IEnrichedEmbedBuilder WithDescription(string description);
-
+    IEnrichedEmbedBuilder WithActionType<TEnum>(TEnum action) where TEnum : Enum;
     /// <summary>
-    /// Sets the embed's title url.
+    /// Sets the action.
     /// </summary>
-    /// <param name="url">Title url to set.</param>
-    /// <returns>This embed builder.</returns>
-    IEnrichedEmbedBuilder WithUrl(string url);
+    IEnrichedEmbedBuilder WithAction<TEnum>(TEnum action) where TEnum : Enum;
 
-    /// <summary>
-    /// Sets the embed's title url.
-    /// </summary>
-    /// <param name="url">Title url to set.</param>
-    /// <returns>This embed builder.</returns>
-    IEnrichedEmbedBuilder WithUrl(Uri url);
-
-
-    /// <summary>
-    /// Sets the embed's color.
-    /// </summary>
-    /// <param name="color">Embed color to set.</param>
-    /// <returns>This embed builder.</returns>
-    IEnrichedEmbedBuilder WithColor(DiscordColor color);
-
-    /// <summary>
-    /// Sets the embed's timestamp.
-    /// </summary>
-    /// <param name="timestamp">Timestamp to set.</param>
-    /// <returns>This embed builder.</returns>
-    IEnrichedEmbedBuilder WithTimestamp(DateTimeOffset? timestamp);
-
-
-    /// <summary>
-    /// Sets the embed's timestamp.
-    /// </summary>
-    /// <param name="timestamp">Timestamp to set.</param>
-    /// <returns>This embed builder.</returns>
-    IEnrichedEmbedBuilder WithTimestamp(DateTime? timestamp);
-
-    /// <summary>
-    /// Sets the embed's timestamp based on a snowflake.
-    /// </summary>
-    /// <param name="snowflake">Snowflake to calculate timestamp from.</param>
-    /// <returns>This embed builder.</returns>
-    IEnrichedEmbedBuilder WithTimestamp(ulong snowflake);
-
-    /// <summary>
-    /// Sets the embed's image url.
-    /// </summary>
-    /// <param name="url">Image url to set.</param>
-    /// <returns>This embed builder.</returns>
-    IEnrichedEmbedBuilder WithImageUrl(string url);
-
-    /// <summary>
-    /// Sets the embed's image url.
-    /// </summary>
-    /// <param name="url">Image url to set.</param>
-    /// <returns>This embed builder.</returns>
-    IEnrichedEmbedBuilder WithImageUrl(Uri url);
-
-    /// <summary>
-    /// Sets the embed's thumbnail.
-    /// </summary>
-    /// <param name="url">Thumbnail url to set.</param>
-    /// <param name="height">The height of the thumbnail to set.</param>
-    /// <param name="width">The width of the thumbnail to set.</param>
-    /// <returns>This embed builder.</returns>
-    IEnrichedEmbedBuilder WithThumbnail(string url, int height = 0, int width = 0);
-
-    /// <summary>
-    /// Sets the embed's thumbnail.
-    /// </summary>
-    /// <param name="url">Thumbnail url to set.</param>
-    /// <param name="height">The height of the thumbnail to set.</param>
-    /// <param name="width">The width of the thumbnail to set.</param>
-    /// <returns>This embed builder.</returns>
-    IEnrichedEmbedBuilder WithThumbnail(Uri url, int height = 0, int width = 0);
-
-    /// <summary>
-    /// Sets the embed's author.
-    /// </summary>
-    /// <param name="name">Author's name.</param>
-    /// <param name="url">Author's url.</param>
-    /// <param name="iconUrl">Author icon's url.</param>
-    /// <returns>This embed builder.</returns>
-    IEnrichedEmbedBuilder WithAuthor(string? name = null, string? url = null, string? iconUrl = null);
-
-    /// <summary>
-    /// Sets the embed's footer.
-    /// </summary>
-    /// <param name="text">Footer's text.</param>
-    /// <param name="iconUrl">Footer icon's url.</param>
-    /// <returns>This embed builder.</returns>
-    IEnrichedEmbedBuilder WithFooter(string? text = null, string? iconUrl = null);
-
-    /// <summary>
-    /// Adds a field to this embed.
-    /// </summary>
-    /// <param name="name">Name of the field to add.</param>
-    /// <param name="value">Value of the field to add.</param>
-    /// <param name="inline">Whether the field is to be inline or not.</param>
-    /// <returns>This embed builder.</returns>
-    IEnrichedEmbedBuilder AddField(string name, string value, bool inline = false);
-
-    /// <summary>
-    /// Removes a field of the specified index from this embed.
-    /// </summary>
-    /// <param name="index">Index of the field to remove.</param>
-    /// <returns>This embed builder.</returns>
-    IEnrichedEmbedBuilder RemoveFieldAt(int index);
-
-    /// <summary>
-    /// Removes fields of the specified range from this embed.
-    /// </summary>
-    /// <param name="index">Index of the first field to remove.</param>
-    /// <param name="count">Number of fields to remove.</param>
-    /// <returns>This embed builder.</returns>
-    IEnrichedEmbedBuilder RemoveFieldRange(int index, int count);
-
-    /// <summary>
-    /// Removes all fields from this embed.
-    /// </summary>
-    /// <returns>This embed builder.</returns>
-    IEnrichedEmbedBuilder ClearFields();
-
+    IEnrichedEmbedBuilder WithCase(long caseId);
+    IEnrichedEmbedBuilder WithFooterSnowflakeInfo(SnowflakeObject snowflake);
+    IEnrichedEmbedBuilder WithAuthorSnowflakeInfo(DiscordMember member);
+    IEnrichedEmbedBuilder SetAuthorTemplate(string template);
+    IEnrichedEmbedBuilder SetFooterTemplate(string template);
+    IEnrichedEmbedBuilder SetTitleTemplate(string template);
 }

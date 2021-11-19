@@ -19,7 +19,7 @@ using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Domain.DTOs.Request.Base;
 using Lisbeth.Bot.Domain.Entities.Base;
-using MikyM.Discord.EmbedBuilders.Builders;
+using MikyM.Discord.EmbedBuilders;
 using MikyM.Discord.EmbedBuilders.Enums;
 using MikyM.Discord.Extensions.BaseExtensions;
 using System.Globalization;
@@ -42,10 +42,9 @@ public class ModAddActionEmbedEnricher : EmbedEnricherBase<IAddModReq>
         this.Previous = previous;
     }
 
-    public override void Enrich(IEnrichedEmbedBuilder embedBuilder)
+    public override void Enrich(IDiscordEmbedBuilderWrapper embedBuilder)
     {
         var (name, pastTense) = base.GetUnderlyingNameAndPastTense(this.Entity);
-
         embedBuilder.WithColor(new DiscordColor(this.HexColor));
         embedBuilder.WithAuthor(
             $" {(this.Previous is not null && !this.IsOverlapping ? "Extend " : "")}{name} {(this.Previous is not null && this.IsOverlapping ? "failed " : "")}| {this.Target.GetFullDisplayName()}",

@@ -17,9 +17,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using DSharpPlus.Entities;
 using MikyM.Discord.EmbedBuilders.Enrichers;
+using System;
 
 namespace MikyM.Discord.EmbedBuilders.Builders;
 
@@ -31,16 +31,22 @@ public abstract class EnrichedEmbedBuilder : IEnrichedEmbedBuilder
     /// <summary>
     /// Gets the previous builder that was used to construct this one.
     /// </summary>
-    protected EnhancedDiscordEmbedBuilder EnhancedBuilder { get; private set; }
+    protected EnhancedDiscordEmbedBuilder EnhancedBuilder { get; }
+
+    /// <summary>
+    /// Gets the discord embed builder wrapper.
+    /// </summary>
+    protected DiscordEmbedBuilderWrapper BaseWrapper { get; }
 
     /// <summary>
     /// Gets the current embed builder.
     /// </summary>
-    protected DiscordEmbedBuilder Current { get; private set; }
+    protected DiscordEmbedBuilder Current => this.EnhancedBuilder.Current;
+
     /// <summary>
     /// Gets the base embed builder that was supplied by the previous builder.
     /// </summary>
-    protected DiscordEmbedBuilder Base { get; private set; }
+    protected DiscordEmbedBuilder Base => this.EnhancedBuilder.Base;
 
     /// <summary>
     /// Constructs an enriched embed builder.
@@ -48,146 +54,78 @@ public abstract class EnrichedEmbedBuilder : IEnrichedEmbedBuilder
     /// <param name="enhancedEmbedBuilder">Builder to base this off of.</param>
     protected EnrichedEmbedBuilder(EnhancedDiscordEmbedBuilder enhancedEmbedBuilder)
     {
-        this.Base = new DiscordEmbedBuilder(enhancedEmbedBuilder.Current);
-        this.Current = enhancedEmbedBuilder.Current;
         this.EnhancedBuilder = enhancedEmbedBuilder;
+        this.BaseWrapper = new DiscordEmbedBuilderWrapper(this.Current);
     }
 
-    public abstract IEnrichedEmbedBuilder EnrichFrom<TEnricher>(TEnricher enricher)
-        where TEnricher : IEmbedEnricher;
+    public virtual IEnrichedEmbedBuilder EnrichFrom<TEnricher>(TEnricher enricher)
+        where TEnricher : IEmbedEnricher
+    {
+        enricher.Enrich(this.BaseWrapper);
+        return this;
+    }
 
     /// <summary>
     /// Prepares the builder for building.
     /// </summary>
     protected virtual void Evaluate()
         => this.EnhancedBuilder.Evaluate();
+
     public DiscordEmbed Build()
-        => this.Current.Build();
+    {
+        this.Evaluate();
+        return this.Current.Build();
+    }
 
     public static implicit operator DiscordEmbed(EnrichedEmbedBuilder builder)
         => builder.Build();
 
-    /// <summary>
-    /// Sets the action type.
-    /// </summary>
-    protected IEnrichedEmbedBuilder WithAction<TEnum>(TEnum action) where TEnum : Enum
+    public IEnrichedEmbedBuilder WithAction<TEnum>(TEnum action) where TEnum : Enum
     {
         this.EnhancedBuilder.WithAction(action);
         this.Evaluate();
         return this;
     }
 
-
-    /// <summary>
-    /// Sets the action.
-    /// </summary>
-    protected IEnrichedEmbedBuilder WithActionType<TEnum>(TEnum action) where TEnum : Enum
+    public IEnrichedEmbedBuilder WithActionType<TEnum>(TEnum action) where TEnum : Enum
     {
         this.EnhancedBuilder.WithActionType(action);
-        this.Current = new DiscordEmbedBuilder(this.EnhancedBuilder.Current);
         this.Evaluate();
         return this;
     }
-
-    public IEnrichedEmbedBuilder WithDescription(string description)
+    
+    public IEnrichedEmbedBuilder WithCase(long caseId)
     {
-        this.Current.WithDescription(description);
+        this.EnhancedBuilder.WithCase(caseId);
         return this;
     }
 
-    public IEnrichedEmbedBuilder WithUrl(string url)
+    public IEnrichedEmbedBuilder WithFooterSnowflakeInfo(SnowflakeObject snowflake)
     {
-        this.Current.WithUrl(url);
+        this.EnhancedBuilder.WithFooterSnowflakeInfo(snowflake);
         return this;
     }
 
-    public IEnrichedEmbedBuilder WithUrl(Uri url)
+    public IEnrichedEmbedBuilder WithAuthorSnowflakeInfo(DiscordMember member)
     {
-        this.Current.WithUrl(url);
+        this.EnhancedBuilder.WithAuthorSnowflakeInfo(member);
         return this;
     }
 
-    public IEnrichedEmbedBuilder WithColor(DiscordColor color)
+    public IEnrichedEmbedBuilder SetAuthorTemplate(string template)
     {
-        this.Current.WithColor(color);
+        this.EnhancedBuilder.SetAuthorTemplate(template);
+        return this;
+    }
+    public IEnrichedEmbedBuilder SetFooterTemplate(string template)
+    {
+        this.EnhancedBuilder.SetFooterTemplate(template);
         return this;
     }
 
-    public IEnrichedEmbedBuilder WithTimestamp(DateTimeOffset? timestamp)
+    public IEnrichedEmbedBuilder SetTitleTemplate(string template)
     {
-        this.Current.WithTimestamp(timestamp);
-        return this;
-    }
-
-    public IEnrichedEmbedBuilder WithTimestamp(DateTime? timestamp)
-    {
-        this.Current.WithTimestamp(timestamp);
-        return this;
-    }
-
-    public IEnrichedEmbedBuilder WithTimestamp(ulong snowflake)
-    {
-        this.Current.WithTimestamp(snowflake);
-        return this;
-    }
-
-    public IEnrichedEmbedBuilder WithImageUrl(string url)
-    {
-        this.Current.WithImageUrl(url);
-        return this;
-    }
-
-    public IEnrichedEmbedBuilder WithImageUrl(Uri url)
-    {
-        this.Current.WithImageUrl(url);
-        return this;
-    }
-
-    public IEnrichedEmbedBuilder WithThumbnail(string url, int height = 0, int width = 0)
-    {
-        this.Current.WithThumbnail(url, height, width);
-        return this;
-    }
-
-    public IEnrichedEmbedBuilder WithThumbnail(Uri url, int height = 0, int width = 0)
-    {
-        this.Current.WithThumbnail(url, height, width);
-        return this;
-    }
-
-    public IEnrichedEmbedBuilder WithAuthor(string? name = null, string? url = null, string? iconUrl = null)
-    {
-        this.Current.WithAuthor(name, url, iconUrl);
-        return this;
-    }
-
-    public IEnrichedEmbedBuilder WithFooter(string? text = null, string? iconUrl = null)
-    {
-        this.Current.WithFooter(text, iconUrl);
-        return this;
-    }
-
-    public IEnrichedEmbedBuilder AddField(string name, string value, bool inline = false)
-    {
-        this.Current.AddField(name, value, inline);
-        return this;
-    }
-
-    public IEnrichedEmbedBuilder RemoveFieldAt(int index)
-    {
-        this.Current.RemoveFieldAt(index);
-        return this;
-    }
-
-    public IEnrichedEmbedBuilder RemoveFieldRange(int index, int count)
-    {
-        this.Current.RemoveFieldRange(index, count);
-        return this;
-    }
-
-    public IEnrichedEmbedBuilder ClearFields()
-    {
-        this.Current.ClearFields();
+        this.EnhancedBuilder.SetTitleTemplate(template);
         return this;
     }
 }

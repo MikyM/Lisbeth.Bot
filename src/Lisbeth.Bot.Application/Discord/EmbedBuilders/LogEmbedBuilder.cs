@@ -24,7 +24,8 @@ public class LogEmbedBuilder : EnrichedEmbedBuilder, ILogEmbedBuilder
 {
     public virtual DiscordLog? Log { get; private set; }
 
-    protected internal LogEmbedBuilder(EnhancedDiscordEmbedBuilder enhancedEmbedBuilder, DiscordLog? log = null) : base(enhancedEmbedBuilder)
+    protected LogEmbedBuilder(EnhancedDiscordEmbedBuilder enhancedEmbedBuilder,
+        DiscordLog? log = null) : base(enhancedEmbedBuilder)
         => this.Log = log;
 
     public ILogEmbedBuilder WithType(DiscordLog log)
@@ -39,12 +40,12 @@ public class LogEmbedBuilder : EnrichedEmbedBuilder, ILogEmbedBuilder
             base.WithAction(this.Log.Value);
         base.WithActionType(DiscordEmbedEnhancement.Log);
 
-        this.EnhancedBuilder.Evaluate();
+        base.Evaluate();
     }
 
     public override LogEmbedBuilder EnrichFrom<TEnricher>(TEnricher enricher)
     {
-        enricher.Enrich(this);
+        enricher.Enrich(base.BaseWrapper);
         return this;
     }
 }

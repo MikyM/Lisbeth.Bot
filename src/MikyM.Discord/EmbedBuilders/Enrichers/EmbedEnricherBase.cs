@@ -15,9 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using MikyM.Discord.EmbedBuilders.Builders;
-
 namespace MikyM.Discord.EmbedBuilders.Enrichers;
 
 public abstract class EmbedEnricherBase<TEntity> : IEmbedEnricher where TEntity : class
@@ -31,5 +28,5 @@ public abstract class EmbedEnricherBase<TEntity> : IEmbedEnricher where TEntity 
         this.Entity = enricher;
     }
 
-    public abstract void Enrich(IEnrichedEmbedBuilder embedBuilder);
+    public abstract void Enrich(IDiscordEmbedBuilderWrapper embedBuilder);
 }

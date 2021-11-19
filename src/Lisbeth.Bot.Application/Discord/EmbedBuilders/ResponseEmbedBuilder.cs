@@ -24,9 +24,9 @@ public class ResponseEmbedBuilder : EnrichedEmbedBuilder, IResponseEmbedBuilder
 {
     public virtual DiscordResponse? Response { get; private set; }
 
-    protected internal ResponseEmbedBuilder(EnhancedDiscordEmbedBuilder enhancedEmbedBuilder,
-        DiscordResponse? response = null) : base(enhancedEmbedBuilder) =>
-        this.Response = response;
+    protected ResponseEmbedBuilder(EnhancedDiscordEmbedBuilder enhancedEmbedBuilder,
+        DiscordResponse? response = null) : base(enhancedEmbedBuilder) 
+        => this.Response = response;
 
     public IResponseEmbedBuilder WithType(DiscordResponse response)
     {
@@ -40,12 +40,12 @@ public class ResponseEmbedBuilder : EnrichedEmbedBuilder, IResponseEmbedBuilder
             base.WithAction(this.Response.Value);
         base.WithActionType(DiscordEmbedEnhancement.Response);
 
-        this.EnhancedBuilder.Evaluate();
+        base.Evaluate();
     }
 
     public override ResponseEmbedBuilder EnrichFrom<TEnricher>(TEnricher enricher)
     {
-        enricher.Enrich(this);
+        enricher.Enrich(this.BaseWrapper);
         return this;
     }
 }

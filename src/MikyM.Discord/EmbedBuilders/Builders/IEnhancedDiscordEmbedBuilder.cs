@@ -16,6 +16,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using DSharpPlus.Entities;
+using System;
 
 namespace MikyM.Discord.EmbedBuilders.Builders;
 
@@ -30,6 +31,8 @@ public interface IEnhancedDiscordEmbedBuilder : IBaseEmbedBuilder
     string? ActionType { get; }
     string? Action { get; }
 
+    IEnhancedDiscordEmbedBuilder WithAction<TEnum>(TEnum action) where TEnum : Enum;
+    IEnhancedDiscordEmbedBuilder WithActionType<TEnum>(TEnum actionType) where TEnum : Enum;
     IEnhancedDiscordEmbedBuilder WithCase(long caseId);
     IEnhancedDiscordEmbedBuilder WithFooterSnowflakeInfo(SnowflakeObject snowflake);
     IEnhancedDiscordEmbedBuilder WithAuthorSnowflakeInfo(DiscordMember member);
