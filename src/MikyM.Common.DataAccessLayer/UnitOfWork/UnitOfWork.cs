@@ -55,9 +55,9 @@ public sealed class UnitOfWork<TContext> : IUnitOfWork<TContext> where TContext 
 
         Type? concrete;
 
-        if (UoFCache.CachedTypes.TryGetValue(name, out concrete) && type.IsAssignableFrom(concrete))
+        if (UoFCache.CachedTypes.TryGetValue(name, out concrete) && concrete is not null && type.IsAssignableFrom(concrete))
         {
-            string? concreteName = concrete?.FullName ?? throw new ArgumentNullException();
+            string? concreteName = concrete.FullName ?? throw new InvalidOperationException();
 
             if (_repositories.TryGetValue(concreteName, out var concreteRepo)) return (TRepository) concreteRepo;
 
