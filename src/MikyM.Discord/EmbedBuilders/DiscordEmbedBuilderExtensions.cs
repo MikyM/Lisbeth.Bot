@@ -30,8 +30,21 @@ public static class DiscordEmbedBuilderExtensions
             builder.Title?.Length + builder.Fields?.Sum(x => x.Value.Length + x.Name.Length) > 6000);
     }
 
-    public static TBuilder EnhanceWith<TBuilder>(this DiscordEmbedBuilder builder, params object[]? args) where TBuilder : IEnrichedEmbedBuilder
+    public static IEnhancedDiscordEmbedBuilder Enhance(this DiscordEmbedBuilder builder)
     {
-        return (TBuilder)Activator.CreateInstance(typeof(TBuilder), args)! ?? throw new InvalidOperationException();
+        return new EnhancedDiscordEmbedBuilder(builder);
+    }
+
+    public static TBuilder As<TBuilder>(this IEnhancedDiscordEmbedBuilder builder, params object[]? args)
+        where TBuilder : IEnrichedEmbedBuilder
+    {
+        if (!BuilderCache.CachedTypes.TryGetValue(typeof(TBuilder).FullName ?? throw new InvalidOperationException(), out var concrete) || !typeof(TBuilder).IsAssignableFrom(concrete))
+            throw new ArgumentException("Given builder type is not valid in this context.");
+
+        return (TBuilder)Activator.CreateInstance(concrete ?? throw new InvalidOperationException(),
+            args is null 
+                ? builder 
+                : args.Concat(new object[] { builder }).ToArray())! 
+               ?? throw new InvalidOperationException();
     }
 }

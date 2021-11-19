@@ -31,7 +31,7 @@ public abstract class EnrichedEmbedBuilder : IEnrichedEmbedBuilder
     /// <summary>
     /// Gets the previous builder that was used to construct this one.
     /// </summary>
-    protected EnhancedDiscordEmbedBuilder BaseBuilder { get; private set; }
+    protected EnhancedDiscordEmbedBuilder EnhancedBuilder { get; private set; }
 
     /// <summary>
     /// Gets the current embed builder.
@@ -45,13 +45,12 @@ public abstract class EnrichedEmbedBuilder : IEnrichedEmbedBuilder
     /// <summary>
     /// Constructs an enriched embed builder.
     /// </summary>
-    /// <param name="baseEmbedBuilder">Builder to base this off of.</param>
-    /// <param name="action">Specific name of the action that the embed responds to if any.</param>
-    protected EnrichedEmbedBuilder(EnhancedDiscordEmbedBuilder baseEmbedBuilder)
+    /// <param name="enhancedEmbedBuilder">Builder to base this off of.</param>
+    protected EnrichedEmbedBuilder(EnhancedDiscordEmbedBuilder enhancedEmbedBuilder)
     {
-        this.Base = new DiscordEmbedBuilder(baseEmbedBuilder.Current);
-        this.Current = baseEmbedBuilder.Current;
-        this.BaseBuilder = baseEmbedBuilder;
+        this.Base = new DiscordEmbedBuilder(enhancedEmbedBuilder.Current);
+        this.Current = enhancedEmbedBuilder.Current;
+        this.EnhancedBuilder = enhancedEmbedBuilder;
     }
 
     public abstract IEnrichedEmbedBuilder EnrichFrom<TEnricher>(TEnricher enricher)
@@ -61,7 +60,7 @@ public abstract class EnrichedEmbedBuilder : IEnrichedEmbedBuilder
     /// Prepares the builder for building.
     /// </summary>
     protected virtual void Evaluate()
-        => this.BaseBuilder.Evaluate();
+        => this.EnhancedBuilder.Evaluate();
     public DiscordEmbed Build()
         => this.Current.Build();
 
@@ -73,7 +72,7 @@ public abstract class EnrichedEmbedBuilder : IEnrichedEmbedBuilder
     /// </summary>
     protected IEnrichedEmbedBuilder WithAction<TEnum>(TEnum action) where TEnum : Enum
     {
-        this.BaseBuilder.WithAction(action);
+        this.EnhancedBuilder.WithAction(action);
         this.Evaluate();
         return this;
     }
@@ -84,8 +83,8 @@ public abstract class EnrichedEmbedBuilder : IEnrichedEmbedBuilder
     /// </summary>
     protected IEnrichedEmbedBuilder WithActionType<TEnum>(TEnum action) where TEnum : Enum
     {
-        this.BaseBuilder.WithActionType(action);
-        this.Current = new DiscordEmbedBuilder(this.BaseBuilder.Current);
+        this.EnhancedBuilder.WithActionType(action);
+        this.Current = new DiscordEmbedBuilder(this.EnhancedBuilder.Current);
         this.Evaluate();
         return this;
     }

@@ -49,16 +49,15 @@ public sealed class UnitOfWork<TContext> : IUnitOfWork<TContext> where TContext 
         _repositories ??= new Dictionary<string, IBaseRepository>();
 
         var type = typeof(TRepository);
-        string name = type.FullName ?? throw new ArgumentNullException();
+        string name = type.FullName ?? throw new InvalidOperationException();
 
         if (_repositories.TryGetValue(name, out var repository)) return (TRepository) repository;
 
-        var concrete =
-            UoFCache.CachedTypes.FirstOrDefault(x => type.IsAssignableFrom(x) && !x.IsAbstract && !x.IsInterface);
+        Type? concrete;
 
-        if (concrete is not null)
+        if (UoFCache.CachedTypes.TryGetValue(name, out concrete) && type.IsAssignableFrom(concrete))
         {
-            string? concreteName = concrete.FullName ?? throw new ArgumentNullException();
+            string? concreteName = concrete?.FullName ?? throw new ArgumentNullException();
 
             if (_repositories.TryGetValue(concreteName, out var concreteRepo)) return (TRepository) concreteRepo;
 

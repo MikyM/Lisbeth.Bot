@@ -23,7 +23,7 @@ namespace MikyM.Discord.EmbedBuilders.Builders;
 
 public sealed class EnhancedDiscordEmbedBuilder : IEnhancedDiscordEmbedBuilder
 {
-    protected DiscordEmbedBuilder Base { get; }
+    private DiscordEmbedBuilder Base { get; }
 
     internal DiscordEmbedBuilder Current { get; }
 
@@ -39,8 +39,8 @@ public sealed class EnhancedDiscordEmbedBuilder : IEnhancedDiscordEmbedBuilder
 
     internal EnhancedDiscordEmbedBuilder(DiscordEmbedBuilder builder)
     {
-        this.Base = new DiscordEmbedBuilder(builder) ?? throw new ArgumentNullException(nameof(builder));
-        this.Current = builder;
+        this.Base = builder ?? throw new ArgumentNullException(nameof(builder));
+        this.Current = new DiscordEmbedBuilder(builder);
     }
 
 

@@ -246,7 +246,8 @@ public class DiscordMuteService : IDiscordMuteService
         await _guildLoggerService.LogToDiscordAsync(guild, req, moderator, guildCfg.EmbedHexColor, id);
 
         return Result<DiscordEmbed>.FromSuccess(new DiscordEmbedBuilder()
-            .EnhanceWith<IResponseEmbedBuilder>()
+            .Enhance()
+            .As<ResponseEmbedBuilder>()
             .EnrichFrom(new ModAddActionEmbedEnricher(req, target, id, guildCfg.EmbedHexColor))
             .Build());
     }

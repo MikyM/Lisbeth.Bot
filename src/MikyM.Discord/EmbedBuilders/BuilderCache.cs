@@ -15,19 +15,21 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using MikyM.Discord.EmbedBuilders.Builders;
+namespace MikyM.Discord.EmbedBuilders;
 
-namespace MikyM.Common.DataAccessLayer.Helpers;
-
-public static class UoFCache
+internal static class BuilderCache
 {
-    static UoFCache()
+    static BuilderCache()
     {
         CachedTypes ??= AppDomain.CurrentDomain.GetAssemblies()
             .SelectMany(x => x.GetTypes()
-                .Where(t => t.GetInterface(nameof(IBaseRepository)) is not null && !t.IsAbstract && t.IsInterface))
+                .Where(t => t.GetInterface(nameof(IEnrichedEmbedBuilder)) is not null && !t.IsAbstract && !t.IsInterface))
             .ToDictionary(x => x.FullName ?? x.Name);
     }
 
-    public static Dictionary<string, Type> CachedTypes { get; }
+    internal static Dictionary<string, Type> CachedTypes { get; }
 }
