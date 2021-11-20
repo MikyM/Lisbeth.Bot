@@ -24,18 +24,12 @@ namespace MikyM.Discord.EmbedBuilders;
 public static class DiscordEmbedBuilderExtensions
 {
     public static bool IsValid(this DiscordEmbedBuilder builder)
-    {
-        return !(builder.Author?.Name.Length + builder.Footer?.Text.Length + builder.Description?.Length +
+        => !(builder.Author?.Name.Length + builder.Footer?.Text.Length + builder.Description?.Length +
             builder.Title?.Length + builder.Fields?.Sum(x => x.Value.Length + x.Name.Length) > 6000);
-    }
 
-    public static IEnhancedDiscordEmbedBuilder AsEnhanced(this DiscordEmbedBuilder builder)
-    {
-        return new EnhancedDiscordEmbedBuilder(builder);
-    }
+    public static IEnhancedDiscordEmbedBuilder AsEnhanced(this DiscordEmbedBuilder builder) 
+        => new EnhancedDiscordEmbedBuilder(builder);
 
-    public static IEnhancedDiscordEmbedBuilder AsEnriched(this DiscordEmbedBuilder builder)
-    {
-        return new EnrichedDiscordEmbedBuilder(builder);
-    }
+    public static IEnhancedDiscordEmbedBuilder AsEnriched(this DiscordEmbedBuilder builder) 
+        => new EnrichedDiscordEmbedBuilder(builder);
 }

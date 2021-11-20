@@ -66,7 +66,7 @@ public static class DependancyInjectionExtensions
                 .Where(t => t.GetInterfaces().Contains(interfaceToSearchFor) && t.IsInterface))
             .ToDictionary(intr => intr,
                 intr => assemblies.SelectMany(impl => impl.GetTypes())
-                    .FirstOrDefault(impl => intr.IsAssignableFrom(impl) && impl.Name == intr.Name[1..]));
+                    .FirstOrDefault(impl => intr.IsAssignableFrom(impl) && impl.Name == intr.Name[1..] && impl.IsClass && !impl.IsGenericType));
 
         return dict;
     }
