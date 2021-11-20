@@ -17,13 +17,13 @@
 
 namespace Lisbeth.Bot.Domain.DTOs.Request.Base;
 
-public class BaseAuthReqDto
+public abstract  class BaseAuthReqDto
 {
-    public BaseAuthReqDto()
+    protected BaseAuthReqDto()
     {
     }
 
-    public BaseAuthReqDto(ulong requestedOnBehalfOfId)
+    protected BaseAuthReqDto(ulong requestedOnBehalfOfId)
     {
         RequestedOnBehalfOfId = requestedOnBehalfOfId;
     }

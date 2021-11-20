@@ -29,6 +29,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MikyM.Common.Domain;
+using MikyM.Discord.EmbedBuilders;
 using Serilog;
 using Serilog.Events;
 
@@ -74,6 +75,7 @@ public class Program
             builder.Services.ConfigureApiVersioning();
             builder.Services.ConfigureHealthChecks();
             builder.Services.ConfigureFluentValidation();
+            builder.Services.AddEnrichedDiscordEmbedBuilders();
 
             // Configure Autofac
             builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());

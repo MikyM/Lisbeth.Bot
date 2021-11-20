@@ -951,7 +951,7 @@ public class DiscordTicketService : IDiscordTicketService
             }
             catch (Exception)
             {
-                return new DiscordNotFoundError(DiscordEntityType.Channel);
+                return new DiscordNotFoundError(DiscordEntity.Channel);
             }
 
             var res = await _ticketService.GetSingleBySpecAsync<Ticket>(
@@ -973,7 +973,7 @@ public class DiscordTicketService : IDiscordTicketService
         }
         catch (Exception)
         {
-            return new DiscordNotFoundError(DiscordEntityType.Member);
+            return new DiscordNotFoundError(DiscordEntity.Member);
         }
 
         return (ticket, requestingMember, guild, targetTicketChannel);

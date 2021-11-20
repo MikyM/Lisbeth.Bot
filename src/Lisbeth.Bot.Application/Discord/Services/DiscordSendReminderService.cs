@@ -91,7 +91,7 @@ public class DiscordSendReminderService : IDiscordSendReminderService
         catch (Exception)
         {
             // ignore
-            return Result.FromError(new DiscordNotFoundError(DiscordEntityType.Channel));
+            return Result.FromError(new DiscordNotFoundError(DiscordEntity.Channel));
         }
 
         if (embedConfig is not null)

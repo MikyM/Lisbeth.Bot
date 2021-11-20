@@ -23,10 +23,11 @@ using MikyM.Discord.EmbedBuilders;
 using MikyM.Discord.EmbedBuilders.Enums;
 using MikyM.Discord.Extensions.BaseExtensions;
 using System.Globalization;
+using MikyM.Discord.EmbedBuilders.Wrappers;
 
 namespace Lisbeth.Bot.Application.Discord.EmbedEnrichers;
 
-public class ModAddActionEmbedEnricher : EmbedEnricherBase<IAddModReq>
+public class ModAddActionEmbedEnricher : EmbedEnricher<IAddModReq>
 {
     public DiscordMember Target { get; }
     public IModEntity? Previous { get; }
@@ -55,19 +56,19 @@ public class ModAddActionEmbedEnricher : EmbedEnricherBase<IAddModReq>
             if (this.IsOverlapping)
             {
                 embedBuilder.WithDescription(
-                    $"This user has already been {pastTense.ToLower()} until {this.Previous.AppliedUntil} by {ExtendedFormatter.Mention(this.Entity.RequestedOnBehalfOfId, DiscordEntityType.User)}");
+                    $"This user has already been {pastTense.ToLower()} until {this.Previous.AppliedUntil} by {ExtendedFormatter.Mention(this.Entity.RequestedOnBehalfOfId, DiscordEntity.User)}");
                 embedBuilder.WithFooter($"Previous case Id: {this.Previous.Id} | Member Id: {this.Previous.UserId}");
                 return;
             }
 
             embedBuilder.AddField($"Previous {name.ToLower()} until", this.Previous.AppliedUntil.ToString(), true);
             embedBuilder.AddField("Previous moderator",
-                $"{ExtendedFormatter.Mention(this.Previous.AppliedById, DiscordEntityType.User)}", true);
+                $"{ExtendedFormatter.Mention(this.Previous.AppliedById, DiscordEntity.User)}", true);
             if (!string.IsNullOrWhiteSpace(this.Previous.Reason)) embedBuilder.AddField("Previous reason", this.Previous.Reason, true);
         }
 
         embedBuilder.AddField("User mention", this.Target.Mention, true);
-        embedBuilder.AddField("Moderator", ExtendedFormatter.Mention(this.Entity.RequestedOnBehalfOfId, DiscordEntityType.Member),
+        embedBuilder.AddField("Moderator", ExtendedFormatter.Mention(this.Entity.RequestedOnBehalfOfId, DiscordEntity.Member),
             true);
 
         TimeSpan duration = this.Entity.AppliedUntil.Subtract(DateTime.UtcNow);

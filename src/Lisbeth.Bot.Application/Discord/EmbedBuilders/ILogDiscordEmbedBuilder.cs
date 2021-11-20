@@ -15,13 +15,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace MikyM.Discord.EmbedBuilders.Enums;
+using MikyM.Discord.EmbedBuilders.Builders;
+using MikyM.Discord.EmbedBuilders.Enums;
 
-public enum DiscordEntityType
+namespace Lisbeth.Bot.Application.Discord.EmbedBuilders;
+
+public interface ILogDiscordEmbedBuilder : IEnrichedDiscordEmbedBuilder
 {
-    Guild,
-    Channel,
-    Member,
-    User,
-    Role
+    public DiscordLog? Log { get; }
+
+    ILogDiscordEmbedBuilder WithType(DiscordLog log);
 }

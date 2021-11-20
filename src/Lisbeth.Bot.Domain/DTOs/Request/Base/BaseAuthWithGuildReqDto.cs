@@ -17,13 +17,13 @@
 
 namespace Lisbeth.Bot.Domain.DTOs.Request.Base;
 
-public class BaseAuthWithGuildReqDto : BaseAuthReqDto, IBaseModAuthReq
+public abstract class BaseAuthWithGuildReqDto : BaseAuthReqDto, IBaseModAuthReq
 {
-    public BaseAuthWithGuildReqDto()
+    protected BaseAuthWithGuildReqDto()
     {
     }
 
-    public BaseAuthWithGuildReqDto(ulong guildId, ulong requestedOnBehalfOfId) : base(requestedOnBehalfOfId)
+    protected BaseAuthWithGuildReqDto(ulong guildId, ulong requestedOnBehalfOfId) : base(requestedOnBehalfOfId)
     {
         GuildId = guildId;
     }

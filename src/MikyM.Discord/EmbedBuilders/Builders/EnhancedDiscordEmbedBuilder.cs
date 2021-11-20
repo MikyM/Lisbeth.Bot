@@ -16,17 +16,16 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using DSharpPlus.Entities;
+using MikyM.Discord.EmbedBuilders.Wrappers;
 using MikyM.Discord.Extensions.BaseExtensions;
 using System;
 
 namespace MikyM.Discord.EmbedBuilders.Builders;
 
-public sealed class EnhancedDiscordEmbedBuilder : IEnhancedDiscordEmbedBuilder
+public class EnhancedDiscordEmbedBuilder : IEnhancedDiscordEmbedBuilder
 {
-    internal DiscordEmbedBuilder Base { get; }
-
-    internal DiscordEmbedBuilder Current { get; }
-
+    public DiscordEmbedBuilderImmutableWrapper? Base { get; private set; }
+    public DiscordEmbedBuilderWrapper Current { get; private set; }
     public string? Action { get; private set; }
     public string? ActionType { get; private set; }
     public long? CaseId { get; private set; }
@@ -36,30 +35,59 @@ public sealed class EnhancedDiscordEmbedBuilder : IEnhancedDiscordEmbedBuilder
     public string TitleTemplate { get; private set; } = @"@action@ @type@@info@"; // 0 - action , 1 - type, 2 - target/caller
     public string FooterTemplate { get; private set; } = @"@caseId@@info@"; // 0 - caseId , 1 - snowflake info
 
-
-    internal EnhancedDiscordEmbedBuilder(DiscordEmbedBuilder builder)
+    public EnhancedDiscordEmbedBuilder() : this(new DiscordEmbedBuilder())
     {
-        this.Base = new DiscordEmbedBuilder(builder) ?? throw new ArgumentNullException(nameof(builder));
-        this.Current = new DiscordEmbedBuilder(builder);
     }
 
-    public TBuilder As<TBuilder>() where TBuilder : EnrichedEmbedBuilder
+    public EnhancedDiscordEmbedBuilder(DiscordEmbedBuilder builder)
     {
+        this.Base = new DiscordEmbedBuilderImmutableWrapper(builder ?? throw new ArgumentNullException(nameof(builder)));
+        this.Current = new DiscordEmbedBuilderWrapper(builder);
+    }
+
+    public TBuilder AsEnriched<TBuilder>(params object[] args) where TBuilder : EnrichedDiscordEmbedBuilder
+    {
+        if (typeof(TBuilder) == typeof(EnrichedDiscordEmbedBuilder)) return (TBuilder)this.AsEnriched();
+
         if (!BuilderCache.CachedTypes.TryGetValue(typeof(TBuilder).FullName ?? throw new InvalidOperationException("Builder type is not valid."),
                 out var type) || !typeof(TBuilder).IsAssignableFrom(type))
             throw new ArgumentException("Given builder type is not valid in this context.");
 
-        var instance = Activator.CreateInstance(type);
-        return instance is null
-            ? throw new InvalidOperationException("Failed to create an instance of the specified builder.")
-            : (TBuilder)instance;
+        var instance = Activator.CreateInstance(type,
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance, null, new object[] { args }, null);
+        if (instance is null)
+            throw new InvalidOperationException("Failed to create an instance of the specified builder.");
+
+        var castInstance = instance as TBuilder;
+        castInstance?.PrepareCustomEnriched(this);
+
+        return castInstance ?? throw new InvalidOperationException("Failed to prepare the created builder instance."); ;
     }
 
-    public IEnhancedDiscordEmbedBuilder WithCase(long caseId)
+    public IEnrichedDiscordEmbedBuilder AsEnriched()
+        => new EnrichedDiscordEmbedBuilder(this);
+
+    public static implicit operator DiscordEmbed(EnhancedDiscordEmbedBuilder builder)
+        => builder.Build();
+
+    public IEnhancedDiscordEmbedBuilder WithCase(long? caseId)
     {
         this.CaseId = caseId;
         return this;
     }
+
+    internal DiscordEmbedBuilder GetCurrentInternal()
+        => this.Current.GetBaseInternal();
+
+    private void PrepareCustomEnriched(IEnhancedDiscordEmbedBuilder builderToBaseOffOf)
+    {
+        this.Current = builderToBaseOffOf.Current;
+        this.Base = builderToBaseOffOf.Base;
+    }
+
+    public DiscordEmbedBuilder? ExtractBase() 
+        => this.Base is null ? null : new DiscordEmbedBuilder(this.Base.GetBaseInternal());
+    
 
     public IEnhancedDiscordEmbedBuilder WithAuthorSnowflakeInfo(DiscordMember member)
     {
@@ -106,7 +134,7 @@ public sealed class EnhancedDiscordEmbedBuilder : IEnhancedDiscordEmbedBuilder
         return this;
     }
 
-    internal void Evaluate()
+    protected virtual void Evaluate()
     {
         string author = this.AuthorTemplate
             .Replace("@action@", this.Action is null ? "" : this.Action.SplitByCapitalAndConcat())

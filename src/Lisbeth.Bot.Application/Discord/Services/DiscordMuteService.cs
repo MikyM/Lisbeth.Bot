@@ -27,6 +27,7 @@ using Lisbeth.Bot.DataAccessLayer.Specifications.Mute;
 using Lisbeth.Bot.Domain.DTOs.Request.Mute;
 using Microsoft.Extensions.Logging;
 using MikyM.Discord.EmbedBuilders;
+using MikyM.Discord.EmbedBuilders.Builders;
 using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.EmbedBuilders.Enums;
 using MikyM.Discord.Interfaces;
@@ -42,9 +43,10 @@ public class DiscordMuteService : IDiscordMuteService
     private readonly IMuteService _muteService;
     private readonly IDiscordGuildLoggerService _guildLoggerService;
     private readonly IDiscordEmbedProvider _embedProvider;
+    private readonly IResponseDiscordEmbedBuilder _embedBuilder;
 
     public DiscordMuteService(IDiscordService discord, IGuildService guildService, ILogger<DiscordMuteService> logger,
-        IMuteService muteService, IDiscordGuildLoggerService guildLoggerService, IDiscordEmbedProvider embedProvider)
+        IMuteService muteService, IDiscordGuildLoggerService guildLoggerService, IDiscordEmbedProvider embedProvider, IResponseDiscordEmbedBuilder embedBuilder)
     {
         _discord = discord;
         _guildService = guildService;
@@ -52,6 +54,7 @@ public class DiscordMuteService : IDiscordMuteService
         _muteService = muteService;
         _guildLoggerService = guildLoggerService;
         _embedProvider = embedProvider;
+        _embedBuilder = embedBuilder;
     }
 
     public async Task<Result<DiscordEmbed>> MuteAsync(MuteReqDto req)
@@ -221,7 +224,7 @@ public class DiscordMuteService : IDiscordMuteService
             await _guildService.GetSingleBySpecAsync(new ActiveGuildByIdSpec(guild.Id));
 
         if (!result.IsDefined())
-            return Result<DiscordEmbed>.FromError(new DiscordNotFoundError(DiscordEntityType.Guild));
+            return Result<DiscordEmbed>.FromError(new DiscordNotFoundError(DiscordEntity.Guild));
 
         var guildCfg = result.Entity;
 
@@ -243,11 +246,9 @@ public class DiscordMuteService : IDiscordMuteService
 
         if (!resMute.IsSuccess) return new DiscordError("Failed to mute.");
 
-        await _guildLoggerService.LogToDiscordAsync(guild, req, moderator, guildCfg.EmbedHexColor, id);
+        //await _guildLoggerService.LogToDiscordAsync(guild, req, moderator, guildCfg.EmbedHexColor, id);
 
-        return Result<DiscordEmbed>.FromSuccess(new DiscordEmbedBuilder()
-            .Enhance()
-            .As<ResponseEmbedBuilder>()
+        return Result<DiscordEmbed>.FromSuccess(_embedBuilder
             .WithType(DiscordResponse.Mute)
             .EnrichFrom(new ModAddActionEmbedEnricher(req, target, id, guildCfg.EmbedHexColor))
             .Build());
@@ -274,7 +275,7 @@ public class DiscordMuteService : IDiscordMuteService
             await _guildService.GetSingleBySpecAsync<Guild>(new ActiveGuildByDiscordIdWithModerationSpec(guild.Id));
 
         if (!result.IsDefined())
-            return Result<DiscordEmbed>.FromError(new DiscordNotFoundError(DiscordEntityType.Guild));
+            return Result<DiscordEmbed>.FromError(new DiscordNotFoundError(DiscordEntity.Guild));
 
         var guildCfg = result.Entity;
 
@@ -287,7 +288,7 @@ public class DiscordMuteService : IDiscordMuteService
         }
         catch (Exception)
         {
-            return Result<DiscordEmbed>.FromError(new DiscordNotFoundError(DiscordEntityType.Channel));
+            return Result<DiscordEmbed>.FromError(new DiscordNotFoundError(DiscordEntity.Channel));
         }
 
         var embed = new DiscordEmbedBuilder();
@@ -361,7 +362,7 @@ public class DiscordMuteService : IDiscordMuteService
             await _guildService.GetSingleBySpecAsync(new ActiveGuildByIdSpec(guild.Id));
 
         if (!result.IsDefined())
-            return Result<DiscordEmbed>.FromError(new DiscordNotFoundError(DiscordEntityType.Guild));
+            return Result<DiscordEmbed>.FromError(new DiscordNotFoundError(DiscordEntity.Guild));
 
         var guildCfg = result.Entity;
 
@@ -374,7 +375,7 @@ public class DiscordMuteService : IDiscordMuteService
         }
         catch (Exception)
         {
-            return Result<DiscordEmbed>.FromError(new DiscordNotFoundError(DiscordEntityType.Channel));
+            return Result<DiscordEmbed>.FromError(new DiscordNotFoundError(DiscordEntity.Channel));
         }
 
 

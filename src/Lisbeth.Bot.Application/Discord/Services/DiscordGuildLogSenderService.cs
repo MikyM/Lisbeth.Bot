@@ -95,7 +95,7 @@ public class DiscordGuildLogSenderService : IDiscordGuildLogSenderService
 
     public async Task<Result> SendAsync(ulong discordGuildId, DiscordLog type, DiscordEmbed embed)
     {
-        if (_discordService.Client.Guilds.TryGetValue(discordGuildId, out var guild)) return new DiscordNotFoundError(DiscordEntityType.Guild);
+        if (_discordService.Client.Guilds.TryGetValue(discordGuildId, out var guild)) return new DiscordNotFoundError(DiscordEntity.Guild);
 
         return await this.SendAsync(guild ?? throw new InvalidOperationException("Guild was null."), type, embed);
     }

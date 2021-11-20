@@ -185,14 +185,14 @@ namespace Lisbeth.Bot.Application.Discord.Helpers
         /// <param name="id">Id of the object.</param>
         /// <param name="type">Type of the object to which the Id belongs.</param>
         /// <returns>Formatted mention.</returns>
-        public static string Mention(ulong id, DiscordEntityType type)
+        public static string Mention(ulong id, DiscordEntity type)
             => type switch
             {
-                DiscordEntityType.Guild => throw new NotSupportedException(),
-                DiscordEntityType.Channel => $"<#{id}>",
-                DiscordEntityType.Member => $"<@!{id}>",
-                DiscordEntityType.User => $"<@{id}>",
-                DiscordEntityType.Role => $"<&!{id}>",
+                DiscordEntity.Guild => throw new NotSupportedException(),
+                DiscordEntity.Channel => $"<#{id}>",
+                DiscordEntity.Member => $"<@!{id}>",
+                DiscordEntity.User => $"<@{id}>",
+                DiscordEntity.Role => $"<&!{id}>",
                 _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
             };
 

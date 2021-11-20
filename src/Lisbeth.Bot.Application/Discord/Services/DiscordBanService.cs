@@ -101,7 +101,7 @@ public class DiscordBanService : IDiscordBanService
             }
             catch (Exception)
             {
-                return Result<DiscordEmbed>.FromError(new DiscordNotFoundError(DiscordEntityType.User));
+                return Result<DiscordEmbed>.FromError(new DiscordNotFoundError(DiscordEntity.User));
             }
 
         return await BanAsync(ctx.Guild, target, ctx.Member, req);
@@ -164,7 +164,7 @@ public class DiscordBanService : IDiscordBanService
             }
             catch (Exception)
             {
-                return Result<DiscordEmbed>.FromError(new DiscordNotFoundError(DiscordEntityType.User));
+                return Result<DiscordEmbed>.FromError(new DiscordNotFoundError(DiscordEntity.User));
             }
 
         return await UnbanAsync(ctx.Guild, target, ctx.Member, req);
@@ -232,7 +232,7 @@ public class DiscordBanService : IDiscordBanService
             }
             catch (Exception)
             {
-                return Result<DiscordEmbed>.FromError(new DiscordNotFoundError(DiscordEntityType.User));
+                return Result<DiscordEmbed>.FromError(new DiscordNotFoundError(DiscordEntity.User));
             }
 
         return await GetAsync(ctx.Guild, target, ctx.Member, req);
@@ -285,7 +285,7 @@ public class DiscordBanService : IDiscordBanService
         }
         catch (Exception)
         {
-            return Result<DiscordEmbed>.FromError(new DiscordNotFoundError(DiscordEntityType.Channel));
+            return Result<DiscordEmbed>.FromError(new DiscordNotFoundError(DiscordEntity.Channel));
         }
 
 
@@ -402,7 +402,7 @@ public class DiscordBanService : IDiscordBanService
         }
         catch (Exception)
         {
-            return Result<DiscordEmbed>.FromError(new DiscordNotFoundError(DiscordEntityType.Channel));
+            return Result<DiscordEmbed>.FromError(new DiscordNotFoundError(DiscordEntity.Channel));
         }
 
         if (!moderator.IsModerator())
@@ -501,7 +501,7 @@ public class DiscordBanService : IDiscordBanService
         }
         catch (Exception)
         {
-            return Result<DiscordEmbed>.FromError(new DiscordNotFoundError(DiscordEntityType.Channel));
+            return Result<DiscordEmbed>.FromError(new DiscordNotFoundError(DiscordEntity.Channel));
         }
 
 

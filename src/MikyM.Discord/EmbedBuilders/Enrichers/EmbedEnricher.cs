@@ -15,21 +15,20 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using DSharpPlus.Entities;
-using MikyM.Discord.EmbedBuilders.Enrichers;
+using MikyM.Discord.EmbedBuilders.Wrappers;
 
-namespace MikyM.Discord.EmbedBuilders.Builders;
+namespace MikyM.Discord.EmbedBuilders.Enrichers;
 
-/// <summary>
-/// Constructs enriched embeds.
-/// </summary>
-public interface IEnrichedEmbedBuilder : IBaseEmbedBuilder
+public abstract class EmbedEnricher<TEntity> : IEmbedEnricher where TEntity : class
 {
-    /// <summary>
-    /// Enriches this embed with an embed enricher.
-    /// </summary>
-    /// <param name="enricher">Enricher to use.</param>
-    IEnrichedEmbedBuilder EnrichFrom<TEnricher>(TEnricher enricher)
-        where TEnricher : IEmbedEnricher;
+    protected long? CaseId { get; }
+    protected TEntity Entity { get; }
+
+    protected EmbedEnricher(TEntity enricher, long? caseId)
+    {
+        this.CaseId = caseId;
+        this.Entity = enricher;
+    }
+
+    public abstract void Enrich(IDiscordEmbedBuilderWrapper embedBuilder);
 }

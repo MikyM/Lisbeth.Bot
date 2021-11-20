@@ -15,11 +15,19 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace MikyM.Discord.EmbedBuilders.Enums;
+using MikyM.Discord.EmbedBuilders.Enrichers;
 
-public enum LogActionType
+namespace MikyM.Discord.EmbedBuilders.Builders;
+
+/// <summary>
+/// Constructs enriched embeds.
+/// </summary>
+public interface IEnrichedDiscordEmbedBuilder : IBaseEmbedBuilder
 {
-    Create,
-    Update,
-    Disable
+    /// <summary>
+    /// Enriches this embed with an embed enricher.
+    /// </summary>
+    /// <param name="enricher">Enricher to use.</param>
+    IEnrichedDiscordEmbedBuilder EnrichFrom<TEnricher>(TEnricher enricher)
+        where TEnricher : IEmbedEnricher;
 }

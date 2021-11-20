@@ -16,8 +16,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using DSharpPlus.Entities;
+using Lisbeth.Bot.Application.Discord.EmbedBuilders;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Domain.DTOs.Request.Base;
+using MikyM.Discord.EmbedBuilders;
+using MikyM.Discord.EmbedBuilders.Enrichers;
 using MikyM.Discord.EmbedBuilders.Enums;
 using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.Interfaces;
@@ -41,10 +44,8 @@ namespace Lisbeth.Bot.Application.Discord.Services
             _guildService = guildService;
         }
 
-        public async Task<Result> LogToDiscordAsync<TRequest>(DiscordGuild discordGuild, TRequest req, DiscordMember? moderator = null, string hexColor = "#26296e", long? id = null) where TRequest : IBaseModAuthReq
+        public async Task<Result> LogToDiscordAsync<TRequest>(DiscordGuild discordGuild, TRequest req, DiscordMember? moderator = null, string hexColor = "#26296e", long? id = null) where TRequest : IBaseModAuthReq, IEmbedEnricher
         {
-            DiscordEmbedBuilder embed;
-
             if (moderator is null)
             {
                 try
@@ -60,38 +61,30 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             if (!moderator.IsModerator()) return new DiscordNotAuthorizedError();
 
-            switch (req)
-            {
-                case IAddModReq addReq:
-                    embed = _embedProvider.GetModerationEmbedLogFrom(addReq, moderator, id, hexColor);
-                    break;
-                case IDisableModReq disableReq:
-                    embed = _embedProvider.GetModerationEmbedLogFrom(disableReq, moderator, id, hexColor);
-                    break;
-                case IGetModReq getReq:
-                    embed = _embedProvider.GetModerationEmbedLogFrom(getReq, moderator, id, hexColor);
-                    break;
-                default:
-                    return new NotSupportedError();
-            }
+            var embed = new DiscordEmbedBuilder().AsEnhanced()
+                .WithCase(id)
+                .AsEnriched<LogDiscordEmbedBuilder>()
+                .WithType(DiscordLog.Moderation)
+                .EnrichFrom(req)
+                .Build();
 
             return await _logSender.SendAsync(discordGuild, DiscordLog.Moderation, embed);
         }
 
 
-        public async Task<Result> LogToDiscordAsync<TRequest>(ulong discordGuildId, TRequest req, DiscordMember? moderator = null, string hexColor = "#26296e", long? id = null) where TRequest : IBaseModAuthReq
+        public async Task<Result> LogToDiscordAsync<TRequest>(ulong discordGuildId, TRequest req, DiscordMember? moderator = null, string hexColor = "#26296e", long? id = null) where TRequest : IBaseModAuthReq, IEmbedEnricher
         {
-            if (_discord.Client.Guilds.TryGetValue(discordGuildId, out var guild)) return new DiscordNotFoundError(DiscordEntityType.Guild);
+            if (_discord.Client.Guilds.TryGetValue(discordGuildId, out var guild)) return new DiscordNotFoundError(DiscordEntity.Guild);
 
             return await this.LogToDiscordAsync(guild ?? throw new InvalidOperationException("Guild was null."), req, moderator, hexColor, id);
         }
 
-        public async Task<Result> LogToDiscordAsync<TRequest>(Guild guild, TRequest req, DiscordMember? moderator = null, string hexColor = "#26296e", long? id = null) where TRequest : IBaseModAuthReq
+        public async Task<Result> LogToDiscordAsync<TRequest>(Guild guild, TRequest req, DiscordMember? moderator = null, string hexColor = "#26296e", long? id = null) where TRequest : IBaseModAuthReq, IEmbedEnricher
         {
             return await this.LogToDiscordAsync(guild.GuildId, req, moderator, hexColor, id);
         }
 
-        public async Task<Result> LogToDiscordAsync<TRequest>(long guildId, TRequest req, DiscordMember? moderator = null, string hexColor = "#26296e", long? id = null) where TRequest : IBaseModAuthReq
+        public async Task<Result> LogToDiscordAsync<TRequest>(long guildId, TRequest req, DiscordMember? moderator = null, string hexColor = "#26296e", long? id = null) where TRequest : IBaseModAuthReq, IEmbedEnricher
         {
             var guildRes =
                 await _guildService.GetAsync(guildId);

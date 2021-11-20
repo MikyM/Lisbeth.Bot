@@ -27,7 +27,7 @@ internal static class BuilderCache
     {
         CachedTypes ??= AppDomain.CurrentDomain.GetAssemblies()
             .SelectMany(x => x.GetTypes()
-                .Where(t => t.GetInterface(nameof(IEnrichedEmbedBuilder)) is not null && !t.IsAbstract && !t.IsInterface))
+                .Where(t => t.GetInterface(nameof(IEnrichedDiscordEmbedBuilder)) is not null && !t.IsAbstract && !t.IsInterface))
             .ToDictionary(x => x.FullName ?? x.Name);
     }
 

@@ -15,37 +15,42 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using DSharpPlus.Entities;
 using MikyM.Discord.EmbedBuilders.Builders;
 using MikyM.Discord.EmbedBuilders.Enums;
 
 namespace Lisbeth.Bot.Application.Discord.EmbedBuilders;
 
-public class LogEmbedBuilder : EnrichedEmbedBuilder, ILogEmbedBuilder
+public sealed class ResponseDiscordEmbedBuilder : EnrichedDiscordEmbedBuilder, IResponseDiscordEmbedBuilder
 {
-    public virtual DiscordLog? Log { get; private set; }
+    public DiscordResponse? Response { get; private set; }
 
-    protected LogEmbedBuilder(EnhancedDiscordEmbedBuilder enhancedEmbedBuilder,
-        DiscordLog? log = null) : base(enhancedEmbedBuilder)
-        => this.Log = log;
+    public ResponseDiscordEmbedBuilder(EnhancedDiscordEmbedBuilder enhanced) : base(enhanced) { }
 
-    public ILogEmbedBuilder WithType(DiscordLog log)
+    public ResponseDiscordEmbedBuilder(DiscordResponse response)
+        => this.Response = response;
+
+    public IResponseDiscordEmbedBuilder WithType(DiscordResponse response)
     {
-        this.Log = log;
+        this.Response = response;
         return this;
     }
 
+    public static implicit operator DiscordEmbed(ResponseDiscordEmbedBuilder builder)
+        => builder.Build();
+
     protected override void Evaluate()
     {
-        if (this.Log is not null or 0) // if not null or default
-            base.WithAction(this.Log.Value);
-        base.WithActionType(DiscordEmbedEnhancement.Log);
+        if (this.Response is not null or 0) // if not default
+            base.WithAction(this.Response.Value);
+        base.WithActionType(DiscordEmbedEnhancement.Response);
 
         base.Evaluate();
     }
 
-    public override LogEmbedBuilder EnrichFrom<TEnricher>(TEnricher enricher)
+    public override ResponseDiscordEmbedBuilder EnrichFrom<TEnricher>(TEnricher enricher)
     {
-        enricher.Enrich(base.BaseWrapper);
+        enricher.Enrich(this.Current);
         return this;
     }
 }
