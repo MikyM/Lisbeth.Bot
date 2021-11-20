@@ -248,6 +248,7 @@ public class DiscordMuteService : IDiscordMuteService
         return Result<DiscordEmbed>.FromSuccess(new DiscordEmbedBuilder()
             .Enhance()
             .As<ResponseEmbedBuilder>()
+            .WithType(DiscordResponse.Mute)
             .EnrichFrom(new ModAddActionEmbedEnricher(req, target, id, guildCfg.EmbedHexColor))
             .Build());
     }

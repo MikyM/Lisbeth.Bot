@@ -43,6 +43,17 @@ public sealed class EnhancedDiscordEmbedBuilder : IEnhancedDiscordEmbedBuilder
         this.Current = new DiscordEmbedBuilder(builder);
     }
 
+    public TBuilder As<TBuilder>() where TBuilder : EnrichedEmbedBuilder
+    {
+        if (!BuilderCache.CachedTypes.TryGetValue(typeof(TBuilder).FullName ?? throw new InvalidOperationException("Builder type is not valid."),
+                out var type) || !typeof(TBuilder).IsAssignableFrom(type))
+            throw new ArgumentException("Given builder type is not valid in this context.");
+
+        var instance = Activator.CreateInstance(type);
+        return instance is null
+            ? throw new InvalidOperationException("Failed to create an instance of the specified builder.")
+            : (TBuilder)instance;
+    }
 
     public IEnhancedDiscordEmbedBuilder WithCase(long caseId)
     {

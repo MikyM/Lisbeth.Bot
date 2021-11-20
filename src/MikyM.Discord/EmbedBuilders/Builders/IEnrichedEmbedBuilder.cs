@@ -32,20 +32,4 @@ public interface IEnrichedEmbedBuilder : IBaseEmbedBuilder
     /// <param name="enricher">Enricher to use.</param>
     IEnrichedEmbedBuilder EnrichFrom<TEnricher>(TEnricher enricher)
         where TEnricher : IEmbedEnricher;
-
-    /// <summary>
-    /// Sets the action type.
-    /// </summary>
-    IEnrichedEmbedBuilder WithActionType<TEnum>(TEnum action) where TEnum : Enum;
-    /// <summary>
-    /// Sets the action.
-    /// </summary>
-    IEnrichedEmbedBuilder WithAction<TEnum>(TEnum action) where TEnum : Enum;
-
-    IEnrichedEmbedBuilder WithCase(long caseId);
-    IEnrichedEmbedBuilder WithFooterSnowflakeInfo(SnowflakeObject snowflake);
-    IEnrichedEmbedBuilder WithAuthorSnowflakeInfo(DiscordMember member);
-    IEnrichedEmbedBuilder SetAuthorTemplate(string template);
-    IEnrichedEmbedBuilder SetFooterTemplate(string template);
-    IEnrichedEmbedBuilder SetTitleTemplate(string template);
 }

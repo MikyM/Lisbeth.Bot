@@ -39,4 +39,10 @@ public interface IEnhancedDiscordEmbedBuilder : IBaseEmbedBuilder
     IEnhancedDiscordEmbedBuilder SetAuthorTemplate(string template);
     IEnhancedDiscordEmbedBuilder SetFooterTemplate(string template);
     IEnhancedDiscordEmbedBuilder SetTitleTemplate(string template);
+
+    /// <summary>
+    /// Creates a new instance of a specified enriched builder.
+    /// </summary>
+    /// <returns>An instance of a specified enriched builder.</returns>
+    TBuilder As<TBuilder>() where TBuilder : EnrichedEmbedBuilder;
 }

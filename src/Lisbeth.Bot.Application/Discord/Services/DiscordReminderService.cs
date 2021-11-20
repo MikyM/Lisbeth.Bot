@@ -26,6 +26,7 @@ using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.Services;
 
+[UsedImplicitly]
 public class DiscordReminderService : IDiscordReminderService
 {
     private readonly IDiscordService _discord;

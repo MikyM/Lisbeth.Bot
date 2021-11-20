@@ -17,7 +17,6 @@
 
 using DSharpPlus.Entities;
 using MikyM.Discord.EmbedBuilders.Builders;
-using System;
 using System.Linq;
 
 namespace MikyM.Discord.EmbedBuilders;
@@ -35,16 +34,15 @@ public static class DiscordEmbedBuilderExtensions
         return new EnhancedDiscordEmbedBuilder(builder);
     }
 
-    public static TBuilder As<TBuilder>(this IEnhancedDiscordEmbedBuilder builder, params object[]? args)
+    /*public static TBuilder As<TBuilder>(this IEnhancedDiscordEmbedBuilder builder, params object[]? args)
         where TBuilder : IEnrichedEmbedBuilder
     {
-        if (!BuilderCache.CachedTypes.TryGetValue(typeof(TBuilder).FullName ?? throw new InvalidOperationException(), out var type) || type is null || !typeof(TBuilder).IsAssignableFrom(type))
+        if (!BuilderCache.CachedTypes.TryGetValue(typeof(TBuilder).FullName ?? throw new InvalidOperationException(),
+                out var type) || !typeof(TBuilder).IsAssignableFrom(type))
             throw new ArgumentException("Given builder type is not valid in this context.");
 
         return (TBuilder)Activator.CreateInstance(type,
-            args is null 
-                ? builder 
-                : args.Concat(new object[] { builder }).ToArray())! 
-               ?? throw new InvalidOperationException();
-    }
+                   args is null ? builder : args.Concat(new object[] { builder }).ToArray())! ??
+               throw new InvalidOperationException();
+    }*/
 }

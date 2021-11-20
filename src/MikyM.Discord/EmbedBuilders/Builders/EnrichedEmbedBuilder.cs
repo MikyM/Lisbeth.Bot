@@ -80,50 +80,50 @@ public abstract class EnrichedEmbedBuilder : IEnrichedEmbedBuilder
     public static implicit operator DiscordEmbed(EnrichedEmbedBuilder builder)
         => builder.Build();
 
-    public IEnrichedEmbedBuilder WithAction<TEnum>(TEnum action) where TEnum : Enum
+    protected IEnrichedEmbedBuilder WithAction<TEnum>(TEnum action) where TEnum : Enum
     {
         this.EnhancedBuilder.WithAction(action);
         this.Evaluate();
         return this;
     }
 
-    public IEnrichedEmbedBuilder WithActionType<TEnum>(TEnum action) where TEnum : Enum
+    protected IEnrichedEmbedBuilder WithActionType<TEnum>(TEnum action) where TEnum : Enum
     {
         this.EnhancedBuilder.WithActionType(action);
         this.Evaluate();
         return this;
     }
     
-    public IEnrichedEmbedBuilder WithCase(long caseId)
+    protected IEnrichedEmbedBuilder WithCase(long caseId)
     {
         this.EnhancedBuilder.WithCase(caseId);
         return this;
     }
 
-    public IEnrichedEmbedBuilder WithFooterSnowflakeInfo(SnowflakeObject snowflake)
+    protected IEnrichedEmbedBuilder WithFooterSnowflakeInfo(SnowflakeObject snowflake)
     {
         this.EnhancedBuilder.WithFooterSnowflakeInfo(snowflake);
         return this;
     }
 
-    public IEnrichedEmbedBuilder WithAuthorSnowflakeInfo(DiscordMember member)
+    protected IEnrichedEmbedBuilder WithAuthorSnowflakeInfo(DiscordMember member)
     {
         this.EnhancedBuilder.WithAuthorSnowflakeInfo(member);
         return this;
     }
 
-    public IEnrichedEmbedBuilder SetAuthorTemplate(string template)
+    protected IEnrichedEmbedBuilder SetAuthorTemplate(string template)
     {
         this.EnhancedBuilder.SetAuthorTemplate(template);
         return this;
     }
-    public IEnrichedEmbedBuilder SetFooterTemplate(string template)
+    protected IEnrichedEmbedBuilder SetFooterTemplate(string template)
     {
         this.EnhancedBuilder.SetFooterTemplate(template);
         return this;
     }
 
-    public IEnrichedEmbedBuilder SetTitleTemplate(string template)
+    protected IEnrichedEmbedBuilder SetTitleTemplate(string template)
     {
         this.EnhancedBuilder.SetTitleTemplate(template);
         return this;
