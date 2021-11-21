@@ -26,6 +26,10 @@ namespace MikyM.Discord.EmbedBuilders;
 
 public static class DependancyInjectionExtensions
 {
+    /// <summary>
+    /// Registers <see cref="IEnhancedDiscordEmbedBuilder"/> with the <see cref="IServiceCollection"/>.
+    /// <br></br>It will also try to register other builders implementing <see cref="IEnhancedDiscordEmbedBuilder"/> with their concrete implementations by naming convention.
+    /// </summary>
     public static void AddEnhancedDiscordEmbedBuilders(this IServiceCollection services)
     {
         services.TryAddTransient<IEnhancedDiscordEmbedBuilder, EnhancedDiscordEmbedBuilder>();
@@ -41,6 +45,11 @@ public static class DependancyInjectionExtensions
         }
     }
 
+    /// <summary>
+    /// Registers <see cref="IEnrichedDiscordEmbedBuilder"/> with the <see cref="IServiceCollection"/>.
+    /// <br></br>It will also try to register other builders implementing <see cref="IEnrichedDiscordEmbedBuilder"/> with their concrete implementations by naming convention.
+    /// <br></br>This will also automatically register <see cref="IEnhancedDiscordEmbedBuilder"/>.
+    /// </summary>
     public static void AddEnrichedDiscordEmbedBuilders(this IServiceCollection services)
     {
         AddEnhancedDiscordEmbedBuilders(services);
@@ -58,6 +67,9 @@ public static class DependancyInjectionExtensions
         }
     }
 
+    /// <summary>
+    /// Gets a dictionary with interface implementation pairs that implement a base interface.
+    /// </summary>
     private static Dictionary<Type, Type?> GetInterfaceImplementationPairsByConvention(Type interfaceToSearchFor)
     {
         var assemblies = AppDomain.CurrentDomain.GetAssemblies();
