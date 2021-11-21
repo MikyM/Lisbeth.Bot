@@ -28,7 +28,7 @@ public static class DependancyInjectionExtensions
 {
     /// <summary>
     /// Registers <see cref="IEnhancedDiscordEmbedBuilder"/> with the <see cref="IServiceCollection"/>.
-    /// <br></br>It will also try to register other builders implementing <see cref="IEnhancedDiscordEmbedBuilder"/> with their concrete implementations by naming convention.
+    /// <br></br><br></br>This method will also try to register other builders implementing <see cref="IEnhancedDiscordEmbedBuilder"/> with their concrete implementations by naming convention.
     /// </summary>
     public static void AddEnhancedDiscordEmbedBuilders(this IServiceCollection services)
     {
@@ -47,8 +47,8 @@ public static class DependancyInjectionExtensions
 
     /// <summary>
     /// Registers <see cref="IEnrichedDiscordEmbedBuilder"/> with the <see cref="IServiceCollection"/>.
-    /// <br></br>It will also try to register other builders implementing <see cref="IEnrichedDiscordEmbedBuilder"/> with their concrete implementations by naming convention.
-    /// <br></br>This will also automatically register <see cref="IEnhancedDiscordEmbedBuilder"/>.
+    /// <br></br><br></br>This method will also try to register other builders implementing <see cref="IEnrichedDiscordEmbedBuilder"/> with their concrete implementations by naming convention.
+    /// <br></br><br></br><see cref="AddEnhancedDiscordEmbedBuilders"/> will also be automatically called.
     /// </summary>
     public static void AddEnrichedDiscordEmbedBuilders(this IServiceCollection services)
     {
