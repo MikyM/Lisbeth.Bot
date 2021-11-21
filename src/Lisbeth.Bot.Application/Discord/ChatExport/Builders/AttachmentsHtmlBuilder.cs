@@ -37,9 +37,9 @@ public class AttachmentsHtmlBuilder : IAsyncHtmlBuilder
     public async Task<string> BuildAsync()
     {
         if (Attachments.Count == 0) return "";
-        List<DiscordAttachment> imageAttachments = Attachments
+        var imageAttachments = Attachments
             .Where(a => HtmlImage.SupportedTypes.Any(x => x == a.Url.Split('.').Last())).ToList();
-        List<DiscordAttachment> videoAttachments = Attachments
+        var videoAttachments = Attachments
             .Where(a => HtmlVideo.SupportedTypes.Any(x => x == a.Url.Split('.').Last())).ToList();
         string imagesHtml = "";
         string videosHtml = "";

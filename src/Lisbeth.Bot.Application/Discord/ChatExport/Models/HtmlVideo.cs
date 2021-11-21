@@ -1,6 +1,4 @@
-using Autofac.Core;
 using Lisbeth.Bot.Application.Discord.ChatExport.Builders;
-using MikyM.Common.Domain;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
@@ -26,10 +24,7 @@ public class HtmlVideo : IAsyncHtmlBuilder
         var client = new VimeoClient(Environment.GetEnvironmentVariable("VIMEO_KEY"));
         IUploadRequest request;
 
-        if (ContainerProvider.Container.TryGetHttpClientFactory(out var httpClientFactory))
-            throw new DependencyResolutionException("Failed to resolve IHttpClientFactory in Chat Builder.");
-
-        using (HttpClient httpClient = httpClientFactory.CreateClient())
+        using (HttpClient httpClient = ChatExportHttpClientFactory.Build())
         {
             using HttpRequestMessage req = new (HttpMethod.Get, DiscordLink);
             using HttpResponseMessage response = await httpClient.SendAsync(req).ConfigureAwait(false);

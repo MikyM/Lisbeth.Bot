@@ -1,13 +1,11 @@
-using Autofac.Core;
 using Imgur.API;
 using Imgur.API.Authentication;
 using Imgur.API.Endpoints;
 using Imgur.API.Models;
-using MikyM.Common.Domain;
+using Lisbeth.Bot.Application.Discord.ChatExport.Builders;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
-using Lisbeth.Bot.Application.Discord.ChatExport.Builders;
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport.Models;
 
@@ -25,13 +23,10 @@ public class HtmlImage : IAsyncHtmlBuilder
     {
         if (SupportedTypes.All(x => x != DiscordLink.Split('.').Last().Split('?').First())) return "";
 
-        if (ContainerProvider.Container.TryGetHttpClientFactory(out var httpClientFactory))
-            throw new DependencyResolutionException("Failed to resolve IHttpClientFactory in Chat Builder.");
-
         ApiClient apiClient = new (Environment.GetEnvironmentVariable("IMGUR_KEY"));
         IImage imageUpload;
-        using HttpClient httpClient = httpClientFactory.CreateClient();
-        using HttpClient imgurHttpClient = httpClientFactory.CreateClient();
+        using HttpClient httpClient = ChatExportHttpClientFactory.Build();
+        using HttpClient imgurHttpClient = ChatExportHttpClientFactory.Build();
         using HttpRequestMessage req = new(HttpMethod.Get, DiscordLink);
         using HttpResponseMessage response = await httpClient.SendAsync(req);
         Stream stream = await response.Content.ReadAsStreamAsync();

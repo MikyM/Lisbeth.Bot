@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Security.Claims;
 using AspNetCore.Authentication.ApiKey;
 using AspNetCoreRateLimit;
 using DSharpPlus;
@@ -39,6 +38,7 @@ using MikyM.Discord.Extensions.Interactivity;
 using MikyM.Discord.Extensions.SlashCommands;
 using OpenTracing;
 using OpenTracing.Mock;
+using System.Security.Claims;
 
 namespace Lisbeth.Bot.API;
 

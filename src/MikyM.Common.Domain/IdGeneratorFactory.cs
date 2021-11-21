@@ -15,20 +15,33 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Autofac;
+using System;
+using IdGen;
 
 namespace MikyM.Common.Domain;
 
-/// <summary>
-///     Autofac container provider for use ONLY under special circumstances when you must use the service locator
-///     anti-pattern.
-///     For everything else use normal DI.
-/// </summary>
-public static class ContainerProvider
+public static class IdGeneratorFactory
 {
     /// <summary>
-    ///     Autofac container for use ONLY under special circumstances when you must use the service locator anti-pattern.
-    ///     For everything else use normal DI.
+    /// The factory used to create an instance
     /// </summary>
-    public static ILifetimeScope Container { get; set; }
+    private static Func<IdGenerator> _factory;
+
+    /// <summary>
+    /// Initializes the specified creation factory.
+    /// </summary>
+    /// <param name="creationFactory">The creation factory.</param>
+    public static void SetFactory(Func<IdGenerator> creationFactory)
+        => _factory = creationFactory;
+
+    /// <summary>
+    /// Creates a <see cref="IdGenerator"/> instance.
+    /// </summary>
+    /// <returns>Returns an instance of an <see cref="IdGenerator"/> </returns>
+    public static IdGenerator Build()
+    {
+        if (_factory == null) throw new InvalidOperationException("You can not create a context without first building the factory.");
+
+        return _factory();
+    }
 }

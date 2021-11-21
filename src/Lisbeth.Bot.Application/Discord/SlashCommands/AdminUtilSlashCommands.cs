@@ -32,6 +32,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net.Http;
 using System.Text;
+using Lisbeth.Bot.Application.Discord.ChatExport;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 
@@ -247,5 +248,5 @@ public sealed class EvaluationEnvironment
     public DiscordUser User => Context.User;
     public DiscordMember Member => Context.Member;
     public DiscordClient Client => Context.Client;
-    public static HttpClient Http => ContainerProvider.Container.Resolve<IHttpClientFactory>().CreateClient();
+    public static HttpClient Http => ChatExportHttpClientFactory.Build();
 }

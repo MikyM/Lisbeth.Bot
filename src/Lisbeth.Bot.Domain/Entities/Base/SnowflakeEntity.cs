@@ -15,8 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Autofac;
-using IdGen;
 using MikyM.Common.Domain;
 using MikyM.Common.Domain.Entities;
 
@@ -24,5 +22,5 @@ namespace Lisbeth.Bot.Domain.Entities.Base;
 
 public class SnowflakeEntity : AggregateRootEntity
 {
-    public override long Id { get; protected set; } = ContainerProvider.Container.Resolve<IdGenerator>().CreateId();
+    public override long Id { get; protected set; } = IdGeneratorFactory.Build().CreateId();
 }

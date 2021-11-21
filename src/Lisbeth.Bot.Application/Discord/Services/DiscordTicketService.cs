@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
@@ -26,7 +25,6 @@ using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Buttons;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Selects;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.SelectValues;
-using Lisbeth.Bot.Application.Enums;
 using Lisbeth.Bot.Application.Helpers;
 using Lisbeth.Bot.Application.Validation.Ticket;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
@@ -37,6 +35,7 @@ using Microsoft.Extensions.Logging;
 using MikyM.Discord.EmbedBuilders.Enums;
 using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.Interfaces;
+using System.Collections.Generic;
 
 namespace Lisbeth.Bot.Application.Discord.Services;
 

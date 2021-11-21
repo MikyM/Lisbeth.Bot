@@ -16,11 +16,14 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Globalization;
+using System.Net.Http;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Hangfire;
+using IdGen;
 using Lisbeth.Bot.API.ExceptionMiddleware;
 using Lisbeth.Bot.API.Helpers;
+using Lisbeth.Bot.Application.Discord.ChatExport;
 using Lisbeth.Bot.Application.Helpers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -92,12 +95,15 @@ public class Program
 
             var app = builder.Build();
 
-            // Configure Autofac job activator and static container provider for special use cases
-            ContainerProvider.Container = app.Services.GetAutofacRoot();
+            // Configure IdGen factory
+            IdGeneratorFactory.SetFactory(() => app.Services.GetAutofacRoot().Resolve<IdGenerator>());
+            ChatExportHttpClientFactory.SetFactory(() =>
+                app.Services.GetAutofacRoot().Resolve<IHttpClientFactory>().CreateClient());
+
             GlobalConfiguration.Configuration.UseAutofacActivator(app.Services.GetAutofacRoot());
 
             // Schedule recurring jobs
-            _ = ContainerProvider.Container
+            _ = app.Services.GetAutofacRoot()
                 .Resolve<IAsyncExecutor>()
                 .ExecuteAsync(async () => await RecurringJobHelper.ScheduleAllDefinedAfterDelayAsync());
 
