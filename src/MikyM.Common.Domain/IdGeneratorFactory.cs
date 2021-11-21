@@ -23,7 +23,7 @@ namespace MikyM.Common.Domain;
 public static class IdGeneratorFactory
 {
     /// <summary>
-    /// The factory used to create an instance
+    /// The factory used to create an instance of a <see cref="IdGenerator"/>.
     /// </summary>
     private static Func<IdGenerator> _factory;
 
@@ -40,7 +40,7 @@ public static class IdGeneratorFactory
     /// <returns>Returns an instance of an <see cref="IdGenerator"/> </returns>
     public static IdGenerator Build()
     {
-        if (_factory == null) throw new InvalidOperationException("You can not create a context without first building the factory.");
+        if (_factory == null) throw new InvalidOperationException("You can not create an instance without first building the factory.");
 
         return _factory();
     }

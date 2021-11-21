@@ -50,11 +50,10 @@ public class AttachmentsHtmlBuilder : IAsyncHtmlBuilder
             imagesHtml = await imagesBuilder.BuildAsync();
         }
 
-        if (videoAttachments.Count != 0)
-        {
-            VideosHtmlBuilder videosBuilder = new(videoAttachments);
-            videosHtml = await videosBuilder.BuildAsync();
-        }
+        if (videoAttachments.Count == 0) return $"<div class=\"attachments\">{imagesHtml}{videosHtml}</div>";
+
+        VideosHtmlBuilder videosBuilder = new(videoAttachments);
+        videosHtml = await videosBuilder.BuildAsync();
 
         return $"<div class=\"attachments\">{imagesHtml}{videosHtml}</div>";
     }
