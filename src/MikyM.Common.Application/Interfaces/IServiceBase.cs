@@ -20,7 +20,7 @@ namespace MikyM.Common.Application.Interfaces;
 public interface IServiceBase<TContext> : IDisposable where TContext : DbContext
 {
     Task<int> CommitAsync();
-    Task<int> CommitAsync(long userId);
+    Task<int> CommitAsync(long auditUserId);
     Task RollbackAsync();
     Task BeginTransactionAsync();
 }
