@@ -32,16 +32,16 @@ public abstract class AuditableDbContext<TContext> : DbContext where TContext : 
     // ReSharper disable once MemberCanBePrivate.Global
     public DbSet<AuditLog> AuditLogs { get; set; } = null!;
 
-    public async Task<int> SaveChangesAsync(long userId)
-    {
-        this.CurrentUserId = userId;
-        return await base.SaveChangesAsync();
-    }
-
     public async Task<int> SaveChangesAsync(long userId, bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {
         this.CurrentUserId = userId;
         return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+    }
+
+    public async Task<int> SaveChangesAsync(long userId, CancellationToken cancellationToken = default)
+    {
+        this.CurrentUserId = userId;
+        return await base.SaveChangesAsync(true, cancellationToken);
     }
 
     public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess,
