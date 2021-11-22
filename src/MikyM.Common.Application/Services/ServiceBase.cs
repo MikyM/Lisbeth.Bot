@@ -31,9 +31,9 @@ public abstract class ServiceBase<TContext> : IServiceBase<TContext> where TCont
         UnitOfWork = uof;
     }
 
-    public virtual async Task<int> CommitAsync(ulong userId)
+    public virtual async Task<int> CommitAsync(long userId)
     {
-        return await UnitOfWork.CommitAsync(ulong userId);
+        return await UnitOfWork.CommitAsync(userId);
     }
 
     public virtual async Task<int> CommitAsync()

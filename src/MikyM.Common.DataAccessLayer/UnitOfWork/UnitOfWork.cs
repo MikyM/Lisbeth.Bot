@@ -21,7 +21,7 @@ using System.Collections.Generic;
 
 namespace MikyM.Common.DataAccessLayer.UnitOfWork;
 
-public sealed class UnitOfWork<TContext> : IUnitOfWork<TContext> where TContext : AuditableDbContext<TContext>
+public sealed class UnitOfWork<TContext> : IUnitOfWork<TContext> where TContext : AuditableDbContext
 {
     private readonly ISpecificationEvaluator _specificationEvaluator;
 
