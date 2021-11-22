@@ -22,7 +22,7 @@ namespace MikyM.Discord.EmbedBuilders.Enums;
 /// </summary>
 public enum DiscordResponse
 {
-    Unknown,
+    Any,
     Ban,
     Unban,
     Mute,

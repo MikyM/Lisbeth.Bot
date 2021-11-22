@@ -36,6 +36,7 @@ using MikyM.Discord.EmbedBuilders.Enums;
 using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.Interfaces;
 using System.Collections.Generic;
+using MikyM.Discord.Enums;
 
 namespace Lisbeth.Bot.Application.Discord.Services;
 

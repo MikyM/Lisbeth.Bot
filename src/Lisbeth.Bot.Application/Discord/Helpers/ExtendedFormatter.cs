@@ -23,6 +23,7 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Enums;
 using MikyM.Discord.EmbedBuilders.Enums;
+using MikyM.Discord.Enums;
 
 namespace Lisbeth.Bot.Application.Discord.Helpers
 {

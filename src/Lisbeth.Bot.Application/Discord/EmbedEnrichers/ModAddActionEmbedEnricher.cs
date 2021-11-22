@@ -24,6 +24,7 @@ using MikyM.Discord.EmbedBuilders.Enums;
 using MikyM.Discord.Extensions.BaseExtensions;
 using System.Globalization;
 using MikyM.Discord.EmbedBuilders.Wrappers;
+using MikyM.Discord.Enums;
 
 namespace Lisbeth.Bot.Application.Discord.EmbedEnrichers;
 
