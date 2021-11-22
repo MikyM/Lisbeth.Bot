@@ -23,7 +23,7 @@ namespace MikyM.Discord.EmbedBuilders.Builders;
 
 public interface IEnhancedDiscordEmbedBuilder : IBaseEmbedBuilder
 {
-    DiscordEmbedBuilderImmutableWrapper? Base { get; }
+    DiscordEmbed? Base { get; }
     DiscordEmbedBuilderWrapper Current { get; }
     string AuthorTemplate { get; }
     string TitleTemplate { get; }

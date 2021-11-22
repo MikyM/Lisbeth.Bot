@@ -24,7 +24,7 @@ namespace MikyM.Discord.EmbedBuilders.Builders;
 
 public class EnhancedDiscordEmbedBuilder : IEnhancedDiscordEmbedBuilder
 {
-    public DiscordEmbedBuilderImmutableWrapper? Base { get; private set; }
+    public DiscordEmbed? Base { get; private set; }
     public DiscordEmbedBuilderWrapper Current { get; private set; }
     public string? Action { get; private set; }
     public string? ActionType { get; private set; }
@@ -41,7 +41,7 @@ public class EnhancedDiscordEmbedBuilder : IEnhancedDiscordEmbedBuilder
 
     public EnhancedDiscordEmbedBuilder(DiscordEmbedBuilder builder)
     {
-        this.Base = new DiscordEmbedBuilderImmutableWrapper(builder ?? throw new ArgumentNullException(nameof(builder)));
+        this.Base = new DiscordEmbedBuilder(builder ?? throw new ArgumentNullException(nameof(builder)));
         this.Current = new DiscordEmbedBuilderWrapper(builder);
     }
 
@@ -86,7 +86,7 @@ public class EnhancedDiscordEmbedBuilder : IEnhancedDiscordEmbedBuilder
     }
 
     public DiscordEmbedBuilder? ExtractBase() 
-        => this.Base is null ? null : new DiscordEmbedBuilder(this.Base.GetBaseInternal());
+        => this.Base is null ? null : new DiscordEmbedBuilder(this.Current.GetBaseInternal());
     
 
     public IEnhancedDiscordEmbedBuilder WithAuthorSnowflakeInfo(DiscordMember member)

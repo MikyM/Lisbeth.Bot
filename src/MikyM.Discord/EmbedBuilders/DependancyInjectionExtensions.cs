@@ -68,8 +68,9 @@ public static class DependancyInjectionExtensions
     }
 
     /// <summary>
-    /// Gets a dictionary with interface implementation pairs that implement a base interface.
+    /// Gets a dictionary with interface implementation pairs that implement a given base interface.
     /// </summary>
+    /// <param name="interfaceToSearchFor">Base interface to search for.</param>
     private static Dictionary<Type, Type?> GetInterfaceImplementationPairsByConvention(Type interfaceToSearchFor)
     {
         var assemblies = AppDomain.CurrentDomain.GetAssemblies();
@@ -78,7 +79,7 @@ public static class DependancyInjectionExtensions
                 .Where(t => t.GetInterfaces().Contains(interfaceToSearchFor) && t.IsInterface))
             .ToDictionary(intr => intr,
                 intr => assemblies.SelectMany(impl => impl.GetTypes())
-                    .FirstOrDefault(impl => intr.IsAssignableFrom(impl) && impl.Name == intr.Name[1..] && impl.IsClass && !impl.IsGenericType));
+                    .FirstOrDefault(impl => intr.IsAssignableFrom(impl) && impl.Name == intr.Name[1..] && impl.IsClass));
 
         return dict;
     }

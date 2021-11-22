@@ -25,20 +25,30 @@ namespace MikyM.Discord.EmbedBuilders.Wrappers;
 /// <summary>
 /// <see cref="DiscordEmbedBuilder"/> wrapper.
 /// </summary>
-public class DiscordEmbedBuilderWrapper : DiscordEmbedBuilderImmutableWrapper, IDiscordEmbedBuilderWrapper
+public class DiscordEmbedBuilderWrapper : IDiscordEmbedBuilderWrapper
 {
     /// <summary>
     /// Wraps an embed builder.
     /// </summary>
     /// <param name="wrapped">Builder to wrap.</param>
-    public DiscordEmbedBuilderWrapper(DiscordEmbedBuilder wrapped) : base(wrapped)
-    {
-    }
+    public DiscordEmbedBuilderWrapper(DiscordEmbedBuilder wrapped)
+        => this.Wrapped = wrapped ?? throw new ArgumentNullException(nameof(wrapped));
+
+    /// <summary>
+    /// Gets the current embed builder.
+    /// </summary>
+    protected DiscordEmbedBuilder Wrapped { get; }
 
     /// <summary>
     /// Builds the embed.
     /// </summary>
     protected internal DiscordEmbed Build() => this.Wrapped.Build();
+
+    /// <summary>
+    /// Extracts the builder.
+    /// </summary>
+    /// <returns>The instance of the currently wrapped builder.</returns>
+    internal DiscordEmbedBuilder GetBaseInternal() => this.Wrapped;
 
     public IDiscordEmbedBuilderWrapper WithDescription(string description)
     {

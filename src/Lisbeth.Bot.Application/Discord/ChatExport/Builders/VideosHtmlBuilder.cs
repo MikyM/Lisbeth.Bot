@@ -37,7 +37,7 @@ public class VideosHtmlBuilder : IAsyncHtmlBuilder
 
     public async Task<string> BuildAsync()
     {
-        if (Videos.Count == 0 || Videos is null) return "";
+        if (Videos.Count == 0) return "";
         string videosHtml = "";
         foreach (var attachment in Videos)
         {
