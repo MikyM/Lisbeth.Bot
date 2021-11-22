@@ -23,13 +23,19 @@ namespace MikyM.Discord.EmbedBuilders;
 
 public static class DiscordEmbedBuilderExtensions
 {
+    /// <summary> Determines whether a given <see cref="DiscordEmbedBuilder"/> is valid regarding all fields combined length being less than 6000 characters long.</summary>
+    /// <returns> Validation result </returns>
     public static bool IsValid(this DiscordEmbedBuilder builder)
         => !(builder.Author?.Name.Length + builder.Footer?.Text.Length + builder.Description?.Length +
             builder.Title?.Length + builder.Fields?.Sum(x => x.Value.Length + x.Name.Length) > 6000);
 
+    /// <summary> Creates an instance of <see cref="EnhancedDiscordEmbedBuilder"/> based on given <see cref="DiscordEmbedBuilder"/>.</summary>
+    /// <returns> New instance of <see cref="EnhancedDiscordEmbedBuilder"/>. </returns>
     public static IEnhancedDiscordEmbedBuilder AsEnhanced(this DiscordEmbedBuilder builder) 
         => new EnhancedDiscordEmbedBuilder(builder);
 
+    /// <summary> Creates an instance of <see cref="EnrichedDiscordEmbedBuilder"/> based on given <see cref="DiscordEmbedBuilder"/>.</summary>
+    /// <returns> New instance of <see cref="EnrichedDiscordEmbedBuilder"/>. </returns>
     public static IEnhancedDiscordEmbedBuilder AsEnriched(this DiscordEmbedBuilder builder) 
         => new EnrichedDiscordEmbedBuilder(builder);
 }

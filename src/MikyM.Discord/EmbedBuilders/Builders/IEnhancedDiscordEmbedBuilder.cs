@@ -23,15 +23,25 @@ namespace MikyM.Discord.EmbedBuilders.Builders;
 
 public interface IEnhancedDiscordEmbedBuilder : IBaseEmbedBuilder
 {
+    /// <summary> Gets base result built from the passed <see cref="DiscordEmbedBuilder"/>, if any.</summary>
     DiscordEmbed? Base { get; }
+    /// <summary> Gets wrapper for current <see cref="DiscordEmbedBuilder"/> in use and gives access to it's methods.</summary>
     DiscordEmbedBuilderWrapper Current { get; }
+    /// <summary> Gets template for <see cref="DiscordEmbedBuilder.EmbedAuthor"/> field.</summary>
     string AuthorTemplate { get; }
+    /// <summary> Gets template for <see cref="DiscordEmbedBuilder.Title"/> field.</summary>
     string TitleTemplate { get; }
+    /// <summary> Gets template for <see cref="DiscordEmbedBuilder.EmbedFooter"/> field.</summary>
     string FooterTemplate { get; }
+    /// <summary> Gets <see cref="long"/> case Id, if any.</summary>
     long? CaseId { get; }
+    /// <summary> Gets <see cref="DiscordMember"/> used for <see cref="DiscordEmbedBuilder.EmbedAuthor"/> templating, if any.</summary>
     DiscordMember? AuthorMember { get; }
+    /// <summary> Gets <see cref="SnowflakeObject"/> used for <see cref="DiscordEmbedBuilder.EmbedFooter"/> templating, if any.</summary>
     SnowflakeObject? FooterSnowflake { get; }
+    /// <summary> Gets <see cref="string"/> action type name used for <see cref="DiscordEmbedBuilder.EmbedAuthor"/> templating, if any.</summary>
     string? ActionType { get; }
+    /// <summary> Gets <see cref="string"/> action name used for <see cref="DiscordEmbedBuilder.EmbedAuthor"/> templating, if any.</summary>
     string? Action { get; }
 
     /// <summary> Sets the enums string representation to be used in the author template as the name of the action performed. </summary>
