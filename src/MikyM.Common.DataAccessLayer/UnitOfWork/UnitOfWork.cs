@@ -15,13 +15,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Storage;
 using MikyM.Common.DataAccessLayer.Helpers;
+using System.Collections.Generic;
 
 namespace MikyM.Common.DataAccessLayer.UnitOfWork;
 
-public sealed class UnitOfWork<TContext> : IUnitOfWork<TContext> where TContext : DbContext
+public sealed class UnitOfWork<TContext> : IUnitOfWork<TContext> where TContext : AuditableDbContext<TContext>
 {
     private readonly ISpecificationEvaluator _specificationEvaluator;
 
@@ -53,9 +53,7 @@ public sealed class UnitOfWork<TContext> : IUnitOfWork<TContext> where TContext 
 
         if (_repositories.TryGetValue(name, out var repository)) return (TRepository) repository;
 
-        Type? concrete;
-
-        if (UoFCache.CachedTypes.TryGetValue(name, out concrete) && concrete is not null && type.IsAssignableFrom(concrete))
+        if (UoFCache.CachedTypes.TryGetValue(name, out var concrete) && type.IsAssignableFrom(concrete))
         {
             string? concreteName = concrete.FullName ?? throw new InvalidOperationException();
 
@@ -84,6 +82,13 @@ public sealed class UnitOfWork<TContext> : IUnitOfWork<TContext> where TContext 
     public async Task<int> CommitAsync()
     {
         int result = await Context.SaveChangesAsync();
+        if (_transaction is not null) await _transaction.CommitAsync();
+        return result;
+    }
+
+    public async Task<int> CommitAsync(long userId)
+    {
+        int result = await Context.SaveChangesAsync(userId);
         if (_transaction is not null) await _transaction.CommitAsync();
         return result;
     }

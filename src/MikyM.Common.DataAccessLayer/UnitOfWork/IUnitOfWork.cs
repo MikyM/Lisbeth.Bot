@@ -22,6 +22,7 @@ public interface IUnitOfWork<TContext> : IDisposable where TContext : DbContext
     TContext Context { get; }
     TRepository? GetRepository<TRepository>() where TRepository : IBaseRepository;
     Task<int> CommitAsync();
+    Task<int> CommitAsync(long userId);
     Task RollbackAsync();
     Task UseTransaction();
 }

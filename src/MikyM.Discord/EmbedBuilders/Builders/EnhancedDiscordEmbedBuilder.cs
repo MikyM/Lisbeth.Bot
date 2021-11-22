@@ -142,7 +142,7 @@ public class EnhancedDiscordEmbedBuilder : IEnhancedDiscordEmbedBuilder
                     ? ""
                     : this.ActionType.SplitByCapitalAndConcat());
 
-        author = author.Replace("@info",
+        author = author.Replace("@info@",
             this.AuthorMember is null ? "" : $" | {this.AuthorMember.GetFullDisplayName()}");
 
         this.Current.WithAuthor(author, null, this.AuthorMember?.AvatarUrl);
