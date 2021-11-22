@@ -15,17 +15,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using MikyM.Common.Domain.Entities;
 using System.Collections.Generic;
 using System.Threading;
-using MikyM.Common.Domain.Entities;
 
 namespace MikyM.Common.DataAccessLayer;
 
-public abstract class AuditableDbContext<TContext> : DbContext where TContext : AuditableDbContext<TContext>
+public abstract class AuditableDbContext : DbContext
 {
     private long? CurrentUserId { get; set; }
 
-    protected AuditableDbContext(DbContextOptions<TContext> options) : base(options)
+    protected AuditableDbContext(DbContextOptions options) : base(options)
     {
     }
 

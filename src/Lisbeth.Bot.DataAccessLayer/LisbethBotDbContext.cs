@@ -19,7 +19,7 @@ using MikyM.Common.DataAccessLayer;
 
 namespace Lisbeth.Bot.DataAccessLayer;
 
-public sealed class LisbethBotDbContext : AuditableDbContext<LisbethBotDbContext>
+public sealed class LisbethBotDbContext : AuditableDbContext
 {
     public LisbethBotDbContext(DbContextOptions<LisbethBotDbContext> options) : base(options)
     {
