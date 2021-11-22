@@ -30,6 +30,12 @@ public class DiscordEmbedBuilderWrapper : IDiscordEmbedBuilderWrapper
     /// <summary>
     /// Wraps an embed builder.
     /// </summary>
+    public DiscordEmbedBuilderWrapper()
+        => this.Wrapped = new DiscordEmbedBuilder();
+
+    /// <summary>
+    /// Wraps an embed builder.
+    /// </summary>
     /// <param name="wrapped">Builder to wrap.</param>
     public DiscordEmbedBuilderWrapper(DiscordEmbedBuilder wrapped)
         => this.Wrapped = wrapped ?? throw new ArgumentNullException(nameof(wrapped));

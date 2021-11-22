@@ -35,9 +35,8 @@ public class EnhancedDiscordEmbedBuilder : IEnhancedDiscordEmbedBuilder
     public string TitleTemplate { get; private set; } = @"@action@ @type@@info@"; // 0 - action , 1 - type, 2 - target/caller
     public string FooterTemplate { get; private set; } = @"@caseId@@info@"; // 0 - caseId , 1 - snowflake info
 
-    public EnhancedDiscordEmbedBuilder() : this(new DiscordEmbedBuilder())
-    {
-    }
+    public EnhancedDiscordEmbedBuilder()
+        => this.Current = new DiscordEmbedBuilderWrapper();
 
     public EnhancedDiscordEmbedBuilder(DiscordEmbedBuilder builder)
     {
