@@ -15,11 +15,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using MikyM.Discord.EmbedBuilders.Builders;
+
 namespace MikyM.Discord.EmbedBuilders.Enums;
 
-public enum LogAction
+/// <summary>
+/// Base types of <see cref="EnhancedDiscordEmbedBuilder"/>.
+/// </summary>
+public enum DiscordAction
 {
-    Create,
-    Update,
-    Disable
+    None,
+    Response,
+    Log
 }

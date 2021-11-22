@@ -45,7 +45,7 @@ public sealed class LogDiscordEmbedBuilder : EnrichedDiscordEmbedBuilder, ILogDi
     {
         if (this.Log is not null or 0) // if not null or default
             base.WithAction(this.Log.Value);
-        base.WithActionType(DiscordEmbedEnhancement.Log);
+        base.WithActionType(DiscordAction.Log);
 
         base.Evaluate();
     }

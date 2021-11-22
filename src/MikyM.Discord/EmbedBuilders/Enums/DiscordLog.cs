@@ -17,6 +17,9 @@
 
 namespace MikyM.Discord.EmbedBuilders.Enums;
 
+/// <summary>
+/// Base log action types for <see cref="DiscordAction"/>.
+/// </summary>
 public enum DiscordLog
 {
     Unknown,

@@ -17,6 +17,7 @@
 
 namespace MikyM.Discord.EmbedBuilders.Enums;
 
+/// <summary>Discord entity types.</summary>
 public enum DiscordEntity
 {
     Guild,

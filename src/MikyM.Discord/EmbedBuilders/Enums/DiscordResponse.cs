@@ -17,6 +17,9 @@
 
 namespace MikyM.Discord.EmbedBuilders.Enums;
 
+/// <summary>
+/// Base response action types for <see cref="DiscordAction"/>.
+/// </summary>
 public enum DiscordResponse
 {
     Unknown,

@@ -43,7 +43,7 @@ public sealed class ResponseDiscordEmbedBuilder : EnrichedDiscordEmbedBuilder, I
     {
         if (this.Response is not null or 0) // if not default
             base.WithAction(this.Response.Value);
-        base.WithActionType(DiscordEmbedEnhancement.Response);
+        base.WithActionType(DiscordAction.Response);
 
         base.Evaluate();
     }
