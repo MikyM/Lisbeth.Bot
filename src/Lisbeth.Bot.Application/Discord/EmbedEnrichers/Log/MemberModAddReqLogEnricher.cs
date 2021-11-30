@@ -26,19 +26,19 @@ namespace Lisbeth.Bot.Application.Discord.EmbedEnrichers.Log;
 
 public class MemberModAddReqLogEnricher : EmbedEnricher<IAddModReq>
 {
-    public DiscordMember? Moderator { get; }
-
-    public MemberModAddReqLogEnricher(IAddModReq request, DiscordMember? moderator) : base(request)
-        => this.Moderator = moderator;
+    public MemberModAddReqLogEnricher(IAddModReq request) : base(request)
+    {
+    }
 
     public override void Enrich(IDiscordEmbedBuilderWrapper embedBuilder)
     {
         var (name, pastTense) = base.GetUnderlyingNameAndPastTense();
 
-        embedBuilder.AddField("Moderator", ExtendedFormatter.Mention(this.Entity.RequestedOnBehalfOfId, DiscordEntity.Member),
-            true);
+        embedBuilder.AddField("Moderator",
+            ExtendedFormatter.Mention(this.Entity.RequestedOnBehalfOfId, DiscordEntity.Member), true);
 
-        embedBuilder.AddField("Target", ExtendedFormatter.Mention(this.Entity.TargetUserId, DiscordEntity.Member), true);
+        embedBuilder.AddField("Target", ExtendedFormatter.Mention(this.Entity.TargetUserId, DiscordEntity.Member),
+            true);
 
         TimeSpan duration = this.Entity.AppliedUntil.Subtract(DateTime.UtcNow);
         string lengthString = this.Entity.AppliedUntil == DateTime.MaxValue
@@ -46,7 +46,8 @@ public class MemberModAddReqLogEnricher : EmbedEnricher<IAddModReq>
             : $"{duration.Days} days, {duration.Hours} hrs, {duration.Minutes} mins";
 
         embedBuilder.AddField("Length", lengthString, true);
-        embedBuilder.AddField($"{pastTense} until", this.Entity.AppliedUntil.ToString(CultureInfo.InvariantCulture), true);
+        embedBuilder.AddField($"{pastTense} until", this.Entity.AppliedUntil.ToString(CultureInfo.InvariantCulture),
+            true);
 
         if (!string.IsNullOrWhiteSpace(this.Entity.Reason)) embedBuilder.AddField("Reason", this.Entity.Reason);
     }

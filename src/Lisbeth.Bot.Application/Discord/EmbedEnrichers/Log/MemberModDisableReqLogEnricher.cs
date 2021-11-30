@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Domain.DTOs.Request.Base;
 using MikyM.Discord.EmbedBuilders.Wrappers;
@@ -25,20 +24,18 @@ namespace Lisbeth.Bot.Application.Discord.EmbedEnrichers.Log;
 
 public class MemberModDisableReqLogEnricher : EmbedEnricher<IDisableModReq>
 {
-    public DiscordMember? Moderator { get; }
-
-    public MemberModDisableReqLogEnricher(IDisableModReq request, DiscordMember? moderator) : base(request)
-        => this.Moderator = moderator;
+    public MemberModDisableReqLogEnricher(IDisableModReq request) : base(request)
+    {
+    }
 
     public override void Enrich(IDiscordEmbedBuilderWrapper embedBuilder)
     {
-        embedBuilder.AddField("Moderator", ExtendedFormatter.Mention(this.Entity.RequestedOnBehalfOfId, DiscordEntity.Member),
-            true);
+        embedBuilder.AddField("Moderator",
+            ExtendedFormatter.Mention(this.Entity.RequestedOnBehalfOfId, DiscordEntity.Member), true);
 
         embedBuilder.AddField("Target",
             this.Entity.TargetUserId.HasValue
                 ? ExtendedFormatter.Mention(this.Entity.TargetUserId.Value, DiscordEntity.Member)
                 : $"Case with Id: {this.Entity.Id}", true);
-
     }
 }
