@@ -18,12 +18,15 @@
 namespace MikyM.Discord.EmbedBuilders.Enums;
 
 /// <summary>
-/// Base log action types for <see cref="DiscordAction"/>.
+/// Base log action types for <see cref="DiscordBotAction"/>.
 /// </summary>
 public enum DiscordLog
 {
     Unknown,
-    Member,
+    MemberAdded,
+    MemberRemoved,
+    MemberUpdated,
+    MessageAdded,
     MessageDeleted,
     MessageUpdated,
     Moderation

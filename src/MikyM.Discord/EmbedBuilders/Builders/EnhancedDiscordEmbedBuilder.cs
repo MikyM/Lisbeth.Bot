@@ -31,8 +31,8 @@ public class EnhancedDiscordEmbedBuilder : IEnhancedDiscordEmbedBuilder
     public long? CaseId { get; private set; }
     public DiscordMember? AuthorMember { get; private set; }
     public SnowflakeObject? FooterSnowflake { get; private set; }
-    public string AuthorTemplate { get; private set; } = @"@action@ @type@@info@"; // 0 - action , 1 - type, 2 - target/caller
-    public string TitleTemplate { get; private set; } = @"@action@ @type@@info@"; // 0 - action , 1 - type, 2 - target/caller
+    public string AuthorTemplate { get; private set; } = @"@action@@type@@info@"; // 0 - action , 1 - type, 2 - target/caller
+    public string TitleTemplate { get; private set; } = @"@action@@type@@info@"; // 0 - action , 1 - type, 2 - target/caller
     public string FooterTemplate { get; private set; } = @"@caseId@@info@"; // 0 - caseId , 1 - snowflake info
 
     public EnhancedDiscordEmbedBuilder()
@@ -75,6 +75,12 @@ public class EnhancedDiscordEmbedBuilder : IEnhancedDiscordEmbedBuilder
         return this;
     }
 
+    public IEnhancedDiscordEmbedBuilder WithEmbedColor(DiscordColor color)
+    {
+        this.Current.WithColor(color);
+        return this;
+    }
+
     internal DiscordEmbedBuilder GetCurrentInternal()
         => this.Current.GetBaseInternal();
 
@@ -88,7 +94,7 @@ public class EnhancedDiscordEmbedBuilder : IEnhancedDiscordEmbedBuilder
         => this.Base is null ? null : new DiscordEmbedBuilder(this.Current.GetBaseInternal());
     
 
-    public IEnhancedDiscordEmbedBuilder WithAuthorSnowflakeInfo(DiscordMember member)
+    public IEnhancedDiscordEmbedBuilder WithAuthorSnowflakeInfo(DiscordMember? member)
     {
         this.AuthorMember = member;
         return this;
@@ -115,7 +121,7 @@ public class EnhancedDiscordEmbedBuilder : IEnhancedDiscordEmbedBuilder
         return this;
     }
 
-    public IEnhancedDiscordEmbedBuilder WithFooterSnowflakeInfo(SnowflakeObject snowflake)
+    public IEnhancedDiscordEmbedBuilder WithFooterSnowflakeInfo(SnowflakeObject? snowflake)
     {
         this.FooterSnowflake = snowflake;
         return this;
@@ -140,7 +146,7 @@ public class EnhancedDiscordEmbedBuilder : IEnhancedDiscordEmbedBuilder
             .Replace("@type@",
                 this.ActionType is null
                     ? ""
-                    : this.ActionType.SplitByCapitalAndConcat());
+                    : $" {this.ActionType.SplitByCapitalAndConcat()}");
 
         author = author.Replace("@info@",
             this.AuthorMember is null ? "" : $" | {this.AuthorMember.GetFullDisplayName()}");
@@ -148,11 +154,11 @@ public class EnhancedDiscordEmbedBuilder : IEnhancedDiscordEmbedBuilder
         this.Current.WithAuthor(author, null, this.AuthorMember?.AvatarUrl);
 
         if (this.FooterSnowflake is null && !this.CaseId.HasValue) return;
-        string footer = this.FooterTemplate.Replace("@caseId@", this.CaseId is null ? "" : this.CaseId.ToString())
+        string footer = this.FooterTemplate.Replace("@caseId@", this.CaseId is null ? "" : $"Case Id: {this.CaseId}")
             .Replace("@info@",
                 this.FooterSnowflake is null
                     ? ""
-                    : $"{this.FooterSnowflake.GetType().Name.SplitByCapitalAndConcat()} Id: {this.FooterSnowflake.Id}");
+                    : $" | {this.FooterSnowflake.GetType().Name.SplitByCapitalAndConcat()} Id: {this.FooterSnowflake.Id}");
 
         this.Current.WithFooter(footer);
     }

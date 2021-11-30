@@ -19,16 +19,13 @@ using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Domain.DTOs.Request.Base;
 using Lisbeth.Bot.Domain.Entities.Base;
-using MikyM.Discord.EmbedBuilders;
-using MikyM.Discord.EmbedBuilders.Enums;
-using MikyM.Discord.Extensions.BaseExtensions;
-using System.Globalization;
 using MikyM.Discord.EmbedBuilders.Wrappers;
 using MikyM.Discord.Enums;
+using System.Globalization;
 
-namespace Lisbeth.Bot.Application.Discord.EmbedEnrichers;
+namespace Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response;
 
-public class ModAddActionEmbedEnricher : EmbedEnricher<IAddModReq>
+public class MemberModAddReqResponseEnricher : EmbedEnricher<IAddModReq>
 {
     public DiscordMember Target { get; }
     public IModEntity? Previous { get; }
@@ -37,8 +34,7 @@ public class ModAddActionEmbedEnricher : EmbedEnricher<IAddModReq>
         this.Previous is not null && this.Previous.AppliedUntil > this.Entity.AppliedUntil &&
         !this.Previous.IsDisabled;
 
-    public ModAddActionEmbedEnricher(IAddModReq request, DiscordMember target, long? caseId = null,
-        string hexColor = "#26296e", IModEntity? previous = null) : base(request, caseId, hexColor)
+    public MemberModAddReqResponseEnricher(IAddModReq request, DiscordMember target, IModEntity? previous = null) : base(request)
     {
         this.Target = target;
         this.Previous = previous;
@@ -46,11 +42,10 @@ public class ModAddActionEmbedEnricher : EmbedEnricher<IAddModReq>
 
     public override void Enrich(IDiscordEmbedBuilderWrapper embedBuilder)
     {
-        var (name, pastTense) = base.GetUnderlyingNameAndPastTense(this.Entity);
-        embedBuilder.WithColor(new DiscordColor(this.HexColor));
-        embedBuilder.WithAuthor(
+        var (name, pastTense) = base.GetUnderlyingNameAndPastTense();
+        /*embedBuilder.WithAuthor(
             $" {(this.Previous is not null && !this.IsOverlapping ? "Extend " : "")}{name} {(this.Previous is not null && this.IsOverlapping ? "failed " : "")}| {this.Target.GetFullDisplayName()}",
-            null, this.Target.AvatarUrl);
+            null, this.Target.AvatarUrl);*/
 
         if (this.Previous is not null)
         {
@@ -58,7 +53,6 @@ public class ModAddActionEmbedEnricher : EmbedEnricher<IAddModReq>
             {
                 embedBuilder.WithDescription(
                     $"This user has already been {pastTense.ToLower()} until {this.Previous.AppliedUntil} by {ExtendedFormatter.Mention(this.Entity.RequestedOnBehalfOfId, DiscordEntity.User)}");
-                embedBuilder.WithFooter($"Previous case Id: {this.Previous.Id} | Member Id: {this.Previous.UserId}");
                 return;
             }
 
@@ -80,6 +74,5 @@ public class ModAddActionEmbedEnricher : EmbedEnricher<IAddModReq>
         embedBuilder.AddField("Length", lengthString, true);
         embedBuilder.AddField($"{pastTense} until", this.Entity.AppliedUntil.ToString(CultureInfo.InvariantCulture), true);
         if (!string.IsNullOrWhiteSpace(this.Entity.Reason)) embedBuilder.AddField("Reason", this.Entity.Reason);
-        embedBuilder.WithFooter($"Case Id: {(!this.CaseId.HasValue ? "Unknown" : this.CaseId)} | Member Id: {this.Entity.TargetUserId}");
     }
 }

@@ -30,5 +30,6 @@ namespace Lisbeth.Bot.Domain.Entities.Base
         ulong LiftedById { get; set; }
         string? Reason { get; set; }
         bool IsDisabled { get; set; }
+        DateTime? CreatedAt { get; set; }
     }
 }

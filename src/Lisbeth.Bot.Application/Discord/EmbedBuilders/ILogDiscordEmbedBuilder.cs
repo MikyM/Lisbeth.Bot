@@ -23,6 +23,8 @@ namespace Lisbeth.Bot.Application.Discord.EmbedBuilders;
 public interface ILogDiscordEmbedBuilder : IEnrichedDiscordEmbedBuilder
 {
     public DiscordLog? Log { get; }
+    public DiscordModeration? Moderation { get; }
 
     ILogDiscordEmbedBuilder WithType(DiscordLog log);
+    ILogDiscordEmbedBuilder WithModerationType(DiscordModeration moderation);
 }

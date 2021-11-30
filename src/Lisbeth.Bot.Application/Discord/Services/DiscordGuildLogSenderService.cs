@@ -66,7 +66,8 @@ public class DiscordGuildLogSenderService : IDiscordGuildLogSenderService
         {
             target = type switch
             {
-                DiscordLog.Member => discordGuild.Channels[guildRes.Entity.ModerationConfig.MemberEventsLogChannelId],
+                DiscordLog.MemberAdded => discordGuild.Channels[guildRes.Entity.ModerationConfig.MemberEventsLogChannelId],
+                DiscordLog.MemberRemoved => discordGuild.Channels[guildRes.Entity.ModerationConfig.MemberEventsLogChannelId],
                 DiscordLog.MessageDeleted => discordGuild.Channels[
                     guildRes.Entity.ModerationConfig.MessageDeletedEventsLogChannelId],
                 DiscordLog.MessageUpdated => discordGuild.Channels[

@@ -16,12 +16,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Lisbeth.Bot.Domain.DTOs.Request.Base;
-using MikyM.Discord.EmbedBuilders.Builders;
 using System;
 
 namespace Lisbeth.Bot.Domain.DTOs.Request.Mute;
 
-public class MuteReqDto : IAddModReq
+public class MuteReqDto : BaseAuthWithGuildReqDto, IAddModReq
 {
     public MuteReqDto()
     {
@@ -47,8 +46,6 @@ public class MuteReqDto : IAddModReq
     }
 
     public ulong TargetUserId { get; set; }
-    public ulong GuildId { get; set; }
     public DateTime AppliedUntil { get; set; }
-    public ulong RequestedOnBehalfOfId { get; set; }
     public string? Reason { get; set; }
 }

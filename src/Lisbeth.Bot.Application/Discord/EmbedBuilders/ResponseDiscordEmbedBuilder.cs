@@ -23,16 +23,16 @@ namespace Lisbeth.Bot.Application.Discord.EmbedBuilders;
 
 public sealed class ResponseDiscordEmbedBuilder : EnrichedDiscordEmbedBuilder, IResponseDiscordEmbedBuilder
 {
-    public DiscordResponse? Response { get; private set; }
+    public DiscordModeration? Moderation { get; private set; }
 
     public ResponseDiscordEmbedBuilder(EnhancedDiscordEmbedBuilder enhanced) : base(enhanced) { }
 
-    public ResponseDiscordEmbedBuilder(DiscordResponse response)
-        => this.Response = response;
+    public ResponseDiscordEmbedBuilder(DiscordModeration moderation)
+        => this.Moderation = moderation;
 
-    public IResponseDiscordEmbedBuilder WithType(DiscordResponse response)
+    public IResponseDiscordEmbedBuilder WithType(DiscordModeration moderation)
     {
-        this.Response = response;
+        this.Moderation = moderation;
         return this;
     }
 
@@ -41,9 +41,9 @@ public sealed class ResponseDiscordEmbedBuilder : EnrichedDiscordEmbedBuilder, I
 
     protected override void Evaluate()
     {
-        if (this.Response is not null or 0) // if not default
-            base.WithAction(this.Response.Value);
-        base.WithActionType(DiscordAction.Response);
+        if (this.Moderation is not null or 0) // if not default
+            base.WithAction(this.Moderation.Value);
+        base.WithActionType(DiscordBotAction.Response);
 
         base.Evaluate();
     }

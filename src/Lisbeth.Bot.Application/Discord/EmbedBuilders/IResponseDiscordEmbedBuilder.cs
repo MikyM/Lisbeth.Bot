@@ -22,7 +22,7 @@ namespace Lisbeth.Bot.Application.Discord.EmbedBuilders;
 
 public interface IResponseDiscordEmbedBuilder : IEnrichedDiscordEmbedBuilder
 {
-    public DiscordResponse? Response { get; }
+    public DiscordModeration? Moderation { get; }
 
-    IResponseDiscordEmbedBuilder WithType(DiscordResponse response);
+    IResponseDiscordEmbedBuilder WithType(DiscordModeration response);
 }

@@ -25,6 +25,8 @@ public sealed class LogDiscordEmbedBuilder : EnrichedDiscordEmbedBuilder, ILogDi
 {
     public DiscordLog? Log { get; private set; }
 
+    public DiscordModeration? Moderation { get; private set; }
+
     public LogDiscordEmbedBuilder() { }
 
     public LogDiscordEmbedBuilder(EnhancedDiscordEmbedBuilder enhanced) : base(enhanced) { }
@@ -41,11 +43,17 @@ public sealed class LogDiscordEmbedBuilder : EnrichedDiscordEmbedBuilder, ILogDi
         return this;
     }
 
+    public ILogDiscordEmbedBuilder WithModerationType(DiscordModeration moderation)
+    {
+        this.Moderation = moderation;
+        return this;
+    }
+
     protected override void Evaluate()
     {
-        if (this.Log is not null or 0) // if not null or default
-            base.WithAction(this.Log.Value);
-        base.WithActionType(DiscordAction.Log);
+        if (this.Moderation is not null or 0) // if not null or default
+            base.WithAction(this.Moderation.Value);
+        base.WithActionType(DiscordBotAction.Log);
 
         base.Evaluate();
     }

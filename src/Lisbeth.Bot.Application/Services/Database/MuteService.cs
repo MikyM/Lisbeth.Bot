@@ -63,11 +63,11 @@ public class MuteService : CrudService<Mute, LisbethBotDbContext>, IMuteService
     {
         if (entry is null) throw new ArgumentNullException(nameof(entry));
 
-        if (!entry.TargetUserId.HasValue || !entry.GuildId.HasValue) throw new InvalidOperationException();
+        if (!entry.TargetUserId.HasValue) throw new InvalidOperationException();
 
         var result =
             await base.GetSingleBySpecAsync<Mute>(
-                new ActiveExpiredMutePerGuildSpec(entry.TargetUserId.Value, entry.GuildId.Value));
+                new ActiveExpiredMutePerGuildSpec(entry.TargetUserId.Value, entry.GuildId));
         if (!result.IsDefined()) return Result<Mute>.FromError(new NotFoundError());
 
         var entity = result.Entity;

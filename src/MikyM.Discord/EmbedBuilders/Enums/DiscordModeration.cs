@@ -15,20 +15,19 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using MikyM.Discord.EmbedBuilders.Wrappers;
 
-namespace MikyM.Discord.EmbedBuilders.Enrichers;
+namespace MikyM.Discord.EmbedBuilders.Enums;
 
-public abstract class EmbedEnricher<TEntity> : IEmbedEnricher where TEntity : class
+public enum DiscordModeration
 {
-    protected long? CaseId { get; }
-    protected TEntity Entity { get; }
-
-    protected EmbedEnricher(TEntity enricher, long? caseId)
-    {
-        this.CaseId = caseId;
-        this.Entity = enricher;
-    }
-
-    public abstract void Enrich(IDiscordEmbedBuilderWrapper embedBuilder);
+    Undefined,
+    Ban,
+    Unban,
+    BanGet,
+    Mute,
+    Unmute,
+    MuteGet,
+    Prune,
+    PruneGet,
+    Id
 }

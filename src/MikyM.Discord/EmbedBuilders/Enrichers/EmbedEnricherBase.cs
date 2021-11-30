@@ -15,18 +15,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace MikyM.Discord.EmbedBuilders.Enums;
+using MikyM.Discord.EmbedBuilders.Wrappers;
 
-/// <summary>
-/// Base response action types for <see cref="DiscordAction"/>.
-/// </summary>
-public enum DiscordResponse
+namespace MikyM.Discord.EmbedBuilders.Enrichers;
+
+public abstract class EmbedEnricherBase<TEntity> : IEmbedEnricher where TEntity : class
 {
-    Any,
-    Ban,
-    Unban,
-    Mute,
-    Unmute,
-    Prune,
-    Id
+    protected TEntity Entity { get; }
+
+    protected EmbedEnricherBase(TEntity enricher)
+        => this.Entity = enricher;
+
+    public abstract void Enrich(IDiscordEmbedBuilderWrapper embedBuilder);
 }

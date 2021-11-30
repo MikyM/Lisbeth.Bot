@@ -19,21 +19,22 @@
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Domain.DTOs.Request.Base;
 using MikyM.Discord.EmbedBuilders.Enrichers;
+using MikyM.Discord.EmbedBuilders.Enums;
 
 namespace Lisbeth.Bot.Application.Discord.Services.Interfaces;
 
 public interface IDiscordGuildLoggerService
 {
     Task<Result> LogToDiscordAsync<TRequest>(DiscordGuild discordGuild, TRequest req,
-        DiscordMember? moderator = null, string hexColor = "#26296e", long? id = null)
-        where TRequest : IBaseModAuthReq, IEmbedEnricher;
+        DiscordModeration moderation, DiscordMember? moderator = null, SnowflakeObject? target = null, string hexColor = "#26296e", long? id = null)
+        where TRequest : class, IBaseModAuthReq;
 
-    Task<Result> LogToDiscordAsync<TRequest>(Guild guild, TRequest req, DiscordMember? moderator = null,
-        string hexColor = "#26296e", long? id = null) where TRequest : IBaseModAuthReq, IEmbedEnricher;
+    Task<Result> LogToDiscordAsync<TRequest>(Guild guild, TRequest req, DiscordModeration moderation, DiscordMember? moderator = null,
+        SnowflakeObject? target = null, string hexColor = "#26296e", long? id = null) where TRequest : class, IBaseModAuthReq;
 
-    Task<Result> LogToDiscordAsync<TRequest>(ulong discordGuildId, TRequest req, DiscordMember? moderator = null,
-        string hexColor = "#26296e", long? id = null) where TRequest : IBaseModAuthReq, IEmbedEnricher;
+    Task<Result> LogToDiscordAsync<TRequest>(ulong discordGuildId, TRequest req, DiscordModeration moderation, DiscordMember? moderator = null,
+        SnowflakeObject? target = null, string hexColor = "#26296e", long? id = null) where TRequest : class, IBaseModAuthReq;
 
-    Task<Result> LogToDiscordAsync<TRequest>(long guildId, TRequest req, DiscordMember? moderator = null,
-        string hexColor = "#26296e", long? id = null) where TRequest : IBaseModAuthReq, IEmbedEnricher;
+    Task<Result> LogToDiscordAsync<TRequest>(long guildId, TRequest req, DiscordModeration moderation, DiscordMember? moderator = null,
+        SnowflakeObject? target = null, string hexColor = "#26296e", long? id = null) where TRequest : class, IBaseModAuthReq;
 }
