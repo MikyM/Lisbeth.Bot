@@ -29,15 +29,15 @@ public class MemberModDisableReqResponseEnricher : EmbedEnricher<IDisableModReq>
     public DiscordMember Target { get; }
 
     public MemberModDisableReqResponseEnricher(IDisableModReq request, DiscordMember target,
-        IModEntity? previous = null) : base(request)
-        => this.Target = target;
+        IModEntity? previous = null) : base(request) =>
+        this.Target = target;
 
     public override void Enrich(IDiscordEmbedBuilderWrapper embedBuilder)
     {
         var (name, pastTense) = base.GetUnderlyingNameAndPastTense();
 
         embedBuilder.AddField("User mention", this.Target.Mention, true);
-        embedBuilder.AddField("Moderator", ExtendedFormatter.Mention(this.Entity.RequestedOnBehalfOfId, DiscordEntity.Member),
-            true);
+        embedBuilder.AddField("Moderator",
+            ExtendedFormatter.Mention(this.Entity.RequestedOnBehalfOfId, DiscordEntity.Member), true);
     }
 }

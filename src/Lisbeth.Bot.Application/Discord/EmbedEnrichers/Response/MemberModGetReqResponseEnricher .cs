@@ -25,13 +25,13 @@ namespace Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response;
 
 public class MemberModGetReqResponseEnricher : EmbedEnricher<IModEntity>
 {
-    public MemberModGetReqResponseEnricher(IModEntity request) :
-        base(request){}
+    public MemberModGetReqResponseEnricher(IModEntity request) : base(request)
+    {
+    }
 
     public override void Enrich(IDiscordEmbedBuilderWrapper embedBuilder)
     {
         var (name, pastTense) = base.GetUnderlyingNameAndPastTense();
-        
 
         embedBuilder.AddField("User", ExtendedFormatter.Mention(this.Entity.UserId, DiscordEntity.User), true);
         embedBuilder.AddField("Moderator", ExtendedFormatter.Mention(this.Entity.AppliedById, DiscordEntity.User),
@@ -44,7 +44,8 @@ public class MemberModGetReqResponseEnricher : EmbedEnricher<IModEntity>
 
         embedBuilder.AddField($"{pastTense} on", this.Entity.CreatedAt?.ToString() ?? "Error");
         embedBuilder.AddField("Length", lengthString, true);
-        embedBuilder.AddField($"{pastTense} until", this.Entity.AppliedUntil.ToString(CultureInfo.InvariantCulture), true);
+        embedBuilder.AddField($"{pastTense} until", this.Entity.AppliedUntil.ToString(CultureInfo.InvariantCulture),
+            true);
 
         if (this.Entity.LiftedOn is not null)
         {

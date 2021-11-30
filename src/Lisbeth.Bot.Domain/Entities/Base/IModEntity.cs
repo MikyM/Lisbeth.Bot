@@ -17,19 +17,18 @@
 
 using System;
 
-namespace Lisbeth.Bot.Domain.Entities.Base
+namespace Lisbeth.Bot.Domain.Entities.Base;
+
+public interface IModEntity
 {
-    public interface IModEntity
-    {
-        long Id { get;}
-        ulong GuildId { get; set; }
-        ulong UserId { get; set; }
-        DateTime? LiftedOn { get; set; }
-        DateTime AppliedUntil { get; set; }
-        ulong AppliedById { get; set; }
-        ulong LiftedById { get; set; }
-        string? Reason { get; set; }
-        bool IsDisabled { get; set; }
-        DateTime? CreatedAt { get; set; }
-    }
+    long Id { get;}
+    ulong GuildId { get; set; }
+    ulong UserId { get; set; }
+    DateTime? LiftedOn { get; set; }
+    DateTime AppliedUntil { get; set; }
+    ulong AppliedById { get; set; }
+    ulong LiftedById { get; set; }
+    string? Reason { get; set; }
+    bool IsDisabled { get; set; }
+    DateTime? CreatedAt { get; set; }
 }

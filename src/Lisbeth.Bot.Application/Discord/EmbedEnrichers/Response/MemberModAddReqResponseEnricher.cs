@@ -31,10 +31,10 @@ public class MemberModAddReqResponseEnricher : EmbedEnricher<IAddModReq>
     public IModEntity? Previous { get; }
 
     public bool IsOverlapping =>
-        this.Previous is not null && this.Previous.AppliedUntil > this.Entity.AppliedUntil &&
-        !this.Previous.IsDisabled;
+        this.Previous is not null && this.Previous.AppliedUntil > this.Entity.AppliedUntil && !this.Previous.IsDisabled;
 
-    public MemberModAddReqResponseEnricher(IAddModReq request, DiscordMember target, IModEntity? previous = null) : base(request)
+    public MemberModAddReqResponseEnricher(IAddModReq request, DiscordMember target, IModEntity? previous = null) :
+        base(request)
     {
         this.Target = target;
         this.Previous = previous;
@@ -59,12 +59,13 @@ public class MemberModAddReqResponseEnricher : EmbedEnricher<IAddModReq>
             embedBuilder.AddField($"Previous {name.ToLower()} until", this.Previous.AppliedUntil.ToString(), true);
             embedBuilder.AddField("Previous moderator",
                 $"{ExtendedFormatter.Mention(this.Previous.AppliedById, DiscordEntity.User)}", true);
-            if (!string.IsNullOrWhiteSpace(this.Previous.Reason)) embedBuilder.AddField("Previous reason", this.Previous.Reason, true);
+            if (!string.IsNullOrWhiteSpace(this.Previous.Reason))
+                embedBuilder.AddField("Previous reason", this.Previous.Reason, true);
         }
 
         embedBuilder.AddField("User mention", this.Target.Mention, true);
-        embedBuilder.AddField("Moderator", ExtendedFormatter.Mention(this.Entity.RequestedOnBehalfOfId, DiscordEntity.Member),
-            true);
+        embedBuilder.AddField("Moderator",
+            ExtendedFormatter.Mention(this.Entity.RequestedOnBehalfOfId, DiscordEntity.Member), true);
 
         TimeSpan duration = this.Entity.AppliedUntil.Subtract(DateTime.UtcNow);
         string lengthString = this.Entity.AppliedUntil == DateTime.MaxValue
@@ -72,7 +73,8 @@ public class MemberModAddReqResponseEnricher : EmbedEnricher<IAddModReq>
             : $"{duration.Days} days, {duration.Hours} hrs, {duration.Minutes} mins";
 
         embedBuilder.AddField("Length", lengthString, true);
-        embedBuilder.AddField($"{pastTense} until", this.Entity.AppliedUntil.ToString(CultureInfo.InvariantCulture), true);
+        embedBuilder.AddField($"{pastTense} until", this.Entity.AppliedUntil.ToString(CultureInfo.InvariantCulture),
+            true);
         if (!string.IsNullOrWhiteSpace(this.Entity.Reason)) embedBuilder.AddField("Reason", this.Entity.Reason);
     }
 }
