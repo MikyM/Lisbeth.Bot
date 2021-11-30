@@ -22,7 +22,7 @@ namespace MikyM.Discord.EmbedBuilders.Builders;
 /// <summary>
 /// Constructs enriched embeds.
 /// </summary>
-public interface IEnrichedDiscordEmbedBuilder : IBaseEmbedBuilder
+public interface IEnrichedDiscordEmbedBuilder : IEnhancedDiscordEmbedBuilder
 {
     /// <summary>
     /// Enriches this embed with an embed enricher.
