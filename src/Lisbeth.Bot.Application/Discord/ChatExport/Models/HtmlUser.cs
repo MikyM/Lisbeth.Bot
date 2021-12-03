@@ -1,5 +1,5 @@
 using DSharpPlus.Entities;
-using Lisbeth.Bot.Application.Discord.ChatExport.Builders;
+using Lisbeth.Bot.Application.Discord.ChatExport.Wrappers;
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport.Models;
 

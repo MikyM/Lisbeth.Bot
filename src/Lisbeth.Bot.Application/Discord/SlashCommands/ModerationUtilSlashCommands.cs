@@ -75,7 +75,7 @@ public class ModerationUtilSlashCommands : ExtendedApplicationCommandModule
         [Option("action", "Action to perform")]
         ModuleActionType action,
         [Option("module", "Module to perform action on")]
-        GuildConfigType type,
+        GuildModule type,
         [Option("clean-after", "After how many hours should inactive closed tickets be cleared")]
         string? cleanAfter = "",
         [Option("close-after", "After how many hours should inactive opened tickets be closed")]
@@ -88,7 +88,7 @@ public class ModerationUtilSlashCommands : ExtendedApplicationCommandModule
 
         switch (type)
         {
-            case GuildConfigType.Ticketing:
+            case GuildModule.Ticketing:
                 switch (action)
                 {
                     case ModuleActionType.Enable:
@@ -151,7 +151,7 @@ public class ModerationUtilSlashCommands : ExtendedApplicationCommandModule
                 }
 
                 break;
-            case GuildConfigType.Moderation:
+            case GuildModule.Moderation:
                 switch (action)
                 {
                     case ModuleActionType.Enable:

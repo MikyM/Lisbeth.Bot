@@ -15,9 +15,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders;
+namespace Lisbeth.Bot.Domain.Enums;
 
-public interface IAsyncHtmlBuilder
+public enum GuildModule
 {
-    Task<string> BuildAsync();
+    Ticketing,
+    Moderation
 }

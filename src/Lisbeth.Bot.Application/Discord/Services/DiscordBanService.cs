@@ -39,15 +39,18 @@ public class DiscordBanService : IDiscordBanService
     private readonly IGuildService _guildService;
     private readonly ILogger<DiscordBanService> _logger;
     private readonly IResponseDiscordEmbedBuilder _embedBuilder;
+    private readonly IDiscordGuildLoggerService _guildLogger;
 
     public DiscordBanService(IBanService banService, IDiscordService discord, IGuildService guildService,
-        ILogger<DiscordBanService> logger, IResponseDiscordEmbedBuilder embedBuilder)
+        ILogger<DiscordBanService> logger, IResponseDiscordEmbedBuilder embedBuilder, IDiscordGuildLoggerService guildLogger)
     {
         _banService = banService;
         _discord = discord;
         _guildService = guildService;
         _logger = logger;
         _embedBuilder = embedBuilder;
+        _guildLogger = guildLogger;
+        _guildService = guildService;
     }
 
     [Queue("moderation")]
@@ -272,11 +275,13 @@ public class DiscordBanService : IDiscordBanService
             await _guildService.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithModerationSpec(guild.Id));
 
-        if (!guildCfg.IsDefined())
+        if (!guildCfg.IsDefined(out var guildEntity))
             return Result<DiscordEmbed>.FromError(guildCfg);
 
-        if (guildCfg.Entity.ModerationConfig is null)
-            return new DisabledEntityError(nameof(guildCfg.Entity.ModerationConfig));
+        if (!guildEntity.IsModerationModuleEnabled)
+            return new DisabledGuildModuleError(GuildModule.Moderation);
+
+        await _guildLogger.LogToDiscordAsync(guild, req, DiscordModeration.MuteGet, moderator, target, guildEntity.EmbedHexColor);
 
         try
         {
@@ -287,19 +292,19 @@ public class DiscordBanService : IDiscordBanService
             ban = null;
         }
 
-        var partial = await _banService.AddOrExtendAsync(req, true);
-
-        if (!partial.IsDefined()) return Result<DiscordEmbed>.FromError(partial);
-
         if (ban is null) await guild.BanMemberAsync(target.Id, 1, req.Reason);
 
-        return _embedBuilder.WithCase(partial.Entity.Id)
-            .WithEmbedColor(new DiscordColor(guildCfg.Entity.EmbedHexColor))
+        var partial = await _banService.AddOrExtendAsync(req, true);
+
+        if (!partial.IsDefined(out var idEntityPair)) return Result<DiscordEmbed>.FromError(partial);
+
+        return _embedBuilder.WithCase(idEntityPair.Id)
+            .WithEmbedColor(new DiscordColor(guildEntity.EmbedHexColor))
             .WithAuthorSnowflakeInfo(target)
             .WithFooterSnowflakeInfo(target)
             .AsEnriched<ResponseDiscordEmbedBuilder>()
             .WithType(DiscordModeration.Mute)
-            .EnrichFrom(new MemberModAddReqResponseEnricher(req, target, partial.Entity.FoundEntity))
+            .EnrichFrom(new MemberModAddReqResponseEnricher(req, target, idEntityPair.FoundEntity))
             .Build();
     }
 
@@ -318,16 +323,16 @@ public class DiscordBanService : IDiscordBanService
             await _guildService.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithModerationSpec(guild.Id));
 
-        if (!result.IsDefined())
+        if (!result.IsDefined(out var guildEntity))
             return Result<DiscordEmbed>.FromError(result);
 
-        var guildCfg = result.Entity;
-
-        if (guildCfg.ModerationConfig is null)
-            return new DisabledEntityError(nameof(guildCfg.ModerationConfig));
+        if (!guildEntity.IsModerationModuleEnabled)
+            return new DisabledGuildModuleError(GuildModule.Moderation);
 
         if (!moderator.IsModerator())
             return new DiscordNotAuthorizedError();
+
+        await _guildLogger.LogToDiscordAsync(guild, req, DiscordModeration.MuteGet, moderator, target, guildEntity.EmbedHexColor);
 
         try
         {
@@ -338,13 +343,23 @@ public class DiscordBanService : IDiscordBanService
             ban = null;
         }
 
-        var res = await _banService.DisableAsync(req);
+        if (ban is not null)
+            try
+            {
+                await guild.UnbanMemberAsync(target.Id);
+            }
+            catch (Exception)
+            {
+                return new DiscordError("Failed to unban");
+            }
 
-        if (!res.IsDefined()) return Result<DiscordEmbed>.FromError(res);
+        var res = await _banService.DisableAsync(req, true);
+
+        if (!res.IsDefined(out var foundBan)) return Result<DiscordEmbed>.FromError(res);
 
         return _embedBuilder
-            .WithCase(res.Entity?.Id)
-            .WithEmbedColor(new DiscordColor(guildCfg.EmbedHexColor))
+            .WithCase(foundBan.Id)
+            .WithEmbedColor(new DiscordColor(guildEntity.EmbedHexColor))
             .WithAuthorSnowflakeInfo(target)
             .WithFooterSnowflakeInfo(target)
             .AsEnriched<ResponseDiscordEmbedBuilder>()
@@ -370,13 +385,13 @@ public class DiscordBanService : IDiscordBanService
             await _guildService.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithModerationSpec(guild.Id));
 
-        if (!result.IsDefined())
+        if (!result.IsDefined(out var guildEntity))
             return Result<DiscordEmbed>.FromError(result);
 
-        var guildCfg = result.Entity;
+        if (!guildEntity.IsModerationModuleEnabled)
+            return new DisabledGuildModuleError(GuildModule.Moderation);
 
-        if (guildCfg.ModerationConfig is null)
-            return new DisabledEntityError(nameof(guildCfg.ModerationConfig));
+        await _guildLogger.LogToDiscordAsync(guild, req, DiscordModeration.MuteGet, moderator, target, guildEntity.EmbedHexColor);
 
         DiscordBan? discordBan;
 
@@ -394,16 +409,16 @@ public class DiscordBanService : IDiscordBanService
                 req.AppliedOn, req.LiftedById));
 
 
-        if (!res.IsDefined()) return new NotFoundError();
+        if (!res.IsDefined(out var foundBan)) return new NotFoundError();
 
         return _embedBuilder
-            .WithCase(res.Entity?.Id)
-            .WithEmbedColor(new DiscordColor(guildCfg.EmbedHexColor))
+            .WithCase(foundBan.Id)
+            .WithEmbedColor(new DiscordColor(guildEntity.EmbedHexColor))
             .WithAuthorSnowflakeInfo(target)
             .WithFooterSnowflakeInfo(target)
             .AsEnriched<ResponseDiscordEmbedBuilder>()
             .WithType(DiscordModeration.Mute)
-            .EnrichFrom(new MemberModGetReqResponseEnricher(res.Entity!))
+            .EnrichFrom(new MemberModGetReqResponseEnricher(foundBan))
             .Build();
     }
 }

@@ -19,15 +19,15 @@ using System.Collections.Generic;
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.ChatExport.Models;
 
-namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders;
+namespace Lisbeth.Bot.Application.Discord.ChatExport.Wrappers.Message;
 
-public class ReactionsHtmlBuilder : IAsyncHtmlBuilder
+public class ReactionsHtmlWrapperBuilder : IAsyncHtmlBuilder
 {
-    public ReactionsHtmlBuilder() : this(new List<DiscordReaction>())
+    public ReactionsHtmlWrapperBuilder() : this(new List<DiscordReaction>())
     {
     }
 
-    public ReactionsHtmlBuilder(List<DiscordReaction> reactions)
+    public ReactionsHtmlWrapperBuilder(List<DiscordReaction> reactions)
     {
         Reactions ??= reactions ?? throw new ArgumentNullException(nameof(reactions));
     }
@@ -48,7 +48,7 @@ public class ReactionsHtmlBuilder : IAsyncHtmlBuilder
         return Task.FromResult($"<div class=\"message-reactions\">{html}</div>");
     }
 
-    public ReactionsHtmlBuilder WithReactions(List<DiscordReaction> reactions)
+    public ReactionsHtmlWrapperBuilder WithReactions(List<DiscordReaction> reactions)
     {
         Reactions = reactions ?? throw new ArgumentNullException(nameof(reactions));
 

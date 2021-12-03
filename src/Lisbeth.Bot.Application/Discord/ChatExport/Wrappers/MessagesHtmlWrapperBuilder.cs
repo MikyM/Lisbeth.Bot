@@ -19,16 +19,16 @@ using System.Collections.Generic;
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.ChatExport.Models;
 
-namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders;
+namespace Lisbeth.Bot.Application.Discord.ChatExport.Wrappers;
 
-public class MessagesHtmlBuilder : IAsyncHtmlBuilder
+public class MessagesHtmlWrapperBuilder : IAsyncHtmlBuilder
 {
-    public MessagesHtmlBuilder() : this(new List<DiscordMessage>())
+    public MessagesHtmlWrapperBuilder() : this(new List<DiscordMessage>())
     {
         
     }
 
-    public MessagesHtmlBuilder(List<DiscordMessage> messages)
+    public MessagesHtmlWrapperBuilder(List<DiscordMessage> messages)
     {
         Messages ??= messages ?? throw new ArgumentNullException(nameof(messages));
     }

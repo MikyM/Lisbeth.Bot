@@ -1,5 +1,6 @@
 using DSharpPlus.Entities;
-using Lisbeth.Bot.Application.Discord.ChatExport.Builders;
+using Lisbeth.Bot.Application.Discord.ChatExport.Wrappers;
+using Lisbeth.Bot.Application.Discord.ChatExport.Wrappers.Message;
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport.Models;
 
@@ -28,13 +29,13 @@ public class HtmlMessage : IAsyncHtmlBuilder
 
         if (Msg.Attachments.Count != 0)
         {
-            AttachmentsHtmlBuilder attachmentsBuilder = new (Msg.Attachments);
+            AttachmentsHtmlWrapperBuilder attachmentsBuilder = new (Msg.Attachments);
             attachmentsHtml = await attachmentsBuilder.BuildAsync();
         }
 
         if (Msg.Reactions.Count != 0)
         {
-            ReactionsHtmlBuilder reactionsHtmlBuilder = new (Msg.Reactions.ToList());
+            ReactionsHtmlWrapperBuilder reactionsHtmlBuilder = new (Msg.Reactions.ToList());
             reactionsHtml = await reactionsHtmlBuilder.BuildAsync();
         }
 

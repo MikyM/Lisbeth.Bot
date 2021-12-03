@@ -16,7 +16,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using DSharpPlus.Entities;
-using Lisbeth.Bot.Application.Discord.ChatExport.Builders;
 using Lisbeth.Bot.Application.Discord.ChatExport.Models;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Ticket;
@@ -27,6 +26,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using Lisbeth.Bot.Application.Discord.ChatExport.Wrappers;
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport;
 

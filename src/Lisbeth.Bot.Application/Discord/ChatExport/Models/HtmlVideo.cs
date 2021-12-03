@@ -1,7 +1,7 @@
-using Lisbeth.Bot.Application.Discord.ChatExport.Builders;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
+using Lisbeth.Bot.Application.Discord.ChatExport.Wrappers;
 using VimeoDotNet;
 using VimeoDotNet.Net;
 

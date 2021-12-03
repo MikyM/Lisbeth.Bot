@@ -50,7 +50,7 @@ public class GuildService : CrudService<Guild, LisbethBotDbContext>, IGuildServi
             new ActiveGuildByDiscordIdWithTicketingSpecifications(req.GuildId));
         if (!result.IsDefined()) return Result<Guild>.FromError(new NotFoundError());
         if (result.Entity.TicketingConfig is not null && result.Entity.TicketingConfig.IsDisabled)
-            return await EnableConfigAsync(req.GuildId, GuildConfigType.Ticketing, shouldSave);
+            return await EnableConfigAsync(req.GuildId, GuildModule.Ticketing, shouldSave);
         if (result.Entity.TicketingConfig is not null && !result.Entity.TicketingConfig.IsDisabled)
             return Result<Guild>.FromError(new InvalidOperationError());
 
@@ -65,7 +65,7 @@ public class GuildService : CrudService<Guild, LisbethBotDbContext>, IGuildServi
             new ActiveGuildByDiscordIdWithModerationSpec(req.GuildId));
         if (!result.IsDefined()) throw new NotFoundException("Guild doesn't exist in the database");
         if (result.Entity.ModerationConfig is not null && result.Entity.ModerationConfig.IsDisabled)
-            return await EnableConfigAsync(req.GuildId, GuildConfigType.Moderation, shouldSave);
+            return await EnableConfigAsync(req.GuildId, GuildModule.Moderation, shouldSave);
         if (result.Entity.ModerationConfig is not null && !result.Entity.ModerationConfig.IsDisabled)
             return Result<Guild>.FromError(new InvalidOperationError());
 
@@ -74,12 +74,12 @@ public class GuildService : CrudService<Guild, LisbethBotDbContext>, IGuildServi
         return result.Entity;
     }
 
-    public async Task<Result> DisableConfigAsync(ulong guildId, GuildConfigType type, bool shouldSave = false)
+    public async Task<Result> DisableConfigAsync(ulong guildId, GuildModule type, bool shouldSave = false)
     {
         Result<Guild> result;
         switch (type)
         {
-            case GuildConfigType.Ticketing:
+            case GuildModule.Ticketing:
                 result = await base.GetSingleBySpecAsync<Guild>(
                     new ActiveGuildByDiscordIdWithTicketingSpecifications(guildId));
                 if (!result.IsDefined() || result.Entity.TicketingConfig is null)
@@ -89,7 +89,7 @@ public class GuildService : CrudService<Guild, LisbethBotDbContext>, IGuildServi
 
                 await _ticketingService.DisableAsync(result.Entity.TicketingConfig, shouldSave);
                 break;
-            case GuildConfigType.Moderation:
+            case GuildModule.Moderation:
                 result = await base.GetSingleBySpecAsync<Guild>(
                     new ActiveGuildByDiscordIdWithModerationSpec(guildId));
                 if (!result.IsDefined() || result.Entity.ModerationConfig is null)
@@ -106,12 +106,12 @@ public class GuildService : CrudService<Guild, LisbethBotDbContext>, IGuildServi
         return Result.FromSuccess();
     }
 
-    public async Task<Result<Guild>> EnableConfigAsync(ulong guildId, GuildConfigType type, bool shouldSave = false)
+    public async Task<Result<Guild>> EnableConfigAsync(ulong guildId, GuildModule type, bool shouldSave = false)
     {
         Result<Guild> result;
         switch (type)
         {
-            case GuildConfigType.Ticketing:
+            case GuildModule.Ticketing:
                 result = await base.GetSingleBySpecAsync<Guild>(
                     new ActiveGuildByDiscordIdWithTicketingSpecifications(guildId));
                 if (!result.IsDefined() || result.Entity.TicketingConfig is null)
@@ -124,7 +124,7 @@ public class GuildService : CrudService<Guild, LisbethBotDbContext>, IGuildServi
 
                 if (shouldSave) await _ticketingService.CommitAsync();
                 break;
-            case GuildConfigType.Moderation:
+            case GuildModule.Moderation:
                 result = await base.GetSingleBySpecAsync<Guild>(
                     new ActiveGuildByDiscordIdWithModerationSpec(guildId));
                 if (!result.IsDefined() || result.Entity.ModerationConfig is null)

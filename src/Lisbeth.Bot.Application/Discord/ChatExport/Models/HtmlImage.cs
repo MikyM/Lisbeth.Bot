@@ -2,10 +2,10 @@ using Imgur.API;
 using Imgur.API.Authentication;
 using Imgur.API.Endpoints;
 using Imgur.API.Models;
-using Lisbeth.Bot.Application.Discord.ChatExport.Builders;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
+using Lisbeth.Bot.Application.Discord.ChatExport.Wrappers;
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport.Models;
 

@@ -18,16 +18,17 @@
 using System.Collections.Generic;
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.ChatExport.Models;
+using Lisbeth.Bot.Application.Discord.ChatExport.Wrappers.Message.Attachments;
 
-namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders;
+namespace Lisbeth.Bot.Application.Discord.ChatExport.Wrappers.Message;
 
-public class AttachmentsHtmlBuilder : IAsyncHtmlBuilder
+public class AttachmentsHtmlWrapperBuilder : IAsyncHtmlBuilder
 {
-    public AttachmentsHtmlBuilder() : this(new List<DiscordAttachment>())
+    public AttachmentsHtmlWrapperBuilder() : this(new List<DiscordAttachment>())
     {
     }
 
-    public AttachmentsHtmlBuilder(IReadOnlyList<DiscordAttachment> attachments)
+    public AttachmentsHtmlWrapperBuilder(IReadOnlyList<DiscordAttachment> attachments)
     {
         Attachments ??= attachments ?? throw new ArgumentNullException(nameof(attachments));
     }
@@ -46,19 +47,19 @@ public class AttachmentsHtmlBuilder : IAsyncHtmlBuilder
 
         if (imageAttachments.Count != 0)
         {
-            ImagesHtmlBuilder imagesBuilder = new(imageAttachments);
+            ImagesHtmlWrapperBuilder imagesBuilder = new(imageAttachments);
             imagesHtml = await imagesBuilder.BuildAsync();
         }
 
         if (videoAttachments.Count == 0) return $"<div class=\"attachments\">{imagesHtml}{videosHtml}</div>";
 
-        VideosHtmlBuilder videosBuilder = new(videoAttachments);
+        VideosHtmlWrapperBuilder videosBuilder = new(videoAttachments);
         videosHtml = await videosBuilder.BuildAsync();
 
         return $"<div class=\"attachments\">{imagesHtml}{videosHtml}</div>";
     }
 
-    public AttachmentsHtmlBuilder WithAttachments(IReadOnlyList<DiscordAttachment> attachments)
+    public AttachmentsHtmlWrapperBuilder WithAttachments(IReadOnlyList<DiscordAttachment> attachments)
     {
         Attachments = attachments ?? throw new ArgumentNullException(nameof(attachments));
 

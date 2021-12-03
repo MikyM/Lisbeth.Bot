@@ -20,7 +20,7 @@ using DSharpPlus.Entities;
 
 // ReSharper disable MemberCanBePrivate.Global
 
-namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders;
+namespace Lisbeth.Bot.Application.Discord.ChatExport.Wrappers;
 
 public class HtmlChatBuilder : IAsyncHtmlBuilder
 {
@@ -49,8 +49,8 @@ public class HtmlChatBuilder : IAsyncHtmlBuilder
         if (Users is null || Messages is null || Channel is null || Js is null || Css is null)
             throw new ArgumentException("You must provide all required parameters before building.");
 
-        MessagesHtmlBuilder messagesBuilder = new(Messages);
-        MembersHtmlBuilder membersBuilder = new(Users);
+        MessagesHtmlWrapper messagesBuilder = new(Messages);
+        MembersHtmlWrapper membersBuilder = new(Users);
 
         return "<!DOCTYPE html>" +
                "<html lang=\"en\">" +

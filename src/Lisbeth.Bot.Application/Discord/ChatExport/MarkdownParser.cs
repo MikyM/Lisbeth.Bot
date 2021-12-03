@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 using DSharpPlus.Entities;
 using MikyM.Discord.Interfaces;
 
-namespace Lisbeth.Bot.Application.Discord.ChatExport.Models;
+namespace Lisbeth.Bot.Application.Discord.ChatExport;
 
 public class MarkdownParser
 {

@@ -17,7 +17,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq.Expressions;
 using Lisbeth.Bot.Domain.Entities.Base;
+using Lisbeth.Bot.Domain.Enums;
+using MikyM.Common.Domain.Entities;
 
 // ReSharper disable CollectionNeverUpdated.Local
 // ReSharper disable InconsistentNaming
@@ -123,4 +127,24 @@ public sealed class Guild : SnowflakeEntity
     {
         ModerationConfig = config ?? throw new ArgumentNullException(nameof(config));
     }
+
+    [MemberNotNullWhen(true, nameof(TicketingConfig))]
+    public bool IsTicketingModuleEnabled
+        => this.TicketingConfig is not null;
+
+    [MemberNotNullWhen(true, nameof(ModerationConfig))]
+    public bool IsModerationModuleEnabled
+        => this.ModerationConfig is not null;
+
+
+    /*[MemberNotNullWhen()]
+    public bool IsModuleEnabled(GuildModule module)
+    {
+        return module switch
+        {
+            GuildModule.Ticketing => this.TicketingConfig is not null,
+            GuildModule.Moderation => this.ModerationConfig is not null,
+            _ => throw new ArgumentOutOfRangeException(nameof(module), module, null)
+        };
+    }*/
 }

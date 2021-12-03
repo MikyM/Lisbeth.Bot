@@ -19,16 +19,16 @@ using System.Collections.Generic;
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.ChatExport.Models;
 
-namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders;
+namespace Lisbeth.Bot.Application.Discord.ChatExport.Wrappers.Message.Attachments;
 
-public class VideosHtmlBuilder : IAsyncHtmlBuilder
+public class VideosHtmlWrapperBuilder : IAsyncHtmlBuilder
 {
-    public VideosHtmlBuilder() : this(new List<DiscordAttachment>())
+    public VideosHtmlWrapperBuilder() : this(new List<DiscordAttachment>())
     {
         
     }
 
-    public VideosHtmlBuilder(IReadOnlyList<DiscordAttachment> videos)
+    public VideosHtmlWrapperBuilder(IReadOnlyList<DiscordAttachment> videos)
     {
         Videos ??= videos ?? throw new ArgumentNullException(nameof(videos));
     }
@@ -48,7 +48,7 @@ public class VideosHtmlBuilder : IAsyncHtmlBuilder
         return $"<div class=\"videos-wrapper\">{videosHtml}</div>";
     }
 
-    public VideosHtmlBuilder WithVideos(IReadOnlyList<DiscordAttachment> videos)
+    public VideosHtmlWrapperBuilder WithVideos(IReadOnlyList<DiscordAttachment> videos)
     {
         Videos = videos ?? throw new ArgumentNullException(nameof(videos));
 

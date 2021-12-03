@@ -19,38 +19,38 @@ using System.Collections.Generic;
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.ChatExport.Models;
 
-namespace Lisbeth.Bot.Application.Discord.ChatExport.Builders;
+namespace Lisbeth.Bot.Application.Discord.ChatExport.Wrappers.Message.Attachments;
 
-public class MembersHtmlBuilder : IAsyncHtmlBuilder
+public class ImagesHtmlWrapperBuilder : IAsyncHtmlBuilder
 {
-    public MembersHtmlBuilder() : this(new List<DiscordUser>())
+    public ImagesHtmlWrapperBuilder() : this(new List<DiscordAttachment>())
     {
     }
 
-    public MembersHtmlBuilder(List<DiscordUser> users)
+    public ImagesHtmlWrapperBuilder(IReadOnlyList<DiscordAttachment> images)
     {
-        Users ??= users ?? throw new ArgumentNullException(nameof(users));
+        Images ??= images ?? throw new ArgumentNullException(nameof(images));
     }
 
-    public List<DiscordUser> Users { get; private set; }
+    public IReadOnlyList<DiscordAttachment> Images { get; private set; }
 
     public async Task<string> BuildAsync()
     {
-        if (Users.Count == 0) return "";
-
-        string usersHtml = "";
-        foreach (var user in Users)
+        if (Images.Count == 0) return "";
+        string imagesHtml = "";
+        foreach (var attachment in Images)
         {
-            HtmlUser userModel = new (user);
-            usersHtml += $"<div class=\"user\">{await userModel.BuildAvatar()} {userModel.BuildAsync()}</div>";
+            HtmlImage image = new (attachment.Url);
+            imagesHtml += await image.BuildAsync();
         }
 
-        return $"<div id=\"users-wrapper\">{usersHtml}</div>";
+        return $"<div class=\"images-wrapper\">{imagesHtml}</div>";
     }
 
-    public MembersHtmlBuilder WithUsers(List<DiscordUser> users)
+    public ImagesHtmlWrapperBuilder WithImages(IReadOnlyList<DiscordAttachment> images)
     {
-        Users = users ?? throw new ArgumentNullException(); ;
+        Images = images ?? throw new ArgumentNullException();
+
         return this;
     }
 }

@@ -122,7 +122,7 @@ public class DiscordGuildService : IDiscordGuildService
         if (req is null) throw new ArgumentNullException(nameof(req));
         if (ctx is null) throw new ArgumentNullException(nameof(ctx));
 
-        return await this.RepairConfigAsync(ctx.Guild, GuildConfigType.Moderation, ctx.Member);
+        return await this.RepairConfigAsync(ctx.Guild, GuildModule.Moderation, ctx.Member);
     }
 
     public async Task<Result<DiscordEmbed>> RepairConfigAsync(TicketingConfigRepairReqDto req)
@@ -131,7 +131,7 @@ public class DiscordGuildService : IDiscordGuildService
 
         DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
 
-        return await this.RepairConfigAsync(guild, GuildConfigType.Ticketing,
+        return await this.RepairConfigAsync(guild, GuildModule.Ticketing,
             await guild.GetMemberAsync(req.RequestedOnBehalfOfId));
     }
 
@@ -141,7 +141,7 @@ public class DiscordGuildService : IDiscordGuildService
 
         DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
 
-        return await this.RepairConfigAsync(guild, GuildConfigType.Moderation,
+        return await this.RepairConfigAsync(guild, GuildModule.Moderation,
             await guild.GetMemberAsync(req.RequestedOnBehalfOfId));
     }
 
@@ -151,7 +151,7 @@ public class DiscordGuildService : IDiscordGuildService
         if (req is null) throw new ArgumentNullException(nameof(req));
         if (ctx is null) throw new ArgumentNullException(nameof(ctx));
 
-        return await this.RepairConfigAsync(ctx.Guild, GuildConfigType.Ticketing, ctx.Member);
+        return await this.RepairConfigAsync(ctx.Guild, GuildModule.Ticketing, ctx.Member);
     }
 
     public async Task<Result<DiscordEmbed>> DisableModuleAsync(ModerationConfigDisableReqDto req)
@@ -161,7 +161,7 @@ public class DiscordGuildService : IDiscordGuildService
         DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
 
         return await this.DisableModuleAsync(guild, await guild.GetMemberAsync(req.RequestedOnBehalfOfId),
-            GuildConfigType.Moderation);
+            GuildModule.Moderation);
     }
 
     public async Task<Result<DiscordEmbed>> DisableModuleAsync(TicketingConfigDisableReqDto req)
@@ -171,7 +171,7 @@ public class DiscordGuildService : IDiscordGuildService
         DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
 
         return await this.DisableModuleAsync(guild, await guild.GetMemberAsync(req.RequestedOnBehalfOfId),
-            GuildConfigType.Ticketing);
+            GuildModule.Ticketing);
     }
 
     public async Task<Result<DiscordEmbed>> DisableModuleAsync(InteractionContext ctx,
@@ -180,7 +180,7 @@ public class DiscordGuildService : IDiscordGuildService
         if (req is null) throw new ArgumentNullException(nameof(req));
         if (ctx is null) throw new ArgumentNullException(nameof(ctx));
 
-        return await this.DisableModuleAsync(ctx.Guild, ctx.Member, GuildConfigType.Moderation);
+        return await this.DisableModuleAsync(ctx.Guild, ctx.Member, GuildModule.Moderation);
     }
 
     public async Task<Result<DiscordEmbed>> DisableModuleAsync(InteractionContext ctx,
@@ -189,7 +189,7 @@ public class DiscordGuildService : IDiscordGuildService
         if (req is null) throw new ArgumentNullException(nameof(req));
         if (ctx is null) throw new ArgumentNullException(nameof(ctx));
 
-        return await this.DisableModuleAsync(ctx.Guild, ctx.Member, GuildConfigType.Ticketing);
+        return await this.DisableModuleAsync(ctx.Guild, ctx.Member, GuildModule.Ticketing);
     }
 
     public async Task<Result<int>> CreateOverwritesForMutedRoleAsync(CreateMuteOverwritesReqDto req)
@@ -320,7 +320,7 @@ public class DiscordGuildService : IDiscordGuildService
     }
 
     private async Task<Result<DiscordEmbed>> RepairConfigAsync([NotNull] DiscordGuild discordGuild,
-        GuildConfigType type, DiscordMember requestingMember)
+        GuildModule type, DiscordMember requestingMember)
     {
         if (discordGuild is null) throw new ArgumentNullException(nameof(discordGuild));
         if (requestingMember is null) throw new ArgumentNullException(nameof(requestingMember));
@@ -334,7 +334,7 @@ public class DiscordGuildService : IDiscordGuildService
 
         switch (type)
         {
-            case GuildConfigType.Ticketing:
+            case GuildModule.Ticketing:
                 guildResult = await _guildService.GetSingleBySpecAsync<Guild>(
                     new ActiveGuildByDiscordIdWithTicketingSpecifications(discordGuild.Id));
                 if (!guildResult.IsDefined() || guildResult.Entity.TicketingConfig is null)
@@ -411,7 +411,7 @@ public class DiscordGuildService : IDiscordGuildService
 
 
                 break;
-            case GuildConfigType.Moderation:
+            case GuildModule.Moderation:
                 guildResult = await _guildService.GetSingleBySpecAsync<Guild>(
                     new ActiveGuildByDiscordIdWithModerationSpec(discordGuild.Id));
 
@@ -553,7 +553,7 @@ public class DiscordGuildService : IDiscordGuildService
     }
 
     private async Task<Result<DiscordEmbed>> DisableModuleAsync(DiscordGuild discordGuild,
-        DiscordMember requestingMember, GuildConfigType type)
+        DiscordMember requestingMember, GuildModule type)
     {
         if (!requestingMember.IsAdmin()) throw new DiscordNotAuthorizedException();
 
@@ -561,21 +561,21 @@ public class DiscordGuildService : IDiscordGuildService
             new ActiveGuildByDiscordIdWithTicketingSpecifications(discordGuild.Id));
         switch (type)
         {
-            case GuildConfigType.Ticketing:
+            case GuildModule.Ticketing:
                 if (!guildResult.IsDefined() || guildResult.Entity.TicketingConfig is null)
                     return Result<DiscordEmbed>.FromError(new NotFoundError());
                 if (guildResult.Entity.TicketingConfig.IsDisabled)
                     return Result<DiscordEmbed>.FromError(new InvalidOperationError());
 
-                await _guildService.DisableConfigAsync(discordGuild.Id, GuildConfigType.Ticketing, true);
+                await _guildService.DisableConfigAsync(discordGuild.Id, GuildModule.Ticketing, true);
                 break;
-            case GuildConfigType.Moderation:
+            case GuildModule.Moderation:
                 if (!guildResult.IsDefined() || guildResult.Entity.ModerationConfig is null)
                     return Result<DiscordEmbed>.FromError(new NotFoundError());
                 if (guildResult.Entity.ModerationConfig.IsDisabled)
                     return Result<DiscordEmbed>.FromError(new InvalidOperationError());
 
-                await _guildService.DisableConfigAsync(discordGuild.Id, GuildConfigType.Moderation, true);
+                await _guildService.DisableConfigAsync(discordGuild.Id, GuildModule.Moderation, true);
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(type), type, null);

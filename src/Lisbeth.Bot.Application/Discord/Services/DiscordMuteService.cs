@@ -26,7 +26,6 @@ using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Mute;
 using Lisbeth.Bot.Domain.DTOs.Request.Mute;
 using Microsoft.Extensions.Logging;
-using MikyM.Discord.EmbedBuilders.Builders;
 using MikyM.Discord.EmbedBuilders.Enums;
 using MikyM.Discord.Enums;
 using MikyM.Discord.Extensions.BaseExtensions;
@@ -41,17 +40,17 @@ public class DiscordMuteService : IDiscordMuteService
     private readonly IGuildService _guildService;
     private readonly ILogger<DiscordMuteService> _logger;
     private readonly IMuteService _muteService;
-    private readonly IDiscordGuildLoggerService _guildLoggerService;
+    private readonly IDiscordGuildLoggerService _guildLogger;
     private readonly IResponseDiscordEmbedBuilder _embedBuilder;
 
     public DiscordMuteService(IDiscordService discord, IGuildService guildService, ILogger<DiscordMuteService> logger,
-        IMuteService muteService, IDiscordGuildLoggerService guildLoggerService, IDiscordEmbedProvider embedProvider, IResponseDiscordEmbedBuilder embedBuilder)
+        IMuteService muteService, IDiscordGuildLoggerService guildLogger, IDiscordEmbedProvider embedProvider, IResponseDiscordEmbedBuilder embedBuilder)
     {
         _discord = discord;
         _guildService = guildService;
         _logger = logger;
         _muteService = muteService;
-        _guildLoggerService = guildLoggerService;
+        _guildLogger = guildLogger;
         _embedBuilder = embedBuilder;
     }
 
@@ -221,15 +220,13 @@ public class DiscordMuteService : IDiscordMuteService
         var result =
             await _guildService.GetSingleBySpecAsync(new ActiveGuildByIdSpec(guild.Id));
 
-        if (!result.IsDefined())
+        if (!result.IsDefined(out var guildEntity))
             return new DiscordNotFoundError(DiscordEntity.Guild);
 
-        var guildCfg = result.Entity;
+        if (!guildEntity.IsModerationModuleEnabled)
+            return new DisabledGuildModuleError(GuildModule.Moderation);
 
-        if (guildCfg.ModerationConfig is null)
-            return new DisabledEntityError(nameof(guildCfg.ModerationConfig));
-
-        if (!guild.Roles.TryGetValue(guildCfg.ModerationConfig.MuteRoleId, out _)) return new DiscordNotFoundError("Mute role not found.");
+        if (!guild.Roles.TryGetValue(guildEntity.ModerationConfig.MuteRoleId, out _)) return new DiscordNotFoundError("Mute role not found.");
 
         if (req.AppliedUntil < DateTime.UtcNow)
             return new ArgumentOutOfRangeError(nameof(req.AppliedUntil));
@@ -237,24 +234,23 @@ public class DiscordMuteService : IDiscordMuteService
         if (!moderator.IsModerator() || target.IsModerator())
             return new DiscordNotAuthorizedError();
 
-        var partial = await _muteService.AddOrExtendAsync(req, true);
 
-        await _guildLoggerService.LogToDiscordAsync(guild, req, DiscordModeration.Mute, moderator, target, guildCfg.EmbedHexColor, partial.IsDefined() ? partial.Entity.Id : null);
+        await _guildLogger.LogToDiscordAsync(guild, req, DiscordModeration.Mute, moderator, target, guildEntity.EmbedHexColor);
 
-        if (!partial.IsDefined()) return Result<DiscordEmbed>.FromError(partial);
-
-        var resMute = await target.MuteAsync(guildCfg.ModerationConfig.MuteRoleId);
-
+        var resMute = await target.MuteAsync(guildEntity.ModerationConfig.MuteRoleId);
         if (!resMute.IsSuccess) return new DiscordError("Failed to mute.");
 
+        var partial = await _muteService.AddOrExtendAsync(req, true);
+        if (!partial.IsDefined(out var idEntityPair)) return Result<DiscordEmbed>.FromError(partial);
+        
         return _embedBuilder
-            .WithCase(partial.Entity.Id)
-            .WithEmbedColor(new DiscordColor(guildCfg.EmbedHexColor))
+            .WithCase(idEntityPair.Id)
+            .WithEmbedColor(new DiscordColor(guildEntity.EmbedHexColor))
             .WithAuthorSnowflakeInfo(target)
             .WithFooterSnowflakeInfo(target)
             .AsEnriched<ResponseDiscordEmbedBuilder>()
             .WithType(DiscordModeration.Mute)
-            .EnrichFrom(new MemberModAddReqResponseEnricher(req, target, partial.Entity.FoundEntity))
+            .EnrichFrom(new MemberModAddReqResponseEnricher(req, target, idEntityPair.FoundEntity))
             .Build();
     }
 
@@ -276,32 +272,29 @@ public class DiscordMuteService : IDiscordMuteService
         var result =
             await _guildService.GetSingleBySpecAsync<Guild>(new ActiveGuildByDiscordIdWithModerationSpec(guild.Id));
 
-        if (!result.IsDefined())
+        if (!result.IsDefined(out var guildEntity))
             return new DiscordNotFoundError(DiscordEntity.Guild);
 
-        var guildCfg = result.Entity;
+        if (!guildEntity.IsModerationModuleEnabled)
+            return new DisabledGuildModuleError(GuildModule.Moderation);
 
-        if (guildCfg.ModerationConfig is null)
-            return new DisabledEntityError(nameof(guildCfg.ModerationConfig));
+        bool isMuted = target.Roles.FirstOrDefault(r => r.Id == guildEntity.ModerationConfig.MuteRoleId) is not null;
 
-        bool isMuted = target.Roles.FirstOrDefault(r => r.Id == guildCfg.ModerationConfig.MuteRoleId) is not null;
-
-        var res = await _muteService.DisableAsync(req);
-
-        await _guildLoggerService.LogToDiscordAsync(guild, req, DiscordModeration.Unmute, moderator, target, guildCfg.EmbedHexColor, res.Entity?.Id);
+        await _guildLogger.LogToDiscordAsync(guild, req, DiscordModeration.Unmute, moderator, target, guildEntity.EmbedHexColor);
 
         if (isMuted)
         {
-            var muteRes = await target.UnmuteAsync(guildCfg.ModerationConfig.MuteRoleId);
+            var muteRes = await target.UnmuteAsync(guildEntity.ModerationConfig.MuteRoleId);
             if (!muteRes.IsSuccess) return new DiscordError("Failed to unmute");
         }
 
-        if (res.IsDefined())
-            await _muteService.CommitAsync();
+        var res = await _muteService.DisableAsync(req, true);
+
+        if (!res.IsDefined(out var foundMute)) return Result<DiscordEmbed>.FromError(res);
 
         return _embedBuilder
-            .WithCase(res.Entity?.Id)
-            .WithEmbedColor(new DiscordColor(guildCfg.EmbedHexColor))
+            .WithCase(foundMute.Id)
+            .WithEmbedColor(new DiscordColor(guildEntity.EmbedHexColor))
             .WithAuthorSnowflakeInfo(target)
             .WithFooterSnowflakeInfo(target)
             .AsEnriched<ResponseDiscordEmbedBuilder>()
@@ -325,31 +318,28 @@ public class DiscordMuteService : IDiscordMuteService
         var result =
             await _guildService.GetSingleBySpecAsync(new ActiveGuildByIdSpec(guild.Id));
 
-        if (!result.IsDefined())
+        if (!result.IsDefined(out var guildEntity))
             return new DiscordNotFoundError(DiscordEntity.Guild);
 
-        var guildCfg = result.Entity;
-
-        if (guildCfg.ModerationConfig is null)
-            return new DisabledEntityError(nameof(guildCfg.ModerationConfig));
-
+        if (!guildEntity.IsModerationModuleEnabled)
+            return new DisabledGuildModuleError(GuildModule.Moderation);
 
         var res = await _muteService.GetSingleBySpecAsync<Mute>(
             new MuteBaseGetSpecifications(req.Id, req.TargetUserId, req.GuildId, req.AppliedById, req.LiftedOn,
                 req.AppliedOn, req.LiftedById));
 
-        await _guildLoggerService.LogToDiscordAsync(guild, req, DiscordModeration.MuteGet, moderator, target, guildCfg.EmbedHexColor, res.Entity?.Id);
+        await _guildLogger.LogToDiscordAsync(guild, req, DiscordModeration.MuteGet, moderator, target, guildEntity.EmbedHexColor);
 
-        if (!res.IsDefined()) return new NotFoundError();
+        if (!res.IsDefined(out var foundMute)) return new NotFoundError();
 
         return _embedBuilder
-            .WithCase(res.Entity?.Id)
-            .WithEmbedColor(new DiscordColor(guildCfg.EmbedHexColor))
+            .WithCase(foundMute.Id)
+            .WithEmbedColor(new DiscordColor(guildEntity.EmbedHexColor))
             .WithAuthorSnowflakeInfo(target)
             .WithFooterSnowflakeInfo(target)
             .AsEnriched<ResponseDiscordEmbedBuilder>()
             .WithType(DiscordModeration.Mute)
-            .EnrichFrom(new MemberModGetReqResponseEnricher(res.Entity!))
+            .EnrichFrom(new MemberModGetReqResponseEnricher(foundMute))
             .Build();
     }
 }

@@ -18,7 +18,6 @@
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Domain.DTOs.Request.Base;
-using Lisbeth.Bot.Domain.Entities.Base;
 using MikyM.Discord.EmbedBuilders.Wrappers;
 using MikyM.Discord.Enums;
 
@@ -28,14 +27,11 @@ public class MemberModDisableReqResponseEnricher : EmbedEnricher<IDisableModReq>
 {
     public DiscordUser Target { get; }
 
-    public MemberModDisableReqResponseEnricher(IDisableModReq request, DiscordUser target,
-        IModEntity? previous = null) : base(request) =>
+    public MemberModDisableReqResponseEnricher(IDisableModReq request, DiscordUser target) : base(request) =>
         this.Target = target;
 
     public override void Enrich(IDiscordEmbedBuilderWrapper embedBuilder)
     {
-        var (name, pastTense) = base.GetUnderlyingNameAndPastTense();
-
         embedBuilder.AddField("User mention", this.Target.Mention, true);
         embedBuilder.AddField("Moderator",
             ExtendedFormatter.Mention(this.Entity.RequestedOnBehalfOfId, DiscordEntity.Member), true);
