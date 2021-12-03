@@ -57,4 +57,7 @@ public static class DiscordMemberExtensions
 
         return Result.FromSuccess();
     }
+
+    public static bool HasRole(this DiscordMember member, ulong roleId, out DiscordRole? role)
+        => (role = member.Roles.FirstOrDefault(x => x.Id == roleId)) is not null;
 }

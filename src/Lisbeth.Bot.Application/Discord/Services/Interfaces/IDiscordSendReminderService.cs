@@ -19,5 +19,5 @@ namespace Lisbeth.Bot.Application.Discord.Services.Interfaces;
 
 public interface IDiscordSendReminderService
 {
-    Task<Result> SendReminderAsync(long reminderId, ReminderType type);
+    Task<Result> SendReminderAsync(long reminderId, Domain.Enums.ReminderType type);
 }

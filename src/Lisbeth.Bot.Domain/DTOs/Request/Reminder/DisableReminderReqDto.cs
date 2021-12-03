@@ -26,7 +26,7 @@ public class DisableReminderReqDto : BaseAuthWithGuildReqDto
     {
     }
 
-    public DisableReminderReqDto(ReminderType type, string name, ulong guildId, ulong requestedOnBehalfOfId,
+    public DisableReminderReqDto(Enums.ReminderType type, string name, ulong guildId, ulong requestedOnBehalfOfId,
         long? reminderId = null) : base(guildId, requestedOnBehalfOfId)
     {
         Type = type;
@@ -34,7 +34,7 @@ public class DisableReminderReqDto : BaseAuthWithGuildReqDto
         ReminderId = reminderId;
     }
 
-    public ReminderType Type { get; set; }
+    public Enums.ReminderType Type { get; set; }
     public string? Name { get; set; }
     public long? ReminderId { get; set; }
 }

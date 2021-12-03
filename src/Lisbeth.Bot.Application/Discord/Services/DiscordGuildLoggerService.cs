@@ -19,6 +19,7 @@ using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using Lisbeth.Bot.Application.Discord.EmbedBuilders;
 using Lisbeth.Bot.Application.Discord.EmbedEnrichers.Log;
+using Lisbeth.Bot.Application.Discord.EmbedEnrichers.Log.Moderation;
 using Lisbeth.Bot.Domain.DTOs.Request.Base;
 using MikyM.Discord.EmbedBuilders.Builders;
 using MikyM.Discord.EmbedBuilders.Enrichers;

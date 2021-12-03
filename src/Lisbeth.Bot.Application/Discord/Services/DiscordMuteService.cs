@@ -15,11 +15,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using Hangfire;
 using Lisbeth.Bot.Application.Discord.EmbedBuilders;
 using Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response;
+using Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response.Moderation;
 using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
@@ -226,13 +228,16 @@ public class DiscordMuteService : IDiscordMuteService
         if (!guildEntity.IsModerationModuleEnabled)
             return new DisabledGuildModuleError(GuildModule.Moderation);
 
-        if (!guild.Roles.TryGetValue(guildEntity.ModerationConfig.MuteRoleId, out _)) return new DiscordNotFoundError("Mute role not found.");
+        if (!guild.RoleExists(guildEntity.ModerationConfig.MuteRoleId, out var mutedRole)) return new DiscordNotFoundError("Mute role not found.");
 
         if (req.AppliedUntil < DateTime.UtcNow)
             return new ArgumentOutOfRangeError(nameof(req.AppliedUntil));
 
         if (!moderator.IsModerator() || target.IsModerator())
             return new DiscordNotAuthorizedError();
+
+        if (!guild.IsRoleHierarchyValid(mutedRole)) return new DiscordError("Bots role is below muted role in the role hierarchy.");
+        if (!guild.HasSelfPermissions(Permissions.ManageRoles)) return new DiscordError("Bot doesn't have manage roles permission.");
 
 
         await _guildLogger.LogToDiscordAsync(guild, req, DiscordModeration.Mute, moderator, target, guildEntity.EmbedHexColor);
@@ -277,6 +282,10 @@ public class DiscordMuteService : IDiscordMuteService
 
         if (!guildEntity.IsModerationModuleEnabled)
             return new DisabledGuildModuleError(GuildModule.Moderation);
+
+        if (!guild.RoleExists(guildEntity.ModerationConfig.MuteRoleId, out var mutedRole)) return new DiscordNotFoundError("Mute role not found.");
+        if (!guild.IsRoleHierarchyValid(mutedRole)) return new DiscordError("Bots role is below muted role in the role hierarchy.");
+        if (!guild.HasSelfPermissions(Permissions.ManageRoles)) return new DiscordError("Bot doesn't have manage roles permission.");
 
         bool isMuted = target.Roles.FirstOrDefault(r => r.Id == guildEntity.ModerationConfig.MuteRoleId) is not null;
 

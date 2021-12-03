@@ -40,6 +40,18 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Discord\EmbedEnrichers\Log\EmbedConfig\" />
+    <Folder Include="Discord\EmbedEnrichers\Log\Misc\" />
+    <Folder Include="Discord\EmbedEnrichers\Log\RoleMenu\" />
+    <Folder Include="Discord\EmbedEnrichers\Log\Tag\" />
+    <Folder Include="Discord\EmbedEnrichers\Log\Ticket\" />
+    <Folder Include="Discord\EmbedEnrichers\Log\Reminder\" />
+    <Folder Include="Discord\EmbedEnrichers\Response\EmbedConfig\" />
+    <Folder Include="Discord\EmbedEnrichers\Response\Misc\" />
+    <Folder Include="Discord\EmbedEnrichers\Response\RoleMenu\" />
+    <Folder Include="Discord\EmbedEnrichers\Response\Tag\" />
+    <Folder Include="Discord\EmbedEnrichers\Response\Ticket\" />
+    <Folder Include="Discord\EmbedEnrichers\Response\Reminder\" />
     <Folder Include="Util\" />
   </ItemGroup>
 </Project>

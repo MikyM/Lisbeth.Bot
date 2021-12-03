@@ -83,7 +83,7 @@ public abstract class AuditableDbContext : DbContext
                 string propertyName = property.Metadata.Name;
                 if (property.Metadata.IsPrimaryKey())
                 {
-                    auditEntry.KeyValues[propertyName] = property.CurrentValue;
+                    auditEntry.KeyValues[propertyName] = property.CurrentValue!;
                     continue;
                 }
 
@@ -91,11 +91,11 @@ public abstract class AuditableDbContext : DbContext
                 {
                     case EntityState.Added:
                         auditEntry.AuditType = AuditType.Create;
-                        auditEntry.NewValues[propertyName] = property.CurrentValue;
+                        auditEntry.NewValues[propertyName] = property.CurrentValue!;
                         break;
                     case EntityState.Deleted:
                         auditEntry.AuditType = AuditType.Disable;
-                        auditEntry.OldValues[propertyName] = property.OriginalValue;
+                        auditEntry.OldValues[propertyName] = property.OriginalValue!;
                         break;
                     case EntityState.Modified:
                         if (property.IsModified)
@@ -103,10 +103,10 @@ public abstract class AuditableDbContext : DbContext
                             auditEntry.ChangedColumns.Add(propertyName);
                             auditEntry.AuditType = AuditType.Update;
                             if (entry.Entity is Entity && propertyName == "IsDisabled" && property.IsModified &&
-                                !(bool)property.OriginalValue &&
-                                (bool)property.CurrentValue) auditEntry.AuditType = AuditType.Disable;
-                            auditEntry.OldValues[propertyName] = property.OriginalValue;
-                            auditEntry.NewValues[propertyName] = property.CurrentValue;
+                                !(bool)property.OriginalValue! &&
+                                (bool)property.CurrentValue!) auditEntry.AuditType = AuditType.Disable;
+                            auditEntry.OldValues[propertyName] = property.OriginalValue!;
+                            auditEntry.NewValues[propertyName] = property.CurrentValue!;
                         }
 
                         break;

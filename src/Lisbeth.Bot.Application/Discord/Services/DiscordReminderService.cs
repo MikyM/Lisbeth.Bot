@@ -135,7 +135,7 @@ public class DiscordReminderService : IDiscordReminderService
         if (requestingMember is null) throw new ArgumentNullException(nameof(requestingMember));
         if (req is null) throw new ArgumentNullException(nameof(req));
 
-        if (req.Type is ReminderType.Recurring && !requestingMember.IsModerator())
+        if (req.Type is Domain.Enums.ReminderType.Recurring && !requestingMember.IsModerator())
             return Result<DiscordEmbed>.FromError(new DiscordNotAuthorizedError());
 
         var result = await _guildService.GetSingleBySpecAsync<Guild>(new ActiveGuildByIdSpec(req.GuildId));

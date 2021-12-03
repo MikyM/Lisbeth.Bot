@@ -34,7 +34,7 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 public class ReminderSlashCommands : ExtendedApplicationCommandModule
 {
     [UsedImplicitly] public IDiscordReminderService? ReminderService { private get; set; }
-    [UsedImplicitly] public IDiscordEmbedConfiguratorService<Reminder>? ReminderEmbedConfiguratorService { private get; set; }
+    [UsedImplicitly] public IDiscordEmbedConfiguratorService<Domain.Entities.Reminder>? ReminderEmbedConfiguratorService { private get; set; }
 
     [UsedImplicitly]
     public IDiscordEmbedConfiguratorService<RecurringReminder>? RecurringReminderEmbedConfiguratorService
@@ -49,7 +49,7 @@ public class ReminderSlashCommands : ExtendedApplicationCommandModule
         [Option("action", "Action to perform")]
         ReminderActionType actionType,
         [Option("reminder-type", "Type of the reminder")]
-        ReminderType reminderType,
+        Domain.Enums.ReminderType reminderType,
         [Option("text", "What to remind about")]
         string text = "default",
         [Option("for-time", "Datetime, cron expression or string a representation")]
@@ -102,22 +102,22 @@ public class ReminderSlashCommands : ExtendedApplicationCommandModule
             case ReminderActionType.Set or ReminderActionType.Reschedule
                 when !isValidCron && !isValidDateTime && !isValidStringRep && !isValidTime:
                 throw new ArgumentException("Couldn't parse given time representation", nameof(time));
-            case ReminderActionType.Set or ReminderActionType.Reschedule when reminderType is ReminderType.Single &&
+            case ReminderActionType.Set or ReminderActionType.Reschedule when reminderType is Domain.Enums.ReminderType.Single &&
                                                                               isValidCron && !isValidDateTime && !isValidStringRep && !isValidTime:
                 throw new ArgumentException("Single reminders can't take a cron expression as an argument",
                     nameof(time));
             case ReminderActionType.Set or ReminderActionType.Reschedule
-                when reminderType is ReminderType.Recurring && !isValidCron && (isValidDateTime || isValidStringRep || isValidTime):
+                when reminderType is Domain.Enums.ReminderType.Recurring && !isValidCron && (isValidDateTime || isValidStringRep || isValidTime):
                 throw new ArgumentException($"Recurring reminders only accepts a valid cron expression as an argument. \n {exMessage}",
                     nameof(time));
             default:
                 switch (actionType)
                 {
                     case ReminderActionType.Set:
-                        if (reminderType is ReminderType.Single && name is "") name = $"{ctx.Guild.Id}_{ctx.User.Id}_{DateTime.UtcNow}";
+                        if (reminderType is Domain.Enums.ReminderType.Single && name is "") name = $"{ctx.Guild.Id}_{ctx.User.Id}_{DateTime.UtcNow}";
 
                         var setReq = new SetReminderReqDto(name, isValidCron && !isValidDateTime && !isValidTime ? time : null,
-                            isValidDateTime ? parsedDateTime : isValidTime ? DateTime.UtcNow.Date.Add(parsedTime.TimeOfDay) : null, isValidStringRep ? time : null, text,
+                            isValidDateTime ? parsedDateTime : isValidTime ? global::System.DateTime.UtcNow.Date.Add(parsedTime.TimeOfDay) : null, isValidStringRep ? time : null, text,
                             mentionList, ctx.Guild.Id, ctx.Member.Id, channel?.Id);
                         var setReqValidator = new SetReminderReqValidator(ctx.Client);
                         await setReqValidator.ValidateAndThrowAsync(setReq);
@@ -134,7 +134,7 @@ public class ReminderSlashCommands : ExtendedApplicationCommandModule
                     case ReminderActionType.ConfigureEmbed:
                         switch (reminderType)
                         {
-                            case ReminderType.Single:
+                            case Domain.Enums.ReminderType.Single:
                                 var res = await this.ReminderEmbedConfiguratorService!.ConfigureAsync(ctx, name);
                                 if (res.IsDefined())
                                     await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(res.Entity));
@@ -143,7 +143,7 @@ public class ReminderSlashCommands : ExtendedApplicationCommandModule
                                         new DiscordWebhookBuilder().AddEmbed(
                                             GetUnsuccessfulResultEmbed(res, ctx.Client)));
                                 return;
-                            case ReminderType.Recurring:
+                            case Domain.Enums.ReminderType.Recurring:
                                 var resRec =
                                     await this.RecurringReminderEmbedConfiguratorService!.ConfigureAsync(ctx, name);
                                 if (resRec.IsDefined())

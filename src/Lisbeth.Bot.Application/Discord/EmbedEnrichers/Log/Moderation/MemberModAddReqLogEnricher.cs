@@ -15,17 +15,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Globalization;
 using Lisbeth.Bot.Application.Discord.Helpers;
-using Lisbeth.Bot.Domain.Entities.Base;
+using Lisbeth.Bot.Domain.DTOs.Request.Base;
 using MikyM.Discord.EmbedBuilders.Wrappers;
 using MikyM.Discord.Enums;
-using System.Globalization;
 
-namespace Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response;
+namespace Lisbeth.Bot.Application.Discord.EmbedEnrichers.Log.Moderation;
 
-public class MemberModGetReqResponseEnricher : EmbedEnricher<IModEntity>
+public class MemberModAddReqLogEnricher : EmbedEnricher<IAddModReq>
 {
-    public MemberModGetReqResponseEnricher(IModEntity request) : base(request)
+    public MemberModAddReqLogEnricher(IAddModReq request) : base(request)
     {
     }
 
@@ -33,8 +33,10 @@ public class MemberModGetReqResponseEnricher : EmbedEnricher<IModEntity>
     {
         var (name, pastTense) = base.GetUnderlyingNameAndPastTense();
 
-        embedBuilder.AddField("User", ExtendedFormatter.Mention(this.Entity.UserId, DiscordEntity.User), true);
-        embedBuilder.AddField("Moderator", ExtendedFormatter.Mention(this.Entity.AppliedById, DiscordEntity.User),
+        embedBuilder.AddField("Moderator",
+            ExtendedFormatter.Mention(this.Entity.RequestedOnBehalfOfId, DiscordEntity.Member), true);
+
+        embedBuilder.AddField("Target", ExtendedFormatter.Mention(this.Entity.TargetUserId, DiscordEntity.Member),
             true);
 
         TimeSpan duration = this.Entity.AppliedUntil.Subtract(DateTime.UtcNow);
@@ -42,16 +44,9 @@ public class MemberModGetReqResponseEnricher : EmbedEnricher<IModEntity>
             ? "Permanent"
             : $"{duration.Days} days, {duration.Hours} hrs, {duration.Minutes} mins";
 
-        embedBuilder.AddField($"{pastTense} on", this.Entity.CreatedAt?.ToString() ?? "Error");
         embedBuilder.AddField("Length", lengthString, true);
         embedBuilder.AddField($"{pastTense} until", this.Entity.AppliedUntil.ToString(CultureInfo.InvariantCulture),
             true);
-
-        if (this.Entity.LiftedOn is not null)
-        {
-            embedBuilder.AddField("Lifted on", this.Entity.LiftedOn.Value.ToString(CultureInfo.InvariantCulture));
-            embedBuilder.AddField("Lifted by", ExtendedFormatter.Mention(this.Entity.LiftedById, DiscordEntity.User));
-        }
 
         if (!string.IsNullOrWhiteSpace(this.Entity.Reason)) embedBuilder.AddField("Reason", this.Entity.Reason);
     }

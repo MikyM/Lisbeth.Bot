@@ -15,15 +15,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Globalization;
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Domain.DTOs.Request.Base;
 using Lisbeth.Bot.Domain.Entities.Base;
 using MikyM.Discord.EmbedBuilders.Wrappers;
 using MikyM.Discord.Enums;
-using System.Globalization;
 
-namespace Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response;
+namespace Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response.Moderation;
 
 public class MemberModAddReqResponseEnricher : EmbedEnricher<IAddModReq>
 {

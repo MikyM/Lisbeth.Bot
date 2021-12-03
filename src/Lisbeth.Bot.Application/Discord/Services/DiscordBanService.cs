@@ -20,6 +20,7 @@ using DSharpPlus.SlashCommands;
 using Hangfire;
 using Lisbeth.Bot.Application.Discord.EmbedBuilders;
 using Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response;
+using Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response.Moderation;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Ban;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.Domain.DTOs.Request.Ban;

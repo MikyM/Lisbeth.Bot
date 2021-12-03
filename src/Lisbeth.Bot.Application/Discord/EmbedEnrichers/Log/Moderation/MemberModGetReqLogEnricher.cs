@@ -21,7 +21,7 @@ using Lisbeth.Bot.Domain.DTOs.Request.Base;
 using MikyM.Discord.EmbedBuilders.Wrappers;
 using MikyM.Discord.Enums;
 
-namespace Lisbeth.Bot.Application.Discord.EmbedEnrichers.Log;
+namespace Lisbeth.Bot.Application.Discord.EmbedEnrichers.Log.Moderation;
 
 public class MemberModGetReqLogEnricher : EmbedEnricher<IGetModReq>
 {

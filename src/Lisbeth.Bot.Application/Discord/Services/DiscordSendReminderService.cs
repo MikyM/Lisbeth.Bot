@@ -48,7 +48,7 @@ public class DiscordSendReminderService : IDiscordSendReminderService
 
     [Queue("reminder")]
     [PreserveOriginalQueue]
-    public async Task<Result> SendReminderAsync(long reminderId, ReminderType type)
+    public async Task<Result> SendReminderAsync(long reminderId, Domain.Enums.ReminderType type)
     {
         Guild guild;
         EmbedConfig? embedConfig;
@@ -59,9 +59,8 @@ public class DiscordSendReminderService : IDiscordSendReminderService
 
         switch (type)
         {
-            case ReminderType.Single:
-                var rem = await _reminderService.GetSingleBySpecAsync<Reminder>(
-                    new ActiveReminderByIdWithEmbedSpec(reminderId));
+            case Domain.Enums.ReminderType.Single:
+                var rem = await _reminderService.GetSingleBySpecAsync<Domain.Entities.Reminder>(new ActiveReminderByIdWithEmbedSpec((long)reminderId));
                 if (!rem.IsDefined() || rem.Entity.Guild?.ReminderChannelId is null)
                     return Result.FromError(new NotFoundError());
                 guild = rem.Entity.Guild;
@@ -70,7 +69,7 @@ public class DiscordSendReminderService : IDiscordSendReminderService
                 mentions = rem.Entity.Mentions;
                 channelId = rem.Entity.ChannelId;
                 break;
-            case ReminderType.Recurring:
+            case Domain.Enums.ReminderType.Recurring:
                 var recRem = await _recurringReminderService.GetSingleBySpecAsync<RecurringReminder>(
                     new ActiveRecurringReminderByIdWithEmbedSpec(reminderId));
                 if (!recRem.IsDefined() || recRem.Entity.Guild?.ReminderChannelId is null)

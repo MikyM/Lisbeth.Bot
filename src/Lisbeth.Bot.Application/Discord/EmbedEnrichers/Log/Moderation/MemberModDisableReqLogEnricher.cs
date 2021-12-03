@@ -19,35 +19,23 @@ using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Domain.DTOs.Request.Base;
 using MikyM.Discord.EmbedBuilders.Wrappers;
 using MikyM.Discord.Enums;
-using System.Globalization;
 
-namespace Lisbeth.Bot.Application.Discord.EmbedEnrichers.Log;
+namespace Lisbeth.Bot.Application.Discord.EmbedEnrichers.Log.Moderation;
 
-public class MemberModAddReqLogEnricher : EmbedEnricher<IAddModReq>
+public class MemberModDisableReqLogEnricher : EmbedEnricher<IDisableModReq>
 {
-    public MemberModAddReqLogEnricher(IAddModReq request) : base(request)
+    public MemberModDisableReqLogEnricher(IDisableModReq request) : base(request)
     {
     }
 
     public override void Enrich(IDiscordEmbedBuilderWrapper embedBuilder)
     {
-        var (name, pastTense) = base.GetUnderlyingNameAndPastTense();
-
         embedBuilder.AddField("Moderator",
             ExtendedFormatter.Mention(this.Entity.RequestedOnBehalfOfId, DiscordEntity.Member), true);
 
-        embedBuilder.AddField("Target", ExtendedFormatter.Mention(this.Entity.TargetUserId, DiscordEntity.Member),
-            true);
-
-        TimeSpan duration = this.Entity.AppliedUntil.Subtract(DateTime.UtcNow);
-        string lengthString = this.Entity.AppliedUntil == DateTime.MaxValue
-            ? "Permanent"
-            : $"{duration.Days} days, {duration.Hours} hrs, {duration.Minutes} mins";
-
-        embedBuilder.AddField("Length", lengthString, true);
-        embedBuilder.AddField($"{pastTense} until", this.Entity.AppliedUntil.ToString(CultureInfo.InvariantCulture),
-            true);
-
-        if (!string.IsNullOrWhiteSpace(this.Entity.Reason)) embedBuilder.AddField("Reason", this.Entity.Reason);
+        embedBuilder.AddField("Target",
+            this.Entity.TargetUserId.HasValue
+                ? ExtendedFormatter.Mention(this.Entity.TargetUserId.Value, DiscordEntity.Member)
+                : $"Case with Id: {this.Entity.Id}", true);
     }
 }

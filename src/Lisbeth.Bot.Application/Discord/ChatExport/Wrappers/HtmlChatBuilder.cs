@@ -49,8 +49,8 @@ public class HtmlChatBuilder : IAsyncHtmlBuilder
         if (Users is null || Messages is null || Channel is null || Js is null || Css is null)
             throw new ArgumentException("You must provide all required parameters before building.");
 
-        MessagesHtmlWrapper messagesBuilder = new(Messages);
-        MembersHtmlWrapper membersBuilder = new(Users);
+        MessagesHtmlWrapperBuilder messagesBuilder = new(Messages);
+        MembersHtmlWrapperBuilder membersBuilder = new(Users);
 
         return "<!DOCTYPE html>" +
                "<html lang=\"en\">" +

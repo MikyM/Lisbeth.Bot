@@ -110,7 +110,7 @@ public class AutoMapperProfile : Profile
             .ForMember(dest => dest.LastEditById, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
         CreateMap<RoleMenuOptionReqDto, RoleMenuOption>();
 
-        CreateMap<SetReminderReqDto, Reminder>()
+        CreateMap<SetReminderReqDto, Domain.Entities.Reminder>()
             .ForMember(dest => dest.CreatorId, source => source.MapFrom(x => x.RequestedOnBehalfOfId))
             .ForMember(dest => dest.LastEditById, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
 

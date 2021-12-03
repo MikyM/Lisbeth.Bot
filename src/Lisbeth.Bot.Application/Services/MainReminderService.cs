@@ -81,8 +81,8 @@ public class MainReminderService : IMainReminderService
                 req.Name = $"{req.GuildId}_{req.RequestedOnBehalfOfId}_{DateTime.UtcNow}";
 
             var partial = await _reminderService.AddAsync(req, true);
-            string hangfireId = _backgroundJobClient.Schedule<IDiscordSendReminderService>(
-                x => x.SendReminderAsync(partial.Entity, ReminderType.Single), setFor.ToUniversalTime(),
+            string hangfireId = _backgroundJobClient.Schedule(
+                (IDiscordSendReminderService x) => x.SendReminderAsync(partial.Entity, Domain.Enums.ReminderType.Single), setFor.ToUniversalTime(),
                 "reminder");
             await _reminderService.SetHangfireIdAsync(partial.Entity, hangfireId, true);
 
@@ -115,7 +115,7 @@ public class MainReminderService : IMainReminderService
 
             var partial = await _recurringReminderService.AddAsync(req, true);
             RecurringJob.AddOrUpdate<IDiscordSendReminderService>(jobName,
-                x => x.SendReminderAsync(partial.Entity, ReminderType.Recurring), req.CronExpression,
+                x => x.SendReminderAsync(partial.Entity, Domain.Enums.ReminderType.Recurring), req.CronExpression,
                 TimeZoneInfo.Utc, "reminder");
             await _recurringReminderService.SetHangfireIdAsync(partial.Entity, jobName, true);
 
@@ -153,8 +153,8 @@ public class MainReminderService : IMainReminderService
 
             if (!res) return new HangfireError("Hangfire failed to delete the job");
 
-            string hangfireId = _backgroundJobClient.Schedule<IDiscordSendReminderService>(
-                x => x.SendReminderAsync(result.Entity.Id, ReminderType.Single), setFor.ToUniversalTime(),
+            string hangfireId = _backgroundJobClient.Schedule(
+                (IDiscordSendReminderService x) => x.SendReminderAsync((long)result.Entity.Id, Domain.Enums.ReminderType.Single), setFor.ToUniversalTime(),
                 "reminder");
 
             req.NewHangfireId = long.Parse(hangfireId);
@@ -178,7 +178,7 @@ public class MainReminderService : IMainReminderService
         string jobName = $"{partial.Entity.GuildId}_{partial.Entity.Name}";
 
         RecurringJob.AddOrUpdate<IDiscordSendReminderService>(jobName,
-            x => x.SendReminderAsync(partial.Entity.Id, ReminderType.Recurring), req.CronExpression,
+            x => x.SendReminderAsync(partial.Entity.Id, Domain.Enums.ReminderType.Recurring), req.CronExpression,
             TimeZoneInfo.Utc, "reminder");
 
         await _recurringReminderService.RescheduleAsync(req, true);
@@ -193,20 +193,20 @@ public class MainReminderService : IMainReminderService
 
         switch (req.Type)
         {
-            case ReminderType.Single:
-                var singleResult = await _reminderService.GetSingleBySpecAsync<Reminder>(
-                    new ActiveReminderByNameOrIdAndGuildSpec(req.Name, req.GuildId, req.ReminderId));
-                if (!singleResult.IsDefined()) return Result<ReminderResDto>.FromError(singleResult);
+            case Domain.Enums.ReminderType.Single:
+                var singleResult = await _reminderService.GetSingleBySpecAsync<Domain.Entities.Reminder>(
+                    (MikyM.Common.DataAccessLayer.Specifications.ISpecification<Domain.Entities.Reminder>)new ActiveReminderByNameOrIdAndGuildSpec((string?)req.Name, (ulong?)req.GuildId, (long?)req.ReminderId));
+                if (!singleResult.IsDefined()) return Result<ReminderResDto>.FromError((Result<Domain.Entities.Reminder>)singleResult);
 
-                bool res = BackgroundJob.Delete(singleResult.Entity.HangfireId);
+                bool res = BackgroundJob.Delete((string?)singleResult.Entity.HangfireId);
 
                 if (!res) throw new Exception("Hangfire failed to delete a scheduled job");
 
                 await _reminderService.DisableAsync(req, true);
 
-                return new ReminderResDto(singleResult.Entity.Id, singleResult.Entity.Name, DateTime.MinValue,
-                    singleResult.Entity.Mentions);
-            case ReminderType.Recurring:
+                return new ReminderResDto((long)singleResult.Entity.Id, (string?)singleResult.Entity.Name, DateTime.MinValue,
+                    (System.Collections.Generic.List<string>?)singleResult.Entity.Mentions);
+            case Domain.Enums.ReminderType.Recurring:
                 var recurringResult = await _recurringReminderService.GetSingleBySpecAsync<RecurringReminder>(
                     new ActiveRecurringReminderByNameOrIdAndGuildSpec(req.Name, req.GuildId, req.ReminderId));
                 if (!recurringResult.IsDefined()) return Result<ReminderResDto>.FromError(recurringResult);

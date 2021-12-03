@@ -15,25 +15,19 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using DSharpPlus;
 using DSharpPlus.Entities;
-using Lisbeth.Bot.Application.Discord.Helpers;
-using Lisbeth.Bot.Domain.DTOs.Request.Base;
-using MikyM.Discord.EmbedBuilders.Wrappers;
-using MikyM.Discord.Enums;
 
-namespace Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response;
+namespace Lisbeth.Bot.Application.Discord.Extensions;
 
-public class MemberModDisableReqResponseEnricher : EmbedEnricher<IDisableModReq>
+public static class DiscordGuildExtensions
 {
-    public DiscordUser Target { get; }
+    public static bool IsRoleHierarchyValid(this DiscordGuild guild, DiscordRole role)
+        => guild.CurrentMember.Roles.Last().Position > role.Position;
 
-    public MemberModDisableReqResponseEnricher(IDisableModReq request, DiscordUser target) : base(request) =>
-        this.Target = target;
+    public static bool HasSelfPermissions(this DiscordGuild guild, Permissions permissions)
+        => guild.CurrentMember.Permissions.HasPermission(permissions);
 
-    public override void Enrich(IDiscordEmbedBuilderWrapper embedBuilder)
-    {
-        embedBuilder.AddField("User mention", this.Target.Mention, true);
-        embedBuilder.AddField("Moderator",
-            ExtendedFormatter.Mention(this.Entity.RequestedOnBehalfOfId, DiscordEntity.Member), true);
-    }
+    public static bool RoleExists(this DiscordGuild guild, ulong roleId, out DiscordRole role)
+        => (role = guild.GetRole(roleId)) is not null;
 }
