@@ -16,7 +16,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using DSharpPlus.Entities;
-using Lisbeth.Bot.Application.Enums;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using MikyM.Discord.EmbedBuilders.Enums;
 using MikyM.Discord.Enums;

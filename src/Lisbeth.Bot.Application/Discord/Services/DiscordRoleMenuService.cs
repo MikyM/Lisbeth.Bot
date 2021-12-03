@@ -529,7 +529,7 @@ public class DiscordRoleMenuService : IDiscordRoleMenuService
         return (currentResult, roleMenu);
     }
 
-    private DiscordEmbed GetTimedOutEmbed(string idOrName, bool isFirst = false)
+    private static DiscordEmbed GetTimedOutEmbed(string idOrName, bool isFirst = false)
     {
         var timedOut = new DiscordEmbedBuilder();
         timedOut.WithAuthor($"Role menu configurator menu for Id: {idOrName}");
