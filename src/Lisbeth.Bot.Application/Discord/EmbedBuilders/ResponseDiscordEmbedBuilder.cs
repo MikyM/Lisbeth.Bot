@@ -25,6 +25,8 @@ public sealed class ResponseDiscordEmbedBuilder : EnrichedDiscordEmbedBuilder, I
 {
     public DiscordModeration? Moderation { get; private set; }
 
+    public ResponseDiscordEmbedBuilder() { }
+
     public ResponseDiscordEmbedBuilder(EnhancedDiscordEmbedBuilder enhanced) : base(enhanced) { }
 
     public ResponseDiscordEmbedBuilder(DiscordModeration moderation)
