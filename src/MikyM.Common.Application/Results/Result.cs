@@ -95,7 +95,7 @@ public readonly struct Result : IResult
     /// <param name="result">The error.</param>
     /// <returns>The failed result.</returns>
     public static Result FromError<TEntity>(Result<TEntity> result)
-        => new(default, result);
+        => new(result.Error, result);
 
     /// <summary>
     /// Converts an error into a failed result.
@@ -179,6 +179,24 @@ public readonly struct Result<TEntity> : IResult<TEntity>
     public bool IsDefined() => this.IsSuccess && this.Entity is not null;
 
     /// <summary>
+    /// Determines whether the result contains a defined value; that is, it has a value, and the value is not null.
+    /// </summary>
+    /// <param name="entity">The entity, if it is defined.</param>
+    /// <returns>true if the result contains a defined value; otherwise, false.</returns>
+    [MemberNotNullWhen(true, nameof(Entity))]
+    public bool IsDefined([NotNullWhen(true)] out TEntity? entity)
+    {
+        entity = default;
+
+        if (!this.IsSuccess) return false;
+
+        if (this.Entity is null) return false;
+
+        entity = this.Entity;
+        return true;
+    }
+
+    /// <summary>
     /// Creates a new successful result.
     /// </summary>
     /// <param name="entity">The returned entity.</param>
@@ -211,7 +229,7 @@ public readonly struct Result<TEntity> : IResult<TEntity>
     /// <param name="result">The error.</param>
     /// <returns>The failed result.</returns>
     public static Result<TEntity> FromError<TOtherEntity>(Result<TOtherEntity> result)
-        => new(default, default, result);
+        => new(default, result.Error, result);
 
     /// <summary>
     /// Creates a new failed result from another result.
@@ -219,7 +237,7 @@ public readonly struct Result<TEntity> : IResult<TEntity>
     /// <param name="result">The error.</param>
     /// <returns>The failed result.</returns>
     public static Result<TEntity> FromError(Result result)
-        => new(default, default, result);
+        => new(default, result.Error, result);
 
     /// <summary>
     /// Converts an entity into a successful result.
