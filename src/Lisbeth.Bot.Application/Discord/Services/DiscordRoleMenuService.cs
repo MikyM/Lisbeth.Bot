@@ -63,8 +63,14 @@ public class DiscordRoleMenuService : IDiscordRoleMenuService
 
         if (!ctx.Member.IsAdmin()) throw new DiscordNotAuthorizedException();
 
-        var guildResult = await _guildService.GetSingleBySpecAsync<Guild>(new ActiveGuildByIdSpec(ctx.Guild.Id));
+        var guildResult = await _guildService.GetSingleBySpecAsync(new ActiveGuildByIdSpec(ctx.Guild.Id));
         if (!guildResult.IsDefined()) return Result<DiscordEmbed>.FromError(guildResult);
+
+        var count = await _roleMenuService.LongCountAsync(
+            new RoleMenuByNameAndGuildWithOptionsSpec(req.Name, req.GuildId));
+
+        if (!count.IsDefined(out var countRes) || countRes >= 1)
+            return new SameEntityNamePerGuildError("Role menu", req.Name ?? "null");
 
         var intr = _discord.Client.GetInteractivity();
         int loopCount = 0;
@@ -241,13 +247,15 @@ public class DiscordRoleMenuService : IDiscordRoleMenuService
 
         if (!res.IsDefined(out var roleMenu)) return Result.FromError(new NotFoundError());
 
-        if (args.Guild.HasSelfPermissions(Permissions.ManageRoles)) return new DiscordError(
+        if (!args.Guild.HasSelfPermissions(Permissions.ManageRoles)) return new DiscordError(
             "Bot doesn't have Manage Roles permission");
 
         try
         {
             var member = (DiscordMember)args.User;
-            var selectedMenuIds = args.Values.Select(ulong.Parse).ToList();
+            var selectedMenuIds = args.Values
+                .Select(x => ulong.Parse(x.Split('_', StringSplitOptions.RemoveEmptyEntries).Last().Trim()))
+                .ToList();
             var userRoleIds = member.Roles.Select(r => r.Id).ToList();
 
             var grantedRoles = new List<string?>();
@@ -270,11 +278,6 @@ public class DiscordRoleMenuService : IDiscordRoleMenuService
                     revokedRoles.Add(role.Name);
                 }
             }
-
-            var availableRoles = roleMenu.RoleMenuOptions.Where(x => member.Roles.All(y => y.Id != x.RoleId))
-                .Select(x => x.Name)
-                .ToList();
-            roleLists.Add(availableRoles);
 
             var embed = new DiscordEmbedBuilder().WithAuthor("Lisbeth Role Menu")
                 .WithFooter($"Member Id: {member.Id}")
@@ -309,8 +312,12 @@ public class DiscordRoleMenuService : IDiscordRoleMenuService
                 embed.AddField(fieldName, joined);
             }
 
+            // wait and refresh member
+            await Task.Delay(500);
+            member = await args.Guild.GetMemberAsync(member.Id);
+
             await args.Interaction.EditFollowupMessageAsync(args.Message.Id, new DiscordWebhookBuilder()
-                .AddComponents(this.GetRoleMenuSelect(roleMenu, (DiscordMember)args.User))
+                .AddComponents(this.GetRoleMenuSelect(roleMenu, member))
                 .AddEmbed(embed.Build()));
         }
         catch (Exception ex)
@@ -445,10 +452,9 @@ public class DiscordRoleMenuService : IDiscordRoleMenuService
         var builder = new DiscordWebhookBuilder();
 
         var button = new DiscordButtonComponent(ButtonStyle.Primary, partial.Entity.CustomButtonId,
-            "Get Role Menu"/*, false, new DiscordComponentEmoji(DiscordEmoji.FromName("::"))*/);
+            "Lets manage my roles!"/*, false, new DiscordComponentEmoji(DiscordEmoji.FromName("::"))*/);
 
         builder.AddComponents(button);
-
         if (partial.Entity.EmbedConfig is null)
         {
             await target.SendMessageAsync(new DiscordMessageBuilder().WithContent(partial.Entity.Text).AddComponents(button));

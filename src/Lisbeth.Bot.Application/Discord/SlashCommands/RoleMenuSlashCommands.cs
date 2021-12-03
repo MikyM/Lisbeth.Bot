@@ -128,7 +128,7 @@ public class RoleMenuSlashCommands : ExtendedApplicationCommandModule
                 if (!isId && string.IsNullOrWhiteSpace(idOrName))
                     throw new ArgumentException("You must supply a valid Id or name");
                 if (channel is null)
-                    throw new ArgumentException("You must supply a channel to send a tag");
+                    throw new ArgumentException("You must supply a channel to send a role menu");
 
                 var sendReq = new RoleMenuSendReqDto
                 {
