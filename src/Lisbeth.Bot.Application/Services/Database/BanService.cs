@@ -42,7 +42,9 @@ public class BanService : CrudService<Ban, LisbethBotDbContext>, IBanService
             return Result<(long Id, Ban? FoundEntity)>.FromSuccess((partial.Entity, null));
         }
 
-        if (result.Entity.AppliedUntil > req.AppliedUntil) return (result.Entity.Id, result.Entity);
+        if (result.Entity.AppliedUntil > req.AppliedUntil)
+            return Result<(long Id, Ban? FoundEntity)>.FromError(
+                new DiscordInvalidOperationError("Existing ban is longer than new one."), result);
 
         var shallowCopy = result.Entity.ShallowCopy();
 

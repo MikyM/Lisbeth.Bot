@@ -15,11 +15,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Globalization;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using Hangfire;
-using Lisbeth.Bot.Application.Enums;
+using Lisbeth.Bot.Application.Discord.EmbedBuilders;
+using Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Ban;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.Domain.DTOs.Request.Ban;
@@ -38,14 +38,16 @@ public class DiscordBanService : IDiscordBanService
     private readonly IDiscordService _discord;
     private readonly IGuildService _guildService;
     private readonly ILogger<DiscordBanService> _logger;
+    private readonly IResponseDiscordEmbedBuilder _embedBuilder;
 
     public DiscordBanService(IBanService banService, IDiscordService discord, IGuildService guildService,
-        ILogger<DiscordBanService> logger)
+        ILogger<DiscordBanService> logger, IResponseDiscordEmbedBuilder embedBuilder)
     {
         _banService = banService;
         _discord = discord;
         _guildService = guildService;
         _logger = logger;
+        _embedBuilder = embedBuilder;
     }
 
     [Queue("moderation")]
@@ -68,8 +70,7 @@ public class DiscordBanService : IDiscordBanService
         catch (Exception ex)
         {
             _logger.LogError($"Automatic unban failed with: {ex.GetFullMessage()}");
-            return Result.FromError(
-                new InvalidOperationError($"Automatic unban failed with: {ex.GetFullMessage()}"));
+            return new InvalidOperationError($"Automatic unban failed with: {ex.GetFullMessage()}");
         }
 
         return Result.FromSuccess();
@@ -102,7 +103,7 @@ public class DiscordBanService : IDiscordBanService
             }
             catch (Exception)
             {
-                return Result<DiscordEmbed>.FromError(new DiscordNotFoundError(DiscordEntity.User));
+                return new DiscordNotFoundError(DiscordEntity.User);
             }
 
         return await BanAsync(ctx.Guild, target, ctx.Member, req);
@@ -165,7 +166,7 @@ public class DiscordBanService : IDiscordBanService
             }
             catch (Exception)
             {
-                return Result<DiscordEmbed>.FromError(new DiscordNotFoundError(DiscordEntity.User));
+                return new DiscordNotFoundError(DiscordEntity.User);
             }
 
         return await UnbanAsync(ctx.Guild, target, ctx.Member, req);
@@ -202,7 +203,7 @@ public class DiscordBanService : IDiscordBanService
 
         DiscordMember moderator = await guild.GetMemberAsync(req.RequestedOnBehalfOfId);
 
-        return await GetAsync(guild, target, moderator, req);
+        return await GetSpecificUserBanAsync(guild, target, moderator, req);
     }
 
     public async Task<Result<DiscordEmbed>> GetSpecificUserGuildBanAsync(InteractionContext ctx, BanGetReqDto req)
@@ -233,10 +234,10 @@ public class DiscordBanService : IDiscordBanService
             }
             catch (Exception)
             {
-                return Result<DiscordEmbed>.FromError(new DiscordNotFoundError(DiscordEntity.User));
+                return new DiscordNotFoundError(DiscordEntity.User);
             }
 
-        return await GetAsync(ctx.Guild, target, ctx.Member, req);
+        return await GetSpecificUserBanAsync(ctx.Guild, target, ctx.Member, req);
     }
 
     private async Task<Result<DiscordEmbed>> BanAsync(DiscordGuild guild, DiscordUser target,
@@ -261,12 +262,11 @@ public class DiscordBanService : IDiscordBanService
         }
 
         if (!moderator.IsModerator())
-            return Result<DiscordEmbed>.FromError(new DiscordNotAuthorizedError());
+            return new DiscordNotAuthorizedError();
         if (targetMember is not null && targetMember.IsModerator())
-            return Result<DiscordEmbed>.FromError(new DiscordNotAuthorizedError());
+            return new DiscordNotAuthorizedError();
 
         DiscordBan? ban;
-        DiscordChannel channel;
 
         var guildCfg =
             await _guildService.GetSingleBySpecAsync<Guild>(
@@ -276,19 +276,7 @@ public class DiscordBanService : IDiscordBanService
             return Result<DiscordEmbed>.FromError(guildCfg);
 
         if (guildCfg.Entity.ModerationConfig is null)
-            return Result<DiscordEmbed>.FromError(
-                new DisabledEntityError(nameof(guildCfg.Entity.ModerationConfig)));
-
-        try
-        {
-            channel = await _discord.Client.GetChannelAsync(guildCfg.Entity.ModerationConfig
-                .MemberEventsLogChannelId);
-        }
-        catch (Exception)
-        {
-            return Result<DiscordEmbed>.FromError(new DiscordNotFoundError(DiscordEntity.Channel));
-        }
-
+            return new DisabledEntityError(nameof(guildCfg.Entity.ModerationConfig));
 
         try
         {
@@ -299,78 +287,20 @@ public class DiscordBanService : IDiscordBanService
             ban = null;
         }
 
-        var result = await _banService.AddOrExtendAsync(req, true);
-        var (id, foundEntity) = result.Entity;
+        var partial = await _banService.AddOrExtendAsync(req, true);
 
-        var embed = new DiscordEmbedBuilder();
-        embed.WithColor(0x18315C);
-        embed.WithAuthor($"Ban | {target.GetFullUsername()}", null, target.AvatarUrl);
+        if (!partial.IsDefined()) return Result<DiscordEmbed>.FromError(partial);
 
-        TimeSpan tmspDuration = req.AppliedUntil.Subtract(DateTime.UtcNow);
+        if (ban is null) await guild.BanMemberAsync(target.Id, 1, req.Reason);
 
-        string lengthString = req.AppliedUntil == DateTime.MaxValue
-            ? "Permanent"
-            : $"{tmspDuration.Days} days, {tmspDuration.Hours} hrs, {tmspDuration.Minutes} mins";
-
-        if (foundEntity is null)
-        {
-            if (ban is null)
-                await guild.BanMemberAsync(target.Id);
-
-            embed.AddField("User mention", target.Mention, true);
-            embed.AddField("Moderator", moderator.Mention, true);
-            embed.AddField("Length", lengthString, true);
-            embed.AddField("Banned until", req.AppliedUntil.ToString(CultureInfo.InvariantCulture), true);
-            embed.AddField("Reason", req.Reason);
-            embed.WithFooter($"Case ID: {id} | User ID: {target.Id}");
-        }
-        else
-        {
-            DiscordUser? previousMod;
-            try
-            {
-                previousMod = await _discord.Client.GetUserAsync(foundEntity.AppliedById);
-            }
-            catch (Exception)
-            {
-                previousMod = null;
-            }
-
-            if (foundEntity.AppliedUntil > req.AppliedUntil)
-            {
-                embed.WithDescription(
-                    $"This user has already been banned until {foundEntity.AppliedUntil} by {(previousMod is not null ? previousMod.Mention : "a deleted user")}");
-                embed.WithFooter($"Case ID: {id} | User ID: {target.Id}");
-            }
-            else
-            {
-                if (ban is null) await guild.BanMemberAsync(req.TargetUserId);
-
-                embed.WithAuthor($"Extend BanAsync | {target.GetFullUsername()}", null, target.AvatarUrl);
-                embed.AddField("Previous ban until", foundEntity.AppliedUntil.ToString(), true);
-                embed.AddField("Previous moderator",
-                    $"{(previousMod is not null ? previousMod.Mention : "Deleted user")}", true);
-                embed.AddField("Previous reason", foundEntity.Reason, true);
-                embed.AddField("User mention", target.Mention, true);
-                embed.AddField("Moderator", moderator.Mention, true);
-                embed.AddField("Length", lengthString, true);
-                embed.AddField("Banned until", req.AppliedUntil.ToString(CultureInfo.InvariantCulture), true);
-                embed.AddField("Reason", req.Reason);
-                embed.WithFooter($"Case ID: {id} | User ID: {target.Id}");
-            }
-        }
-
-        try
-        {
-            if (channel is not null) await channel.SendMessageAsync(embed.Build());
-        }
-        catch (Exception)
-        {
-            throw new ArgumentException(
-                $"Can't send messages in channel with Id: {guildCfg.Entity.ModerationConfig.MemberEventsLogChannelId}.");
-        }
-
-        return Result<DiscordEmbed>.FromSuccess(embed.Build());
+        return _embedBuilder.WithCase(partial.Entity.Id)
+            .WithEmbedColor(new DiscordColor(guildCfg.Entity.EmbedHexColor))
+            .WithAuthorSnowflakeInfo(target)
+            .WithFooterSnowflakeInfo(target)
+            .AsEnriched<ResponseDiscordEmbedBuilder>()
+            .WithType(DiscordModeration.Mute)
+            .EnrichFrom(new MemberModAddReqResponseEnricher(req, target, partial.Entity.FoundEntity))
+            .Build();
     }
 
     private async Task<Result<DiscordEmbed>> UnbanAsync(DiscordGuild guild, DiscordUser target,
@@ -382,7 +312,6 @@ public class DiscordBanService : IDiscordBanService
         if (moderator is null) throw new ArgumentNullException(nameof(moderator));
         if (req is null) throw new ArgumentNullException(nameof(req));
 
-        DiscordChannel channel;
         DiscordBan? ban;
 
         var result =
@@ -395,19 +324,10 @@ public class DiscordBanService : IDiscordBanService
         var guildCfg = result.Entity;
 
         if (guildCfg.ModerationConfig is null)
-            return Result<DiscordEmbed>.FromError(new DisabledEntityError(nameof(guildCfg.ModerationConfig)));
-
-        try
-        {
-            channel = await _discord.Client.GetChannelAsync(guildCfg.ModerationConfig.MemberEventsLogChannelId);
-        }
-        catch (Exception)
-        {
-            return Result<DiscordEmbed>.FromError(new DiscordNotFoundError(DiscordEntity.Channel));
-        }
+            return new DisabledEntityError(nameof(guildCfg.ModerationConfig));
 
         if (!moderator.IsModerator())
-            return Result<DiscordEmbed>.FromError(new DiscordNotAuthorizedError());
+            return new DiscordNotAuthorizedError();
 
         try
         {
@@ -418,57 +338,22 @@ public class DiscordBanService : IDiscordBanService
             ban = null;
         }
 
-        var embed = new DiscordEmbedBuilder();
-        embed.WithColor(0x18315C);
-        embed.WithAuthor($"Unban | {target.GetFullUsername()}", null, target.AvatarUrl);
-
         var res = await _banService.DisableAsync(req);
 
         if (!res.IsDefined()) return Result<DiscordEmbed>.FromError(res);
 
-        if (ban is null)
-        {
-            embed.WithFooter($"Case ID: unknown  | Member ID: {target.Id}");
-
-            if (res.IsDefined())
-            {
-                embed.WithFooter($"Case ID: {res.Entity.Id}  | Member ID: {target.Id}");
-                await _banService.CommitAsync();
-            }
-            else
-            {
-                embed.WithAuthor($"Unban failed | {target.GetFullUsername()}", null, target.AvatarUrl);
-                embed.WithDescription("This user isn't currently banned.");
-            }
-        }
-        else
-        {
-            // ReSharper disable once PossibleNullReferenceException
-            await target.UnbanAsync(guild);
-            await _banService.CommitAsync();
-
-            embed.WithAuthor($"UnbanAsync | {target.GetFullUsername()}", null, target.AvatarUrl);
-            embed.AddField("Moderator", moderator.Mention, true);
-            embed.AddField("User mention", target.Mention, true);
-            embed.WithDescription("Successfully unbanned");
-            embed.WithFooter($"Case ID: {res.Entity.Id} | Member ID: {target.Id}");
-        }
-
-        // means we're logging to log channel and returning an embed for interaction or other purposes
-
-        try
-        {
-            await channel.SendMessageAsync(embed.Build());
-        }
-        catch (Exception)
-        {
-            return Result<DiscordEmbed>.FromError(new DiscordInvalidOperationError());
-        }
-
-        return Result<DiscordEmbed>.FromSuccess(embed.Build());
+        return _embedBuilder
+            .WithCase(res.Entity?.Id)
+            .WithEmbedColor(new DiscordColor(guildCfg.EmbedHexColor))
+            .WithAuthorSnowflakeInfo(target)
+            .WithFooterSnowflakeInfo(target)
+            .AsEnriched<ResponseDiscordEmbedBuilder>()
+            .WithType(DiscordModeration.Mute)
+            .EnrichFrom(new MemberModDisableReqResponseEnricher(req, target))
+            .Build();
     }
 
-    private async Task<Result<DiscordEmbed>> GetAsync(DiscordGuild guild, DiscordUser target,
+    private async Task<Result<DiscordEmbed>> GetSpecificUserBanAsync(DiscordGuild guild, DiscordUser target,
         DiscordMember moderator,
         BanGetReqDto req)
     {
@@ -479,7 +364,7 @@ public class DiscordBanService : IDiscordBanService
 
 
         if (!moderator.IsModerator())
-            return Result<DiscordEmbed>.FromError(new DiscordNotAuthorizedError());
+            return new DiscordNotAuthorizedError();
 
         var result =
             await _guildService.GetSingleBySpecAsync<Guild>(
@@ -491,20 +376,9 @@ public class DiscordBanService : IDiscordBanService
         var guildCfg = result.Entity;
 
         if (guildCfg.ModerationConfig is null)
-            return Result<DiscordEmbed>.FromError(new DisabledEntityError(nameof(guildCfg.ModerationConfig)));
+            return new DisabledEntityError(nameof(guildCfg.ModerationConfig));
 
-        DiscordChannel channel;
         DiscordBan? discordBan;
-
-        try
-        {
-            channel = await _discord.Client.GetChannelAsync(guildCfg.ModerationConfig.MemberEventsLogChannelId);
-        }
-        catch (Exception)
-        {
-            return Result<DiscordEmbed>.FromError(new DiscordNotFoundError(DiscordEntity.Channel));
-        }
-
 
         try
         {
@@ -519,75 +393,17 @@ public class DiscordBanService : IDiscordBanService
             new BanBaseGetSpecifications(req.Id, req.TargetUserId, req.GuildId, req.AppliedById, req.LiftedOn,
                 req.AppliedOn, req.LiftedById));
 
-        var embed = new DiscordEmbedBuilder();
-        embed.WithColor(0x18315C);
 
-        if (res.IsDefined())
-        {
-            DiscordUser? banningMod = null;
-            try
-            {
-                banningMod = await _discord.Client.GetUserAsync(res.Entity.AppliedById);
-            }
-            catch (Exception)
-            {
-                // ignore
-            }
+        if (!res.IsDefined()) return new NotFoundError();
 
-            embed.WithAuthor($"Ban Info | {target.GetFullUsername()}", null, target.AvatarUrl);
-            embed.AddField("User mention", target.Mention, true);
-            embed.AddField("Moderator", $"{(banningMod is not null ? banningMod.Mention : "Deleted user")}", true);
-            embed.AddField("Banned until", res.Entity.AppliedUntil.ToString(), true);
-            embed.AddField("Reason", res.Entity.Reason);
-            if (res.Entity.LiftedById != 0)
-            {
-                DiscordUser? liftingMod = null;
-                try
-                {
-                    if (req.LiftedById is not null)
-                        liftingMod = await _discord.Client.GetUserAsync(res.Entity.LiftedById);
-                }
-                catch (Exception)
-                {
-                    // ignore
-                }
-
-                embed.AddField("Was lifted by",
-                    $"{(liftingMod is not null ? liftingMod.Mention : "Deleted or unavailable user")}");
-            }
-
-            embed.WithFooter($"Case ID: {res.Entity.Id} | User ID: {target.Id}");
-        }
-        else
-        {
-            if (discordBan is not null)
-            {
-                embed.WithAuthor($"Ban Info (from Discord) | {target.GetFullUsername()}", null, target.AvatarUrl);
-                embed.AddField("User mention", target.Mention, true);
-                embed.AddField("Moderator", "Unknown", true);
-                embed.AddField("Banned until", "Permanently", true);
-                embed.AddField("Reason", discordBan.Reason);
-                embed.WithFooter($"Case ID: unknown | User ID: {target.Id}");
-            }
-            else
-            {
-                embed.WithAuthor($"Ban Info | {target.GetFullUsername()}", null, target.AvatarUrl);
-                embed.WithDescription("Ban info not found.");
-                embed.WithFooter($"Case ID: unknown | User ID: {target.Id}");
-            }
-        }
-
-        // means we're logging to log channel and returning an embed for interaction or other purposes
-
-        try
-        {
-            await channel.SendMessageAsync(embed.Build());
-        }
-        catch (Exception)
-        {
-            return Result<DiscordEmbed>.FromError(new DiscordInvalidOperationError());
-        }
-
-        return Result<DiscordEmbed>.FromSuccess(embed.Build());
+        return _embedBuilder
+            .WithCase(res.Entity?.Id)
+            .WithEmbedColor(new DiscordColor(guildCfg.EmbedHexColor))
+            .WithAuthorSnowflakeInfo(target)
+            .WithFooterSnowflakeInfo(target)
+            .AsEnriched<ResponseDiscordEmbedBuilder>()
+            .WithType(DiscordModeration.Mute)
+            .EnrichFrom(new MemberModGetReqResponseEnricher(res.Entity!))
+            .Build();
     }
 }

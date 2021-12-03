@@ -26,15 +26,15 @@ namespace Lisbeth.Bot.Application.Discord.Services.Interfaces;
 public interface IDiscordGuildLoggerService
 {
     Task<Result> LogToDiscordAsync<TRequest>(DiscordGuild discordGuild, TRequest req,
-        DiscordModeration moderation, DiscordMember? moderator = null, SnowflakeObject? target = null, string hexColor = "#26296e", long? id = null)
+        DiscordModeration moderation, DiscordMember? moderator = null, SnowflakeObject? target = null, string hexColor = "#26296e", long? caseId = null)
         where TRequest : class, IBaseModAuthReq;
 
     Task<Result> LogToDiscordAsync<TRequest>(Guild guild, TRequest req, DiscordModeration moderation, DiscordMember? moderator = null,
-        SnowflakeObject? target = null, string hexColor = "#26296e", long? id = null) where TRequest : class, IBaseModAuthReq;
+        SnowflakeObject? target = null, string hexColor = "#26296e", long? caseId = null) where TRequest : class, IBaseModAuthReq;
 
     Task<Result> LogToDiscordAsync<TRequest>(ulong discordGuildId, TRequest req, DiscordModeration moderation, DiscordMember? moderator = null,
-        SnowflakeObject? target = null, string hexColor = "#26296e", long? id = null) where TRequest : class, IBaseModAuthReq;
+        SnowflakeObject? target = null, string hexColor = "#26296e", long? caseId = null) where TRequest : class, IBaseModAuthReq;
 
     Task<Result> LogToDiscordAsync<TRequest>(long guildId, TRequest req, DiscordModeration moderation, DiscordMember? moderator = null,
-        SnowflakeObject? target = null, string hexColor = "#26296e", long? id = null) where TRequest : class, IBaseModAuthReq;
+        SnowflakeObject? target = null, string hexColor = "#26296e", long? caseId = null) where TRequest : class, IBaseModAuthReq;
 }

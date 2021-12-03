@@ -45,7 +45,8 @@ public class MuteService : CrudService<Mute, LisbethBotDbContext>, IMuteService
 
         var entity = result.Entity;
 
-        if (entity.AppliedUntil > req.AppliedUntil) return (entity.Id, entity);
+        if (entity.AppliedUntil > req.AppliedUntil) return Result<(long Id, Mute? FoundEntity)>.FromError(
+            new DiscordInvalidOperationError("Existing mute is longer than new one."), result);
 
         var shallowCopy = entity.ShallowCopy();
 

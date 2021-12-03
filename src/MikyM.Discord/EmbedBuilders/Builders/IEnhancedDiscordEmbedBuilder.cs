@@ -36,7 +36,7 @@ public interface IEnhancedDiscordEmbedBuilder : IBaseEmbedBuilder
     /// <summary> Gets case Id, if any.</summary>
     long? CaseId { get; }
     /// <summary> Gets <see cref="DiscordMember"/> used for <see cref="DiscordEmbedBuilder.EmbedAuthor"/> templating, if any.</summary>
-    DiscordMember? AuthorMember { get; }
+    DiscordUser? AuthorUser { get; }
     /// <summary> Gets <see cref="SnowflakeObject"/> used for <see cref="DiscordEmbedBuilder.EmbedFooter"/> templating, if any.</summary>
     SnowflakeObject? FooterSnowflake { get; }
     /// <summary> Gets action type name used for <see cref="DiscordEmbedBuilder.EmbedAuthor"/> templating, if any.</summary>
@@ -63,10 +63,10 @@ public interface IEnhancedDiscordEmbedBuilder : IBaseEmbedBuilder
     /// <param name="snowflake">Target of the action.</param>
     /// <returns>The current builder instance.</returns>
     IEnhancedDiscordEmbedBuilder WithFooterSnowflakeInfo(SnowflakeObject? snowflake);
-    /// <summary> Sets the <see cref="DiscordMember"/> to be used in the author template. </summary>
+    /// <summary> Sets the <see cref="DiscordUser"/> to be used in the author template. </summary>
     /// <param name="member">Target, cause or caller of the action.</param>
     /// <returns>The current builder instance.</returns>
-    IEnhancedDiscordEmbedBuilder WithAuthorSnowflakeInfo(DiscordMember? member);
+    IEnhancedDiscordEmbedBuilder WithAuthorSnowflakeInfo(DiscordUser? user);
     /// <summary> Sets the author template. </summary>
     /// <returns>The current builder instance.</returns>
     /// <param name="template">Author template.</param>

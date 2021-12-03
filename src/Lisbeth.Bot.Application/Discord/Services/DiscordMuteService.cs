@@ -19,7 +19,6 @@ using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using Hangfire;
 using Lisbeth.Bot.Application.Discord.EmbedBuilders;
-using Lisbeth.Bot.Application.Discord.EmbedEnrichers.Log;
 using Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response;
 using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Helpers;
@@ -43,10 +42,10 @@ public class DiscordMuteService : IDiscordMuteService
     private readonly ILogger<DiscordMuteService> _logger;
     private readonly IMuteService _muteService;
     private readonly IDiscordGuildLoggerService _guildLoggerService;
-    private readonly IEnhancedDiscordEmbedBuilder _embedBuilder;
+    private readonly IResponseDiscordEmbedBuilder _embedBuilder;
 
     public DiscordMuteService(IDiscordService discord, IGuildService guildService, ILogger<DiscordMuteService> logger,
-        IMuteService muteService, IDiscordGuildLoggerService guildLoggerService, IDiscordEmbedProvider embedProvider, IEnhancedDiscordEmbedBuilder embedBuilder)
+        IMuteService muteService, IDiscordGuildLoggerService guildLoggerService, IDiscordEmbedProvider embedProvider, IResponseDiscordEmbedBuilder embedBuilder)
     {
         _discord = discord;
         _guildService = guildService;
@@ -239,22 +238,23 @@ public class DiscordMuteService : IDiscordMuteService
             return new DiscordNotAuthorizedError();
 
         var partial = await _muteService.AddOrExtendAsync(req, true);
-        var (id, foundEntity) = partial.Entity;
 
-        await _guildLoggerService.LogToDiscordAsync(guild, req, DiscordModeration.Mute, moderator, target, guildCfg.EmbedHexColor, id);
+        await _guildLoggerService.LogToDiscordAsync(guild, req, DiscordModeration.Mute, moderator, target, guildCfg.EmbedHexColor, partial.IsDefined() ? partial.Entity.Id : null);
+
+        if (!partial.IsDefined()) return Result<DiscordEmbed>.FromError(partial);
 
         var resMute = await target.MuteAsync(guildCfg.ModerationConfig.MuteRoleId);
 
         if (!resMute.IsSuccess) return new DiscordError("Failed to mute.");
 
         return _embedBuilder
-            .WithCase(id)
+            .WithCase(partial.Entity.Id)
             .WithEmbedColor(new DiscordColor(guildCfg.EmbedHexColor))
             .WithAuthorSnowflakeInfo(target)
             .WithFooterSnowflakeInfo(target)
             .AsEnriched<ResponseDiscordEmbedBuilder>()
             .WithType(DiscordModeration.Mute)
-            .EnrichFrom(new MemberModAddReqResponseEnricher(req, target, foundEntity))
+            .EnrichFrom(new MemberModAddReqResponseEnricher(req, target, partial.Entity.FoundEntity))
             .Build();
     }
 

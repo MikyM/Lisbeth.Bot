@@ -26,9 +26,9 @@ namespace Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response;
 
 public class MemberModDisableReqResponseEnricher : EmbedEnricher<IDisableModReq>
 {
-    public DiscordMember Target { get; }
+    public DiscordUser Target { get; }
 
-    public MemberModDisableReqResponseEnricher(IDisableModReq request, DiscordMember target,
+    public MemberModDisableReqResponseEnricher(IDisableModReq request, DiscordUser target,
         IModEntity? previous = null) : base(request) =>
         this.Target = target;
 

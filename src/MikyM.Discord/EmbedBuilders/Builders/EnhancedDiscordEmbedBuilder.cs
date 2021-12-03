@@ -29,7 +29,7 @@ public class EnhancedDiscordEmbedBuilder : IEnhancedDiscordEmbedBuilder
     public string? Action { get; private set; }
     public string? ActionType { get; private set; }
     public long? CaseId { get; private set; }
-    public DiscordMember? AuthorMember { get; private set; }
+    public DiscordUser? AuthorUser { get; private set; }
     public SnowflakeObject? FooterSnowflake { get; private set; }
     public string AuthorTemplate { get; private set; } = @"@action@@type@@info@"; // 0 - action , 1 - type, 2 - target/caller
     public string TitleTemplate { get; private set; } = @"@action@@type@@info@"; // 0 - action , 1 - type, 2 - target/caller
@@ -94,9 +94,9 @@ public class EnhancedDiscordEmbedBuilder : IEnhancedDiscordEmbedBuilder
         => this.Base is null ? null : new DiscordEmbedBuilder(this.Current.GetBaseInternal());
     
 
-    public IEnhancedDiscordEmbedBuilder WithAuthorSnowflakeInfo(DiscordMember? member)
+    public IEnhancedDiscordEmbedBuilder WithAuthorSnowflakeInfo(DiscordUser? user)
     {
-        this.AuthorMember = member;
+        this.AuthorUser = user;
         return this;
     }
 
@@ -149,9 +149,9 @@ public class EnhancedDiscordEmbedBuilder : IEnhancedDiscordEmbedBuilder
                     : $" {this.ActionType.SplitByCapitalAndConcat()}");
 
         author = author.Replace("@info@",
-            this.AuthorMember is null ? "" : $" | {this.AuthorMember.GetFullDisplayName()}");
+            this.AuthorUser is null ? "" : $" | {this.AuthorUser.GetFullUsername()}");
 
-        this.Current.WithAuthor(author, null, this.AuthorMember?.AvatarUrl);
+        this.Current.WithAuthor(author, null, this.AuthorUser?.AvatarUrl);
 
         if (this.FooterSnowflake is null && !this.CaseId.HasValue) return;
         string footer = this.FooterTemplate.Replace("@caseId@", this.CaseId is null ? "" : $"Case Id: {this.CaseId}")

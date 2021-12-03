@@ -46,7 +46,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             _guildService = guildService;
         }
 
-        public async Task<Result> LogToDiscordAsync<TRequest>(DiscordGuild discordGuild, TRequest req, DiscordModeration moderation, DiscordMember? moderator = null, SnowflakeObject? target = null, string hexColor = "#26296e", long? id = null) where TRequest : class, IBaseModAuthReq
+        public async Task<Result> LogToDiscordAsync<TRequest>(DiscordGuild discordGuild, TRequest req, DiscordModeration moderation, DiscordMember? moderator = null, SnowflakeObject? target = null, string hexColor = "#26296e", long? caseId = null) where TRequest : class, IBaseModAuthReq
         {
             if (moderator is null)
             {
@@ -69,7 +69,7 @@ namespace Lisbeth.Bot.Application.Discord.Services
             };
 
             var embed = _embedBuilder
-                .WithCase(id)
+                .WithCase(caseId)
                 .WithEmbedColor(new DiscordColor(hexColor))
                 .WithAuthorSnowflakeInfo(moderator)
                 .WithFooterSnowflakeInfo(target)
@@ -83,26 +83,26 @@ namespace Lisbeth.Bot.Application.Discord.Services
         }
 
 
-        public async Task<Result> LogToDiscordAsync<TRequest>(ulong discordGuildId, TRequest req, DiscordModeration moderation, DiscordMember? moderator = null, SnowflakeObject? target = null, string hexColor = "#26296e", long? id = null) where TRequest : class, IBaseModAuthReq
+        public async Task<Result> LogToDiscordAsync<TRequest>(ulong discordGuildId, TRequest req, DiscordModeration moderation, DiscordMember? moderator = null, SnowflakeObject? target = null, string hexColor = "#26296e", long? caseId = null) where TRequest : class, IBaseModAuthReq
         {
             if (_discord.Client.Guilds.TryGetValue(discordGuildId, out var guild)) return new DiscordNotFoundError(DiscordEntity.Guild);
 
-            return await this.LogToDiscordAsync(guild ?? throw new InvalidOperationException("Guild was null."), req, moderation, moderator, target, hexColor, id);
+            return await this.LogToDiscordAsync(guild ?? throw new InvalidOperationException("Guild was null."), req, moderation, moderator, target, hexColor, caseId);
         }
 
-        public async Task<Result> LogToDiscordAsync<TRequest>(Guild guild, TRequest req, DiscordModeration moderation, DiscordMember? moderator = null, SnowflakeObject? target = null, string hexColor = "#26296e", long? id = null) where TRequest : class, IBaseModAuthReq
+        public async Task<Result> LogToDiscordAsync<TRequest>(Guild guild, TRequest req, DiscordModeration moderation, DiscordMember? moderator = null, SnowflakeObject? target = null, string hexColor = "#26296e", long? caseId = null) where TRequest : class, IBaseModAuthReq
         {
-            return await this.LogToDiscordAsync(guild.GuildId, req, moderation, moderator, target, hexColor, id);
+            return await this.LogToDiscordAsync(guild.GuildId, req, moderation, moderator, target, hexColor, caseId);
         }
 
-        public async Task<Result> LogToDiscordAsync<TRequest>(long guildId, TRequest req, DiscordModeration moderation, DiscordMember? moderator = null, SnowflakeObject? target = null, string hexColor = "#26296e", long? id = null) where TRequest : class, IBaseModAuthReq
+        public async Task<Result> LogToDiscordAsync<TRequest>(long guildId, TRequest req, DiscordModeration moderation, DiscordMember? moderator = null, SnowflakeObject? target = null, string hexColor = "#26296e", long? caseId = null) where TRequest : class, IBaseModAuthReq
         {
             var guildRes =
                 await _guildService.GetAsync(guildId);
 
             if (!guildRes.IsDefined()) return new NotFoundError();
 
-            return await this.LogToDiscordAsync(guildRes.Entity.GuildId, req, moderation, moderator, target, hexColor, id);
+            return await this.LogToDiscordAsync(guildRes.Entity.GuildId, req, moderation, moderator, target, hexColor, caseId);
         }
 
         public async Task<Result> LogToDiscordAsync<TEvent>(DiscordGuild discordGuild, TEvent discordEvent, DiscordLog log, string hexColor = "#26296e") where TEvent : DiscordEventArgs

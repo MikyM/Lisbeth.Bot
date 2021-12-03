@@ -27,13 +27,13 @@ namespace Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response;
 
 public class MemberModAddReqResponseEnricher : EmbedEnricher<IAddModReq>
 {
-    public DiscordMember Target { get; }
+    public DiscordUser Target { get; }
     public IModEntity? Previous { get; }
 
     public bool IsOverlapping =>
         this.Previous is not null && this.Previous.AppliedUntil > this.Entity.AppliedUntil && !this.Previous.IsDisabled;
 
-    public MemberModAddReqResponseEnricher(IAddModReq request, DiscordMember target, IModEntity? previous = null) :
+    public MemberModAddReqResponseEnricher(IAddModReq request, DiscordUser target, IModEntity? previous = null) :
         base(request)
     {
         this.Target = target;
