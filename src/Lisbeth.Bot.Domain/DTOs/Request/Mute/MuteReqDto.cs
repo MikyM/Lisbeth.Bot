@@ -20,7 +20,7 @@ using System;
 
 namespace Lisbeth.Bot.Domain.DTOs.Request.Mute;
 
-public class MuteReqDto : BaseAuthWithGuildReqDto, IAddModReq
+public class MuteReqDto : BaseAuthWithGuildReqDto, IApplyInfractionReq
 {
     public MuteReqDto()
     {

@@ -20,7 +20,7 @@ using Lisbeth.Bot.Domain.DTOs.Request.Base;
 
 namespace Lisbeth.Bot.Domain.DTOs.Request.Ban;
 
-public class BanDisableReqDto : BaseAuthWithGuildReqDto, IDisableModReq
+public class BanDisableReqDto : BaseAuthWithGuildReqDto, IRevokeInfractionReq
 {
     public BanDisableReqDto()
     {

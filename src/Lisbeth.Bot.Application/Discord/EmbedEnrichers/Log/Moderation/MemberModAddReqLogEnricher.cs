@@ -23,9 +23,9 @@ using MikyM.Discord.Enums;
 
 namespace Lisbeth.Bot.Application.Discord.EmbedEnrichers.Log.Moderation;
 
-public class MemberModAddReqLogEnricher : EmbedEnricher<IAddModReq>
+public class MemberModAddReqLogEnricher : EmbedEnricher<IApplyInfractionReq>
 {
-    public MemberModAddReqLogEnricher(IAddModReq request) : base(request)
+    public MemberModAddReqLogEnricher(IApplyInfractionReq request) : base(request)
     {
     }
 

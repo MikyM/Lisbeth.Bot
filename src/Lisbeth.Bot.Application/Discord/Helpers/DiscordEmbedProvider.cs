@@ -33,17 +33,17 @@ public interface IDiscordEmbedProvider
     DiscordEmbedBuilder GetUnsuccessfulActionEmbed(IResultError error);
     DiscordEmbedBuilder GetUnsuccessfulActionEmbed(string error);
     DiscordEmbedBuilder GetActionTimedOutEmbed();
-    DiscordEmbedBuilder GetEmbedResponseFrom(IAddModReq req, DiscordMember target, long? caseId = null,
+    DiscordEmbedBuilder GetEmbedResponseFrom(IApplyInfractionReq req, DiscordMember target, long? caseId = null,
         string hexColor = "#26296e", IModEntity? previous = null);
     DiscordEmbedBuilder GetEmbedResponseFrom(IModEntity entity, DiscordMember target,
         long? caseId = null, string hexColor = "#26296e");
-    DiscordEmbedBuilder GetEmbedResponseFrom(IDisableModReq req, DiscordMember target,
+    DiscordEmbedBuilder GetEmbedResponseFrom(IRevokeInfractionReq req, DiscordMember target,
         long? caseId = null, string hexColor = "#26296e");
-    DiscordEmbedBuilder GetModerationEmbedLogFrom(IGetModReq req, DiscordMember moderator,
+    DiscordEmbedBuilder GetModerationEmbedLogFrom(IGetInfractionReq req, DiscordMember moderator,
         long? caseId = null, string hexColor = "#26296e");
-    DiscordEmbedBuilder GetModerationEmbedLogFrom(IAddModReq req, DiscordMember moderator,
+    DiscordEmbedBuilder GetModerationEmbedLogFrom(IApplyInfractionReq req, DiscordMember moderator,
         long? caseId = null, string hexColor = "#26296e");
-    DiscordEmbedBuilder GetModerationEmbedLogFrom(IDisableModReq req, DiscordMember moderator,
+    DiscordEmbedBuilder GetModerationEmbedLogFrom(IRevokeInfractionReq req, DiscordMember moderator,
         long? caseId = null, string hexColor = "#26296e");
 }
 
@@ -138,7 +138,7 @@ public class DiscordEmbedProvider : IDiscordEmbedProvider
         return embed;
     }
 
-    public DiscordEmbedBuilder GetEmbedResponseFrom(IAddModReq req, DiscordMember target, long? caseId = null,
+    public DiscordEmbedBuilder GetEmbedResponseFrom(IApplyInfractionReq req, DiscordMember target, long? caseId = null,
         string hexColor = "#26296e", IModEntity? previous = null)
     {
         var data = GetUnderlyingNameAndPastTense(req);
@@ -201,7 +201,7 @@ public class DiscordEmbedProvider : IDiscordEmbedProvider
         return embed;
     }
 
-    public DiscordEmbedBuilder GetEmbedResponseFrom(IDisableModReq req, DiscordMember target,
+    public DiscordEmbedBuilder GetEmbedResponseFrom(IRevokeInfractionReq req, DiscordMember target,
         long? caseId = null, string hexColor = "#26296e")
     {
         var data = GetUnderlyingNameAndPastTense(req);
@@ -218,7 +218,7 @@ public class DiscordEmbedProvider : IDiscordEmbedProvider
         return embed;
     }
 
-    public DiscordEmbedBuilder GetModerationEmbedLogFrom(IDisableModReq req, DiscordMember moderator,
+    public DiscordEmbedBuilder GetModerationEmbedLogFrom(IRevokeInfractionReq req, DiscordMember moderator,
         long? caseId = null, string hexColor = "#26296e")
     {
         var data = GetUnderlyingNameAndPastTense(req);
@@ -238,7 +238,7 @@ public class DiscordEmbedProvider : IDiscordEmbedProvider
         return embed;
     }
 
-    public DiscordEmbedBuilder GetModerationEmbedLogFrom(IAddModReq req, DiscordMember moderator,
+    public DiscordEmbedBuilder GetModerationEmbedLogFrom(IApplyInfractionReq req, DiscordMember moderator,
         long? caseId = null, string hexColor = "#26296e")
     {
         var data = GetUnderlyingNameAndPastTense(req);
@@ -263,7 +263,7 @@ public class DiscordEmbedProvider : IDiscordEmbedProvider
         return embed;
     }
 
-    public DiscordEmbedBuilder GetModerationEmbedLogFrom(IGetModReq req, DiscordMember moderator,
+    public DiscordEmbedBuilder GetModerationEmbedLogFrom(IGetInfractionReq req, DiscordMember moderator,
         long? caseId = null, string hexColor = "#26296e")
     {
         var data = GetUnderlyingNameAndPastTense(req);

@@ -16,36 +16,24 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Lisbeth.Bot.Domain.DTOs.Request.Base;
 
 namespace Lisbeth.Bot.Domain.DTOs.Request.Mute;
 
-public class MuteGetReqDto : BaseAuthWithGuildReqDto, IGetInfractionReq
+public class MuteRevokeReqDto : BaseAuthWithGuildReqDto, IRevokeInfractionReq
 {
-    public MuteGetReqDto(ulong requestedOnBehalfId, ulong guildId, long? id = null, ulong? targetUserId = null,
-        ulong? appliedById = null, DateTime? liftedOn = null, DateTime? appliedOn = null, ulong? liftedById = null)
+    public MuteRevokeReqDto()
     {
-        Id = id;
+    }
+
+    public MuteRevokeReqDto(ulong? targetUserId, ulong guildId, ulong requestedOnBehalfOfId)
+    {
         TargetUserId = targetUserId;
         GuildId = guildId;
-        AppliedById = appliedById;
-        LiftedOn = liftedOn;
-        AppliedOn = appliedOn;
-        LiftedById = liftedById;
-        RequestedOnBehalfOfId = requestedOnBehalfId;
+        RequestedOnBehalfOfId = requestedOnBehalfOfId;
     }
 
     public long? Id { get; set; }
     public ulong? TargetUserId { get; set; }
-    public ulong? AppliedById { get; set; }
-    public DateTime? LiftedOn { get; set; }
-    public DateTime? AppliedOn { get; set; }
-    public ulong? LiftedById { get; set; }
-
-    public override string ToString()
-    {
-        return JsonSerializer.Serialize(this, new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault, WriteIndented = true});
-    }
+    public DateTime LiftedOn { get; set; } = DateTime.UtcNow;
 }

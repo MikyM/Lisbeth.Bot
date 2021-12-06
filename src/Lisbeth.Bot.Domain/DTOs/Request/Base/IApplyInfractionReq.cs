@@ -19,14 +19,9 @@ using System;
 
 namespace Lisbeth.Bot.Domain.DTOs.Request.Base;
 
-public interface IGetModReq : IBaseModAuthReq
+public interface IApplyInfractionReq : IBaseModAuthReq
 {
-    long? Id { get; set; }
-    ulong? TargetUserId { get; set; }
-    ulong? AppliedById { get; set; }
-    DateTime? LiftedOn { get; set; }
-    DateTime? AppliedOn { get; set; }
-    ulong? LiftedById { get; set; }
-
-    string ToString();
+    public ulong TargetUserId { get; set; }
+    public DateTime AppliedUntil { get; set; }
+    public string? Reason { get; set; }
 }

@@ -25,7 +25,7 @@ using MikyM.Discord.Enums;
 
 namespace Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response.Moderation;
 
-public class MemberModAddReqResponseEnricher : EmbedEnricher<IAddModReq>
+public class MemberModAddReqResponseEnricher : EmbedEnricher<IApplyInfractionReq>
 {
     public DiscordUser Target { get; }
     public IModEntity? Previous { get; }
@@ -33,7 +33,7 @@ public class MemberModAddReqResponseEnricher : EmbedEnricher<IAddModReq>
     public bool IsOverlapping =>
         this.Previous is not null && this.Previous.AppliedUntil > this.Entity.AppliedUntil && !this.Previous.IsDisabled;
 
-    public MemberModAddReqResponseEnricher(IAddModReq request, DiscordUser target, IModEntity? previous = null) :
+    public MemberModAddReqResponseEnricher(IApplyInfractionReq request, DiscordUser target, IModEntity? previous = null) :
         base(request)
     {
         this.Target = target;

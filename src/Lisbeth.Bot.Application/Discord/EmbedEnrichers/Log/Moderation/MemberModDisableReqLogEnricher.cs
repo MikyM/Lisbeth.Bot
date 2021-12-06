@@ -22,9 +22,9 @@ using MikyM.Discord.Enums;
 
 namespace Lisbeth.Bot.Application.Discord.EmbedEnrichers.Log.Moderation;
 
-public class MemberModDisableReqLogEnricher : EmbedEnricher<IDisableModReq>
+public class MemberModDisableReqLogEnricher : EmbedEnricher<IRevokeInfractionReq>
 {
-    public MemberModDisableReqLogEnricher(IDisableModReq request) : base(request)
+    public MemberModDisableReqLogEnricher(IRevokeInfractionReq request) : base(request)
     {
     }
 

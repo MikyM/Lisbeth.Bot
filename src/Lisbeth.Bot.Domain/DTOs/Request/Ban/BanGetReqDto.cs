@@ -22,7 +22,7 @@ using Lisbeth.Bot.Domain.DTOs.Request.Base;
 
 namespace Lisbeth.Bot.Domain.DTOs.Request.Ban;
 
-public class BanGetReqDto : BaseAuthWithGuildReqDto, IGetModReq
+public class BanGetReqDto : BaseAuthWithGuildReqDto, IGetInfractionReq
 {
     public BanGetReqDto(ulong requestedOnBehalfOfId, long? id = null, ulong? targetUserId = null,
         ulong guildId = 0, ulong? appliedById = null, DateTime? liftedOn = null, DateTime? appliedOn = null,

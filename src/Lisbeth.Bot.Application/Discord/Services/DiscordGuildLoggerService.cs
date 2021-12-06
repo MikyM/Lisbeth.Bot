@@ -63,9 +63,9 @@ namespace Lisbeth.Bot.Application.Discord.Services
 
             IEmbedEnricher enricher = req switch
             {
-                IAddModReq addReq => new MemberModAddReqLogEnricher(addReq),
-                IDisableModReq disableReq => new MemberModDisableReqLogEnricher(disableReq),
-                IGetModReq getReq => new MemberModGetReqLogEnricher(getReq),
+                IApplyInfractionReq addReq => new MemberModAddReqLogEnricher(addReq),
+                IRevokeInfractionReq disableReq => new MemberModDisableReqLogEnricher(disableReq),
+                IGetInfractionReq getReq => new MemberModGetReqLogEnricher(getReq),
                 _ => throw new NotSupportedException("Given request to log is not supported")
             };
 

@@ -15,13 +15,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
+namespace Lisbeth.Bot.Domain.Enums;
 
-namespace Lisbeth.Bot.Domain.DTOs.Request.Base;
-
-public interface IDisableModReq : IBaseModAuthReq
+public enum InfractionType
 {
-    public long? Id { get; set; }
-    public ulong? TargetUserId { get; set; }
-    public DateTime LiftedOn { get; set; }
+    Mute,
+    Ban
 }

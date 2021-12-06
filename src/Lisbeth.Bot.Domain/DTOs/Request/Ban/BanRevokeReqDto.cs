@@ -15,25 +15,25 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus.Entities;
-using Lisbeth.Bot.Application.Discord.Helpers;
+using System;
 using Lisbeth.Bot.Domain.DTOs.Request.Base;
-using MikyM.Discord.EmbedBuilders.Wrappers;
-using MikyM.Discord.Enums;
 
-namespace Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response.Moderation;
+namespace Lisbeth.Bot.Domain.DTOs.Request.Ban;
 
-public class MemberModDisableReqResponseEnricher : EmbedEnricher<IRevokeInfractionReq>
+public class BanRevokeReqDto : BaseAuthWithGuildReqDto, IRevokeInfractionReq
 {
-    public DiscordUser Target { get; }
-
-    public MemberModDisableReqResponseEnricher(IRevokeInfractionReq request, DiscordUser target) : base(request) =>
-        this.Target = target;
-
-    public override void Enrich(IDiscordEmbedBuilderWrapper embedBuilder)
+    public BanRevokeReqDto()
     {
-        embedBuilder.AddField("User mention", this.Target.Mention, true);
-        embedBuilder.AddField("Moderator",
-            ExtendedFormatter.Mention(this.Entity.RequestedOnBehalfOfId, DiscordEntity.Member), true);
     }
+
+    public BanRevokeReqDto(ulong? targetUserId, ulong guildId, ulong requestedOnBehalfOfId)
+    {
+        TargetUserId = targetUserId;
+        GuildId = guildId;
+        RequestedOnBehalfOfId = requestedOnBehalfOfId;
+    }
+
+    public long? Id { get; set; }
+    public ulong? TargetUserId { get; set; }
+    public DateTime LiftedOn { get; set; } = DateTime.UtcNow;
 }
