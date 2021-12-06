@@ -15,16 +15,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
 using DSharpPlus.Entities;
 using Hangfire;
 using Lisbeth.Bot.Application.Discord.Helpers;
-using Lisbeth.Bot.Application.Enums;
 using Lisbeth.Bot.DataAccessLayer.Specifications.RecurringReminder;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Reminder;
-using MikyM.Discord.EmbedBuilders.Enums;
 using MikyM.Discord.Enums;
 using MikyM.Discord.Interfaces;
+using System.Collections.Generic;
 
 namespace Lisbeth.Bot.Application.Discord.Services;
 

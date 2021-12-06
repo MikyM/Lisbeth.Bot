@@ -20,8 +20,8 @@ using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Application.Discord.Exceptions;
+using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Helpers;
-using Lisbeth.Bot.Application.Enums;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
@@ -200,9 +200,9 @@ public class DiscordGuildService : IDiscordGuildService
             new ActiveGuildByDiscordIdWithModerationSpec(req.GuildId));
 
         if (!guildResult.IsDefined() || guildResult.Entity.ModerationConfig is null)
-            return Result<int>.FromError(new NotFoundError());
+            return new NotFoundError();
         if (guildResult.Entity.ModerationConfig.IsDisabled)
-            return Result<int>.FromError(new DisabledEntityError(nameof(guildResult.Entity.ModerationConfig)));
+            return new DisabledEntityError(nameof(guildResult.Entity.ModerationConfig));
 
         var discordGuild = await _discord.Client.GetGuildAsync(req.GuildId);
 
@@ -221,9 +221,9 @@ public class DiscordGuildService : IDiscordGuildService
             new ActiveGuildByDiscordIdWithModerationSpec(req.GuildId));
 
         if (!guildResult.IsDefined() || guildResult.Entity.ModerationConfig is null)
-            return Result<int>.FromError(new NotFoundError());
+            return new NotFoundError();
         if (guildResult.Entity.ModerationConfig.IsDisabled)
-            return Result<int>.FromError(new DisabledEntityError(nameof(guildResult.Entity.ModerationConfig)));
+            return new DisabledEntityError(nameof(guildResult.Entity.ModerationConfig));
 
         return await this.CreateOverwritesForMutedRoleAsync(ctx.Guild,
             ctx.Guild.Roles[guildResult.Entity.ModerationConfig.MuteRoleId], ctx.Member);
@@ -236,7 +236,7 @@ public class DiscordGuildService : IDiscordGuildService
         if (requestingMember is null) throw new ArgumentNullException(nameof(requestingMember));
         if (req is null) throw new ArgumentNullException(nameof(req));
 
-        if (!requestingMember.IsAdmin()) return Result<DiscordEmbed>.FromError(new DiscordNotAuthorizedError());
+        if (!requestingMember.IsAdmin()) return new DiscordNotAuthorizedError();
 
         var everyoneDeny = new[]
             { new DiscordOverwriteBuilder(guild.EveryoneRole).Deny(Permissions.AccessChannels) };
@@ -253,7 +253,7 @@ public class DiscordGuildService : IDiscordGuildService
         req.ClosedCategoryId = closedCat.Id;
         req.LogChannelId = ticketLogs.Id;
         var res = await _guildService.AddConfigAsync(req, true);
-        if (!res.IsDefined()) return Result<DiscordEmbed>.FromError(new InvalidOperationError());
+        if (!res.IsDefined()) return new InvalidOperationError();
 
         var embed = new DiscordEmbedBuilder();
         embed.WithColor(new DiscordColor(res.Entity.EmbedHexColor));
@@ -275,7 +275,7 @@ public class DiscordGuildService : IDiscordGuildService
         if (requestingMember is null) throw new ArgumentNullException(nameof(requestingMember));
         if (req is null) throw new ArgumentNullException(nameof(req));
 
-        if (!requestingMember.IsAdmin()) return Result<DiscordEmbed>.FromError(new DiscordNotAuthorizedError());
+        if (!requestingMember.IsAdmin()) return new DiscordNotAuthorizedError();
 
         var everyoneDeny = new[]
             { new DiscordOverwriteBuilder(guild.EveryoneRole).Deny(Permissions.AccessChannels) };
@@ -293,7 +293,9 @@ public class DiscordGuildService : IDiscordGuildService
 
         await Task.Delay(300); // give discord a break
 
-        _ = await CreateOverwritesForMutedRoleAsync(guild, mutedRole, requestingMember);
+        var muteRes = await CreateOverwritesForMutedRoleAsync(guild, mutedRole, requestingMember);
+
+        if (!muteRes.IsSuccess) return Result<DiscordEmbed>.FromError(muteRes);
 
         req.MemberEventsLogChannelId = memberEventsLogChannel.Id;
         req.MessageDeletedEventsLogChannelId = messageDeleteLogChannel.Id;
@@ -301,7 +303,7 @@ public class DiscordGuildService : IDiscordGuildService
         req.ModerationLogChannelId = moderationChannelLog.Id;
         req.MuteRoleId = mutedRole.Id;
         var res = await _guildService.AddConfigAsync(req, true);
-        if (!res.IsDefined()) return Result<DiscordEmbed>.FromError(new InvalidOperationError());
+        if (!res.IsDefined()) return new InvalidOperationError();
 
         var embed = new DiscordEmbedBuilder();
         embed.WithColor(new DiscordColor(res.Entity.EmbedHexColor));
@@ -319,12 +321,12 @@ public class DiscordGuildService : IDiscordGuildService
         return embed.Build();
     }
 
-    private async Task<Result<DiscordEmbed>> RepairConfigAsync([NotNull] DiscordGuild discordGuild,
+    private async Task<Result<DiscordEmbed>> RepairConfigAsync(DiscordGuild discordGuild,
         GuildModule type, DiscordMember requestingMember)
     {
         if (discordGuild is null) throw new ArgumentNullException(nameof(discordGuild));
         if (requestingMember is null) throw new ArgumentNullException(nameof(requestingMember));
-        if (!requestingMember.IsAdmin()) return Result<DiscordEmbed>.FromError(new DiscordNotAuthorizedError());
+        if (!requestingMember.IsAdmin()) return new DiscordNotAuthorizedError();
 
         Result<Guild> guildResult;
         Guild guild;
@@ -338,10 +340,9 @@ public class DiscordGuildService : IDiscordGuildService
                 guildResult = await _guildService.GetSingleBySpecAsync<Guild>(
                     new ActiveGuildByDiscordIdWithTicketingSpecifications(discordGuild.Id));
                 if (!guildResult.IsDefined() || guildResult.Entity.TicketingConfig is null)
-                    return Result<DiscordEmbed>.FromError(new NotFoundError());
+                    return new NotFoundError();
                 if (guildResult.Entity.TicketingConfig.IsDisabled)
-                    return Result<DiscordEmbed>.FromError(
-                        new DisabledEntityError(nameof(guildResult.Entity.TicketingConfig)));
+                    return new DisabledEntityError(nameof(guildResult.Entity.TicketingConfig));
 
                 guild = guildResult.Entity;
 
@@ -360,7 +361,7 @@ public class DiscordGuildService : IDiscordGuildService
                 try
                 {
                     var openedCat = await _discord.Client.GetChannelAsync(guild.TicketingConfig.OpenedCategoryId);
-                    if (openedCat is null) return Result<DiscordEmbed>.FromError(new DiscordNotFoundError());
+                    if (openedCat is null) return new DiscordNotFoundError();
                 }
                 catch
                 {
@@ -372,7 +373,7 @@ public class DiscordGuildService : IDiscordGuildService
                 try
                 {
                     closedCat = await _discord.Client.GetChannelAsync(guild.TicketingConfig.ClosedCategoryId);
-                    if (closedCat is null) return Result<DiscordEmbed>.FromError(new DiscordNotFoundError());
+                    if (closedCat is null) return new DiscordNotFoundError();
                 }
                 catch
                 {
@@ -384,7 +385,7 @@ public class DiscordGuildService : IDiscordGuildService
                 try
                 {
                     var ticketLogs = await _discord.Client.GetChannelAsync(guild.TicketingConfig.LogChannelId);
-                    if (ticketLogs is null) return Result<DiscordEmbed>.FromError(new DiscordNotFoundError());
+                    if (ticketLogs is null) return new DiscordNotFoundError();
                 }
                 catch
                 {
@@ -416,10 +417,9 @@ public class DiscordGuildService : IDiscordGuildService
                     new ActiveGuildByDiscordIdWithModerationSpec(discordGuild.Id));
 
                 if (!guildResult.IsDefined() || guildResult.Entity.ModerationConfig is null)
-                    return Result<DiscordEmbed>.FromError(new NotFoundError());
+                    return new NotFoundError();
                 if (guildResult.Entity.ModerationConfig.IsDisabled)
-                    return Result<DiscordEmbed>.FromError(
-                        new DisabledEntityError(nameof(guildResult.Entity.ModerationConfig)));
+                    return new DisabledEntityError(nameof(guildResult.Entity.ModerationConfig));
 
                 guild = guildResult.Entity;
 
@@ -446,7 +446,7 @@ public class DiscordGuildService : IDiscordGuildService
                     var moderationChannelLog =
                         await _discord.Client.GetChannelAsync(guild.ModerationConfig.ModerationLogChannelId);
                     if (moderationChannelLog is null)
-                        return Result<DiscordEmbed>.FromError(new DiscordNotFoundError());
+                        return new DiscordNotFoundError();
                 }
                 catch
                 {
@@ -460,7 +460,7 @@ public class DiscordGuildService : IDiscordGuildService
                     var memberEventsLogChannel =
                         await _discord.Client.GetChannelAsync(guild.ModerationConfig.MemberEventsLogChannelId);
                     if (memberEventsLogChannel is null)
-                        return Result<DiscordEmbed>.FromError(new DiscordNotFoundError());
+                        return new DiscordNotFoundError();
                 }
                 catch
                 {
@@ -475,7 +475,7 @@ public class DiscordGuildService : IDiscordGuildService
                         await _discord.Client.GetChannelAsync(guild.ModerationConfig
                             .MessageUpdatedEventsLogChannelId);
                     if (messageEditLogChannel is null)
-                        return Result<DiscordEmbed>.FromError(new DiscordNotFoundError());
+                        return new DiscordNotFoundError();
                 }
                 catch
                 {
@@ -490,7 +490,7 @@ public class DiscordGuildService : IDiscordGuildService
                         await _discord.Client.GetChannelAsync(guild.ModerationConfig
                             .MessageDeletedEventsLogChannelId);
                     if (messageDeleteLogChannel is null)
-                        return Result<DiscordEmbed>.FromError(new DiscordNotFoundError());
+                        return new DiscordNotFoundError();
                 }
                 catch
                 {
@@ -502,7 +502,7 @@ public class DiscordGuildService : IDiscordGuildService
                 try
                 {
                     var mutedRole = discordGuild.GetRole(guild.ModerationConfig.MuteRoleId);
-                    if (mutedRole is null) return Result<DiscordEmbed>.FromError(new DiscordNotFoundError());
+                    if (mutedRole is null) return new DiscordNotFoundError();
                 }
                 catch
                 {
@@ -555,7 +555,7 @@ public class DiscordGuildService : IDiscordGuildService
     private async Task<Result<DiscordEmbed>> DisableModuleAsync(DiscordGuild discordGuild,
         DiscordMember requestingMember, GuildModule type)
     {
-        if (!requestingMember.IsAdmin()) throw new DiscordNotAuthorizedException();
+        if (!requestingMember.IsAdmin()) return new DiscordNotAuthorizedError();
 
         var guildResult = await _guildService.GetSingleBySpecAsync<Guild>(
             new ActiveGuildByDiscordIdWithTicketingSpecifications(discordGuild.Id));
@@ -563,17 +563,17 @@ public class DiscordGuildService : IDiscordGuildService
         {
             case GuildModule.Ticketing:
                 if (!guildResult.IsDefined() || guildResult.Entity.TicketingConfig is null)
-                    return Result<DiscordEmbed>.FromError(new NotFoundError());
+                    return new NotFoundError();
                 if (guildResult.Entity.TicketingConfig.IsDisabled)
-                    return Result<DiscordEmbed>.FromError(new InvalidOperationError());
+                    return new InvalidOperationError();
 
                 await _guildService.DisableConfigAsync(discordGuild.Id, GuildModule.Ticketing, true);
                 break;
             case GuildModule.Moderation:
                 if (!guildResult.IsDefined() || guildResult.Entity.ModerationConfig is null)
-                    return Result<DiscordEmbed>.FromError(new NotFoundError());
+                    return new NotFoundError();
                 if (guildResult.Entity.ModerationConfig.IsDisabled)
-                    return Result<DiscordEmbed>.FromError(new InvalidOperationError());
+                    return new InvalidOperationError();
 
                 await _guildService.DisableConfigAsync(discordGuild.Id, GuildModule.Moderation, true);
                 break;
@@ -587,23 +587,20 @@ public class DiscordGuildService : IDiscordGuildService
             .Build();
     }
 
-    private async Task<Result<int>> CreateOverwritesForMutedRoleAsync([NotNull] DiscordGuild discordGuild,
-        [NotNull] DiscordRole mutedRole, [NotNull] DiscordMember requestingMember)
+    private async Task<Result<int>> CreateOverwritesForMutedRoleAsync(DiscordGuild discordGuild,
+        DiscordRole mutedRole, DiscordMember requestingMember)
     {
         if (discordGuild is null) throw new ArgumentNullException(nameof(discordGuild));
         if (mutedRole is null) throw new ArgumentNullException(nameof(mutedRole));
         if (requestingMember is null) throw new ArgumentNullException(nameof(requestingMember));
 
-        if (!requestingMember.IsAdmin()) return Result<int>.FromError(new DiscordNotAuthorizedError());
+        if (!requestingMember.IsAdmin()) return new DiscordNotAuthorizedError();
 
         int count = 0;
         foreach (var channel in discordGuild.Channels.Values.Where(x =>
                      x.Type is ChannelType.Category or ChannelType.Text))
         {
-            await channel.AddOverwriteAsync(mutedRole,
-                deny: Permissions.SendMessages | Permissions.SendMessagesInThreads |
-                      Permissions.AddReactions | Permissions.CreatePrivateThreads |
-                      Permissions.CreatePublicThreads);
+            await channel.CreateMuteOverwriteAsync(mutedRole);
             await Task.Delay(500);
 
             count++;
