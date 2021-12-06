@@ -39,7 +39,7 @@ public class BanCheckService : IBanCheckService
 
         if (!ban.IsDefined()) return;
 
-        await _banService.AddOrExtendAsync(new BanReqDto(targetId, guildId, requestedOnBehalfOfId,
+        await _banService.AddOrExtendAsync(new BanApplyReqDto(targetId, guildId, requestedOnBehalfOfId,
             DateTime.MaxValue));
     }
 
@@ -52,6 +52,6 @@ public class BanCheckService : IBanCheckService
 
         if (!ban.IsDefined()) return;
 
-        await _banService.DisableAsync(new BanDisableReqDto(targetId, guildId, requestedOnBehalfOfId));
+        await _banService.DisableAsync(new BanRevokeReqDto(targetId, guildId, requestedOnBehalfOfId));
     }
 }

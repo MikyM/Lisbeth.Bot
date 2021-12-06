@@ -58,7 +58,7 @@ public class BanApplicationCommands : ExtendedApplicationCommandModule
                 if (!isValid)
                     throw new ArgumentException($"Parameter {nameof(length)} can't be parsed to a known duration.");
 
-                var banReq = new BanReqDto(validId, ctx.Guild.Id, ctx.User.Id, occurrence, reason);
+                var banReq = new BanApplyReqDto(validId, ctx.Guild.Id, ctx.User.Id, occurrence, reason);
                 var banReqValidator = new BanReqValidator(ctx.Client);
                 await banReqValidator.ValidateAndThrowAsync(banReq);
 
@@ -67,7 +67,7 @@ public class BanApplicationCommands : ExtendedApplicationCommandModule
             case BanActionType.Remove:
                 if (id == "") throw new ArgumentException("You must supply an Id of the user to unban.");
 
-                var banDisableReq = new BanDisableReqDto(validId, ctx.Guild.Id, ctx.User.Id);
+                var banDisableReq = new BanRevokeReqDto(validId, ctx.Guild.Id, ctx.User.Id);
                 var banDisableReqValidator = new BanDisableReqValidator(ctx.Client);
                 await banDisableReqValidator.ValidateAndThrowAsync(banDisableReq);
 

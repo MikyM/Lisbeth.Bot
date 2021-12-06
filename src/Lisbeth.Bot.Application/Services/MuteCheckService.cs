@@ -52,10 +52,10 @@ public class MuteCheckService : IMuteCheckService
         switch (wasMuted)
         {
             case true when !isMuted:
-                await _muteService.DisableAsync(new MuteDisableReqDto(targetId, guildId, requestedOnBehalfOfId));
+                await _muteService.DisableAsync(new MuteRevokeReqDto(targetId, guildId, requestedOnBehalfOfId));
                 break;
             case false when isMuted:
-                await _muteService.AddOrExtendAsync(new MuteReqDto(targetId, guildId, requestedOnBehalfOfId,
+                await _muteService.AddOrExtendAsync(new MuteApplyReqDto(targetId, guildId, requestedOnBehalfOfId,
                     DateTime.MaxValue));
                 break;
         }

@@ -24,7 +24,7 @@ using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Validation.Mute;
 
-public class MuteReqValidator : AbstractValidator<MuteReqDto>
+public class MuteReqValidator : AbstractValidator<MuteApplyReqDto>
 {
     public MuteReqValidator(IDiscordService discordService) : this(discordService.Client)
     {
@@ -37,10 +37,10 @@ public class MuteReqValidator : AbstractValidator<MuteReqDto>
         RuleFor(x => x.GuildId).NotEmpty();
         RuleFor(x => x.TargetUserId)
             .NotEmpty()
-            .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<MuteReqDto>(discord)));
+            .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<MuteApplyReqDto>(discord)));
         RuleFor(x => x.RequestedOnBehalfOfId)
             .NotEmpty()
-            .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<MuteReqDto>(discord)));
+            .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<MuteApplyReqDto>(discord)));
         RuleFor(x => x.AppliedUntil).NotEmpty().Must(x => x.ToUniversalTime() > DateTime.UtcNow);
     }
 }

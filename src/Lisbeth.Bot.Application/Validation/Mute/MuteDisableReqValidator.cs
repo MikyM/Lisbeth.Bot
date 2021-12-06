@@ -24,7 +24,7 @@ using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Validation.Mute;
 
-public class MuteDisableReqValidator : AbstractValidator<MuteDisableReqDto>
+public class MuteDisableReqValidator : AbstractValidator<MuteRevokeReqDto>
 {
     public MuteDisableReqValidator(IDiscordService discordService) : this(discordService.Client)
     {
@@ -38,14 +38,14 @@ public class MuteDisableReqValidator : AbstractValidator<MuteDisableReqDto>
 
         RuleFor(x => x.GuildId)
             .NotEmpty()
-            .DependentRules(x => x.SetAsyncValidator(new DiscordGuildIdValidator<MuteDisableReqDto>(discord)));
+            .DependentRules(x => x.SetAsyncValidator(new DiscordGuildIdValidator<MuteRevokeReqDto>(discord)));
         RuleFor(x => x.TargetUserId)
             .NotEmpty()
             .When(x => x.Id.HasValue)
-            .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<MuteDisableReqDto>(discord)));
+            .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<MuteRevokeReqDto>(discord)));
 
         RuleFor(x => x.RequestedOnBehalfOfId)
             .NotEmpty()
-            .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<MuteDisableReqDto>(discord)));
+            .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<MuteRevokeReqDto>(discord)));
     }
 }

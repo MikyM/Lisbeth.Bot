@@ -30,7 +30,7 @@ public class BanService : CrudService<Ban, LisbethBotDbContext>, IBanService
     {
     }
 
-    public async Task<Result<(long Id, Ban? FoundEntity)>> AddOrExtendAsync(BanReqDto req, bool shouldSave = false)
+    public async Task<Result<(long Id, Ban? FoundEntity)>> AddOrExtendAsync(BanApplyReqDto req, bool shouldSave = false)
     {
         if (req is null) throw new ArgumentNullException(nameof(req));
 
@@ -58,7 +58,7 @@ public class BanService : CrudService<Ban, LisbethBotDbContext>, IBanService
         return Result<(long Id, Ban? FoundEntity)>.FromSuccess((result.Entity.Id, shallowCopy));
     }
 
-    public async Task<Result<Ban>> DisableAsync(BanDisableReqDto req, bool shouldSave = false)
+    public async Task<Result<Ban>> DisableAsync(BanRevokeReqDto req, bool shouldSave = false)
     {
         if (req is null) throw new ArgumentNullException(nameof(req));
 

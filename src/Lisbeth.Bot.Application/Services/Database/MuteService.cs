@@ -31,7 +31,7 @@ public class MuteService : CrudService<Mute, LisbethBotDbContext>, IMuteService
     {
     }
 
-    public async Task<Result<(long Id, Mute? FoundEntity)>> AddOrExtendAsync(MuteReqDto req,
+    public async Task<Result<(long Id, Mute? FoundEntity)>> AddOrExtendAsync(MuteApplyReqDto req,
         bool shouldSave = false)
     {
         if (req is null) throw new ArgumentNullException(nameof(req));
@@ -60,7 +60,7 @@ public class MuteService : CrudService<Mute, LisbethBotDbContext>, IMuteService
         return (entity.Id, shallowCopy);
     }
 
-    public async Task<Result<Mute>> DisableAsync(MuteDisableReqDto entry, bool shouldSave = false)
+    public async Task<Result<Mute>> DisableAsync(MuteRevokeReqDto entry, bool shouldSave = false)
     {
         if (entry is null) throw new ArgumentNullException(nameof(entry));
 

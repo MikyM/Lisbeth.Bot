@@ -58,14 +58,14 @@ public partial class MuteApplicationCommands : ExtendedApplicationCommandModule
                     throw new ArgumentException($"Parameter {nameof(length)} can't be parsed to a known duration.");
                 if (length is "") throw new ArgumentException($"Parameter {nameof(length)} can't be empty.");
 
-                var muteReq = new MuteReqDto(user.Id, ctx.Guild.Id, ctx.User.Id, occurrence, reason);
+                var muteReq = new MuteApplyReqDto(user.Id, ctx.Guild.Id, ctx.User.Id, occurrence, reason);
                 var muteReqValidator = new MuteReqValidator(ctx.Client);
                 await muteReqValidator.ValidateAndThrowAsync(muteReq);
 
                 result = await this.DiscordMuteService!.MuteAsync(ctx, muteReq);
                 break;
             case MuteActionType.Remove:
-                var muteDisableReq = new MuteDisableReqDto(user.Id, ctx.Guild.Id, ctx.User.Id);
+                var muteDisableReq = new MuteRevokeReqDto(user.Id, ctx.Guild.Id, ctx.User.Id);
                 var muteDisableReqValidator = new MuteDisableReqValidator(ctx.Client);
                 await muteDisableReqValidator.ValidateAndThrowAsync(muteDisableReq);
 

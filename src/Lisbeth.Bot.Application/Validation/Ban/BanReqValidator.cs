@@ -24,7 +24,7 @@ using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Validation.Ban;
 
-public class BanReqValidator : AbstractValidator<BanReqDto>
+public class BanReqValidator : AbstractValidator<BanApplyReqDto>
 {
     public BanReqValidator(IDiscordService discordService) : this(discordService.Client)
     {
@@ -37,10 +37,10 @@ public class BanReqValidator : AbstractValidator<BanReqDto>
         RuleFor(x => x.GuildId).NotEmpty();
         RuleFor(x => x.TargetUserId)
             .NotEmpty()
-            .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<BanReqDto>(discord)));
+            .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<BanApplyReqDto>(discord)));
         RuleFor(x => x.RequestedOnBehalfOfId)
             .NotEmpty()
-            .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<BanReqDto>(discord)));
+            .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<BanApplyReqDto>(discord)));
         RuleFor(x => x.AppliedUntil).NotEmpty().Must(x => x.ToUniversalTime() > DateTime.UtcNow);
     }
 }

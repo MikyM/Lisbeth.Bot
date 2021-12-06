@@ -23,10 +23,10 @@ namespace Lisbeth.Bot.Application.Discord.Services.Interfaces;
 
 public interface IDiscordBanService
 {
-    Task<Result<DiscordEmbed>> BanAsync(BanReqDto req);
-    Task<Result<DiscordEmbed>> BanAsync(InteractionContext ctx, BanReqDto req);
-    Task<Result<DiscordEmbed>> UnbanAsync(BanDisableReqDto req);
-    Task<Result<DiscordEmbed>> UnbanAsync(InteractionContext ctx, BanDisableReqDto req);
+    Task<Result<DiscordEmbed>> BanAsync(BanApplyReqDto req);
+    Task<Result<DiscordEmbed>> BanAsync(InteractionContext ctx, BanApplyReqDto req);
+    Task<Result<DiscordEmbed>> UnbanAsync(BanRevokeReqDto req);
+    Task<Result<DiscordEmbed>> UnbanAsync(InteractionContext ctx, BanRevokeReqDto req);
     Task<Result<DiscordEmbed>> GetSpecificUserGuildBanAsync(BanGetReqDto req);
     Task<Result<DiscordEmbed>> GetSpecificUserGuildBanAsync(InteractionContext ctx, BanGetReqDto req);
     Task<Result> UnbanCheckAsync();

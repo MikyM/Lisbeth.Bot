@@ -18,22 +18,34 @@
 using System;
 using Lisbeth.Bot.Domain.DTOs.Request.Base;
 
-namespace Lisbeth.Bot.Domain.DTOs.Request.Mute;
+namespace Lisbeth.Bot.Domain.DTOs.Request.Ban;
 
-public class MuteDisableReqDto : BaseAuthWithGuildReqDto, IRevokeInfractionReq
+public class BanApplyReqDto : BaseAuthWithGuildReqDto, IApplyInfractionReq
 {
-    public MuteDisableReqDto()
+    public BanApplyReqDto()
     {
     }
 
-    public MuteDisableReqDto(ulong? targetUserId, ulong guildId, ulong requestedOnBehalfOfId)
+    public BanApplyReqDto(ulong targetUserId, ulong guildId, ulong requestedOnBehalfOfId, DateTime appliedUntil) : this(
+        targetUserId, guildId, requestedOnBehalfOfId, appliedUntil, null)
     {
         TargetUserId = targetUserId;
         GuildId = guildId;
+        AppliedUntil = appliedUntil;
         RequestedOnBehalfOfId = requestedOnBehalfOfId;
     }
 
-    public long? Id { get; set; }
-    public ulong? TargetUserId { get; set; }
-    public DateTime LiftedOn { get; set; } = DateTime.UtcNow;
+    public BanApplyReqDto(ulong targetUserId, ulong guildId, ulong requestedOnBehalfOfId, DateTime appliedUntil,
+        string? reason)
+    {
+        TargetUserId = targetUserId;
+        GuildId = guildId;
+        AppliedUntil = appliedUntil;
+        RequestedOnBehalfOfId = requestedOnBehalfOfId;
+        Reason = reason;
+    }
+
+    public ulong TargetUserId { get; set; }
+    public DateTime AppliedUntil { get; set; }
+    public string? Reason { get; set; }
 }

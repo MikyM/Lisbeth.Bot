@@ -38,7 +38,7 @@ public partial class MuteApplicationCommands
     {
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
-        var muteReq = new MuteReqDto(ctx.TargetUser.Id, ctx.Guild.Id, ctx.User.Id, DateTime.MaxValue,
+        var muteReq = new MuteApplyReqDto(ctx.TargetUser.Id, ctx.Guild.Id, ctx.User.Id, DateTime.MaxValue,
             "No reason provided - muted via user context menu");
         var muteReqValidator = new MuteReqValidator(ctx.Client);
         await muteReqValidator.ValidateAndThrowAsync(muteReq);
@@ -62,7 +62,7 @@ public partial class MuteApplicationCommands
     {
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
-        var muteDisableReq = new MuteDisableReqDto(ctx.TargetUser.Id, ctx.Guild.Id, ctx.User.Id);
+        var muteDisableReq = new MuteRevokeReqDto(ctx.TargetUser.Id, ctx.Guild.Id, ctx.User.Id);
         var muteDisableReqValidator = new MuteDisableReqValidator(ctx.Client);
         await muteDisableReqValidator.ValidateAndThrowAsync(muteDisableReq);
 
@@ -112,7 +112,7 @@ public partial class MuteApplicationCommands
     {
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
-        var muteReq = new MuteReqDto(ctx.TargetMessage.Author.Id, ctx.Guild.Id, ctx.User.Id, DateTime.MaxValue,
+        var muteReq = new MuteApplyReqDto(ctx.TargetMessage.Author.Id, ctx.Guild.Id, ctx.User.Id, DateTime.MaxValue,
             "No reason provided - muted via user context menu");
         var muteReqValidator = new MuteReqValidator(ctx.Client);
         await muteReqValidator.ValidateAndThrowAsync(muteReq);
@@ -136,7 +136,7 @@ public partial class MuteApplicationCommands
     {
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
-        var muteReq = new MuteReqDto(ctx.TargetMessage.Author.Id, ctx.Guild.Id, ctx.User.Id, DateTime.MaxValue,
+        var muteReq = new MuteApplyReqDto(ctx.TargetMessage.Author.Id, ctx.Guild.Id, ctx.User.Id, DateTime.MaxValue,
             "No reason provided - muted via user context menu");
         var muteReqValidator = new MuteReqValidator(ctx.Client);
         await muteReqValidator.ValidateAndThrowAsync(muteReq);

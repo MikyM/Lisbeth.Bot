@@ -24,7 +24,7 @@ using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Validation.Ban;
 
-public class BanDisableReqValidator : AbstractValidator<BanDisableReqDto>
+public class BanDisableReqValidator : AbstractValidator<BanRevokeReqDto>
 {
     public BanDisableReqValidator(IDiscordService discordService) : this(discordService.Client)
     {
@@ -38,14 +38,14 @@ public class BanDisableReqValidator : AbstractValidator<BanDisableReqDto>
 
         RuleFor(x => x.GuildId)
             .NotEmpty()
-            .DependentRules(x => x.SetAsyncValidator(new DiscordGuildIdValidator<BanDisableReqDto>(discord)));
+            .DependentRules(x => x.SetAsyncValidator(new DiscordGuildIdValidator<BanRevokeReqDto>(discord)));
         RuleFor(x => x.TargetUserId)
             .NotEmpty()
             .When(x => !x.Id.HasValue)
-            .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<BanDisableReqDto>(discord, true)));
+            .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<BanRevokeReqDto>(discord, true)));
 
         RuleFor(x => x.RequestedOnBehalfOfId)
             .NotEmpty()
-            .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<BanDisableReqDto>(discord)));
+            .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<BanRevokeReqDto>(discord)));
     }
 }

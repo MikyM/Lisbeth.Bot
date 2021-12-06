@@ -67,7 +67,7 @@ public class DiscordBanService : IDiscordBanService
 
             foreach (var ban in res.Entity)
             {
-                var req = new BanDisableReqDto(ban.UserId, ban.GuildId, _discord.Client.CurrentUser.Id);
+                var req = new BanRevokeReqDto(ban.UserId, ban.GuildId, _discord.Client.CurrentUser.Id);
                 await UnbanAsync(req);
             }
         }
@@ -80,7 +80,7 @@ public class DiscordBanService : IDiscordBanService
         return Result.FromSuccess();
     }
 
-    public async Task<Result<DiscordEmbed>> BanAsync(BanReqDto req)
+    public async Task<Result<DiscordEmbed>> BanAsync(BanApplyReqDto req)
     {
         if (req is null) throw new ArgumentNullException(nameof(req));
 
@@ -91,7 +91,7 @@ public class DiscordBanService : IDiscordBanService
         return await BanAsync(guild, target, moderator, req);
     }
 
-    public async Task<Result<DiscordEmbed>> BanAsync(InteractionContext ctx, BanReqDto req)
+    public async Task<Result<DiscordEmbed>> BanAsync(InteractionContext ctx, BanApplyReqDto req)
     {
         if (ctx is null) throw new ArgumentNullException(nameof(ctx));
         if (req is null) throw new ArgumentNullException(nameof(req));
@@ -113,7 +113,7 @@ public class DiscordBanService : IDiscordBanService
         return await BanAsync(ctx.Guild, target, ctx.Member, req);
     }
 
-    public async Task<Result<DiscordEmbed>> UnbanAsync(BanDisableReqDto req)
+    public async Task<Result<DiscordEmbed>> UnbanAsync(BanRevokeReqDto req)
     {
         if (req is null) throw new ArgumentNullException(nameof(req));
 
@@ -142,7 +142,7 @@ public class DiscordBanService : IDiscordBanService
         return await UnbanAsync(guild, target, moderator, req);
     }
 
-    public async Task<Result<DiscordEmbed>> UnbanAsync(InteractionContext ctx, BanDisableReqDto req)
+    public async Task<Result<DiscordEmbed>> UnbanAsync(InteractionContext ctx, BanRevokeReqDto req)
     {
         if (ctx is null) throw new ArgumentNullException(nameof(ctx));
         if (req is null) throw new ArgumentNullException(nameof(req));
@@ -246,7 +246,7 @@ public class DiscordBanService : IDiscordBanService
 
     private async Task<Result<DiscordEmbed>> BanAsync(DiscordGuild guild, DiscordUser target,
         DiscordMember moderator,
-        BanReqDto req)
+        BanApplyReqDto req)
     {
         if (guild is null) throw new ArgumentNullException(nameof(guild));
         if (moderator is null) throw new ArgumentNullException(nameof(moderator));
@@ -311,7 +311,7 @@ public class DiscordBanService : IDiscordBanService
 
     private async Task<Result<DiscordEmbed>> UnbanAsync(DiscordGuild guild, DiscordUser target,
         DiscordMember moderator,
-        BanDisableReqDto req)
+        BanRevokeReqDto req)
     {
         if (guild is null) throw new ArgumentNullException(nameof(guild));
         if (target is null) throw new ArgumentNullException(nameof(target));

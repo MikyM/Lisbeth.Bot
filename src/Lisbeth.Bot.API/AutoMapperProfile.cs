@@ -35,17 +35,17 @@ public class AutoMapperProfile : Profile
 {
     public AutoMapperProfile()
     {
-        CreateMap<MuteReqDto, Mute>()
+        CreateMap<MuteApplyReqDto, Mute>()
             .ForMember(dest => dest.UserId, source => source.MapFrom(x => x.TargetUserId))
             .ForMember(dest => dest.AppliedById, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
-        CreateMap<MuteDisableReqDto, Mute>()
+        CreateMap<MuteRevokeReqDto, Mute>()
             .ForMember(dest => dest.UserId, source => source.MapFrom(x => x.TargetUserId))
             .ForMember(dest => dest.AppliedById, source => source.MapFrom(x => x.RequestedOnBehalfOfId))
             .ForMember(dest => dest.GuildId, source => source.MapFrom(x => x.GuildId));
-        CreateMap<BanReqDto, Ban>()
+        CreateMap<BanApplyReqDto, Ban>()
             .ForMember(dest => dest.UserId, source => source.MapFrom(x => x.TargetUserId))
             .ForMember(dest => dest.AppliedById, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
-        CreateMap<BanDisableReqDto, Ban>()
+        CreateMap<BanRevokeReqDto, Ban>()
             .ForMember(dest => dest.UserId, source => source.MapFrom(x => x.TargetUserId))
             .ForMember(dest => dest.AppliedById, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
         CreateMap<PruneReqDto, Prune>()

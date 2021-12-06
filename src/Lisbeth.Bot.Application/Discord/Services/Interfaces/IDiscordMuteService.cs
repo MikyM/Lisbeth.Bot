@@ -23,12 +23,12 @@ namespace Lisbeth.Bot.Application.Discord.Services.Interfaces;
 
 public interface IDiscordMuteService
 {
-    Task<Result<DiscordEmbed>> MuteAsync(MuteReqDto req);
-    Task<Result<DiscordEmbed>> MuteAsync(ContextMenuContext ctx, MuteReqDto req);
-    Task<Result<DiscordEmbed>> MuteAsync(InteractionContext ctx, MuteReqDto req);
-    Task<Result<DiscordEmbed>> UnmuteAsync(MuteDisableReqDto req);
-    Task<Result<DiscordEmbed>> UnmuteAsync(ContextMenuContext ctx, MuteDisableReqDto req);
-    Task<Result<DiscordEmbed>> UnmuteAsync(InteractionContext ctx, MuteDisableReqDto req);
+    Task<Result<DiscordEmbed>> MuteAsync(MuteApplyReqDto req);
+    Task<Result<DiscordEmbed>> MuteAsync(ContextMenuContext ctx, MuteApplyReqDto req);
+    Task<Result<DiscordEmbed>> MuteAsync(InteractionContext ctx, MuteApplyReqDto req);
+    Task<Result<DiscordEmbed>> UnmuteAsync(MuteRevokeReqDto req);
+    Task<Result<DiscordEmbed>> UnmuteAsync(ContextMenuContext ctx, MuteRevokeReqDto req);
+    Task<Result<DiscordEmbed>> UnmuteAsync(InteractionContext ctx, MuteRevokeReqDto req);
     Task<Result<DiscordEmbed>> GetSpecificUserGuildMuteAsync(MuteGetReqDto req);
     Task<Result<DiscordEmbed>> GetSpecificUserGuildMuteAsync(InteractionContext ctx, MuteGetReqDto req);
     Task<Result<DiscordEmbed>> GetSpecificUserGuildMuteAsync(ContextMenuContext ctx, MuteGetReqDto req);

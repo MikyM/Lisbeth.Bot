@@ -15,25 +15,37 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using Lisbeth.Bot.Domain.DTOs.Request.Base;
+using System;
 
-namespace Lisbeth.Bot.Domain.DTOs.Request.Ban;
+namespace Lisbeth.Bot.Domain.DTOs.Request.Mute;
 
-public class BanDisableReqDto : BaseAuthWithGuildReqDto, IRevokeInfractionReq
+public class MuteApplyReqDto : BaseAuthWithGuildReqDto, IApplyInfractionReq
 {
-    public BanDisableReqDto()
+    public MuteApplyReqDto()
     {
     }
 
-    public BanDisableReqDto(ulong? targetUserId, ulong guildId, ulong requestedOnBehalfOfId)
+    public MuteApplyReqDto(ulong targetUserId, ulong guildId, ulong requestedOnBehalfOfId, DateTime appliedUntil) : this(
+        targetUserId, guildId, requestedOnBehalfOfId, appliedUntil, null)
     {
         TargetUserId = targetUserId;
         GuildId = guildId;
+        AppliedUntil = appliedUntil;
         RequestedOnBehalfOfId = requestedOnBehalfOfId;
     }
 
-    public long? Id { get; set; }
-    public ulong? TargetUserId { get; set; }
-    public DateTime LiftedOn { get; set; } = DateTime.UtcNow;
+    public MuteApplyReqDto(ulong targetUserId, ulong guildId, ulong requestedOnBehalfOfId, DateTime appliedUntil,
+        string? reason)
+    {
+        TargetUserId = targetUserId;
+        GuildId = guildId;
+        AppliedUntil = appliedUntil;
+        RequestedOnBehalfOfId = requestedOnBehalfOfId;
+        Reason = reason;
+    }
+
+    public ulong TargetUserId { get; set; }
+    public DateTime AppliedUntil { get; set; }
+    public string? Reason { get; set; }
 }

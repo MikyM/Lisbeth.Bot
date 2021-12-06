@@ -56,7 +56,7 @@ public class DiscordMuteService : IDiscordMuteService
         _embedBuilder = embedBuilder;
     }
 
-    public async Task<Result<DiscordEmbed>> MuteAsync(MuteReqDto req)
+    public async Task<Result<DiscordEmbed>> MuteAsync(MuteApplyReqDto req)
     {
         if (req is null) throw new ArgumentNullException(nameof(req));
 
@@ -67,7 +67,7 @@ public class DiscordMuteService : IDiscordMuteService
         return await MuteAsync(guild, target, moderator, req);
     }
 
-    public async Task<Result<DiscordEmbed>> MuteAsync(InteractionContext ctx, MuteReqDto req)
+    public async Task<Result<DiscordEmbed>> MuteAsync(InteractionContext ctx, MuteApplyReqDto req)
     {
         if (ctx is null) throw new ArgumentNullException(nameof(ctx));
         if (req is null) throw new ArgumentNullException(nameof(req));
@@ -76,7 +76,7 @@ public class DiscordMuteService : IDiscordMuteService
             ctx.Member, req);
     }
 
-    public async Task<Result<DiscordEmbed>> MuteAsync(ContextMenuContext ctx, MuteReqDto req)
+    public async Task<Result<DiscordEmbed>> MuteAsync(ContextMenuContext ctx, MuteApplyReqDto req)
     {
         if (ctx is null) throw new ArgumentNullException(nameof(ctx));
         if (req is null) throw new ArgumentNullException(nameof(req));
@@ -84,7 +84,7 @@ public class DiscordMuteService : IDiscordMuteService
         return await MuteAsync(ctx.Guild, ctx.TargetMember, ctx.Member, req);
     }
 
-    public async Task<Result<DiscordEmbed>> UnmuteAsync(MuteDisableReqDto req)
+    public async Task<Result<DiscordEmbed>> UnmuteAsync(MuteRevokeReqDto req)
     {
         if (req is null) throw new ArgumentNullException(nameof(req));
 
@@ -114,7 +114,7 @@ public class DiscordMuteService : IDiscordMuteService
         return await UnmuteAsync(guild, target, moderator, req);
     }
 
-    public async Task<Result<DiscordEmbed>> UnmuteAsync(InteractionContext ctx, MuteDisableReqDto req)
+    public async Task<Result<DiscordEmbed>> UnmuteAsync(InteractionContext ctx, MuteRevokeReqDto req)
     {
         if (ctx is null) throw new ArgumentNullException(nameof(ctx));
         if (req is null) throw new ArgumentNullException(nameof(req));
@@ -123,7 +123,7 @@ public class DiscordMuteService : IDiscordMuteService
             ctx.Member, req);
     }
 
-    public async Task<Result<DiscordEmbed>> UnmuteAsync(ContextMenuContext ctx, MuteDisableReqDto req)
+    public async Task<Result<DiscordEmbed>> UnmuteAsync(ContextMenuContext ctx, MuteRevokeReqDto req)
     {
         if (ctx is null) throw new ArgumentNullException(nameof(ctx));
         if (req is null) throw new ArgumentNullException(nameof(req));
@@ -196,7 +196,7 @@ public class DiscordMuteService : IDiscordMuteService
 
             foreach (var mute in res.Entity)
             {
-                var req = new MuteDisableReqDto(mute.UserId, mute.GuildId, _discord.Client.CurrentUser.Id);
+                var req = new MuteRevokeReqDto(mute.UserId, mute.GuildId, _discord.Client.CurrentUser.Id);
                 await UnmuteAsync(req);
             }
         }
@@ -212,7 +212,7 @@ public class DiscordMuteService : IDiscordMuteService
 
     private async Task<Result<DiscordEmbed>> MuteAsync(DiscordGuild guild, DiscordMember target,
         DiscordMember moderator,
-        MuteReqDto req)
+        MuteApplyReqDto req)
     {
         if (guild is null) throw new ArgumentNullException(nameof(guild));
         if (target is null) throw new ArgumentNullException(nameof(target));
@@ -261,7 +261,7 @@ public class DiscordMuteService : IDiscordMuteService
 
     private async Task<Result<DiscordEmbed>> UnmuteAsync(DiscordGuild guild, DiscordMember target,
         DiscordMember moderator,
-        MuteDisableReqDto req)
+        MuteRevokeReqDto req)
     {
         if (guild is null) throw new ArgumentNullException(nameof(guild));
         if (target is null) throw new ArgumentNullException(nameof(target));
