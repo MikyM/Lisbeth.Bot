@@ -34,6 +34,6 @@ public class MemberModDisableReqResponseEnricher : EmbedEnricher<IRevokeInfracti
     {
         embedBuilder.AddField("User mention", this.Target.Mention, true);
         embedBuilder.AddField("Moderator",
-            ExtendedFormatter.Mention(this.Entity.RequestedOnBehalfOfId, DiscordEntity.Member), true);
+            ExtendedFormatter.Mention(this.PrimaryEnricher.RequestedOnBehalfOfId, DiscordEntity.Member), true);
     }
 }

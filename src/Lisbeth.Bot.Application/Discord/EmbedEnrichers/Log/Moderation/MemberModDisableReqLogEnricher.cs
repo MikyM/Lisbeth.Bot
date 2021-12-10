@@ -31,11 +31,11 @@ public class MemberModDisableReqLogEnricher : EmbedEnricher<IRevokeInfractionReq
     public override void Enrich(IDiscordEmbedBuilderWrapper embedBuilder)
     {
         embedBuilder.AddField("Moderator",
-            ExtendedFormatter.Mention(this.Entity.RequestedOnBehalfOfId, DiscordEntity.Member), true);
+            ExtendedFormatter.Mention(this.PrimaryEnricher.RequestedOnBehalfOfId, DiscordEntity.Member), true);
 
         embedBuilder.AddField("Target",
-            this.Entity.TargetUserId.HasValue
-                ? ExtendedFormatter.Mention(this.Entity.TargetUserId.Value, DiscordEntity.Member)
-                : $"Case with Id: {this.Entity.Id}", true);
+            this.PrimaryEnricher.TargetUserId.HasValue
+                ? ExtendedFormatter.Mention(this.PrimaryEnricher.TargetUserId.Value, DiscordEntity.Member)
+                : $"Case with Id: {this.PrimaryEnricher.Id}", true);
     }
 }

@@ -49,6 +49,7 @@ public class AdminUtilSlashCommands : ApplicationCommandModule
         _service = service;
     }
 
+    [UsedImplicitly]
     [SlashRequireOwner]
     [SlashCommand("audit", "Gets last 10 audit logs.", false)]
     public async Task AuditCommand(InteractionContext ctx,
@@ -68,9 +69,10 @@ public class AdminUtilSlashCommands : ApplicationCommandModule
         await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent(botRes));
     }
 
+    [UsedImplicitly]
     [SlashRequireOwner]
     [SlashCommand("sql", "A command that runs sql query.", false)]
-    public async Task MuteCommand(InteractionContext ctx,
+    public async Task SqlCommand(InteractionContext ctx,
         [Option("query", "Sql query to be executed.")] string query,
         [Option("ephemeral", "Whether response should be eph")] string shouldEph = "true")
     {
@@ -134,6 +136,7 @@ public class AdminUtilSlashCommands : ApplicationCommandModule
         await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
     }
 
+    [UsedImplicitly]
     [SlashRequireOwner]
     [SlashCommand("eval", "Evaluate a piece of C# code.", false)]
     public async Task EvalCommand(InteractionContext ctx, [Option("code", "Code to evaluate.")] string code,

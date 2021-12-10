@@ -33,26 +33,26 @@ public class MemberModGetReqResponseEnricher : EmbedEnricher<IModEntity>
     {
         var (name, pastTense) = base.GetUnderlyingNameAndPastTense();
 
-        embedBuilder.AddField("User", ExtendedFormatter.Mention(this.Entity.UserId, DiscordEntity.User), true);
-        embedBuilder.AddField("Moderator", ExtendedFormatter.Mention(this.Entity.AppliedById, DiscordEntity.User),
+        embedBuilder.AddField("User", ExtendedFormatter.Mention(this.PrimaryEnricher.UserId, DiscordEntity.User), true);
+        embedBuilder.AddField("Moderator", ExtendedFormatter.Mention(this.PrimaryEnricher.AppliedById, DiscordEntity.User),
             true);
 
-        TimeSpan duration = this.Entity.AppliedUntil.Subtract(DateTime.UtcNow);
-        string lengthString = this.Entity.AppliedUntil == DateTime.MaxValue
+        TimeSpan duration = this.PrimaryEnricher.AppliedUntil.Subtract(DateTime.UtcNow);
+        string lengthString = this.PrimaryEnricher.AppliedUntil == DateTime.MaxValue
             ? "Permanent"
             : $"{duration.Days} days, {duration.Hours} hrs, {duration.Minutes} mins";
 
-        embedBuilder.AddField($"{pastTense} on", this.Entity.CreatedAt?.ToString() ?? "Error");
+        embedBuilder.AddField($"{pastTense} on", this.PrimaryEnricher.CreatedAt?.ToString() ?? "Error");
         embedBuilder.AddField("Length", lengthString, true);
-        embedBuilder.AddField($"{pastTense} until", this.Entity.AppliedUntil.ToString(CultureInfo.InvariantCulture),
+        embedBuilder.AddField($"{pastTense} until", this.PrimaryEnricher.AppliedUntil.ToString(CultureInfo.InvariantCulture),
             true);
 
-        if (this.Entity.LiftedOn is not null)
+        if (this.PrimaryEnricher.LiftedOn is not null)
         {
-            embedBuilder.AddField("Lifted on", this.Entity.LiftedOn.Value.ToString(CultureInfo.InvariantCulture));
-            embedBuilder.AddField("Lifted by", ExtendedFormatter.Mention(this.Entity.LiftedById, DiscordEntity.User));
+            embedBuilder.AddField("Lifted on", this.PrimaryEnricher.LiftedOn.Value.ToString(CultureInfo.InvariantCulture));
+            embedBuilder.AddField("Lifted by", ExtendedFormatter.Mention(this.PrimaryEnricher.LiftedById, DiscordEntity.User));
         }
 
-        if (!string.IsNullOrWhiteSpace(this.Entity.Reason)) embedBuilder.AddField("Reason", this.Entity.Reason);
+        if (!string.IsNullOrWhiteSpace(this.PrimaryEnricher.Reason)) embedBuilder.AddField("Reason", this.PrimaryEnricher.Reason);
     }
 }

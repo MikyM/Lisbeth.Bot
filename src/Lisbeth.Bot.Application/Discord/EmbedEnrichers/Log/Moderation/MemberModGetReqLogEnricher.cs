@@ -31,10 +31,10 @@ public class MemberModGetReqLogEnricher : EmbedEnricher<IGetInfractionReq>
 
     public override void Enrich(IDiscordEmbedBuilderWrapper embedBuilder)
     {
-        embedBuilder.AddField("Moderator", ExtendedFormatter.Mention(this.Entity.RequestedOnBehalfOfId, DiscordEntity.Member),
+        embedBuilder.AddField("Moderator", ExtendedFormatter.Mention(this.PrimaryEnricher.RequestedOnBehalfOfId, DiscordEntity.Member),
             true);
 
-        var args = this.Entity.ToDictionary();
+        var args = this.PrimaryEnricher.ToDictionary();
 
         foreach (var (argumentName, argumentValue) in args.Where(x => x.Value is not null))
         {

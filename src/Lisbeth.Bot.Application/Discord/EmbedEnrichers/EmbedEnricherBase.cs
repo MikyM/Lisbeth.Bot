@@ -20,9 +20,9 @@ using MikyM.Discord.EmbedBuilders.Enums;
 
 namespace Lisbeth.Bot.Application.Discord.EmbedEnrichers;
 
-public abstract class EmbedEnricher<TEntity> : EmbedEnricherBase<TEntity> where TEntity : class
+public abstract class EmbedEnricher<TPrimaryEnricher> : EmbedEnricherBase<TPrimaryEnricher> where TPrimaryEnricher : class
 {
-    protected EmbedEnricher(TEntity entity) : base(entity){}
+    protected EmbedEnricher(TPrimaryEnricher entity) : base(entity){}
 
     protected (string Name, string PastTense) GetUnderlyingNameAndPastTense()
     {
@@ -32,7 +32,7 @@ public abstract class EmbedEnricher<TEntity> : EmbedEnricherBase<TEntity> where 
 
     protected (DiscordModeration Moderation, string PastTense) GetModerationTypeAndPastTense()
     {
-        string type = this.Entity.GetType().Name;
+        string type = this.PrimaryEnricher.GetType().Name;
         if (type.Contains("unban", StringComparison.InvariantCultureIgnoreCase)) return (DiscordModeration.Unban, "Unbanned");
         if (type.Contains("unmute", StringComparison.InvariantCultureIgnoreCase)) return (DiscordModeration.Unmute, "Unmuted");
         if (type.Contains("ban", StringComparison.InvariantCultureIgnoreCase)) return (DiscordModeration.Ban, "Banned");
