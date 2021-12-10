@@ -154,4 +154,10 @@ public interface IDiscordEmbedBuilderWrapper
     /// </summary>
     /// <returns>This embed builder wrapper.</returns>
     IDiscordEmbedBuilderWrapper ClearFields();
+
+    /// <summary>
+    /// Sets this embed's title.
+    /// </summary>
+    /// <returns>This embed builder wrapper.</returns>
+    IDiscordEmbedBuilderWrapper WithTitle(string title);
 }

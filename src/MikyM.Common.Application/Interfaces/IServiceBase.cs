@@ -15,12 +15,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using MikyM.Common.Application.Results;
+
 namespace MikyM.Common.Application.Interfaces;
 
 public interface IServiceBase<TContext> : IDisposable where TContext : DbContext
 {
-    Task<int> CommitAsync();
-    Task<int> CommitAsync(long auditUserId);
-    Task RollbackAsync();
-    Task BeginTransactionAsync();
+    Task<Result<int>> CommitAsync();
+    Task<Result<int>> CommitAsync(long auditUserId);
+    Task<Result> RollbackAsync();
+    Task<Result> BeginTransactionAsync();
 }

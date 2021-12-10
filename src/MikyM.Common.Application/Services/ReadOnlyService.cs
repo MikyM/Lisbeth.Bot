@@ -65,7 +65,7 @@ public class ReadOnlyService<TEntity, TContext> : ServiceBase<TContext>, IReadOn
     {
         var res = await this.UnitOfWork.GetRepository<ReadOnlyRepository<TEntity>>()
             ?.GetBySpecAsync(specification)!;
-        return res.Count is 0 ? Result<IReadOnlyList<TEntity>>.FromError(new NotFoundError()) : Result<IReadOnlyList<TEntity>>.FromSuccess(res);
+        return Result<IReadOnlyList<TEntity>>.FromSuccess(res);
     }
 
     public virtual async Task<Result<IReadOnlyList<TGetResult>>> GetBySpecAsync<TGetResult>(
@@ -81,7 +81,7 @@ public class ReadOnlyService<TEntity, TContext> : ServiceBase<TContext>, IReadOn
     {
         var res = await this.UnitOfWork.GetRepository<ReadOnlyRepository<TEntity>>()
             ?.GetBySpecAsync(specification)!;
-        return res.Count is 0 ? Result<IReadOnlyList<TGetProjectedResult>>.FromError(new NotFoundError()) : Result<IReadOnlyList<TGetProjectedResult>>.FromSuccess(res);
+        return Result<IReadOnlyList<TGetProjectedResult>>.FromSuccess(res);
     }
 
     public virtual async Task<Result<IReadOnlyList<TGetResult>>> GetAllAsync<TGetResult>(bool shouldProject = false) where TGetResult : class
@@ -92,15 +92,15 @@ public class ReadOnlyService<TEntity, TContext> : ServiceBase<TContext>, IReadOn
         else res = this.Mapper.Map<IReadOnlyList<TGetResult>>(await this.UnitOfWork.GetRepository<ReadOnlyRepository<TEntity>>()
             ?.GetAllAsync()!);
 
-        return res.Count is 0 ? Result<IReadOnlyList<TGetResult>>.FromError(new NotFoundError()) : Result<IReadOnlyList<TGetResult>>.FromSuccess(res);
+        return Result<IReadOnlyList<TGetResult>>.FromSuccess(res);
     }
 
     public virtual async Task<Result<IReadOnlyList<TEntity>>> GetAllAsync()
     {
         var res = await this.UnitOfWork.GetRepository<ReadOnlyRepository<TEntity>>()
-            ?.GetAllAsync<TEntity>()!;
+            ?.GetAllAsync()!;
 
-        return res.Count is 0 ? Result<IReadOnlyList<TEntity>>.FromError(new NotFoundError()) : Result<IReadOnlyList<TEntity>>.FromSuccess(res);
+        return Result<IReadOnlyList<TEntity>>.FromSuccess(res);
     }
 
     public virtual async Task<Result<long>> LongCountAsync(ISpecification<TEntity>? specification = null)

@@ -34,6 +34,7 @@ public class EnhancedDiscordEmbedBuilder : IEnhancedDiscordEmbedBuilder
     public string AuthorTemplate { get; private set; } = @"@action@@type@@info@"; // 0 - action , 1 - type, 2 - target/caller
     public string TitleTemplate { get; private set; } = @"@action@@type@@info@"; // 0 - action , 1 - type, 2 - target/caller
     public string FooterTemplate { get; private set; } = @"@caseId@@info@"; // 0 - caseId , 1 - snowflake info
+    public bool IsTemplatingEnabled { get; private set; } = true;
 
     public EnhancedDiscordEmbedBuilder()
         => this.Current = new DiscordEmbedBuilderWrapper();
@@ -68,6 +69,13 @@ public class EnhancedDiscordEmbedBuilder : IEnhancedDiscordEmbedBuilder
 
     public static implicit operator DiscordEmbed(EnhancedDiscordEmbedBuilder builder)
         => builder.Build();
+
+    public IEnhancedDiscordEmbedBuilder DisableTemplating(bool shouldDisableTemplating = true)
+    {
+        this.IsTemplatingEnabled = !shouldDisableTemplating;
+        return this;
+    }
+
 
     public IEnhancedDiscordEmbedBuilder WithCase(long? caseId)
     {
@@ -141,6 +149,8 @@ public class EnhancedDiscordEmbedBuilder : IEnhancedDiscordEmbedBuilder
 
     protected virtual void Evaluate()
     {
+        if (!this.IsTemplatingEnabled) return;
+
         string author = this.AuthorTemplate
             .Replace("@action@", this.Action is null ? "" : this.Action.SplitByCapitalAndConcat())
             .Replace("@type@",

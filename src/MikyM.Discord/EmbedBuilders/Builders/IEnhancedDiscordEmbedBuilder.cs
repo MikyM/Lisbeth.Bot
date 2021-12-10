@@ -43,7 +43,12 @@ public interface IEnhancedDiscordEmbedBuilder : IBaseEmbedBuilder
     string? ActionType { get; }
     /// <summary> Gets action name used for <see cref="DiscordEmbedBuilder.EmbedAuthor"/> templating, if any.</summary>
     string? Action { get; }
+    /// <summary> Gets whether templating of author and footer fields is enabled (default - enabled).</summary>
+    public bool IsTemplatingEnabled { get; }
 
+    /// <summary> Sets whether the author and footer field templating should be enabled. </summary>
+    /// <returns>The current builder instance.</returns>
+    IEnhancedDiscordEmbedBuilder DisableTemplating(bool shouldDisableTemplating = true);
     /// <summary> Sets the embed color for this builder. </summary>
     /// <returns>The current builder instance.</returns>
     IEnhancedDiscordEmbedBuilder WithEmbedColor(DiscordColor color);

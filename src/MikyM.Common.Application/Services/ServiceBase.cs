@@ -16,6 +16,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using AutoMapper;
+using MikyM.Common.Application.Results;
 
 namespace MikyM.Common.Application.Services;
 
@@ -31,24 +32,26 @@ public abstract class ServiceBase<TContext> : IServiceBase<TContext> where TCont
         UnitOfWork = uof;
     }
 
-    public virtual async Task<int> CommitAsync(long auditUserId)
+    public virtual async Task<Result<int>> CommitAsync(long auditUserId)
     {
         return await UnitOfWork.CommitAsync(auditUserId);
     }
 
-    public virtual async Task<int> CommitAsync()
+    public virtual async Task<Result<int>> CommitAsync()
     {
         return await UnitOfWork.CommitAsync();
     }
 
-    public virtual async Task RollbackAsync()
+    public virtual async Task<Result> RollbackAsync()
     {
         await UnitOfWork.RollbackAsync();
+        return Result.FromSuccess();
     }
 
-    public virtual async Task BeginTransactionAsync()
+    public virtual async Task<Result> BeginTransactionAsync()
     {
         await UnitOfWork.UseTransaction();
+        return Result.FromSuccess();
     }
 
     // Public implementation of Dispose pattern callable by consumers.

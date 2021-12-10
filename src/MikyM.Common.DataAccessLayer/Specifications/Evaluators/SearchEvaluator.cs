@@ -33,8 +33,12 @@ public class SearchEvaluator : IEvaluator
     {
         if (!specification.SearchCriterias.AnyNullable()) return query;
 
-        return specification.SearchCriterias.GroupBy(x => x.SearchGroup)
-            .Select(searchCriteria => searchCriteria.Select(x => (x.Selector, x.SearchTerm)))
-            .Aggregate(query, (current, criterias) => current.Search(criterias));
+        foreach (var searchCriteria in specification.SearchCriterias.GroupBy(x => x.SearchGroup))
+        {
+            var criterias = searchCriteria.Select(x => (x.Selector, x.SearchTerm));
+            query = query.Search(criterias);
+        }
+
+        return query;
     }
 }

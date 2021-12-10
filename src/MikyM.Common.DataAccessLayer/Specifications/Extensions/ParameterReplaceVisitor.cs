@@ -30,8 +30,7 @@ internal class ParameterReplacerVisitor : ExpressionVisitor
         this.newExpression = newExpression;
     }
 
-    internal static Expression Replace(Expression expression, ParameterExpression oldParameter,
-        Expression newExpression)
+    internal static Expression Replace(Expression expression, ParameterExpression oldParameter, Expression newExpression)
     {
         return new ParameterReplacerVisitor(oldParameter, newExpression).Visit(expression);
     }

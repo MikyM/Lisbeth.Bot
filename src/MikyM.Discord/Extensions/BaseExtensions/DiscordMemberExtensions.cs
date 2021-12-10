@@ -45,7 +45,8 @@ public static class DiscordMemberExtensions
 
     public static bool IsAdmin(this DiscordMember member)
     {
-        return member.Roles.Any(x =>
+        return member.Permissions.HasPermission(Permissions.Administrator) || 
+               member.Roles.Any(x =>
                    x.Permissions.HasPermission(Permissions.Administrator)) ||
                member.Permissions.HasPermission(Permissions.All) ||
                member.IsOwner;

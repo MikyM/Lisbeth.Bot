@@ -157,4 +157,10 @@ public class DiscordEmbedBuilderWrapper : IDiscordEmbedBuilderWrapper
         this.Wrapped.ClearFields();
         return this;
     }
+
+    public IDiscordEmbedBuilderWrapper WithTitle(string title)
+    {
+        this.Wrapped.WithTitle(title);
+        return this;
+    }
 }

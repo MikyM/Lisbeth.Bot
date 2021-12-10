@@ -17,6 +17,7 @@
 
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 
 namespace MikyM.Common.DataAccessLayer.Specifications.Extensions;
 
@@ -37,22 +38,31 @@ public static class SearchExtension
     public static IQueryable<T> Search<T>(this IQueryable<T> source,
         IEnumerable<(Expression<Func<T, string>> selector, string searchTerm)> criterias)
     {
+        Expression? expr = null;
         var parameter = Expression.Parameter(typeof(T), "x");
 
-        Expression? expr =
-            (from criteria in criterias
-                where criteria.selector is not null && !string.IsNullOrEmpty(criteria.searchTerm)
-                let functions = Expression.Property(null, typeof(EF).GetProperty(nameof(EF.Functions)) ?? throw new InvalidOperationException())
-                let like =
-                    typeof(DbFunctionsExtensions).GetMethod(nameof(DbFunctionsExtensions.Like),
-                        new[] {functions.Type, typeof(string), typeof(string)})
-                let propertySelector =
-                    ParameterReplacerVisitor.Replace(criteria.selector, criteria.selector.Parameters[0], parameter)
-                select Expression.Call(null, like, functions, (propertySelector as LambdaExpression)?.Body ?? throw new InvalidOperationException(),
-                    Expression.Constant(criteria.searchTerm))).Aggregate<MethodCallExpression, Expression?>(null,
-                (current, likeExpression) =>
-                    current is null ? likeExpression : Expression.OrElse(current, likeExpression));
+        foreach (var (selector, searchTerm) in criterias)
+        {
+            if (string.IsNullOrEmpty(searchTerm))
+                continue;
 
-        return expr is null ? source : source.Where(Expression.Lambda<Func<T, bool>>(expr, parameter));
+            var functions = Expression.Property(null, typeof(EF).GetProperty(nameof(EF.Functions))!);
+            var like = typeof(DbFunctionsExtensions).GetMethod(nameof(DbFunctionsExtensions.Like), new Type[] { functions.Type, typeof(string), typeof(string) });
+
+            var propertySelector = ParameterReplacerVisitor.Replace(selector, selector.Parameters[0], parameter);
+
+            var likeExpression = Expression.Call(
+                null,
+                like!,
+                functions,
+                (propertySelector as LambdaExpression)?.Body!,
+                Expression.Constant(searchTerm));
+
+            expr = expr == null ? (Expression)likeExpression : Expression.OrElse(expr, likeExpression);
+        }
+
+        return expr == null
+            ? source
+            : source.Where(Expression.Lambda<Func<T, bool>>(expr, parameter));
     }
 }

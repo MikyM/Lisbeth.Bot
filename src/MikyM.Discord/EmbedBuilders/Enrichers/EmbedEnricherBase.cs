@@ -19,12 +19,43 @@ using MikyM.Discord.EmbedBuilders.Wrappers;
 
 namespace MikyM.Discord.EmbedBuilders.Enrichers;
 
-public abstract class EmbedEnricherBase<TEntity> : IEmbedEnricher where TEntity : class
+public abstract class EmbedEnricherBase<TPrimaryEnricher> : IEmbedEnricher
 {
-    protected TEntity Entity { get; }
+    protected TPrimaryEnricher PrimaryEnricher { get; }
 
-    protected EmbedEnricherBase(TEntity enricher)
-        => this.Entity = enricher;
+    protected EmbedEnricherBase(TPrimaryEnricher primaryEnricher)
+        => this.PrimaryEnricher = primaryEnricher;
 
     public abstract void Enrich(IDiscordEmbedBuilderWrapper embedBuilder);
+}
+
+public abstract class EmbedEnricherBase<TPrimaryEnricher, TSecondaryEnricher> : EmbedEnricherBase<TPrimaryEnricher>
+{
+    protected TSecondaryEnricher SecondaryEnricher { get; }
+
+    protected EmbedEnricherBase(TPrimaryEnricher primaryEnricher, TSecondaryEnricher secondaryEnricher) :
+        base(primaryEnricher) =>
+        this.SecondaryEnricher = secondaryEnricher;
+}
+
+public abstract class
+    EmbedEnricherBase<TPrimaryEnricher, TSecondaryEnricher, TTertiaryEnricher> : EmbedEnricherBase<TPrimaryEnricher,
+        TSecondaryEnricher>
+{
+    protected TTertiaryEnricher TertiaryEnricher { get; }
+
+    protected EmbedEnricherBase(TPrimaryEnricher primaryEnricher, TSecondaryEnricher secondaryEnricher, TTertiaryEnricher tertiaryEnricher) :
+        base(primaryEnricher, secondaryEnricher) =>
+        this.TertiaryEnricher = tertiaryEnricher;
+}
+
+public abstract class
+    EmbedEnricherBase<TPrimaryEnricher, TSecondaryEnricher, TTertiaryEnricher, TQuaternaryEnricher> : EmbedEnricherBase<TPrimaryEnricher,
+        TSecondaryEnricher, TTertiaryEnricher>
+{
+    protected TQuaternaryEnricher QuaternaryEnricher { get; }
+
+    protected EmbedEnricherBase(TPrimaryEnricher primaryEnricher, TSecondaryEnricher secondaryEnricher, TTertiaryEnricher tertiaryEnricher, TQuaternaryEnricher quaternaryEnricher) :
+        base(primaryEnricher, secondaryEnricher, tertiaryEnricher) =>
+        this.QuaternaryEnricher = quaternaryEnricher;
 }

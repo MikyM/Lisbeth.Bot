@@ -331,6 +331,7 @@ public class DiscordService : IDiscordService
                 .BuildSpan(nameof(Client.GuildUpdated))
                 .IgnoreActiveSpan()
                 .StartActive(true);
+
             workScope.Span.SetTag("Guild.Id", args.GuildBefore.Id.ToString());
 
             using var scope = ServiceProvider.CreateScope();
@@ -747,7 +748,7 @@ public class DiscordService : IDiscordService
             using var workScope = Tracer.BuildSpan(nameof(Client.PresenceUpdated))
                 .IgnoreActiveSpan()
                 .StartActive(true);
-            workScope.Span.SetTag("User.Id", args.User.Id.ToString());
+            workScope.Span.SetTag("User.Id", args.User?.Id.ToString());
 
             using var scope = ServiceProvider.CreateScope();
 
@@ -760,7 +761,7 @@ public class DiscordService : IDiscordService
             using var workScope = Tracer.BuildSpan(nameof(Client.UserSettingsUpdated))
                 .IgnoreActiveSpan()
                 .StartActive(true);
-            workScope.Span.SetTag("User.Id", args.User.Id.ToString());
+            workScope.Span.SetTag("User.Id", args.User?.Id.ToString());
 
             using var scope = ServiceProvider.CreateScope();
 
@@ -771,8 +772,8 @@ public class DiscordService : IDiscordService
         Client.UserUpdated += async (sender, args) =>
         {
             using var workScope = Tracer.BuildSpan(nameof(Client.UserUpdated)).IgnoreActiveSpan().StartActive(true);
-            workScope.Span.SetTag("UserBefore.Id", args.UserBefore.Id.ToString());
-            workScope.Span.SetTag("UserBefore.Id", args.UserBefore.Id.ToString());
+            workScope.Span.SetTag("UserBefore.Id", args.UserBefore?.Id.ToString());
+            workScope.Span.SetTag("UserBefore.Id", args.UserBefore?.Id.ToString());
 
             using var scope = ServiceProvider.CreateScope();
 
