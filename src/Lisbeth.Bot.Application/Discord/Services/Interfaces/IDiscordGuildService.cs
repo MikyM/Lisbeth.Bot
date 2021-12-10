@@ -41,4 +41,5 @@ public interface IDiscordGuildService
     Task<Result<DiscordEmbed>> RepairConfigAsync(InteractionContext ctx, TicketingConfigRepairReqDto req);
     Task<Result<int>> CreateOverwritesForMutedRoleAsync(CreateMuteOverwritesReqDto req);
     Task<Result<int>> CreateOverwritesForMutedRoleAsync(InteractionContext ctx, CreateMuteOverwritesReqDto req);
+    Task<Result> BulkOverwriteSlashPermissionsAsync(GuildCreateEventArgs args);
 }

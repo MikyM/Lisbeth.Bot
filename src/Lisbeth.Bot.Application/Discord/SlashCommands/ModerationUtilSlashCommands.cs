@@ -4,7 +4,6 @@ using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
 using FluentValidation;
 using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
-using Lisbeth.Bot.Application.Enums;
 using Lisbeth.Bot.Application.Validation.ModerationConfig;
 using Lisbeth.Bot.Application.Validation.TicketingConfig;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
@@ -14,7 +13,7 @@ using MikyM.Discord.Extensions.BaseExtensions;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 
-[SlashCommandGroup("mod", "Moderation commands")]
+[SlashCommandGroup("mod-util", "Moderation commands")]
 [SlashModuleLifespan(SlashModuleLifespan.Transient)]
 public class ModerationUtilSlashCommands : ExtendedApplicationCommandModule
 {
