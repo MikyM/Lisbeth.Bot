@@ -28,11 +28,16 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands;
 [UsedImplicitly]
 public partial class PruneApplicationCommands : ApplicationCommandModule
 {
-    [UsedImplicitly] public IDiscordMessageService? DiscordMessageService { private get; set; }
+    public PruneApplicationCommands(IDiscordMessageService discordMessageService)
+    {
+        _discordMessageService = discordMessageService;
+    }
+
+    private readonly IDiscordMessageService _discordMessageService;
 
     [UsedImplicitly]
     [SlashRequireUserPermissions(Permissions.ManageMessages)]
-    [SlashCommand("prune", "A command that allows banning a user.")]
+    [SlashCommand("prune", "A command that allows banning a user.", false)]
     public async Task PruneCommand(InteractionContext ctx,
         [Option("count", "Number of messages to prune")]
         long count,
@@ -55,11 +60,11 @@ public partial class PruneApplicationCommands : ApplicationCommandModule
                 {
                     case 0:
                         var reqNoUsNoMsgId = new PruneReqDto((int)count + 1);
-                        embed = await this.DiscordMessageService!.PruneAsync(reqNoUsNoMsgId, 0, ctx);
+                        embed = await this._discordMessageService!.PruneAsync(reqNoUsNoMsgId, 0, ctx);
                         break;
                     default:
                         var reqNoUsWithMsgId = new PruneReqDto((int)count, (ulong)id);
-                        embed = await this.DiscordMessageService!.PruneAsync(reqNoUsWithMsgId, 0, ctx);
+                        embed = await this._discordMessageService!.PruneAsync(reqNoUsWithMsgId, 0, ctx);
                         break;
                 }
 
@@ -69,11 +74,11 @@ public partial class PruneApplicationCommands : ApplicationCommandModule
                 {
                     case 0:
                         var reqWithUsNoMsgId = new PruneReqDto((int)count, null, user.Id);
-                        embed = await this.DiscordMessageService!.PruneAsync(reqWithUsNoMsgId, 0, ctx);
+                        embed = await this._discordMessageService!.PruneAsync(reqWithUsNoMsgId, 0, ctx);
                         break;
                     default:
                         var reqWithUsWithMsgId = new PruneReqDto((int)count, (ulong)id, user.Id);
-                        embed = await this.DiscordMessageService!.PruneAsync(reqWithUsWithMsgId, 0, ctx);
+                        embed = await this._discordMessageService!.PruneAsync(reqWithUsWithMsgId, 0, ctx);
                         break;
                 }
 

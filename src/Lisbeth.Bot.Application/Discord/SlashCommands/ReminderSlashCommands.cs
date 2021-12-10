@@ -33,18 +33,21 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 [SlashModuleLifespan(SlashModuleLifespan.Transient)]
 public class ReminderSlashCommands : ExtendedApplicationCommandModule
 {
-    [UsedImplicitly] public IDiscordReminderService? ReminderService { private get; set; }
-    [UsedImplicitly] public IDiscordEmbedConfiguratorService<Domain.Entities.Reminder>? ReminderEmbedConfiguratorService { private get; set; }
-
-    [UsedImplicitly]
-    public IDiscordEmbedConfiguratorService<RecurringReminder>? RecurringReminderEmbedConfiguratorService
+    public ReminderSlashCommands(IDiscordReminderService reminderService,
+        IDiscordEmbedConfiguratorService<Reminder> reminderEmbedConfiguratorService,
+        IDiscordEmbedConfiguratorService<RecurringReminder> recurringReminderEmbedConfiguratorService)
     {
-        private get;
-        set;
+        _reminderService = reminderService;
+        _reminderEmbedConfiguratorService = reminderEmbedConfiguratorService;
+        _recurringReminderEmbedConfiguratorService = recurringReminderEmbedConfiguratorService;
     }
 
+    private readonly IDiscordReminderService _reminderService;
+    private readonly IDiscordEmbedConfiguratorService<Reminder> _reminderEmbedConfiguratorService;
+    private readonly IDiscordEmbedConfiguratorService<RecurringReminder> _recurringReminderEmbedConfiguratorService;
+
     [UsedImplicitly]
-    [SlashCommand("reminder", "Single reminder command")]
+    [SlashCommand("reminder", "Command that allows working with reminders.", false)]
     public async Task SingleReminderCommand(InteractionContext ctx,
         [Option("action", "Action to perform")]
         ReminderActionType actionType,
@@ -121,7 +124,7 @@ public class ReminderSlashCommands : ExtendedApplicationCommandModule
                             mentionList, ctx.Guild.Id, ctx.Member.Id, channel?.Id);
                         var setReqValidator = new SetReminderReqValidator(ctx.Client);
                         await setReqValidator.ValidateAndThrowAsync(setReq);
-                        result = await this.ReminderService!.SetNewReminderAsync(ctx, setReq);
+                        result = await this._reminderService!.SetNewReminderAsync(ctx, setReq);
                         break;
                     case ReminderActionType.Reschedule:
                         var rescheduleReq = new RescheduleReminderReqDto(name, isValidCron ? time : null,
@@ -129,13 +132,13 @@ public class ReminderSlashCommands : ExtendedApplicationCommandModule
                             ctx.Member.Id, name.IsDigitsOnly() ? long.Parse(name) : null);
                         var rescheduleReqValidator = new RescheduleReminderReqValidator(ctx.Client);
                         await rescheduleReqValidator.ValidateAndThrowAsync(rescheduleReq);
-                        result = await this.ReminderService!.RescheduleReminderAsync(ctx, rescheduleReq);
+                        result = await this._reminderService!.RescheduleReminderAsync(ctx, rescheduleReq);
                         break;
                     case ReminderActionType.ConfigureEmbed:
                         switch (reminderType)
                         {
                             case Domain.Enums.ReminderType.Single:
-                                var res = await this.ReminderEmbedConfiguratorService!.ConfigureAsync(ctx, name);
+                                var res = await this._reminderEmbedConfiguratorService!.ConfigureAsync(ctx, name);
                                 if (res.IsDefined())
                                     await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(res.Entity));
                                 else
@@ -145,7 +148,7 @@ public class ReminderSlashCommands : ExtendedApplicationCommandModule
                                 return;
                             case Domain.Enums.ReminderType.Recurring:
                                 var resRec =
-                                    await this.RecurringReminderEmbedConfiguratorService!.ConfigureAsync(ctx, name);
+                                    await this._recurringReminderEmbedConfiguratorService!.ConfigureAsync(ctx, name);
                                 if (resRec.IsDefined())
                                     await ctx.EditResponseAsync(
                                         new DiscordWebhookBuilder().AddEmbed(resRec.Entity));
@@ -162,7 +165,7 @@ public class ReminderSlashCommands : ExtendedApplicationCommandModule
                             name.IsDigitsOnly() ? long.Parse(name) : null);
                         var disableReqValidator = new DisableReminderReqValidator(ctx.Client);
                         await disableReqValidator.ValidateAndThrowAsync(disableReq);
-                        result = await this.ReminderService!.DisableReminderAsync(ctx, disableReq);
+                        result = await this._reminderService!.DisableReminderAsync(ctx, disableReq);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException(nameof(actionType), actionType, null);
@@ -178,7 +181,7 @@ public class ReminderSlashCommands : ExtendedApplicationCommandModule
     }
 
     [UsedImplicitly]
-    [SlashCommand("cron-help", "Single reminder command")]
+    [SlashCommand("cron-help", "Single reminder command", false)]
     public async Task SingleReminderCommand(InteractionContext ctx,
         [Option("cron-expression", "Crone to parse")]
         string cron)

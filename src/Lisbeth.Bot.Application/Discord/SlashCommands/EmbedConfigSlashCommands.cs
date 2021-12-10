@@ -18,6 +18,7 @@
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
+using DSharpPlus.SlashCommands.Attributes;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 
@@ -25,9 +26,15 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 [SlashModuleLifespan(SlashModuleLifespan.Transient)]
 public class EmbedConfigSlashCommands : ApplicationCommandModule
 {
-    public IDiscordEmbedConfiguratorService<Tag>? EmbedConfigService { private get; set; }
+    private readonly IDiscordEmbedConfiguratorService<Tag> _embedConfigService;
 
-    [SlashCommand("test", "something")]
+    public EmbedConfigSlashCommands(IDiscordEmbedConfiguratorService<Tag> embedConfigService)
+    {
+        _embedConfigService = embedConfigService;
+    }
+
+    [SlashRequireOwner]
+    [SlashCommand("test", "something", false)]
     public async Task EmbedConfigCommand(InteractionContext ctx,
         [Option("target", "The id of a reminder, tag or role menu to create embed for,")]
         string id)
@@ -36,7 +43,7 @@ public class EmbedConfigSlashCommands : ApplicationCommandModule
 
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
-        var result = await this.EmbedConfigService!.ConfigureAsync(ctx, parsedId.ToString());
+        var result = await this._embedConfigService!.ConfigureAsync(ctx, parsedId.ToString());
 
         await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(result.Entity));
     }

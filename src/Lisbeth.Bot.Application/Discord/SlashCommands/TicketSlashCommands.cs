@@ -30,11 +30,16 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 [UsedImplicitly]
 public class TicketSlashCommands : ExtendedApplicationCommandModule
 {
-    [UsedImplicitly] public IDiscordTicketService? DiscordTicketService { private get; set; }
+    public TicketSlashCommands(IDiscordTicketService discordTicketService)
+    {
+        _discordTicketService = discordTicketService;
+    }
+
+    private readonly IDiscordTicketService _discordTicketService;
 
     [UsedImplicitly]
     [SlashRequireUserPermissions(Permissions.BanMembers)]
-    [SlashCommand("ticket", "A command that allows managing tickets")]
+    [SlashCommand("ticket", "A command that allows managing tickets", false)]
     public async Task TicketHandlerCommand(InteractionContext ctx,
         [Option("action", "Type of action to perform")]
         TicketActionType action,
@@ -53,14 +58,14 @@ public class TicketSlashCommands : ExtendedApplicationCommandModule
                 var addReq = new TicketAddReqDto(null, null, ctx.Guild.Id, ctx.Channel.Id, ctx.User.Id, target.Id);
                 var addReqValidator = new TicketAddReqValidator(ctx.Client);
                 await addReqValidator.ValidateAndThrowAsync(addReq);
-                result = await this.DiscordTicketService!.AddToTicketAsync(ctx, addReq);
+                result = await this._discordTicketService!.AddToTicketAsync(ctx, addReq);
                 break;
             case TicketActionType.Remove:
                 var removeReq = new TicketRemoveReqDto(null, null, ctx.Guild.Id, ctx.Channel.Id, ctx.User.Id,
                     target.Id);
                 var removeReqValidator = new TicketRemoveReqValidator(ctx.Client);
                 await removeReqValidator.ValidateAndThrowAsync(removeReq);
-                result = await this.DiscordTicketService!.RemoveFromTicketAsync(ctx, removeReq);
+                result = await this._discordTicketService!.RemoveFromTicketAsync(ctx, removeReq);
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(action), action, null);

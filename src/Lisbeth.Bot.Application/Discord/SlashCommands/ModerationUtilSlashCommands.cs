@@ -18,12 +18,20 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 [SlashModuleLifespan(SlashModuleLifespan.Transient)]
 public class ModerationUtilSlashCommands : ExtendedApplicationCommandModule
 {
-    [UsedImplicitly] public IGuildService? GuildService { private get; set; }
-    [UsedImplicitly] public IDiscordGuildService? DiscordGuildService { private get; set; }
-    [UsedImplicitly] public IDiscordTicketService? DiscordTicketService { private get; set; }
+    private readonly IGuildService _guildService;
+    private readonly IDiscordGuildService _discordGuildService;
+    private readonly IDiscordTicketService _discordTicketService;
+
+    public ModerationUtilSlashCommands(IGuildService guildService, IDiscordGuildService discordGuildService,
+        IDiscordTicketService discordTicketService)
+    {
+        _guildService = guildService;
+        _discordGuildService = discordGuildService;
+        _discordTicketService = discordTicketService;
+    }
 
     [SlashRequireUserPermissions(Permissions.Administrator)]
-    [SlashCommand("identity", "A command that allows checking information about a member.")]
+    [SlashCommand("identity", "A command that allows checking information about a member.", false)]
     [UsedImplicitly]
     public async Task IdentityCommand(InteractionContext ctx,
         [Option("user", "User to identify")] DiscordUser user)
@@ -32,7 +40,7 @@ public class ModerationUtilSlashCommands : ExtendedApplicationCommandModule
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
             new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
-        var res = await this.GuildService!.GetSingleBySpecAsync<Guild>(
+        var res = await this._guildService!.GetSingleBySpecAsync<Guild>(
             new ActiveGuildByDiscordIdWithTicketingSpecifications(ctx.Guild.Id));
 
         if (!res.IsDefined()) throw new ArgumentException("Guild not found in database");
@@ -55,13 +63,13 @@ public class ModerationUtilSlashCommands : ExtendedApplicationCommandModule
 
     [UsedImplicitly]
     [SlashRequireUserPermissions(Permissions.Administrator)]
-    [SlashCommand("ticket-center", "A command that allows creating a ticket center message")]
+    [SlashCommand("ticket-center", "A command that allows creating a ticket center message", false)]
     public async Task TicketCenterCommand(InteractionContext ctx)
     {
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
             new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
-        var builder = await this.DiscordTicketService!.GetTicketCenterEmbedAsync(ctx);
+        var builder = await this._discordTicketService!.GetTicketCenterEmbedAsync(ctx);
 
         await ctx.Channel.SendMessageAsync(builder.Entity);
         await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
@@ -70,7 +78,7 @@ public class ModerationUtilSlashCommands : ExtendedApplicationCommandModule
 
     [UsedImplicitly]
     [SlashRequireUserPermissions(Permissions.Administrator)]
-    [SlashCommand("module", "A command that allows configuring modules")]
+    [SlashCommand("module", "A command that allows configuring modules", false)]
     public async Task TicketConfigCommand(InteractionContext ctx,
         [Option("action", "Action to perform")]
         ModuleActionType action,
@@ -122,7 +130,7 @@ public class ModerationUtilSlashCommands : ExtendedApplicationCommandModule
 
                         var enableTicketingValidator = new TicketingConfigReqValidator(ctx.Client);
                         await enableTicketingValidator.ValidateAndThrowAsync(enableTicketingReq);
-                        result = await this.DiscordGuildService!.CreateModuleAsync(ctx, enableTicketingReq);
+                        result = await this._discordGuildService!.CreateModuleAsync(ctx, enableTicketingReq);
                         break;
                     case ModuleActionType.Repair:
                         var repairTicketingReq = new TicketingConfigRepairReqDto
@@ -132,7 +140,7 @@ public class ModerationUtilSlashCommands : ExtendedApplicationCommandModule
                         };
                         var repairTicketingValidator = new TicketingConfigRepairReqValidator(ctx.Client);
                         await repairTicketingValidator.ValidateAndThrowAsync(repairTicketingReq);
-                        result = await this.DiscordGuildService!.RepairConfigAsync(ctx, repairTicketingReq);
+                        result = await this._discordGuildService!.RepairConfigAsync(ctx, repairTicketingReq);
                         break;
                     case ModuleActionType.Edit:
                         break;
@@ -144,7 +152,7 @@ public class ModerationUtilSlashCommands : ExtendedApplicationCommandModule
                         };
                         var disableTicketingValidator = new TicketingConfigDisableReqValidator(ctx.Client);
                         await disableTicketingValidator.ValidateAndThrowAsync(disableTicketingReq);
-                        result = await this.DiscordGuildService!.DisableModuleAsync(ctx, disableTicketingReq);
+                        result = await this._discordGuildService!.DisableModuleAsync(ctx, disableTicketingReq);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException(nameof(action), action, null);
@@ -162,7 +170,7 @@ public class ModerationUtilSlashCommands : ExtendedApplicationCommandModule
                         };
                         var enableModerationValidator = new ModerationConfigReqValidator(ctx.Client);
                         await enableModerationValidator.ValidateAndThrowAsync(enableModerationReq);
-                        result = await this.DiscordGuildService!.CreateModuleAsync(ctx, enableModerationReq);
+                        result = await this._discordGuildService!.CreateModuleAsync(ctx, enableModerationReq);
                         break;
                     case ModuleActionType.Repair:
                         var repairModerationReq = new ModerationConfigRepairReqDto
@@ -172,7 +180,7 @@ public class ModerationUtilSlashCommands : ExtendedApplicationCommandModule
                         };
                         var repairModerationValidator = new ModerationConfigRepairReqValidator(ctx.Client);
                         await repairModerationValidator.ValidateAndThrowAsync(repairModerationReq);
-                        result = await this.DiscordGuildService!.RepairConfigAsync(ctx, repairModerationReq);
+                        result = await this._discordGuildService!.RepairConfigAsync(ctx, repairModerationReq);
                         break;
                     case ModuleActionType.Edit:
                         break;
@@ -184,7 +192,7 @@ public class ModerationUtilSlashCommands : ExtendedApplicationCommandModule
                         };
                         var disableModerationValidator = new ModerationConfigDisableReqValidator(ctx.Client);
                         await disableModerationValidator.ValidateAndThrowAsync(disableModerationReq);
-                        result = await this.DiscordGuildService!.DisableModuleAsync(ctx, disableModerationReq);
+                        result = await this._discordGuildService!.DisableModuleAsync(ctx, disableModerationReq);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException(nameof(action), action, null);
@@ -205,7 +213,7 @@ public class ModerationUtilSlashCommands : ExtendedApplicationCommandModule
 
     [UsedImplicitly]
     [SlashRequireUserPermissions(Permissions.Administrator)]
-    [SlashCommand("moderation-config", "A command that allows setting moderation module up")]
+    [SlashCommand("moderation-config", "A command that allows setting moderation module up", false)]
     public async Task ModConfigCommand(InteractionContext ctx,
         [Option("deleted", "Channel for message deletion logs")]
         DiscordChannel deletedChannel,
@@ -215,7 +223,7 @@ public class ModerationUtilSlashCommands : ExtendedApplicationCommandModule
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
             new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
-        var res = await this.GuildService!.GetSingleBySpecAsync<Guild>(
+        var res = await this._guildService!.GetSingleBySpecAsync<Guild>(
             new ActiveGuildByDiscordIdWithTicketingSpecifications(ctx.Guild.Id));
         if (!res.IsDefined()) throw new ArgumentException("Guild not found in database");
 
@@ -227,16 +235,16 @@ public class ModerationUtilSlashCommands : ExtendedApplicationCommandModule
             MessageUpdatedEventsLogChannelId = updatedChannel.Id
         };
 
-        this.GuildService.BeginUpdate(guild);
+        this._guildService.BeginUpdate(guild);
         guild.SetModerationConfig(modConfig);
-        await this.GuildService.CommitAsync();
+        await this._guildService.CommitAsync();
 
         await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("Done"));
     }
 
     [UsedImplicitly]
-    [SlashRequireUserPermissions(Permissions.Administrator)]
-    [SlashCommand("guild-add", "A command that adds current guild to bot's database.")]
+    [SlashRequireOwner]
+    [SlashCommand("guild-add", "A command that adds current guild to bot's database.", false)]
     public async Task TestGuild(InteractionContext ctx)
     {
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
@@ -244,7 +252,7 @@ public class ModerationUtilSlashCommands : ExtendedApplicationCommandModule
 
         var guild = new Guild { GuildId = ctx.Guild.Id, UserId = ctx.User.Id, IsDisabled = false };
 
-        await this.GuildService!.AddAsync(guild, true);
+        await this._guildService!.AddAsync(guild, true);
 
         await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("Done"));
     }

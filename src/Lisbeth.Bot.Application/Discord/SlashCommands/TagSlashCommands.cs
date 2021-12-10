@@ -19,9 +19,11 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using FluentValidation;
+using Lisbeth.Bot.Application.Discord.Exceptions;
 using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
 using Lisbeth.Bot.Application.Validation.Tag;
 using Lisbeth.Bot.Domain.DTOs.Request.Tag;
+using MikyM.Discord.Extensions.BaseExtensions;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 
@@ -29,16 +31,24 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 [SlashModuleLifespan(SlashModuleLifespan.Transient)]
 public class TagSlashCommands : ExtendedApplicationCommandModule
 {
-    [UsedImplicitly] public IDiscordTagService? DiscordTagService { private get; set; }
-    [UsedImplicitly] public IDiscordEmbedConfiguratorService<Tag>? DiscordEmbedTagConfiguratorService { private get; set; }
+    public TagSlashCommands(IDiscordTagService discordTagService,
+        IDiscordEmbedConfiguratorService<Tag> discordEmbedTagConfiguratorService)
+    {
+        _discordTagService = discordTagService;
+        _discordEmbedTagConfiguratorService = discordEmbedTagConfiguratorService;
+    }
 
+    private readonly IDiscordTagService _discordTagService;
+    private readonly IDiscordEmbedConfiguratorService<Tag> _discordEmbedTagConfiguratorService;
+
+    [UsedImplicitly]
     [SlashCommand("tag", "Allows working with tags.")]
     public async Task TagCommand(InteractionContext ctx,
         [Option("action", "Type of action to perform")]
         TagActionType action,
         [Option("channel", "Channel to send the tag to.")]
         DiscordChannel? channel = null,
-        [Option("id", "Type of action to perform")]
+        [Option("id", "Id or name of the tag")]
         string idOrName = "",
         [Option("text", "Base text for the tag.")]
         string text = "")
@@ -67,7 +77,7 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
                 var getValidator = new TagGetReqValidator(ctx.Client);
                 await getValidator.ValidateAndThrowAsync(getReq);
 
-                result = await this.DiscordTagService!.GetAsync(ctx, getReq);
+                result = await this._discordTagService!.GetAsync(ctx, getReq);
                 break;
             case TagActionType.Create:
                 if (string.IsNullOrWhiteSpace(idOrName))
@@ -84,7 +94,7 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
                 var addValidator = new TagAddReqValidator(ctx.Client);
                 await addValidator.ValidateAndThrowAsync(addReq);
 
-                partial = await this.DiscordTagService!.AddAsync(ctx, addReq);
+                partial = await this._discordTagService!.AddAsync(ctx, addReq);
 
                 break;
             case TagActionType.Edit:
@@ -103,7 +113,7 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
                 var editValidator = new TagEditReqValidator(ctx.Client);
                 await editValidator.ValidateAndThrowAsync(editReq);
 
-                partial = await this.DiscordTagService!.EditAsync(ctx, editReq);
+                partial = await this._discordTagService!.EditAsync(ctx, editReq);
                 break;
             case TagActionType.Remove:
                 if (!isId && string.IsNullOrWhiteSpace(idOrName))
@@ -120,10 +130,10 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
                 var disableValidator = new TagDisableReqValidator(ctx.Client);
                 await disableValidator.ValidateAndThrowAsync(removeReq);
 
-                partial = await this.DiscordTagService!.DisableAsync(ctx, removeReq);
+                partial = await this._discordTagService!.DisableAsync(ctx, removeReq);
                 break;
             case TagActionType.ConfigureEmbed:
-                partial = await this.DiscordEmbedTagConfiguratorService!.ConfigureAsync(ctx, idOrName);
+                partial = await this._discordEmbedTagConfiguratorService!.ConfigureAsync(ctx, idOrName);
                 break;
             case TagActionType.Send:
                 if (!isId && string.IsNullOrWhiteSpace(idOrName))
@@ -143,7 +153,7 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
                 var sendValidator = new TagSendReqValidator(ctx.Client);
                 await sendValidator.ValidateAndThrowAsync(sendReq);
 
-                result = await this.DiscordTagService!.SendAsync(ctx, sendReq);
+                result = await this._discordTagService!.SendAsync(ctx, sendReq);
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(action), action, null);

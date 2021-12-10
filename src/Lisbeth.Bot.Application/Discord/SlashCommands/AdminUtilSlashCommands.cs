@@ -21,37 +21,42 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
+using Lisbeth.Bot.Application.Discord.ChatExport;
 using Lisbeth.Bot.DataAccessLayer;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.EntityFrameworkCore;
-using MikyM.Common.Domain;
 using MikyM.Common.Domain.Entities;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net.Http;
 using System.Text;
-using Lisbeth.Bot.Application.Discord.ChatExport;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 
-[SlashCommandGroup("admin", "Admin util commands")]
+[SlashCommandGroup("owner", "Owner util commands", false)]
 [SlashModuleLifespan(SlashModuleLifespan.Transient)]
 [UsedImplicitly]
 public class AdminUtilSlashCommands : ApplicationCommandModule
 {
-    [UsedImplicitly] public LisbethBotDbContext? Ctx { private get; set; }
-    [UsedImplicitly] public IReadOnlyService<AuditLog, LisbethBotDbContext>? Service { private get; set; }
+    private readonly LisbethBotDbContext _ctx;
+    private readonly IReadOnlyService<AuditLog, LisbethBotDbContext> _service;
+
+    public AdminUtilSlashCommands(LisbethBotDbContext ctx, IReadOnlyService<AuditLog, LisbethBotDbContext> service)
+    {
+        _ctx = ctx;
+        _service = service;
+    }
 
     [SlashRequireOwner]
-    [SlashCommand("audit", "Gets last 10 audit logs.")]
+    [SlashCommand("audit", "Gets last 10 audit logs.", false)]
     public async Task AuditCommand(InteractionContext ctx,
         [Option("ephemeral", "Whether response should be eph")] string shouldEph = "true")
     {
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
             new DiscordInteractionResponseBuilder().AsEphemeral(bool.Parse(shouldEph)));
-        var res = await this.Service!.GetAllAsync<AuditLog>();
+        var res = await this._service!.GetAllAsync<AuditLog>();
 
         if (!res.IsDefined()) throw new InvalidOperationException();
 
@@ -64,7 +69,7 @@ public class AdminUtilSlashCommands : ApplicationCommandModule
     }
 
     [SlashRequireOwner]
-    [SlashCommand("sql", "A command that runs sql query.")]
+    [SlashCommand("sql", "A command that runs sql query.", false)]
     public async Task MuteCommand(InteractionContext ctx,
         [Option("query", "Sql query to be executed.")] string query,
         [Option("ephemeral", "Whether response should be eph")] string shouldEph = "true")
@@ -74,8 +79,8 @@ public class AdminUtilSlashCommands : ApplicationCommandModule
         var dat = new List<Dictionary<string, string?>>();
         int i;
 
-        using var cmd = this.Ctx!.Database.GetDbConnection().CreateCommand();
-        await this.Ctx.Database.OpenConnectionAsync();
+        using var cmd = this._ctx!.Database.GetDbConnection().CreateCommand();
+        await this._ctx.Database.OpenConnectionAsync();
 
         cmd.CommandText = query;
         using var rdr = await cmd.ExecuteReaderAsync();
@@ -130,7 +135,7 @@ public class AdminUtilSlashCommands : ApplicationCommandModule
     }
 
     [SlashRequireOwner]
-    [SlashCommand("eval", "Evaluate a piece of C# code.")]
+    [SlashCommand("eval", "Evaluate a piece of C# code.", false)]
     public async Task EvalCommand(InteractionContext ctx, [Option("code", "Code to evaluate.")] string code,
         [Option("ephemeral", "Whether response should be eph")]
         string shouldEph = "true")

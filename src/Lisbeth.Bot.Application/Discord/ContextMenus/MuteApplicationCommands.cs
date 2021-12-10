@@ -43,7 +43,7 @@ public partial class MuteApplicationCommands
         var muteReqValidator = new MuteReqValidator(ctx.Client);
         await muteReqValidator.ValidateAndThrowAsync(muteReq);
 
-        var result = await DiscordMuteService!.MuteAsync(ctx, muteReq);
+        var result = await _discordMuteService!.MuteAsync(ctx, muteReq);
 
         if (result.IsDefined())
             await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
@@ -66,7 +66,7 @@ public partial class MuteApplicationCommands
         var muteDisableReqValidator = new MuteDisableReqValidator(ctx.Client);
         await muteDisableReqValidator.ValidateAndThrowAsync(muteDisableReq);
 
-        var result = await DiscordMuteService!.UnmuteAsync(ctx, muteDisableReq);
+        var result = await _discordMuteService!.UnmuteAsync(ctx, muteDisableReq);
 
         if (result.IsDefined())
             await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
@@ -89,7 +89,7 @@ public partial class MuteApplicationCommands
         var muteGetReqValidator = new MuteGetReqValidator(ctx.Client);
         await muteGetReqValidator.ValidateAndThrowAsync(muteGetReq);
 
-        var result = await DiscordMuteService!.GetSpecificUserGuildMuteAsync(ctx, muteGetReq);
+        var result = await _discordMuteService!.GetSpecificUserGuildMuteAsync(ctx, muteGetReq);
 
         if (result.IsDefined())
             await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
@@ -117,7 +117,7 @@ public partial class MuteApplicationCommands
         var muteReqValidator = new MuteReqValidator(ctx.Client);
         await muteReqValidator.ValidateAndThrowAsync(muteReq);
 
-        var result = await DiscordMuteService!.MuteAsync(ctx, muteReq);
+        var result = await _discordMuteService!.MuteAsync(ctx, muteReq);
 
         if (result.IsDefined())
             await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
@@ -141,7 +141,7 @@ public partial class MuteApplicationCommands
         var muteReqValidator = new MuteReqValidator(ctx.Client);
         await muteReqValidator.ValidateAndThrowAsync(muteReq);
 
-        var result = await DiscordMuteService!.MuteAsync(ctx, muteReq);
+        var result = await _discordMuteService!.MuteAsync(ctx, muteReq);
 
         //await _discordMessageService.PruneAsync()
 
