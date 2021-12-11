@@ -26,7 +26,7 @@ using Lisbeth.Bot.Domain.DTOs.Request.Ban;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 
-[SlashModuleLifespan(SlashModuleLifespan.Transient)]
+[SlashModuleLifespan(SlashModuleLifespan.Scoped)]
 [UsedImplicitly]
 public class BanApplicationCommands : ExtendedApplicationCommandModule
 {

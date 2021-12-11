@@ -31,6 +31,7 @@ using MikyM.Common.Application;
 using MikyM.Common.DataAccessLayer;
 using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Common.DataAccessLayer.Specifications.Evaluators;
+using MikyM.Discord.EmbedBuilders;
 
 namespace Lisbeth.Bot.API;
 
@@ -43,10 +44,13 @@ public class AutofacContainerModule : Module
 
         builder.AddDataAccessLayer();
         builder.AddApplicationLayer();
+        builder.AddEnrichedDiscordEmbedBuilders();
 
         // bulk register custom services - follow naming convention
-        builder.RegisterAssemblyTypes(typeof(MuteService).Assembly).Where(t => t.Name.EndsWith("Service"))
+        builder.RegisterAssemblyTypes(typeof(MuteService).Assembly).Where(t => t.Name.EndsWith("Service")/* && !t.Name.Contains("Discord")*/)
             .AsImplementedInterfaces().InstancePerLifetimeScope();
+        /*builder.RegisterAssemblyTypes(typeof(MuteService).Assembly).Where(t => t.Name.EndsWith("Service") && t.Name.Contains("Discord"))
+            .AsImplementedInterfaces().InstancePerDependency();*/
         // bulk register custom services - follow naming convention
         builder.RegisterAssemblyTypes(typeof(MuteRepository).Assembly).Where(t => t.Name.EndsWith("Repository"))
             .AsImplementedInterfaces().InstancePerLifetimeScope();

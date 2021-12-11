@@ -160,7 +160,7 @@ public class DiscordChatExportService : IDiscordChatExportService
             if (requestingMember is null) throw new ArgumentNullException(nameof(requestingMember));
 
             var resGuild =
-                await _guildService.GetSingleBySpecAsync(new ActiveGuildByIdSpec(guild.Id));
+                await _guildService.GetSingleBySpecAsync(new ActiveGuildByDiscordIdWithTicketingSpecifications(guild.Id));
 
             if (!resGuild.IsDefined()) return new NotFoundError("Guild doesn't exist in database.");
 
@@ -171,12 +171,10 @@ public class DiscordChatExportService : IDiscordChatExportService
 
             if (ticket is null)
             {
-                var res = await _ticketService.GetSingleBySpecAsync<Ticket>(
-                    new TicketBaseGetSpecifications(null, null, guild.Id, target.Id, null, false, 1, true));
+                var res = await _ticketService.GetSingleBySpecAsync(
+                    new TicketByChannelIdOrGuildAndOwnerIdSpec(target.Id, null, null));
 
-                if (!res.IsDefined()) return new NotFoundError("Ticket doesn't exist in database.");
-
-                ticket = res.Entity;
+                if (!res.IsDefined(out ticket)) return new NotFoundError("Ticket doesn't exist in database.");
             }
 
             DiscordChannel ticketLogChannel;

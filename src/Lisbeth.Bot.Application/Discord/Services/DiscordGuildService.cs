@@ -27,6 +27,7 @@ using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
 using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.Interfaces;
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 
 namespace Lisbeth.Bot.Application.Discord.Services;
 
@@ -37,14 +38,16 @@ public class DiscordGuildService : IDiscordGuildService
     private readonly IEmbedConfigService _embedConfigService;
     private readonly IDiscordEmbedProvider _embedProvider;
     private readonly IGuildService _guildService;
+    private readonly ILogger<DiscordGuildService> _logger;
 
     public DiscordGuildService(IEmbedConfigService embedConfigService, IDiscordEmbedProvider embedProvider,
-        IGuildService guildService, IDiscordService discord)
+        IGuildService guildService, IDiscordService discord, ILogger<DiscordGuildService> logger)
     {
         _embedConfigService = embedConfigService;
         _embedProvider = embedProvider;
         _guildService = guildService;
         _discord = discord;
+        _logger = logger;
     }
 
     public async Task<Result> HandleGuildCreateAsync(GuildCreateEventArgs args)
@@ -55,7 +58,7 @@ public class DiscordGuildService : IDiscordGuildService
         {
             await _guildService.AddAsync(new Guild { GuildId = args.Guild.Id, UserId = args.Guild.OwnerId }, true);
             var embedResult = await _embedConfigService.GetAsync(1);
-            if (!embedResult.IsDefined()) return Result.FromError(embedResult);
+            if (!embedResult.IsDefined()) return Result.FromSuccess();
             await args.Guild.Owner.SendMessageAsync(_embedProvider.GetEmbedFromConfig(embedResult.Entity).Build());
         }
         else
@@ -65,10 +68,10 @@ public class DiscordGuildService : IDiscordGuildService
             await _guildService.CommitAsync();
 
             var embedResult = await _embedConfigService.GetAsync(2);
-            if (!embedResult.IsDefined()) return Result.FromError(embedResult);
+            if (!embedResult.IsDefined()) return Result.FromSuccess();
             await args.Guild.Owner.SendMessageAsync(_embedProvider.GetEmbedFromConfig(embedResult.Entity).Build());
         }
-        _ = await this.BulkOverwriteSlashPermissionsAsync(args);
+        _ = await this.PrepareSlashPermissionsAsync(args.Guild);
 
         return Result.FromSuccess();
     }
@@ -230,67 +233,88 @@ public class DiscordGuildService : IDiscordGuildService
             ctx.Guild.Roles[guildResult.Entity.ModerationConfig.MuteRoleId], ctx.Member);
     }
 
-    public async Task<Result> BulkOverwriteSlashPermissionsAsync(GuildCreateEventArgs args)
+    public async Task<Result> PrepareSlashPermissionsAsync(DiscordGuild guild)
     {
-        if (args is null) throw new ArgumentNullException(nameof(args));
+        if (guild is null) throw new ArgumentNullException(nameof(guild));
+
+        return await this.PrepareSlashPermissionsAsync(new[] { guild });
+    }
+
+    public async Task<Result> PrepareSlashPermissionsAsync(IEnumerable<DiscordGuild> guilds)
+    {
+        if (guilds is null) throw new ArgumentNullException(nameof(guilds));
 
         await Task.Delay(10000);
 
-        var adminRoles = new List<DiscordRole>();
-        var manageMessagesRoles = new List<DiscordRole>();
-        var userManageRoles = new List<DiscordRole>();
-        var ownerPerms = new List<DiscordApplicationCommandPermission>();
-
-        foreach (var role in args.Guild.Roles.Values)
+        foreach (var guild in guilds)
         {
-            if (role.CheckPermission(Permissions.Administrator) is PermissionLevel.Allowed)
-                adminRoles.Add(role);
-            if (role.CheckPermission(Permissions.BanMembers) is PermissionLevel.Allowed)
-                userManageRoles.Add(role);
-            if (role.CheckPermission(Permissions.ManageMessages) is PermissionLevel.Allowed)
-                manageMessagesRoles.Add(role);
+            try
+            {
+                var adminRoles = new List<DiscordRole>();
+                var manageMessagesRoles = new List<DiscordRole>();
+                var userManageRoles = new List<DiscordRole>();
+                var ownerPerms = new List<DiscordApplicationCommandPermission>();
+
+                foreach (var role in guild.Roles.Values)
+                {
+                    if (role.Permissions.HasPermission(Permissions.Administrator))
+                        adminRoles.Add(role);
+                    if (role.Permissions.HasPermission(Permissions.BanMembers))
+                        userManageRoles.Add(role);
+                    if (role.Permissions.HasPermission(Permissions.ManageMessages))
+                        manageMessagesRoles.Add(role);
+                }
+
+                DiscordMember? botOwner;
+                try
+                {
+                    botOwner = await guild.GetMemberAsync(_discord.Client.CurrentApplication.Owners.First().Id);
+                }
+                catch
+                {
+                    botOwner = null;
+                }
+
+                if (botOwner is not null) ownerPerms.Add(new DiscordApplicationCommandPermission(botOwner, true));
+                var admPerms = adminRoles
+                    .Select(adminRole => new DiscordApplicationCommandPermission(adminRole, true))
+                    .ToList();
+                var messagePerms = manageMessagesRoles
+                    .Select(messageRole => new DiscordApplicationCommandPermission(messageRole, true))
+                    .ToList();
+                var userPerms = userManageRoles
+                    .Select(userRole => new DiscordApplicationCommandPermission(userRole, true))
+                    .ToList();
+
+                var cmds = await guild.GetApplicationCommandsAsync();
+
+                var modCmds = cmds.Where(x => x.Name is "ban" or "mute" or "identity").ToList();
+                var messageCmds = cmds.Where(x => x.Name is "prune").ToList();
+                var admCmds = cmds.Where(x => x.Name is "role-menu" or "ticket" || x.Name.Contains("admin-util")).ToList();
+                var ownerCmds = cmds.Where(x => x.Name is "owner").ToList();
+
+                var update = modCmds.Select(modCmd => new DiscordGuildApplicationCommandPermissions(modCmd.Id, userPerms))
+                    .ToList();
+                update.AddRange(admCmds.Select(admCmd => new DiscordGuildApplicationCommandPermissions(admCmd.Id, admPerms)));
+                update.AddRange(messageCmds.Select(msgCmd =>
+                    new DiscordGuildApplicationCommandPermissions(msgCmd.Id, messagePerms)));
+
+                if (botOwner is not null)
+                    update.AddRange(ownerCmds.Select(ownerCmd =>
+                        new DiscordGuildApplicationCommandPermissions(ownerCmd.Id, ownerPerms)));
+
+                await guild.BatchEditApplicationCommandPermissionsAsync(update);
+
+                _logger.LogDebug($"Overwriting slashies done for {guild.Id}");
+
+                await Task.Delay(2000);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Failed to bulk overwrite slashies for guild: {guild.Id} because: {ex.GetFullMessage()}");
+            }
         }
         
-        DiscordMember? botOwner;
-        try
-        {
-            botOwner = await args.Guild.GetMemberAsync(_discord.Client.CurrentApplication.Owners.First().Id);
-        }
-        catch
-        {
-            botOwner = null;
-        }
-
-        if (botOwner is not null) ownerPerms.Add(new DiscordApplicationCommandPermission(botOwner, true));
-        var admPerms = adminRoles
-            .Select(adminRole => new DiscordApplicationCommandPermission(adminRole, true))
-            .ToList();
-        var messagePerms = manageMessagesRoles
-            .Select(messageRole => new DiscordApplicationCommandPermission(messageRole, true))
-            .ToList();
-        var userPerms = userManageRoles
-            .Select(userRole => new DiscordApplicationCommandPermission(userRole, true))
-            .ToList();
-
-        var cmds = await args.Guild.GetApplicationCommandsAsync();
-
-        var modCmds = cmds.Where(x => x.Name is "ban" or "mute" or "mod-util" or "ticket").ToList();
-        var messageCmds = cmds.Where(x => x.Name is "prune").ToList();
-        var admCmds = cmds.Where(x => x.Name is "role-menu").ToList();
-        var ownerCmds = cmds.Where(x => x.Name is "owner").ToList();
-
-        var update = modCmds.Select(modCmd => new DiscordGuildApplicationCommandPermissions(modCmd.Id, userPerms))
-            .ToList();
-        update.AddRange(admCmds.Select(admCmd => new DiscordGuildApplicationCommandPermissions(admCmd.Id, admPerms)));
-        update.AddRange(messageCmds.Select(msgCmd =>
-            new DiscordGuildApplicationCommandPermissions(msgCmd.Id, messagePerms)));
-
-        if (botOwner is not null)
-            update.AddRange(ownerCmds.Select(ownerCmd =>
-                new DiscordGuildApplicationCommandPermissions(ownerCmd.Id, ownerPerms)));
-
-        await args.Guild.BatchEditApplicationCommandPermissionsAsync(update);
-
         return Result.FromSuccess();
     }
 

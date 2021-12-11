@@ -42,7 +42,7 @@ public class MembersHtmlWrapperBuilder : IAsyncHtmlBuilder
         foreach (var user in Users)
         {
             HtmlUser userModel = new (user);
-            usersHtml += $"<div class=\"user\">{await userModel.BuildAvatar()} {userModel.BuildAsync()}</div>";
+            usersHtml += $"<div class=\"user\">{await userModel.BuildAvatar()} {await userModel.BuildAsync()}</div>";
         }
 
         return $"<div id=\"users-wrapper\">{usersHtml}</div>";

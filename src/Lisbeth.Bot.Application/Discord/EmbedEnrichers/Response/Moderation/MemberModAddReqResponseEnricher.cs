@@ -56,13 +56,14 @@ public class MemberModAddReqResponseEnricher : EmbedEnricher<IApplyInfractionReq
                 return;
             }
 
-            embedBuilder.AddField($"Previous {name.ToLower()} until", this.Previous.AppliedUntil.ToString(), true);
+            embedBuilder.AddField($"Previous {name.ToLower()} until", this.Previous.AppliedUntil.ToString(CultureInfo.InvariantCulture), true);
             embedBuilder.AddField("Previous moderator",
                 $"{ExtendedFormatter.Mention(this.Previous.AppliedById, DiscordEntity.User)}", true);
             if (!string.IsNullOrWhiteSpace(this.Previous.Reason))
                 embedBuilder.AddField("Previous reason", this.Previous.Reason, true);
         }
 
+        embedBuilder.WithDescription($"Successfully {pastTense.ToLower()}");
         embedBuilder.AddField("User mention", this.Target.Mention, true);
         embedBuilder.AddField("Moderator",
             ExtendedFormatter.Mention(this.PrimaryEnricher.RequestedOnBehalfOfId, DiscordEntity.Member), true);

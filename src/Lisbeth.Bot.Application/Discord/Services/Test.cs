@@ -1,8 +1,20 @@
-﻿using System.Collections.Generic;
-using System.Globalization;
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Text.RegularExpressions;
+﻿// This file is part of Lisbeth.Bot project
+//
+// Copyright (C) 2021 Krzysztof Kupisz - MikyM
+// 
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+// 
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 using AutoMapper;
 using DSharpPlus;
 using DSharpPlus.Entities;
@@ -17,20 +29,23 @@ using Lisbeth.Bot.Application.Enums;
 using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.DataAccessLayer.Specifications.EmbedConfig;
 using Lisbeth.Bot.Domain.Entities.Base;
-using MikyM.Common.Utilities.ExpressionHelpers;
 using MikyM.Discord.EmbedBuilders;
 using MikyM.Discord.Extensions.BaseExtensions;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace Lisbeth.Bot.Application.Discord.Services;
 
-public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorService<T> where T : SnowflakeDiscordEntity
+[UsedImplicitly]
+public class Test<T> : ITest<T> where T : EmbedConfigEntity
 {
     private readonly IEmbedConfigService _embedConfigService;
     private readonly IDiscordEmbedProvider _embedProvider;
     private readonly IMapper _mapper;
     private readonly ICrudService<T, LisbethBotDbContext> _service;
 
-    public DiscordEmbedConfiguratorService(ICrudService<T, LisbethBotDbContext> service, IMapper mapper,
+    public Test(ICrudService<T, LisbethBotDbContext> service, IMapper mapper,
         IDiscordEmbedProvider embedProvider, IEmbedConfigService embedConfigService)
     {
         _service = service;
@@ -39,20 +54,21 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
         _embedConfigService = embedConfigService;
     }
 
-    public async Task<Result<DiscordEmbed>> ConfigureAsync<TEmbedProperty>(InteractionContext ctx,
-        Expression<Func<T, TEmbedProperty?>> embedToConfigure, Expression<Func<T, long?>> embedIdProperty, string? idOrName = null) where TEmbedProperty : EmbedConfig
+    public async Task<Result<DiscordEmbed>> ConfigureAsync(InteractionContext ctx, string idOrName)
     {
         if (ctx is null) throw new ArgumentNullException(nameof(ctx));
 
+        bool isValidId = long.TryParse(idOrName, out long id);
+
         var entityResult = await _service.GetSingleBySpecAsync<T>(
-            new ActiveSnowflakeWithGivenEmbedSpec<T, TEmbedProperty?>(embedToConfigure, ctx.Guild.Id));
+            new ActiveWithEmbedCfgByIdOrNameSpecifications<T>(isValidId ? id : null, idOrName, ctx.Guild.Id));
 
         if (!entityResult.IsDefined(out var entity)) return new NotFoundError();
         if (entityResult.Entity.GuildId != ctx.Guild.Id)
             return new DiscordNotAuthorizedError();
         var member = await ctx.Guild.GetMemberAsync(ctx.User.Id);
 
-        if (!member.IsModerator())
+        if (entityResult.Entity.CreatorId != ctx.User.Id || !member.IsModerator())
             return new DiscordNotAuthorizedError();
 
         var intr = ctx.Client.GetInteractivity();
@@ -67,12 +83,9 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
         var resultEmbed = new DiscordEmbedBuilder();
         var webhook = new DiscordWebhookBuilder();
 
-        var func = embedToConfigure.Compile();
-        var embed = func(entity);
-
-        if (embed is not null)
+        if (entity.EmbedConfig is not null)
         {
-            resultEmbed = _embedProvider.GetEmbedFromConfig(embed);
+            resultEmbed = _embedProvider.GetEmbedFromConfig(entity.EmbedConfig);
             webhook.AddEmbed(resultEmbed.Build()).WithContent("Current embed:");
         }
 
@@ -128,25 +141,25 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
             var result = choice switch
             {
                 nameof(EmbedConfigSelectValue.EmbedConfigSetAuthorValue) => await SetModuleAsync(
-                    EmbedConfigModuleType.Author, ctx, intr, resultEmbed, entity, embed, embedIdProperty),
+                    EmbedConfigModuleType.Author, ctx, intr, resultEmbed, entity),
                 nameof(EmbedConfigSelectValue.EmbedConfigSetFooterValue) => await SetModuleAsync(
-                    EmbedConfigModuleType.Footer, ctx, intr, resultEmbed, entity, embed, embedIdProperty),
+                    EmbedConfigModuleType.Footer, ctx, intr, resultEmbed, entity),
                 nameof(EmbedConfigSelectValue.EmbedConfigSetDescValue) => await SetModuleAsync(
-                    EmbedConfigModuleType.Description, ctx, intr, resultEmbed, entity, embed, embedIdProperty),
+                    EmbedConfigModuleType.Description, ctx, intr, resultEmbed, entity),
                 nameof(EmbedConfigSelectValue.EmbedConfigSetFieldValue) => await SetModuleAsync(
-                    EmbedConfigModuleType.Field, ctx, intr, resultEmbed, entity, embed, embedIdProperty),
+                    EmbedConfigModuleType.Field, ctx, intr, resultEmbed, entity),
                 nameof(EmbedConfigSelectValue.EmbedConfigDeleteFieldValue) => await SetModuleAsync(
-                    EmbedConfigModuleType.RemoveField, ctx, intr, resultEmbed, entity, embed, embedIdProperty),
+                    EmbedConfigModuleType.RemoveField, ctx, intr, resultEmbed, entity),
                 nameof(EmbedConfigSelectValue.EmbedConfigSetImageValue) => await SetModuleAsync(
-                    EmbedConfigModuleType.Image, ctx, intr, resultEmbed, entity, embed, embedIdProperty),
+                    EmbedConfigModuleType.Image, ctx, intr, resultEmbed, entity),
                 nameof(EmbedConfigSelectValue.EmbedConfigSetColorValue) => await SetModuleAsync(
-                    EmbedConfigModuleType.Color, ctx, intr, resultEmbed, entity, embed, embedIdProperty),
+                    EmbedConfigModuleType.Color, ctx, intr, resultEmbed, entity),
                 nameof(EmbedConfigSelectValue.EmbedConfigSetTitleValue) => await SetModuleAsync(
-                    EmbedConfigModuleType.Title, ctx, intr, resultEmbed, entity, embed, embedIdProperty),
+                    EmbedConfigModuleType.Title, ctx, intr, resultEmbed, entity),
                 nameof(EmbedConfigSelectValue.EmbedConfigSetThumbnailValue) => await SetModuleAsync(
-                    EmbedConfigModuleType.Thumbnail, ctx, intr, resultEmbed, entity, embed, embedIdProperty),
+                    EmbedConfigModuleType.Thumbnail, ctx, intr, resultEmbed, entity),
                 nameof(EmbedConfigSelectValue.EmbedConfigSetTimestampValue) => await SetModuleAsync(
-                    EmbedConfigModuleType.Timestamp, ctx, intr, resultEmbed, entity, embed, embedIdProperty),
+                    EmbedConfigModuleType.Timestamp, ctx, intr, resultEmbed, entity),
                 _ => new Result<DiscordEmbedBuilder>()
             };
 
@@ -185,7 +198,7 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
     }
 
     private async Task<Result<DiscordEmbedBuilder>> SetModuleAsync(EmbedConfigModuleType action,
-        InteractionContext ctx, InteractivityExtension intr, DiscordEmbedBuilder currentResult, T foundEntity, EmbedConfig? config, Expression<Func<T, long?>> idProp)
+        InteractionContext ctx, InteractivityExtension intr, DiscordEmbedBuilder currentResult, T foundEntity)
     {
         var embed = new DiscordEmbedBuilder().WithFooter($"Parent Id: {foundEntity.Id}");
 
@@ -472,19 +485,18 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
         {
             case nameof(EmbedConfigButton.EmbedConfigConfirmButton):
                 var newEmbed = _mapper.Map<EmbedConfig>(currentResult.Build());
-                if (config is null)
+                if (foundEntity.EmbedConfig is null)
                 {
                     _service.BeginUpdate(foundEntity);
-                    config = newEmbed;
+                    foundEntity.EmbedConfig = newEmbed;
 
-                    await _embedConfigService.AddAsync(config, true);
-                    var setter = idProp.GetSetter();
-                    setter(foundEntity, config.Id);
+                    await _embedConfigService.AddAsync(foundEntity.EmbedConfig, true);
+                    foundEntity.EmbedConfigId ??= foundEntity.EmbedConfig.Id;
                     await _service.CommitAsync();
                 }
                 else
                 {
-                    var entity = config;
+                    var entity = foundEntity.EmbedConfig;
 
                     // we null cause EF core doesn't detach children objects when detaching parent and we face an ex
                     entity.Tag = null;

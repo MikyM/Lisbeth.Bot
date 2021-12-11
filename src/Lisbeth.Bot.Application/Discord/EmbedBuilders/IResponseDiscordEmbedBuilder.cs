@@ -16,6 +16,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using MikyM.Discord.EmbedBuilders.Builders;
+using MikyM.Discord.EmbedBuilders.Enrichers;
 using MikyM.Discord.EmbedBuilders.Enums;
 
 namespace Lisbeth.Bot.Application.Discord.EmbedBuilders;
@@ -25,4 +26,5 @@ public interface IResponseDiscordEmbedBuilder : IEnrichedDiscordEmbedBuilder
     public DiscordModeration? Moderation { get; }
 
     IResponseDiscordEmbedBuilder WithType(DiscordModeration response);
+    new IResponseDiscordEmbedBuilder EnrichFrom<TEnricher>(TEnricher enricher) where TEnricher : IEmbedEnricher;
 }

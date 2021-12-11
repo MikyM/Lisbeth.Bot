@@ -20,15 +20,14 @@ using System.Net.Http;
 using Autofac;
 using MikyM.Discord.Interfaces;
 
-namespace Lisbeth.Bot.Application.Extensions
-{
-    // ReSharper disable once InconsistentNaming
-    public static class ILifetimeScopeExtensions
-    {
-        public static bool TryGetDiscordService(this ILifetimeScope scope, [NotNullWhen(true)] out IDiscordService? discordService)
-            => scope.TryResolve(out discordService);
+namespace Lisbeth.Bot.Application.Extensions;
 
-        public static bool TryGetHttpClientFactory(this ILifetimeScope scope, [NotNullWhen(true)] out IHttpClientFactory? httpClientFactory)
-            => scope.TryResolve(out httpClientFactory);
-    }
+// ReSharper disable once InconsistentNaming
+public static class ILifetimeScopeExtensions
+{
+    public static bool TryGetDiscordService(this ILifetimeScope scope, [NotNullWhen(true)] out IDiscordService? discordService)
+        => scope.TryResolve(out discordService);
+
+    public static bool TryGetHttpClientFactory(this ILifetimeScope scope, [NotNullWhen(true)] out IHttpClientFactory? httpClientFactory)
+        => scope.TryResolve(out httpClientFactory);
 }

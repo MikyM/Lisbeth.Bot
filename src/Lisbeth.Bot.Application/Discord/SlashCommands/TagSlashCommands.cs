@@ -19,16 +19,14 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using FluentValidation;
-using Lisbeth.Bot.Application.Discord.Exceptions;
 using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
 using Lisbeth.Bot.Application.Validation.Tag;
 using Lisbeth.Bot.Domain.DTOs.Request.Tag;
-using MikyM.Discord.Extensions.BaseExtensions;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 
 [UsedImplicitly]
-[SlashModuleLifespan(SlashModuleLifespan.Transient)]
+[SlashModuleLifespan(SlashModuleLifespan.Scoped)]
 public class TagSlashCommands : ExtendedApplicationCommandModule
 {
     public TagSlashCommands(IDiscordTagService discordTagService,
@@ -133,7 +131,7 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
                 partial = await this._discordTagService!.DisableAsync(ctx, removeReq);
                 break;
             case TagActionType.ConfigureEmbed:
-                partial = await this._discordEmbedTagConfiguratorService!.ConfigureAsync(ctx, idOrName);
+                partial = await this._discordEmbedTagConfiguratorService!.ConfigureAsync(ctx, x => x.EmbedConfig, x => x.EmbedConfigId, idOrName);
                 break;
             case TagActionType.Send:
                 if (!isId && string.IsNullOrWhiteSpace(idOrName))

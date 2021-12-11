@@ -189,7 +189,7 @@ public class DiscordMuteService : IDiscordMuteService
     {
         try
         {
-            var res = await _muteService.GetBySpecAsync<Mute>(
+            var res = await _muteService.GetBySpecAsync(
                 new ActiveExpiredMutesInActiveGuildsSpecifications());
 
             if (!res.IsDefined() || res.Entity.Count == 0) return Result.FromSuccess();
@@ -220,7 +220,7 @@ public class DiscordMuteService : IDiscordMuteService
         if (req is null) throw new ArgumentNullException(nameof(req));
 
         var result =
-            await _guildService.GetSingleBySpecAsync(new ActiveGuildByIdSpec(guild.Id));
+            await _guildService.GetSingleBySpecAsync(new ActiveGuildByDiscordIdWithModerationSpec(guild.Id));
 
         if (!result.IsDefined(out var guildEntity))
             return new DiscordNotFoundError(DiscordEntity.Guild);
@@ -249,13 +249,12 @@ public class DiscordMuteService : IDiscordMuteService
         if (!partial.IsDefined(out var idEntityPair)) return Result<DiscordEmbed>.FromError(partial);
         
         return _embedBuilder
+            .WithType(DiscordModeration.Mute)
+            .EnrichFrom(new MemberModAddReqResponseEnricher(req, target, idEntityPair.FoundEntity))
             .WithCase(idEntityPair.Id)
             .WithEmbedColor(new DiscordColor(guildEntity.EmbedHexColor))
             .WithAuthorSnowflakeInfo(target)
             .WithFooterSnowflakeInfo(target)
-            .AsEnriched<ResponseDiscordEmbedBuilder>()
-            .WithType(DiscordModeration.Mute)
-            .EnrichFrom(new MemberModAddReqResponseEnricher(req, target, idEntityPair.FoundEntity))
             .Build();
     }
 
@@ -302,13 +301,12 @@ public class DiscordMuteService : IDiscordMuteService
         if (!res.IsDefined(out var foundMute)) return Result<DiscordEmbed>.FromError(res);
 
         return _embedBuilder
+            .WithType(DiscordModeration.Mute)
+            .EnrichFrom(new MemberModDisableReqResponseEnricher(req, target))
             .WithCase(foundMute.Id)
             .WithEmbedColor(new DiscordColor(guildEntity.EmbedHexColor))
             .WithAuthorSnowflakeInfo(target)
             .WithFooterSnowflakeInfo(target)
-            .AsEnriched<ResponseDiscordEmbedBuilder>()
-            .WithType(DiscordModeration.Mute)
-            .EnrichFrom(new MemberModDisableReqResponseEnricher(req, target))
             .Build();
     }
 
@@ -325,7 +323,7 @@ public class DiscordMuteService : IDiscordMuteService
             return new DiscordNotAuthorizedError();
 
         var result =
-            await _guildService.GetSingleBySpecAsync(new ActiveGuildByIdSpec(guild.Id));
+            await _guildService.GetSingleBySpecAsync(new ActiveGuildByDiscordIdWithModerationSpec(guild.Id));
 
         if (!result.IsDefined(out var guildEntity))
             return new DiscordNotFoundError(DiscordEntity.Guild);
@@ -342,13 +340,12 @@ public class DiscordMuteService : IDiscordMuteService
         if (!res.IsDefined(out var foundMute)) return new NotFoundError();
 
         return _embedBuilder
+            .WithType(DiscordModeration.Mute)
+            .EnrichFrom(new MemberModGetReqResponseEnricher(foundMute))
             .WithCase(foundMute.Id)
             .WithEmbedColor(new DiscordColor(guildEntity.EmbedHexColor))
             .WithAuthorSnowflakeInfo(target)
             .WithFooterSnowflakeInfo(target)
-            .AsEnriched<ResponseDiscordEmbedBuilder>()
-            .WithType(DiscordModeration.Mute)
-            .EnrichFrom(new MemberModGetReqResponseEnricher(foundMute))
             .Build();
     }
 }

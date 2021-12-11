@@ -19,7 +19,6 @@ using AutoMapper;
 using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Mute;
 using Lisbeth.Bot.Domain.DTOs.Request.Mute;
-using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
 
 namespace Lisbeth.Bot.Application.Services.Database;
@@ -36,7 +35,7 @@ public class MuteService : CrudService<Mute, LisbethBotDbContext>, IMuteService
     {
         if (req is null) throw new ArgumentNullException(nameof(req));
 
-        var result = await base.GetSingleBySpecAsync(new ActiveMuteSpec(req.TargetUserId, req.GuildId));
+        var result = await base.GetSingleBySpecAsync(new ActiveMutePerGuildAndUserSpec(req.TargetUserId, req.GuildId));
         if (!result.IsDefined())
         {
             var partial = await base.AddAsync(req, shouldSave);
@@ -67,9 +66,9 @@ public class MuteService : CrudService<Mute, LisbethBotDbContext>, IMuteService
         if (!entry.TargetUserId.HasValue) throw new InvalidOperationException();
 
         var result =
-            await base.GetSingleBySpecAsync<Mute>(
-                new ActiveExpiredMutePerGuildSpec(entry.TargetUserId.Value, entry.GuildId));
-        if (!result.IsDefined()) return Result<Mute>.FromError(new NotFoundError());
+            await base.GetSingleBySpecAsync(
+                new ActiveMutePerGuildAndUserSpec(entry.TargetUserId.Value, entry.GuildId));
+        if (!result.IsDefined()) return new NotFoundError();
 
         var entity = result.Entity;
 

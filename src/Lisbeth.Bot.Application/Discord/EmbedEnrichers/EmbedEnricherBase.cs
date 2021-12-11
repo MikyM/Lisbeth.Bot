@@ -27,14 +27,14 @@ public abstract class EmbedEnricher<TPrimaryEnricher> : EmbedEnricherBase<TPrima
     protected (string Name, string PastTense) GetUnderlyingNameAndPastTense()
     {
         var partial = this.GetModerationTypeAndPastTense();
-        return (partial.ToString(), partial.PastTense);
+        return (partial.Moderation.ToString(), partial.PastTense);
     }
 
     protected (DiscordModeration Moderation, string PastTense) GetModerationTypeAndPastTense()
     {
         string type = this.PrimaryEnricher.GetType().Name;
-        if (type.Contains("unban", StringComparison.InvariantCultureIgnoreCase)) return (DiscordModeration.Unban, "Unbanned");
-        if (type.Contains("unmute", StringComparison.InvariantCultureIgnoreCase)) return (DiscordModeration.Unmute, "Unmuted");
+        if (type.Contains("ban", StringComparison.InvariantCultureIgnoreCase) && type.Contains("revoke", StringComparison.InvariantCultureIgnoreCase)) return (DiscordModeration.Unban, "Unbanned");
+        if (type.Contains("mute", StringComparison.InvariantCultureIgnoreCase) && type.Contains("revoke", StringComparison.InvariantCultureIgnoreCase)) return (DiscordModeration.Unmute, "Unmuted");
         if (type.Contains("ban", StringComparison.InvariantCultureIgnoreCase)) return (DiscordModeration.Ban, "Banned");
         if (type.Contains("mute", StringComparison.InvariantCultureIgnoreCase)) return (DiscordModeration.Mute, "Muted");
         if (type.Contains("prune", StringComparison.InvariantCultureIgnoreCase)) return (DiscordModeration.Prune, "Pruned");

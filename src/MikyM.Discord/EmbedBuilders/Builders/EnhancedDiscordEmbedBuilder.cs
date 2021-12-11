@@ -159,7 +159,7 @@ public class EnhancedDiscordEmbedBuilder : IEnhancedDiscordEmbedBuilder
                     : $" {this.ActionType.SplitByCapitalAndConcat()}");
 
         author = author.Replace("@info@",
-            this.AuthorUser is null ? "" : $" | {this.AuthorUser.GetFullUsername()}");
+            this.AuthorUser is null ? "" : $" {(this.ActionType is not null || this.Action is not null ? " | " :  "")} {this.AuthorUser.GetFullUsername()}");
 
         this.Current.WithAuthor(author, null, this.AuthorUser?.AvatarUrl);
 
@@ -168,7 +168,7 @@ public class EnhancedDiscordEmbedBuilder : IEnhancedDiscordEmbedBuilder
             .Replace("@info@",
                 this.FooterSnowflake is null
                     ? ""
-                    : $" | {this.FooterSnowflake.GetType().Name.SplitByCapitalAndConcat()} Id: {this.FooterSnowflake.Id}");
+                    : $" {(this.CaseId is null ? "" : " | ")} {this.FooterSnowflake.GetType().Name.SplitByCapitalAndConcat()} Id: {this.FooterSnowflake.Id}");
 
         this.Current.WithFooter(footer);
     }

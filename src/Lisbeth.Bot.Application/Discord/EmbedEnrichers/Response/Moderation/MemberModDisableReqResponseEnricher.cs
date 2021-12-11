@@ -32,6 +32,7 @@ public class MemberModDisableReqResponseEnricher : EmbedEnricher<IRevokeInfracti
 
     public override void Enrich(IDiscordEmbedBuilderWrapper embedBuilder)
     {
+        embedBuilder.WithDescription($"Successfully {this.GetModerationTypeAndPastTense().PastTense.ToLower()}");
         embedBuilder.AddField("User mention", this.Target.Mention, true);
         embedBuilder.AddField("Moderator",
             ExtendedFormatter.Mention(this.PrimaryEnricher.RequestedOnBehalfOfId, DiscordEntity.Member), true);

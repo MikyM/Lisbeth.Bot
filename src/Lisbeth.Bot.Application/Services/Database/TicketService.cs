@@ -86,10 +86,9 @@ public class TicketService : CrudService<Ticket, LisbethBotDbContext>, ITicketSe
     {
         if (req is null) throw new ArgumentNullException(nameof(req));
 
-        var res = await base.GetSingleBySpecAsync<Ticket>(
-            new TicketBaseGetSpecifications(null, req.RequestedOnBehalfOfId, req.GuildId));
+        var res = await base.GetBySpecAsync(new ActiveTicketByUserIdSpec(req.RequestedOnBehalfOfId));
 
-        if (res.IsDefined()) return new InvalidOperationError("User already has an opened ticket in this guild");
+        if (res.IsDefined() && res.Entity.Count != 0) return new InvalidOperationError("User already has an opened ticket in this guild");
 
         var id = await base.AddAsync(req, true);
 

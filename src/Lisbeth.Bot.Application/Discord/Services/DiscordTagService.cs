@@ -253,6 +253,10 @@ public class DiscordTagService : IDiscordTagService
         if (!creator.IsModerator())
             return new DiscordNotAuthorizedError();
 
+        var check = await _tagService.LongCountAsync(new ActiveTagByGuildAndNameSpec(req.Name, req.GuildId));
+
+        if (check.IsDefined(out var count) && count > 0) return new SameEntityNamePerGuildError("Tag", req.Name!);
+
         var res = await _tagService.AddAsync(req, true);
 
         if (!res.IsSuccess) return Result<DiscordEmbed>.FromError(res);

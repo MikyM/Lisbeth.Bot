@@ -33,6 +33,13 @@ public enum MuteActionType
     [ChoiceName("get")] Get
 }
 
+public enum TicketCenterActionType
+{
+    [ChoiceName("get")] Get,
+    [ChoiceName("configure-embed")] ConfigureEmbed,
+    [ChoiceName("send")] Send
+}
+
 public enum PruneActionType
 {
     [ChoiceName("prune")] Prune,

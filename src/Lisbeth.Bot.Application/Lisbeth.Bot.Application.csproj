@@ -37,6 +37,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Lisbeth.Bot.DataAccessLayer\Lisbeth.Bot.DataAccessLayer.csproj" />
     <ProjectReference Include="..\MikyM.Common.Application\MikyM.Common.Application.csproj" />
+    <ProjectReference Include="..\MikyM.Common.Utilities\MikyM.Common.Utilities.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -79,12 +79,10 @@ public class EmbedConfigConfig : IEntityTypeConfiguration<EmbedConfig>
             .HasMaxLength(100);
         builder.Property(x => x.ThumbnailHeight)
             .HasColumnName("thumbnail_height")
-            .HasColumnType("integer")
-            .IsRequired();
+            .HasColumnType("integer");
         builder.Property(x => x.ThumbnailWidth)
             .HasColumnName("thumbnail_width")
-            .HasColumnType("integer")
-            .IsRequired();
+            .HasColumnType("integer");
 
 /*            builder.HasOne(x => x.Reminder)
                 .WithOne(x => x.EmbedConfig)

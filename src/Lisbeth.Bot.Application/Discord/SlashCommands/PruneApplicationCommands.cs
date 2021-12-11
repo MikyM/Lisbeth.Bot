@@ -24,7 +24,7 @@ using Lisbeth.Bot.Domain.DTOs.Request;
 // ReSharper disable once CheckNamespace
 namespace Lisbeth.Bot.Application.Discord.ApplicationCommands;
 
-[SlashModuleLifespan(SlashModuleLifespan.Transient)]
+[SlashModuleLifespan(SlashModuleLifespan.Scoped)]
 [UsedImplicitly]
 public partial class PruneApplicationCommands : ApplicationCommandModule
 {

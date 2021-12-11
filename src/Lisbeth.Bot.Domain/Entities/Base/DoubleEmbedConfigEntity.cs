@@ -15,17 +15,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+namespace Lisbeth.Bot.Domain.Entities.Base;
 
-using DSharpPlus.Entities;
-using Lisbeth.Bot.Application.Enums;
-using MikyM.Discord.EmbedBuilders.Enums;
-
-namespace Lisbeth.Bot.Application.Discord.Services.Interfaces;
-
-public interface IDiscordGuildLogSenderService
+public class DoubleEmbedConfigEntity : EmbedConfigEntity
 {
-    Task<Result> SendAsync(DiscordGuild discordGuild, DiscordLog type, DiscordEmbed embed);
-    Task<Result> SendAsync(ulong discordGuildId, DiscordLog type, DiscordEmbed embed);
-    Task<Result> SendAsync(Guild guild, DiscordLog type, DiscordEmbed embed);
-    Task<Result> SendAsync(long guildId, DiscordLog type, DiscordEmbed embed);
+    public long? SecondaryEmbedConfigId { get; set; }
+    public EmbedConfig? SecondaryEmbedConfig { get; set; }
 }

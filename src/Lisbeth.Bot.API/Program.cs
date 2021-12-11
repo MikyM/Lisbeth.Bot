@@ -78,7 +78,7 @@ public class Program
             builder.Services.ConfigureApiVersioning();
             builder.Services.ConfigureHealthChecks();
             builder.Services.ConfigureFluentValidation();
-            builder.Services.AddEnrichedDiscordEmbedBuilders();
+            //builder.Services.AddEnrichedDiscordEmbedBuilders();
 
             // Configure Autofac
             builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());

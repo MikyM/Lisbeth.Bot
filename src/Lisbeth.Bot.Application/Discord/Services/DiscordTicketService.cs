@@ -32,11 +32,10 @@ using Lisbeth.Bot.DataAccessLayer.Specifications.Ticket;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket.Base;
 using Microsoft.Extensions.Logging;
-using MikyM.Discord.EmbedBuilders.Enums;
+using MikyM.Discord.Enums;
 using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.Interfaces;
 using System.Collections.Generic;
-using MikyM.Discord.Enums;
 
 namespace Lisbeth.Bot.Application.Discord.Services;
 
@@ -359,7 +358,7 @@ public class DiscordTicketService : IDiscordTicketService
 
         embed.WithFooter("Click on the button below to create a ticket");
 
-        var btn = new DiscordButtonComponent(ButtonStyle.Primary, "ticket_open_btn", "Open a ticket", false,
+        var btn = new DiscordButtonComponent(ButtonStyle.Primary, nameof(TicketButton.TicketOpenButton), "Open a ticket", false,
             new DiscordComponentEmoji(envelopeEmoji));
         var builder = new DiscordMessageBuilder();
         builder.AddEmbed(embed.Build());
@@ -378,24 +377,16 @@ public class DiscordTicketService : IDiscordTicketService
         if (owner.Guild.Id != guild.Id) return new DiscordNotAuthorizedError(nameof(owner));
 
         var guildRes =
-            await _guildService.GetSingleBySpecAsync<Guild>(
+            await _guildService.GetSingleBySpecAsync(
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(guild.Id));
 
-        if (!guildRes.IsDefined()) return Result<DiscordMessageBuilder>.FromError(guildRes);
+        if (!guildRes.IsDefined(out var guildCfg)) return Result<DiscordMessageBuilder>.FromError(guildRes);
 
-        if (guildRes.Entity.TicketingConfig is null)
+        if (guildCfg.TicketingConfig is null)
             return new DisabledEntityError($"Guild with Id:{guild.Id} doesn't have ticketing enabled.");
 
-        var guildCfg = guildRes.Entity;
-
-        req.GuildSpecificId = guildCfg.TicketingConfig.LastTicketId + 1;
-        _guildService.BeginUpdate(guildCfg);
-        guildCfg.TicketingConfig.LastTicketId++;
-        await _guildService.CommitAsync();
-
         var ticketRes = await _ticketService.OpenAsync(req);
-
-        if (!ticketRes.IsDefined())
+        if (!ticketRes.IsDefined(out var ticket))
         {
             var failEmbed = new DiscordEmbedBuilder();
             failEmbed.WithColor(new DiscordColor(guildCfg.EmbedHexColor));
@@ -407,7 +398,13 @@ public class DiscordTicketService : IDiscordTicketService
             return new InvalidOperationError("Member already has an opened ticket in this guild.");
         }
 
-        var ticket = ticketRes.Entity;
+
+        req.GuildSpecificId = guildCfg.TicketingConfig.LastTicketId + 1;
+        _guildService.BeginUpdate(guildCfg);
+        guildCfg.TicketingConfig.LastTicketId++;
+        await _guildService.CommitAsync();
+
+
 
         var embed = new DiscordEmbedBuilder();
 
@@ -426,7 +423,7 @@ public class DiscordTicketService : IDiscordTicketService
 
         embed.WithFooter($"Ticket Id: {req.GuildSpecificId}");
 
-        var btn = new DiscordButtonComponent(ButtonStyle.Primary, nameof(TicketButton.TicketOpenButton),
+        var btn = new DiscordButtonComponent(ButtonStyle.Primary, nameof(TicketButton.TicketCloseButton),
             "Close this ticket", false,
             new DiscordComponentEmoji(DiscordEmoji.FromName(_discord.Client, ":lock:")));
 
@@ -534,12 +531,10 @@ public class DiscordTicketService : IDiscordTicketService
 
         var guildCfg = guildRes.Entity;
 
-        var res = await _ticketService.GetSingleBySpecAsync<Ticket>(
-            new TicketBaseGetSpecifications(req.Id, req.OwnerId, req.GuildId, req.ChannelId, req.GuildSpecificId));
+        var res = await _ticketService.GetSingleBySpecAsync(
+            new TicketByChannelIdOrGuildAndOwnerIdSpec(req.ChannelId, req.GuildId, req.OwnerId));
 
-        if (!res.IsDefined()) return new NotFoundError($"Ticket with channel Id: {target.Id} doesn't exist.");
-
-        var ticket = res.Entity;
+        if (!res.IsDefined(out var ticket)) return new NotFoundError($"Ticket with channel Id: {target.Id} doesn't exist.");
 
         if (ticket.IsDisabled)
             return new DisabledEntityError(
@@ -649,19 +644,15 @@ public class DiscordTicketService : IDiscordTicketService
 
         var guildCfg = guildRes.Entity;
 
-        var res = await _ticketService.GetSingleBySpecAsync<Ticket>(
-            new TicketBaseGetSpecifications(req.Id, req.OwnerId, req.GuildId, req.ChannelId, req.GuildSpecificId,
-                true));
+        var res = await _ticketService.GetSingleBySpecAsync(new TicketByChannelIdOrGuildAndOwnerIdSpec(req.ChannelId, req.GuildId, req.OwnerId));
 
-        if (!res.IsDefined()) return new NotFoundError($"Ticket with channel Id: {target.Id} doesn't exist.");
+        if (!res.IsDefined(out var ticket)) return new NotFoundError($"Ticket with channel Id: {target.Id} doesn't exist.");
 
-        var ticket = res.Entity;
-
-        if (ticket.IsDisabled)
+        if (!ticket.IsDisabled)
             return new DisabledEntityError(
-                $"Ticket with Id: {ticket.GuildSpecificId}, TargetUserId: {ticket.UserId}, GuildId: {ticket.GuildId}, ChannelId: {ticket.ChannelId} is already closed.");
+                $"Ticket with Id: {ticket.GuildSpecificId}, TargetUserId: {ticket.UserId}, GuildId: {ticket.GuildId}, ChannelId: {ticket.ChannelId} is already opened.");
 
-        if (!requestingMember.Permissions.HasPermission(Permissions.BanMembers))
+        if (!requestingMember.IsModerator())
             return new DiscordNotAuthorizedError("Requesting member doesn't have moderator rights.");
 
         var embed = new DiscordEmbedBuilder();
@@ -899,7 +890,7 @@ public class DiscordTicketService : IDiscordTicketService
 
     private async
         Task<Result<(Ticket Ticket, DiscordMember RequestingMember, DiscordGuild Guild, DiscordChannel Channel)>>
-        GetTicketByBaseRequestAsync([NotNull] BaseTicketGetReqDto req)
+        GetTicketByBaseRequestAsync(BaseTicketGetReqDto req)
     {
         if (req is null) throw new ArgumentNullException(nameof(req));
 

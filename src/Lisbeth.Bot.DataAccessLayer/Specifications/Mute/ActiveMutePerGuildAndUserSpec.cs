@@ -15,17 +15,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using MikyM.Common.DataAccessLayer.Specifications;
 
-using DSharpPlus.Entities;
-using Lisbeth.Bot.Application.Enums;
-using MikyM.Discord.EmbedBuilders.Enums;
+namespace Lisbeth.Bot.DataAccessLayer.Specifications.Mute;
 
-namespace Lisbeth.Bot.Application.Discord.Services.Interfaces;
-
-public interface IDiscordGuildLogSenderService
+public class ActiveMutePerGuildAndUserSpec : Specification<Domain.Entities.Mute>
 {
-    Task<Result> SendAsync(DiscordGuild discordGuild, DiscordLog type, DiscordEmbed embed);
-    Task<Result> SendAsync(ulong discordGuildId, DiscordLog type, DiscordEmbed embed);
-    Task<Result> SendAsync(Guild guild, DiscordLog type, DiscordEmbed embed);
-    Task<Result> SendAsync(long guildId, DiscordLog type, DiscordEmbed embed);
+    public ActiveMutePerGuildAndUserSpec(ulong targetUserId, ulong guildId)
+    {
+        Where(x => !x.IsDisabled);
+        Where(x => x.GuildId == guildId);
+        Where(x => x.UserId == targetUserId);
+        Where(x => !x.Guild.IsDisabled);
+    }
 }

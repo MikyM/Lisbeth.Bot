@@ -30,7 +30,7 @@ using System.Text.RegularExpressions;
 namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 
 [UsedImplicitly]
-[SlashModuleLifespan(SlashModuleLifespan.Transient)]
+[SlashModuleLifespan(SlashModuleLifespan.Scoped)]
 public class ReminderSlashCommands : ExtendedApplicationCommandModule
 {
     public ReminderSlashCommands(IDiscordReminderService reminderService,
@@ -117,7 +117,7 @@ public class ReminderSlashCommands : ExtendedApplicationCommandModule
                 switch (actionType)
                 {
                     case ReminderActionType.Set:
-                        if (reminderType is Domain.Enums.ReminderType.Single && name is "") name = $"{ctx.Guild.Id}_{ctx.User.Id}_{DateTime.UtcNow}";
+                        if (reminderType is ReminderType.Single && name is "") name = $"{ctx.Guild.Id}_{ctx.User.Id}_{DateTime.UtcNow}";
 
                         var setReq = new SetReminderReqDto(name, isValidCron && !isValidDateTime && !isValidTime ? time : null,
                             isValidDateTime ? parsedDateTime : isValidTime ? global::System.DateTime.UtcNow.Date.Add(parsedTime.TimeOfDay) : null, isValidStringRep ? time : null, text,
@@ -137,8 +137,9 @@ public class ReminderSlashCommands : ExtendedApplicationCommandModule
                     case ReminderActionType.ConfigureEmbed:
                         switch (reminderType)
                         {
-                            case Domain.Enums.ReminderType.Single:
-                                var res = await this._reminderEmbedConfiguratorService!.ConfigureAsync(ctx, name);
+                            case ReminderType.Single:
+                                var res = await this._reminderEmbedConfiguratorService!.ConfigureAsync(ctx,
+                                    x => x.EmbedConfig, x => x.EmbedConfigId, name);
                                 if (res.IsDefined())
                                     await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(res.Entity));
                                 else
@@ -146,9 +147,9 @@ public class ReminderSlashCommands : ExtendedApplicationCommandModule
                                         new DiscordWebhookBuilder().AddEmbed(
                                             GetUnsuccessfulResultEmbed(res, ctx.Client)));
                                 return;
-                            case Domain.Enums.ReminderType.Recurring:
-                                var resRec =
-                                    await this._recurringReminderEmbedConfiguratorService!.ConfigureAsync(ctx, name);
+                            case ReminderType.Recurring:
+                                var resRec = await this._recurringReminderEmbedConfiguratorService!.ConfigureAsync(ctx,
+                                    x => x.EmbedConfig, x => x.EmbedConfigId, name);
                                 if (resRec.IsDefined())
                                     await ctx.EditResponseAsync(
                                         new DiscordWebhookBuilder().AddEmbed(resRec.Entity));

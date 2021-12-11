@@ -50,7 +50,7 @@ public sealed class ResponseDiscordEmbedBuilder : EnrichedDiscordEmbedBuilder, I
         base.Evaluate();
     }
 
-    public override ResponseDiscordEmbedBuilder EnrichFrom<TEnricher>(TEnricher enricher)
+    public override IResponseDiscordEmbedBuilder EnrichFrom<TEnricher>(TEnricher enricher)
     {
         enricher.Enrich(this.Current);
         return this;

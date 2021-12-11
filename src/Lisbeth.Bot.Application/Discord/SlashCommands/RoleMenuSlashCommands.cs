@@ -26,7 +26,7 @@ using Lisbeth.Bot.Domain.DTOs.Request.RoleMenu;
 namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 
 [UsedImplicitly]
-[SlashModuleLifespan(SlashModuleLifespan.Transient)]
+[SlashModuleLifespan(SlashModuleLifespan.Scoped)]
 public class RoleMenuSlashCommands : ExtendedApplicationCommandModule
 {
     public RoleMenuSlashCommands(IDiscordRoleMenuService discordRoleMenuService,
@@ -130,13 +130,13 @@ public class RoleMenuSlashCommands : ExtendedApplicationCommandModule
                 //partial = await _discordRoleMenuService.DisableAsync(ctx, removeReq);
                 break;
             case RoleMenuActionType.ConfigureEmbed:
-                partial = await this._discordEmbedConfiguratorService!.ConfigureAsync(ctx, idOrName);
+                partial = await this._discordEmbedConfiguratorService!.ConfigureAsync(ctx, x => x.EmbedConfig,
+                    x => x.EmbedConfigId, idOrName);
                 break;
             case RoleMenuActionType.Send:
                 if (!isId && string.IsNullOrWhiteSpace(idOrName))
                     throw new ArgumentException("You must supply a valid Id or name");
-                if (channel is null)
-                    throw new ArgumentException("You must supply a channel to send a role menu");
+                if (channel is null) throw new ArgumentException("You must supply a channel to send a role menu");
 
                 var sendReq = new RoleMenuSendReqDto
                 {

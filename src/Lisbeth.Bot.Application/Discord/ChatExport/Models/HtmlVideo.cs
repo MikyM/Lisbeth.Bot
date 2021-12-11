@@ -27,7 +27,7 @@ public class HtmlVideo : IAsyncHtmlBuilder
         using (HttpClient httpClient = ChatExportHttpClientFactory.Build())
         {
             using HttpRequestMessage req = new (HttpMethod.Get, DiscordLink);
-            using HttpResponseMessage response = await httpClient.SendAsync(req).ConfigureAwait(false);
+            using HttpResponseMessage response = await httpClient.SendAsync(req);
             Stream stream = await response.Content.ReadAsStreamAsync();
             request = await client.UploadEntireFileAsync(new BinaryContent(stream,
                 "application/x-www-form-urlencoded"));

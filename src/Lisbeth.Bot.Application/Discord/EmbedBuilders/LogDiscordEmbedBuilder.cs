@@ -27,7 +27,9 @@ public sealed class LogDiscordEmbedBuilder : EnrichedDiscordEmbedBuilder, ILogDi
 
     public DiscordModeration? Moderation { get; private set; }
 
-    public LogDiscordEmbedBuilder() { }
+    public LogDiscordEmbedBuilder()
+    {
+    }
 
     public LogDiscordEmbedBuilder(EnhancedDiscordEmbedBuilder enhanced) : base(enhanced) { }
 
@@ -58,7 +60,7 @@ public sealed class LogDiscordEmbedBuilder : EnrichedDiscordEmbedBuilder, ILogDi
         base.Evaluate();
     }
 
-    public override LogDiscordEmbedBuilder EnrichFrom<TEnricher>(TEnricher enricher)
+    public override ILogDiscordEmbedBuilder EnrichFrom<TEnricher>(TEnricher enricher)
     {
         enricher.Enrich(base.Current);
         return this;

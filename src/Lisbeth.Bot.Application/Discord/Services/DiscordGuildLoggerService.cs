@@ -18,129 +18,124 @@
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using Lisbeth.Bot.Application.Discord.EmbedBuilders;
-using Lisbeth.Bot.Application.Discord.EmbedEnrichers.Log;
 using Lisbeth.Bot.Application.Discord.EmbedEnrichers.Log.Moderation;
 using Lisbeth.Bot.Domain.DTOs.Request.Base;
-using MikyM.Discord.EmbedBuilders.Builders;
 using MikyM.Discord.EmbedBuilders.Enrichers;
 using MikyM.Discord.EmbedBuilders.Enums;
 using MikyM.Discord.Enums;
-using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.Interfaces;
 
-namespace Lisbeth.Bot.Application.Discord.Services
+namespace Lisbeth.Bot.Application.Discord.Services;
+
+[UsedImplicitly]
+public class DiscordGuildLoggerService : IDiscordGuildLoggerService
 {
-    [UsedImplicitly]
-    public class DiscordGuildLoggerService : IDiscordGuildLoggerService
+    private readonly IDiscordGuildLogSenderService _logSender;
+    private readonly IDiscordService _discord;
+    private readonly IGuildService _guildService;
+    private readonly ILogDiscordEmbedBuilder _embedBuilder;
+
+    public DiscordGuildLoggerService(ILogDiscordEmbedBuilder embedBuilder, IDiscordGuildLogSenderService logSender,
+        IDiscordService discord, IGuildService guildService)
     {
-        private readonly IDiscordGuildLogSenderService _logSender;
-        private readonly IDiscordService _discord;
-        private readonly IGuildService _guildService;
-        private readonly IEnhancedDiscordEmbedBuilder _embedBuilder;
+        _embedBuilder = embedBuilder;
+        _logSender = logSender;
+        _discord = discord;
+        _guildService = guildService;
+    }
 
-        public DiscordGuildLoggerService(IEnhancedDiscordEmbedBuilder embedBuilder, IDiscordGuildLogSenderService logSender,
-            IDiscordService discord, IGuildService guildService)
+    public async Task<Result> LogToDiscordAsync<TRequest>(DiscordGuild discordGuild, TRequest req, DiscordModeration moderation, DiscordMember? moderator = null, SnowflakeObject? target = null, string hexColor = "#26296e", long? caseId = null) where TRequest : class, IBaseModAuthReq
+    {
+        if (moderator is null)
         {
-            _embedBuilder = embedBuilder;
-            _logSender = logSender;
-            _discord = discord;
-            _guildService = guildService;
-        }
-
-        public async Task<Result> LogToDiscordAsync<TRequest>(DiscordGuild discordGuild, TRequest req, DiscordModeration moderation, DiscordMember? moderator = null, SnowflakeObject? target = null, string hexColor = "#26296e", long? caseId = null) where TRequest : class, IBaseModAuthReq
-        {
-            if (moderator is null)
+            try
             {
-                try
-                {
-                    moderator = await discordGuild.GetMemberAsync(req.RequestedOnBehalfOfId);
-                }
-                catch (Exception)
-                {
-                    // ignore
-                }
+                moderator = await discordGuild.GetMemberAsync(req.RequestedOnBehalfOfId);
             }
-
-            IEmbedEnricher enricher = req switch
+            catch (Exception)
             {
-                IApplyInfractionReq addReq => new MemberModAddReqLogEnricher(addReq),
-                IRevokeInfractionReq disableReq => new MemberModDisableReqLogEnricher(disableReq),
-                IGetInfractionReq getReq => new MemberModGetReqLogEnricher(getReq),
-                _ => throw new NotSupportedException("Given request to log is not supported")
-            };
-
-            var embed = _embedBuilder
-                .WithCase(caseId)
-                .WithEmbedColor(new DiscordColor(hexColor))
-                .WithAuthorSnowflakeInfo(moderator)
-                .WithFooterSnowflakeInfo(target)
-                .AsEnriched<LogDiscordEmbedBuilder>()
-                .WithType(DiscordLog.Moderation)
-                .WithModerationType(moderation)
-                .EnrichFrom(enricher)
-                .Build();
-
-            return await _logSender.SendAsync(discordGuild, DiscordLog.Moderation, embed);
+                // ignore
+            }
         }
 
-
-        public async Task<Result> LogToDiscordAsync<TRequest>(ulong discordGuildId, TRequest req, DiscordModeration moderation, DiscordMember? moderator = null, SnowflakeObject? target = null, string hexColor = "#26296e", long? caseId = null) where TRequest : class, IBaseModAuthReq
+        IEmbedEnricher enricher = req switch
         {
-            if (_discord.Client.Guilds.TryGetValue(discordGuildId, out var guild)) return new DiscordNotFoundError(DiscordEntity.Guild);
+            IApplyInfractionReq addReq => new MemberModAddReqLogEnricher(addReq),
+            IRevokeInfractionReq disableReq => new MemberModDisableReqLogEnricher(disableReq),
+            IGetInfractionReq getReq => new MemberModGetReqLogEnricher(getReq),
+            _ => throw new NotSupportedException("Given request to log is not supported")
+        };
 
-            return await this.LogToDiscordAsync(guild ?? throw new InvalidOperationException("Guild was null."), req, moderation, moderator, target, hexColor, caseId);
-        }
+        var embed = _embedBuilder
+            .EnrichFrom(enricher)
+            .WithType(DiscordLog.Moderation)
+            .WithModerationType(moderation)
+            .WithCase(caseId)
+            .WithEmbedColor(new DiscordColor(hexColor))
+            .WithAuthorSnowflakeInfo(moderator)
+            .WithFooterSnowflakeInfo(target)
+            .Build();
 
-        public async Task<Result> LogToDiscordAsync<TRequest>(Guild guild, TRequest req, DiscordModeration moderation, DiscordMember? moderator = null, SnowflakeObject? target = null, string hexColor = "#26296e", long? caseId = null) where TRequest : class, IBaseModAuthReq
-        {
-            return await this.LogToDiscordAsync(guild.GuildId, req, moderation, moderator, target, hexColor, caseId);
-        }
-
-        public async Task<Result> LogToDiscordAsync<TRequest>(long guildId, TRequest req, DiscordModeration moderation, DiscordMember? moderator = null, SnowflakeObject? target = null, string hexColor = "#26296e", long? caseId = null) where TRequest : class, IBaseModAuthReq
-        {
-            var guildRes =
-                await _guildService.GetAsync(guildId);
-
-            if (!guildRes.IsDefined()) return new NotFoundError();
-
-            return await this.LogToDiscordAsync(guildRes.Entity.GuildId, req, moderation, moderator, target, hexColor, caseId);
-        }
-
-        public async Task<Result> LogToDiscordAsync<TEvent>(DiscordGuild discordGuild, TEvent discordEvent, DiscordLog log, string hexColor = "#26296e") where TEvent : DiscordEventArgs
-        {
-            IEmbedEnricher enricher = null;
-
-            var embed = _embedBuilder
-                .WithEmbedColor(new DiscordColor(hexColor))
-                .AsEnriched<LogDiscordEmbedBuilder>()
-                .WithType(log)
-                .EnrichFrom(enricher)
-                .Build();
-
-            return await _logSender.SendAsync(discordGuild, log, embed);
-        }
+        return await _logSender.SendAsync(discordGuild, DiscordLog.Moderation, embed);
+    }
 
 
-        public async Task<Result> LogToDiscordAsync<TEvent>(ulong discordGuildId, TEvent discordEvent, DiscordLog log, string hexColor = "#26296e") where TEvent : DiscordEventArgs
-        {
-            if (_discord.Client.Guilds.TryGetValue(discordGuildId, out var guild)) return new DiscordNotFoundError(DiscordEntity.Guild);
+    public async Task<Result> LogToDiscordAsync<TRequest>(ulong discordGuildId, TRequest req, DiscordModeration moderation, DiscordMember? moderator = null, SnowflakeObject? target = null, string hexColor = "#26296e", long? caseId = null) where TRequest : class, IBaseModAuthReq
+    {
+        if (_discord.Client.Guilds.TryGetValue(discordGuildId, out var guild)) return new DiscordNotFoundError(DiscordEntity.Guild);
 
-            return await this.LogToDiscordAsync(guild ?? throw new InvalidOperationException("Guild was null."), discordEvent, log, hexColor);
-        }
+        return await this.LogToDiscordAsync(guild ?? throw new InvalidOperationException("Guild was null."), req, moderation, moderator, target, hexColor, caseId);
+    }
 
-        public async Task<Result> LogToDiscordAsync<TEvent>(Guild guild, TEvent discordEvent, DiscordLog log, string hexColor = "#26296e") where TEvent : DiscordEventArgs
-        {
-            return await this.LogToDiscordAsync(guild.GuildId, discordEvent, log, hexColor);
-        }
+    public async Task<Result> LogToDiscordAsync<TRequest>(Guild guild, TRequest req, DiscordModeration moderation, DiscordMember? moderator = null, SnowflakeObject? target = null, string hexColor = "#26296e", long? caseId = null) where TRequest : class, IBaseModAuthReq
+    {
+        return await this.LogToDiscordAsync(guild.GuildId, req, moderation, moderator, target, hexColor, caseId);
+    }
 
-        public async Task<Result> LogToDiscordAsync<TEvent>(long guildId, TEvent discordEvent, DiscordLog log, string hexColor = "#26296e") where TEvent : DiscordEventArgs
-        {
-            var guildRes =
-                await _guildService.GetAsync(guildId);
+    public async Task<Result> LogToDiscordAsync<TRequest>(long guildId, TRequest req, DiscordModeration moderation, DiscordMember? moderator = null, SnowflakeObject? target = null, string hexColor = "#26296e", long? caseId = null) where TRequest : class, IBaseModAuthReq
+    {
+        var guildRes =
+            await _guildService.GetAsync(guildId);
 
-            if (!guildRes.IsDefined()) return new NotFoundError();
+        if (!guildRes.IsDefined()) return new NotFoundError();
 
-            return await this.LogToDiscordAsync(guildRes.Entity.GuildId, discordEvent, log, hexColor);
-        }
+        return await this.LogToDiscordAsync(guildRes.Entity.GuildId, req, moderation, moderator, target, hexColor, caseId);
+    }
+
+    public async Task<Result> LogToDiscordAsync<TEvent>(DiscordGuild discordGuild, TEvent discordEvent, DiscordLog log, string hexColor = "#26296e") where TEvent : DiscordEventArgs
+    {
+        IEmbedEnricher enricher = null;
+
+        var embed = _embedBuilder
+            .WithEmbedColor(new DiscordColor(hexColor))
+            .AsEnriched<LogDiscordEmbedBuilder>()
+            .WithType(log)
+            .EnrichFrom(enricher)
+            .Build();
+
+        return await _logSender.SendAsync(discordGuild, log, embed);
+    }
+
+
+    public async Task<Result> LogToDiscordAsync<TEvent>(ulong discordGuildId, TEvent discordEvent, DiscordLog log, string hexColor = "#26296e") where TEvent : DiscordEventArgs
+    {
+        if (_discord.Client.Guilds.TryGetValue(discordGuildId, out var guild)) return new DiscordNotFoundError(DiscordEntity.Guild);
+
+        return await this.LogToDiscordAsync(guild ?? throw new InvalidOperationException("Guild was null."), discordEvent, log, hexColor);
+    }
+
+    public async Task<Result> LogToDiscordAsync<TEvent>(Guild guild, TEvent discordEvent, DiscordLog log, string hexColor = "#26296e") where TEvent : DiscordEventArgs
+    {
+        return await this.LogToDiscordAsync(guild.GuildId, discordEvent, log, hexColor);
+    }
+
+    public async Task<Result> LogToDiscordAsync<TEvent>(long guildId, TEvent discordEvent, DiscordLog log, string hexColor = "#26296e") where TEvent : DiscordEventArgs
+    {
+        var guildRes =
+            await _guildService.GetAsync(guildId);
+
+        if (!guildRes.IsDefined()) return new NotFoundError();
+
+        return await this.LogToDiscordAsync(guildRes.Entity.GuildId, discordEvent, log, hexColor);
     }
 }

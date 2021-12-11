@@ -23,7 +23,7 @@ using DSharpPlus.SlashCommands.Attributes;
 namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 
 [UsedImplicitly]
-[SlashModuleLifespan(SlashModuleLifespan.Transient)]
+[SlashModuleLifespan(SlashModuleLifespan.Scoped)]
 public class EmbedConfigSlashCommands : ApplicationCommandModule
 {
     private readonly IDiscordEmbedConfiguratorService<Tag> _embedConfigService;
@@ -43,7 +43,9 @@ public class EmbedConfigSlashCommands : ApplicationCommandModule
 
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
-        var result = await this._embedConfigService!.ConfigureAsync(ctx, parsedId.ToString());
+        var result =
+            await this._embedConfigService!.ConfigureAsync(ctx, x => x.EmbedConfig, x => x.EmbedConfigId,
+                parsedId.ToString());
 
         await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(result.Entity));
     }

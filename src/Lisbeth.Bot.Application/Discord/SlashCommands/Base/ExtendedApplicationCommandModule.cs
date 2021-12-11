@@ -21,7 +21,7 @@ using DSharpPlus.SlashCommands;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands.Base;
 
-public class ExtendedApplicationCommandModule : ApplicationCommandModule
+public abstract class ExtendedApplicationCommandModule : ApplicationCommandModule
 {
     protected DiscordEmbed GetUnsuccessfulResultEmbed(IResult result, DiscordClient discord)
     {
@@ -40,5 +40,14 @@ public class ExtendedApplicationCommandModule : ApplicationCommandModule
             .WithAuthor($"{DiscordEmoji.FromName(discord, ":x:")} Operation errored")
             .AddField("Message", error)
             .Build();
+    }
+
+    protected DiscordEmbed GetSuccessfulActionEmbed(DiscordClient discord, string? description = null)
+    {
+        return new DiscordEmbedBuilder()
+            .WithTitle(
+                $"{DiscordEmoji.FromName(discord, ":ok_hand:")} Action successful")
+            .WithDescription(description)
+            .WithColor(new DiscordColor("#2ECC71"));
     }
 }

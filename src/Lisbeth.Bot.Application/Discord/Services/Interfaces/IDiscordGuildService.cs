@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Generic;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.SlashCommands;
@@ -41,5 +42,6 @@ public interface IDiscordGuildService
     Task<Result<DiscordEmbed>> RepairConfigAsync(InteractionContext ctx, TicketingConfigRepairReqDto req);
     Task<Result<int>> CreateOverwritesForMutedRoleAsync(CreateMuteOverwritesReqDto req);
     Task<Result<int>> CreateOverwritesForMutedRoleAsync(InteractionContext ctx, CreateMuteOverwritesReqDto req);
-    Task<Result> BulkOverwriteSlashPermissionsAsync(GuildCreateEventArgs args);
+    Task<Result> PrepareSlashPermissionsAsync(IEnumerable<DiscordGuild> guilds);
+    Task<Result> PrepareSlashPermissionsAsync(DiscordGuild guild);
 }

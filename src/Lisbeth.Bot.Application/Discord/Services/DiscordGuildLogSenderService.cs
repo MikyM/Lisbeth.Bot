@@ -56,7 +56,7 @@ public class DiscordGuildLogSenderService : IDiscordGuildLogSenderService
             await _guildService.GetSingleBySpecAsync(new ActiveGuildByDiscordIdWithModerationSpec(discordGuild.Id));
 
         if (!guildRes.IsDefined()) return Result.FromError(guildRes);
-        if (guildRes.Entity.ModerationConfig is null || !guildRes.Entity.ModerationConfig.IsDisabled)
+        if (guildRes.Entity.ModerationConfig is null || guildRes.Entity.ModerationConfig.IsDisabled)
             return new DisabledEntityError(nameof(guildRes.Entity.ModerationConfig));
 
         DiscordChannel? target;

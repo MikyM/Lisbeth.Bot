@@ -16,6 +16,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using DSharpPlus;
+using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using Lisbeth.Bot.Application.Helpers;
 using MikyM.Discord.Events;
@@ -59,9 +60,11 @@ public class GuildEventsHandler : IDiscordGuildEventsSubscriber
         return Task.CompletedTask;
     }
 
-    public Task DiscordOnGuildDownloadCompleted(DiscordClient sender, GuildDownloadCompletedEventArgs args)
+    public async Task DiscordOnGuildDownloadCompleted(DiscordClient sender, GuildDownloadCompletedEventArgs args)
     {
-        return Task.CompletedTask;
+        _ = _asyncExecutor.ExecuteAsync<IDiscordGuildService>(async x =>
+            await x.PrepareSlashPermissionsAsync(args.Guilds.Values));
+        await sender.UpdateStatusAsync(new DiscordActivity("you closely.", ActivityType.Watching));
     }
 
     public Task DiscordOnGuildEmojisUpdated(DiscordClient sender, GuildEmojisUpdateEventArgs args)
