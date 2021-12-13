@@ -19,6 +19,7 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using Lisbeth.Bot.Application.Discord.ChatExport;
+using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Buttons;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Selects;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.SelectValues;
@@ -34,11 +35,14 @@ public class TicketEventsHandler : IDiscordMiscEventsSubscriber, IDiscordChannel
 {
     private readonly IAsyncExecutor _asyncExecutor;
     private readonly ILogger<TicketEventsHandler> _logger;
+    private readonly ITicketQueueService _ticketQueueService;
 
-    public TicketEventsHandler(IAsyncExecutor asyncExecutor, ILogger<TicketEventsHandler> logger)
+    public TicketEventsHandler(IAsyncExecutor asyncExecutor, ILogger<TicketEventsHandler> logger,
+        ITicketQueueService ticketQueueService)
     {
         _asyncExecutor = asyncExecutor;
         _logger = logger;
+        _ticketQueueService = ticketQueueService;
     }
 
     public Task DiscordOnChannelCreated(DiscordClient sender, ChannelCreateEventArgs args)
@@ -82,10 +86,8 @@ public class TicketEventsHandler : IDiscordMiscEventsSubscriber, IDiscordChannel
             case nameof(TicketButton.TicketOpenButton):
                 await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
                     new DiscordInteractionResponseBuilder().AsEphemeral(true));
-                var openReq = new TicketOpenReqDto
-                    { GuildId = args.Guild.Id, RequestedOnBehalfOfId = args.User.Id };
-                _ = _asyncExecutor.ExecuteAsync<IDiscordTicketService>(async x =>
-                    await x.OpenTicketAsync(args.Interaction, openReq));
+                var openReq = new TicketOpenReqDto { GuildId = args.Guild.Id, RequestedOnBehalfOfId = args.User.Id };
+                _ = _asyncExecutor.ExecuteAsync<ITicketQueueService>(x => x.EnqueueAsync(openReq, args.Interaction));
                 break;
             case nameof(TicketSelect.TicketCloseMessageSelect):
                 await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);

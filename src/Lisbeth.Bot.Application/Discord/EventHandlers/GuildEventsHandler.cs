@@ -18,6 +18,7 @@
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using Lisbeth.Bot.Application.Discord.Helpers;
 using MikyM.Common.Utilities;
 using MikyM.Discord.Events;
 
@@ -27,15 +28,18 @@ namespace Lisbeth.Bot.Application.Discord.EventHandlers;
 public class GuildEventsHandler : IDiscordGuildEventsSubscriber
 {
     private readonly IAsyncExecutor _asyncExecutor;
+    private readonly ITicketQueueService _ticketQueueService;
 
-    public GuildEventsHandler(IAsyncExecutor asyncExecutor)
+    public GuildEventsHandler(IAsyncExecutor asyncExecutor, ITicketQueueService ticketQueueService)
     {
         _asyncExecutor = asyncExecutor;
+        _ticketQueueService = ticketQueueService;
     }
 
     public Task DiscordOnGuildCreated(DiscordClient sender, GuildCreateEventArgs args)
     {
         _ = _asyncExecutor.ExecuteAsync<IDiscordGuildService>(async x => await x.HandleGuildCreateAsync(args));
+        _ticketQueueService.AddGuildQueue(args.Guild.Id);
         return Task.CompletedTask;
     }
 
@@ -52,6 +56,7 @@ public class GuildEventsHandler : IDiscordGuildEventsSubscriber
     public Task DiscordOnGuildDeleted(DiscordClient sender, GuildDeleteEventArgs args)
     {
         _ = _asyncExecutor.ExecuteAsync<IDiscordGuildService>(async x => await x.HandleGuildDeleteAsync(args));
+        _ticketQueueService.RemoveGuildQueue(args.Guild.Id);
         return Task.CompletedTask;
     }
 
@@ -65,6 +70,9 @@ public class GuildEventsHandler : IDiscordGuildEventsSubscriber
         _ = _asyncExecutor.ExecuteAsync<IDiscordGuildService>(async x =>
             await x.PrepareSlashPermissionsAsync(args.Guilds.Values));
         await sender.UpdateStatusAsync(new DiscordActivity("you closely.", ActivityType.Watching));
+
+        foreach (var key in args.Guilds.Keys)
+            _ticketQueueService.AddGuildQueue(key);
     }
 
     public Task DiscordOnGuildEmojisUpdated(DiscordClient sender, GuildEmojisUpdateEventArgs args)

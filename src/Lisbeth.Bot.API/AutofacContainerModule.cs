@@ -64,6 +64,7 @@ public class AutofacContainerModule : Module
         }).As<IUriService>().SingleInstance();
 
         builder.RegisterType<AsyncExecutor>().As<IAsyncExecutor>().SingleInstance();
+        builder.RegisterType<TicketQueueService>().As<ITicketQueueService>().SingleInstance();
 
         // Register Entity Framework
         builder.Register(x =>

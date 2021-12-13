@@ -33,12 +33,10 @@ public interface IAsyncExecutor
 public class AsyncExecutor : IAsyncExecutor
 {
     private readonly ILifetimeScope _lifetimeScope;
-    private readonly ILogger<AsyncExecutor> _logger;
 
-    public AsyncExecutor(ILifetimeScope lifetimeScope, ILogger<AsyncExecutor> logger)
+    public AsyncExecutor(ILifetimeScope lifetimeScope)
     {
         _lifetimeScope = lifetimeScope;
-        _logger = logger;
     }
 
     public Task ExecuteAsync<T>(Func<T, Task> func)

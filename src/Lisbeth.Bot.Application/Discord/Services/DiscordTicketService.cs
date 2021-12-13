@@ -31,12 +31,12 @@ using Lisbeth.Bot.DataAccessLayer.Specifications.Ticket;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket.Base;
 using Microsoft.Extensions.Logging;
+using MikyM.Common.Utilities;
+using MikyM.Common.Utilities.Extensions;
 using MikyM.Discord.Enums;
 using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.Interfaces;
 using System.Collections.Generic;
-using MikyM.Common.Utilities;
-using MikyM.Common.Utilities.Extensions;
 
 namespace Lisbeth.Bot.Application.Discord.Services;
 
@@ -398,7 +398,6 @@ public class DiscordTicketService : IDiscordTicketService
                     .AsEphemeral(true));
             return new InvalidOperationError("Member already has an opened ticket in this guild.");
         }
-
 
         req.GuildSpecificId = guildCfg.TicketingConfig.LastTicketId + 1;
         _guildService.BeginUpdate(guildCfg);
