@@ -41,7 +41,7 @@ public static class RecurringJobHelper
 
     public static async Task ScheduleAllDefinedAfterDelayAsync()
     {
-        await Task.Delay(10000);
+        await Task.Delay(3000);
         ScheduleAutomaticUnban();
         ScheduleAutomaticUnmute();
         Log.Logger.Information("Recurring jobs scheduled.");

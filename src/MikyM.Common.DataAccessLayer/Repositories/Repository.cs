@@ -16,6 +16,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using MikyM.Common.DataAccessLayer.Exceptions;
 using MikyM.Common.DataAccessLayer.Helpers;
 using MikyM.Common.Domain.Entities;
 
@@ -37,28 +38,6 @@ public class Repository<TEntity> : ReadOnlyRepository<TEntity>, IRepository<TEnt
     public virtual void AddRange(IEnumerable<TEntity> entities)
     {
         Context.Set<TEntity>().AddRange(entities);
-    }
-
-    public virtual void AddOrUpdate(TEntity entity)
-    {
-        var local = Context.Set<TEntity>().Local.FirstOrDefault(entry => entry.Id.Equals(entity.Id));
-
-        if (local is not null) Context.Entry(local).State = EntityState.Detached;
-
-        Context.Set<TEntity>().Update(entity);
-    }
-
-    public virtual void AddOrUpdateRange(IEnumerable<TEntity> entities)
-    {
-        var aggregateRootEntities = entities.ToList();
-        foreach (var entity in aggregateRootEntities)
-        {
-            var local = Context.Set<TEntity>().Local.FirstOrDefault(entry => entry.Id.Equals(entity.Id));
-
-            if (local is not null) Context.Entry(local).State = EntityState.Detached;
-        }
-
-        Context.Set<TEntity>().UpdateRange(aggregateRootEntities);
     }
 
     public virtual void BeginUpdate(TEntity entity)
@@ -115,7 +94,7 @@ public class Repository<TEntity> : ReadOnlyRepository<TEntity>, IRepository<TEnt
     public virtual async Task DisableAsync(long id)
     {
         var entity = await GetAsync(id);
-        BeginUpdate(entity ?? throw new InvalidOperationException());
+        BeginUpdate(entity ?? throw new NotFoundException());
         entity.IsDisabled = true;
     }
 

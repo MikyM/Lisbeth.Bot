@@ -23,7 +23,7 @@ using Lisbeth.Bot.Domain.Entities.Base;
 using MikyM.Discord.EmbedBuilders.Wrappers;
 using MikyM.Discord.Enums;
 
-namespace Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response.Moderation;
+namespace Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response.Infractions;
 
 public class MemberModAddReqResponseEnricher : EmbedEnricher<IApplyInfractionReq>
 {

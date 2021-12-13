@@ -19,6 +19,7 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
+using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
 using Lisbeth.Bot.Domain.DTOs.Request;
 
 // ReSharper disable once CheckNamespace
@@ -26,7 +27,7 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands;
 
 [SlashModuleLifespan(SlashModuleLifespan.Scoped)]
 [UsedImplicitly]
-public partial class PruneApplicationCommands : ApplicationCommandModule
+public partial class PruneApplicationCommands : ExtendedApplicationCommandModule
 {
     public PruneApplicationCommands(IDiscordMessageService discordMessageService)
     {
@@ -43,7 +44,7 @@ public partial class PruneApplicationCommands : ApplicationCommandModule
         long count,
         [Option("user", "User to target prune at")]
         DiscordUser? user = null,
-        [Option("id", "message id to prune to")]
+        [Option("id", "Message id to prune to")]
         long id = 0,
         [Option("reason", "Reason for ban")] string reason = "No reason provided")
     {
@@ -52,40 +53,44 @@ public partial class PruneApplicationCommands : ApplicationCommandModule
 
         if (count > 99) count = 99;
 
-        DiscordEmbed embed;
+        Result<DiscordEmbed>? result = null;
         switch (user)
         {
             case null:
                 switch (id)
                 {
                     case 0:
-                        var reqNoUsNoMsgId = new PruneReqDto((int)count + 1);
-                        embed = await this._discordMessageService!.PruneAsync(reqNoUsNoMsgId, 0, ctx);
+                        var reqNoUsNoMsgId = new PruneReqDto(ctx.Guild.Id, ctx.Channel.Id, ctx.Member.Id, (int)count);
+                        result = await this._discordMessageService.PruneAsync(ctx, reqNoUsNoMsgId);
                         break;
                     default:
-                        var reqNoUsWithMsgId = new PruneReqDto((int)count, (ulong)id);
-                        embed = await this._discordMessageService!.PruneAsync(reqNoUsWithMsgId, 0, ctx);
+                        var reqNoUsWithMsgId =
+                            new PruneReqDto(ctx.Guild.Id, ctx.Channel.Id, ctx.Member.Id, null, (ulong)id);
+                        result = await this._discordMessageService.PruneAsync(ctx, reqNoUsWithMsgId);
                         break;
                 }
 
                 break;
-            default:
+            case not null:
                 switch (id)
                 {
                     case 0:
-                        var reqWithUsNoMsgId = new PruneReqDto((int)count, null, user.Id);
-                        embed = await this._discordMessageService!.PruneAsync(reqWithUsNoMsgId, 0, ctx);
+                        var reqWithUsNoMsgId = new PruneReqDto(ctx.Guild.Id, ctx.Channel.Id, ctx.Member.Id, null, null,
+                            user.Id);
+                        result = await this._discordMessageService.PruneAsync(ctx, reqWithUsNoMsgId);
                         break;
                     default:
-                        var reqWithUsWithMsgId = new PruneReqDto((int)count, (ulong)id, user.Id);
-                        embed = await this._discordMessageService!.PruneAsync(reqWithUsWithMsgId, 0, ctx);
-                        break;
+                        throw new ArgumentException(nameof(id));
                 }
-
                 break;
         }
 
-        await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(embed)
-            .AsEphemeral(true));
+
+        if (!result.Value.IsDefined(out var embed))
+            await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(result, ctx.Client))
+                .AsEphemeral(true));
+        else
+            await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(embed)
+                .AsEphemeral(true));
     }
 }

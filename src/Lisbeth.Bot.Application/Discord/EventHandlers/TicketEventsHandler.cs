@@ -22,9 +22,9 @@ using Lisbeth.Bot.Application.Discord.ChatExport;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Buttons;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Selects;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.SelectValues;
-using Lisbeth.Bot.Application.Helpers;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 using Microsoft.Extensions.Logging;
+using MikyM.Common.Utilities;
 using MikyM.Discord.Events;
 
 namespace Lisbeth.Bot.Application.Discord.EventHandlers;

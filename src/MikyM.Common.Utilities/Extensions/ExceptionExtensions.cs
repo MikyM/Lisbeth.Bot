@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Lisbeth.Bot.Application.Extensions;
+﻿namespace MikyM.Common.Utilities.Extensions;
 
 public static class ExceptionExtensions
 {

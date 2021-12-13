@@ -18,7 +18,7 @@
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using Lisbeth.Bot.Application.Helpers;
+using MikyM.Common.Utilities;
 using MikyM.Discord.Events;
 
 namespace Lisbeth.Bot.Application.Discord.EventHandlers;

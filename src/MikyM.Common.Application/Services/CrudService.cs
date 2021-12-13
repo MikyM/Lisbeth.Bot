@@ -96,52 +96,6 @@ public class CrudService<TEntity, TContext> : ReadOnlyService<TEntity, TContext>
         return Result.FromSuccess();
     }
 
-    public virtual async Task<Result<long>> AddOrUpdateAsync<TPut>(TPut entry, bool shouldSave = false) where TPut : class
-    {
-        if (entry  is null) throw new ArgumentNullException(nameof(entry));
-
-        TEntity entity;
-
-        if (entry is TEntity rootEntity)
-        {
-            entity = rootEntity;
-            UnitOfWork.GetRepository<Repository<TEntity>>()?.AddOrUpdate(entity);
-        }
-        else
-        {
-            entity = Mapper.Map<TEntity>(entry);
-            UnitOfWork.GetRepository<Repository<TEntity>>()?.AddOrUpdate(entity);
-        }
-
-        if (!shouldSave) return 0;
-        await CommitAsync();
-        return Result<long>.FromSuccess(entity.Id);
-    }
-
-    public virtual async Task<Result<IEnumerable<long>>> AddOrUpdateRangeAsync<TPut>(IEnumerable<TPut> entries,
-        bool shouldSave = false) where TPut : class
-    {
-        if (entries  is null) throw new ArgumentNullException(nameof(entries));
-
-        IEnumerable<TEntity> entities;
-
-        if (entries is IEnumerable<TEntity> rootEntities)
-        {
-            entities = rootEntities;
-            UnitOfWork.GetRepository<Repository<TEntity>>()?.AddOrUpdateRange(entities);
-        }
-        else
-        {
-            entities = Mapper.Map<IEnumerable<TEntity>>(entries);
-            UnitOfWork.GetRepository<Repository<TEntity>>()
-                ?.AddOrUpdateRange(Mapper.Map<IEnumerable<TEntity>>(entities));
-        }
-
-        if (!shouldSave) return new List<long>();
-        await CommitAsync();
-        return Result<IEnumerable<long>>.FromSuccess(entities.Select(e => e.Id).ToList());
-    }
-
     public virtual async Task<Result> DeleteAsync<TDelete>(TDelete entry, bool shouldSave = false) where TDelete : class
     {
         if (entry  is null) throw new ArgumentNullException(nameof(entry));

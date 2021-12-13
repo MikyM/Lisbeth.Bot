@@ -15,25 +15,24 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using Lisbeth.Bot.Domain.DTOs.Request.Base;
+
 namespace Lisbeth.Bot.Domain.DTOs.Request;
 
-public class PruneReqDto
+public class PruneReqDto : BaseAuthWithGuildReqDto
 {
-    public PruneReqDto(int count, ulong? messageId = null, ulong? targetAuthorId = null, ulong? channelId = null,
-        ulong? guildId = null, ulong? requestedOnBehalfOfId = null)
+    public PruneReqDto(ulong guildId, ulong channelId, ulong requestedOnBehalfOfId, int? count = null, ulong? messageId = null,
+        ulong? targetAuthorId = null) : base(guildId, requestedOnBehalfOfId)
     {
         Count = count;
         MessageId = messageId;
         TargetAuthorId = targetAuthorId;
         ChannelId = channelId;
-        GuildId = guildId;
-        RequestedOnBehalfOfId = requestedOnBehalfOfId;
     }
 
-    public int Count { get; set; } = 100;
+    public int? Count { get; set; }
     public ulong? TargetAuthorId { get; set; }
     public ulong? MessageId { get; set; }
-    public ulong? ChannelId { get; set; }
-    public ulong? GuildId { get; set; }
-    public ulong? RequestedOnBehalfOfId { get; set; }
+    public ulong ChannelId { get; set; }
+    public bool? IsTargetedMessageDelete { get; set; }
 }

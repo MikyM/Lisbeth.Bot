@@ -36,12 +36,16 @@ public partial class PruneApplicationCommands
     {
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
-        var req = new PruneReqDto(10, null, ctx.TargetUser.Id, ctx.Channel.Id, ctx.Guild.Id, ctx.Member.Id);
+        var req = new PruneReqDto(ctx.Guild.Id, ctx.Channel.Id, ctx.Member.Id, 10);
 
-        var embed = await _discordMessageService!.PruneAsync(req, 0, ctx);
+        var result = await _discordMessageService.PruneAsync(ctx, req);
 
-        await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(embed)
-            .AsEphemeral(true));
+        if (!result.IsDefined(out var embed))
+            await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(result, ctx.Client))
+                .AsEphemeral(true));
+        else
+            await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(embed)
+                .AsEphemeral(true));
     }
 
     #endregion
@@ -55,12 +59,16 @@ public partial class PruneApplicationCommands
     {
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
-        var req = new PruneReqDto(10, null, null, ctx.Channel.Id, ctx.Guild.Id, ctx.Member.Id);
+        var req = new PruneReqDto(ctx.Guild.Id, ctx.Channel.Id, ctx.Member.Id, 10);
 
-        var embed = await _discordMessageService!.PruneAsync(req, 0, ctx);
+        var result = await _discordMessageService.PruneAsync(ctx, req);
 
-        await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(embed)
-            .AsEphemeral(true));
+        if (!result.IsDefined(out var embed))
+            await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(result, ctx.Client))
+                .AsEphemeral(true));
+        else
+            await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(embed)
+                .AsEphemeral(true));
     }
 
     [UsedImplicitly]
@@ -70,12 +78,16 @@ public partial class PruneApplicationCommands
     {
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
-        var req = new PruneReqDto(0, ctx.TargetMessage.Id, null, ctx.Channel.Id, ctx.Guild.Id, ctx.Member.Id);
+        var req = new PruneReqDto(ctx.Guild.Id, ctx.Channel.Id, ctx.Member.Id, null, ctx.TargetMessage.Id);
 
-        var embed = await _discordMessageService!.PruneAsync(req, 0, ctx);
+        var result = await _discordMessageService.PruneAsync(ctx, req);
 
-        await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(embed)
-            .AsEphemeral(true));
+        if (!result.IsDefined(out var embed))
+            await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(result, ctx.Client))
+                .AsEphemeral(true));
+        else
+            await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(embed)
+                .AsEphemeral(true));
     }
 
     [UsedImplicitly]
@@ -85,13 +97,16 @@ public partial class PruneApplicationCommands
     {
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
-        var req = new PruneReqDto(0, ctx.TargetMessage.Id, ctx.TargetMessage.Author.Id, ctx.Channel.Id,
-            ctx.Guild.Id, ctx.Member.Id);
+        var req = new PruneReqDto(ctx.Guild.Id, ctx.Channel.Id, ctx.Member.Id, null, null, ctx.TargetUser.Id);
 
-        var embed = await _discordMessageService!.PruneAsync(req, 0, ctx);
+        var result = await _discordMessageService.PruneAsync(ctx, req);
 
-        await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(embed)
-            .AsEphemeral(true));
+        if (!result.IsDefined(out var embed))
+            await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(result, ctx.Client))
+                .AsEphemeral(true));
+        else
+            await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(embed)
+                .AsEphemeral(true));
     }
 
     #endregion

@@ -19,6 +19,7 @@ using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.EventArgs;
 using Microsoft.Extensions.Logging;
+using MikyM.Common.Utilities.Extensions;
 using MikyM.Discord.Extensions.SlashCommands.Events;
 
 namespace Lisbeth.Bot.Application.Discord.EventHandlers;

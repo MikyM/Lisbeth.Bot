@@ -20,7 +20,6 @@ using EFCoreSecondLevelCacheInterceptor;
 using IdGen;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Application.Discord.Services;
-using Lisbeth.Bot.Application.Helpers;
 using Lisbeth.Bot.Application.Services;
 using Lisbeth.Bot.Application.Services.Database;
 using Lisbeth.Bot.DataAccessLayer;
@@ -31,7 +30,7 @@ using MikyM.Common.Application;
 using MikyM.Common.DataAccessLayer;
 using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Common.DataAccessLayer.Specifications.Evaluators;
-using MikyM.Discord.EmbedBuilders;
+using MikyM.Common.Utilities;
 
 namespace Lisbeth.Bot.API;
 
@@ -44,7 +43,6 @@ public class AutofacContainerModule : Module
 
         builder.AddDataAccessLayer();
         builder.AddApplicationLayer();
-        builder.AddEnrichedDiscordEmbedBuilders();
 
         // bulk register custom services - follow naming convention
         builder.RegisterAssemblyTypes(typeof(MuteService).Assembly).Where(t => t.Name.EndsWith("Service")/* && !t.Name.Contains("Discord")*/)

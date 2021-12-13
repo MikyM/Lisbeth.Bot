@@ -15,18 +15,19 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+
 using Autofac;
 using Microsoft.Extensions.Logging;
+using MikyM.Common.Utilities.Extensions;
 
 #nullable disable
 // ReSharper disable UseAwaitUsing
 
-namespace Lisbeth.Bot.Application.Helpers;
+namespace MikyM.Common.Utilities;
 
 public interface IAsyncExecutor
 {
     public Task ExecuteAsync<T>(Func<T, Task> func);
-    public Task ExecuteAsync(Func<Task> func);
 }
 
 public class AsyncExecutor : IAsyncExecutor
@@ -48,19 +49,13 @@ public class AsyncExecutor : IAsyncExecutor
                 var service = scope.Resolve<T>();
                 await func(service);
             })
-            .ContinueWith(x => _lifetimeScope.Resolve<ILogger<T>>().LogError(x.Exception.GetFullMessage()),
+            .ContinueWith(x => _lifetimeScope.Resolve<ILogger<T>>().LogError(x.Exception?.GetFullMessage()),
                 TaskContinuationOptions.OnlyOnFaulted);
     }
+}
 
-    public Task ExecuteAsync(Func<Task> func)
-    {
-        Type t = func.GetType();
-        return Task.Run(async () =>
-            {
-                using var scope = _lifetimeScope.BeginLifetimeScope();
-                await func.Invoke();
-            })
-            .ContinueWith(x => _logger.LogError(x.Exception.GetFullMessage()),
-                TaskContinuationOptions.OnlyOnFaulted);
-    }
+public static class AsyncExecutorExtensions
+{
+    public static void AddAsyncExecutor(this ContainerBuilder services)
+        => services.RegisterType<AsyncExecutor>().As<IAsyncExecutor>().SingleInstance();
 }

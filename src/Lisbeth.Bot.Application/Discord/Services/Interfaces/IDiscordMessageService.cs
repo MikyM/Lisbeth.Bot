@@ -24,15 +24,10 @@ namespace Lisbeth.Bot.Application.Discord.Services.Interfaces;
 
 public interface IDiscordMessageService
 {
-    Task<DiscordEmbed> PruneAsync(PruneReqDto req, ulong logChannelId = 0, InteractionContext? ctx = null,
-        bool isSingleMessageDelete = false);
-
-    Task<DiscordEmbed> PruneAsync(PruneReqDto req, ulong logChannelId = 0, ContextMenuContext? ctx = null,
-        bool isSingleMessageDelete = false);
-
-    Task<DiscordEmbed> PruneAsync(PruneReqDto req, ulong logChannelId = 0, DiscordChannel? channel = null,
-        DiscordGuild? guild = null, DiscordUser? moderator = null, DiscordUser? author = null,
-        DiscordMessage? message = null, bool isSingleMessageDelete = false, ulong idToSkip = 0);
+    Task<Result<DiscordEmbed>> PruneAsync(InteractionContext ctx, PruneReqDto req);
+    Task<Result<DiscordEmbed>> PruneAsync(ContextMenuContext ctx, PruneReqDto req);
+    Task<Result<DiscordEmbed>> PruneAsync(PruneReqDto req, DiscordChannel channel, DiscordGuild guild,
+        DiscordMember moderator, ulong? interactionId = null);
 
     Task LogMessageUpdatedEventAsync(MessageUpdateEventArgs args);
     Task LogMessageDeletedEventAsync(MessageDeleteEventArgs args);

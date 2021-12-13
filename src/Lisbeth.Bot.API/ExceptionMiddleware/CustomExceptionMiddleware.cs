@@ -18,6 +18,7 @@
 using System.Net;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using MikyM.Common.Utilities.Extensions;
 
 namespace Lisbeth.Bot.API.ExceptionMiddleware;
 

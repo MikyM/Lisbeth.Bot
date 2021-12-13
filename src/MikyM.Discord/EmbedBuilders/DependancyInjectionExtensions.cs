@@ -21,7 +21,6 @@ using MikyM.Discord.EmbedBuilders.Builders;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Autofac;
 
 namespace MikyM.Discord.EmbedBuilders;
 
@@ -49,6 +48,7 @@ public static class DependancyInjectionExtensions
     /// <summary>
     /// Registers <see cref="IEnrichedDiscordEmbedBuilder"/> with the <see cref="IServiceCollection"/>.
     /// <br></br><br></br>This method will also try to register other builders implementing <see cref="IEnrichedDiscordEmbedBuilder"/> with their concrete implementations by naming convention.
+    /// <br></br><br></br><see cref="AddEnhancedDiscordEmbedBuilders"/> will also be automatically called.
     /// </summary>
     public static void AddEnrichedDiscordEmbedBuilders(this IServiceCollection services)
     {
@@ -64,46 +64,6 @@ public static class DependancyInjectionExtensions
         {
             if (impl is null) continue;
             services.TryAddTransient(intr, impl);
-        }
-    }
-
-    /// <summary>
-    /// Registers <see cref="IEnhancedDiscordEmbedBuilder"/> with the <see cref="IServiceCollection"/>.
-    /// <br></br><br></br>This method will also try to register other builders implementing <see cref="IEnhancedDiscordEmbedBuilder"/> with their concrete implementations by naming convention.
-    /// </summary>
-    public static void AddEnhancedDiscordEmbedBuilders(this ContainerBuilder services)
-    {
-        services.RegisterType<EnhancedDiscordEmbedBuilder>().As<IEnhancedDiscordEmbedBuilder>().InstancePerDependency();
-
-        var pairs = GetInterfaceImplementationPairsByConvention(typeof(IEnhancedDiscordEmbedBuilder));
-
-        if (pairs.Count == 0) return;
-
-        foreach (var (intr, impl) in pairs)
-        {
-            if (impl is null) continue;
-            services.RegisterType(impl).As(intr).InstancePerDependency();
-        }
-    }
-
-    /// <summary>
-    /// Registers <see cref="IEnrichedDiscordEmbedBuilder"/> with the <see cref="IServiceCollection"/>.
-    /// <br></br><br></br>This method will also try to register other builders implementing <see cref="IEnrichedDiscordEmbedBuilder"/> with their concrete implementations by naming convention.
-    /// </summary>
-    public static void AddEnrichedDiscordEmbedBuilders(this ContainerBuilder services)
-    {
-        AddEnhancedDiscordEmbedBuilders(services);
-
-        services.RegisterType<EnrichedDiscordEmbedBuilder>().As<IEnrichedDiscordEmbedBuilder>().InstancePerDependency();
-
-        var pairs = GetInterfaceImplementationPairsByConvention(typeof(IEnrichedDiscordEmbedBuilder));
-
-        if (pairs.Count == 0) return;
-
-        foreach (var (intr, impl) in pairs)
-        {
-            if (impl is null) continue;
-            services.RegisterType(impl).As(intr).InstancePerDependency();
         }
     }
 

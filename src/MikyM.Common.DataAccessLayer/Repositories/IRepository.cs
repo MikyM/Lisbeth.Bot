@@ -24,8 +24,6 @@ public interface IRepository<TEntity> : IReadOnlyRepository<TEntity> where TEnti
 {
     void Add(TEntity entity);
     void AddRange(IEnumerable<TEntity> entities);
-    void AddOrUpdate(TEntity entity);
-    void AddOrUpdateRange(IEnumerable<TEntity> entities);
     void BeginUpdate(TEntity entity);
     void BeginUpdateRange(IEnumerable<TEntity> entities);
     void Delete(TEntity entity);

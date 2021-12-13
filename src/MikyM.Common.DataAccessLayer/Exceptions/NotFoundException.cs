@@ -15,19 +15,21 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Diagnostics.CodeAnalysis;
-using System.Net.Http;
-using Autofac;
-using MikyM.Discord.Interfaces;
+namespace MikyM.Common.DataAccessLayer.Exceptions;
 
-namespace Lisbeth.Bot.Application.Extensions;
-
-// ReSharper disable once InconsistentNaming
-public static class ILifetimeScopeExtensions
+public class NotFoundException : Exception
 {
-    public static bool TryGetDiscordService(this ILifetimeScope scope, [NotNullWhen(true)] out IDiscordService? discordService)
-        => scope.TryResolve(out discordService);
+    public NotFoundException()
+    {
+    }
 
-    public static bool TryGetHttpClientFactory(this ILifetimeScope scope, [NotNullWhen(true)] out IHttpClientFactory? httpClientFactory)
-        => scope.TryResolve(out httpClientFactory);
+    public NotFoundException(string message)
+        : base(message)
+    {
+    }
+
+    public NotFoundException(string message, Exception inner)
+        : base(message, inner)
+    {
+    }
 }

@@ -18,8 +18,12 @@
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.SlashCommands;
+using Lisbeth.Bot.Application.Discord.EmbedBuilders;
+using Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response.Prune;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.Domain.DTOs.Request;
+using Microsoft.Extensions.Logging;
+using MikyM.Discord.EmbedBuilders.Enums;
 using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.Interfaces;
 using System.Collections.Generic;
@@ -32,204 +36,103 @@ public class DiscordMessageService : IDiscordMessageService
     private readonly IDiscordService _discord;
     private readonly IGuildService _guildService;
     private readonly IPruneService _pruneService;
+    private readonly ILogger<DiscordMessageService> _logger;
+    private readonly IResponseDiscordEmbedBuilder _embedBuilder;
+    private readonly IDiscordGuildLoggerService _discordGuildLogger;
 
-    public DiscordMessageService(IDiscordService discord, IPruneService pruneService, IGuildService guildService)
+    public DiscordMessageService(IDiscordService discord, IPruneService pruneService, IGuildService guildService,
+        ILogger<DiscordMessageService> logger, IResponseDiscordEmbedBuilder embedBuilder,
+        IDiscordGuildLoggerService discordGuildLogger)
     {
         _pruneService = pruneService;
         _discord = discord;
         _guildService = guildService;
+        _logger = logger;
+        _embedBuilder = embedBuilder;
+        _discordGuildLogger = discordGuildLogger;
     }
 
 
-    public async Task<DiscordEmbed> PruneAsync(PruneReqDto req, ulong logChannelId = 0,
-        InteractionContext? ctx = null, bool isSingleMessageDelete = false)
+    public async Task<Result<DiscordEmbed>> PruneAsync(InteractionContext ctx, PruneReqDto req)
     {
         if (req is null) throw new ArgumentNullException(nameof(req));
+        if (ctx is null) throw new ArgumentNullException(nameof(ctx));
 
-        if (ctx is null) return await PruneAsync(req, logChannelId, null, null);
-
-        return await PruneAsync(req, logChannelId, ctx.Channel, ctx.Guild, ctx.Member, ctx.ResolvedUserMentions[0],
-            null, isSingleMessageDelete, ctx.InteractionId);
+        return await PruneAsync(req, ctx.Channel, ctx.Guild, ctx.Member, ctx.InteractionId);
     }
 
-    public async Task<DiscordEmbed> PruneAsync(PruneReqDto req, ulong logChannelId = 0,
-        ContextMenuContext? ctx = null, bool isSingleMessageDelete = false)
+    public async Task<Result<DiscordEmbed>> PruneAsync(ContextMenuContext ctx, PruneReqDto req)
     {
         if (req is null) throw new ArgumentNullException(nameof(req));
+        if (ctx is null) throw new ArgumentNullException(nameof(ctx));
 
-        if (ctx is null) return await PruneAsync(req, logChannelId, null, null);
-
-        return await PruneAsync(req, logChannelId, ctx.Channel, ctx.Guild, ctx.Member,
-            ctx.TargetMessage.Author ?? ctx.TargetUser,
-            ctx.TargetMessage, isSingleMessageDelete, ctx.InteractionId);
+        return await PruneAsync(req, ctx.Channel, ctx.Guild, ctx.Member, ctx.InteractionId);
     }
 
-    public async Task<DiscordEmbed> PruneAsync(PruneReqDto req, ulong logChannelId = 0,
-        DiscordChannel? channel = null, DiscordGuild? guild = null,
-        DiscordUser? moderator = null, DiscordUser? author = null, DiscordMessage? message = null,
-        bool isSingleMessageDelete = false, ulong idToSkip = 0)
+    public async Task<Result<DiscordEmbed>> PruneAsync(PruneReqDto req, DiscordChannel channel, DiscordGuild guild,
+        DiscordMember moderator, ulong? interactionId = null)
     {
+        if (channel is null) throw new ArgumentNullException(nameof(channel));
+        if (guild is null) throw new ArgumentNullException(nameof(guild));
+        if (moderator is null) throw new ArgumentNullException(nameof(moderator));
         if (req is null) throw new ArgumentNullException(nameof(req));
 
-        if (guild is null)
-            try
-            {
-                guild = await _discord.Client.GetGuildAsync(req.GuildId ?? throw new InvalidOperationException());
-            }
-            catch (Exception)
-            {
-                throw new ArgumentException($"Guild with Id: {req.GuildId} doesn't exist.");
-            }
+        if (!moderator.IsModerator())
+            return new DiscordNotAuthorizedError();
 
-        if (author is null)
-            try
-            {
-                author = await guild.GetMemberAsync(req.TargetAuthorId ?? throw new InvalidOperationException());
-            }
-            catch (Exception)
-            {
-                throw new ArgumentException($"User with Id: {req.TargetAuthorId} isn't the guilds member.");
-            }
+        await _discordGuildLogger.LogToDiscordAsync(guild, req, DiscordModeration.Prune, moderator);
 
-        if (moderator is null)
-            try
-            {
-                moderator = await _discord.Client.GetUserAsync(req.RequestedOnBehalfOfId ??
-                                                               throw new InvalidOperationException());
-            }
-            catch (Exception)
-            {
-                throw new ArgumentException($"User with Id: {req.RequestedOnBehalfOfId} doesn't exist.");
-            }
+        int count = 0;
 
-        if (channel is null)
-            try
-            {
-                if (req.ChannelId is not null) channel = await _discord.Client.GetChannelAsync(req.ChannelId.Value);
-            }
-            catch (Exception)
-            {
-                throw new ArgumentException($"Channel with Id: {req.ChannelId} doesn't exist.");
-            }
-
-        if (message is null)
-            try
-            {
-                if (req.MessageId is not null && channel is not null)
-                    await channel.GetMessageAsync(req.MessageId.Value);
-            }
-            catch (Exception)
-            {
-                throw new ArgumentException($"message with Id: {req.MessageId} doesn't exist.");
-            }
-
-        if (logChannelId != 0)
-            try
-            {
-                channel = await _discord.Client.GetChannelAsync(logChannelId);
-            }
-            catch (Exception)
-            {
-                throw new ArgumentException($"Channel with Id: {logChannelId} doesn't exist.");
-            }
-
-        var embed = new DiscordEmbedBuilder();
-        embed.WithColor(0x18315C);
-        embed.WithAuthor($"Prune result | {moderator.GetFullUsername()}", null, moderator.AvatarUrl);
-
-        int deletedMessagesCount = 0;
-
-        List<DiscordMessage> messagesToDelete = new();
-
-
-        if (isSingleMessageDelete)
+        if (req.Count is not null)
         {
-            if (channel is not null) await channel.DeleteMessageAsync(message);
-            deletedMessagesCount++;
+            var messages = await channel.GetMessagesAsync(req.Count.Value);
+            await channel.DeleteMessagesAsync(messages);
+            count = messages.Count;
         }
-        else
+        else if (req.IsTargetedMessageDelete.HasValue && req.IsTargetedMessageDelete.Value && req.MessageId is not null)
         {
-            if (req.MessageId is null && channel is not null && req.TargetAuthorId is not null)
-            {
-                var messages = await channel.GetMessagesAsync();
-                messagesToDelete.AddRange(messages.Where(x => x.Author.Id == author.Id)
-                    .OrderByDescending(x => x.Timestamp).Take(req.Count));
-                deletedMessagesCount = messagesToDelete.Count;
-                await channel.DeleteMessagesAsync(messagesToDelete);
-            }
+            await channel.DeleteMessageAsync(await channel.GetMessageAsync(req.MessageId.Value));
+            count++;
+        }
+        else if ((req.IsTargetedMessageDelete.HasValue && !req.IsTargetedMessageDelete.Value || !req.IsTargetedMessageDelete.HasValue) && req.MessageId is not null)
+        {
+            List<DiscordMessage> messagesToDelete = new();
+            int cycles = 0;
+            bool shouldStop = false;
+            var lastMessage = await channel.GetMessageAsync(req.MessageId.Value);
+            if (lastMessage is null) return new DiscordNotFoundError("Message with given Id was not found");
 
-            if (req.MessageId is null && channel is not null && req.TargetAuthorId is null)
+            while (cycles <= 10 && !shouldStop)
             {
-                var messages = await channel.GetMessagesAsync(req.Count);
-                messagesToDelete.AddRange(messages);
-                if (idToSkip != 0)
-                    messagesToDelete.RemoveAll(x => x.Interaction is not null && x.Interaction.Id == idToSkip);
-                deletedMessagesCount = messagesToDelete.Count;
-                await channel.DeleteMessagesAsync(messagesToDelete);
-            }
-
-            if (req.MessageId is not null && channel is not null && req.TargetAuthorId is null)
-            {
-                DiscordMessage? lastMessage = message;
-                while (true)
+                messagesToDelete.Clear();
+                messagesToDelete.AddRange(
+                    await channel.GetMessagesAfterAsync(lastMessage.Id));
+                await Task.Delay(300);
+                var target = messagesToDelete.FirstOrDefault(x => x.Id == req.MessageId);
+                if (target is not null)
                 {
-                    await Task.Delay(300);
-                    messagesToDelete.Clear();
-                    messagesToDelete.AddRange(
-                        await channel.GetMessagesAfterAsync(
-                            lastMessage?.Id ?? throw new InvalidOperationException()));
-                    if (idToSkip != 0)
-                        messagesToDelete.RemoveAll(x => x.Interaction is not null && x.Interaction.Id == idToSkip);
-                    if (messagesToDelete.Count == 0)
-                        break;
-                    deletedMessagesCount += messagesToDelete.Count;
-                    lastMessage = messagesToDelete.Last();
-                    await Task.Delay(200);
-                    await channel.DeleteMessagesAsync(messagesToDelete);
+                    messagesToDelete.RemoveRange(0, messagesToDelete.IndexOf(target) + 1);
+                    shouldStop = true;
                 }
-
-                await channel.DeleteMessageAsync(message);
-                deletedMessagesCount++;
-            }
-
-            if (req.MessageId is not null && channel is not null && req.TargetAuthorId is not null)
-            {
-                DiscordMessage? lastMessage = message;
-                while (true)
-                {
-                    await Task.Delay(300);
-                    messagesToDelete.Clear();
-                    var tempMessages =
-                        await channel.GetMessagesAfterAsync(
-                            lastMessage?.Id ?? throw new InvalidOperationException());
-                    if (messagesToDelete.Count == 0)
-                        break;
-                    messagesToDelete.AddRange(tempMessages.Where(x => x.Author.Id == author?.Id));
-                    deletedMessagesCount += messagesToDelete.Count;
-                    lastMessage = messagesToDelete.Last();
-                    await Task.Delay(200);
-                    await channel.DeleteMessagesAsync(messagesToDelete);
-                }
-
-                await channel.DeleteMessageAsync(message);
-                deletedMessagesCount++;
+                lastMessage = messagesToDelete.Last();
+                await Task.Delay(200);
+                // keep interaction message
+                if (interactionId.HasValue)
+                    messagesToDelete.RemoveAll(x => x.Interaction is not null && x.Interaction.Id == interactionId.Value);
+                await channel.DeleteMessagesAsync(messagesToDelete);
+                count += messagesToDelete.Count;
+                cycles++;
             }
         }
 
-        embed.AddField("Moderator", moderator.Mention, true);
-        embed.AddField("Delete count", deletedMessagesCount.ToString(), true);
-        embed.AddField("Channel", channel?.Mention, true);
+        var res = await _pruneService.AddAsync(req, true);
+        if (!res.IsDefined(out var id)) return Result<DiscordEmbed>.FromError(res);
 
-
-        if (req.TargetAuthorId is not null)
-        {
-            embed.AddField("Target author", author.Mention, true);
-            embed.WithAuthor($"Prune result | {author.GetFullUsername()}", null, author.AvatarUrl);
-        }
-
-        _ = await _pruneService.AddAsync(req, true);
-
-        return embed;
+        return _embedBuilder.WithType(DiscordModeration.Prune)
+            .EnrichFrom(new PruneReqResponseEnricher(req, count))
+            .WithCase(id)
+            .Build();
     }
 
     public async Task LogMessageUpdatedEventAsync(MessageUpdateEventArgs args)

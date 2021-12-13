@@ -24,7 +24,6 @@ using IdGen;
 using Lisbeth.Bot.API.ExceptionMiddleware;
 using Lisbeth.Bot.API.Helpers;
 using Lisbeth.Bot.Application.Discord.ChatExport;
-using Lisbeth.Bot.Application.Helpers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
@@ -32,6 +31,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MikyM.Common.Domain;
+using MikyM.Common.Utilities;
 using MikyM.Discord.EmbedBuilders;
 using Serilog;
 using Serilog.Events;
@@ -78,7 +78,7 @@ public class Program
             builder.Services.ConfigureApiVersioning();
             builder.Services.ConfigureHealthChecks();
             builder.Services.ConfigureFluentValidation();
-            //builder.Services.AddEnrichedDiscordEmbedBuilders();
+            builder.Services.AddEnrichedDiscordEmbedBuilders();
 
             // Configure Autofac
             builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
@@ -101,11 +101,6 @@ public class Program
                 app.Services.GetAutofacRoot().Resolve<IHttpClientFactory>().CreateClient());
 
             GlobalConfiguration.Configuration.UseAutofacActivator(app.Services.GetAutofacRoot());
-
-            // Schedule recurring jobs
-            _ = app.Services.GetAutofacRoot()
-                .Resolve<IAsyncExecutor>()
-                .ExecuteAsync(async () => await RecurringJobHelper.ScheduleAllDefinedAfterDelayAsync());
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -133,6 +128,9 @@ public class Program
                 else endpoints.MapHealthChecks("/health");
                 endpoints.MapControllers();
             });
+
+            // Schedule recurring jobs
+            await RecurringJobHelper.ScheduleAllDefinedAfterDelayAsync();
 
             await app.RunAsync();
         }

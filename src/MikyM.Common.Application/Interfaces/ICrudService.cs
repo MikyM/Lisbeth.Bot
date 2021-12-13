@@ -32,11 +32,6 @@ public interface ICrudService<TEntity, TContext> : IReadOnlyService<TEntity, TCo
     Result BeginUpdateRange<TPatch>(IEnumerable<TPatch> entries)
         where TPatch : class;
 
-    Task<Result<long>> AddOrUpdateAsync<TPut>(TPut entry, bool shouldSave = false) where TPut : class;
-
-    Task<Result<IEnumerable<long>>> AddOrUpdateRangeAsync<TPut>(IEnumerable<TPut> entries, bool shouldSave = false)
-        where TPut : class;
-
     Task<Result> DeleteAsync<TDelete>(TDelete entry, bool shouldSave = false) where TDelete : class;
     Task<Result> DeleteAsync(long id, bool shouldSave = false);
 

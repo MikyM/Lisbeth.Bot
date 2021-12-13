@@ -28,6 +28,7 @@ using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.Interfaces;
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
+using MikyM.Common.Utilities.Extensions;
 
 namespace Lisbeth.Bot.Application.Discord.Services;
 

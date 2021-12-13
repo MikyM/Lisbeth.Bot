@@ -25,7 +25,6 @@ using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Buttons;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Selects;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.SelectValues;
-using Lisbeth.Bot.Application.Helpers;
 using Lisbeth.Bot.Application.Validation.Ticket;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Ticket;
@@ -36,6 +35,8 @@ using MikyM.Discord.Enums;
 using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.Interfaces;
 using System.Collections.Generic;
+using MikyM.Common.Utilities;
+using MikyM.Common.Utilities.Extensions;
 
 namespace Lisbeth.Bot.Application.Discord.Services;
 
