@@ -34,19 +34,19 @@ namespace Lisbeth.Bot.Application.Discord.Services;
 public class DiscordMessageService : IDiscordMessageService
 {
     private readonly IDiscordService _discord;
-    private readonly IGuildService _guildService;
+    private readonly IGuildDataService _guildDataService;
     private readonly IPruneService _pruneService;
     private readonly ILogger<DiscordMessageService> _logger;
     private readonly IResponseDiscordEmbedBuilder _embedBuilder;
     private readonly IDiscordGuildLoggerService _discordGuildLogger;
 
-    public DiscordMessageService(IDiscordService discord, IPruneService pruneService, IGuildService guildService,
+    public DiscordMessageService(IDiscordService discord, IPruneService pruneService, IGuildDataService guildDataService,
         ILogger<DiscordMessageService> logger, IResponseDiscordEmbedBuilder embedBuilder,
         IDiscordGuildLoggerService discordGuildLogger)
     {
         _pruneService = pruneService;
         _discord = discord;
-        _guildService = guildService;
+        _guildDataService = guildDataService;
         _logger = logger;
         _embedBuilder = embedBuilder;
         _discordGuildLogger = discordGuildLogger;
@@ -142,7 +142,7 @@ public class DiscordMessageService : IDiscordMessageService
         if (args.Author.IsBot || args.MessageBefore.Content == args.Message.Content &&
             args.MessageBefore.Attachments.Count == args.Message.Attachments.Count) return;
 
-        var res = await _guildService.GetSingleBySpecAsync<Guild>(
+        var res = await _guildDataService.GetSingleBySpecAsync<Guild>(
             new ActiveGuildByDiscordIdWithModerationSpec(args.Guild.Id));
 
         if (!res.IsDefined()) throw new ArgumentException();
@@ -206,7 +206,7 @@ public class DiscordMessageService : IDiscordMessageService
 
         if (args.Message.Author.IsBot) return;
 
-        var res = await _guildService.GetSingleBySpecAsync<Guild>(
+        var res = await _guildDataService.GetSingleBySpecAsync<Guild>(
             new ActiveGuildByDiscordIdWithModerationSpec(args.Guild.Id));
 
         if (!res.IsDefined()) throw new ArgumentException();
@@ -284,7 +284,7 @@ public class DiscordMessageService : IDiscordMessageService
     {
         if (args is null) throw new ArgumentNullException(nameof(args));
 
-        var res = await _guildService.GetSingleBySpecAsync<Guild>(
+        var res = await _guildDataService.GetSingleBySpecAsync<Guild>(
             new ActiveGuildByDiscordIdWithModerationSpec(args.Guild.Id));
 
         if (!res.IsDefined()) throw new ArgumentException();

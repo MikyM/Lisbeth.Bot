@@ -18,6 +18,7 @@
 using Autofac;
 using EFCoreSecondLevelCacheInterceptor;
 using IdGen;
+using Lisbeth.Bot.Application.Discord.Handlers.Ticket;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Application.Discord.Services;
 using Lisbeth.Bot.Application.Services;
@@ -46,6 +47,8 @@ public class AutofacContainerModule : Module
 
         // bulk register custom services - follow naming convention
         builder.RegisterAssemblyTypes(typeof(MuteService).Assembly).Where(t => t.Name.EndsWith("Service")/* && !t.Name.Contains("Discord")*/)
+            .AsImplementedInterfaces().InstancePerLifetimeScope();
+        builder.RegisterAssemblyTypes(typeof(DiscordCloseTicketHandler).Assembly).Where(t => t.Name.EndsWith("Handler")/* && !t.Name.Contains("Discord")*/)
             .AsImplementedInterfaces().InstancePerLifetimeScope();
         /*builder.RegisterAssemblyTypes(typeof(MuteService).Assembly).Where(t => t.Name.EndsWith("Service") && t.Name.Contains("Discord"))
             .AsImplementedInterfaces().InstancePerDependency();*/

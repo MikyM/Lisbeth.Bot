@@ -42,16 +42,16 @@ public class DiscordRoleMenuService : IDiscordRoleMenuService
 {
     private readonly IDiscordService _discord;
     private readonly IDiscordEmbedProvider _embedProvider;
-    private readonly IGuildService _guildService;
+    private readonly IGuildDataService _guildDataService;
     private readonly ILogger<DiscordRoleMenuService> _logger;
     private readonly IRoleMenuService _roleMenuService;
 
-    public DiscordRoleMenuService(IDiscordService discord, IGuildService guildService,
+    public DiscordRoleMenuService(IDiscordService discord, IGuildDataService guildDataService,
         IRoleMenuService roleMenuService, ILogger<DiscordRoleMenuService> logger,
         IDiscordEmbedProvider embedProvider)
     {
         _discord = discord;
-        _guildService = guildService;
+        _guildDataService = guildDataService;
         _roleMenuService = roleMenuService;
         _logger = logger;
         _embedProvider = embedProvider;
@@ -64,7 +64,7 @@ public class DiscordRoleMenuService : IDiscordRoleMenuService
 
         if (!ctx.Member.IsAdmin()) throw new DiscordNotAuthorizedException();
 
-        var guildResult = await _guildService.GetSingleBySpecAsync(new ActiveGuildByIdSpec(ctx.Guild.Id));
+        var guildResult = await _guildDataService.GetSingleBySpecAsync(new ActiveGuildByIdSpec(ctx.Guild.Id));
         if (!guildResult.IsDefined()) return Result<DiscordEmbed>.FromError(guildResult);
 
         var count = await _roleMenuService.LongCountAsync(
@@ -85,13 +85,13 @@ public class DiscordRoleMenuService : IDiscordRoleMenuService
         var wbhk = new DiscordWebhookBuilder();
 
         var mainButton = new DiscordButtonComponent(ButtonStyle.Primary,
-            nameof(RoleMenuButton.RoleMenuAddOptionButton),
+            nameof(RoleMenuButton.RoleMenuAddOption),
             "Add an option", false,
             new DiscordComponentEmoji(DiscordEmoji.FromName(_discord.Client, ":heavy_plus_sign:")));
         var mainMsg = await ctx.EditResponseAsync(wbhk.AddEmbed(mainMenu.Build()).AddComponents(mainButton));
 
         var waitResult = await intr.WaitForButtonAsync(mainMsg,
-            x => x.User.Id == ctx.Member.Id && x.Id == nameof(RoleMenuButton.RoleMenuAddOptionButton),
+            x => x.User.Id == ctx.Member.Id && x.Id == nameof(RoleMenuButton.RoleMenuAddOption),
             TimeSpan.FromMinutes(1));
 
         if (waitResult.TimedOut) return Result<DiscordEmbed>.FromError(new DiscordTimedOutError());
@@ -121,18 +121,18 @@ public class DiscordRoleMenuService : IDiscordRoleMenuService
                 .AddComponents(GetMainFinalizeButton(ctx.Client)));
 
             var waitForFinalButtonTask = intr.WaitForButtonAsync(mainMsg,
-                x => x.User.Id == ctx.Member.Id && x.Id == nameof(RoleMenuButton.RoleMenuFinalizeButton),
+                x => x.User.Id == ctx.Member.Id && x.Id == nameof(RoleMenuButton.RoleMenuFinalize),
                 TimeSpan.FromMinutes(10));
 
             var waitForNextOptionTask = intr.WaitForButtonAsync(mainMsg,
-                x => x.User.Id == ctx.Member.Id && x.Id == nameof(RoleMenuButton.RoleMenuAddOptionButton),
+                x => x.User.Id == ctx.Member.Id && x.Id == nameof(RoleMenuButton.RoleMenuAddOption),
                 TimeSpan.FromMinutes(1));
 
             var taskAggregate = await Task.WhenAny(new[] { waitForFinalButtonTask, waitForNextOptionTask });
 
             if (taskAggregate.Result.TimedOut)
                 return Result<DiscordEmbed>.FromError(new DiscordTimedOutError());
-            if (taskAggregate.Result.Result.Id == nameof(RoleMenuButton.RoleMenuFinalizeButton))
+            if (taskAggregate.Result.Result.Id == nameof(RoleMenuButton.RoleMenuFinalize))
                 break;
 
             loopCount++;
@@ -354,7 +354,7 @@ public class DiscordRoleMenuService : IDiscordRoleMenuService
         else
         {
             var guildResult =
-                await _guildService.GetSingleBySpecAsync<Guild>(
+                await _guildDataService.GetSingleBySpecAsync<Guild>(
                     new ActiveGuildByIdSpec(guild.Id));
             if (!guildResult.IsDefined())
                 return Result<(DiscordWebhookBuilder? Builder, string Text)>.FromError(guildResult);
@@ -425,7 +425,7 @@ public class DiscordRoleMenuService : IDiscordRoleMenuService
         else
         {
             var guildResult =
-                await _guildService.GetSingleBySpecAsync<Guild>(
+                await _guildDataService.GetSingleBySpecAsync<Guild>(
                     new ActiveGuildByIdSpec(guild.Id));
             if (!guildResult.IsDefined())
                 return Result<(DiscordWebhookBuilder? Builder, string Text)>.FromError(guildResult);
@@ -550,7 +550,7 @@ public class DiscordRoleMenuService : IDiscordRoleMenuService
 
     private static DiscordButtonComponent GetMainFinalizeButton(DiscordClient client)
     {
-        return new DiscordButtonComponent(ButtonStyle.Primary, nameof(RoleMenuButton.RoleMenuFinalizeButton),
+        return new DiscordButtonComponent(ButtonStyle.Primary, nameof(RoleMenuButton.RoleMenuFinalize),
             "Finalize", false,
             new DiscordComponentEmoji(DiscordEmoji.FromName(client, ":white_check_mark:")));
     }

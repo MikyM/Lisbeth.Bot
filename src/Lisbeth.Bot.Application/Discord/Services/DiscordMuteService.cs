@@ -40,17 +40,17 @@ namespace Lisbeth.Bot.Application.Discord.Services;
 public class DiscordMuteService : IDiscordMuteService
 {
     private readonly IDiscordService _discord;
-    private readonly IGuildService _guildService;
+    private readonly IGuildDataService _guildDataService;
     private readonly ILogger<DiscordMuteService> _logger;
     private readonly IMuteService _muteService;
     private readonly IDiscordGuildLoggerService _guildLogger;
     private readonly IResponseDiscordEmbedBuilder _embedBuilder;
 
-    public DiscordMuteService(IDiscordService discord, IGuildService guildService, ILogger<DiscordMuteService> logger,
+    public DiscordMuteService(IDiscordService discord, IGuildDataService guildDataService, ILogger<DiscordMuteService> logger,
         IMuteService muteService, IDiscordGuildLoggerService guildLogger, IDiscordEmbedProvider embedProvider, IResponseDiscordEmbedBuilder embedBuilder)
     {
         _discord = discord;
-        _guildService = guildService;
+        _guildDataService = guildDataService;
         _logger = logger;
         _muteService = muteService;
         _guildLogger = guildLogger;
@@ -221,7 +221,7 @@ public class DiscordMuteService : IDiscordMuteService
         if (req is null) throw new ArgumentNullException(nameof(req));
 
         var result =
-            await _guildService.GetSingleBySpecAsync(new ActiveGuildByDiscordIdWithModerationSpec(guild.Id));
+            await _guildDataService.GetSingleBySpecAsync(new ActiveGuildByDiscordIdWithModerationSpec(guild.Id));
 
         if (!result.IsDefined(out var guildEntity))
             return new DiscordNotFoundError(DiscordEntity.Guild);
@@ -275,7 +275,7 @@ public class DiscordMuteService : IDiscordMuteService
             return new DiscordNotAuthorizedError();
 
         var result =
-            await _guildService.GetSingleBySpecAsync<Guild>(new ActiveGuildByDiscordIdWithModerationSpec(guild.Id));
+            await _guildDataService.GetSingleBySpecAsync<Guild>(new ActiveGuildByDiscordIdWithModerationSpec(guild.Id));
 
         if (!result.IsDefined(out var guildEntity))
             return new DiscordNotFoundError(DiscordEntity.Guild);
@@ -324,7 +324,7 @@ public class DiscordMuteService : IDiscordMuteService
             return new DiscordNotAuthorizedError();
 
         var result =
-            await _guildService.GetSingleBySpecAsync(new ActiveGuildByDiscordIdWithModerationSpec(guild.Id));
+            await _guildDataService.GetSingleBySpecAsync(new ActiveGuildByDiscordIdWithModerationSpec(guild.Id));
 
         if (!result.IsDefined(out var guildEntity))
             return new DiscordNotFoundError(DiscordEntity.Guild);

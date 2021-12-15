@@ -17,6 +17,8 @@
 
 using System.Collections.Generic;
 using Hangfire;
+using Lisbeth.Bot.Application.Discord.Handlers.Ticket.Interfaces;
+using Lisbeth.Bot.Application.Discord.Requests.Ticket;
 using Serilog;
 
 namespace Lisbeth.Bot.API.Helpers;
@@ -39,11 +41,27 @@ public static class RecurringJobHelper
         JobIds.Add("unban");
     }
 
+    public static void ScheduleAutomaticTicketClean()
+    {
+        RecurringJob.AddOrUpdate<IDiscordCleanClosedTicketsHandler>("unmute", x => x.HandleAsync(new CleanClosedTicketsRequest()), Cron.Hourly,
+            TimeZoneInfo.Utc, "ticketing");
+        JobIds.Add("ticketClean");
+    }
+
+    public static void ScheduleAutomaticTicketClose()
+    {
+        RecurringJob.AddOrUpdate<IDiscordCloseInactiveTicketsHandler>("unmute", x => x.HandleAsync(new CloseInactiveTicketsRequest()), Cron.Hourly,
+            TimeZoneInfo.Utc, "ticketing");
+        JobIds.Add("ticketClose");
+    }
+
     public static async Task ScheduleAllDefinedAfterDelayAsync()
     {
         await Task.Delay(3000);
         ScheduleAutomaticUnban();
         ScheduleAutomaticUnmute();
+        ScheduleAutomaticTicketClean();
+        ScheduleAutomaticTicketClose();
         Log.Logger.Information("Recurring jobs scheduled.");
     }
 }

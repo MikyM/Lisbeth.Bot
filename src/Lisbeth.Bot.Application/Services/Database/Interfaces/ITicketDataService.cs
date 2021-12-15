@@ -22,7 +22,7 @@ using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 
 namespace Lisbeth.Bot.Application.Services.Database.Interfaces;
 
-public interface ITicketService : ICrudService<Ticket, LisbethBotDbContext>
+public interface ITicketDataService : ICrudService<Ticket, LisbethBotDbContext>
 {
     Task<Result<Ticket>> CloseAsync(TicketCloseReqDto req, bool shouldSave = false);
     Task<Result<Ticket>> CloseAsync(TicketCloseReqDto req, Ticket ticket);

@@ -32,10 +32,10 @@ public class EmbedConfigEventHandler : IDiscordMiscEventsSubscriber
         switch (args.Id)
         {
             case nameof(EmbedConfigSelect.EmbedConfigMainSelect):
-            case nameof(EmbedConfigButton.EmbedConfigConfirmButton):
-            case nameof(EmbedConfigButton.EmbedConfigAbortButton):
-            case nameof(EmbedConfigButton.EmbedConfigFinalButton):
-            case nameof(EmbedConfigButton.EmbedConfigContinueButton):
+            case nameof(EmbedConfigButton.EmbedConfigConfirm):
+            case nameof(EmbedConfigButton.EmbedConfigAbort):
+            case nameof(EmbedConfigButton.EmbedConfigFinal):
+            case nameof(EmbedConfigButton.EmbedConfigContinue):
                 await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
                 break;
         }

@@ -19,12 +19,13 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using Lisbeth.Bot.Application.Discord.ChatExport;
+using Lisbeth.Bot.Application.Discord.Handlers.Ticket.Interfaces;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Buttons;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Selects;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.SelectValues;
+using Lisbeth.Bot.Application.Discord.Requests.Ticket;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
-using Microsoft.Extensions.Logging;
 using MikyM.Common.Utilities;
 using MikyM.Discord.Events;
 
@@ -34,15 +35,10 @@ namespace Lisbeth.Bot.Application.Discord.EventHandlers;
 public class TicketEventsHandler : IDiscordMiscEventsSubscriber, IDiscordChannelEventsSubscriber
 {
     private readonly IAsyncExecutor _asyncExecutor;
-    private readonly ILogger<TicketEventsHandler> _logger;
-    private readonly ITicketQueueService _ticketQueueService;
 
-    public TicketEventsHandler(IAsyncExecutor asyncExecutor, ILogger<TicketEventsHandler> logger,
-        ITicketQueueService ticketQueueService)
+    public TicketEventsHandler(IAsyncExecutor asyncExecutor)
     {
         _asyncExecutor = asyncExecutor;
-        _logger = logger;
-        _ticketQueueService = ticketQueueService;
     }
 
     public Task DiscordOnChannelCreated(DiscordClient sender, ChannelCreateEventArgs args)
@@ -57,7 +53,7 @@ public class TicketEventsHandler : IDiscordMiscEventsSubscriber, IDiscordChannel
 
     public Task DiscordOnChannelDeleted(DiscordClient sender, ChannelDeleteEventArgs args)
     {
-        _ = _asyncExecutor.ExecuteAsync<ITicketService>(async x =>
+        _ = _asyncExecutor.ExecuteAsync<ITicketDataService>(async x =>
             await x.CheckForDeletedTicketChannelAsync(args.Channel.Id, args.Guild.Id, sender.CurrentUser.Id));
         return Task.CompletedTask;
     }
@@ -77,13 +73,14 @@ public class TicketEventsHandler : IDiscordMiscEventsSubscriber, IDiscordChannel
     {
         switch (args.Id)
         {
-            case nameof(TicketButton.TicketCloseButton):
-                await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
-                var closeReq = new TicketCloseReqDto(null, null, args.Guild.Id, args.Channel.Id, args.User.Id);
-                _ = _asyncExecutor.ExecuteAsync<IDiscordTicketService>(async x =>
-                    await x.CloseTicketAsync(args.Interaction, closeReq));
+            case nameof(TicketButton.TicketClose):
+                await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
+                    new DiscordInteractionResponseBuilder().AsEphemeral(true));
+                var handleCloseButtonReq = new CloseTicketRequest(args.Interaction);
+                _ = _asyncExecutor.ExecuteAsync<IDiscordCloseTicketHandler>(x =>
+                    x.HandleAsync(handleCloseButtonReq));
                 break;
-            case nameof(TicketButton.TicketOpenButton):
+            case nameof(TicketButton.TicketOpen):
                 await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
                     new DiscordInteractionResponseBuilder().AsEphemeral(true));
                 var openReq = new TicketOpenReqDto { GuildId = args.Guild.Id, RequestedOnBehalfOfId = args.User.Id };
@@ -99,15 +96,27 @@ public class TicketEventsHandler : IDiscordMiscEventsSubscriber, IDiscordChannel
                             GuildId = args.Guild.Id, ChannelId = args.Channel.Id,
                             RequestedOnBehalfOfId = args.User.Id
                         };
-                        _ = _asyncExecutor.ExecuteAsync<IDiscordTicketService>(async x =>
-                            await x.ReopenTicketAsync(args.Interaction, req));
+                        _ = _asyncExecutor.ExecuteAsync<IDiscordReopenTicketHandler>(async x =>
+                            await x.HandleAsync(new ReopenTicketRequest(req, args.Interaction)));
                         break;
                     case nameof(TicketSelectValue.TicketTranscriptValue):
                         _ = _asyncExecutor.ExecuteAsync<IDiscordChatExportService>(async x =>
                             await x.ExportToHtmlAsync(args.Interaction));
                         break;
                 }
-
+                break;
+            case nameof(TicketButton.TicketCloseConfirm):
+                await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+                var closeReq = new TicketCloseReqDto(null, args.Guild.Id, args.Channel.Id, args.User.Id);
+                _ = _asyncExecutor.ExecuteAsync<IDiscordConfirmCloseTicketHandler>(async x =>
+                    await x.HandleAsync(new ConfirmCloseTicketRequest(closeReq, args.Interaction)));
+                break;
+            case nameof(TicketButton.TicketCloseReject):
+                await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
+                    new DiscordInteractionResponseBuilder().AsEphemeral(true));
+                var rejectReq = new RejectCloseTicketRequest(args.Interaction, args.Message);
+                _ = _asyncExecutor.ExecuteAsync<IDiscordRejectCloseTicketHandler>(x =>
+                    x.HandleAsync(rejectReq));
                 break;
         }
     }

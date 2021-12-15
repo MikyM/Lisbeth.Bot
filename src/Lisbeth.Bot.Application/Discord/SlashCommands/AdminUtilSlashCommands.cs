@@ -17,15 +17,15 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 [SlashModuleLifespan(SlashModuleLifespan.Scoped)]
 public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
 {
-    private readonly IGuildService _guildService;
+    private readonly IGuildDataService _guildDataService;
     private readonly IDiscordGuildService _discordGuildService;
     private readonly IDiscordTicketService _discordTicketService;
     private readonly IDiscordEmbedConfiguratorService<TicketingConfig> _embedConfiguratorService;
 
-    public AdminUtilSlashCommands(IGuildService guildService, IDiscordGuildService discordGuildService,
+    public AdminUtilSlashCommands(IGuildDataService guildDataService, IDiscordGuildService discordGuildService,
         IDiscordTicketService discordTicketService, IDiscordEmbedConfiguratorService<TicketingConfig> embedConfiguratorService)
     {
-        _guildService = guildService;
+        _guildDataService = guildDataService;
         _discordGuildService = discordGuildService;
         _discordTicketService = discordTicketService;
         _embedConfiguratorService = embedConfiguratorService;
@@ -226,7 +226,7 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
             new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
-        var res = await this._guildService!.GetSingleBySpecAsync<Guild>(
+        var res = await this._guildDataService!.GetSingleBySpecAsync<Guild>(
             new ActiveGuildByDiscordIdWithTicketingSpecifications(ctx.Guild.Id));
         if (!res.IsDefined()) throw new ArgumentException("Guild not found in database");
 
@@ -238,9 +238,9 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
             MessageUpdatedEventsLogChannelId = updatedChannel.Id
         };
 
-        this._guildService.BeginUpdate(guild);
+        this._guildDataService.BeginUpdate(guild);
         guild.SetModerationConfig(modConfig);
-        await this._guildService.CommitAsync();
+        await this._guildDataService.CommitAsync();
 
         await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("Done"));
     }
@@ -255,7 +255,7 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
 
         var guild = new Guild { GuildId = ctx.Guild.Id, UserId = ctx.User.Id, IsDisabled = false };
 
-        await this._guildService!.AddAsync(guild, true);
+        await this._guildDataService!.AddAsync(guild, true);
 
         await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("Done"));
     }

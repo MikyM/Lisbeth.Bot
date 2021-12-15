@@ -19,6 +19,8 @@ namespace Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Buttons;
 
 public enum TicketButton
 {
-    TicketCloseButton,
-    TicketOpenButton
+    TicketClose,
+    TicketOpen,
+    TicketCloseConfirm,
+    TicketCloseReject
 }

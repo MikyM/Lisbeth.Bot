@@ -27,9 +27,9 @@ using MikyM.Common.DataAccessLayer.UnitOfWork;
 namespace Lisbeth.Bot.Application.Services.Database;
 
 [UsedImplicitly]
-public class TicketService : CrudService<Ticket, LisbethBotDbContext>, ITicketService
+public class TicketDataService : CrudService<Ticket, LisbethBotDbContext>, ITicketDataService
 {
-    public TicketService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
+    public TicketDataService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
     {
     }
 
@@ -41,7 +41,7 @@ public class TicketService : CrudService<Ticket, LisbethBotDbContext>, ITicketSe
 
         if (!res.IsDefined()) return Result.FromSuccess();
 
-        var req = new TicketCloseReqDto(res.Entity.Id, res.Entity.UserId, res.Entity.GuildId, res.Entity.ChannelId,
+        var req = new TicketCloseReqDto(res.Entity.UserId, res.Entity.GuildId, res.Entity.ChannelId,
             requestedOnBehalfOfId);
         await CloseAsync(req, res.Entity);
 
@@ -52,8 +52,8 @@ public class TicketService : CrudService<Ticket, LisbethBotDbContext>, ITicketSe
     {
         if (req is null) throw new ArgumentNullException(nameof(req));
 
-        var res = await base.GetSingleBySpecAsync<Ticket>(new TicketBaseGetSpecifications(req.Id, req.OwnerId,
-            req.GuildId, req.ChannelId, req.GuildSpecificId));
+        var res = await base.GetSingleBySpecAsync<Ticket>(new TicketBaseGetSpecifications(null, req.OwnerId,
+            req.GuildId, req.ChannelId, null));
 
         if (!res.IsDefined()) return Result<Ticket>.FromError(res);
 
@@ -115,8 +115,8 @@ public class TicketService : CrudService<Ticket, LisbethBotDbContext>, ITicketSe
     {
         if (req is null) throw new ArgumentNullException(nameof(req));
 
-        var res = await base.GetSingleBySpecAsync<Ticket>(new TicketBaseGetSpecifications(req.Id, req.OwnerId,
-            req.GuildId, req.ChannelId, req.GuildSpecificId, true));
+        var res = await base.GetSingleBySpecAsync<Ticket>(new TicketBaseGetSpecifications(null, req.OwnerId,
+            req.GuildId, req.ChannelId, null, true));
 
         if (!res.IsDefined()) return Result<Ticket>.FromError(res);
 

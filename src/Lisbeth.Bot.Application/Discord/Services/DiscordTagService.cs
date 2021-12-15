@@ -32,14 +32,14 @@ public class DiscordTagService : IDiscordTagService
 {
     private readonly IDiscordService _discord;
     private readonly IDiscordEmbedProvider _embedProvider;
-    private readonly IGuildService _guildService;
+    private readonly IGuildDataService _guildDataService;
     private readonly ITagService _tagService;
 
-    public DiscordTagService(IDiscordService discord, IGuildService guildService, ITagService tagService,
+    public DiscordTagService(IDiscordService discord, IGuildDataService guildDataService, ITagService tagService,
         IDiscordEmbedProvider embedProvider)
     {
         _discord = discord;
-        _guildService = guildService;
+        _guildDataService = guildDataService;
         _tagService = tagService;
         _embedProvider = embedProvider;
     }
@@ -212,7 +212,7 @@ public class DiscordTagService : IDiscordTagService
         else
         {
             var guildCfg =
-                await _guildService.GetSingleBySpecAsync<Guild>(
+                await _guildDataService.GetSingleBySpecAsync<Guild>(
                     new ActiveGuildByDiscordIdWithTagsSpecifications(guild.Id));
             if (!guildCfg.IsDefined())
                 return Result<(DiscordEmbed? Embed, string Text)>.FromError(guildCfg);
@@ -245,7 +245,7 @@ public class DiscordTagService : IDiscordTagService
         if (req is null) throw new ArgumentNullException(nameof(req));
 
         var guildCfg =
-            await _guildService.GetSingleBySpecAsync<Guild>(
+            await _guildDataService.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithTagsSpecifications(req.GuildId));
         if (!guildCfg.IsDefined())
             return Result<DiscordEmbed>.FromError(guildCfg);
@@ -276,7 +276,7 @@ public class DiscordTagService : IDiscordTagService
         if (req is null) throw new ArgumentNullException(nameof(req));
 
         var guildCfg =
-            await _guildService.GetSingleBySpecAsync<Guild>(
+            await _guildDataService.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithTagsSpecifications(guild.Id));
         if (!guildCfg.IsDefined())
             return Result<DiscordEmbed>.FromError(guildCfg);
@@ -316,7 +316,7 @@ public class DiscordTagService : IDiscordTagService
         else
         {
             var guildCfg =
-                await _guildService.GetSingleBySpecAsync<Guild>(
+                await _guildDataService.GetSingleBySpecAsync<Guild>(
                     new ActiveGuildByDiscordIdWithTagsSpecifications(guild.Id));
             if (!guildCfg.IsDefined())
                 return Result<(DiscordEmbed? Embed, string Text)>.FromError(guildCfg);
@@ -346,7 +346,7 @@ public class DiscordTagService : IDiscordTagService
         if (req is null) throw new ArgumentNullException(nameof(req));
 
         var guildCfg =
-            await _guildService.GetSingleBySpecAsync<Guild>(
+            await _guildDataService.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithTagsSpecifications(guild.Id));
         if (!guildCfg.IsDefined())
             return Result<DiscordEmbed>.FromError(guildCfg);

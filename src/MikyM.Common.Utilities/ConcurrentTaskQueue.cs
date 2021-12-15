@@ -2,15 +2,15 @@
 
 namespace MikyM.Common.Utilities;
 
-public class TaskConcurrentQueue
+public class ConcurrentTaskQueue
 {
     private readonly SemaphoreSlim _semaphore;
     private readonly ConcurrentQueue<TaskCompletionSource<bool>> _queue = new();
 
-    public TaskConcurrentQueue()
+    public ConcurrentTaskQueue()
         => _semaphore = new SemaphoreSlim(1);
 
-    public async Task<T> EnqueueAsync<T>(Func<Task<T>> taskGenerator)
+    public async Task<T> EnqueueAsync<T>(Func<Task<T>> task)
     {
         var tcs = new TaskCompletionSource<bool>();
         _queue.Enqueue(tcs);
@@ -22,14 +22,14 @@ public class TaskConcurrentQueue
         });
         try
         {
-            return await taskGenerator();
+            return await task();
         }
         finally
         {
             _semaphore.Release();
         }
     }
-    public async Task EnqueueAsync(Func<Task> taskGenerator)
+    public async Task EnqueueAsync(Func<Task> task)
     {
         var tcs = new TaskCompletionSource<bool>();
         _queue.Enqueue(tcs);
@@ -40,7 +40,7 @@ public class TaskConcurrentQueue
         });
         try
         {
-            await taskGenerator();
+            await task();
         }
         finally
         {

@@ -4,7 +4,7 @@
 
 namespace Lisbeth.Bot.DataAccessLayer.Migrations
 {
-    public partial class req : Migration
+    public partial class request : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

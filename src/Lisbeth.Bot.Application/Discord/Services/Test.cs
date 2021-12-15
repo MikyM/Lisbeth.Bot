@@ -188,7 +188,7 @@ public class Test<T> : ITest<T> where T : EmbedConfigEntity
             var taskAggregate = await Task.WhenAny(new[] { waitForFinalButtonTask, waitForSelectTask });
 
             if (taskAggregate.Result.TimedOut ||
-                taskAggregate.Result.Result.Id == nameof(EmbedConfigButton.EmbedConfigFinalButton))
+                taskAggregate.Result.Result.Id == nameof(EmbedConfigButton.EmbedConfigFinal))
                 return Result<DiscordEmbed>.FromSuccess(resultEmbed.Build());
 
             loopCount++;
@@ -483,7 +483,7 @@ public class Test<T> : ITest<T> where T : EmbedConfigEntity
 
         switch (btnWaitResult.Result.Id)
         {
-            case nameof(EmbedConfigButton.EmbedConfigConfirmButton):
+            case nameof(EmbedConfigButton.EmbedConfigConfirm):
                 var newEmbed = _mapper.Map<EmbedConfig>(currentResult.Build());
                 if (foundEntity.EmbedConfig is null)
                 {
@@ -523,7 +523,7 @@ public class Test<T> : ITest<T> where T : EmbedConfigEntity
                 }
 
                 return Result<DiscordEmbedBuilder>.FromSuccess(currentResult);
-            case nameof(EmbedConfigButton.EmbedConfigAbortButton):
+            case nameof(EmbedConfigButton.EmbedConfigAbort):
                 return Result<DiscordEmbedBuilder>.FromError(new DiscordAbortedError());
         }
 
@@ -545,24 +545,24 @@ public class Test<T> : ITest<T> where T : EmbedConfigEntity
     private static IEnumerable<DiscordButtonComponent> GetModuleFinalizeButtons(DiscordClient client)
     {
         var confirmBtn = new DiscordButtonComponent(ButtonStyle.Primary,
-            nameof(EmbedConfigButton.EmbedConfigConfirmButton), "Confirm and save changes", false,
+            nameof(EmbedConfigButton.EmbedConfigConfirm), "Confirm and save changes", false,
             new DiscordComponentEmoji(DiscordEmoji.FromName(client, ":white_check_mark:")));
         var abortBtn = new DiscordButtonComponent(ButtonStyle.Danger,
-            nameof(EmbedConfigButton.EmbedConfigAbortButton), "Abort changes and finish", false,
+            nameof(EmbedConfigButton.EmbedConfigAbort), "Abort changes and finish", false,
             new DiscordComponentEmoji(DiscordEmoji.FromName(client, ":x:")));
         return new List<DiscordButtonComponent> { confirmBtn, abortBtn };
     }
 
     private static DiscordButtonComponent GetMainFinalizeButton(DiscordClient client)
     {
-        return new DiscordButtonComponent(ButtonStyle.Primary, nameof(EmbedConfigButton.EmbedConfigFinalButton),
+        return new DiscordButtonComponent(ButtonStyle.Primary, nameof(EmbedConfigButton.EmbedConfigFinal),
             "Finalize", false,
             new DiscordComponentEmoji(DiscordEmoji.FromName(client, ":white_check_mark:")));
     }
 
     private static DiscordButtonComponent GetContinueButton(DiscordClient client)
     {
-        return new DiscordButtonComponent(ButtonStyle.Primary, nameof(EmbedConfigButton.EmbedConfigContinueButton),
+        return new DiscordButtonComponent(ButtonStyle.Primary, nameof(EmbedConfigButton.EmbedConfigContinue),
             "Continue", false,
             new DiscordComponentEmoji(DiscordEmoji.FromName(client, ":arrow_forward:")));
     }

@@ -13,7 +13,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
 {
     [DbContext(typeof(LisbethBotDbContext))]
     [Migration("20211211171906_req")]
-    partial class req
+    partial class request
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

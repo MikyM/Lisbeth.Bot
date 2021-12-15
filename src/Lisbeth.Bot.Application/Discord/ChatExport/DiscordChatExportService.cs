@@ -34,16 +34,16 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport;
 public class DiscordChatExportService : IDiscordChatExportService
 {
     private readonly IDiscordService _discord;
-    private readonly IGuildService _guildService;
+    private readonly IGuildDataService _guildDataService;
     private readonly ILogger<DiscordChatExportService> _logger;
-    private readonly ITicketService _ticketService;
+    private readonly ITicketDataService _ticketDataService;
 
-    public DiscordChatExportService(IDiscordService discord, IGuildService guildService,
-        ITicketService ticketService, ILogger<DiscordChatExportService> logger)
+    public DiscordChatExportService(IDiscordService discord, IGuildDataService guildDataService,
+        ITicketDataService ticketDataService, ILogger<DiscordChatExportService> logger)
     {
         _discord = discord;
-        _guildService = guildService;
-        _ticketService = ticketService;
+        _guildDataService = guildDataService;
+        _ticketDataService = ticketDataService;
         _logger = logger;
     }
 
@@ -56,34 +56,10 @@ public class DiscordChatExportService : IDiscordChatExportService
         DiscordUser owner;
         Ticket ticket;
 
-        if (req.Id.HasValue)
+         if (req.OwnerId.HasValue)
         {
-            var ticketResult = await _ticketService.GetAsync(req.Id.Value);
-            if (!ticketResult.IsDefined())
-                return new NotFoundError("Opened ticket with given params doesn't exist in the database.");
-
-            ticket = ticketResult.Entity;
-            req.ChannelId = ticket.ChannelId;
-            req.GuildId = ticket.GuildId;
-            req.OwnerId = ticket.UserId;
-        }
-        else if (req.OwnerId.HasValue && req.GuildId.HasValue)
-        {
-            var res = await _ticketService.GetSingleBySpecAsync(
+            var res = await _ticketDataService.GetSingleBySpecAsync(
                 new TicketBaseGetSpecifications(null, req.OwnerId, req.GuildId, null, null, false, 1));
-            if (!res.IsDefined())
-                return new NotFoundError("Opened ticket with given params doesn't exist in the database.");
-
-            ticket = res.Entity;
-            req.ChannelId = ticket.ChannelId;
-            req.GuildId = ticket.GuildId;
-            req.OwnerId = ticket.UserId;
-        }
-        else if (req.GuildSpecificId.HasValue && req.GuildId.HasValue)
-        {
-            var res = await _ticketService.GetSingleBySpecAsync<Ticket>(
-                new TicketBaseGetSpecifications(null, null, req.GuildId, null, req.GuildSpecificId.Value, false,
-                    1));
             if (!res.IsDefined())
                 return new NotFoundError("Opened ticket with given params doesn't exist in the database.");
 
@@ -94,7 +70,7 @@ public class DiscordChatExportService : IDiscordChatExportService
         }
         else
         {
-            var res = await _ticketService.GetSingleBySpecAsync<Ticket>(
+            var res = await _ticketDataService.GetSingleBySpecAsync<Ticket>(
                 new TicketBaseGetSpecifications(null, null, null, req.ChannelId, null, false, 1));
             if (!res.IsDefined())
                 return new NotFoundError("Opened ticket with given params doesn't exist in the database.");
@@ -160,7 +136,7 @@ public class DiscordChatExportService : IDiscordChatExportService
             if (requestingMember is null) throw new ArgumentNullException(nameof(requestingMember));
 
             var resGuild =
-                await _guildService.GetSingleBySpecAsync(new ActiveGuildByDiscordIdWithTicketingSpecifications(guild.Id));
+                await _guildDataService.GetSingleBySpecAsync(new ActiveGuildByDiscordIdWithTicketingSpecifications(guild.Id));
 
             if (!resGuild.IsDefined()) return new NotFoundError("Guild doesn't exist in database.");
 
@@ -171,7 +147,7 @@ public class DiscordChatExportService : IDiscordChatExportService
 
             if (ticket is null)
             {
-                var res = await _ticketService.GetSingleBySpecAsync(
+                var res = await _ticketDataService.GetSingleBySpecAsync(
                     new TicketByChannelIdOrGuildAndOwnerIdSpec(target.Id, null, null));
 
                 if (!res.IsDefined(out ticket)) return new NotFoundError("Ticket doesn't exist in database.");

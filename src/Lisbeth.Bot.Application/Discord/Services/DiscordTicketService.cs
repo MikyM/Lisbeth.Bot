@@ -46,16 +46,16 @@ public class DiscordTicketService : IDiscordTicketService
     private readonly IAsyncExecutor _asyncExecutor;
     private readonly IDiscordService _discord;
     private readonly IDiscordEmbedProvider _embedProvider;
-    private readonly IGuildService _guildService;
+    private readonly IGuildDataService _guildDataService;
     private readonly ILogger<DiscordTicketService> _logger;
-    private readonly ITicketService _ticketService;
+    private readonly ITicketDataService _ticketDataService;
 
-    public DiscordTicketService(IDiscordService discord, ITicketService ticketService, IGuildService guildService,
+    public DiscordTicketService(IDiscordService discord, ITicketDataService ticketDataService, IGuildDataService guildDataService,
         ILogger<DiscordTicketService> logger, IAsyncExecutor asyncExecutor, IDiscordEmbedProvider embedProvider)
     {
         _discord = discord;
-        _ticketService = ticketService;
-        _guildService = guildService;
+        _ticketDataService = ticketDataService;
+        _guildDataService = guildDataService;
         _logger = logger;
         _asyncExecutor = asyncExecutor;
         _embedProvider = embedProvider;
@@ -219,7 +219,7 @@ public class DiscordTicketService : IDiscordTicketService
         {
             foreach (var (guildId, _) in _discord.Client.Guilds)
             {
-                var res = await _guildService.GetSingleBySpecAsync<Guild>(
+                var res = await _guildDataService.GetSingleBySpecAsync<Guild>(
                     new ActiveGuildByDiscordIdWithTicketingAndInactiveTicketsSpecifications(guildId));
 
                 if (!res.IsDefined()) continue;
@@ -274,7 +274,7 @@ public class DiscordTicketService : IDiscordTicketService
         {
             foreach (var (guildId, guild) in _discord.Client.Guilds)
             {
-                var res = await _guildService.GetSingleBySpecAsync<Guild>(
+                var res = await _guildDataService.GetSingleBySpecAsync<Guild>(
                     new ActiveGuildByDiscordIdWithTicketingAndTicketsSpecifications(guildId));
 
                 if (!res.IsDefined()) continue;
@@ -305,11 +305,11 @@ public class DiscordTicketService : IDiscordTicketService
                     var msg = lastMessage?.FirstOrDefault();
                     if (msg is null) continue;
 
-                    if (!((DiscordMember)msg.Author).Permissions.HasPermission(Permissions.BanMembers)) continue;
+                    if (!((DiscordMember)msg.Author).IsModerator()) continue;
 
                     var timeDifference = DateTime.UtcNow.Subtract(msg.Timestamp.UtcDateTime);
 
-                    var req = new TicketCloseReqDto(null, null, guildId, openedTicketChannel.Id,
+                    var req = new TicketCloseReqDto(null, guildId, openedTicketChannel.Id,
                         _discord.Client.CurrentUser.Id);
 
                     var validator = new TicketCloseReqValidator(_discord);
@@ -336,7 +336,7 @@ public class DiscordTicketService : IDiscordTicketService
 
     public async Task<Result<DiscordMessageBuilder>> GetTicketCenterEmbedAsync(InteractionContext ctx)
     {
-        var res = await _guildService.GetSingleBySpecAsync<Guild>(
+        var res = await _guildDataService.GetSingleBySpecAsync<Guild>(
             new ActiveGuildByDiscordIdWithTicketingSpecifications(ctx.Guild.Id));
 
         if (!res.IsDefined()) return Result<DiscordMessageBuilder>.FromError(res);
@@ -359,7 +359,7 @@ public class DiscordTicketService : IDiscordTicketService
 
         embed.WithFooter("Click on the button below to create a ticket");
 
-        var btn = new DiscordButtonComponent(ButtonStyle.Primary, nameof(TicketButton.TicketOpenButton), "Open a ticket", false,
+        var btn = new DiscordButtonComponent(ButtonStyle.Primary, nameof(TicketButton.TicketOpen), "Open a ticket", false,
             new DiscordComponentEmoji(envelopeEmoji));
         var builder = new DiscordMessageBuilder();
         builder.AddEmbed(embed.Build());
@@ -378,7 +378,7 @@ public class DiscordTicketService : IDiscordTicketService
         if (owner.Guild.Id != guild.Id) return new DiscordNotAuthorizedError(nameof(owner));
 
         var guildRes =
-            await _guildService.GetSingleBySpecAsync(
+            await _guildDataService.GetSingleBySpecAsync(
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(guild.Id));
 
         if (!guildRes.IsDefined(out var guildCfg)) return Result<DiscordMessageBuilder>.FromError(guildRes);
@@ -386,7 +386,7 @@ public class DiscordTicketService : IDiscordTicketService
         if (guildCfg.TicketingConfig is null)
             return new DisabledEntityError($"Guild with Id:{guild.Id} doesn't have ticketing enabled.");
 
-        var ticketRes = await _ticketService.OpenAsync(req);
+        var ticketRes = await _ticketDataService.OpenAsync(req);
         if (!ticketRes.IsDefined(out var ticket))
         {
             var failEmbed = new DiscordEmbedBuilder();
@@ -400,9 +400,9 @@ public class DiscordTicketService : IDiscordTicketService
         }
 
         req.GuildSpecificId = guildCfg.TicketingConfig.LastTicketId + 1;
-        _guildService.BeginUpdate(guildCfg);
+        _guildDataService.BeginUpdate(guildCfg);
         guildCfg.TicketingConfig.LastTicketId++;
-        await _guildService.CommitAsync();
+        await _guildDataService.CommitAsync();
 
 
 
@@ -423,7 +423,7 @@ public class DiscordTicketService : IDiscordTicketService
 
         embed.WithFooter($"Ticket Id: {req.GuildSpecificId}");
 
-        var btn = new DiscordButtonComponent(ButtonStyle.Primary, nameof(TicketButton.TicketCloseButton),
+        var btn = new DiscordButtonComponent(ButtonStyle.Primary, nameof(TicketButton.TicketClose),
             "Close this ticket", false,
             new DiscordComponentEmoji(DiscordEmoji.FromName(_discord.Client, ":lock:")));
 
@@ -470,10 +470,10 @@ public class DiscordTicketService : IDiscordTicketService
                     .AsEphemeral(true));
             }
 
-            _ticketService.BeginUpdate(ticket);
+            _ticketDataService.BeginUpdate(ticket);
             ticket.ChannelId = newTicketChannel.Id;
             ticket.MessageOpenId = msg.Id;
-            await _ticketService.SetAddedUsersAsync(ticket, newTicketChannel.Users.Select(x => x.Id));
+            await _ticketDataService.SetAddedUsersAsync(ticket, newTicketChannel.Users.Select(x => x.Id));
 
             List<ulong> roleIds = new();
             foreach (var overwrite in newTicketChannel.PermissionOverwrites)
@@ -497,8 +497,8 @@ public class DiscordTicketService : IDiscordTicketService
                 await Task.Delay(500);
             }
 
-            await _ticketService.SetAddedRolesAsync(ticket, roleIds);
-            await _ticketService.CommitAsync();
+            await _ticketDataService.SetAddedRolesAsync(ticket, roleIds);
+            await _ticketDataService.CommitAsync();
         }
         catch (Exception ex)
         {
@@ -521,17 +521,15 @@ public class DiscordTicketService : IDiscordTicketService
         if (target.Guild.Id != guild.Id) return new DiscordNotAuthorizedError(nameof(target));
 
         var guildRes =
-            await _guildService.GetSingleBySpecAsync<Guild>(
+            await _guildDataService.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(guild.Id));
 
-        if (!guildRes.IsDefined()) return Result<DiscordMessageBuilder>.FromError(guildRes);
+        if (!guildRes.IsDefined(out var guildCfg)) return Result<DiscordMessageBuilder>.FromError(guildRes);
 
-        if (guildRes.Entity.TicketingConfig is null)
+        if (guildCfg.TicketingConfig is null)
             return new DisabledEntityError($"Guild with Id:{guild.Id} doesn't have ticketing enabled.");
 
-        var guildCfg = guildRes.Entity;
-
-        var res = await _ticketService.GetSingleBySpecAsync(
+        var res = await _ticketDataService.GetSingleBySpecAsync(
             new TicketByChannelIdOrGuildAndOwnerIdSpec(req.ChannelId, req.GuildId, req.OwnerId));
 
         if (!res.IsDefined(out var ticket)) return new NotFoundError($"Ticket with channel Id: {target.Id} doesn't exist.");
@@ -611,7 +609,7 @@ public class DiscordTicketService : IDiscordTicketService
         await target.ModifyAsync(x => x.Parent = closedCat);
 
         req.ClosedMessageId = closeMsg.Id;
-        await _ticketService.CloseAsync(req, ticket);
+        await _ticketDataService.CloseAsync(req, ticket);
 
         if (ticket.IsPrivate) return msgBuilder;
 
@@ -634,7 +632,7 @@ public class DiscordTicketService : IDiscordTicketService
         if (target.Guild.Id != guild.Id) throw new ArgumentException(nameof(target));
 
         var guildRes =
-            await _guildService.GetSingleBySpecAsync<Guild>(
+            await _guildDataService.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(guild.Id));
 
         if (!guildRes.IsDefined()) return Result<DiscordMessageBuilder>.FromError(guildRes);
@@ -644,7 +642,7 @@ public class DiscordTicketService : IDiscordTicketService
 
         var guildCfg = guildRes.Entity;
 
-        var res = await _ticketService.GetSingleBySpecAsync(new TicketByChannelIdOrGuildAndOwnerIdSpec(req.ChannelId, req.GuildId, req.OwnerId));
+        var res = await _ticketDataService.GetSingleBySpecAsync(new TicketByChannelIdOrGuildAndOwnerIdSpec(req.ChannelId, req.GuildId, req.OwnerId));
 
         if (!res.IsDefined(out var ticket)) return new NotFoundError($"Ticket with channel Id: {target.Id} doesn't exist.");
 
@@ -710,7 +708,7 @@ public class DiscordTicketService : IDiscordTicketService
             await target.DeleteMessageAsync(await target.GetMessageAsync(ticket.MessageCloseId.Value));
 
         req.ReopenMessageId = reopenMsg.Id;
-        await _ticketService.ReopenAsync(req, ticket);
+        await _ticketDataService.ReopenAsync(req, ticket);
 
         return msgBuilder;
     }
@@ -730,7 +728,7 @@ public class DiscordTicketService : IDiscordTicketService
         if (targetTicketChannel.Guild.Id != guild.Id) throw new ArgumentException(nameof(targetTicketChannel));
 
         var guildRes =
-            await _guildService.GetSingleBySpecAsync<Guild>(
+            await _guildDataService.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(guild.Id));
 
         if (!guildRes.IsDefined()) return Result<DiscordEmbed>.FromError(guildRes);
@@ -740,8 +738,8 @@ public class DiscordTicketService : IDiscordTicketService
 
         var guildCfg = guildRes.Entity;
 
-        var res = await _ticketService.GetSingleBySpecAsync<Ticket>(
-            new TicketBaseGetSpecifications(req.Id, req.OwnerId, req.GuildId, req.ChannelId, req.GuildSpecificId));
+        var res = await _ticketDataService.GetSingleBySpecAsync<Domain.Entities.Ticket>(
+            new TicketBaseGetSpecifications(null, req.OwnerId, req.GuildId, req.ChannelId, null));
 
 
         if (!res.IsDefined()) return new NotFoundError($"Ticket with channel Id: {req.ChannelId} doesn't exist.");
@@ -758,8 +756,8 @@ public class DiscordTicketService : IDiscordTicketService
         if (targetRole is null)
         {
             await targetTicketChannel.AddOverwriteAsync(targetMember, Permissions.AccessChannels);
-            await _ticketService.SetAddedUsersAsync(ticket, targetTicketChannel.Users.Select(x => x.Id));
-            await _ticketService.CheckAndSetPrivacyAsync(ticket, guild);
+            await _ticketDataService.SetAddedUsersAsync(ticket, targetTicketChannel.Users.Select(x => x.Id));
+            await _ticketDataService.CheckAndSetPrivacyAsync(ticket, guild);
         }
         else
         {
@@ -786,8 +784,8 @@ public class DiscordTicketService : IDiscordTicketService
                 await Task.Delay(500);
             }
 
-            await _ticketService.SetAddedRolesAsync(ticket, roleIds);
-            await _ticketService.CheckAndSetPrivacyAsync(ticket, guild);
+            await _ticketDataService.SetAddedRolesAsync(ticket, roleIds);
+            await _ticketDataService.CheckAndSetPrivacyAsync(ticket, guild);
         }
 
         var embed = new DiscordEmbedBuilder();
@@ -817,7 +815,7 @@ public class DiscordTicketService : IDiscordTicketService
         if (targetTicketChannel.Guild.Id != guild.Id) throw new ArgumentException(nameof(targetTicketChannel));
 
         var guildRes =
-            await _guildService.GetSingleBySpecAsync<Guild>(
+            await _guildDataService.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(guild.Id));
 
         if (!guildRes.IsDefined()) return Result<DiscordEmbed>.FromError(guildRes);
@@ -827,8 +825,8 @@ public class DiscordTicketService : IDiscordTicketService
 
         var guildCfg = guildRes.Entity;
 
-        var res = await _ticketService.GetSingleBySpecAsync<Ticket>(
-            new TicketBaseGetSpecifications(req.Id, req.OwnerId, req.GuildId, req.ChannelId, req.GuildSpecificId));
+        var res = await _ticketDataService.GetSingleBySpecAsync<Domain.Entities.Ticket>(
+            new TicketBaseGetSpecifications(null, req.OwnerId, req.GuildId, req.ChannelId, null));
 
         if (!res.IsDefined()) return new NotFoundError($"Ticket with channel Id: {req.ChannelId} doesn't exist.");
 
@@ -844,8 +842,8 @@ public class DiscordTicketService : IDiscordTicketService
         if (targetRole is null)
         {
             await targetTicketChannel.AddOverwriteAsync(targetMember, deny: Permissions.AccessChannels);
-            await _ticketService.SetAddedUsersAsync(ticket, targetTicketChannel.Users.Select(x => x.Id));
-            await _ticketService.CheckAndSetPrivacyAsync(ticket, guild);
+            await _ticketDataService.SetAddedUsersAsync(ticket, targetTicketChannel.Users.Select(x => x.Id));
+            await _ticketDataService.CheckAndSetPrivacyAsync(ticket, guild);
         }
         else
         {
@@ -873,8 +871,8 @@ public class DiscordTicketService : IDiscordTicketService
                 await Task.Delay(500);
             }
 
-            await _ticketService.SetAddedRolesAsync(ticket, roleIds);
-            await _ticketService.CheckAndSetPrivacyAsync(ticket, guild);
+            await _ticketDataService.SetAddedRolesAsync(ticket, roleIds);
+            await _ticketDataService.CheckAndSetPrivacyAsync(ticket, guild);
         }
 
         var embed = new DiscordEmbedBuilder();
@@ -898,33 +896,11 @@ public class DiscordTicketService : IDiscordTicketService
         DiscordChannel? targetTicketChannel = null;
         Ticket ticket;
 
-        if (req.Id.HasValue)
+        
+        if (req.OwnerId.HasValue)
         {
-            var res = await _ticketService.GetAsync(req.Id.Value);
-            if (!res.IsDefined())
-                return Result<(Ticket Ticket, DiscordMember RequestingMember, DiscordGuild Guild, DiscordChannel
-                    Channel)>.FromError(res);
-
-            ticket = res.Entity;
-            req.ChannelId = ticket.ChannelId;
-            req.GuildId = ticket.GuildId;
-        }
-        else if (req.OwnerId.HasValue && req.GuildId.HasValue)
-        {
-            var res = await _ticketService.GetSingleBySpecAsync<Ticket>(
+            var res = await _ticketDataService.GetSingleBySpecAsync<Ticket>(
                 new TicketBaseGetSpecifications(null, req.OwnerId, req.GuildId, null, null, false, 1));
-            if (!res.IsDefined())
-                return Result<(Ticket Ticket, DiscordMember RequestingMember, DiscordGuild Guild, DiscordChannel
-                    Channel)>.FromError(res);
-
-            ticket = res.Entity;
-            req.ChannelId = ticket.ChannelId;
-            req.GuildId = ticket.GuildId;
-        }
-        else if (req.GuildSpecificId.HasValue && req.GuildId.HasValue)
-        {
-            var res = await _ticketService.GetSingleBySpecAsync<Ticket>(
-                new TicketBaseGetSpecifications(null, null, req.GuildId, null, req.GuildSpecificId, false, 1));
             if (!res.IsDefined())
                 return Result<(Ticket Ticket, DiscordMember RequestingMember, DiscordGuild Guild, DiscordChannel
                     Channel)>.FromError(res);
@@ -945,10 +921,10 @@ public class DiscordTicketService : IDiscordTicketService
                 return new DiscordNotFoundError(DiscordEntity.Channel);
             }
 
-            var res = await _ticketService.GetSingleBySpecAsync<Ticket>(
+            var res = await _ticketDataService.GetSingleBySpecAsync<Domain.Entities.Ticket>(
                 new TicketBaseGetSpecifications(null, null, null, req.ChannelId.Value, null, false, 1));
             if (!res.IsDefined())
-                return Result<(Ticket Ticket, DiscordMember RequestingMember, DiscordGuild Guild, DiscordChannel
+                return Result<(Domain.Entities.Ticket Ticket, DiscordMember RequestingMember, DiscordGuild Guild, DiscordChannel
                     Channel)>.FromError(res);
 
             ticket = res.Entity;

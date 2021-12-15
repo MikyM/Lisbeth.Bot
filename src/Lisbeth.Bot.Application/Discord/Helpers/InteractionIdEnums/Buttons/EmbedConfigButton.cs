@@ -19,8 +19,8 @@ namespace Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Buttons;
 
 public enum EmbedConfigButton
 {
-    EmbedConfigConfirmButton,
-    EmbedConfigAbortButton,
-    EmbedConfigFinalButton,
-    EmbedConfigContinueButton
+    EmbedConfigConfirm,
+    EmbedConfigAbort,
+    EmbedConfigFinal,
+    EmbedConfigContinue
 }

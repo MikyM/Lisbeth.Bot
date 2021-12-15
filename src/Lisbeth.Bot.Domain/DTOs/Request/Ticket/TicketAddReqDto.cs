@@ -21,10 +21,9 @@ namespace Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 
 public class TicketAddReqDto : BaseTicketGetReqDto
 {
-    public TicketAddReqDto(long? id, ulong? ownerId, ulong? guildId, ulong? channelId, ulong requestedOnBehalfOfId,
+    public TicketAddReqDto(ulong? ownerId, ulong guildId, ulong? channelId, ulong requestedOnBehalfOfId,
         ulong snowflakeId)
     {
-        Id = id;
         OwnerId = ownerId;
         GuildId = guildId;
         ChannelId = channelId;

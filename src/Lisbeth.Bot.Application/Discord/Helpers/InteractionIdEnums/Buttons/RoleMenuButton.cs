@@ -19,6 +19,6 @@ namespace Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Buttons;
 
 public enum RoleMenuButton
 {
-    RoleMenuFinalizeButton,
-    RoleMenuAddOptionButton
+    RoleMenuFinalize,
+    RoleMenuAddOption
 }

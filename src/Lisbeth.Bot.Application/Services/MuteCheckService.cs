@@ -25,13 +25,13 @@ namespace Lisbeth.Bot.Application.Services;
 [UsedImplicitly]
 public class MuteCheckService : IMuteCheckService
 {
-    private readonly IGuildService _guildService;
+    private readonly IGuildDataService _guildDataService;
     private readonly IMuteService _muteService;
 
-    public MuteCheckService(IMuteService muteService, IGuildService guildService)
+    public MuteCheckService(IMuteService muteService, IGuildDataService guildDataService)
     {
         _muteService = muteService;
-        _guildService = guildService;
+        _guildDataService = guildDataService;
     }
 
     public async Task<Result> CheckForNonBotMuteActionAsync(ulong targetId, ulong guildId,
@@ -40,7 +40,7 @@ public class MuteCheckService : IMuteCheckService
     {
         await Task.Delay(1000);
 
-        var result = await _guildService.GetSingleBySpecAsync<Guild>(
+        var result = await _guildDataService.GetSingleBySpecAsync<Guild>(
             new ActiveGuildByDiscordIdWithModerationSpec(guildId));
 
         if (!result.IsDefined() || result.Entity.ModerationConfig is null)

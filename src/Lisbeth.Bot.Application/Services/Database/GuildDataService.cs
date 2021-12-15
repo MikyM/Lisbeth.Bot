@@ -28,13 +28,13 @@ using MikyM.Common.DataAccessLayer.UnitOfWork;
 namespace Lisbeth.Bot.Application.Services.Database;
 
 [UsedImplicitly]
-public class GuildService : CrudService<Guild, LisbethBotDbContext>, IGuildService
+public class GuildDataService : CrudService<Guild, LisbethBotDbContext>, IGuildDataService
 {
     private readonly ICrudService<ModerationConfig, LisbethBotDbContext> _moderationService;
     private readonly ICrudService<RoleMenu, LisbethBotDbContext> _roleMenuService;
     private readonly ICrudService<TicketingConfig, LisbethBotDbContext> _ticketingService;
 
-    public GuildService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof,
+    public GuildDataService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof,
         ICrudService<ModerationConfig, LisbethBotDbContext> moderationService,
         ICrudService<TicketingConfig, LisbethBotDbContext> ticketingService,
         ICrudService<RoleMenu, LisbethBotDbContext> roleMenuService) : base(mapper, uof)

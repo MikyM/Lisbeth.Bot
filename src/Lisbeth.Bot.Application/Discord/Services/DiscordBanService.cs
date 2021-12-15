@@ -37,21 +37,21 @@ public class DiscordBanService : IDiscordBanService
 {
     private readonly IBanService _banService;
     private readonly IDiscordService _discord;
-    private readonly IGuildService _guildService;
+    private readonly IGuildDataService _guildDataService;
     private readonly ILogger<DiscordBanService> _logger;
     private readonly IResponseDiscordEmbedBuilder _embedBuilder;
     private readonly IDiscordGuildLoggerService _guildLogger;
 
-    public DiscordBanService(IBanService banService, IDiscordService discord, IGuildService guildService,
+    public DiscordBanService(IBanService banService, IDiscordService discord, IGuildDataService guildDataService,
         ILogger<DiscordBanService> logger, IResponseDiscordEmbedBuilder embedBuilder, IDiscordGuildLoggerService guildLogger)
     {
         _banService = banService;
         _discord = discord;
-        _guildService = guildService;
+        _guildDataService = guildDataService;
         _logger = logger;
         _embedBuilder = embedBuilder;
         _guildLogger = guildLogger;
-        _guildService = guildService;
+        _guildDataService = guildDataService;
     }
 
     [Queue("moderation")]
@@ -273,7 +273,7 @@ public class DiscordBanService : IDiscordBanService
         DiscordBan? ban;
 
         var guildCfg =
-            await _guildService.GetSingleBySpecAsync<Guild>(
+            await _guildDataService.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithModerationSpec(guild.Id));
 
         if (!guildCfg.IsDefined(out var guildEntity))
@@ -321,7 +321,7 @@ public class DiscordBanService : IDiscordBanService
         DiscordBan? ban;
 
         var result =
-            await _guildService.GetSingleBySpecAsync<Guild>(
+            await _guildDataService.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithModerationSpec(guild.Id));
 
         if (!result.IsDefined(out var guildEntity))
@@ -382,7 +382,7 @@ public class DiscordBanService : IDiscordBanService
             return new DiscordNotAuthorizedError();
 
         var result =
-            await _guildService.GetSingleBySpecAsync<Guild>(
+            await _guildDataService.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithModerationSpec(guild.Id));
 
         if (!result.IsDefined(out var guildEntity))

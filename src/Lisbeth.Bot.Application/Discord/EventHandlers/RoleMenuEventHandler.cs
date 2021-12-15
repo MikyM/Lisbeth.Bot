@@ -38,8 +38,8 @@ public class RoleMenuEventHandler : IDiscordMiscEventsSubscriber
     {
         switch (args.Id)
         {
-            case nameof(RoleMenuButton.RoleMenuFinalizeButton):
-            case nameof(RoleMenuButton.RoleMenuAddOptionButton):
+            case nameof(RoleMenuButton.RoleMenuFinalize):
+            case nameof(RoleMenuButton.RoleMenuAddOption):
                 await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
                 break;
         }

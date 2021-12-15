@@ -21,14 +21,12 @@ namespace Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 
 public class TicketExportReqDto : BaseTicketGetReqDto
 {
-    public TicketExportReqDto(long? id, ulong? guildId, ulong? ownerId, ulong? channelId, long? guildSpecificId,
+    public TicketExportReqDto(ulong guildId, ulong? ownerId, ulong? channelId, long? guildSpecificId,
         ulong requestedOnBehalfOfId)
     {
-        Id = id;
         GuildId = guildId;
         OwnerId = ownerId;
         ChannelId = channelId;
-        GuildSpecificId = guildSpecificId;
         RequestedOnBehalfOfId = requestedOnBehalfOfId;
     }
 }

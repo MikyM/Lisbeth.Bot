@@ -19,24 +19,24 @@ using Autofac;
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 using Microsoft.Extensions.Logging;
-using Serilog;
-using System.Collections.Concurrent;
-using System.Threading;
 using MikyM.Common.Utilities;
+using System.Collections.Concurrent;
+using Lisbeth.Bot.Application.Discord.Handlers.Ticket.Interfaces;
+using Lisbeth.Bot.Application.Discord.Requests.Ticket;
 
 namespace Lisbeth.Bot.Application.Discord.Helpers;
 
 public interface ITicketQueueService
 {
     Task EnqueueAsync(TicketOpenReqDto req);
-    Task EnqueueAsync(TicketOpenReqDto req, DiscordInteraction args);
+    Task EnqueueAsync(TicketOpenReqDto req, DiscordInteraction interaction);
     bool AddGuildQueue(ulong guildId);
     bool RemoveGuildQueue(ulong guildId);
 }
 
 public class TicketQueueService : ITicketQueueService
 {
-    private readonly ConcurrentDictionary<ulong, TaskConcurrentQueue> _cache = new();
+    private readonly ConcurrentDictionary<ulong, ConcurrentTaskQueue> _guildQueues = new();
     private readonly ILogger<TicketQueueService> _logger;
     private readonly ILifetimeScope _lifetimeScope;
 
@@ -45,37 +45,37 @@ public class TicketQueueService : ITicketQueueService
         _logger = logger;
         _lifetimeScope = lifetimeScope;
     }
-
-    public async Task EnqueueAsync(TicketOpenReqDto req, DiscordInteraction args)
+      
+    public async Task EnqueueAsync(TicketOpenReqDto req, DiscordInteraction interaction)
     {
-        if (!_cache.TryGetValue(args.Guild.Id, out var guildsQueue))
+        if (!_guildQueues.TryGetValue(interaction.Guild.Id, out var guildsQueue))
         {
-            _logger.LogError($"Couldn't queue ticket creation for {args.Guild.Id}, key not found");
+            _logger.LogError($"Couldn't queue ticket creation for {interaction.Guild.Id}, key not found");
             return;
         }
 
-        var service = _lifetimeScope.BeginLifetimeScope().Resolve<IDiscordTicketService>();
-        await guildsQueue.EnqueueAsync(() => service.OpenTicketAsync(args, req));
+        using var scope = _lifetimeScope.BeginLifetimeScope();
+        var service = scope.Resolve<IDiscordOpenTicketHandler>();
+        await guildsQueue.EnqueueAsync(() => service.HandleAsync(new OpenTicketRequest(req, interaction)));
     }
 
-    public bool AddGuildQueue(ulong guildId)
-    {
-        _logger.LogDebug($"Adding guild with Id: {guildId}");
-        return this._cache.TryAdd(guildId, new TaskConcurrentQueue());
-    }
+    public bool AddGuildQueue(ulong guildId) 
+        => this._guildQueues.TryAdd(guildId, new ConcurrentTaskQueue());
+
 
     public bool RemoveGuildQueue(ulong guildId)
-        => this._cache.TryRemove(guildId, out _);
+        => this._guildQueues.TryRemove(guildId, out _);
 
     public async Task EnqueueAsync(TicketOpenReqDto req)
     {
-        if (!_cache.TryGetValue(req.GuildId, out var guildsQueue))
+        if (!_guildQueues.TryGetValue(req.GuildId, out var guildsQueue))
         {
             _logger.LogError($"Couldn't queue ticket creation for {req.GuildId}, key not found");
             return;
         }
 
-        var service = _lifetimeScope.BeginLifetimeScope().Resolve<IDiscordTicketService>();
+        using var scope = _lifetimeScope.BeginLifetimeScope();
+        var service = scope.Resolve<IDiscordTicketService>();
         await guildsQueue.EnqueueAsync(() => service.OpenTicketAsync(req));
     }
 }

@@ -38,35 +38,35 @@ public class DiscordGuildService : IDiscordGuildService
     private readonly IDiscordService _discord;
     private readonly IEmbedConfigService _embedConfigService;
     private readonly IDiscordEmbedProvider _embedProvider;
-    private readonly IGuildService _guildService;
+    private readonly IGuildDataService _guildDataService;
     private readonly ILogger<DiscordGuildService> _logger;
 
     public DiscordGuildService(IEmbedConfigService embedConfigService, IDiscordEmbedProvider embedProvider,
-        IGuildService guildService, IDiscordService discord, ILogger<DiscordGuildService> logger)
+        IGuildDataService guildDataService, IDiscordService discord, ILogger<DiscordGuildService> logger)
     {
         _embedConfigService = embedConfigService;
         _embedProvider = embedProvider;
-        _guildService = guildService;
+        _guildDataService = guildDataService;
         _discord = discord;
         _logger = logger;
     }
 
     public async Task<Result> HandleGuildCreateAsync(GuildCreateEventArgs args)
     {
-        var result = await _guildService.GetSingleBySpecAsync(new GuildByIdSpec(args.Guild.Id));
+        var result = await _guildDataService.GetSingleBySpecAsync(new GuildByIdSpec(args.Guild.Id));
 
         if (!result.IsDefined())
         {
-            await _guildService.AddAsync(new Guild { GuildId = args.Guild.Id, UserId = args.Guild.OwnerId }, true);
+            await _guildDataService.AddAsync(new Guild { GuildId = args.Guild.Id, UserId = args.Guild.OwnerId }, true);
             var embedResult = await _embedConfigService.GetAsync(1);
             if (!embedResult.IsDefined()) return Result.FromSuccess();
             await args.Guild.Owner.SendMessageAsync(_embedProvider.GetEmbedFromConfig(embedResult.Entity).Build());
         }
         else
         {
-            _guildService.BeginUpdate(result.Entity);
+            _guildDataService.BeginUpdate(result.Entity);
             result.Entity.IsDisabled = false;
-            await _guildService.CommitAsync();
+            await _guildDataService.CommitAsync();
 
             var embedResult = await _embedConfigService.GetAsync(2);
             if (!embedResult.IsDefined()) return Result.FromSuccess();
@@ -79,9 +79,9 @@ public class DiscordGuildService : IDiscordGuildService
 
     public async Task<Result> HandleGuildDeleteAsync(GuildDeleteEventArgs args)
     {
-        var result = await _guildService.GetSingleBySpecAsync(new GuildByIdSpec(args.Guild.Id));
+        var result = await _guildDataService.GetSingleBySpecAsync(new GuildByIdSpec(args.Guild.Id));
 
-        if (result.IsDefined()) await _guildService.DisableAsync(result.Entity, true);
+        if (result.IsDefined()) await _guildDataService.DisableAsync(result.Entity, true);
 
         return Result.FromSuccess();
     }
@@ -201,7 +201,7 @@ public class DiscordGuildService : IDiscordGuildService
     {
         if (req is null) throw new ArgumentNullException(nameof(req));
 
-        var guildResult = await _guildService.GetSingleBySpecAsync<Guild>(
+        var guildResult = await _guildDataService.GetSingleBySpecAsync<Guild>(
             new ActiveGuildByDiscordIdWithModerationSpec(req.GuildId));
 
         if (!guildResult.IsDefined() || guildResult.Entity.ModerationConfig is null)
@@ -222,7 +222,7 @@ public class DiscordGuildService : IDiscordGuildService
         if (ctx is null) throw new ArgumentNullException(nameof(ctx));
         if (req is null) throw new ArgumentNullException(nameof(req));
 
-        var guildResult = await _guildService.GetSingleBySpecAsync<Guild>(
+        var guildResult = await _guildDataService.GetSingleBySpecAsync<Guild>(
             new ActiveGuildByDiscordIdWithModerationSpec(req.GuildId));
 
         if (!guildResult.IsDefined() || guildResult.Entity.ModerationConfig is null)
@@ -342,7 +342,7 @@ public class DiscordGuildService : IDiscordGuildService
         req.OpenedCategoryId = openedCat.Id;
         req.ClosedCategoryId = closedCat.Id;
         req.LogChannelId = ticketLogs.Id;
-        var res = await _guildService.AddConfigAsync(req, true);
+        var res = await _guildDataService.AddConfigAsync(req, true);
         if (!res.IsDefined()) return new InvalidOperationError();
 
         var embed = new DiscordEmbedBuilder();
@@ -392,7 +392,7 @@ public class DiscordGuildService : IDiscordGuildService
         req.MessageUpdatedEventsLogChannelId = messageEditLogChannel.Id;
         req.ModerationLogChannelId = moderationChannelLog.Id;
         req.MuteRoleId = mutedRole.Id;
-        var res = await _guildService.AddConfigAsync(req, true);
+        var res = await _guildDataService.AddConfigAsync(req, true);
         if (!res.IsDefined()) return new InvalidOperationError();
 
         var embed = new DiscordEmbedBuilder();
@@ -427,7 +427,7 @@ public class DiscordGuildService : IDiscordGuildService
         switch (type)
         {
             case GuildModule.Ticketing:
-                guildResult = await _guildService.GetSingleBySpecAsync<Guild>(
+                guildResult = await _guildDataService.GetSingleBySpecAsync<Guild>(
                     new ActiveGuildByDiscordIdWithTicketingSpecifications(discordGuild.Id));
                 if (!guildResult.IsDefined() || guildResult.Entity.TicketingConfig is null)
                     return new NotFoundError();
@@ -488,7 +488,7 @@ public class DiscordGuildService : IDiscordGuildService
                 {
                     ticketingReq.GuildId = guild.GuildId;
                     ticketingReq.RequestedOnBehalfOfId = requestingMember.Id;
-                    await _guildService.RepairModuleConfigAsync(ticketingReq, true);
+                    await _guildDataService.RepairModuleConfigAsync(ticketingReq, true);
 
                     if (newOpenedCat is not null) embed.AddField("Opened ticket category", newOpenedCat.Mention);
                     if (newClosedCat is not null) embed.AddField("Closed ticket category", newClosedCat.Mention);
@@ -503,7 +503,7 @@ public class DiscordGuildService : IDiscordGuildService
 
                 break;
             case GuildModule.Moderation:
-                guildResult = await _guildService.GetSingleBySpecAsync<Guild>(
+                guildResult = await _guildDataService.GetSingleBySpecAsync<Guild>(
                     new ActiveGuildByDiscordIdWithModerationSpec(discordGuild.Id));
 
                 if (!guildResult.IsDefined() || guildResult.Entity.ModerationConfig is null)
@@ -610,7 +610,7 @@ public class DiscordGuildService : IDiscordGuildService
                 {
                     moderationReq.GuildId = guild.GuildId;
                     moderationReq.RequestedOnBehalfOfId = requestingMember.Id;
-                    await _guildService.RepairModuleConfigAsync(moderationReq, true);
+                    await _guildDataService.RepairModuleConfigAsync(moderationReq, true);
 
                     embed.AddField("Moderation category", newModerationCat.Mention);
                     if (newModerationLogChannel is not null)
@@ -647,7 +647,7 @@ public class DiscordGuildService : IDiscordGuildService
     {
         if (!requestingMember.IsAdmin()) return new DiscordNotAuthorizedError();
 
-        var guildResult = await _guildService.GetSingleBySpecAsync<Guild>(
+        var guildResult = await _guildDataService.GetSingleBySpecAsync<Guild>(
             new ActiveGuildByDiscordIdWithTicketingSpecifications(discordGuild.Id));
         switch (type)
         {
@@ -657,7 +657,7 @@ public class DiscordGuildService : IDiscordGuildService
                 if (guildResult.Entity.TicketingConfig.IsDisabled)
                     return new InvalidOperationError();
 
-                await _guildService.DisableConfigAsync(discordGuild.Id, GuildModule.Ticketing, true);
+                await _guildDataService.DisableConfigAsync(discordGuild.Id, GuildModule.Ticketing, true);
                 break;
             case GuildModule.Moderation:
                 if (!guildResult.IsDefined() || guildResult.Entity.ModerationConfig is null)
@@ -665,7 +665,7 @@ public class DiscordGuildService : IDiscordGuildService
                 if (guildResult.Entity.ModerationConfig.IsDisabled)
                     return new InvalidOperationError();
 
-                await _guildService.DisableConfigAsync(discordGuild.Id, GuildModule.Moderation, true);
+                await _guildDataService.DisableConfigAsync(discordGuild.Id, GuildModule.Moderation, true);
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(type), type, null);

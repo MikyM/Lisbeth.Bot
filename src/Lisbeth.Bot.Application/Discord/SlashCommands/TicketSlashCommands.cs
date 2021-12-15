@@ -20,6 +20,8 @@ using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
 using FluentValidation;
+using Lisbeth.Bot.Application.Discord.Handlers.Ticket.Interfaces;
+using Lisbeth.Bot.Application.Discord.Requests.Ticket;
 using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
 using Lisbeth.Bot.Application.Validation.Ticket;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
@@ -30,12 +32,15 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 [UsedImplicitly]
 public class TicketSlashCommands : ExtendedApplicationCommandModule
 {
-    public TicketSlashCommands(IDiscordTicketService discordTicketService)
+    public TicketSlashCommands(IDiscordAddSnowflakeTicketHandler addSnowflakeTicketHandler,
+        IDiscordRemoveSnowflakeTicketHandler removeSnowflakeHandler)
     {
-        _discordTicketService = discordTicketService;
+        _addSnowflakeTicketHandler = addSnowflakeTicketHandler;
+        _removeSnowflakeHandler = removeSnowflakeHandler;
     }
 
-    private readonly IDiscordTicketService _discordTicketService;
+    private readonly IDiscordAddSnowflakeTicketHandler _addSnowflakeTicketHandler;
+    private readonly IDiscordRemoveSnowflakeTicketHandler _removeSnowflakeHandler;
 
     [UsedImplicitly]
     [SlashRequireUserPermissions(Permissions.BanMembers)]
@@ -55,17 +60,17 @@ public class TicketSlashCommands : ExtendedApplicationCommandModule
         switch (action)
         {
             case TicketActionType.Add:
-                var addReq = new TicketAddReqDto(null, null, ctx.Guild.Id, ctx.Channel.Id, ctx.User.Id, target.Id);
+                var addReq = new TicketAddReqDto(null,  ctx.Guild.Id, ctx.Channel.Id, ctx.User.Id, target.Id);
                 var addReqValidator = new TicketAddReqValidator(ctx.Client);
                 await addReqValidator.ValidateAndThrowAsync(addReq);
-                result = await this._discordTicketService!.AddToTicketAsync(ctx, addReq);
+                result = await this._addSnowflakeTicketHandler.HandleAsync(new AddSnowflakeToTicketRequest(addReq, ctx));
                 break;
             case TicketActionType.Remove:
-                var removeReq = new TicketRemoveReqDto(null, null, ctx.Guild.Id, ctx.Channel.Id, ctx.User.Id,
+                var removeReq = new TicketRemoveReqDto(null, ctx.Guild.Id, ctx.Channel.Id, ctx.User.Id,
                     target.Id);
                 var removeReqValidator = new TicketRemoveReqValidator(ctx.Client);
                 await removeReqValidator.ValidateAndThrowAsync(removeReq);
-                result = await this._discordTicketService!.RemoveFromTicketAsync(ctx, removeReq);
+                result = await this._removeSnowflakeHandler.HandleAsync(new RemoveSnowflakeFromTicketRequest(removeReq, ctx));
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(action), action, null);

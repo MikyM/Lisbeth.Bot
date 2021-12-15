@@ -23,7 +23,7 @@ using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
 
 namespace Lisbeth.Bot.Application.Services.Database.Interfaces;
 
-public interface IGuildService : ICrudService<Guild, LisbethBotDbContext>
+public interface IGuildDataService : ICrudService<Guild, LisbethBotDbContext>
 {
     Task<Result<Guild>> AddConfigAsync(ModerationConfigReqDto req, bool shouldSave = false);
     Task<Result<Guild>> AddConfigAsync(TicketingConfigReqDto req, bool shouldSave = false);
