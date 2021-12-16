@@ -96,13 +96,12 @@ public static class ServiceCollectionExtensions
         #endregion
     }
 
-    public static void ConfigureHangfire(this IServiceCollection services)
+    public static void ConfigureHangfire(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddHangfire(options =>
         {
             options.UseRecommendedSerializerSettings();
-            options.UsePostgreSqlStorage(
-                "User ID=lisbethbot;Password=lisbethbot;Host=localhost;Port=5438;Database=lisbeth_bot_hangfire_test;",
+            options.UsePostgreSqlStorage(configuration.GetConnectionString("HangfireDb"),
                 new PostgreSqlStorageOptions { QueuePollInterval = TimeSpan.FromSeconds(15) });
             //options.UseFilter(new QueueFilter());
             //options.UseFilter(new PreserveOriginalQueueAttribute());

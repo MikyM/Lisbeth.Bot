@@ -395,7 +395,8 @@ public class DiscordRoleMenuService : IDiscordRoleMenuService
             return (builder.WithContent(partial.Entity.Text ?? throw new ArgumentNullException()),
                 partial.Entity.Text ?? throw new ArgumentNullException());
 
-        var embed = _embedProvider.GetEmbedFromConfig(partial.Entity.EmbedConfig).Build();
+        var embed = _embedProvider.GetEmbedFromConfig(partial.Entity.EmbedConfig)
+            .WithFooter("Click on the button below to manage your roles!").Build();
         return (builder.AddEmbed(embed), partial.Entity.Text ?? throw new ArgumentNullException());
     }
 

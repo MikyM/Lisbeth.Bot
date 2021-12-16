@@ -63,27 +63,30 @@ public class DiscordEmbedProvider : IDiscordEmbedProvider
 
         var builder = new DiscordEmbedBuilder();
 
-        if (!string.IsNullOrWhiteSpace(config.Author)) builder.WithAuthor(config.Author);
-        else if (!string.IsNullOrWhiteSpace(config.Author) && !string.IsNullOrWhiteSpace(config.AuthorImageUrl))
+        if (!string.IsNullOrWhiteSpace(config.Author))
             builder.WithAuthor(config.Author, null, config.AuthorImageUrl);
 
-        if (!string.IsNullOrWhiteSpace(config.Footer)) builder.WithFooter(config.Footer);
-        else if (!string.IsNullOrWhiteSpace(config.Footer) && !string.IsNullOrWhiteSpace(config.FooterImageUrl))
+        if (!string.IsNullOrWhiteSpace(config.Footer))
             builder.WithFooter(config.Footer, config.FooterImageUrl);
 
-        if (!string.IsNullOrWhiteSpace(config.Description)) builder.WithDescription(config.Description);
+        if (!string.IsNullOrWhiteSpace(config.Description))
+            builder.WithDescription(config.Description);
 
-        if (!string.IsNullOrWhiteSpace(config.ImageUrl)) builder.WithImageUrl(config.ImageUrl);
+        if (!string.IsNullOrWhiteSpace(config.ImageUrl)) 
+            builder.WithImageUrl(config.ImageUrl);
 
-        if (!string.IsNullOrWhiteSpace(config.HexColor)) builder.WithColor(new DiscordColor(config.HexColor));
+        if (!string.IsNullOrWhiteSpace(config.HexColor))
+            builder.WithColor(new DiscordColor(config.HexColor));
 
-        if (config.Timestamp is not null) builder.WithTimestamp(config.Timestamp);
+        if (config.Timestamp is not null)
+            builder.WithTimestamp(config.Timestamp);
 
-        if (!string.IsNullOrWhiteSpace(config.Title)) builder.WithTitle(config.Title);
+        if (!string.IsNullOrWhiteSpace(config.Title)) 
+            builder.WithTitle(config.Title);
 
         if (!string.IsNullOrWhiteSpace(config.Thumbnail))
-            builder.WithThumbnail(config.Thumbnail, config.ThumbnailHeight ?? throw new InvalidOperationException(),
-                config.ThumbnailWidth ?? throw new InvalidOperationException());
+            builder.WithThumbnail(config.Thumbnail, config.ThumbnailHeight ?? 0,
+                config.ThumbnailWidth ?? 0);
 
         if (config.Fields is null || config.Fields.Count == 0) return builder;
 

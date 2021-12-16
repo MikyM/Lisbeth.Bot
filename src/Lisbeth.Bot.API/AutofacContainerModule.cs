@@ -26,6 +26,7 @@ using Lisbeth.Bot.Application.Services.Database;
 using Lisbeth.Bot.DataAccessLayer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using MikyM.Common.Application;
 using MikyM.Common.Application.CommandHandlers;
 using MikyM.Common.DataAccessLayer;
@@ -78,8 +79,7 @@ public class AutofacContainerModule : Module
             optionsBuilder.AddInterceptors(x.Resolve<SecondLevelCacheInterceptor>());
             //optionsBuilder.EnableSensitiveDataLogging();
             //optionsBuilder.UseLoggerFactory(x.Resolve<ILoggerFactory>());
-            optionsBuilder.UseNpgsql(
-                "User ID=lisbethbot;Password=lisbethbot;Host=localhost;Port=5438;Database=lisbeth_bot_test;");
+            optionsBuilder.UseNpgsql(x.Resolve<IConfiguration>().GetConnectionString("MainDb"));
             return new LisbethBotDbContext(optionsBuilder.Options);
         }).AsSelf().InstancePerLifetimeScope();
 

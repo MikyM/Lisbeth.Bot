@@ -15,8 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Globalization;
-using System.Net.Http;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Hangfire;
@@ -31,16 +29,21 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MikyM.Common.Domain;
-using MikyM.Common.Utilities;
 using MikyM.Discord.EmbedBuilders;
 using Serilog;
 using Serilog.Events;
+using System.Globalization;
+using System.Net.Http;
+using System.Threading;
 
 namespace Lisbeth.Bot.API;
 
 // ReSharper disable once ClassNeverInstantiated.Global
 public class Program
 {
+    // ReSharper disable once InconsistentNaming
+    private static readonly CancellationTokenSource _cts = new ();
+
     public static async Task Main(string[] args)
     {
         try
@@ -60,9 +63,8 @@ public class Program
 
             // Configuration
             builder.Configuration.SetBasePath(AppDomain.CurrentDomain.BaseDirectory);
-            if (builder.Environment.IsProduction())
-                builder.Configuration.AddJsonFile("appsettings.json", false, true);
-            builder.Configuration.AddJsonFile("appsettings.Development.json", true, true);
+            builder.Configuration.AddJsonFile(
+                builder.Environment.IsDevelopment() ? "appsettings.Development.json" : "appsettings.json", false, true);
             builder.Configuration.AddEnvironmentVariables();
 
             // Configure some services with base Microsoft DI
@@ -71,7 +73,7 @@ public class Program
             builder.Services.ConfigureSwagger();
             builder.Services.AddHttpClient();
             builder.Services.ConfigureDiscord();
-            builder.Services.ConfigureHangfire();
+            builder.Services.ConfigureHangfire(builder.Configuration);
             builder.Services.ConfigureApiKey(builder.Configuration);
             builder.Services.ConfigureRateLimiting(builder.Configuration);
             builder.Services.ConfigureEfCache();
@@ -132,7 +134,8 @@ public class Program
             // Schedule recurring jobs
             await RecurringJobHelper.ScheduleAllDefinedAfterDelayAsync();
 
-            await app.RunAsync();
+            await app.RunAsync(_cts.Token);
+            await Task.Delay(TimeSpan.FromSeconds(15));
         }
         catch (Exception ex)
         {
