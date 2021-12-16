@@ -15,11 +15,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
 using Hangfire;
-using Lisbeth.Bot.Application.Discord.Handlers.Ticket.Interfaces;
 using Lisbeth.Bot.Application.Discord.Requests.Ticket;
 using Serilog;
+using System.Collections.Generic;
+using MikyM.Common.Application.CommandHandlers;
 
 namespace Lisbeth.Bot.API.Helpers;
 
@@ -43,14 +43,14 @@ public static class RecurringJobHelper
 
     public static void ScheduleAutomaticTicketClean()
     {
-        RecurringJob.AddOrUpdate<IDiscordCleanClosedTicketsCommandHandler>("unmute", x => x.HandleAsync(new CleanClosedTicketsCommand()), Cron.Hourly,
+        RecurringJob.AddOrUpdate<ICommandHandler<CleanClosedTicketsCommand>>("unmute", x => x.HandleAsync(new CleanClosedTicketsCommand()), Cron.Hourly,
             TimeZoneInfo.Utc, "ticketing");
         JobIds.Add("ticketClean");
     }
 
     public static void ScheduleAutomaticTicketClose()
     {
-        RecurringJob.AddOrUpdate<IDiscordCloseInactiveTicketsCommandHandler>("unmute", x => x.HandleAsync(new CloseInactiveTicketsCommand()), Cron.Hourly,
+        RecurringJob.AddOrUpdate<ICommandHandler<CloseInactiveTicketsCommand>>("unmute", x => x.HandleAsync(new CloseInactiveTicketsCommand()), Cron.Hourly,
             TimeZoneInfo.Utc, "ticketing");
         JobIds.Add("ticketClose");
     }

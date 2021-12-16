@@ -35,11 +35,11 @@ public class DiscordOpenTicketCommandHandler : ICommandHandler<OpenTicketCommand
     private readonly IGuildDataService _guildDataService;
     private readonly ITicketDataService _ticketDataService;
     private readonly ILogger<DiscordOpenTicketCommandHandler> _logger;
-    private readonly ICommandHandler<GetTicketWelcomeEmbedCommand> _welcomeEmbedCommandHandler;
+    private readonly ICommandHandler<GetTicketWelcomeEmbedCommand, DiscordMessageBuilder> _welcomeEmbedCommandHandler;
 
     public DiscordOpenTicketCommandHandler(IGuildDataService guildDataService, ITicketDataService ticketDataService,
         IDiscordService discord, ILogger<DiscordOpenTicketCommandHandler> logger,
-        ICommandHandler<GetTicketWelcomeEmbedCommand> welcomeEmbedCommandHandler)
+        ICommandHandler<GetTicketWelcomeEmbedCommand, DiscordMessageBuilder> welcomeEmbedCommandHandler)
     {
         _guildDataService = guildDataService;
         _ticketDataService = ticketDataService;

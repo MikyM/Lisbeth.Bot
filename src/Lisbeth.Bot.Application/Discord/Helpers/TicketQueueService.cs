@@ -17,12 +17,12 @@
 
 using Autofac;
 using DSharpPlus.Entities;
+using Lisbeth.Bot.Application.Discord.Requests.Ticket;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 using Microsoft.Extensions.Logging;
 using MikyM.Common.Utilities;
 using System.Collections.Concurrent;
-using Lisbeth.Bot.Application.Discord.Handlers.Ticket.Interfaces;
-using Lisbeth.Bot.Application.Discord.Requests.Ticket;
+using MikyM.Common.Application.CommandHandlers;
 
 namespace Lisbeth.Bot.Application.Discord.Helpers;
 
@@ -55,7 +55,7 @@ public class TicketQueueService : ITicketQueueService
         }
 
         using var scope = _lifetimeScope.BeginLifetimeScope();
-        var service = scope.Resolve<IDiscordOpenTicketCommandHandler>();
+        var service = scope.Resolve<ICommandHandler<OpenTicketCommand>>();
         await guildsQueue.EnqueueAsync(() => service.HandleAsync(new OpenTicketCommand(req, interaction)));
     }
 

@@ -20,11 +20,11 @@ using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
 using FluentValidation;
-using Lisbeth.Bot.Application.Discord.Handlers.Ticket.Interfaces;
 using Lisbeth.Bot.Application.Discord.Requests.Ticket;
 using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
 using Lisbeth.Bot.Application.Validation.Ticket;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
+using MikyM.Common.Application.CommandHandlers;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 
@@ -32,15 +32,15 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 [UsedImplicitly]
 public class TicketSlashCommands : ExtendedApplicationCommandModule
 {
-    public TicketSlashCommands(IDiscordAddSnowflakeTicketCommandHandler addSnowflakeTicketCommandHandler,
-        IDiscordRemoveSnowflakeTicketCommandHandler removeSnowflakeCommandHandler)
+    public TicketSlashCommands(ICommandHandler<AddSnowflakeToTicketCommand, DiscordEmbed> addSnowflakeTicketCommandHandler,
+        ICommandHandler<RemoveSnowflakeFromTicketCommand, DiscordEmbed> removeSnowflakeCommandHandler)
     {
         _addSnowflakeTicketCommandHandler = addSnowflakeTicketCommandHandler;
         _removeSnowflakeCommandHandler = removeSnowflakeCommandHandler;
     }
 
-    private readonly IDiscordAddSnowflakeTicketCommandHandler _addSnowflakeTicketCommandHandler;
-    private readonly IDiscordRemoveSnowflakeTicketCommandHandler _removeSnowflakeCommandHandler;
+    private readonly ICommandHandler<AddSnowflakeToTicketCommand, DiscordEmbed> _addSnowflakeTicketCommandHandler;
+    private readonly ICommandHandler<RemoveSnowflakeFromTicketCommand, DiscordEmbed> _removeSnowflakeCommandHandler;
 
     [UsedImplicitly]
     [SlashRequireUserPermissions(Permissions.BanMembers)]
