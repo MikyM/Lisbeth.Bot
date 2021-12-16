@@ -33,7 +33,7 @@ using MikyM.Discord.Interfaces;
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 
 [UsedImplicitly]
-public class DiscordConfirmCloseTicketCommandHandler : ICommandHandler<ConfirmCloseTicketCommand, DiscordMessageBuilder>
+public class DiscordConfirmCloseTicketCommandHandler : ICommandHandler<ConfirmCloseTicketCommand>
 {
     private readonly IDiscordService _discord;
     private readonly IGuildDataService _guildDataService;
@@ -52,7 +52,7 @@ public class DiscordConfirmCloseTicketCommandHandler : ICommandHandler<ConfirmCl
         _asyncExecutor = asyncExecutor;
     }
 
-    public async Task<Result<DiscordMessageBuilder>> HandleAsync(ConfirmCloseTicketCommand command)
+    public async Task<Result> HandleAsync(ConfirmCloseTicketCommand command)
     {
         if (command is null) throw new ArgumentNullException(nameof(command));
 
@@ -60,7 +60,7 @@ public class DiscordConfirmCloseTicketCommandHandler : ICommandHandler<ConfirmCl
             await _guildDataService.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(command.Dto.GuildId));
 
-        if (!guildRes.IsDefined(out var guildCfg)) return Result<DiscordMessageBuilder>.FromError(guildRes);
+        if (!guildRes.IsDefined(out var guildCfg)) return Result.FromError(guildRes);
 
         if (guildCfg.TicketingConfig is null)
             return new DisabledEntityError($"Guild with Id:{command.Dto.GuildId} doesn't have ticketing enabled.");
@@ -155,12 +155,12 @@ public class DiscordConfirmCloseTicketCommandHandler : ICommandHandler<ConfirmCl
         command.Dto.ClosedMessageId = closeMsg.Id;
         await _ticketDataService.CloseAsync(command.Dto, ticket);
 
-        if (ticket.IsPrivate) return msgBuilder;
+        if (ticket.IsPrivate) return Result.FromSuccess();
 
         _ = _asyncExecutor.ExecuteAsync<IDiscordChatExportService>(async x => await x.ExportToHtmlAsync(guild,
             target, requestingMember,
             owner ?? await _discord.Client.GetUserAsync(ticket.UserId), ticket));
 
-        return msgBuilder;
+        return Result.FromSuccess();
     }
 }

@@ -110,7 +110,7 @@ public static class ServiceCollectionExtensions
 
         services.AddHangfireServer(options =>
         {
-            options.Queues = new[] { "critical", "moderation", "reminder", "default" };
+            options.Queues = new[] { "critical", "moderation", "reminder", "ticketing", "default" };
         });
     }
 

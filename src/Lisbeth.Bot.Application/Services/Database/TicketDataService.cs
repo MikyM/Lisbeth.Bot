@@ -15,14 +15,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
 using AutoMapper;
-using DSharpPlus;
-using DSharpPlus.Entities;
 using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Ticket;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
+using System.Collections.Generic;
 
 namespace Lisbeth.Bot.Application.Services.Database;
 
@@ -163,47 +161,15 @@ public class TicketDataService : CrudService<Ticket, LisbethBotDbContext>, ITick
         return Result.FromSuccess();
     }
 
-    public async Task<Result> CheckAndSetPrivacyAsync(Ticket ticket, DiscordGuild guild)
+    public async Task<Result> SetPrivacyAsync(Ticket ticket, bool isPrivate, bool shouldSave = false)
     {
         if (ticket is null) throw new ArgumentNullException(nameof(ticket));
-        if (guild is null) throw new ArgumentNullException(nameof(guild));
 
-        var isPrivateRes = await IsTicketPrivateAsync(ticket, guild);
+        base.BeginUpdate(ticket);
+        ticket.IsPrivate = isPrivate;
 
-        if (isPrivateRes.IsDefined() && isPrivateRes.Entity == ticket.IsPrivate) return Result.FromSuccess();
-
-        ticket.IsPrivate = isPrivateRes.Entity;
-
-        await base.CommitAsync();
+        if (shouldSave) await base.CommitAsync();
 
         return Result.FromSuccess();
-    }
-
-    public async Task<Result<bool>> IsTicketPrivateAsync(Ticket ticket, DiscordGuild guild)
-    {
-        if (ticket is null) throw new ArgumentNullException(nameof(ticket));
-        if (guild is null) throw new ArgumentNullException(nameof(guild));
-
-        if (ticket.AddedUserIds?.Count == 0) return new InvalidOperationError("User list was empty");
-
-        if (ticket.AddedUserIds is null) return true;
-
-        foreach (var id in ticket.AddedUserIds)
-        {
-            try
-            {
-                var member = await guild.GetMemberAsync(id);
-                if (!member.Permissions.HasPermission(Permissions.Administrator) && member.Id != ticket.UserId)
-                    return false;
-            }
-            catch (Exception)
-            {
-                continue;
-            }
-
-            await Task.Delay(500);
-        }
-
-        return true;
     }
 }

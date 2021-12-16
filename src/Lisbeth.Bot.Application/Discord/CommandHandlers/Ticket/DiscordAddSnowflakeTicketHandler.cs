@@ -34,14 +34,18 @@ public class DiscordAddSnowflakeTicketCommandHandler : ICommandHandler<AddSnowfl
     private readonly ITicketDataService _ticketDataService;
     private readonly ILogger<DiscordAddSnowflakeTicketCommandHandler> _logger;
     private readonly IDiscordService _discord;
+    private readonly ICommandHandler<PrivacyCheckTicketCommand, bool> _privacyCheckHandler;
 
     public DiscordAddSnowflakeTicketCommandHandler(IGuildDataService guildDataService,
-        ILogger<DiscordAddSnowflakeTicketCommandHandler> logger, IDiscordService discord, ITicketDataService ticketDataService)
+        ILogger<DiscordAddSnowflakeTicketCommandHandler> logger, IDiscordService discord,
+        ITicketDataService ticketDataService,
+        ICommandHandler<PrivacyCheckTicketCommand, bool> privacyCheckHandler)
     {
         _guildDataService = guildDataService;
         _logger = logger;
         _discord = discord;
         _ticketDataService = ticketDataService;
+        _privacyCheckHandler = privacyCheckHandler;
     }
 
     public async Task<Result<DiscordEmbed>> HandleAsync(AddSnowflakeToTicketCommand command)
@@ -90,7 +94,12 @@ public class DiscordAddSnowflakeTicketCommandHandler : ICommandHandler<AddSnowfl
                 ticketChannel.Users.Any(x => x.Id == targetMember.Id)
                     ? ticketChannel.Users.Select(x => x.Id)
                     : ticketChannel.Users.Select(x => x.Id).Append(targetMember.Id));
-            await _ticketDataService.CheckAndSetPrivacyAsync(ticket, guild);
+
+            var privacyRes = await _privacyCheckHandler.HandleAsync(new PrivacyCheckTicketCommand(guild, ticket));
+
+            if (privacyRes.IsDefined(out var isPrivate))
+
+            await _ticketDataService.SetPrivacyAsync(ticket, isPrivate, true);
         }
         else if (targetRole is not null)
         {
@@ -126,7 +135,12 @@ public class DiscordAddSnowflakeTicketCommandHandler : ICommandHandler<AddSnowfl
                 roleIds.Add(targetRole.Id);
 
             await _ticketDataService.SetAddedRolesAsync(ticket, roleIds);
-            await _ticketDataService.CheckAndSetPrivacyAsync(ticket, guild);
+
+            var privacyRes = await _privacyCheckHandler.HandleAsync(new PrivacyCheckTicketCommand(guild, ticket));
+
+            if (privacyRes.IsDefined(out var isPrivate))
+
+                await _ticketDataService.SetPrivacyAsync(ticket, isPrivate, true);
         }
 
         var embed = new DiscordEmbedBuilder();

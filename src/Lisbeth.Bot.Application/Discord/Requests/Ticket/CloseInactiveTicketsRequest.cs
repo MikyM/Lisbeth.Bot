@@ -19,7 +19,7 @@ using MikyM.Common.Application.CommandHandlers;
 
 namespace Lisbeth.Bot.Application.Discord.Requests.Ticket;
 
-public class CloseInactiveTicketsCommand : CommandBase
+public class CleanClosedTicketsCommand : CommandBase
 {
         
 }

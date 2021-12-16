@@ -31,7 +31,6 @@ public interface ITicketDataService : ICrudService<Ticket, LisbethBotDbContext>
     Task<Result<Ticket>> ReopenAsync(TicketReopenReqDto req);
     Task<Result> SetAddedUsersAsync(Ticket ticket, IEnumerable<ulong> userIds, bool shouldSave = false);
     Task<Result> SetAddedRolesAsync(Ticket ticket, IEnumerable<ulong> roleIds, bool shouldSave = false);
-    Task<Result<bool>> IsTicketPrivateAsync(Ticket ticket, DiscordGuild guild);
-    Task<Result> CheckAndSetPrivacyAsync(Ticket ticket, DiscordGuild guild);
+    Task<Result> SetPrivacyAsync(Ticket ticket, bool isPrivate, bool shouldSave = false);
     Task<Result> CheckForDeletedTicketChannelAsync(ulong channelId, ulong guildId, ulong requestedOnBehalfOfId);
 }

@@ -51,9 +51,9 @@ public class LoggingCommandHandler<TRequest, TResult> : ICommandHandler<TRequest
         _commandHandler = commandHandler;
     }
 
-    public async Task<Result<TResult>> HandleAsync(TRequest request)
+    public async Task<Result<TResult>> HandleAsync(TRequest command)
     {
-        _logger.LogDebug("Processing request: {0}", request);
-        return await _commandHandler.HandleAsync(request);
+        _logger.LogDebug("Processing request: {0}", command);
+        return await _commandHandler.HandleAsync(command);
     }
 }

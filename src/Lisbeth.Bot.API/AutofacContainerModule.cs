@@ -24,10 +24,10 @@ using Lisbeth.Bot.Application.Discord.Services;
 using Lisbeth.Bot.Application.Services;
 using Lisbeth.Bot.Application.Services.Database;
 using Lisbeth.Bot.DataAccessLayer;
-using Lisbeth.Bot.DataAccessLayer.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using MikyM.Common.Application;
+using MikyM.Common.Application.CommandHandlers;
 using MikyM.Common.DataAccessLayer;
 using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Common.DataAccessLayer.Specifications.Evaluators;
@@ -46,10 +46,16 @@ public class AutofacContainerModule : Module
         builder.AddApplicationLayer();
 
         // bulk register custom services - follow naming convention
-        builder.RegisterAssemblyTypes(typeof(MuteService).Assembly).Where(t => t.Name.EndsWith("Service"))
-            .AsImplementedInterfaces().InstancePerLifetimeScope();
-        builder.RegisterAssemblyTypes(typeof(DiscordCloseTicketCommandHandler).Assembly).Where(t => t.Name.EndsWith("Handler") && !t.Name.Contains("Event"))
-            .AsImplementedInterfaces().InstancePerLifetimeScope();
+        builder.RegisterAssemblyTypes(typeof(MuteService).Assembly)
+            .Where(t => t.Name.EndsWith("Service"))
+            .AsImplementedInterfaces()
+            .InstancePerLifetimeScope();
+        builder.RegisterAssemblyTypes(typeof(DiscordCloseTicketCommandHandler).Assembly)
+            .AsClosedTypesOf(typeof(ICommandHandler<>))
+            .InstancePerLifetimeScope();
+        builder.RegisterAssemblyTypes(typeof(DiscordCloseTicketCommandHandler).Assembly)
+            .AsClosedTypesOf(typeof(ICommandHandler<,>))
+            .InstancePerLifetimeScope();
 
         // pagination stuff
         builder.RegisterType<HttpContextAccessor>().As<IHttpContextAccessor>().SingleInstance();

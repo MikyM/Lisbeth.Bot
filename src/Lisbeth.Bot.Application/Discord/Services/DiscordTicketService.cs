@@ -757,7 +757,7 @@ public class DiscordTicketService : IDiscordTicketService
         {
             await targetTicketChannel.AddOverwriteAsync(targetMember, Permissions.AccessChannels);
             await _ticketDataService.SetAddedUsersAsync(ticket, targetTicketChannel.Users.Select(x => x.Id));
-            await _ticketDataService.CheckAndSetPrivacyAsync(ticket, guild);
+            //await _ticketDataService.SetPrivacyAsync(ticket, guild);
         }
         else
         {
@@ -785,7 +785,7 @@ public class DiscordTicketService : IDiscordTicketService
             }
 
             await _ticketDataService.SetAddedRolesAsync(ticket, roleIds);
-            await _ticketDataService.CheckAndSetPrivacyAsync(ticket, guild);
+           // await _ticketDataService.SetPrivacyAsync(ticket, guild);
         }
 
         var embed = new DiscordEmbedBuilder();
@@ -843,7 +843,7 @@ public class DiscordTicketService : IDiscordTicketService
         {
             await targetTicketChannel.AddOverwriteAsync(targetMember, deny: Permissions.AccessChannels);
             await _ticketDataService.SetAddedUsersAsync(ticket, targetTicketChannel.Users.Select(x => x.Id));
-            await _ticketDataService.CheckAndSetPrivacyAsync(ticket, guild);
+            //await _ticketDataService.SetPrivacyAsync(ticket, guild);
         }
         else
         {
@@ -872,7 +872,7 @@ public class DiscordTicketService : IDiscordTicketService
             }
 
             await _ticketDataService.SetAddedRolesAsync(ticket, roleIds);
-            await _ticketDataService.CheckAndSetPrivacyAsync(ticket, guild);
+            //await _ticketDataService.SetPrivacyAsync(ticket, guild);
         }
 
         var embed = new DiscordEmbedBuilder();

@@ -44,7 +44,7 @@ public class Repository<TEntity> : ReadOnlyRepository<TEntity>, IRepository<TEnt
     {
         var local = Context.Set<TEntity>().Local.FirstOrDefault(entry => entry.Id.Equals(entity.Id));
 
-        if (local is not null) Context.Entry(local).State = EntityState.Detached;
+        if (local is not null) return;
 
         Context.Attach(entity);
     }
@@ -55,7 +55,7 @@ public class Repository<TEntity> : ReadOnlyRepository<TEntity>, IRepository<TEnt
         {
             var local = Context.Set<TEntity>().Local.FirstOrDefault(entry => entry.Id.Equals(entity.Id));
 
-            if (local is not null) Context.Entry(local).State = EntityState.Detached;
+            if (local is not null) continue;
 
             Context.Attach(entity);
         }

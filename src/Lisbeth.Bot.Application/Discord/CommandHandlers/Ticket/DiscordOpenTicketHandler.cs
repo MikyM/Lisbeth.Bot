@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Requests.Ticket;
@@ -25,11 +24,12 @@ using MikyM.Common.Application.CommandHandlers;
 using MikyM.Common.Utilities.Extensions;
 using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.Interfaces;
+using System.Collections.Generic;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 
 [UsedImplicitly]
-public class DiscordOpenTicketCommandHandler : ICommandHandler<OpenTicketCommand, DiscordMessageBuilder>
+public class DiscordOpenTicketCommandHandler : ICommandHandler<OpenTicketCommand>
 {
     private readonly IDiscordService _discord;
     private readonly IGuildDataService _guildDataService;
@@ -48,7 +48,7 @@ public class DiscordOpenTicketCommandHandler : ICommandHandler<OpenTicketCommand
         _welcomeEmbedCommandHandler = welcomeEmbedCommandHandler;
     }
 
-    public async Task<Result<DiscordMessageBuilder>> HandleAsync(OpenTicketCommand command)
+    public async Task<Result> HandleAsync(OpenTicketCommand command)
     {
         if (command is null) throw new ArgumentNullException(nameof(command));
 
@@ -63,7 +63,7 @@ public class DiscordOpenTicketCommandHandler : ICommandHandler<OpenTicketCommand
             await _guildDataService.GetSingleBySpecAsync(
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(guild.Id));
 
-        if (!guildRes.IsDefined(out var guildCfg)) return Result<DiscordMessageBuilder>.FromError(guildRes);
+        if (!guildRes.IsDefined(out var guildCfg)) return Result.FromError(guildRes);
 
         if (guildCfg.TicketingConfig is null)
             return new DisabledEntityError($"Guild with Id:{guild.Id} doesn't have ticketing enabled.");
@@ -171,6 +171,6 @@ public class DiscordOpenTicketCommandHandler : ICommandHandler<OpenTicketCommand
             return ex;
         }
 
-        return message;
+        return Result.FromSuccess();
     }
 }
