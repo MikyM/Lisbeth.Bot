@@ -16,7 +16,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
 using MikyM.Common.Application.CommandHandlers;
 
 namespace Lisbeth.Bot.Application.Discord.Requests.Ticket;

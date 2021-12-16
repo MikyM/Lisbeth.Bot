@@ -50,7 +50,7 @@ public class DiscordGetWelcomeEmbedTicketCommandHandler : ICommandHandler<GetTic
         if (guild.TicketingConfig is null)
             return new DisabledEntityError("Guild doesn't have ticketing configured");
 
-        var envelopeEmoji = DiscordEmoji.FromName(_discord.Client, ":lock:");
+        var lockEmoji = DiscordEmoji.FromName(_discord.Client, ":lock:");
         var embed = new DiscordEmbedBuilder();
 
         if (guild.TicketingConfig.WelcomeEmbedConfig is not null)
@@ -69,7 +69,7 @@ public class DiscordGetWelcomeEmbedTicketCommandHandler : ICommandHandler<GetTic
         embed.WithFooter($"To close this ticket press on the button below");
 
         var btn = new DiscordButtonComponent(ButtonStyle.Primary, nameof(TicketButton.TicketClose), "Close this ticket", false,
-            new DiscordComponentEmoji(envelopeEmoji));
+            new DiscordComponentEmoji(lockEmoji));
         var builder = new DiscordMessageBuilder();
         builder.AddEmbed(embed.Build());
         builder.AddComponents(btn);
