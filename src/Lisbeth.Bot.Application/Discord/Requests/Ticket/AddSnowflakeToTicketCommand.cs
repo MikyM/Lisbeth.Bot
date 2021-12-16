@@ -17,13 +17,13 @@
 
 using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
-using MikyM.Common.Application.HandlerServices;
+using MikyM.Common.Application.CommandHandlers;
 
 namespace Lisbeth.Bot.Application.Discord.Requests.Ticket;
 
-public class AddSnowflakeToTicketRequest : HandlerRequestBase
+public class AddSnowflakeToTicketCommand : CommandBase
 {
-    public AddSnowflakeToTicketRequest(TicketAddReqDto dto, InteractionContext? interactionContext = null)
+    public AddSnowflakeToTicketCommand(TicketAddReqDto dto, InteractionContext? interactionContext = null)
     {
         InteractionContext = interactionContext;
         Dto = dto;

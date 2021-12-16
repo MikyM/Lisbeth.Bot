@@ -15,12 +15,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Lisbeth.Bot.Application.Discord.Requests.Ticket;
-using MikyM.Common.Application.HandlerServices;
+using MikyM.Common.Utilities;
 
-namespace Lisbeth.Bot.Application.Discord.Handlers.Ticket.Interfaces;
+namespace Lisbeth.Bot.Application.Discord.EventHandlers.Base;
 
-public interface IDiscordRejectCloseTicketHandler : IHandlerService<RejectCloseTicketRequest>
+public abstract class BaseEventHandler
 {
-    
+    protected readonly IAsyncExecutor AsyncExecutor;
+
+    protected BaseEventHandler(IAsyncExecutor asyncExecutor)
+    {
+        AsyncExecutor = asyncExecutor;
+    }
 }

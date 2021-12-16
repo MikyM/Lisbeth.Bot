@@ -17,25 +17,26 @@
 
 using DSharpPlus;
 using DSharpPlus.Entities;
-using Lisbeth.Bot.Application.Discord.Handlers.Ticket.Interfaces;
 using Lisbeth.Bot.Application.Discord.Requests.Ticket;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Ticket;
 using Microsoft.Extensions.Logging;
+using MikyM.Common.Application.CommandHandlers;
 using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.Interfaces;
 
-namespace Lisbeth.Bot.Application.Discord.Handlers.Ticket;
+namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 
-public class DiscordReopenTicketHandler : IDiscordReopenTicketHandler
+[UsedImplicitly]
+public class DiscordReopenTicketCommandHandler : ICommandHandler<ReopenTicketCommand, DiscordMessageBuilder>
 {
     private readonly IDiscordService _discord;
     private readonly IGuildDataService _guildDataService;
     private readonly ITicketDataService _ticketDataService;
-    private readonly ILogger<DiscordConfirmCloseTicketHandler> _logger;
+    private readonly ILogger<DiscordConfirmCloseTicketCommandHandler> _logger;
 
-    public DiscordReopenTicketHandler(IDiscordService discord, IGuildDataService guildDataService,
-        ITicketDataService ticketDataService, ILogger<DiscordConfirmCloseTicketHandler> logger)
+    public DiscordReopenTicketCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
+        ITicketDataService ticketDataService, ILogger<DiscordConfirmCloseTicketCommandHandler> logger)
     {
         _discord = discord;
         _guildDataService = guildDataService;
@@ -43,32 +44,32 @@ public class DiscordReopenTicketHandler : IDiscordReopenTicketHandler
         _logger = logger;
     }
 
-    public async Task<Result<DiscordMessageBuilder>> HandleAsync(ReopenTicketRequest request)
+    public async Task<Result<DiscordMessageBuilder>> HandleAsync(ReopenTicketCommand command)
     {
-        if (request is null) throw new ArgumentNullException(nameof(request));
+        if (command is null) throw new ArgumentNullException(nameof(command));
 
         var guildRes =
             await _guildDataService.GetSingleBySpecAsync<Guild>(
-                new ActiveGuildByDiscordIdWithTicketingSpecifications(request.Dto.GuildId));
+                new ActiveGuildByDiscordIdWithTicketingSpecifications(command.Dto.GuildId));
 
         if (!guildRes.IsDefined(out var guildCfg)) return Result<DiscordMessageBuilder>.FromError(guildRes);
 
         if (guildCfg.TicketingConfig is null)
-            return new DisabledEntityError($"Guild with Id:{request.Dto.GuildId} doesn't have ticketing enabled.");
+            return new DisabledEntityError($"Guild with Id:{command.Dto.GuildId} doesn't have ticketing enabled.");
 
         var res = await _ticketDataService.GetSingleBySpecAsync(
-            new TicketByChannelIdOrGuildAndOwnerIdSpec(request.Dto.ChannelId, request.Dto.GuildId, request.Dto.OwnerId));
+            new TicketByChannelIdOrGuildAndOwnerIdSpec(command.Dto.ChannelId, command.Dto.GuildId, command.Dto.OwnerId));
 
         if (!res.IsDefined(out var ticket)) return new NotFoundError($"Ticket with given params doesn't exist.");
 
-        if (ticket.IsDisabled)
+        if (!ticket.IsDisabled)
             return new DisabledEntityError(
-                $"Ticket with Id: {ticket.GuildSpecificId}, TargetUserId: {ticket.UserId}, GuildId: {ticket.GuildId}, ChannelId: {ticket.ChannelId} is already closed.");
+                $"Ticket with Id: {ticket.GuildSpecificId}, TargetUserId: {ticket.UserId}, GuildId: {ticket.GuildId}, ChannelId: {ticket.ChannelId} is not closed.");
 
         // data req
-        DiscordGuild guild = request.Interaction?.Guild ?? await _discord.Client.GetGuildAsync(request.Dto.GuildId);
-        DiscordMember requestingMember = request.Interaction?.User as DiscordMember ?? await guild.GetMemberAsync(request.Dto.RequestedOnBehalfOfId);
-        DiscordChannel target = request.Interaction?.Channel ?? guild.GetChannel(ticket.ChannelId);
+        DiscordGuild guild = command.Interaction?.Guild ?? await _discord.Client.GetGuildAsync(command.Dto.GuildId);
+        DiscordMember requestingMember = command.Interaction?.User as DiscordMember ?? await guild.GetMemberAsync(command.Dto.RequestedOnBehalfOfId);
+        DiscordChannel target = command.Interaction?.Channel ?? guild.GetChannel(ticket.ChannelId);
 
 
         if (!requestingMember.IsModerator())
@@ -128,8 +129,8 @@ public class DiscordReopenTicketHandler : IDiscordReopenTicketHandler
         if (ticket.MessageCloseId.HasValue)
             await target.DeleteMessageAsync(await target.GetMessageAsync(ticket.MessageCloseId.Value));
 
-        request.Dto.ReopenMessageId = reopenMsg.Id;
-        await _ticketDataService.ReopenAsync(request.Dto, ticket);
+        command.Dto.ReopenMessageId = reopenMsg.Id;
+        await _ticketDataService.ReopenAsync(command.Dto, ticket);
 
         return msgBuilder;
     }

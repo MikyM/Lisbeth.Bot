@@ -81,6 +81,24 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
 
     [UsedImplicitly]
     [SlashRequireUserPermissions(Permissions.Administrator)]
+    [SlashCommand("ticket-welcome-config", "A command that allows configuring ticket welcome message", false)]
+    public async Task TicketCenterCommand(InteractionContext ctx)
+    {
+        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
+            new DiscordInteractionResponseBuilder().AsEphemeral(true));
+
+        var res = await _embedConfiguratorService.ConfigureAsync(ctx, x => x.WelcomeEmbedConfig,
+            x => x.WelcomeEmbedConfigId);
+
+        if (!res.IsDefined(out var embed))
+            await ctx.EditResponseAsync(
+                new DiscordWebhookBuilder().AddEmbed(GetUnsuccessfulResultEmbed(res, ctx.Client)));
+        else
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
+    }
+
+    [UsedImplicitly]
+    [SlashRequireUserPermissions(Permissions.Administrator)]
     [SlashCommand("module", "A command that allows configuring modules", false)]
     public async Task TicketConfigCommand(InteractionContext ctx,
         [Option("action", "Action to perform")]
@@ -207,8 +225,8 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
         }
 
         if (!result.HasValue) return;
-        if (result.Value.IsDefined())
-            await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(result.Value.Entity));
+        if (result.Value.IsDefined( out var embed))
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
         else
             await ctx.EditResponseAsync(
                 new DiscordWebhookBuilder().AddEmbed(GetUnsuccessfulResultEmbed(result, ctx.Client)));

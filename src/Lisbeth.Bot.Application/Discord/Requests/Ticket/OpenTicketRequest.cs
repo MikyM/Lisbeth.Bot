@@ -1,12 +1,12 @@
 ﻿using DSharpPlus.Entities;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
-using MikyM.Common.Application.HandlerServices;
+using MikyM.Common.Application.CommandHandlers;
 
 namespace Lisbeth.Bot.Application.Discord.Requests.Ticket;
 
-public class OpenTicketRequest : IHandlerRequest
+public class OpenTicketCommand : ICommand
 {
-    public OpenTicketRequest(TicketOpenReqDto dto, DiscordInteraction? interaction = null)
+    public OpenTicketCommand(TicketOpenReqDto dto, DiscordInteraction? interaction = null)
     {
         Dto = dto;
         Interaction = interaction;

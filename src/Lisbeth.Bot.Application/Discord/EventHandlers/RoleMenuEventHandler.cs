@@ -17,6 +17,7 @@
 
 using DSharpPlus;
 using DSharpPlus.EventArgs;
+using Lisbeth.Bot.Application.Discord.EventHandlers.Base;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Buttons;
 using MikyM.Common.Utilities;
 using MikyM.Discord.Events;
@@ -24,14 +25,9 @@ using MikyM.Discord.Events;
 namespace Lisbeth.Bot.Application.Discord.EventHandlers;
 
 [UsedImplicitly]
-public class RoleMenuEventHandler : IDiscordMiscEventsSubscriber
+public class RoleMenuEventHandler : BaseEventHandler, IDiscordMiscEventsSubscriber
 {
-    private readonly IAsyncExecutor _asyncExecutor;
-
-    public RoleMenuEventHandler(IAsyncExecutor asyncExecutor)
-    {
-        _asyncExecutor = asyncExecutor;
-    }
+    public RoleMenuEventHandler(IAsyncExecutor asyncExecutor) : base(asyncExecutor){}
 
     public async Task DiscordOnComponentInteractionCreated(DiscordClient sender,
         ComponentInteractionCreateEventArgs args)
@@ -47,14 +43,14 @@ public class RoleMenuEventHandler : IDiscordMiscEventsSubscriber
         if (args.Id.StartsWith("role_menu_button"))
         {
             await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
-            _ = _asyncExecutor.ExecuteAsync<IDiscordRoleMenuService>(async x =>
+            _ = AsyncExecutor.ExecuteAsync<IDiscordRoleMenuService>(async x =>
                 await x.HandleRoleMenuButtonAsync(args));
         }
 
         if (args.Id.StartsWith("role_menu_") && !args.Id.Contains("button"))
         {
             await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
-            _ = _asyncExecutor.ExecuteAsync<IDiscordRoleMenuService>(async x =>
+            _ = AsyncExecutor.ExecuteAsync<IDiscordRoleMenuService>(async x =>
                 await x.HandleOptionSelectionAsync(args));
         }
     }

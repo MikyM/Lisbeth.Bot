@@ -16,13 +16,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using DSharpPlus.SlashCommands;
-using MikyM.Common.Application.HandlerServices;
+using MikyM.Common.Application.CommandHandlers;
 
 namespace Lisbeth.Bot.Application.Discord.Requests.Ticket;
 
-public class TicketCenterEmbedRequest : HandlerRequestBase
+public class GetTicketCenterEmbedCommand : CommandBase
 {
-    public TicketCenterEmbedRequest(InteractionContext interactionContext)
+    public GetTicketCenterEmbedCommand(InteractionContext interactionContext)
     {
         InteractionContext = interactionContext;
     }

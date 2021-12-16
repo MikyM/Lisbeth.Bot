@@ -17,56 +17,63 @@
 
 using DSharpPlus;
 using DSharpPlus.Entities;
-using Lisbeth.Bot.Application.Discord.Handlers.Ticket.Interfaces;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Buttons;
 using Lisbeth.Bot.Application.Discord.Requests.Ticket;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
+using MikyM.Common.Application.CommandHandlers;
+using MikyM.Discord.Interfaces;
 
-namespace Lisbeth.Bot.Application.Discord.Handlers.Ticket;
+namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 
 [UsedImplicitly]
-public class DiscordGetCenterEmbedTicketHandler : IDiscordGetCenterEmbedTicketHandler
+public class DiscordGetWelcomeEmbedTicketCommandHandler : ICommandHandler<GetTicketWelcomeEmbedCommand, DiscordMessageBuilder>
 {
     private readonly IGuildDataService _guildDataService;
     private readonly IDiscordEmbedProvider _embedProvider;
+    private readonly IDiscordService _discord;
 
-    public DiscordGetCenterEmbedTicketHandler(IGuildDataService guildDataService, IDiscordEmbedProvider embedProvider)
+    public DiscordGetWelcomeEmbedTicketCommandHandler(IGuildDataService guildDataService, IDiscordEmbedProvider embedProvider,
+        IDiscordService discord)
     {
         _guildDataService = guildDataService;
         _embedProvider = embedProvider;
+        _discord = discord;
     }
 
-    public async Task<Result<DiscordMessageBuilder>> HandleAsync(TicketCenterEmbedRequest request)
+    public async Task<Result<DiscordMessageBuilder>> HandleAsync(GetTicketWelcomeEmbedCommand command)
     {
         var res = await _guildDataService.GetSingleBySpecAsync<Guild>(
-            new ActiveGuildByDiscordIdWithTicketingSpecifications(request.InteractionContext.Guild.Id));
+            new ActiveGuildByDiscordIdWithTicketingSpecifications(command.GuildId));
 
         if (!res.IsDefined(out var guild)) return Result<DiscordMessageBuilder>.FromError(res);
-        if (res.Entity.TicketingConfig is null)
+        if (guild.TicketingConfig is null)
             return new DisabledEntityError("Guild doesn't have ticketing configured");
 
-        var envelopeEmoji = DiscordEmoji.FromName(request.InteractionContext.Client, ":envelope:");
+        var envelopeEmoji = DiscordEmoji.FromName(_discord.Client, ":lock:");
         var embed = new DiscordEmbedBuilder();
 
-        if (res.Entity.TicketingConfig.CenterEmbedConfig is not null)
+        if (guild.TicketingConfig.WelcomeEmbedConfig is not null)
         {
-            embed = _embedProvider.GetEmbedFromConfig(res.Entity.TicketingConfig.CenterEmbedConfig);
+            embed = _embedProvider.GetEmbedFromConfig(guild.TicketingConfig.WelcomeEmbedConfig);
+            embed.WithDescription(embed.Description.Replace("@ownerMention@", command.Owner.Mention));
         }
         else
         {
-            embed.WithTitle($"__{request.InteractionContext.Guild.Name}'s Support Ticket Center__");
-            embed.WithDescription(res.Entity.TicketingConfig.BaseCenterMessage);
+            embed.WithColor(new DiscordColor(guild.EmbedHexColor));
+            embed.WithDescription(
+                guild.TicketingConfig.BaseWelcomeMessage.Replace("@ownerMention@", command.Owner.Mention));
             embed.WithColor(new DiscordColor(guild.EmbedHexColor));
         }
 
-        embed.WithFooter("Click on the button below to create a ticket");
+        embed.WithFooter($"To close this ticket press on the button below");
 
-        var btn = new DiscordButtonComponent(ButtonStyle.Primary, nameof(TicketButton.TicketOpen), "Open a ticket", false,
+        var btn = new DiscordButtonComponent(ButtonStyle.Primary, nameof(TicketButton.TicketClose), "Close this ticket", false,
             new DiscordComponentEmoji(envelopeEmoji));
         var builder = new DiscordMessageBuilder();
         builder.AddEmbed(embed.Build());
         builder.AddComponents(btn);
+        builder.WithContent($"{command.Owner.Mention} Welcome");
 
         return builder;
     }

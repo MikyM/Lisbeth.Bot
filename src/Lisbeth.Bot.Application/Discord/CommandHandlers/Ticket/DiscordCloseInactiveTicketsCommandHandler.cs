@@ -16,30 +16,30 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using DSharpPlus.Entities;
-using Lisbeth.Bot.Application.Discord.Handlers.Ticket.Interfaces;
 using Lisbeth.Bot.Application.Discord.Requests.Ticket;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Microsoft.Extensions.Logging;
+using MikyM.Common.Application.CommandHandlers;
 using MikyM.Discord.Interfaces;
 
-namespace Lisbeth.Bot.Application.Discord.Handlers.Ticket;
+namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 
 [UsedImplicitly]
-public class DiscordCloseInactiveTicketsHandler : IDiscordCloseInactiveTicketsHandler
+public class DiscordCloseInactiveTicketsCommandHandler : ICommandHandler<CloseInactiveTicketsCommand>
 {
     private readonly IDiscordService _discord;
     private readonly IGuildDataService _guildDataService;
-    private readonly ILogger<DiscordCloseInactiveTicketsHandler> _logger;
+    private readonly ILogger<DiscordCloseInactiveTicketsCommandHandler> _logger;
 
-    public DiscordCloseInactiveTicketsHandler(IDiscordService discord, IGuildDataService guildDataService,
-        ILogger<DiscordCloseInactiveTicketsHandler> logger)
+    public DiscordCloseInactiveTicketsCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
+        ILogger<DiscordCloseInactiveTicketsCommandHandler> logger)
     {
         _discord = discord;
         _guildDataService = guildDataService;
         _logger = logger;
     }
 
-    public async Task<Result> HandleAsync(CloseInactiveTicketsRequest request)
+    public async Task<Result> HandleAsync(CloseInactiveTicketsCommand command)
     {
         try
         {

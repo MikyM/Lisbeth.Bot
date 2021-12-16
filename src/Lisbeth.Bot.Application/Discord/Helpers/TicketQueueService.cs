@@ -55,8 +55,8 @@ public class TicketQueueService : ITicketQueueService
         }
 
         using var scope = _lifetimeScope.BeginLifetimeScope();
-        var service = scope.Resolve<IDiscordOpenTicketHandler>();
-        await guildsQueue.EnqueueAsync(() => service.HandleAsync(new OpenTicketRequest(req, interaction)));
+        var service = scope.Resolve<IDiscordOpenTicketCommandHandler>();
+        await guildsQueue.EnqueueAsync(() => service.HandleAsync(new OpenTicketCommand(req, interaction)));
     }
 
     public bool AddGuildQueue(ulong guildId) 

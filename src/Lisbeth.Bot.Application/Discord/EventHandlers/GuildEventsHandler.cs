@@ -18,6 +18,7 @@
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using Lisbeth.Bot.Application.Discord.EventHandlers.Base;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using MikyM.Common.Utilities;
 using MikyM.Discord.Events;
@@ -25,20 +26,18 @@ using MikyM.Discord.Events;
 namespace Lisbeth.Bot.Application.Discord.EventHandlers;
 
 [UsedImplicitly]
-public class GuildEventsHandler : IDiscordGuildEventsSubscriber
+public class GuildEventsHandler : BaseEventHandler, IDiscordGuildEventsSubscriber
 {
-    private readonly IAsyncExecutor _asyncExecutor;
     private readonly ITicketQueueService _ticketQueueService;
 
-    public GuildEventsHandler(IAsyncExecutor asyncExecutor, ITicketQueueService ticketQueueService)
+    public GuildEventsHandler(IAsyncExecutor asyncExecutor, ITicketQueueService ticketQueueService) : base(asyncExecutor)
     {
-        _asyncExecutor = asyncExecutor;
         _ticketQueueService = ticketQueueService;
     }
 
     public Task DiscordOnGuildCreated(DiscordClient sender, GuildCreateEventArgs args)
     {
-        _ = _asyncExecutor.ExecuteAsync<IDiscordGuildService>(async x => await x.HandleGuildCreateAsync(args));
+        _ = AsyncExecutor.ExecuteAsync<IDiscordGuildService>(async x => await x.HandleGuildCreateAsync(args));
         _ticketQueueService.AddGuildQueue(args.Guild.Id);
         return Task.CompletedTask;
     }
@@ -55,7 +54,7 @@ public class GuildEventsHandler : IDiscordGuildEventsSubscriber
 
     public Task DiscordOnGuildDeleted(DiscordClient sender, GuildDeleteEventArgs args)
     {
-        _ = _asyncExecutor.ExecuteAsync<IDiscordGuildService>(async x => await x.HandleGuildDeleteAsync(args));
+        _ = AsyncExecutor.ExecuteAsync<IDiscordGuildService>(async x => await x.HandleGuildDeleteAsync(args));
         _ticketQueueService.RemoveGuildQueue(args.Guild.Id);
         return Task.CompletedTask;
     }
@@ -67,7 +66,7 @@ public class GuildEventsHandler : IDiscordGuildEventsSubscriber
 
     public async Task DiscordOnGuildDownloadCompleted(DiscordClient sender, GuildDownloadCompletedEventArgs args)
     {
-        _ = _asyncExecutor.ExecuteAsync<IDiscordGuildService>(async x =>
+        _ = AsyncExecutor.ExecuteAsync<IDiscordGuildService>(async x =>
             await x.PrepareSlashPermissionsAsync(args.Guilds.Values));
         await sender.UpdateStatusAsync(new DiscordActivity("you closely.", ActivityType.Watching));
 

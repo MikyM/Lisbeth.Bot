@@ -20,5 +20,6 @@ namespace Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.SelectValue
 public enum TicketSelectValue
 {
     TicketReopenValue,
-    TicketTranscriptValue
+    TicketTranscriptValue,
+    TicketDeleteValue
 }

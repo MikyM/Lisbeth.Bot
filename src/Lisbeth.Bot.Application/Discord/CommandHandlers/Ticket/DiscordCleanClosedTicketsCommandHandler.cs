@@ -17,35 +17,35 @@
 
 using DSharpPlus.Entities;
 using FluentValidation;
-using Lisbeth.Bot.Application.Discord.Handlers.Ticket.Interfaces;
 using Lisbeth.Bot.Application.Discord.Requests.Ticket;
 using Lisbeth.Bot.Application.Validation.Ticket;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 using Microsoft.Extensions.Logging;
+using MikyM.Common.Application.CommandHandlers;
 using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.Interfaces;
 
-namespace Lisbeth.Bot.Application.Discord.Handlers.Ticket;
+namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 
 [UsedImplicitly]
-public class DiscordCleanClosedTicketsHandler : IDiscordCleanClosedTicketsHandler
+public class DiscordCleanClosedTicketsCommandHandler : ICommandHandler<CleanClosedTicketsCommand>
 {
     private readonly IDiscordService _discord;
     private readonly IGuildDataService _guildDataService;
-    private readonly ILogger<DiscordCleanClosedTicketsHandler> _logger;
-    private readonly IDiscordConfirmCloseTicketHandler _closeTicketHandler;
+    private readonly ILogger<DiscordCleanClosedTicketsCommandHandler> _logger;
+    private readonly ICommandHandler<ConfirmCloseTicketCommand> _closeTicketCommandHandler;
 
-    public DiscordCleanClosedTicketsHandler(IDiscordService discord, IGuildDataService guildDataService,
-        ILogger<DiscordCleanClosedTicketsHandler> logger, IDiscordConfirmCloseTicketHandler closeTicketHandler)
+    public DiscordCleanClosedTicketsCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
+        ILogger<DiscordCleanClosedTicketsCommandHandler> logger, ICommandHandler<ConfirmCloseTicketCommand> closeTicketCommandHandler)
     {
         _discord = discord;
         _guildDataService = guildDataService;
         _logger = logger;
-        _closeTicketHandler = closeTicketHandler;
+        _closeTicketCommandHandler = closeTicketCommandHandler;
     }
 
-    public async Task<Result> HandleAsync(CleanClosedTicketsRequest request)
+    public async Task<Result> HandleAsync(CleanClosedTicketsCommand command)
     {
         try
         {
@@ -91,7 +91,7 @@ public class DiscordCleanClosedTicketsHandler : IDiscordCleanClosedTicketsHandle
                     await validator.ValidateAndThrowAsync(req);
 
                     if (timeDifference.TotalHours >= guildCfg.TicketingConfig.CloseAfter.Value.Hours)
-                        await _closeTicketHandler.HandleAsync(new ConfirmCloseTicketRequest(req));
+                        await _closeTicketCommandHandler.HandleAsync(new ConfirmCloseTicketCommand(req));
 
                     await Task.Delay(500);
                 }

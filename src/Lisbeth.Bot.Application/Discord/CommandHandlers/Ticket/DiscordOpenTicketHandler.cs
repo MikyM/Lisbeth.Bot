@@ -15,48 +15,47 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Generic;
 using DSharpPlus;
 using DSharpPlus.Entities;
-using Lisbeth.Bot.Application.Discord.Handlers.Ticket.Interfaces;
-using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Application.Discord.Requests.Ticket;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Microsoft.Extensions.Logging;
+using MikyM.Common.Application.CommandHandlers;
 using MikyM.Common.Utilities.Extensions;
 using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.Interfaces;
-using System.Collections.Generic;
 
-namespace Lisbeth.Bot.Application.Discord.Handlers.Ticket;
+namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 
 [UsedImplicitly]
-public class DiscordOpenTicketHandler : IDiscordOpenTicketHandler
+public class DiscordOpenTicketCommandHandler : ICommandHandler<OpenTicketCommand, DiscordMessageBuilder>
 {
     private readonly IDiscordService _discord;
     private readonly IGuildDataService _guildDataService;
     private readonly ITicketDataService _ticketDataService;
-    private readonly ILogger<DiscordOpenTicketHandler> _logger;
-    private readonly IDiscordGetWelcomeEmbedTicketHandler _welcomeEmbedHandler;
+    private readonly ILogger<DiscordOpenTicketCommandHandler> _logger;
+    private readonly ICommandHandler<GetTicketWelcomeEmbedCommand> _welcomeEmbedCommandHandler;
 
-    public DiscordOpenTicketHandler(IGuildDataService guildDataService, ITicketDataService ticketDataService,
-        IDiscordService discord, ILogger<DiscordOpenTicketHandler> logger,
-        IDiscordGetWelcomeEmbedTicketHandler welcomeEmbedHandler)
+    public DiscordOpenTicketCommandHandler(IGuildDataService guildDataService, ITicketDataService ticketDataService,
+        IDiscordService discord, ILogger<DiscordOpenTicketCommandHandler> logger,
+        ICommandHandler<GetTicketWelcomeEmbedCommand> welcomeEmbedCommandHandler)
     {
         _guildDataService = guildDataService;
         _ticketDataService = ticketDataService;
         _discord = discord;
         _logger = logger;
-        _welcomeEmbedHandler = welcomeEmbedHandler;
+        _welcomeEmbedCommandHandler = welcomeEmbedCommandHandler;
     }
 
-    public async Task<Result<DiscordMessageBuilder>> HandleAsync(OpenTicketRequest request)
+    public async Task<Result<DiscordMessageBuilder>> HandleAsync(OpenTicketCommand command)
     {
-        if (request is null) throw new ArgumentNullException(nameof(request));
+        if (command is null) throw new ArgumentNullException(nameof(command));
 
         // data req
-        DiscordGuild guild = request.Interaction?.Guild ?? await _discord.Client.GetGuildAsync(request.Dto.GuildId);
-        DiscordMember owner = request.Interaction?.User as DiscordMember ??
-                              await guild.GetMemberAsync(request.Dto.RequestedOnBehalfOfId);
+        DiscordGuild guild = command.Interaction?.Guild ?? await _discord.Client.GetGuildAsync(command.Dto.GuildId);
+        DiscordMember owner = command.Interaction?.User as DiscordMember ??
+                              await guild.GetMemberAsync(command.Dto.RequestedOnBehalfOfId);
 
         if (owner.Guild.Id != guild.Id) return new DiscordNotAuthorizedError(nameof(owner));
 
@@ -69,27 +68,27 @@ public class DiscordOpenTicketHandler : IDiscordOpenTicketHandler
         if (guildCfg.TicketingConfig is null)
             return new DisabledEntityError($"Guild with Id:{guild.Id} doesn't have ticketing enabled.");
 
-        var ticketRes = await _ticketDataService.OpenAsync(request.Dto);
+        command.Dto.GuildSpecificId = guildCfg.TicketingConfig.LastTicketId + 1;
+        var ticketRes = await _ticketDataService.OpenAsync(command.Dto);
         if (!ticketRes.IsDefined(out var ticket))
         {
             var failEmbed = new DiscordEmbedBuilder();
             failEmbed.WithColor(new DiscordColor(guildCfg.EmbedHexColor));
             failEmbed.WithDescription("You already have an opened ticket in this guild.");
-            if (request.Interaction is not null)
-                await request.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+            if (command.Interaction is not null)
+                await command.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
                     .AddEmbed(failEmbed.Build())
                     .AsEphemeral(true));
             return new InvalidOperationError("Member already has an opened ticket in this guild.");
         }
-
-        request.Dto.GuildSpecificId = guildCfg.TicketingConfig.LastTicketId + 1;
+        
         _guildDataService.BeginUpdate(guildCfg);
         guildCfg.TicketingConfig.LastTicketId++;
         await _guildDataService.CommitAsync();
 
         var msgRes =
-            await _welcomeEmbedHandler.HandleAsync(new TicketWelcomeEmbedRequest(guild.Id,
-                request.Dto.GuildSpecificId.Value, owner));
+            await _welcomeEmbedCommandHandler.HandleAsync(new GetTicketWelcomeEmbedCommand(guild.Id,
+                command.Dto.GuildSpecificId.Value, owner));
 
         if (!msgRes.IsDefined(out var message))
         {
@@ -120,18 +119,18 @@ public class DiscordOpenTicketHandler : IDiscordOpenTicketHandler
         try
         {
             DiscordChannel newTicketChannel = await guild.CreateChannelAsync(
-                $"{guildCfg.TicketingConfig.OpenedNamePrefix}-{request.Dto.GuildSpecificId:D4}", ChannelType.Text,
+                $"{guildCfg.TicketingConfig.OpenedNamePrefix}-{command.Dto.GuildSpecificId:D4}", ChannelType.Text,
                 openedCat, topic, null, null, overwrites);
             DiscordMessage msg =
                 await newTicketChannel.SendMessageAsync(message);
             //Program.cachedMsgs.Add(msg.Id, msg);
 
-            if (request.Interaction is not null)
+            if (command.Interaction is not null)
             {
                 var succEmbed = new DiscordEmbedBuilder();
                 succEmbed.WithColor(new DiscordColor(guildCfg.EmbedHexColor));
                 succEmbed.WithDescription($"Ticket created successfully! Channel: {newTicketChannel.Mention}");
-                await request.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                await command.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
                     .AddEmbed(succEmbed.Build())
                     .AsEphemeral(true));
             }

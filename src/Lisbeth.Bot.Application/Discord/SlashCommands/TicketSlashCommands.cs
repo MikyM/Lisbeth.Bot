@@ -32,15 +32,15 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 [UsedImplicitly]
 public class TicketSlashCommands : ExtendedApplicationCommandModule
 {
-    public TicketSlashCommands(IDiscordAddSnowflakeTicketHandler addSnowflakeTicketHandler,
-        IDiscordRemoveSnowflakeTicketHandler removeSnowflakeHandler)
+    public TicketSlashCommands(IDiscordAddSnowflakeTicketCommandHandler addSnowflakeTicketCommandHandler,
+        IDiscordRemoveSnowflakeTicketCommandHandler removeSnowflakeCommandHandler)
     {
-        _addSnowflakeTicketHandler = addSnowflakeTicketHandler;
-        _removeSnowflakeHandler = removeSnowflakeHandler;
+        _addSnowflakeTicketCommandHandler = addSnowflakeTicketCommandHandler;
+        _removeSnowflakeCommandHandler = removeSnowflakeCommandHandler;
     }
 
-    private readonly IDiscordAddSnowflakeTicketHandler _addSnowflakeTicketHandler;
-    private readonly IDiscordRemoveSnowflakeTicketHandler _removeSnowflakeHandler;
+    private readonly IDiscordAddSnowflakeTicketCommandHandler _addSnowflakeTicketCommandHandler;
+    private readonly IDiscordRemoveSnowflakeTicketCommandHandler _removeSnowflakeCommandHandler;
 
     [UsedImplicitly]
     [SlashRequireUserPermissions(Permissions.BanMembers)]
@@ -63,14 +63,14 @@ public class TicketSlashCommands : ExtendedApplicationCommandModule
                 var addReq = new TicketAddReqDto(null,  ctx.Guild.Id, ctx.Channel.Id, ctx.User.Id, target.Id);
                 var addReqValidator = new TicketAddReqValidator(ctx.Client);
                 await addReqValidator.ValidateAndThrowAsync(addReq);
-                result = await this._addSnowflakeTicketHandler.HandleAsync(new AddSnowflakeToTicketRequest(addReq, ctx));
+                result = await this._addSnowflakeTicketCommandHandler.HandleAsync(new AddSnowflakeToTicketCommand(addReq, ctx));
                 break;
             case TicketActionType.Remove:
                 var removeReq = new TicketRemoveReqDto(null, ctx.Guild.Id, ctx.Channel.Id, ctx.User.Id,
                     target.Id);
                 var removeReqValidator = new TicketRemoveReqValidator(ctx.Client);
                 await removeReqValidator.ValidateAndThrowAsync(removeReq);
-                result = await this._removeSnowflakeHandler.HandleAsync(new RemoveSnowflakeFromTicketRequest(removeReq, ctx));
+                result = await this._removeSnowflakeCommandHandler.HandleAsync(new RemoveSnowflakeFromTicketCommand(removeReq, ctx));
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(action), action, null);

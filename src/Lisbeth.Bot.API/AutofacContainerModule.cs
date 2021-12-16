@@ -18,7 +18,7 @@
 using Autofac;
 using EFCoreSecondLevelCacheInterceptor;
 using IdGen;
-using Lisbeth.Bot.Application.Discord.Handlers.Ticket;
+using Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Application.Discord.Services;
 using Lisbeth.Bot.Application.Services;
@@ -46,14 +46,9 @@ public class AutofacContainerModule : Module
         builder.AddApplicationLayer();
 
         // bulk register custom services - follow naming convention
-        builder.RegisterAssemblyTypes(typeof(MuteService).Assembly).Where(t => t.Name.EndsWith("Service")/* && !t.Name.Contains("Discord")*/)
+        builder.RegisterAssemblyTypes(typeof(MuteService).Assembly).Where(t => t.Name.EndsWith("Service"))
             .AsImplementedInterfaces().InstancePerLifetimeScope();
-        builder.RegisterAssemblyTypes(typeof(DiscordCloseTicketHandler).Assembly).Where(t => t.Name.EndsWith("Handler")/* && !t.Name.Contains("Discord")*/)
-            .AsImplementedInterfaces().InstancePerLifetimeScope();
-        /*builder.RegisterAssemblyTypes(typeof(MuteService).Assembly).Where(t => t.Name.EndsWith("Service") && t.Name.Contains("Discord"))
-            .AsImplementedInterfaces().InstancePerDependency();*/
-        // bulk register custom services - follow naming convention
-        builder.RegisterAssemblyTypes(typeof(MuteRepository).Assembly).Where(t => t.Name.EndsWith("Repository"))
+        builder.RegisterAssemblyTypes(typeof(DiscordCloseTicketCommandHandler).Assembly).Where(t => t.Name.EndsWith("Handler") && !t.Name.Contains("Event"))
             .AsImplementedInterfaces().InstancePerLifetimeScope();
 
         // pagination stuff

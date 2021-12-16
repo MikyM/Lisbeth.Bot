@@ -1,12 +1,12 @@
 ﻿using DSharpPlus.Entities;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
-using MikyM.Common.Application.HandlerServices;
+using MikyM.Common.Application.CommandHandlers;
 
 namespace Lisbeth.Bot.Application.Discord.Requests.Ticket;
 
-public class ConfirmCloseTicketRequest : HandlerRequestBase
+public class ConfirmCloseTicketCommand : CommandBase
 {
-    public ConfirmCloseTicketRequest(TicketCloseReqDto dto, DiscordInteraction? interaction = null)
+    public ConfirmCloseTicketCommand(TicketCloseReqDto dto, DiscordInteraction? interaction = null)
     {
         Interaction = interaction;
         Dto = dto;

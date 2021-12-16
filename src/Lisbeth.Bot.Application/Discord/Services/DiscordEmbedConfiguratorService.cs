@@ -54,6 +54,10 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
         if (!member.IsModerator())
             return new DiscordNotAuthorizedError();
 
+        if (typeof(T) == typeof(TicketingConfig))
+            idOrName = "Ticketing " + (embedToConfigure.Body as MemberExpression)?.Member.Name.Replace("Config", "")
+                .SplitByCapitalAndConcat();
+
         var intr = ctx.Client.GetInteractivity();
         int loopCount = 0;
 

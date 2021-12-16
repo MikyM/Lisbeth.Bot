@@ -15,37 +15,38 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Lisbeth.Bot.Application.Discord.Handlers.Ticket.Interfaces;
 using Lisbeth.Bot.Application.Discord.Requests.Ticket;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Microsoft.Extensions.Logging;
+using MikyM.Common.Application.CommandHandlers;
 
-namespace Lisbeth.Bot.Application.Discord.Handlers.Ticket;
+namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 
-public class DiscordRejectCloseTicketHandler : IDiscordRejectCloseTicketHandler
+[UsedImplicitly]
+public class DiscordRejectCloseTicketCommandHandler : ICommandHandler<RejectCloseTicketCommand>
 {
     private readonly IGuildDataService _guildDataService;
-    private readonly ILogger<DiscordCloseTicketHandler> _logger;
+    private readonly ILogger<DiscordCloseTicketCommandHandler> _logger;
 
-    public DiscordRejectCloseTicketHandler(IGuildDataService guildDataService,
-        ILogger<DiscordCloseTicketHandler> logger)
+    public DiscordRejectCloseTicketCommandHandler(IGuildDataService guildDataService,
+        ILogger<DiscordCloseTicketCommandHandler> logger)
     {
         _guildDataService = guildDataService;
         _logger = logger;
     }
 
-    public async Task<Result> HandleAsync(RejectCloseTicketRequest request)
+    public async Task<Result> HandleAsync(RejectCloseTicketCommand command)
     {
         var guildRes =
             await _guildDataService.GetSingleBySpecAsync(
-                new ActiveGuildByDiscordIdWithTicketingSpecifications(request.Interaction.Guild.Id));
+                new ActiveGuildByDiscordIdWithTicketingSpecifications(command.Interaction.Guild.Id));
 
         if (!guildRes.IsDefined(out var guildCfg)) return Result.FromError(guildRes);
 
         if (guildCfg.TicketingConfig is null)
-            return new DisabledEntityError($"Guild with Id:{request.Interaction.Guild.Id} doesn't have ticketing enabled.");
+            return new DisabledEntityError($"Guild with Id:{command.Interaction.Guild.Id} doesn't have ticketing enabled.");
 
-        await request.Interaction.Channel.DeleteMessageAsync(request.Message);
+        await command.Interaction.Channel.DeleteMessageAsync(command.Message);
 
         return Result.FromSuccess();
     }

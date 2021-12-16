@@ -15,34 +15,34 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Generic;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.ChatExport;
 using Lisbeth.Bot.Application.Discord.Exceptions;
-using Lisbeth.Bot.Application.Discord.Handlers.Ticket.Interfaces;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Selects;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.SelectValues;
 using Lisbeth.Bot.Application.Discord.Requests.Ticket;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Ticket;
-using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
+using MikyM.Common.Application.CommandHandlers;
 using MikyM.Common.Utilities;
 using MikyM.Discord.Interfaces;
 
-namespace Lisbeth.Bot.Application.Discord.Handlers.Ticket;
+namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 
 [UsedImplicitly]
-public class DiscordConfirmCloseTicketHandler : IDiscordConfirmCloseTicketHandler
+public class DiscordConfirmCloseTicketCommandHandler : ICommandHandler<ConfirmCloseTicketCommand, DiscordMessageBuilder>
 {
     private readonly IDiscordService _discord;
     private readonly IGuildDataService _guildDataService;
     private readonly ITicketDataService _ticketDataService;
-    private readonly ILogger<DiscordConfirmCloseTicketHandler> _logger;
+    private readonly ILogger<DiscordConfirmCloseTicketCommandHandler> _logger;
     private readonly IAsyncExecutor _asyncExecutor;
 
-    public DiscordConfirmCloseTicketHandler(IDiscordService discord, IGuildDataService guildDataService,
-        ITicketDataService ticketDataService, ILogger<DiscordConfirmCloseTicketHandler> logger,
+    public DiscordConfirmCloseTicketCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
+        ITicketDataService ticketDataService, ILogger<DiscordConfirmCloseTicketCommandHandler> logger,
         IAsyncExecutor asyncExecutor)
     {
         _discord = discord;
@@ -52,21 +52,21 @@ public class DiscordConfirmCloseTicketHandler : IDiscordConfirmCloseTicketHandle
         _asyncExecutor = asyncExecutor;
     }
 
-    public async Task<Result<DiscordMessageBuilder>> HandleAsync(ConfirmCloseTicketRequest request)
+    public async Task<Result<DiscordMessageBuilder>> HandleAsync(ConfirmCloseTicketCommand command)
     {
-        if (request is null) throw new ArgumentNullException(nameof(request));
+        if (command is null) throw new ArgumentNullException(nameof(command));
 
         var guildRes =
             await _guildDataService.GetSingleBySpecAsync<Guild>(
-                new ActiveGuildByDiscordIdWithTicketingSpecifications(request.Dto.GuildId));
+                new ActiveGuildByDiscordIdWithTicketingSpecifications(command.Dto.GuildId));
 
         if (!guildRes.IsDefined(out var guildCfg)) return Result<DiscordMessageBuilder>.FromError(guildRes);
 
         if (guildCfg.TicketingConfig is null)
-            return new DisabledEntityError($"Guild with Id:{request.Dto.GuildId} doesn't have ticketing enabled.");
+            return new DisabledEntityError($"Guild with Id:{command.Dto.GuildId} doesn't have ticketing enabled.");
 
         var res = await _ticketDataService.GetSingleBySpecAsync(
-            new TicketByChannelIdOrGuildAndOwnerIdSpec(request.Dto.ChannelId, request.Dto.GuildId, request.Dto.OwnerId));
+            new TicketByChannelIdOrGuildAndOwnerIdSpec(command.Dto.ChannelId, command.Dto.GuildId, command.Dto.OwnerId));
 
         if (!res.IsDefined(out var ticket)) return new NotFoundError($"Ticket with given params doesn't exist.");
 
@@ -75,9 +75,9 @@ public class DiscordConfirmCloseTicketHandler : IDiscordConfirmCloseTicketHandle
                 $"Ticket with Id: {ticket.GuildSpecificId}, TargetUserId: {ticket.UserId}, GuildId: {ticket.GuildId}, ChannelId: {ticket.ChannelId} is already closed.");
 
         // data req
-        DiscordGuild guild = request.Interaction?.Guild ?? await _discord.Client.GetGuildAsync(request.Dto.GuildId);
-        DiscordMember requestingMember = request.Interaction?.User as DiscordMember ?? await guild.GetMemberAsync(request.Dto.RequestedOnBehalfOfId);
-        DiscordChannel target = request.Interaction?.Channel ?? guild.GetChannel(ticket.ChannelId);
+        DiscordGuild guild = command.Interaction?.Guild ?? await _discord.Client.GetGuildAsync(command.Dto.GuildId);
+        DiscordMember requestingMember = command.Interaction?.User as DiscordMember ?? await guild.GetMemberAsync(command.Dto.RequestedOnBehalfOfId);
+        DiscordChannel target = command.Interaction?.Channel ?? guild.GetChannel(ticket.ChannelId);
 
         if (ticket.UserId != requestingMember.Id &&
             !requestingMember.Permissions.HasPermission(Permissions.BanMembers))
@@ -97,7 +97,10 @@ public class DiscordConfirmCloseTicketHandler : IDiscordConfirmCloseTicketHandle
                 false, new DiscordComponentEmoji(DiscordEmoji.FromName(_discord.Client, ":unlock:"))),
             new("Transcript", nameof(TicketSelectValue.TicketTranscriptValue),
                 "Generates HTML transcript for this ticket",
-                false, new DiscordComponentEmoji(DiscordEmoji.FromName(_discord.Client, ":blue_book:")))
+                false, new DiscordComponentEmoji(DiscordEmoji.FromName(_discord.Client, ":blue_book:"))),
+            new("Delete", nameof(TicketSelectValue.TicketDeleteValue),
+                "Delete this ticket",
+                false, new DiscordComponentEmoji(DiscordEmoji.FromName(_discord.Client, ":no_entry:")))
         };
         var selectDropdown = new DiscordSelectComponent(nameof(TicketSelect.TicketCloseMessageSelect),
             "Choose an action", options);
@@ -149,8 +152,8 @@ public class DiscordConfirmCloseTicketHandler : IDiscordConfirmCloseTicketHandle
 
         await target.ModifyAsync(x => x.Parent = closedCat);
 
-        request.Dto.ClosedMessageId = closeMsg.Id;
-        await _ticketDataService.CloseAsync(request.Dto, ticket);
+        command.Dto.ClosedMessageId = closeMsg.Id;
+        await _ticketDataService.CloseAsync(command.Dto, ticket);
 
         if (ticket.IsPrivate) return msgBuilder;
 

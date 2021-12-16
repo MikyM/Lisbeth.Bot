@@ -18,42 +18,42 @@
 using Microsoft.Extensions.Logging;
 using MikyM.Common.Application.Results;
 
-namespace MikyM.Common.Application.HandlerServices;
+namespace MikyM.Common.Application.CommandHandlers;
 
 [UsedImplicitly]
-public class LoggingHandlerProxy<TRequest> : IHandlerService<TRequest> where TRequest : IHandlerRequest
+public class LoggingCommandHandlerProxy<TRequest> : ICommandHandler<TRequest> where TRequest : ICommand
 {
-    private readonly ILogger<LoggingHandlerProxy<TRequest>> _logger;
-    private readonly IHandlerService<TRequest> _handlerService;
+    private readonly ILogger<LoggingCommandHandlerProxy<TRequest>> _logger;
+    private readonly ICommandHandler<TRequest> _commandHandler;
 
-    public LoggingHandlerProxy(ILogger<LoggingHandlerProxy<TRequest>> logger, IHandlerService<TRequest> handlerService)
+    public LoggingCommandHandlerProxy(ILogger<LoggingCommandHandlerProxy<TRequest>> logger, ICommandHandler<TRequest> commandHandler)
     {
         _logger = logger;
-        _handlerService = handlerService;
+        _commandHandler = commandHandler;
     }
 
     public async Task<Result> HandleAsync(TRequest request)
     {
         _logger.LogDebug("Processing request: {0}", request);
-        return await _handlerService.HandleAsync(request);
+        return await _commandHandler.HandleAsync(request);
     }
 }
 
 [UsedImplicitly]
-public class LoggingHandler<TRequest, TResult> : IHandlerService<TRequest, TResult> where TRequest : IHandlerRequest
+public class LoggingCommandHandler<TRequest, TResult> : ICommandHandler<TRequest, TResult> where TRequest : ICommand
 {
-    private readonly ILogger<LoggingHandler<TRequest, TResult>> _logger;
-    private readonly IHandlerService<TRequest, TResult> _handlerService;
+    private readonly ILogger<LoggingCommandHandler<TRequest, TResult>> _logger;
+    private readonly ICommandHandler<TRequest, TResult> _commandHandler;
 
-    public LoggingHandler(ILogger<LoggingHandler<TRequest, TResult>> logger, IHandlerService<TRequest, TResult> handlerService)
+    public LoggingCommandHandler(ILogger<LoggingCommandHandler<TRequest, TResult>> logger, ICommandHandler<TRequest, TResult> commandHandler)
     {
         _logger = logger;
-        _handlerService = handlerService;
+        _commandHandler = commandHandler;
     }
 
     public async Task<Result<TResult>> HandleAsync(TRequest request)
     {
         _logger.LogDebug("Processing request: {0}", request);
-        return await _handlerService.HandleAsync(request);
+        return await _commandHandler.HandleAsync(request);
     }
 }

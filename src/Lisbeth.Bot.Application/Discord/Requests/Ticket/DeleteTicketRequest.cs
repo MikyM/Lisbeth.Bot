@@ -16,12 +16,16 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using DSharpPlus.Entities;
-using Lisbeth.Bot.Application.Discord.Requests.Ticket;
-using MikyM.Common.Application.HandlerServices;
+using MikyM.Common.Application.CommandHandlers;
 
-namespace Lisbeth.Bot.Application.Discord.Handlers.Ticket.Interfaces;
+namespace Lisbeth.Bot.Application.Discord.Requests.Ticket;
 
-public interface IDiscordConfirmCloseTicketHandler : IHandlerService<ConfirmCloseTicketRequest, DiscordMessageBuilder>
+public class DeleteTicketCommand : CommandBase
 {
-        
+    public DeleteTicketCommand(DiscordInteraction interaction)
+    {
+        Interaction = interaction;
+    }
+
+    public DiscordInteraction Interaction { get; set; }        
 }

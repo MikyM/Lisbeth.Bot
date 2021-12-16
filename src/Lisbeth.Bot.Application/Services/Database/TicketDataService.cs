@@ -88,7 +88,7 @@ public class TicketDataService : CrudService<Ticket, LisbethBotDbContext>, ITick
 
         var res = await base.GetBySpecAsync(new ActiveTicketByUserIdSpec(req.RequestedOnBehalfOfId));
 
-        if (res.IsDefined() && res.Entity.Count != 0) return new InvalidOperationError("User already has an opened ticket in this guild");
+        //if (res.IsDefined() && res.Entity.Count != 0) return new InvalidOperationError("User already has an opened ticket in this guild");
 
         var id = await base.AddAsync(req, true);
 
@@ -140,6 +140,7 @@ public class TicketDataService : CrudService<Ticket, LisbethBotDbContext>, ITick
 
         if (!discordMembers.Any()) return Result.FromSuccess();
 
+        base.BeginUpdate(ticket);
         ticket.AddedUserIds = discordMembers;
 
         if (shouldSave) await base.CommitAsync();
@@ -154,6 +155,7 @@ public class TicketDataService : CrudService<Ticket, LisbethBotDbContext>, ITick
         var discordRoles = roleIds.ToList();
         if (!discordRoles.Any()) return Result.FromSuccess();
 
+        base.BeginUpdate(ticket);
         ticket.AddedRoleIds = discordRoles;
 
         if (shouldSave) await base.CommitAsync();

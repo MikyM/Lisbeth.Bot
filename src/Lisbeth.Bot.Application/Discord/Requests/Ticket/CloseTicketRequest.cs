@@ -16,13 +16,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using DSharpPlus.Entities;
-using MikyM.Common.Application.HandlerServices;
+using MikyM.Common.Application.CommandHandlers;
 
 namespace Lisbeth.Bot.Application.Discord.Requests.Ticket;
 
-public class CloseTicketRequest : HandlerRequestBase
+public class CloseTicketCommand : CommandBase
 {
-    public CloseTicketRequest(DiscordInteraction interaction)
+    public CloseTicketCommand(DiscordInteraction interaction)
     {
         Interaction = interaction;
     }

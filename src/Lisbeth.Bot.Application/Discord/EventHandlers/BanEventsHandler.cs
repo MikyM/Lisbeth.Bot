@@ -17,31 +17,29 @@
 
 using DSharpPlus;
 using DSharpPlus.EventArgs;
+using Lisbeth.Bot.Application.Discord.EventHandlers.Base;
 using MikyM.Common.Utilities;
 using MikyM.Discord.Events;
 
 namespace Lisbeth.Bot.Application.Discord.EventHandlers;
 
 [UsedImplicitly]
-public class BanEventsHandler : IDiscordGuildBanEventsSubscriber
+public class BanEventsHandler : BaseEventHandler, IDiscordGuildBanEventsSubscriber
 {
-    private readonly IAsyncExecutor _asyncExecutor;
-
-    public BanEventsHandler(IAsyncExecutor asyncExecutor)
+    public BanEventsHandler(IAsyncExecutor asyncExecutor) : base(asyncExecutor)
     {
-        _asyncExecutor = asyncExecutor;
     }
 
     public Task DiscordOnGuildBanAdded(DiscordClient sender, GuildBanAddEventArgs args)
     {
-        _ = _asyncExecutor.ExecuteAsync<IBanCheckService>(x =>
+        _ = AsyncExecutor.ExecuteAsync<IBanCheckService>(x =>
             x.CheckForNonBotBanAsync(args.Member.Id, args.Guild.Id, sender.CurrentUser.Id));
         return Task.CompletedTask;
     }
 
     public Task DiscordOnGuildBanRemoved(DiscordClient sender, GuildBanRemoveEventArgs args)
     {
-        _ = _asyncExecutor.ExecuteAsync<IBanCheckService>(x =>
+        _ = AsyncExecutor.ExecuteAsync<IBanCheckService>(x =>
             x.CheckForNonBotUnbanAsync(args.Member.Id, args.Guild.Id, sender.CurrentUser.Id));
         return Task.CompletedTask;
     }

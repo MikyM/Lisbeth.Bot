@@ -634,7 +634,7 @@ public class DiscordService : IDiscordService
                 .StartActive(true);
             if (args.Guild is not null) workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
             workScope.Span.SetTag("Channel.Id", args.Channel.Id.ToString());
-            workScope.Span.SetTag("Author.Id", args.Author.Id.ToString());
+            if (args.Author is not null) workScope.Span.SetTag("Author.Id", args.Author.Id.ToString());
             workScope.Span.SetTag("message.Id", args.Message.Id.ToString());
 
             using var scope = ServiceProvider.CreateScope();

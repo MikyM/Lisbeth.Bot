@@ -43,14 +43,14 @@ public static class RecurringJobHelper
 
     public static void ScheduleAutomaticTicketClean()
     {
-        RecurringJob.AddOrUpdate<IDiscordCleanClosedTicketsHandler>("unmute", x => x.HandleAsync(new CleanClosedTicketsRequest()), Cron.Hourly,
+        RecurringJob.AddOrUpdate<IDiscordCleanClosedTicketsCommandHandler>("unmute", x => x.HandleAsync(new CleanClosedTicketsCommand()), Cron.Hourly,
             TimeZoneInfo.Utc, "ticketing");
         JobIds.Add("ticketClean");
     }
 
     public static void ScheduleAutomaticTicketClose()
     {
-        RecurringJob.AddOrUpdate<IDiscordCloseInactiveTicketsHandler>("unmute", x => x.HandleAsync(new CloseInactiveTicketsRequest()), Cron.Hourly,
+        RecurringJob.AddOrUpdate<IDiscordCloseInactiveTicketsCommandHandler>("unmute", x => x.HandleAsync(new CloseInactiveTicketsCommand()), Cron.Hourly,
             TimeZoneInfo.Utc, "ticketing");
         JobIds.Add("ticketClose");
     }

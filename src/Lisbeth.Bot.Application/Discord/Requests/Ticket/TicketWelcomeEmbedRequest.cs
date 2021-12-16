@@ -17,13 +17,13 @@
 
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
-using MikyM.Common.Application.HandlerServices;
+using MikyM.Common.Application.CommandHandlers;
 
 namespace Lisbeth.Bot.Application.Discord.Requests.Ticket;
 
-public class TicketWelcomeEmbedRequest : HandlerRequestBase
+public class GetTicketWelcomeEmbedCommand : CommandBase
 {
-    public TicketWelcomeEmbedRequest(ulong guildId, long guildSpecificId, DiscordMember owner)
+    public GetTicketWelcomeEmbedCommand(ulong guildId, long guildSpecificId, DiscordMember owner)
     {
         GuildId = guildId;
         GuildSpecificId = guildSpecificId;

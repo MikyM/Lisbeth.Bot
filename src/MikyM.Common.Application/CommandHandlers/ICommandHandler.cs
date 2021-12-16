@@ -15,13 +15,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus.Entities;
-using Lisbeth.Bot.Application.Discord.Requests.Ticket;
-using MikyM.Common.Application.HandlerServices;
+using MikyM.Common.Application.Results;
 
-namespace Lisbeth.Bot.Application.Discord.Handlers.Ticket.Interfaces;
+namespace MikyM.Common.Application.CommandHandlers;
 
-public interface IDiscordOpenTicketHandler : IHandlerService<OpenTicketRequest, DiscordMessageBuilder>
+public interface ICommandHandler<TCommand> where TCommand : ICommand
 {
-        
+    Task<Result> HandleAsync(TCommand request);
+}
+
+public interface ICommandHandler<TCommand, TResult> where TCommand : ICommand
+{
+    Task<Result<TResult>> HandleAsync(TCommand request);
 }

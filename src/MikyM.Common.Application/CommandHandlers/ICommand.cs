@@ -15,16 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using MikyM.Common.Application.Results;
+namespace MikyM.Common.Application.CommandHandlers;
 
-namespace MikyM.Common.Application.HandlerServices;
-
-public interface IHandlerService<TRequest> where TRequest : IHandlerRequest
+public interface ICommand
 {
-    Task<Result> HandleAsync(TRequest request);
-}
-
-public interface IHandlerService<TRequest, TResult> where TRequest : IHandlerRequest
-{
-    Task<Result<TResult>> HandleAsync(TRequest request);
+    
 }
