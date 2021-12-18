@@ -16,24 +16,19 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using DSharpPlus.Entities;
-using Lisbeth.Bot.Application.Discord.Commands.Ticket;
 using MikyM.Common.Application.CommandHandlers;
 
-namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
+namespace Lisbeth.Bot.Application.Discord.Commands.Ticket;
 
-[UsedImplicitly]
-public class DiscordDeleteTicketCommandHandler : ICommandHandler<DeleteTicketCommand>
+public class PrivacyCheckTicketCommand : ICommand
 {
-    public async Task<Result> HandleAsync(DeleteTicketCommand command)
+    public PrivacyCheckTicketCommand(DiscordGuild guild, Domain.Entities.Ticket ticket)
     {
-        await command.Interaction.CreateFollowupMessageAsync(
-            new DiscordFollowupMessageBuilder().AddEmbed(
-                new DiscordEmbedBuilder().WithDescription("This ticket will be deleted in 5 seconds")));
-
-        await Task.Delay(5000);
-
-        await command.Interaction.Channel.DeleteAsync();
-
-        return Result.FromSuccess();
+        
+        Guild = guild;
+        Ticket = ticket;
     }
+
+    public DiscordGuild Guild { get; set; }
+    public Domain.Entities.Ticket Ticket { get; set; }
 }

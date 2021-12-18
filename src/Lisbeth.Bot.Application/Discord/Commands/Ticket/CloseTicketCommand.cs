@@ -15,20 +15,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus.SlashCommands;
-using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
+using DSharpPlus.Entities;
 using MikyM.Common.Application.CommandHandlers;
 
-namespace Lisbeth.Bot.Application.Discord.Requests.Ticket;
+namespace Lisbeth.Bot.Application.Discord.Commands.Ticket;
 
-public class RemoveSnowflakeFromTicketCommand : CommandBase
+public class CloseTicketCommand : CommandBase
 {
-    public RemoveSnowflakeFromTicketCommand(TicketRemoveReqDto dto, InteractionContext? interactionContext = null)
+    public CloseTicketCommand(DiscordInteraction interaction)
     {
-        InteractionContext = interactionContext;
-        Dto = dto;
+        Interaction = interaction;
     }
 
-    public InteractionContext? InteractionContext { get; set; }
-    public TicketRemoveReqDto Dto { get; set; }
+    public DiscordInteraction Interaction { get; set; }
 }

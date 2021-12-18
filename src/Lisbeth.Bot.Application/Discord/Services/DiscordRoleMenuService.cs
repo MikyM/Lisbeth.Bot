@@ -1,4 +1,4 @@
-﻿// This file is part of Lisbeth.Bot project
+﻿/*// This file is part of Lisbeth.Bot project
 //
 // Copyright (C) 2021 Krzysztof Kupisz - MikyM
 // 
@@ -44,15 +44,15 @@ public class DiscordRoleMenuService : IDiscordRoleMenuService
     private readonly IDiscordEmbedProvider _embedProvider;
     private readonly IGuildDataService _guildDataService;
     private readonly ILogger<DiscordRoleMenuService> _logger;
-    private readonly IRoleMenuService _roleMenuService;
+    private readonly IRoleMenuDataService _roleMenuDataService;
 
     public DiscordRoleMenuService(IDiscordService discord, IGuildDataService guildDataService,
-        IRoleMenuService roleMenuService, ILogger<DiscordRoleMenuService> logger,
+        IRoleMenuDataService roleMenuDataService, ILogger<DiscordRoleMenuService> logger,
         IDiscordEmbedProvider embedProvider)
     {
         _discord = discord;
         _guildDataService = guildDataService;
-        _roleMenuService = roleMenuService;
+        _roleMenuDataService = roleMenuDataService;
         _logger = logger;
         _embedProvider = embedProvider;
     }
@@ -67,7 +67,7 @@ public class DiscordRoleMenuService : IDiscordRoleMenuService
         var guildResult = await _guildDataService.GetSingleBySpecAsync(new ActiveGuildByIdSpec(ctx.Guild.Id));
         if (!guildResult.IsDefined()) return Result<DiscordEmbed>.FromError(guildResult);
 
-        var count = await _roleMenuService.LongCountAsync(
+        var count = await _roleMenuDataService.LongCountAsync(
             new RoleMenuByNameAndGuildWithOptionsSpec(req.Name, req.GuildId));
 
         if (!count.IsDefined(out var countRes) || countRes >= 1)
@@ -146,7 +146,7 @@ public class DiscordRoleMenuService : IDiscordRoleMenuService
             await Task.Delay(300);
         }
 
-        await _roleMenuService.AddAsync(roleMenu, true);
+        await _roleMenuDataService.AddAsync(roleMenu, true);
 
         return resultEmbed.Build();
     }
@@ -162,7 +162,7 @@ public class DiscordRoleMenuService : IDiscordRoleMenuService
         }
         else if (req.Id.HasValue)
         {
-            var result = await _roleMenuService.GetAsync(req.Id.Value);
+            var result = await _roleMenuDataService.GetAsync(req.Id.Value);
             if (!result.IsDefined()) return Result<(DiscordWebhookBuilder? Builder, string Text)>.FromError(result);
             guild = await _discord.Client.GetGuildAsync(result.Entity.GuildId);
         }
@@ -194,7 +194,7 @@ public class DiscordRoleMenuService : IDiscordRoleMenuService
         }
         else if (req.Id.HasValue)
         {
-            var result = await _roleMenuService.GetAsync(req.Id.Value);
+            var result = await _roleMenuDataService.GetAsync(req.Id.Value);
             if (!result.IsDefined()) return Result<(DiscordWebhookBuilder? Builder, string Text)>.FromError(result);
             guild = await _discord.Client.GetGuildAsync(result.Entity.GuildId);
         }
@@ -221,7 +221,7 @@ public class DiscordRoleMenuService : IDiscordRoleMenuService
         if (!long.TryParse(args.Id.Split('_', StringSplitOptions.RemoveEmptyEntries).Last().Trim(),
                 out var parsedRoleMenuId)) return Result.FromError(new DiscordError());
 
-        var res = await _roleMenuService.GetSingleBySpecAsync<RoleMenu>(
+        var res = await _roleMenuDataService.GetSingleBySpecAsync<RoleMenu>(
             new RoleMenuByIdAndGuildWithOptionsSpec(parsedRoleMenuId, args.Guild.Id));
 
         if (!res.IsDefined(out var roleMenu)) return Result.FromError(new NotFoundError());
@@ -243,7 +243,7 @@ public class DiscordRoleMenuService : IDiscordRoleMenuService
         if (!long.TryParse(args.Id.Split('_', StringSplitOptions.RemoveEmptyEntries).Last().Trim(),
                 out var parsedRoleMenuId)) return Result.FromError(new DiscordError());
 
-        var res = await _roleMenuService.GetSingleBySpecAsync<RoleMenu>(
+        var res = await _roleMenuDataService.GetSingleBySpecAsync<RoleMenu>(
             new RoleMenuByIdAndGuildWithOptionsSpec(parsedRoleMenuId, args.Guild.Id));
 
         if (!res.IsDefined(out var roleMenu)) return Result.FromError(new NotFoundError());
@@ -342,12 +342,12 @@ public class DiscordRoleMenuService : IDiscordRoleMenuService
         {
             if (req.Id.HasValue)
             {
-                partial = await _roleMenuService.GetSingleBySpecAsync<RoleMenu>(
+                partial = await _roleMenuDataService.GetSingleBySpecAsync<RoleMenu>(
                     new RoleMenuByIdWithOptionsSpec(req.Id.Value));
             }
             else
             {
-                partial = await _roleMenuService.GetSingleBySpecAsync<RoleMenu>(
+                partial = await _roleMenuDataService.GetSingleBySpecAsync<RoleMenu>(
                     new RoleMenuByNameWithOptionsSpec(req.Name));
             }
         }
@@ -365,12 +365,12 @@ public class DiscordRoleMenuService : IDiscordRoleMenuService
 
             if (req.Id.HasValue)
             {
-                partial = await _roleMenuService.GetSingleBySpecAsync<RoleMenu>(
+                partial = await _roleMenuDataService.GetSingleBySpecAsync<RoleMenu>(
                     new RoleMenuByIdAndGuildWithOptionsSpec(req.Id.Value, guild.Id));
             }
             else
             {
-                partial = await _roleMenuService.GetSingleBySpecAsync<RoleMenu>(
+                partial = await _roleMenuDataService.GetSingleBySpecAsync<RoleMenu>(
                     new RoleMenuByNameAndGuildWithOptionsSpec(req.Name, guild.Id));
             }
         }
@@ -387,7 +387,7 @@ public class DiscordRoleMenuService : IDiscordRoleMenuService
 
         //builder.AddComponents(this.GetRoleMenuSelect(partial.Entity).Entity);
         var button = new DiscordButtonComponent(ButtonStyle.Primary, partial.Entity.CustomButtonId,
-            "Lets manage my roles!"/*, false, new DiscordComponentEmoji(DiscordEmoji.FromName("::"))*/);
+            "Lets manage my roles!"/*, false, new DiscordComponentEmoji(DiscordEmoji.FromName("::"))#1#);
 
         builder.AddComponents(button);
 
@@ -414,12 +414,12 @@ public class DiscordRoleMenuService : IDiscordRoleMenuService
         {
             if (req.Id.HasValue)
             {
-                partial = await _roleMenuService.GetSingleBySpecAsync<RoleMenu>(
+                partial = await _roleMenuDataService.GetSingleBySpecAsync<RoleMenu>(
                     new RoleMenuByIdWithOptionsSpec(req.Id.Value));
             }
             else
             {
-                partial = await _roleMenuService.GetSingleBySpecAsync<RoleMenu>(
+                partial = await _roleMenuDataService.GetSingleBySpecAsync<RoleMenu>(
                     new RoleMenuByNameWithOptionsSpec(req.Name));
             }
         }
@@ -437,12 +437,12 @@ public class DiscordRoleMenuService : IDiscordRoleMenuService
 
             if (req.Id.HasValue)
             {
-                partial = await _roleMenuService.GetSingleBySpecAsync<RoleMenu>(
+                partial = await _roleMenuDataService.GetSingleBySpecAsync<RoleMenu>(
                     new RoleMenuByIdAndGuildWithOptionsSpec(req.Id.Value, guild.Id));
             }
             else
             {
-                partial = await _roleMenuService.GetSingleBySpecAsync<RoleMenu>(
+                partial = await _roleMenuDataService.GetSingleBySpecAsync<RoleMenu>(
                     new RoleMenuByNameAndGuildWithOptionsSpec(req.Name, guild.Id));
             }
         }
@@ -454,7 +454,7 @@ public class DiscordRoleMenuService : IDiscordRoleMenuService
         var builder = new DiscordWebhookBuilder();
 
         var button = new DiscordButtonComponent(ButtonStyle.Primary, partial.Entity.CustomButtonId,
-            "Lets manage my roles!"/*, false, new DiscordComponentEmoji(DiscordEmoji.FromName("::"))*/);
+            "Lets manage my roles!"/*, false, new DiscordComponentEmoji(DiscordEmoji.FromName("::"))#1#);
 
         builder.AddComponents(button);
         if (partial.Entity.EmbedConfig is null)
@@ -578,4 +578,4 @@ public class DiscordRoleMenuService : IDiscordRoleMenuService
 
         return select;
     }
-}
+}*/

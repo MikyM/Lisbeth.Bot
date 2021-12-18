@@ -32,10 +32,10 @@ public class LoggingCommandHandlerProxy<TRequest> : ICommandHandler<TRequest> wh
         _commandHandler = commandHandler;
     }
 
-    public async Task<Result> HandleAsync(TRequest request)
+    public async Task<Result> HandleAsync(TRequest command)
     {
-        _logger.LogDebug("Processing request: {0}", request);
-        return await _commandHandler.HandleAsync(request);
+        _logger.LogDebug("Processing request: {0}", command);
+        return await _commandHandler.HandleAsync(command);
     }
 }
 

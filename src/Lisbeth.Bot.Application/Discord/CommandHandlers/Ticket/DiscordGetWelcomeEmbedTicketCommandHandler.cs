@@ -17,9 +17,9 @@
 
 using DSharpPlus;
 using DSharpPlus.Entities;
+using Lisbeth.Bot.Application.Discord.Commands.Ticket;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Buttons;
-using Lisbeth.Bot.Application.Discord.Requests.Ticket;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using MikyM.Common.Application.CommandHandlers;
 using MikyM.Discord.Interfaces;

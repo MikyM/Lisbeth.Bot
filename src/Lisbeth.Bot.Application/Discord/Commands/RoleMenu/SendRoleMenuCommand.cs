@@ -15,25 +15,20 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus.Entities;
-using Lisbeth.Bot.Application.Discord.Commands.Ticket;
+using DSharpPlus.SlashCommands;
+using Lisbeth.Bot.Domain.DTOs.Request.RoleMenu;
 using MikyM.Common.Application.CommandHandlers;
 
-namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
+namespace Lisbeth.Bot.Application.Discord.Commands.RoleMenu;
 
-[UsedImplicitly]
-public class DiscordDeleteTicketCommandHandler : ICommandHandler<DeleteTicketCommand>
+public class SendRoleMenuCommand : CommandBase
 {
-    public async Task<Result> HandleAsync(DeleteTicketCommand command)
+    public SendRoleMenuCommand(RoleMenuSendReqDto dto, InteractionContext? ctx = null)
     {
-        await command.Interaction.CreateFollowupMessageAsync(
-            new DiscordFollowupMessageBuilder().AddEmbed(
-                new DiscordEmbedBuilder().WithDescription("This ticket will be deleted in 5 seconds")));
-
-        await Task.Delay(5000);
-
-        await command.Interaction.Channel.DeleteAsync();
-
-        return Result.FromSuccess();
+        Ctx = ctx;
+        Dto = dto;
     }
+
+    public InteractionContext? Ctx { get; set; }
+    public RoleMenuSendReqDto Dto { get; set; }
 }

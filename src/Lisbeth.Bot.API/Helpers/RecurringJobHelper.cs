@@ -16,9 +16,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Hangfire;
-using Lisbeth.Bot.Application.Discord.Requests.Ticket;
 using Serilog;
 using System.Collections.Generic;
+using Lisbeth.Bot.Application.Discord.Commands.Ticket;
 using MikyM.Common.Application.CommandHandlers;
 
 namespace Lisbeth.Bot.API.Helpers;

@@ -17,7 +17,7 @@
 
 using DSharpPlus.Entities;
 using FluentValidation;
-using Lisbeth.Bot.Application.Discord.Requests.Ticket;
+using Lisbeth.Bot.Application.Discord.Commands.Ticket;
 using Lisbeth.Bot.Application.Validation.Ticket;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;

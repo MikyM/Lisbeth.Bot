@@ -18,7 +18,7 @@
 using System.Collections.Generic;
 using DSharpPlus;
 using DSharpPlus.Entities;
-using Lisbeth.Bot.Application.Discord.Requests.Ticket;
+using Lisbeth.Bot.Application.Discord.Commands.Ticket;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Ticket;
 using Microsoft.Extensions.Logging;

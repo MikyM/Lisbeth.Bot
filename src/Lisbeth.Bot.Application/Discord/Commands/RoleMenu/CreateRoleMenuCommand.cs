@@ -16,19 +16,19 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using DSharpPlus.SlashCommands;
-using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
+using Lisbeth.Bot.Domain.DTOs.Request.RoleMenu;
 using MikyM.Common.Application.CommandHandlers;
 
-namespace Lisbeth.Bot.Application.Discord.Requests.Ticket;
+namespace Lisbeth.Bot.Application.Discord.Commands.RoleMenu;
 
-public class AddSnowflakeToTicketCommand : CommandBase
+public class CreateRoleMenuCommand : CommandBase
 {
-    public AddSnowflakeToTicketCommand(TicketAddReqDto dto, InteractionContext? interactionContext = null)
+    public CreateRoleMenuCommand(RoleMenuAddReqDto dto, InteractionContext ctx)
     {
-        InteractionContext = interactionContext;
+        Ctx = ctx;
         Dto = dto;
     }
 
-    public InteractionContext? InteractionContext { get; set; }
-    public TicketAddReqDto Dto { get; set; }
+    public InteractionContext Ctx { get; set; }
+    public RoleMenuAddReqDto Dto { get; set; }
 }

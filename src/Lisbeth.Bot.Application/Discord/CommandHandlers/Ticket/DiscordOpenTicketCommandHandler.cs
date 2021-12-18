@@ -17,7 +17,6 @@
 
 using DSharpPlus;
 using DSharpPlus.Entities;
-using Lisbeth.Bot.Application.Discord.Requests.Ticket;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Microsoft.Extensions.Logging;
 using MikyM.Common.Application.CommandHandlers;
@@ -25,6 +24,7 @@ using MikyM.Common.Utilities.Extensions;
 using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.Interfaces;
 using System.Collections.Generic;
+using Lisbeth.Bot.Application.Discord.Commands.Ticket;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 

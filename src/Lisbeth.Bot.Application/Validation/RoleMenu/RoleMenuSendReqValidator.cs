@@ -33,11 +33,9 @@ public class RoleMenuSendReqValidator : AbstractValidator<RoleMenuSendReqDto>
     {
         CascadeMode = CascadeMode.Stop;
 
-        RuleFor(x => x.Id).NotEmpty().When(x => x.Name is not null && !x.GuildId.HasValue);
-        RuleFor(x => x.Name).NotEmpty().When(x => !x.Id.HasValue);
+        RuleFor(x => x.Name).NotEmpty();
         RuleFor(x => x.GuildId)
             .NotEmpty()
-            .When(x => !x.Id.HasValue)
             .DependentRules(x => x.SetAsyncValidator(new DiscordGuildIdValidator<RoleMenuSendReqDto>(discord)));
         RuleFor(x => x.RequestedOnBehalfOfId)
             .NotEmpty()

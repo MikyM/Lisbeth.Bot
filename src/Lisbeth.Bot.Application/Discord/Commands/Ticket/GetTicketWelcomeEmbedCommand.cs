@@ -15,10 +15,21 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using DSharpPlus.Entities;
 using MikyM.Common.Application.CommandHandlers;
 
-namespace Lisbeth.Bot.Application.Discord.Requests.Ticket;
+namespace Lisbeth.Bot.Application.Discord.Commands.Ticket;
 
-public class CloseInactiveTicketsCommand : CommandBase
+public class GetTicketWelcomeEmbedCommand : CommandBase
 {
+    public GetTicketWelcomeEmbedCommand(ulong guildId, long guildSpecificId, DiscordMember owner)
+    {
+        GuildId = guildId;
+        GuildSpecificId = guildSpecificId;
+        Owner = owner;
+    }
+
+    public ulong GuildId { get;  set; }
+    public long GuildSpecificId { get; set; }
+    public DiscordMember Owner { get; set; }
 }

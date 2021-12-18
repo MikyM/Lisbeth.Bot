@@ -21,7 +21,7 @@ namespace MikyM.Common.Application.CommandHandlers;
 
 public interface ICommandHandler<TCommand> where TCommand : ICommand
 {
-    Task<Result> HandleAsync(TCommand request);
+    Task<Result> HandleAsync(TCommand command);
 }
 
 public interface ICommandHandler<TCommand, TResult> where TCommand : ICommand

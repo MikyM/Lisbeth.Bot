@@ -17,11 +17,11 @@
 
 using Autofac;
 using DSharpPlus.Entities;
-using Lisbeth.Bot.Application.Discord.Requests.Ticket;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 using Microsoft.Extensions.Logging;
 using MikyM.Common.Utilities;
 using System.Collections.Concurrent;
+using Lisbeth.Bot.Application.Discord.Commands.Ticket;
 using MikyM.Common.Application.CommandHandlers;
 
 namespace Lisbeth.Bot.Application.Discord.Helpers;

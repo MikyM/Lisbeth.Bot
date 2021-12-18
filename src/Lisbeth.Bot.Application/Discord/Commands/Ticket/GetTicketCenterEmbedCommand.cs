@@ -15,25 +15,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus.Entities;
-using Lisbeth.Bot.Application.Discord.Commands.Ticket;
+using DSharpPlus.SlashCommands;
 using MikyM.Common.Application.CommandHandlers;
 
-namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
+namespace Lisbeth.Bot.Application.Discord.Commands.Ticket;
 
-[UsedImplicitly]
-public class DiscordDeleteTicketCommandHandler : ICommandHandler<DeleteTicketCommand>
+public class GetTicketCenterEmbedCommand : CommandBase
 {
-    public async Task<Result> HandleAsync(DeleteTicketCommand command)
+    public GetTicketCenterEmbedCommand(InteractionContext interactionContext)
     {
-        await command.Interaction.CreateFollowupMessageAsync(
-            new DiscordFollowupMessageBuilder().AddEmbed(
-                new DiscordEmbedBuilder().WithDescription("This ticket will be deleted in 5 seconds")));
-
-        await Task.Delay(5000);
-
-        await command.Interaction.Channel.DeleteAsync();
-
-        return Result.FromSuccess();
+        InteractionContext = interactionContext;
     }
+
+    public InteractionContext InteractionContext { get; set; }
 }

@@ -16,24 +16,18 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using DSharpPlus.Entities;
-using Lisbeth.Bot.Application.Discord.Commands.Ticket;
 using MikyM.Common.Application.CommandHandlers;
 
-namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
+namespace Lisbeth.Bot.Application.Discord.Commands.RoleMenu;
 
-[UsedImplicitly]
-public class DiscordDeleteTicketCommandHandler : ICommandHandler<DeleteTicketCommand>
+public class GetRoleMenuSelectCommand : CommandBase
 {
-    public async Task<Result> HandleAsync(DeleteTicketCommand command)
+    public GetRoleMenuSelectCommand(Domain.Entities.RoleMenu roleMenu, DiscordMember? discordMember =  null)
     {
-        await command.Interaction.CreateFollowupMessageAsync(
-            new DiscordFollowupMessageBuilder().AddEmbed(
-                new DiscordEmbedBuilder().WithDescription("This ticket will be deleted in 5 seconds")));
-
-        await Task.Delay(5000);
-
-        await command.Interaction.Channel.DeleteAsync();
-
-        return Result.FromSuccess();
+        RoleMenu = roleMenu;
+        DiscordMember = discordMember;
     }
+
+    public Domain.Entities.RoleMenu RoleMenu { get; set; }
+    public DiscordMember? DiscordMember { get; set; }
 }

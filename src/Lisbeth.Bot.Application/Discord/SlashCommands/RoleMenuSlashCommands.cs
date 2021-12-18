@@ -19,9 +19,11 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using FluentValidation;
+using Lisbeth.Bot.Application.Discord.Commands.RoleMenu;
 using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
 using Lisbeth.Bot.Application.Validation.RoleMenu;
 using Lisbeth.Bot.Domain.DTOs.Request.RoleMenu;
+using MikyM.Common.Application.CommandHandlers;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 
@@ -29,14 +31,9 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 [SlashModuleLifespan(SlashModuleLifespan.Scoped)]
 public class RoleMenuSlashCommands : ExtendedApplicationCommandModule
 {
-    public RoleMenuSlashCommands(IDiscordRoleMenuService discordRoleMenuService,
-        IDiscordEmbedConfiguratorService<RoleMenu> discordEmbedConfiguratorService)
-    {
-        _discordRoleMenuService = discordRoleMenuService;
-        _discordEmbedConfiguratorService = discordEmbedConfiguratorService;
-    }
-
-    private readonly IDiscordRoleMenuService _discordRoleMenuService;
+    private readonly ICommandHandler<SendRoleMenuCommand> _sendRoleMenuHandler;
+    private readonly ICommandHandler<GetRoleMenuCommand, DiscordMessageBuilder> _getRoleMenuHandler;
+    private readonly ICommandHandler<CreateRoleMenuCommand, DiscordMessageBuilder> _createRoleMenuHandler;
     private readonly IDiscordEmbedConfiguratorService<RoleMenu> _discordEmbedConfiguratorService;
 
     [UsedImplicitly]
@@ -46,45 +43,47 @@ public class RoleMenuSlashCommands : ExtendedApplicationCommandModule
         RoleMenuActionType action,
         [Option("channel", "Channel to send the role menu to")]
         DiscordChannel? channel = null,
-        [Option("id-or-name", "Type of action to perform")]
-        string idOrName = "",
+        [Option("name", "Name of the role menu")]
+        string name = "",
         [Option("text", "Base text for the role menu")]
         string text = "")
     {
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
-        bool isId = long.TryParse(idOrName, out long id);
-
-        Result<(DiscordWebhookBuilder? WebhookBuilder, string Text)>? result = null;
-        Result<DiscordEmbed>? partial = null;
-
         switch (action)
         {
             case RoleMenuActionType.Get:
-                if (!isId && string.IsNullOrWhiteSpace(idOrName))
-                    throw new ArgumentException("You must supply a valid Id or name");
+                if (string.IsNullOrWhiteSpace(name))
+                    throw new ArgumentException("You must supply a name");
 
                 var getReq = new RoleMenuGetReqDto
                 {
                     GuildId = ctx.Guild.Id,
-                    Id = isId ? id : null,
-                    Name = isId ? null : idOrName,
+                    Name = name,
                     RequestedOnBehalfOfId = ctx.User.Id
                 };
 
                 var getValidator = new RoleMenuGetReqValidator(ctx.Client);
                 await getValidator.ValidateAndThrowAsync(getReq);
 
-                result = await this._discordRoleMenuService!.GetAsync(ctx, getReq);
+                var getRes = await _getRoleMenuHandler.HandleAsync(new GetRoleMenuCommand(getReq, ctx));
+                if (getRes.IsDefined(out var builder))
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbeds(builder.Embeds)
+                        .AddComponents(builder.Components)
+                        .WithContent(builder.Content));
+                else
+                    await ctx.EditResponseAsync(
+                        new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(getRes, ctx.Client)));
+
                 break;
             case RoleMenuActionType.Create:
-                if (string.IsNullOrWhiteSpace(idOrName))
+                if (string.IsNullOrWhiteSpace(name))
                     throw new ArgumentException("You must supply name.");
 
                 var addReq = new RoleMenuAddReqDto
                 {
                     GuildId = ctx.Guild.Id,
-                    Name = idOrName,
+                    Name = name,
                     RequestedOnBehalfOfId = ctx.User.Id,
                     Text = text
                 };
@@ -92,17 +91,23 @@ public class RoleMenuSlashCommands : ExtendedApplicationCommandModule
                 var addValidator = new RoleMenuDiscordAddReqValidator(ctx.Client);
                 await addValidator.ValidateAndThrowAsync(addReq);
 
-                partial = await this._discordRoleMenuService!.CreateRoleMenuAsync(ctx, addReq);
+                var createRes = await _createRoleMenuHandler.HandleAsync(new CreateRoleMenuCommand(addReq, ctx));
+                if (createRes.IsDefined(out var createBuilder))
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbeds(createBuilder.Embeds)
+                        .AddComponents(createBuilder.Components)
+                        .WithContent(createBuilder.Content));
+                else
+                    await ctx.EditResponseAsync(
+                        new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(createRes, ctx.Client)));
                 break;
             case RoleMenuActionType.Edit:
-                if (!isId && string.IsNullOrWhiteSpace(idOrName))
-                    throw new ArgumentException("You must supply a valid Id or name");
+                if (string.IsNullOrWhiteSpace(name))
+                    throw new ArgumentException("You must supply a name");
 
                 var editReq = new RoleMenuEditReqDto
                 {
                     GuildId = ctx.Guild.Id,
-                    Id = isId ? id : null,
-                    Name = isId ? null : idOrName,
+                    Name = name,
                     RequestedOnBehalfOfId = ctx.User.Id,
                     Text = text
                 };
@@ -113,14 +118,13 @@ public class RoleMenuSlashCommands : ExtendedApplicationCommandModule
                 //result.Embed = await _discordRoleMenuService.EditAsync(ctx, editReq);
                 break;
             case RoleMenuActionType.Remove:
-                if (!isId && string.IsNullOrWhiteSpace(idOrName))
-                    throw new ArgumentException("You must supply a valid Id or name");
+                if (string.IsNullOrWhiteSpace(name))
+                    throw new ArgumentException("You must supply a name");
 
                 var removeReq = new RoleMenuDisableReqDto
                 {
                     GuildId = ctx.Guild.Id,
-                    Id = isId ? id : null,
-                    Name = isId ? null : idOrName,
+                    Name = name,
                     RequestedOnBehalfOfId = ctx.User.Id
                 };
 
@@ -130,19 +134,23 @@ public class RoleMenuSlashCommands : ExtendedApplicationCommandModule
                 //partial = await _discordRoleMenuService.DisableAsync(ctx, removeReq);
                 break;
             case RoleMenuActionType.ConfigureEmbed:
-                partial = await this._discordEmbedConfiguratorService!.ConfigureAsync(ctx, x => x.EmbedConfig,
-                    x => x.EmbedConfigId, idOrName);
+                var configRes = await this._discordEmbedConfiguratorService.ConfigureAsync(ctx, x => x.EmbedConfig,
+                    x => x.EmbedConfigId, name);
+                if (configRes.IsDefined(out var configEmbed))
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(configEmbed));
+                else
+                    await ctx.EditResponseAsync(
+                        new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(configRes, ctx.Client)));
                 break;
             case RoleMenuActionType.Send:
-                if (!isId && string.IsNullOrWhiteSpace(idOrName))
-                    throw new ArgumentException("You must supply a valid Id or name");
+                if (string.IsNullOrWhiteSpace(name))
+                    throw new ArgumentException("You must supply a name");
                 if (channel is null) throw new ArgumentException("You must supply a channel to send a role menu");
 
                 var sendReq = new RoleMenuSendReqDto
                 {
                     GuildId = ctx.Guild.Id,
-                    Id = isId ? id : null,
-                    Name = isId ? null : idOrName,
+                    Name = name,
                     RequestedOnBehalfOfId = ctx.User.Id,
                     ChannelId = channel.Id
                 };
@@ -150,45 +158,15 @@ public class RoleMenuSlashCommands : ExtendedApplicationCommandModule
                 var sendValidator = new RoleMenuSendReqValidator(ctx.Client);
                 await sendValidator.ValidateAndThrowAsync(sendReq);
 
-                result = await this._discordRoleMenuService!.SendAsync(ctx, sendReq);
+                var sendRes = await _sendRoleMenuHandler.HandleAsync(new SendRoleMenuCommand(sendReq, ctx));
+                if (sendRes.IsSuccess)
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(base.GetSuccessfulActionEmbed(ctx.Client)));
+                else
+                    await ctx.EditResponseAsync(
+                        new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(sendRes, ctx.Client)));
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(action), action, null);
-        }
-
-        if (partial.HasValue)
-        {
-            if (partial.Value.IsDefined())
-                await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(partial.Value.Entity));
-            else
-                await ctx.EditResponseAsync(
-                    new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(partial, ctx.Client)));
-        }
-        else if (result.HasValue)
-        {
-            if (!result.Value.IsDefined())
-            {
-                await ctx.EditResponseAsync(
-                    new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(result, ctx.Client)));
-            }
-            else
-            {
-                switch (action)
-                {
-                    case RoleMenuActionType.Get:
-                    case RoleMenuActionType.Create:
-                    case RoleMenuActionType.Edit:
-                    case RoleMenuActionType.ConfigureEmbed:
-                    case RoleMenuActionType.Remove:
-                        await ctx.EditResponseAsync(result.Value.Entity.WebhookBuilder);
-                        break;
-                    case RoleMenuActionType.Send:
-                        await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("Sent"));
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(action), action, null);
-                }
-            }
         }
     }
 }

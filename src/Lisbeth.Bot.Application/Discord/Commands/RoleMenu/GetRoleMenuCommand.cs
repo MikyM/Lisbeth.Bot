@@ -15,17 +15,20 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus.Entities;
+using DSharpPlus.SlashCommands;
+using Lisbeth.Bot.Domain.DTOs.Request.RoleMenu;
 using MikyM.Common.Application.CommandHandlers;
 
-namespace Lisbeth.Bot.Application.Discord.Requests.Ticket;
+namespace Lisbeth.Bot.Application.Discord.Commands.RoleMenu;
 
-public class DeleteTicketCommand : CommandBase
+public class GetRoleMenuCommand : CommandBase
 {
-    public DeleteTicketCommand(DiscordInteraction interaction)
+    public GetRoleMenuCommand(RoleMenuGetReqDto dto, InteractionContext? ctx = null)
     {
-        Interaction = interaction;
+        Dto = dto;
+        Ctx = ctx;
     }
 
-    public DiscordInteraction Interaction { get; set; }        
+    public InteractionContext? Ctx { get; set; }
+    public RoleMenuGetReqDto Dto { get; set; }
 }

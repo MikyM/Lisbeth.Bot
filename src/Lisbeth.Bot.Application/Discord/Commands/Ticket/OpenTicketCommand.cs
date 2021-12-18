@@ -15,17 +15,20 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus.SlashCommands;
+using DSharpPlus.Entities;
+using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 using MikyM.Common.Application.CommandHandlers;
 
-namespace Lisbeth.Bot.Application.Discord.Requests.Ticket;
+namespace Lisbeth.Bot.Application.Discord.Commands.Ticket;
 
-public class GetTicketCenterEmbedCommand : CommandBase
+public class OpenTicketCommand : ICommand
 {
-    public GetTicketCenterEmbedCommand(InteractionContext interactionContext)
+    public OpenTicketCommand(TicketOpenReqDto dto, DiscordInteraction? interaction = null)
     {
-        InteractionContext = interactionContext;
+        Dto = dto;
+        Interaction = interaction;
     }
 
-    public InteractionContext InteractionContext { get; set; }
+    public TicketOpenReqDto Dto { get; set; }
+    public DiscordInteraction? Interaction { get; set; }
 }

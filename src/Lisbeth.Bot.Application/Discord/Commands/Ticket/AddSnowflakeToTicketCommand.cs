@@ -15,21 +15,20 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus.Entities;
+using DSharpPlus.SlashCommands;
+using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 using MikyM.Common.Application.CommandHandlers;
 
-namespace Lisbeth.Bot.Application.Discord.Requests.Ticket;
+namespace Lisbeth.Bot.Application.Discord.Commands.Ticket;
 
-public class GetTicketWelcomeEmbedCommand : CommandBase
+public class AddSnowflakeToTicketCommand : CommandBase
 {
-    public GetTicketWelcomeEmbedCommand(ulong guildId, long guildSpecificId, DiscordMember owner)
+    public AddSnowflakeToTicketCommand(TicketAddReqDto dto, InteractionContext? interactionContext = null)
     {
-        GuildId = guildId;
-        GuildSpecificId = guildSpecificId;
-        Owner = owner;
+        InteractionContext = interactionContext;
+        Dto = dto;
     }
 
-    public ulong GuildId { get;  set; }
-    public long GuildSpecificId { get; set; }
-    public DiscordMember Owner { get; set; }
+    public InteractionContext? InteractionContext { get; set; }
+    public TicketAddReqDto Dto { get; set; }
 }
