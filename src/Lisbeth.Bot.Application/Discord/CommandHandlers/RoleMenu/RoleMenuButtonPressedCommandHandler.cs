@@ -47,6 +47,7 @@ public class RoleMenuButtonPressedCommandHandler : ICommandHandler<RoleMenuButto
 
         if (!res.IsDefined(out var roleMenu)) return Result.FromError(new NotFoundError());
 
+        var memberRoles = ((DiscordMember)command.Interaction.User).Roles;
         var builder = new DiscordFollowupMessageBuilder().AsEphemeral(true);
         var embed = new DiscordEmbedBuilder().WithColor(new DiscordColor(roleMenu.Guild?.EmbedHexColor));
         embed.WithAuthor("Lisbeth Role Menu");
@@ -54,7 +55,7 @@ public class RoleMenuButtonPressedCommandHandler : ICommandHandler<RoleMenuButto
 
         var selectRes =
             await _getSelectHandler.HandleAsync(new GetRoleMenuSelectCommand(roleMenu,
-                (DiscordMember)command.Interaction.User));
+                memberRoles));
 
         builder.AddEmbed(embed.Build())
             .AddComponents(selectRes.IsDefined(out var select) ? select : throw new DiscordNotFoundException());

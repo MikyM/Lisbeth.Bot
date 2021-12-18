@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Generic;
 using DSharpPlus.Entities;
 using MikyM.Common.Application.CommandHandlers;
 
@@ -22,12 +23,12 @@ namespace Lisbeth.Bot.Application.Discord.Commands.RoleMenu;
 
 public class GetRoleMenuSelectCommand : CommandBase
 {
-    public GetRoleMenuSelectCommand(Domain.Entities.RoleMenu roleMenu, DiscordMember? discordMember =  null)
+    public GetRoleMenuSelectCommand(Domain.Entities.RoleMenu roleMenu, IEnumerable<DiscordRole> memberRoles)
     {
         RoleMenu = roleMenu;
-        DiscordMember = discordMember;
+        MemberRoles = memberRoles;
     }
 
     public Domain.Entities.RoleMenu RoleMenu { get; set; }
-    public DiscordMember? DiscordMember { get; set; }
+    public IEnumerable<DiscordRole> MemberRoles { get; set; }
 }

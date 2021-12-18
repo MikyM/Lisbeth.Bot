@@ -68,7 +68,7 @@ public class CreateRoleMenuCommandHandler : ICommandHandler<CreateRoleMenuComman
         if (requestingUser is null)
             return new DiscordNotFoundError(DiscordEntity.User);
 
-        if (requestingUser.IsAdmin()) throw new DiscordNotAuthorizedException();
+        if (!requestingUser.IsAdmin()) return new DiscordNotAuthorizedError();
 
         var guildResult = await _guildDataService.GetSingleBySpecAsync(new ActiveGuildByIdSpec(command.Dto.GuildId));
         if (!guildResult.IsDefined()) return Result<DiscordMessageBuilder>.FromError(guildResult);

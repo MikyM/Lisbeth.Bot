@@ -17,8 +17,10 @@
 
 using DSharpPlus;
 using DSharpPlus.EventArgs;
+using Lisbeth.Bot.Application.Discord.Commands.RoleMenu;
 using Lisbeth.Bot.Application.Discord.EventHandlers.Base;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Buttons;
+using MikyM.Common.Application.CommandHandlers;
 using MikyM.Common.Utilities;
 using MikyM.Discord.Events;
 
@@ -43,15 +45,15 @@ public class RoleMenuEventHandler : BaseEventHandler, IDiscordMiscEventsSubscrib
         if (args.Id.StartsWith("role_menu_button"))
         {
             await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
-            _ = AsyncExecutor.ExecuteAsync<IDiscordRoleMenuService>(async x =>
-                await x.HandleRoleMenuButtonAsync(args));
+            _ = AsyncExecutor.ExecuteAsync<ICommandHandler<RoleMenuButtonPressedCommand>>(async x =>
+                await x.HandleAsync(new RoleMenuButtonPressedCommand(args)));
         }
 
         if (args.Id.StartsWith("role_menu_") && !args.Id.Contains("button"))
         {
             await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
-            _ = AsyncExecutor.ExecuteAsync<IDiscordRoleMenuService>(async x =>
-                await x.HandleOptionSelectionAsync(args));
+            _ = AsyncExecutor.ExecuteAsync<ICommandHandler<RoleMenuOptionSelectedCommand>>(async x =>
+                await x.HandleAsync(new RoleMenuOptionSelectedCommand(args)));
         }
     }
 

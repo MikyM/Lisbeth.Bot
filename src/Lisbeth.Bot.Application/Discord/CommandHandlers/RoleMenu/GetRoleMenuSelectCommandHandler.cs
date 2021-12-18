@@ -15,12 +15,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.RoleMenu;
-using Lisbeth.Bot.Application.Discord.Extensions;
 using MikyM.Common.Application.CommandHandlers;
 using MikyM.Discord.Interfaces;
+using System.Collections.Generic;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.RoleMenu;
 
@@ -48,7 +47,7 @@ public class GetRoleMenuSelectCommandHandler : ICommandHandler<GetRoleMenuSelect
                 DiscordEmoji.TryFromUnicode(_discord.Client, option.Emoji, out emoji);
 
             options.Add(new DiscordSelectComponentOption(option.Name, option.CustomSelectOptionValueId,
-                option.Description, command.DiscordMember is not null && command.DiscordMember.HasRole(option.RoleId, out _), emoji is null ? null : new DiscordComponentEmoji(emoji)));
+                option.Description, command.MemberRoles.Any(x => x.Id == option.RoleId), emoji is null ? null : new DiscordComponentEmoji(emoji)));
         }
 
         var select = new DiscordSelectComponent(command.RoleMenu.CustomSelectComponentId, "Choose a role!", options, false, 0,

@@ -70,6 +70,7 @@ public class RoleMenuOptionSelectedCommandHandler  : ICommandHandler<RoleMenuOpt
             var grantedRoles = new List<string?>();
             var revokedRoles = new List<string?>();
             var roleLists = new List<List<string?>> { grantedRoles, revokedRoles };
+            var memberRoles = member.Roles.ToList();
 
             foreach (var option in roleMenu.RoleMenuOptions ?? throw new InvalidOperationException("Role menu options were null"))
             {
@@ -80,11 +81,13 @@ public class RoleMenuOptionSelectedCommandHandler  : ICommandHandler<RoleMenuOpt
                 {
                     await member.GrantRoleAsync(role);
                     grantedRoles.Add(role.Name);
+                    memberRoles.Add(role);
                 }
                 else if (!selectedMenuIds.Contains(option.RoleId) && userRoleIds.Contains(role.Id))
                 {
                     await member.RevokeRoleAsync(role);
                     revokedRoles.Add(role.Name);
+                    memberRoles.RemoveAll(x => x.Id == role.Id);
                 }
             }
 
@@ -121,13 +124,9 @@ public class RoleMenuOptionSelectedCommandHandler  : ICommandHandler<RoleMenuOpt
                 embed.AddField(fieldName, joined);
             }
 
-            // wait and refresh member
-            await Task.Delay(500);
-            member = await command.Interaction.Guild.GetMemberAsync(member.Id);
-
             var selectRes =
                 await _getSelectHandler.HandleAsync(new GetRoleMenuSelectCommand(roleMenu,
-                    (DiscordMember)command.Interaction.User));
+                    memberRoles));
 
             await command.Interaction.Interaction.EditFollowupMessageAsync(command.Interaction.Message.Id,
                 new DiscordWebhookBuilder()

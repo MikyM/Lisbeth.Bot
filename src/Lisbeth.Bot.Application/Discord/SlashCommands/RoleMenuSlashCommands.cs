@@ -36,6 +36,17 @@ public class RoleMenuSlashCommands : ExtendedApplicationCommandModule
     private readonly ICommandHandler<CreateRoleMenuCommand, DiscordMessageBuilder> _createRoleMenuHandler;
     private readonly IDiscordEmbedConfiguratorService<RoleMenu> _discordEmbedConfiguratorService;
 
+    public RoleMenuSlashCommands(ICommandHandler<SendRoleMenuCommand> sendRoleMenuHandler,
+        ICommandHandler<GetRoleMenuCommand, DiscordMessageBuilder> getRoleMenuHandler,
+        ICommandHandler<CreateRoleMenuCommand, DiscordMessageBuilder> createRoleMenuHandler,
+        IDiscordEmbedConfiguratorService<RoleMenu> discordEmbedConfiguratorService)
+    {
+        _sendRoleMenuHandler = sendRoleMenuHandler;
+        _getRoleMenuHandler = getRoleMenuHandler;
+        _createRoleMenuHandler = createRoleMenuHandler;
+        _discordEmbedConfiguratorService = discordEmbedConfiguratorService;
+    }
+
     [UsedImplicitly]
     [SlashCommand("role-menu", "Allows working with role menus.", false)]
     public async Task RoleMenuCommand(InteractionContext ctx,
