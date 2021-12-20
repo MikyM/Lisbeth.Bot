@@ -85,6 +85,9 @@ public class Program
             builder.Services.AddOptions<BotOptions>()
                 .BindConfiguration("BotOptions", options => options.BindNonPublicProperties = true);
 
+            Log.Information($"Hangfire: {builder.Configuration.GetConnectionString("HangfireDb")}");
+            Log.Information($"Main: {builder.Configuration.GetConnectionString("MainDb")}");
+
             // Configure Autofac
             builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
             builder.Host.ConfigureContainer<ContainerBuilder>(cb =>
