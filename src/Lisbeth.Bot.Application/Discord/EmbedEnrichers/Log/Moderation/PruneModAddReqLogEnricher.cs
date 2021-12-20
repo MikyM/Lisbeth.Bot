@@ -35,6 +35,9 @@ public class PruneModAddReqLogEnricher : EmbedEnricher<PruneReqDto>
         embedBuilder.AddField("Moderator",
             ExtendedFormatter.Mention(this.PrimaryEnricher.RequestedOnBehalfOfId, DiscordEntity.Member), true);
 
+        embedBuilder.AddField("Channel",
+            ExtendedFormatter.Mention(this.PrimaryEnricher.ChannelId, DiscordEntity.Channel), true);
+
         if (this.PrimaryEnricher.Count.HasValue)
             embedBuilder.AddField("Message count",
                 this.PrimaryEnricher.Count.Value.ToString(), true);
