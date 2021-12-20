@@ -187,7 +187,7 @@ public class DiscordMessageService : IDiscordMessageService
         if (newContent == "") newContent = "No content";
 
         var embed = new DiscordEmbedBuilder();
-        embed.WithTitle("message has been edited");
+        embed.WithTitle("Message has been edited");
         embed.WithThumbnail(args.Author.AvatarUrl);
         embed.AddField("Author", $"{args.Author.GetFullUsername()}", true);
         embed.AddField("Author mention", $"{args.Message.Author.Mention}", true);
@@ -265,12 +265,12 @@ public class DiscordMessageService : IDiscordMessageService
         embed.AddField("Channel", $"{args.Channel.Mention}", true);
         if (filteredBans.Count() != 0)
         {
-            embed.WithTitle("message has been deleted due to ban prune");
+            embed.WithTitle("Message has been deleted due to ban prune");
             embed.AddField("Deleted by", $"{filteredBans[0].UserResponsible.Mention}");
         }
         else
         {
-            embed.WithTitle("message has been deleted");
+            embed.WithTitle("Message has been deleted");
             embed.AddField("Deleted by", $"{deletedBy.Mention}");
         }
 
@@ -342,17 +342,17 @@ public class DiscordMessageService : IDiscordMessageService
 
             if (filtered.Count() != 0)
             {
-                embed.WithTitle("message has been deleted due to ban prune");
+                embed.WithTitle("Message has been deleted due to ban prune");
                 embed.AddField("Pruned by", $"{filtered[0].UserResponsible.Mention}");
             }
             else if (filteredBulk.Count() != 0)
             {
-                embed.WithTitle("message has been deleted via prune command");
+                embed.WithTitle("Message has been deleted via prune command");
                 embed.AddField("Pruned by", $"{filteredBulk[0].UserResponsible.Mention}");
             }
             else
             {
-                embed.WithTitle("message has been deleted in a bulk deletion action");
+                embed.WithTitle("Message has been deleted in a bulk deletion action");
                 embed.AddField("Pruned by", "Unknown");
             }
 

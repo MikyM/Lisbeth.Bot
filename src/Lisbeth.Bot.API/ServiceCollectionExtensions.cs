@@ -110,6 +110,7 @@ public static class ServiceCollectionExtensions
         services.AddHangfireServer(options =>
         {
             options.Queues = new[] { "critical", "moderation", "reminder", "ticketing", "default" };
+            options.WorkerCount = 20;
         });
     }
 
@@ -134,7 +135,7 @@ public static class ServiceCollectionExtensions
                 options.Events.OnValidateKey =
                     context =>
                     {
-                        var isValid = key.Equals(context.ApiKey, StringComparison.OrdinalIgnoreCase);
+                        var isValid = key.Equals(context.ApiKey, StringComparison.InvariantCulture);
                         if (isValid)
                         {
                             context.Principal = new ClaimsPrincipal(new[]
@@ -177,9 +178,9 @@ public static class ServiceCollectionExtensions
             {
                 config.DBConfig = new InMemoryCachingOptions
                 {
-                    SizeLimit = 100
+                    SizeLimit = 1000
                 };
-                config.EnableLogging = true;
+                config.EnableLogging = false;
             }, "InMemoryCache");
         });
     }
