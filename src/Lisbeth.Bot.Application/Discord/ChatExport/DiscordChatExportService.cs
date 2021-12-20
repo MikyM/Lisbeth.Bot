@@ -73,7 +73,7 @@ public class DiscordChatExportService : IDiscordChatExportService
         }
         else
         {
-            var res = await _ticketDataService.GetSingleBySpecAsync<Ticket>(
+            var res = await _ticketDataService.GetSingleBySpecAsync(
                 new TicketBaseGetSpecifications(null, null, null, req.ChannelId, null, false, 1));
             if (!res.IsDefined())
                 return new NotFoundError("Opened ticket with given params doesn't exist in the database.");

@@ -49,7 +49,6 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<ITracer>(_ => new MockTracer());
         services.AddDiscord(options =>
         {
-            var a = configuration.GetValue<string>("BotOptions:LisbethBotToken");
             options.Token = configuration.GetValue<string>("BotOptions:LisbethBotToken");
             options.Intents = DiscordIntents.All;
         });

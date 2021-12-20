@@ -93,7 +93,7 @@ public class TicketEventsHandler : BaseEventHandler, IDiscordMiscEventsSubscribe
                             GuildId = args.Guild.Id, ChannelId = args.Channel.Id,
                             RequestedOnBehalfOfId = args.User.Id
                         };
-                        _ = AsyncExecutor.ExecuteAsync<ICommandHandler<ReopenTicketCommand>>(async x =>
+                        _ = AsyncExecutor.ExecuteAsync<ICommandHandler<ReopenTicketCommand, DiscordMessageBuilder>>(async x =>
                             await x.HandleAsync(new ReopenTicketCommand(req, args.Interaction)));
                         break;
                     case nameof(TicketSelectValue.TicketTranscriptValue):
