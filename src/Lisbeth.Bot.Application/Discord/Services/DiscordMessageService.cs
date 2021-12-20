@@ -197,7 +197,7 @@ public class DiscordMessageService : IDiscordMessageService
         embed.AddField("Old attachments", oldAttachmentsString);
         embed.AddField("New content", newContent);
         embed.AddField("New attachments", newAttachmentsString);
-        embed.WithFooter($"message Id: {args.Message.Id} || Author Id: {args.Message.Author.Id}");
+        embed.WithFooter($"Message Id: {args.Message.Id} || Author Id: {args.Message.Author.Id}");
         embed.WithColor(new DiscordColor(guild.EmbedHexColor));
 
         try
@@ -277,7 +277,7 @@ public class DiscordMessageService : IDiscordMessageService
         embed.AddField("Date sent", $"{args.Message.Timestamp}");
         embed.AddField("Content", content);
         embed.AddField("Attachments", attachmentsString);
-        embed.WithFooter($"message Id: {args.Message.Id} || Author Id: {args.Message.Author.Id}");
+        embed.WithFooter($"Message Id: {args.Message.Id} || Author Id: {args.Message.Author.Id}");
         embed.WithColor(new DiscordColor(guild.EmbedHexColor));
 
         try
@@ -359,7 +359,7 @@ public class DiscordMessageService : IDiscordMessageService
             embed.AddField("Date sent", $"{msg.Timestamp}");
             embed.AddField("Content", content);
             embed.AddField("Attachments", attachmentsString);
-            embed.WithFooter($"message ID: {msg.Id} || Author ID: {msg.Author.Id}");
+            embed.WithFooter($"Message ID: {msg.Id} || Author ID: {msg.Author.Id}");
             embed.WithColor(new DiscordColor(guild.EmbedHexColor));
 
             try
