@@ -168,7 +168,7 @@ public class EnhancedDiscordEmbedBuilder : IEnhancedDiscordEmbedBuilder
             .Replace("@info@",
                 this.FooterSnowflake is null
                     ? ""
-                    : $" | {this.FooterSnowflake.GetType().Name.SplitByCapitalAndConcat()} Id: {this.FooterSnowflake.Id}");
+                    : $"{(this.CaseId.HasValue ? " | " : "")}{this.FooterSnowflake.GetType().Name.SplitByCapitalAndConcat()} Id: {this.FooterSnowflake.Id}");
 
         this.Current.WithFooter(footer);
     }
