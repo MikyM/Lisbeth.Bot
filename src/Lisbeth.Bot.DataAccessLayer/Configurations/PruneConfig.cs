@@ -15,6 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Generic;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Lisbeth.Bot.DataAccessLayer.Configurations;
@@ -38,6 +41,13 @@ public class PruneConfig : IEntityTypeConfiguration<Prune>
         builder.Property(x => x.Count).HasColumnName("count").HasColumnType("int").IsRequired();
         builder.Property(x => x.ChannelId).HasColumnName("channel_id").HasColumnType("bigint").IsRequired();
         builder.Property(x => x.ModeratorId).HasColumnName("moderator_id").HasColumnType("bigint").IsRequired();
-        builder.Property(x => x.Messages).HasColumnName("messages").HasColumnType("text");
+        builder.Property(x => x.Messages)
+            .HasColumnName("messages")
+            .HasColumnType("text")
+            .HasConversion(
+                x => JsonSerializer.Serialize(x,
+                    new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull }),
+                x => JsonSerializer.Deserialize<List<MessageLog>>(x,
+                    new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull }));
     }
 }

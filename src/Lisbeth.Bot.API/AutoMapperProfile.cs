@@ -120,5 +120,10 @@ public class AutoMapperProfile : Profile
 
         CreateMap<TagSendReqDto, TagGetReqDto>();
         CreateMap<RoleMenuSendReqDto, RoleMenuGetReqDto>();
+
+        CreateMap<DiscordMessage, MessageLog>()
+            .ForMember(dest => dest.Content, source => source.MapFrom(x => x.Content))
+            .ForMember(dest => dest.AuthorId, source => source.MapFrom(x => x.Author.Id))
+            .ForMember(dest => dest.MessageId, source => source.MapFrom(x => x.Id));
     }
 }

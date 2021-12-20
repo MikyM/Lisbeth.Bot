@@ -15,7 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Generic;
 using Lisbeth.Bot.Domain.DTOs.Request.Base;
+using Lisbeth.Bot.Domain.Entities;
 
 namespace Lisbeth.Bot.Domain.DTOs.Request;
 
@@ -35,4 +37,5 @@ public class PruneReqDto : BaseAuthWithGuildReqDto
     public ulong? MessageId { get; set; }
     public ulong ChannelId { get; set; }
     public bool? IsTargetedMessageDelete { get; set; }
+    public List<MessageLog> Messages { get; set; } = new();
 }

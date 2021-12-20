@@ -27,6 +27,9 @@ using MikyM.Discord.EmbedBuilders.Enums;
 using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.Interfaces;
 using System.Collections.Generic;
+using System.Dynamic;
+using System.Text.Json;
+using AutoMapper;
 
 namespace Lisbeth.Bot.Application.Discord.Services;
 
@@ -39,10 +42,11 @@ public class DiscordMessageService : IDiscordMessageService
     private readonly ILogger<DiscordMessageService> _logger;
     private readonly IResponseDiscordEmbedBuilder _embedBuilder;
     private readonly IDiscordGuildLoggerService _discordGuildLogger;
+    private readonly IMapper _mapper;
 
     public DiscordMessageService(IDiscordService discord, IPruneService pruneService, IGuildDataService guildDataService,
         ILogger<DiscordMessageService> logger, IResponseDiscordEmbedBuilder embedBuilder,
-        IDiscordGuildLoggerService discordGuildLogger)
+        IDiscordGuildLoggerService discordGuildLogger, IMapper mapper)
     {
         _pruneService = pruneService;
         _discord = discord;
@@ -50,6 +54,7 @@ public class DiscordMessageService : IDiscordMessageService
         _logger = logger;
         _embedBuilder = embedBuilder;
         _discordGuildLogger = discordGuildLogger;
+        _mapper = mapper;
     }
 
 
@@ -91,10 +96,13 @@ public class DiscordMessageService : IDiscordMessageService
                 ? messages
                 : messages.TakeWhile(x => x.Interaction is null || x.Interaction.Id != interactionId));
             count = messages.Count;
+            req.Messages = _mapper.Map<List<MessageLog>>(messages);
         }
         else if (req.IsTargetedMessageDelete.HasValue && req.IsTargetedMessageDelete.Value && req.MessageId is not null)
         {
-            await channel.DeleteMessageAsync(await channel.GetMessageAsync(req.MessageId.Value));
+            var message = await channel.GetMessageAsync(req.MessageId.Value);
+            await channel.DeleteMessageAsync(message);
+            req.Messages = _mapper.Map<List<MessageLog>>(new List<DiscordMessage>{ message });
             count++;
         }
         else if (req.MessageId is not null)
@@ -128,13 +136,14 @@ public class DiscordMessageService : IDiscordMessageService
                 await channel.DeleteMessagesAsync(messagesToDelete);
                 count += messagesToDelete.Count;
                 cycles++;
+                req.Messages.AddRange(_mapper.Map<List<MessageLog>>(messagesToDelete));
             }
         }
         else if (req.TargetAuthorId.HasValue)
         {
             var messages = await channel.GetMessagesAsync();
             var messagesToDelete = messages.Where(x => x.Author.Id == req.TargetAuthorId.Value);
-
+            req.Messages = _mapper.Map<List<MessageLog>>(messagesToDelete);
             await channel.DeleteMessagesAsync(messagesToDelete);
         }
 
