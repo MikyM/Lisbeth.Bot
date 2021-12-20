@@ -73,7 +73,7 @@ public class Program
                 options.Conventions.Add(new RouteTokenTransformerConvention(new SlugifyParameterTransformer())));
             builder.Services.ConfigureSwagger();
             builder.Services.AddHttpClient();
-            builder.Services.ConfigureDiscord();
+            builder.Services.ConfigureDiscord(builder.Configuration);
             builder.Services.ConfigureHangfire(builder.Configuration);
             builder.Services.ConfigureApiKey(builder.Configuration);
             builder.Services.ConfigureRateLimiting(builder.Configuration);

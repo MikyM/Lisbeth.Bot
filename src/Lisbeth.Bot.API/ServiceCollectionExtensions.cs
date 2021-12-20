@@ -44,12 +44,13 @@ namespace Lisbeth.Bot.API;
 
 public static class ServiceCollectionExtensions
 {
-    public static void ConfigureDiscord(this IServiceCollection services)
+    public static void ConfigureDiscord(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddSingleton<ITracer>(_ => new MockTracer());
         services.AddDiscord(options =>
         {
-            options.Token = Environment.GetEnvironmentVariable("LisbethToken");
+            var a = configuration.GetValue<string>("BotOptions:LisbethBotToken");
+            options.Token = configuration.GetValue<string>("BotOptions:LisbethBotToken");
             options.Intents = DiscordIntents.All;
         });
         services.AddDiscordHostedService(true);
