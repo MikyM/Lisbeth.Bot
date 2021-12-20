@@ -79,7 +79,7 @@ public class Program
             builder.Services.ConfigureRateLimiting(builder.Configuration);
             builder.Services.ConfigureEfCache();
             builder.Services.ConfigureApiVersioning();
-            builder.Services.ConfigureHealthChecks();
+            builder.Services.ConfigureHealthChecks(builder.Configuration);
             builder.Services.ConfigureFluentValidation();
             builder.Services.AddEnrichedDiscordEmbedBuilders();
             builder.Services.AddOptions<BotOptions>()
