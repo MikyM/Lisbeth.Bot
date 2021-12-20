@@ -32,6 +32,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net.Http;
 using System.Text;
+using Lisbeth.Bot.Application.Discord.Exceptions;
+using MikyM.Discord.Extensions.BaseExtensions;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 
@@ -57,6 +59,10 @@ public class OwnerUtilSlashCommands : ApplicationCommandModule
     {
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
             new DiscordInteractionResponseBuilder().AsEphemeral(bool.Parse(shouldEph)));
+
+        if (!ctx.User.IsBotOwner(ctx.Client))
+            throw new DiscordNotAuthorizedException();
+
         var res = await this._service!.GetAllAsync<AuditLog>();
 
         if (!res.IsDefined()) throw new InvalidOperationException();
@@ -78,6 +84,10 @@ public class OwnerUtilSlashCommands : ApplicationCommandModule
     {
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
             new DiscordInteractionResponseBuilder().AsEphemeral(bool.Parse(shouldEph)));
+
+        if (!ctx.User.IsBotOwner(ctx.Client))
+            throw new DiscordNotAuthorizedException();
+
         var dat = new List<Dictionary<string, string?>>();
         int i;
 
@@ -145,6 +155,9 @@ public class OwnerUtilSlashCommands : ApplicationCommandModule
     {
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
             new DiscordInteractionResponseBuilder().AsEphemeral(bool.Parse(shouldEph)));
+
+        if (!ctx.User.IsBotOwner(ctx.Client))
+            throw new DiscordNotAuthorizedException();
 
         var cs1 = code.IndexOf("```", StringComparison.Ordinal) + 3;
         var cs2 = code.LastIndexOf("```", StringComparison.Ordinal);

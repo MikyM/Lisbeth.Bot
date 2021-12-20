@@ -15,10 +15,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Data.Entity.Core.Metadata.Edm;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using Lisbeth.Bot.Application.Discord.EmbedBuilders;
 using Lisbeth.Bot.Application.Discord.EmbedEnrichers.Log.Moderation;
+using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.DTOs.Request.Base;
 using MikyM.Discord.EmbedBuilders.Enrichers;
 using MikyM.Discord.EmbedBuilders.Enums;
@@ -63,6 +65,7 @@ public class DiscordGuildLoggerService : IDiscordGuildLoggerService
             IApplyInfractionReq addReq => new MemberModAddReqLogEnricher(addReq),
             IRevokeInfractionReq disableReq => new MemberModDisableReqLogEnricher(disableReq),
             IGetInfractionReq getReq => new MemberModGetReqLogEnricher(getReq),
+            PruneReqDto pruneReq => new PruneModAddReqLogEnricher(pruneReq),
             _ => throw new NotSupportedException("Given request to log is not supported")
         };
 

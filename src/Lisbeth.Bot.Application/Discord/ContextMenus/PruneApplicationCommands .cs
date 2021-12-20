@@ -34,7 +34,7 @@ public partial class PruneApplicationCommands
     [ContextMenu(ApplicationCommandType.UserContextMenu, "Prune last 10 messages")]
     public async Task PruneLastTenUserMenu(ContextMenuContext ctx)
     {
-        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
         var req = new PruneReqDto(ctx.Guild.Id, ctx.Channel.Id, ctx.Member.Id, 10);
 
@@ -57,7 +57,7 @@ public partial class PruneApplicationCommands
     [ContextMenu(ApplicationCommandType.MessageContextMenu, "Prune last 10")]
     public async Task PruneLastTenFromThisMessageMenu(ContextMenuContext ctx)
     {
-        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
         var req = new PruneReqDto(ctx.Guild.Id, ctx.Channel.Id, ctx.Member.Id, 10);
 
@@ -73,10 +73,10 @@ public partial class PruneApplicationCommands
 
     [UsedImplicitly]
     [SlashRequireUserPermissions(Permissions.ManageMessages)]
-    [ContextMenu(ApplicationCommandType.MessageContextMenu, "Prune")]
+    [ContextMenu(ApplicationCommandType.MessageContextMenu, "Prune until this")]
     public async Task PruneUntilThisMessageMenu(ContextMenuContext ctx)
     {
-        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
         var req = new PruneReqDto(ctx.Guild.Id, ctx.Channel.Id, ctx.Member.Id, null, ctx.TargetMessage.Id);
 
@@ -95,9 +95,9 @@ public partial class PruneApplicationCommands
     [ContextMenu(ApplicationCommandType.MessageContextMenu, "Prune by author")]
     public async Task PruneUntilThisByThisAuthorMessageMenu(ContextMenuContext ctx)
     {
-        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
-        var req = new PruneReqDto(ctx.Guild.Id, ctx.Channel.Id, ctx.Member.Id, null, null, ctx.TargetUser.Id);
+        var req = new PruneReqDto(ctx.Guild.Id, ctx.Channel.Id, ctx.Member.Id, null, null, ctx.TargetMessage.Author.Id);
 
         var result = await _discordMessageService.PruneAsync(ctx, req);
 

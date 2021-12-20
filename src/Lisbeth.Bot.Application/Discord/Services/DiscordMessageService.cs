@@ -87,7 +87,7 @@ public class DiscordMessageService : IDiscordMessageService
         if (req.Count is not null)
         {
             var messages = await channel.GetMessagesAsync(req.Count.Value);
-            await channel.DeleteMessagesAsync(messages);
+            await channel.DeleteMessagesAsync(messages.Where(x => x.Id != interactionId));
             count = messages.Count;
         }
         else if (req.IsTargetedMessageDelete.HasValue && req.IsTargetedMessageDelete.Value && req.MessageId is not null)
@@ -95,28 +95,31 @@ public class DiscordMessageService : IDiscordMessageService
             await channel.DeleteMessageAsync(await channel.GetMessageAsync(req.MessageId.Value));
             count++;
         }
-        else if ((req.IsTargetedMessageDelete.HasValue && !req.IsTargetedMessageDelete.Value || !req.IsTargetedMessageDelete.HasValue) && req.MessageId is not null)
+        else if (req.MessageId is not null)
         {
             List<DiscordMessage> messagesToDelete = new();
             int cycles = 0;
             bool shouldStop = false;
-            var lastMessage = await channel.GetMessageAsync(req.MessageId.Value);
-            if (lastMessage is null) return new DiscordNotFoundError("Message with given Id was not found");
+            var targetMessage = await channel.GetMessageAsync(req.MessageId.Value);
+            if (targetMessage is null) return new DiscordNotFoundError("Message with given Id was not found");
+            var messages = await channel.GetMessagesAsync(1);
+            var lastMessage = messages[0];
 
             while (cycles <= 10 && !shouldStop)
             {
                 messagesToDelete.Clear();
                 messagesToDelete.AddRange(
-                    await channel.GetMessagesAfterAsync(lastMessage.Id));
+                    await channel.GetMessagesBeforeAsync(lastMessage.Id));
                 await Task.Delay(300);
                 var target = messagesToDelete.FirstOrDefault(x => x.Id == req.MessageId);
                 if (target is not null)
                 {
-                    messagesToDelete.RemoveRange(0, messagesToDelete.IndexOf(target) + 1);
+                    var index = messagesToDelete.IndexOf(target);
+                    messagesToDelete.RemoveRange(index + 1, messagesToDelete.Count - index - 1);
                     shouldStop = true;
                 }
                 lastMessage = messagesToDelete.Last();
-                await Task.Delay(200);
+                await Task.Delay(600);
                 // keep interaction message
                 if (interactionId.HasValue)
                     messagesToDelete.RemoveAll(x => x.Interaction is not null && x.Interaction.Id == interactionId.Value);
@@ -124,6 +127,13 @@ public class DiscordMessageService : IDiscordMessageService
                 count += messagesToDelete.Count;
                 cycles++;
             }
+        }
+        else if (req.TargetAuthorId.HasValue)
+        {
+            var messages = await channel.GetMessagesAsync();
+            var messagesToDelete = messages.Where(x => x.Author.Id == req.TargetAuthorId.Value);
+
+            await channel.DeleteMessagesAsync(messagesToDelete);
         }
 
         var res = await _pruneService.AddAsync(req, true);
