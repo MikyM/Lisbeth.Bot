@@ -62,5 +62,5 @@ public static class DiscordMemberExtensions
         => (role = member.Roles.FirstOrDefault(x => x.Id == roleId)) is not null;
 
     public static bool CanAccessTag(this DiscordMember member, Tag tag)
-        => (tag.AllowedRoleIds.Count == 0 && tag.AllowedUserIds.Count == 0) || tag.AllowedRoleIds.Any(x => member.Roles.Select(r => r.Id).Contains(x)) || tag.AllowedUserIds.Contains(member.Id);
+        => tag.AllowedRoleIds.Count == 0 && tag.AllowedUserIds.Count == 0 || tag.AllowedRoleIds.Any(x => member.Roles.Select(r => r.Id).Contains(x)) || tag.AllowedUserIds.Contains(member.Id);
 }

@@ -15,25 +15,23 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.ChatExport.Models;
+using Lisbeth.Bot.Domain;
+using System.Collections.Generic;
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport.Wrappers;
 
 public class MessagesHtmlWrapperBuilder : IAsyncHtmlBuilder
 {
-    public MessagesHtmlWrapperBuilder() : this(new List<DiscordMessage>())
-    {
-        
-    }
-
-    public MessagesHtmlWrapperBuilder(List<DiscordMessage> messages)
+    public MessagesHtmlWrapperBuilder(List<DiscordMessage> messages, BotOptions options)
     {
         Messages ??= messages ?? throw new ArgumentNullException(nameof(messages));
+        BotOptions ??= options ?? throw new ArgumentNullException(nameof(options));
     }
 
     public List<DiscordMessage> Messages { get; }
+    public BotOptions BotOptions { get; private set; }
 
     public async Task<string> BuildAsync()
     {
@@ -42,10 +40,17 @@ public class MessagesHtmlWrapperBuilder : IAsyncHtmlBuilder
         foreach (var msg in Messages)
         {
             if (msg.Author.IsBot) continue;
-            HtmlMessage message = new (msg);
+            HtmlMessage message = new (msg, BotOptions);
             messagesHtml += await message.BuildAsync();
         }
 
         return $"<div id=\"messages-wrapper\">{messagesHtml}</div>";
+    }
+
+    public MessagesHtmlWrapperBuilder WithOptions(BotOptions options)
+    {
+        BotOptions = options ?? throw new ArgumentNullException(nameof(options));
+
+        return this;
     }
 }

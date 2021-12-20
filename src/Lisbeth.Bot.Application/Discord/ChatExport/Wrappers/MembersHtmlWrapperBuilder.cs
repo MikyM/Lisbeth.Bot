@@ -18,21 +18,20 @@
 using System.Collections.Generic;
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.ChatExport.Models;
+using Lisbeth.Bot.Domain;
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport.Wrappers;
 
 public class MembersHtmlWrapperBuilder : IAsyncHtmlBuilder
 {
-    public MembersHtmlWrapperBuilder() : this(new List<DiscordUser>())
-    {
-    }
-
-    public MembersHtmlWrapperBuilder(List<DiscordUser> users)
+    public MembersHtmlWrapperBuilder(List<DiscordUser> users, BotOptions options)
     {
         Users ??= users ?? throw new ArgumentNullException(nameof(users));
+        BotOptions ??= options ?? throw new ArgumentNullException(nameof(options));
     }
 
     public List<DiscordUser> Users { get; private set; }
+    public BotOptions BotOptions { get; }
 
     public async Task<string> BuildAsync()
     {
@@ -41,7 +40,7 @@ public class MembersHtmlWrapperBuilder : IAsyncHtmlBuilder
         string usersHtml = "";
         foreach (var user in Users)
         {
-            HtmlUser userModel = new (user);
+            HtmlUser userModel = new (user, BotOptions);
             usersHtml += $"<div class=\"user\">{await userModel.BuildAvatar()} {await userModel.BuildAsync()}</div>";
         }
 

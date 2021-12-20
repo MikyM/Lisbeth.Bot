@@ -1,17 +1,20 @@
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.ChatExport.Wrappers;
 using Lisbeth.Bot.Application.Discord.ChatExport.Wrappers.Message;
+using Lisbeth.Bot.Domain;
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport.Models;
 
 public class HtmlMessage : IAsyncHtmlBuilder
 {
-    public HtmlMessage(DiscordMessage message)
+    public HtmlMessage(DiscordMessage message, BotOptions options)
     {
         Msg ??= message ?? throw new ArgumentNullException(nameof(message));
+        BotOptions ??= options ?? throw new ArgumentNullException(nameof(options));
     }
 
     public DiscordMessage Msg { get; }
+    public BotOptions BotOptions { get; private set; }
 
     public async Task<string> BuildAsync()
     {
@@ -29,7 +32,7 @@ public class HtmlMessage : IAsyncHtmlBuilder
 
         if (Msg.Attachments.Count != 0)
         {
-            AttachmentsHtmlWrapperBuilder attachmentsBuilder = new (Msg.Attachments);
+            AttachmentsHtmlWrapperBuilder attachmentsBuilder = new (Msg.Attachments, BotOptions);
             attachmentsHtml = await attachmentsBuilder.BuildAsync();
         }
 
@@ -40,5 +43,12 @@ public class HtmlMessage : IAsyncHtmlBuilder
         }
 
         return $"<div class=\"message\">{messageTop}{messageBot}{attachmentsHtml}{reactionsHtml}</div><hr>";
+    }
+
+    public HtmlMessage WithOptions(BotOptions options)
+    {
+        BotOptions = options ?? throw new ArgumentNullException(nameof(options));
+
+        return this;
     }
 }

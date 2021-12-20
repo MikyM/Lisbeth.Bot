@@ -16,23 +16,23 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using CronExpressionDescriptor;
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.ChatExport.Models;
+using Lisbeth.Bot.Domain;
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport.Wrappers.Message.Attachments;
 
 public class ImagesHtmlWrapperBuilder : IAsyncHtmlBuilder
 {
-    public ImagesHtmlWrapperBuilder() : this(new List<DiscordAttachment>())
-    {
-    }
-
-    public ImagesHtmlWrapperBuilder(IReadOnlyList<DiscordAttachment> images)
+    public ImagesHtmlWrapperBuilder(IReadOnlyList<DiscordAttachment> images, BotOptions options)
     {
         Images ??= images ?? throw new ArgumentNullException(nameof(images));
+        BotOptions ??= options ?? throw new ArgumentNullException(nameof(options));
     }
 
     public IReadOnlyList<DiscordAttachment> Images { get; private set; }
+    public BotOptions BotOptions { get; private set; }
 
     public async Task<string> BuildAsync()
     {
@@ -40,7 +40,7 @@ public class ImagesHtmlWrapperBuilder : IAsyncHtmlBuilder
         string imagesHtml = "";
         foreach (var attachment in Images)
         {
-            HtmlImage image = new (attachment.Url);
+            HtmlImage image = new (attachment.Url,BotOptions);
             imagesHtml += await image.BuildAsync();
         }
 
@@ -50,6 +50,13 @@ public class ImagesHtmlWrapperBuilder : IAsyncHtmlBuilder
     public ImagesHtmlWrapperBuilder WithImages(IReadOnlyList<DiscordAttachment> images)
     {
         Images = images ?? throw new ArgumentNullException();
+
+        return this;
+    }
+
+    public ImagesHtmlWrapperBuilder WithOptions(BotOptions options)
+    {
+        BotOptions = options ?? throw new ArgumentNullException();
 
         return this;
     }

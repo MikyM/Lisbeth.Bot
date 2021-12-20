@@ -6,24 +6,27 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using Lisbeth.Bot.Application.Discord.ChatExport.Wrappers;
+using Lisbeth.Bot.Domain;
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport.Models;
 
 public class HtmlImage : IAsyncHtmlBuilder
 {
-    public HtmlImage(string discordLink)
+    public HtmlImage(string discordLink, BotOptions options)
     {
         DiscordLink ??= discordLink ?? throw new ArgumentNullException(nameof(discordLink));
+        BotOptions ??= options ?? throw new ArgumentNullException(nameof(options));
     }
 
     public string DiscordLink { get; }
     public static List<string> SupportedTypes { get; } = new() { "png", "bmp", "jpg", "jpeg", "gif", "tif" };
+    public BotOptions BotOptions { get; }
 
     public async Task<string> GetImgurLinkAsync()
     {
         if (SupportedTypes.All(x => x != DiscordLink.Split('.').Last().Split('?').First())) return "";
 
-        ApiClient apiClient = new (Environment.GetEnvironmentVariable("IMGUR_KEY"));
+        ApiClient apiClient = new (BotOptions.ImgurApiKey);
         IImage imageUpload;
         using HttpClient httpClient = ChatExportHttpClientFactory.Build();
         using HttpClient imgurHttpClient = ChatExportHttpClientFactory.Build();

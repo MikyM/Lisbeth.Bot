@@ -19,21 +19,20 @@ using System.Collections.Generic;
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.ChatExport.Models;
 using Lisbeth.Bot.Application.Discord.ChatExport.Wrappers.Message.Attachments;
+using Lisbeth.Bot.Domain;
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport.Wrappers.Message;
 
 public class AttachmentsHtmlWrapperBuilder : IAsyncHtmlBuilder
 {
-    public AttachmentsHtmlWrapperBuilder() : this(new List<DiscordAttachment>())
-    {
-    }
-
-    public AttachmentsHtmlWrapperBuilder(IReadOnlyList<DiscordAttachment> attachments)
+    public AttachmentsHtmlWrapperBuilder(IReadOnlyList<DiscordAttachment> attachments, BotOptions options)
     {
         Attachments ??= attachments ?? throw new ArgumentNullException(nameof(attachments));
+        BotOptions ??= options ?? throw new ArgumentNullException(nameof(options));
     }
 
     public IReadOnlyList<DiscordAttachment> Attachments { get; private set; }
+    public BotOptions BotOptions { get; private set; }
 
     public async Task<string> BuildAsync()
     {
@@ -47,13 +46,13 @@ public class AttachmentsHtmlWrapperBuilder : IAsyncHtmlBuilder
 
         if (imageAttachments.Count != 0)
         {
-            ImagesHtmlWrapperBuilder imagesBuilder = new(imageAttachments);
+            ImagesHtmlWrapperBuilder imagesBuilder = new(imageAttachments, BotOptions);
             imagesHtml = await imagesBuilder.BuildAsync();
         }
 
         if (videoAttachments.Count == 0) return $"<div class=\"attachments\">{imagesHtml}{videosHtml}</div>";
 
-        VideosHtmlWrapperBuilder videosBuilder = new(videoAttachments);
+        VideosHtmlWrapperBuilder videosBuilder = new(videoAttachments, BotOptions);
         videosHtml = await videosBuilder.BuildAsync();
 
         return $"<div class=\"attachments\">{imagesHtml}{videosHtml}</div>";
@@ -62,6 +61,13 @@ public class AttachmentsHtmlWrapperBuilder : IAsyncHtmlBuilder
     public AttachmentsHtmlWrapperBuilder WithAttachments(IReadOnlyList<DiscordAttachment> attachments)
     {
         Attachments = attachments ?? throw new ArgumentNullException(nameof(attachments));
+
+        return this;
+    }
+
+    public AttachmentsHtmlWrapperBuilder WithOptions(BotOptions options)
+    {
+        BotOptions = options ?? throw new ArgumentNullException(nameof(options));
 
         return this;
     }

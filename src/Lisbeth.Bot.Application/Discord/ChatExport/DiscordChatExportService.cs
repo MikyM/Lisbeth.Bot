@@ -16,7 +16,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using DSharpPlus.Entities;
-using Lisbeth.Bot.Application.Discord.ChatExport.Models;
+using Lisbeth.Bot.Application.Discord.ChatExport.Wrappers;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Ticket;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
@@ -26,7 +26,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
-using Lisbeth.Bot.Application.Discord.ChatExport.Wrappers;
+using Lisbeth.Bot.Domain;
+using Microsoft.Extensions.Options;
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport;
 
@@ -37,14 +38,16 @@ public class DiscordChatExportService : IDiscordChatExportService
     private readonly IGuildDataService _guildDataService;
     private readonly ILogger<DiscordChatExportService> _logger;
     private readonly ITicketDataService _ticketDataService;
+    private readonly IOptions<BotOptions> _options;
 
     public DiscordChatExportService(IDiscordService discord, IGuildDataService guildDataService,
-        ITicketDataService ticketDataService, ILogger<DiscordChatExportService> logger)
+        ITicketDataService ticketDataService, ILogger<DiscordChatExportService> logger, IOptions<BotOptions> options)
     {
         _discord = discord;
         _guildDataService = guildDataService;
         _ticketDataService = ticketDataService;
         _logger = logger;
+        _options = options;
     }
 
     public async Task<Result<DiscordEmbed>> ExportToHtmlAsync(TicketExportReqDto req)
@@ -233,7 +236,12 @@ public class DiscordChatExportService : IDiscordChatExportService
             }
 
             var htmlChatBuilder = new HtmlChatBuilder();
-            htmlChatBuilder.WithChannel(target).WithUsers(users).WithMessages(messages).WithCss(css).WithJs(js);
+            htmlChatBuilder.WithChannel(target)
+                .WithUsers(users)
+                .WithMessages(messages)
+                .WithCss(css)
+                .WithJs(js)
+                .WithOptions(_options.Value);
             string html = await htmlChatBuilder.BuildAsync();
 
             var parser = new MarkdownParser(html, users, guild, _discord);

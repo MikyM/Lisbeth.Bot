@@ -49,7 +49,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<ITracer>(_ => new MockTracer());
         services.AddDiscord(options =>
         {
-            options.Token = Environment.GetEnvironmentVariable("LisbethTstToken");
+            options.Token = Environment.GetEnvironmentVariable("LisbethToken");
             options.Intents = DiscordIntents.All;
         });
         services.AddDiscordHostedService(true);

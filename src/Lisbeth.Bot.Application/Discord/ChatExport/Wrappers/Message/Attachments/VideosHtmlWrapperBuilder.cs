@@ -18,22 +18,21 @@
 using System.Collections.Generic;
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.ChatExport.Models;
+using Lisbeth.Bot.Domain;
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport.Wrappers.Message.Attachments;
 
 public class VideosHtmlWrapperBuilder : IAsyncHtmlBuilder
 {
-    public VideosHtmlWrapperBuilder() : this(new List<DiscordAttachment>())
-    {
-        
-    }
 
-    public VideosHtmlWrapperBuilder(IReadOnlyList<DiscordAttachment> videos)
+    public VideosHtmlWrapperBuilder(IReadOnlyList<DiscordAttachment> videos, BotOptions options)
     {
         Videos ??= videos ?? throw new ArgumentNullException(nameof(videos));
+        Options ??= options ?? throw new ArgumentNullException(nameof(options));
     }
 
     public IReadOnlyList<DiscordAttachment> Videos { get; private set; }
+    public BotOptions Options { get; private set; }
 
     public async Task<string> BuildAsync()
     {
@@ -41,7 +40,7 @@ public class VideosHtmlWrapperBuilder : IAsyncHtmlBuilder
         string videosHtml = "";
         foreach (var attachment in Videos)
         {
-            HtmlVideo video = new(attachment.Url);
+            HtmlVideo video = new(attachment.Url, Options);
             videosHtml += await video.BuildAsync();
         }
 

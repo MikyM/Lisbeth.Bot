@@ -17,6 +17,7 @@
 
 using System.Collections.Generic;
 using DSharpPlus.Entities;
+using Lisbeth.Bot.Domain;
 
 // ReSharper disable MemberCanBePrivate.Global
 
@@ -29,13 +30,14 @@ public class HtmlChatBuilder : IAsyncHtmlBuilder
     }
 
     public HtmlChatBuilder(List<DiscordUser>? users, List<DiscordMessage>? messages, DiscordChannel? channel,
-        string? js, string? css)
+        string? js, string? css, BotOptions? options)
     {
         Users = users ?? throw new ArgumentNullException(nameof(users));
         Messages = messages ?? throw new ArgumentNullException(nameof(messages));
         Channel = channel ?? throw new ArgumentNullException(nameof(channel));
         Js = js ?? throw new ArgumentNullException(nameof(js));
         Css = css ?? throw new ArgumentNullException(nameof(css));
+        Options = options ?? throw new ArgumentNullException(nameof(options));
     }
 
     public List<DiscordUser>? Users { get; private set; }
@@ -43,14 +45,15 @@ public class HtmlChatBuilder : IAsyncHtmlBuilder
     public DiscordChannel? Channel { get; private set; }
     public string? Js { get; private set; }
     public string? Css { get; private set; }
+    public BotOptions? Options { get; private set; }
 
     public async Task<string> BuildAsync()
     {
         if (Users is null || Messages is null || Channel is null || Js is null || Css is null)
             throw new ArgumentException("You must provide all required parameters before building.");
 
-        MessagesHtmlWrapperBuilder messagesBuilder = new(Messages);
-        MembersHtmlWrapperBuilder membersBuilder = new(Users);
+        MessagesHtmlWrapperBuilder messagesBuilder = new(Messages, Options ?? throw new InvalidOperationException("Options were null"));
+        MembersHtmlWrapperBuilder membersBuilder = new(Users, Options);
 
         return "<!DOCTYPE html>" +
                "<html lang=\"en\">" +
@@ -106,6 +109,13 @@ public class HtmlChatBuilder : IAsyncHtmlBuilder
     public HtmlChatBuilder WithCss(string css)
     {
         Css ??= css ?? throw new ArgumentNullException(nameof(css));
+
+        return this;
+    }
+
+    public HtmlChatBuilder WithOptions(BotOptions options)
+    {
+        Options ??= options ?? throw new ArgumentNullException(nameof(options));
 
         return this;
     }

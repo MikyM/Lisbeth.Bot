@@ -35,6 +35,7 @@ using Serilog.Events;
 using System.Globalization;
 using System.Net.Http;
 using System.Threading;
+using Lisbeth.Bot.Domain;
 
 namespace Lisbeth.Bot.API;
 
@@ -81,6 +82,8 @@ public class Program
             builder.Services.ConfigureHealthChecks();
             builder.Services.ConfigureFluentValidation();
             builder.Services.AddEnrichedDiscordEmbedBuilders();
+            builder.Services.AddOptions<BotOptions>()
+                .BindConfiguration("BotOptions", options => options.BindNonPublicProperties = true);
 
             // Configure Autofac
             builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
