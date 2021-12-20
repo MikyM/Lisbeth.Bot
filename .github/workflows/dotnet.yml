@@ -30,7 +30,7 @@ jobs:
         with:
           context: ./src
           push: true
-          tags: mikym/stellar-bot:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/lisbeth-bot:latest
       - 
         name: Sleep for 10 seconds
         uses: jakejarvis/wait-action@master
