@@ -43,7 +43,7 @@ public partial class MuteApplicationCommands
         var muteReqValidator = new MuteReqValidator(ctx.Client);
         await muteReqValidator.ValidateAndThrowAsync(muteReq);
 
-        var result = await _discordMuteService!.MuteAsync(ctx, muteReq);
+        var result = await _discordMuteService.MuteAsync(ctx, muteReq);
 
         if (result.IsDefined())
             await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
