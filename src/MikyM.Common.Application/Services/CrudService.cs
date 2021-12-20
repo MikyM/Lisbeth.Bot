@@ -71,24 +71,24 @@ public class CrudService<TEntity, TContext> : ReadOnlyService<TEntity, TContext>
         return Result<IEnumerable<long>>.FromSuccess(entities.Select(e => e.Id).ToList());
     }
 
-    public virtual Result BeginUpdate<TPatch>(TPatch entry) where TPatch : class
+    public virtual Result BeginUpdate<TPatch>(TPatch entry, bool shouldSwapAttached = false) where TPatch : class
     {
         if (entry  is null) throw new ArgumentNullException(nameof(entry));
 
         if (entry is TEntity rootEntity)
-            UnitOfWork.GetRepository<Repository<TEntity>>()?.BeginUpdate(rootEntity);
+            UnitOfWork.GetRepository<Repository<TEntity>>()?.BeginUpdate(rootEntity, shouldSwapAttached);
         else
             UnitOfWork.GetRepository<Repository<TEntity>>()?.BeginUpdate(Mapper.Map<TEntity>(entry));
 
         return Result.FromSuccess();
     }
 
-    public virtual Result BeginUpdateRange<TPatch>(IEnumerable<TPatch> entries) where TPatch : class
+    public virtual Result BeginUpdateRange<TPatch>(IEnumerable<TPatch> entries, bool shouldSwapAttached = false) where TPatch : class
     {
         if (entries  is null) throw new ArgumentNullException(nameof(entries));
 
         if (entries is IEnumerable<TEntity> rootEntities)
-            UnitOfWork.GetRepository<Repository<TEntity>>()?.BeginUpdateRange(rootEntities);
+            UnitOfWork.GetRepository<Repository<TEntity>>()?.BeginUpdateRange(rootEntities, shouldSwapAttached);
         else
             UnitOfWork.GetRepository<Repository<TEntity>>()
                 ?.BeginUpdateRange(Mapper.Map<IEnumerable<TEntity>>(entries));

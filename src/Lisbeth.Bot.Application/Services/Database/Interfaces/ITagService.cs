@@ -20,9 +20,13 @@ using Lisbeth.Bot.Domain.DTOs.Request.Tag;
 
 namespace Lisbeth.Bot.Application.Services.Database.Interfaces;
 
-public interface ITagService : ICrudService<Tag, LisbethBotDbContext>
+public interface ITagDataService : ICrudService<Tag, LisbethBotDbContext>
 {
     Task<Result> AddAsync(TagAddReqDto req, bool shouldSave = false);
     Task<Result> UpdateTagEmbedConfigAsync(TagEditReqDto req, bool shouldSave = false);
     Task<Result> DisableAsync(TagDisableReqDto req, bool shouldSave = false);
+    Task<Result> AddAllowedRoleAsync(TagAddSnowflakePermissionReqDto permissionReq, bool shouldSave = false);
+    Task<Result> AddAllowedUserAsync(TagAddSnowflakePermissionReqDto permissionReq, bool shouldSave = false);
+    Task<Result> RemoveAllowedRoleAsync(TagRevokeSnowflakePermissionReqDto permissionReq, bool shouldSave = false);
+    Task<Result> RemoveAllowedUserAsync(TagRevokeSnowflakePermissionReqDto permissionReq, bool shouldSave = false);
 }

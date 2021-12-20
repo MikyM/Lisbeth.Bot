@@ -33,7 +33,7 @@ public class TagSendReqValidator : AbstractValidator<TagSendReqDto>
     {
         CascadeMode = CascadeMode.Stop;
 
-        RuleFor(x => x.Id).NotEmpty().When(x => x.Name is not null && !x.GuildId.HasValue);
+        RuleFor(x => x.Id).NotEmpty().When(x => x.Name is null);
         RuleFor(x => x.Name).NotEmpty().When(x => !x.Id.HasValue);
         RuleFor(x => x.GuildId)
             .NotEmpty()

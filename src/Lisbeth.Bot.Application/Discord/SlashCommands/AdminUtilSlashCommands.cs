@@ -3,12 +3,14 @@ using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
 using FluentValidation;
+using Lisbeth.Bot.Application.Discord.Commands.Ticket;
 using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
 using Lisbeth.Bot.Application.Validation.ModerationConfig;
 using Lisbeth.Bot.Application.Validation.TicketingConfig;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
+using MikyM.Common.Application.CommandHandlers;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 
@@ -19,11 +21,11 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
 {
     private readonly IGuildDataService _guildDataService;
     private readonly IDiscordGuildService _discordGuildService;
-    private readonly IDiscordTicketService _discordTicketService;
+    private readonly ICommandHandler<GetTicketCenterEmbedCommand, DiscordMessageBuilder> _discordTicketService;
     private readonly IDiscordEmbedConfiguratorService<TicketingConfig> _embedConfiguratorService;
 
     public AdminUtilSlashCommands(IGuildDataService guildDataService, IDiscordGuildService discordGuildService,
-        IDiscordTicketService discordTicketService, IDiscordEmbedConfiguratorService<TicketingConfig> embedConfiguratorService)
+        ICommandHandler<GetTicketCenterEmbedCommand, DiscordMessageBuilder> discordTicketService, IDiscordEmbedConfiguratorService<TicketingConfig> embedConfiguratorService)
     {
         _guildDataService = guildDataService;
         _discordGuildService = discordGuildService;
@@ -42,7 +44,7 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
         switch (action)
         {
             case TicketCenterActionType.Get:
-                var builderGet = await this._discordTicketService!.GetTicketCenterEmbedAsync(ctx);
+                var builderGet = await this._discordTicketService.HandleAsync(new GetTicketCenterEmbedCommand(ctx));
                 await ctx.Channel.SendMessageAsync(builderGet.Entity);
                 await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
                     .AddEmbed(base.GetSuccessfulActionEmbed(ctx.Client, "Message sent successfully"))
@@ -68,7 +70,7 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
                         .AddEmbed(GetSuccessfulActionEmbed(ctx.Client, "You have to provide a channel")));
                     return;
                 }
-                var builderSend = await this._discordTicketService!.GetTicketCenterEmbedAsync(ctx);
+                var builderSend = await this._discordTicketService.HandleAsync(new GetTicketCenterEmbedCommand(ctx));
                 await channel.SendMessageAsync(builderSend.Entity);
                 await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
                     .AddEmbed(base.GetSuccessfulActionEmbed(ctx.Client, "Message sent successfully"))

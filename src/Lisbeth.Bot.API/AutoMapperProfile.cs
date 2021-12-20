@@ -117,5 +117,8 @@ public class AutoMapperProfile : Profile
         CreateMap<SetReminderReqDto, RecurringReminder>()
             .ForMember(dest => dest.CreatorId, source => source.MapFrom(x => x.RequestedOnBehalfOfId))
             .ForMember(dest => dest.LastEditById, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
+
+        CreateMap<TagSendReqDto, TagGetReqDto>();
+        CreateMap<RoleMenuSendReqDto, RoleMenuGetReqDto>();
     }
 }

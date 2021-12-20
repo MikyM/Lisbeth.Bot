@@ -40,22 +40,36 @@ public class Repository<TEntity> : ReadOnlyRepository<TEntity>, IRepository<TEnt
         Context.Set<TEntity>().AddRange(entities);
     }
 
-    public virtual void BeginUpdate(TEntity entity)
+    public virtual void BeginUpdate(TEntity entity, bool shouldSwapAttached = false)
     {
         var local = Context.Set<TEntity>().Local.FirstOrDefault(entry => entry.Id.Equals(entity.Id));
 
-        if (local is not null) return;
+        if (local is not null && shouldSwapAttached)
+        {
+            Context.Entry(local).State = EntityState.Detached;
+        }
+        else if (local is not null && !shouldSwapAttached)
+        {
+            return;
+        }
 
         Context.Attach(entity);
     }
 
-    public virtual void BeginUpdateRange(IEnumerable<TEntity> entities)
+    public virtual void BeginUpdateRange(IEnumerable<TEntity> entities, bool shouldSwapAttached = false)
     {
         foreach (var entity in entities)
         {
             var local = Context.Set<TEntity>().Local.FirstOrDefault(entry => entry.Id.Equals(entity.Id));
 
-            if (local is not null) continue;
+            if (local is not null && shouldSwapAttached)
+            {
+                Context.Entry(local).State = EntityState.Detached;
+            }
+            else if (local is not null && !shouldSwapAttached)
+            {
+                return;
+            }
 
             Context.Attach(entity);
         }

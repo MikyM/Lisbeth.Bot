@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using Lisbeth.Bot.Domain.Entities.Base;
 
 namespace Lisbeth.Bot.Domain.Entities;
@@ -23,4 +25,9 @@ public class Tag : EmbedConfigEntity
 {
     public string? Text { get; set; }
     public Guild? Guild { get; set; }
+
+    [NotMapped] public bool IsRestricted => AllowedRoleIds.Count != 0 || AllowedUserIds.Count != 0;
+
+    public List<ulong> AllowedRoleIds { get; set; }
+    public List<ulong> AllowedUserIds { get; set; }
 }

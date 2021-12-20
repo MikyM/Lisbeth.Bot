@@ -16,6 +16,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System.Collections.Generic;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Lisbeth.Bot.DataAccessLayer.Configurations;
 
@@ -40,6 +43,22 @@ public class TagConfig : IEntityTypeConfiguration<Tag>
             .IsRequired();
         builder.Property(x => x.Text).HasColumnName("text").HasColumnType("text");
         builder.Property(x => x.EmbedConfigId).HasColumnName("embed_config_id").HasColumnType("bigint");
+        builder.Property(x => x.AllowedRoleIds)
+            .HasColumnName("allowed_role_ids")
+            .HasColumnType("text")
+            .HasConversion(
+                x => JsonSerializer.Serialize(x,
+                    new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull }),
+                x => JsonSerializer.Deserialize<List<ulong>>(x,
+                    new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull }));
+        builder.Property(x => x.AllowedUserIds)
+            .HasColumnName("allowed_user_ids")
+            .HasColumnType("text")
+            .HasConversion(
+                x => JsonSerializer.Serialize(x,
+                    new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull }),
+                x => JsonSerializer.Deserialize<List<ulong>>(x,
+                    new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull }));
 
         builder.HasOne(x => x.EmbedConfig)
             .WithOne(x => x.Tag)

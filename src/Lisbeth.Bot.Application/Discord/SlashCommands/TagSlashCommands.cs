@@ -19,9 +19,11 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using FluentValidation;
+using Lisbeth.Bot.Application.Discord.Commands.Tag;
 using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
 using Lisbeth.Bot.Application.Validation.Tag;
 using Lisbeth.Bot.Domain.DTOs.Request.Tag;
+using MikyM.Common.Application.CommandHandlers;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 
@@ -29,53 +31,69 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 [SlashModuleLifespan(SlashModuleLifespan.Scoped)]
 public class TagSlashCommands : ExtendedApplicationCommandModule
 {
-    public TagSlashCommands(IDiscordTagService discordTagService,
-        IDiscordEmbedConfiguratorService<Tag> discordEmbedTagConfiguratorService)
+    public TagSlashCommands(IDiscordEmbedConfiguratorService<Tag> discordEmbedTagConfiguratorService,
+        ICommandHandler<GetTagCommand, DiscordMessageBuilder> getHandler, ICommandHandler<SendTagCommand> sendHandler,
+        ICommandHandler<CreateTagCommand> createHandler, ICommandHandler<EditTagCommand> editHandler,
+        ICommandHandler<DisableTagCommand> disableHandler, ICommandHandler<AddSnowflakePermissionTagCommand> addPermissionHandler,
+        ICommandHandler<RevokeSnowflakePermissionTagCommand> removePermissionHandler)
     {
-        _discordTagService = discordTagService;
         _discordEmbedTagConfiguratorService = discordEmbedTagConfiguratorService;
+        _getHandler = getHandler;
+        _sendHandler = sendHandler;
+        _createHandler = createHandler;
+        _editHandler = editHandler;
+        _disableHandler = disableHandler;
+        _addPermissionHandler = addPermissionHandler;
+        _removePermissionHandler = removePermissionHandler;
     }
 
-    private readonly IDiscordTagService _discordTagService;
     private readonly IDiscordEmbedConfiguratorService<Tag> _discordEmbedTagConfiguratorService;
+    private readonly ICommandHandler<GetTagCommand, DiscordMessageBuilder> _getHandler;
+    private readonly ICommandHandler<SendTagCommand> _sendHandler;
+    private readonly ICommandHandler<CreateTagCommand> _createHandler;
+    private readonly ICommandHandler<EditTagCommand> _editHandler;
+    private readonly ICommandHandler<DisableTagCommand> _disableHandler;
+    private readonly ICommandHandler<AddSnowflakePermissionTagCommand> _addPermissionHandler;
+    private readonly ICommandHandler<RevokeSnowflakePermissionTagCommand> _removePermissionHandler;
 
     [UsedImplicitly]
     [SlashCommand("tag", "Allows working with tags.")]
     public async Task TagCommand(InteractionContext ctx,
         [Option("action", "Type of action to perform")]
         TagActionType action,
-        [Option("channel", "Channel to send the tag to.")]
-        DiscordChannel? channel = null,
-        [Option("id", "Id or name of the tag")]
+        [Option("snowflake", "Channel to send the tag to or a role/member to add/revoke permissions for.")]
+        SnowflakeObject? snowflake = null,
+        [Option("name", "Name of the tag")]
         string idOrName = "",
         [Option("text", "Base text for the tag.")]
         string text = "")
     {
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
-        bool isId = long.TryParse(idOrName, out long id);
-
-        Result<(DiscordEmbed? Embed, string Text)>? result = null;
-        Result<DiscordEmbed>? partial = null;
-
         switch (action)
         {
             case TagActionType.Get:
-                if (!isId && string.IsNullOrWhiteSpace(idOrName))
-                    throw new ArgumentException("You must supply a valid Id or name");
+                if (string.IsNullOrWhiteSpace(idOrName))
+                    throw new ArgumentException("You must supply a valid name");
 
                 var getReq = new TagGetReqDto
                 {
                     GuildId = ctx.Guild.Id,
-                    Id = isId ? id : null,
-                    Name = isId ? null : idOrName,
+                    Name = idOrName,
                     RequestedOnBehalfOfId = ctx.User.Id
                 };
 
                 var getValidator = new TagGetReqValidator(ctx.Client);
                 await getValidator.ValidateAndThrowAsync(getReq);
 
-                result = await this._discordTagService!.GetAsync(ctx, getReq);
+                var getRes = await _getHandler.HandleAsync(new GetTagCommand(getReq, ctx));
+
+                if (getRes.IsDefined(out var getBuilder))
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent(getBuilder.Content)
+                        .AddEmbeds(getBuilder.Embeds));
+                else
+                    await ctx.EditResponseAsync(
+                        new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(getRes, ctx.Client)));
                 break;
             case TagActionType.Create:
                 if (string.IsNullOrWhiteSpace(idOrName))
@@ -92,18 +110,22 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
                 var addValidator = new TagAddReqValidator(ctx.Client);
                 await addValidator.ValidateAndThrowAsync(addReq);
 
-                partial = await this._discordTagService!.AddAsync(ctx, addReq);
+                var createRes = await _createHandler.HandleAsync(new CreateTagCommand(addReq, ctx));
 
+                if (createRes.IsSuccess)
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(base.GetSuccessfulActionEmbed(ctx.Client)));
+                else
+                    await ctx.EditResponseAsync(
+                        new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(createRes, ctx.Client)));
                 break;
             case TagActionType.Edit:
-                if (!isId && string.IsNullOrWhiteSpace(idOrName))
+                if (string.IsNullOrWhiteSpace(idOrName))
                     throw new ArgumentException("You must supply a valid Id or name");
 
                 var editReq = new TagEditReqDto
                 {
                     GuildId = ctx.Guild.Id,
-                    Id = isId ? id : null,
-                    Name = isId ? null : idOrName,
+                    Name = idOrName,
                     RequestedOnBehalfOfId = ctx.User.Id,
                     Text = text
                 };
@@ -111,73 +133,122 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
                 var editValidator = new TagEditReqValidator(ctx.Client);
                 await editValidator.ValidateAndThrowAsync(editReq);
 
-                partial = await this._discordTagService!.EditAsync(ctx, editReq);
+                var editRes = await _editHandler.HandleAsync(new EditTagCommand(editReq, ctx));
+
+                if (editRes.IsSuccess)
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(base.GetSuccessfulActionEmbed(ctx.Client)));
+                else
+                    await ctx.EditResponseAsync(
+                        new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(editRes, ctx.Client)));
                 break;
-            case TagActionType.Remove:
-                if (!isId && string.IsNullOrWhiteSpace(idOrName))
+            case TagActionType.Disable:
+                if (string.IsNullOrWhiteSpace(idOrName))
                     throw new ArgumentException("You must supply a valid Id or name");
 
                 var removeReq = new TagDisableReqDto
                 {
                     GuildId = ctx.Guild.Id,
-                    Id = isId ? id : null,
-                    Name = isId ? null : idOrName,
+                    Name = idOrName,
                     RequestedOnBehalfOfId = ctx.User.Id
                 };
 
                 var disableValidator = new TagDisableReqValidator(ctx.Client);
                 await disableValidator.ValidateAndThrowAsync(removeReq);
 
-                partial = await this._discordTagService!.DisableAsync(ctx, removeReq);
+                var disableRes = await _disableHandler.HandleAsync(new DisableTagCommand(removeReq, ctx));
+
+                if (disableRes.IsSuccess)
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(base.GetSuccessfulActionEmbed(ctx.Client)));
+                else
+                    await ctx.EditResponseAsync(
+                        new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(disableRes, ctx.Client)));
                 break;
             case TagActionType.ConfigureEmbed:
-                partial = await this._discordEmbedTagConfiguratorService!.ConfigureAsync(ctx, x => x.EmbedConfig, x => x.EmbedConfigId, idOrName);
+                var configRes = await _discordEmbedTagConfiguratorService.ConfigureAsync(ctx, x => x.EmbedConfig, x => x.EmbedConfigId, idOrName);
+
+                if (configRes.IsDefined(out var embed))
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
+                else
+                    await ctx.EditResponseAsync(
+                        new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(configRes, ctx.Client)));
                 break;
             case TagActionType.Send:
-                if (!isId && string.IsNullOrWhiteSpace(idOrName))
-                    throw new ArgumentException("You must supply a valid Id or name");
-                if (channel is null)
+                if (string.IsNullOrWhiteSpace(idOrName))
+                    throw new ArgumentException("You must supply a name");
+                if (snowflake is null)
                     throw new ArgumentException("You must supply a channel to send a tag");
 
                 var sendReq = new TagSendReqDto
                 {
                     GuildId = ctx.Guild.Id,
-                    Id = isId ? id : null,
-                    Name = isId ? null : idOrName,
+                    Name = idOrName,
                     RequestedOnBehalfOfId = ctx.User.Id,
-                    ChannelId = channel.Id
+                    ChannelId = snowflake.Id
                 };
 
                 var sendValidator = new TagSendReqValidator(ctx.Client);
                 await sendValidator.ValidateAndThrowAsync(sendReq);
 
-                result = await this._discordTagService!.SendAsync(ctx, sendReq);
+                var sendRes = await _sendHandler.HandleAsync(new SendTagCommand(sendReq, ctx));
+
+                if (sendRes.IsSuccess)
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(base.GetSuccessfulActionEmbed(ctx.Client)));
+                else
+                    await ctx.EditResponseAsync(
+                        new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(sendRes, ctx.Client)));
+                break;
+            case TagActionType.AddPermissionFor:
+                if (string.IsNullOrWhiteSpace(idOrName))
+                    throw new ArgumentException("You must supply name.");
+                if (snowflake is null)
+                    throw new ArgumentException("You must supply a member or a role to add permissions for.");
+
+                var addPermReq = new TagAddSnowflakePermissionReqDto
+                {
+                    GuildId = ctx.Guild.Id,
+                    Name = idOrName,
+                    RequestedOnBehalfOfId = ctx.User.Id,
+                    SnowflakeId = snowflake.Id
+                };
+
+                var addPermValidator = new TagAddPermissionReqValidator(ctx.Client);
+                await addPermValidator.ValidateAndThrowAsync(addPermReq);
+
+                var addPermRes = await _addPermissionHandler.HandleAsync(new AddSnowflakePermissionTagCommand(addPermReq, ctx));
+
+                if (addPermRes.IsSuccess)
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(base.GetSuccessfulActionEmbed(ctx.Client)));
+                else
+                    await ctx.EditResponseAsync(
+                        new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(addPermRes, ctx.Client)));
+                break;
+            case TagActionType.RevokePermissionFor:
+                if (string.IsNullOrWhiteSpace(idOrName))
+                    throw new ArgumentException("You must supply name.");
+                if (snowflake is null)
+                    throw new ArgumentException("You must supply a member or a role to add permissions for.");
+
+                var revokePermReq = new TagRevokeSnowflakePermissionReqDto
+                {
+                    GuildId = ctx.Guild.Id,
+                    Name = idOrName,
+                    RequestedOnBehalfOfId = ctx.User.Id,
+                    SnowflakeId = snowflake.Id
+                };
+
+                var revokePermValidator = new TagRevokePermissionReqValidator(ctx.Client);
+                await revokePermValidator.ValidateAndThrowAsync(revokePermReq);
+
+                var revokePermRes = await _removePermissionHandler.HandleAsync(new RevokeSnowflakePermissionTagCommand(revokePermReq, ctx));
+
+                if (revokePermRes.IsSuccess)
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(base.GetSuccessfulActionEmbed(ctx.Client)));
+                else
+                    await ctx.EditResponseAsync(
+                        new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(revokePermRes, ctx.Client)));
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(action), action, null);
-        }
-
-        if (partial.HasValue)
-        {
-            if (partial.Value.IsDefined())
-                await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(partial.Value.Entity));
-            else
-                await ctx.EditResponseAsync(
-                    new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(partial, ctx.Client)));
-        }
-        else if (result.HasValue)
-        {
-            if (!result.Value.IsDefined())
-            {
-                await ctx.EditResponseAsync(
-                    new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(result, ctx.Client)));
-            }
-            else
-            {
-                if (result.Value.Entity.Embed is not null)
-                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(result.Value.Entity.Embed));
-                else await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent(result.Value.Entity.Text));
-            }
         }
     }
 }

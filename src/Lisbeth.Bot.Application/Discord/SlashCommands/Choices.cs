@@ -66,9 +66,11 @@ public enum TagActionType
     [ChoiceName("get")] Get,
     [ChoiceName("send")] Send,
     [ChoiceName("create")] Create,
+    [ChoiceName("add-permission-for")] AddPermissionFor,
+    [ChoiceName("revoke-permission-for")] RevokePermissionFor,
     [ChoiceName("edit")] Edit,
     [ChoiceName("configure-embed")] ConfigureEmbed,
-    [ChoiceName("remove")] Remove
+    [ChoiceName("disable")] Disable
 }
 
 public enum RoleMenuActionType

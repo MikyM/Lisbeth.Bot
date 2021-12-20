@@ -19,15 +19,14 @@ using AutoMapper;
 using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Tag;
 using Lisbeth.Bot.Domain.DTOs.Request.Tag;
-using MikyM.Common.DataAccessLayer.Specifications;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
 
 namespace Lisbeth.Bot.Application.Services.Database;
 
 [UsedImplicitly]
-public class TagService : CrudService<Tag, LisbethBotDbContext>, ITagService
+public class TagDataService : CrudService<Tag, LisbethBotDbContext>, ITagDataService
 {
-    public TagService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
+    public TagDataService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
     {
     }
 
@@ -43,25 +42,111 @@ public class TagService : CrudService<Tag, LisbethBotDbContext>, ITagService
 
     public async Task<Result> UpdateTagEmbedConfigAsync(TagEditReqDto req, bool shouldSave = false)
     {
-        Result<Tag> tag;
-        if (req.Id.HasValue)
-            tag = await base.GetAsync(req.Id.Value);
-        else if (req.Name is not null && req.Name != "")
-            tag = await base.GetSingleBySpecAsync(new ActiveTagByGuildAndNameSpec(req.Name,
-                req.GuildId ?? throw new InvalidOperationException("Guild Id was null, validate the request first.")));
+        Result<Tag> tagRes;
+        if (req.Name is not null && req.Name != "")
+            tagRes = await base.GetSingleBySpecAsync(new ActiveTagByGuildAndNameSpec(req.Name,
+                req.GuildId));
         else
-            throw new ArgumentException("Invalid tag Id/Name was provided.");
+            return new NotFoundError();
 
-        if (!tag.IsDefined()) return Result.FromError(tag);
-        if (tag.Entity.IsDisabled)
-            return new DiscordArgumentError(nameof(tag.Entity),
+        if (!tagRes.IsDefined(out var tag)) return Result.FromError(tagRes);
+        if (tag.IsDisabled)
+            return new DiscordArgumentError(nameof(tag),
                 "Can't update embed config for a disabled tag, enable the tag first.");
 
-        base.BeginUpdate(tag.Entity);
-        if (req.EmbedConfig is not null) tag.Entity.EmbedConfig = Mapper.Map<EmbedConfig>(req.EmbedConfig);
-        tag.Entity.LastEditById = req.RequestedOnBehalfOfId;
-        if (!string.IsNullOrWhiteSpace(req.Name)) tag.Entity.Name = req.Name;
-        if (!string.IsNullOrWhiteSpace(req.Text)) tag.Entity.Text = req.Text;
+        base.BeginUpdate(tag);
+        if (req.EmbedConfig is not null) tag.EmbedConfig = Mapper.Map<EmbedConfig>(req.EmbedConfig);
+        tag.LastEditById = req.RequestedOnBehalfOfId;
+        if (!string.IsNullOrWhiteSpace(req.Name)) tag.Name = req.Name;
+        if (!string.IsNullOrWhiteSpace(req.Text)) tag.Text = req.Text;
+
+        if (shouldSave) await base.CommitAsync();
+
+        return Result.FromSuccess();
+    }
+
+    public async Task<Result> AddAllowedUserAsync(TagAddSnowflakePermissionReqDto permissionReq, bool shouldSave = false)
+    {
+        Result<Tag> tagRes;
+        if (permissionReq.Name is not null && permissionReq.Name != "")
+            tagRes = await base.GetSingleBySpecAsync(new ActiveTagByGuildAndNameSpec(permissionReq.Name,
+                permissionReq.GuildId));
+        else
+            return new NotFoundError();
+
+        if (!tagRes.IsDefined(out var tag)) return Result.FromError(tagRes);
+        if (tag.IsDisabled)
+            return new DiscordArgumentError(nameof(tag),
+                "Can't update a disabled tag, enable the tag first.");
+
+        base.BeginUpdate(tag, true);
+        tag.AllowedUserIds = tag.AllowedUserIds.Select(x => x).Append(permissionReq.SnowflakeId).ToList();
+
+        if (shouldSave) await base.CommitAsync();
+
+        return Result.FromSuccess();
+    }
+
+    public async Task<Result> RemoveAllowedRoleAsync(TagRevokeSnowflakePermissionReqDto permissionReq, bool shouldSave = false)
+    {
+        Result<Tag> tagRes;
+        if (permissionReq.Name is not null && permissionReq.Name != "")
+            tagRes = await base.GetSingleBySpecAsync(new ActiveTagByGuildAndNameSpec(permissionReq.Name,
+                permissionReq.GuildId));
+        else
+            return new NotFoundError();
+
+        if (!tagRes.IsDefined(out var tag)) return Result.FromError(tagRes);
+        if (tag.IsDisabled)
+            return new DiscordArgumentError(nameof(tag),
+                "Can't update a disabled tag, enable the tag first.");
+
+        base.BeginUpdate(tag, true);
+        tag.AllowedRoleIds = tag.AllowedRoleIds.TakeWhile(x => x != permissionReq.SnowflakeId).ToList();
+
+        if (shouldSave) await base.CommitAsync();
+
+        return Result.FromSuccess();
+    }
+
+    public async Task<Result> RemoveAllowedUserAsync(TagRevokeSnowflakePermissionReqDto permissionReq, bool shouldSave = false)
+    {
+        Result<Tag> tagRes;
+        if (permissionReq.Name is not null && permissionReq.Name != "")
+            tagRes = await base.GetSingleBySpecAsync(new ActiveTagByGuildAndNameSpec(permissionReq.Name,
+                permissionReq.GuildId));
+        else
+            return new NotFoundError();
+
+        if (!tagRes.IsDefined(out var tag)) return Result.FromError(tagRes);
+        if (tag.IsDisabled)
+            return new DiscordArgumentError(nameof(tag),
+                "Can't update a disabled tag, enable the tag first.");
+
+        base.BeginUpdate(tag, true);
+        tag.AllowedUserIds = tag.AllowedUserIds.TakeWhile(x => x != permissionReq.SnowflakeId).ToList();
+
+        if (shouldSave) await base.CommitAsync();
+
+        return Result.FromSuccess();
+    }
+
+    public async Task<Result> AddAllowedRoleAsync(TagAddSnowflakePermissionReqDto permissionReq, bool shouldSave = false)
+    {
+        Result<Tag> tagRes;
+        if (permissionReq.Name is not null && permissionReq.Name != "")
+            tagRes = await base.GetSingleBySpecAsync(new ActiveTagByGuildAndNameSpec(permissionReq.Name,
+                permissionReq.GuildId));
+        else
+            return new NotFoundError();
+
+        if (!tagRes.IsDefined(out var tag)) return Result.FromError(tagRes);
+        if (tag.IsDisabled)
+            return new DiscordArgumentError(nameof(tag),
+                "Can't update a disabled tag, enable the tag first.");
+
+        base.BeginUpdate(tag, true);
+        tag.AllowedRoleIds = tag.AllowedRoleIds.Select(x => x).Append(permissionReq.SnowflakeId).ToList();
 
         if (shouldSave) await base.CommitAsync();
 
@@ -71,13 +156,11 @@ public class TagService : CrudService<Tag, LisbethBotDbContext>, ITagService
     public async Task<Result> DisableAsync(TagDisableReqDto req, bool shouldSave = false)
     {
         Result<Tag> tag;
-        if (req.Id.HasValue)
-            tag = await base.GetAsync(req.Id.Value);
-        else if (req.Name is not null && req.Name != "")
+        if (req.Name is not null && req.Name != "")
             tag = await base.GetSingleBySpecAsync(new ActiveTagByGuildAndNameSpec(req.Name,
-                req.GuildId ?? throw new InvalidOperationException("Guild Id was null, validate the request first.")));
+                req.GuildId));
         else
-            throw new ArgumentException("Invalid tag Id/Name was provided.");
+            return new NotFoundError();
 
         if (!tag.IsDefined()) return Result.FromError(tag);
         if (tag.Entity.IsDisabled) return Result.FromError(new DisabledEntityError(nameof(tag.Entity)));

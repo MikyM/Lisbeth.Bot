@@ -23,24 +23,22 @@ using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Validation.Tag;
 
-public class TagGetReqValidator : AbstractValidator<TagGetReqDto>
+public class TagAddPermissionReqValidator : AbstractValidator<TagAddSnowflakePermissionReqDto>
 {
-    public TagGetReqValidator(IDiscordService discordService) : this(discordService.Client)
+    public TagAddPermissionReqValidator(IDiscordService discordService) : this(discordService.Client)
     {
     }
 
-    public TagGetReqValidator(DiscordClient discord)
+    public TagAddPermissionReqValidator(DiscordClient discord)
     {
         CascadeMode = CascadeMode.Stop;
 
-        RuleFor(x => x.Id).NotEmpty().When(x => x.Name is null);
-        RuleFor(x => x.Name).NotEmpty().When(x => !x.Id.HasValue);
-        RuleFor(x => x.GuildId)
-            .NotEmpty()
-            .When(x => !x.Id.HasValue)
-            .DependentRules(x => x.SetAsyncValidator(new DiscordGuildIdValidator<TagGetReqDto>(discord)));
-        RuleFor(x => x.RequestedOnBehalfOfId)
-            .NotEmpty()
-            .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<TagGetReqDto>(discord)));
+        RuleFor(x => x.Name).NotEmpty();
+        RuleFor(x => x.GuildId).NotEmpty().DependentRules(x =>
+            x.SetAsyncValidator(new DiscordGuildIdValidator<TagAddSnowflakePermissionReqDto>(discord)));
+        RuleFor(x => x.RequestedOnBehalfOfId).NotEmpty()
+            .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<TagAddSnowflakePermissionReqDto>(discord)));
+        RuleFor(x => x.SnowflakeId).NotEmpty().DependentRules(x =>
+            x.SetAsyncValidator(new DiscordSnowflakeIdValidator<TagAddSnowflakePermissionReqDto>(discord)));
     }
 }

@@ -15,14 +15,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using Lisbeth.Bot.Domain.DTOs.Request.Base;
+
 namespace Lisbeth.Bot.Domain.DTOs.Request.Tag;
 
-public class TagEditReqDto
+public class TagEditReqDto  : BaseAuthWithGuildReqDto
 {
-    public long? Id { get; set; }
     public string? Name { get; set; }
-    public ulong RequestedOnBehalfOfId { get; set; }
-    public ulong? GuildId { get; set; }
     public string? Text { get; set; }
     public EmbedConfigDto? EmbedConfig { get; set; }
 }

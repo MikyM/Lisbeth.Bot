@@ -15,11 +15,20 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Lisbeth.Bot.Domain.DTOs.Request.Base;
+using DSharpPlus.SlashCommands;
+using Lisbeth.Bot.Domain.DTOs.Request.Tag;
+using MikyM.Common.Application.CommandHandlers;
 
-namespace Lisbeth.Bot.Domain.DTOs.Request.Tag;
+namespace Lisbeth.Bot.Application.Discord.Commands.Tag;
 
-public class TagDisableReqDto : BaseAuthWithGuildReqDto
+public class SendTagCommand : CommandBase
 {
-    public string? Name { get; set; }
+    public SendTagCommand(TagSendReqDto dto, InteractionContext? ctx = null)
+    {
+        Ctx = ctx;
+        Dto = dto;
+    }
+
+    public InteractionContext? Ctx { get; set; }
+    public TagSendReqDto Dto { get; set; }
 }

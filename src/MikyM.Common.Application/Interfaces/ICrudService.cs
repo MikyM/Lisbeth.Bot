@@ -27,9 +27,9 @@ public interface ICrudService<TEntity, TContext> : IReadOnlyService<TEntity, TCo
     Task<Result<IEnumerable<long>>> AddRangeAsync<TPost>(IEnumerable<TPost> entries, bool shouldSave = false)
         where TPost : class;
 
-    Result BeginUpdate<TPatch>(TPatch entry) where TPatch : class;
+    Result BeginUpdate<TPatch>(TPatch entry, bool shouldSwapAttached = false) where TPatch : class;
 
-    Result BeginUpdateRange<TPatch>(IEnumerable<TPatch> entries)
+    Result BeginUpdateRange<TPatch>(IEnumerable<TPatch> entries, bool shouldSwapAttached = false)
         where TPatch : class;
 
     Task<Result> DeleteAsync<TDelete>(TDelete entry, bool shouldSave = false) where TDelete : class;

@@ -60,4 +60,7 @@ public static class DiscordMemberExtensions
 
     public static bool HasRole(this DiscordMember member, ulong roleId, out DiscordRole? role)
         => (role = member.Roles.FirstOrDefault(x => x.Id == roleId)) is not null;
+
+    public static bool CanAccessTag(this DiscordMember member, Tag tag)
+        => tag.AllowedRoleIds.Any(x => member.Roles.Select(r => r.Id).Contains(x)) || tag.AllowedUserIds.Contains(member.Id);
 }
