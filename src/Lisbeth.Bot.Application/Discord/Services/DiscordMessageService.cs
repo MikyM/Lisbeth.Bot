@@ -87,7 +87,9 @@ public class DiscordMessageService : IDiscordMessageService
         if (req.Count is not null)
         {
             var messages = await channel.GetMessagesAsync(req.Count.Value);
-            await channel.DeleteMessagesAsync(messages.Where(x => x.Id != interactionId));
+            await channel.DeleteMessagesAsync(interactionId is null
+                ? messages
+                : messages.TakeWhile(x => x.Interaction is null || x.Interaction.Id != interactionId));
             count = messages.Count;
         }
         else if (req.IsTargetedMessageDelete.HasValue && req.IsTargetedMessageDelete.Value && req.MessageId is not null)
