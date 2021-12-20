@@ -39,7 +39,7 @@ public static class ChatExportHttpClientFactory
     /// <returns>Returns an instance of an <see cref="HttpClient"/> </returns>
     public static HttpClient Build()
     {
-        if (_factory == null) throw new InvalidOperationException("You can not create an instance without first building the factory.");
+        if (_factory is null) throw new InvalidOperationException("You can not create an instance without first building the factory.");
 
         return _factory();
     }
