@@ -131,7 +131,7 @@ public partial class MuteApplicationCommands
 
     [UsedImplicitly]
     [SlashRequireUserPermissions(Permissions.BanMembers)]
-    [ContextMenu(ApplicationCommandType.MessageContextMenu, "Mute author and prune")]
+    [ContextMenu(ApplicationCommandType.MessageContextMenu, "Mute author and prune", false)]
     public async Task MuteAuthorWithWipeMessageMenu(ContextMenuContext ctx)
     {
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
