@@ -31,7 +31,7 @@ public partial class PruneApplicationCommands
 
     [UsedImplicitly]
     [SlashRequireUserPermissions(Permissions.ManageMessages)]
-    [ContextMenu(ApplicationCommandType.UserContextMenu, "Prune last 10 messages")]
+    [ContextMenu(ApplicationCommandType.UserContextMenu, "Prune last 10 messages", false)]
     public async Task PruneLastTenUserMenu(ContextMenuContext ctx)
     {
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
@@ -54,7 +54,7 @@ public partial class PruneApplicationCommands
 
     [UsedImplicitly]
     [SlashRequireUserPermissions(Permissions.ManageMessages)]
-    [ContextMenu(ApplicationCommandType.MessageContextMenu, "Prune last 10")]
+    [ContextMenu(ApplicationCommandType.MessageContextMenu, "Prune last 10", false)]
     public async Task PruneLastTenFromThisMessageMenu(ContextMenuContext ctx)
     {
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
@@ -73,7 +73,7 @@ public partial class PruneApplicationCommands
 
     [UsedImplicitly]
     [SlashRequireUserPermissions(Permissions.ManageMessages)]
-    [ContextMenu(ApplicationCommandType.MessageContextMenu, "Prune until this")]
+    [ContextMenu(ApplicationCommandType.MessageContextMenu, "Prune until this", false)]
     public async Task PruneUntilThisMessageMenu(ContextMenuContext ctx)
     {
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
@@ -92,7 +92,7 @@ public partial class PruneApplicationCommands
 
     [UsedImplicitly]
     [SlashRequireUserPermissions(Permissions.ManageMessages)]
-    [ContextMenu(ApplicationCommandType.MessageContextMenu, "Prune by author")]
+    [ContextMenu(ApplicationCommandType.MessageContextMenu, "Prune by author", false)]
     public async Task PruneUntilThisByThisAuthorMessageMenu(ContextMenuContext ctx)
     {
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));

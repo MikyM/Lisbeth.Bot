@@ -33,7 +33,7 @@ public partial class MuteApplicationCommands
 
     [UsedImplicitly]
     [SlashRequireUserPermissions(Permissions.BanMembers)]
-    [ContextMenu(ApplicationCommandType.UserContextMenu, "Mute user")]
+    [ContextMenu(ApplicationCommandType.UserContextMenu, "Mute user", false)]
     public async Task MuteUserMenu(ContextMenuContext ctx)
     {
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
@@ -57,7 +57,7 @@ public partial class MuteApplicationCommands
 
     [UsedImplicitly]
     [SlashRequireUserPermissions(Permissions.BanMembers)]
-    [ContextMenu(ApplicationCommandType.UserContextMenu, "Unmute user")]
+    [ContextMenu(ApplicationCommandType.UserContextMenu, "Unmute user", false)]
     public async Task UnmuteUserMenu(ContextMenuContext ctx)
     {
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
@@ -80,7 +80,7 @@ public partial class MuteApplicationCommands
 
     [UsedImplicitly]
     [SlashRequireUserPermissions(Permissions.BanMembers)]
-    [ContextMenu(ApplicationCommandType.UserContextMenu, "Get mute info")]
+    [ContextMenu(ApplicationCommandType.UserContextMenu, "Get mute info", false)]
     public async Task GetMuteUserMenu(ContextMenuContext ctx)
     {
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
@@ -107,7 +107,7 @@ public partial class MuteApplicationCommands
 
     [UsedImplicitly]
     [SlashRequireUserPermissions(Permissions.BanMembers)]
-    [ContextMenu(ApplicationCommandType.MessageContextMenu, "Mute author")]
+    [ContextMenu(ApplicationCommandType.MessageContextMenu, "Mute author", false)]
     public async Task MuteAuthorMessageMenu(ContextMenuContext ctx)
     {
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
