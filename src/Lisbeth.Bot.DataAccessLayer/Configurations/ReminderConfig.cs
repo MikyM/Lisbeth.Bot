@@ -59,7 +59,13 @@ public class ReminderConfig : IEntityTypeConfiguration<Reminder>
             .HasColumnType("boolean")
             .IsRequired();
         builder.Property(x => x.HangfireId).HasColumnName("hangfire_id").HasColumnType("varchar(300)").HasMaxLength(300);
-        builder.Property(x => x.ChannelId).HasColumnName("bigint");
+        builder.Property(x => x.ChannelId).HasColumnName("channel_id");
+        builder.Property(x => x.Name)
+            .HasColumnName("name")
+            .HasColumnType("varchar(100)")
+            .HasMaxLength(100)
+            .IsRequired()
+            .ValueGeneratedOnAdd();
 
         builder.HasOne(x => x.EmbedConfig)
             .WithOne(x => x.Reminder)

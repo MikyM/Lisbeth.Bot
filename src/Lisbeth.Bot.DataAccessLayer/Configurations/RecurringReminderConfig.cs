@@ -69,7 +69,7 @@ public class RecurringReminderConfig : IEntityTypeConfiguration<RecurringReminde
             .IsRequired();
         builder.Property(x => x.EmbedConfigId).HasColumnName("embed_config_id").HasColumnType("bigint");
         builder.Property(x => x.HangfireId).HasColumnName("hangfire_id").HasColumnType("varchar(300)").HasMaxLength(300);
-        builder.Property(x => x.ChannelId).HasColumnName("bigint");
+        builder.Property(x => x.ChannelId).HasColumnName("channel_id");
 
         builder.HasOne(x => x.EmbedConfig)
             .WithOne(x => x.RecurringReminder)
