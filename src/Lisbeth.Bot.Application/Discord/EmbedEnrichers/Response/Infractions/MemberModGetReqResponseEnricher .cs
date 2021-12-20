@@ -44,12 +44,12 @@ public class MemberModGetReqResponseEnricher : EmbedEnricher<IModEntity>
 
         embedBuilder.AddField($"{pastTense} on", this.PrimaryEnricher.CreatedAt?.ToString() ?? "Error");
         embedBuilder.AddField("Length", lengthString, true);
-        embedBuilder.AddField($"{pastTense} until", this.PrimaryEnricher.AppliedUntil.ToString(CultureInfo.InvariantCulture),
+        embedBuilder.AddField($"{pastTense} until", this.PrimaryEnricher.AppliedUntil.ToString(CultureInfo.CurrentCulture),
             true);
 
         if (this.PrimaryEnricher.LiftedOn is not null)
         {
-            embedBuilder.AddField("Lifted on", this.PrimaryEnricher.LiftedOn.Value.ToString(CultureInfo.InvariantCulture));
+            embedBuilder.AddField("Lifted on", this.PrimaryEnricher.LiftedOn.Value.ToString(CultureInfo.CurrentCulture));
             embedBuilder.AddField("Lifted by", ExtendedFormatter.Mention(this.PrimaryEnricher.LiftedById, DiscordEntity.User));
         }
 

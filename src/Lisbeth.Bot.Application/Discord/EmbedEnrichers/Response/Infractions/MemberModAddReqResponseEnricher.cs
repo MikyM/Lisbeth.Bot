@@ -56,7 +56,7 @@ public class MemberModAddReqResponseEnricher : EmbedEnricher<IApplyInfractionReq
                 return;
             }
 
-            embedBuilder.AddField($"Previous {name.ToLower()} until", this.Previous.AppliedUntil.ToString(CultureInfo.InvariantCulture), true);
+            embedBuilder.AddField($"Previous {name.ToLower()} until", this.Previous.AppliedUntil.ToString(CultureInfo.CurrentCulture), true);
             embedBuilder.AddField("Previous moderator",
                 $"{ExtendedFormatter.Mention(this.Previous.AppliedById, DiscordEntity.User)}", true);
             if (!string.IsNullOrWhiteSpace(this.Previous.Reason))
@@ -74,7 +74,7 @@ public class MemberModAddReqResponseEnricher : EmbedEnricher<IApplyInfractionReq
             : $"{duration.Days} days, {duration.Hours} hrs, {duration.Minutes} mins";
 
         embedBuilder.AddField("Length", lengthString, true);
-        embedBuilder.AddField($"{pastTense} until", this.PrimaryEnricher.AppliedUntil.ToString(CultureInfo.InvariantCulture),
+        embedBuilder.AddField($"{pastTense} until", this.PrimaryEnricher.AppliedUntil.ToString(CultureInfo.CurrentCulture),
             true);
         if (!string.IsNullOrWhiteSpace(this.PrimaryEnricher.Reason)) embedBuilder.AddField("Reason", this.PrimaryEnricher.Reason);
     }

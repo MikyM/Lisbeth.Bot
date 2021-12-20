@@ -164,7 +164,7 @@ public class DiscordEmbedProvider : IDiscordEmbedProvider
                 return embed;
             }
 
-            embed.AddField($"Previous {data.Name.ToLower()} until", previous.AppliedUntil.ToString(), true);
+            embed.AddField($"Previous {data.Name.ToLower()} until", previous.AppliedUntil.ToString(CultureInfo.CurrentCulture), true);
             embed.AddField("Previous moderator",
                 $"{ExtendedFormatter.Mention(previous.AppliedById, DiscordEntity.User)}", true);
             embed.AddField("Previous reason", previous.Reason, true);
@@ -180,7 +180,7 @@ public class DiscordEmbedProvider : IDiscordEmbedProvider
             : $"{duration.Days} days, {duration.Hours} hrs, {duration.Minutes} mins";
 
         embed.AddField("Length", lengthString, true);
-        embed.AddField($"{data.PastTense} until", req.AppliedUntil.ToString(CultureInfo.InvariantCulture), true);
+        embed.AddField($"{data.PastTense} until", req.AppliedUntil.ToString(CultureInfo.CurrentCulture), true);
         embed.AddField("Reason", req.Reason);
         embed.WithFooter($"Case Id: {(caseId is null ? "Unknown" : caseId)} | Member Id: {req.TargetUserId}");
 
@@ -259,7 +259,7 @@ public class DiscordEmbedProvider : IDiscordEmbedProvider
         embed.AddField("Action", data.Name, true);
         embed.AddField("Target", ExtendedFormatter.Mention(req.TargetUserId, DiscordEntity.Member), true);
         embed.AddField("Length", lengthString, true);
-        embed.AddField($"{data.PastTense} until", req.AppliedUntil.ToString(CultureInfo.InvariantCulture), true);
+        embed.AddField($"{data.PastTense} until", req.AppliedUntil.ToString(CultureInfo.CurrentCulture), true);
         embed.AddField("Reason", req.Reason, true);
         embed.WithFooter($"Case Id: {(caseId is null ? "Unknown" : caseId)}");
 

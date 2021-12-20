@@ -179,7 +179,7 @@ public class DiscordReminderService : IDiscordReminderService
             .WithDescription("Reminder rescheduled successfully")
             .AddField("Reminder's id", res.Entity.Id.ToString())
             .AddField("Reminder's name", res.Entity.Name)
-            .AddField("Next occurrence", res.Entity.NextOccurrence.ToString(CultureInfo.InvariantCulture))
+            .AddField("Next occurrence", res.Entity.NextOccurrence.ToString(CultureInfo.CurrentCulture))
             .AddField("Mentions", string.Join(", ", res.Entity.Mentions ?? new List<string>()));
 
         return embed.Build();
