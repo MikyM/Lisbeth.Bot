@@ -29,15 +29,15 @@ using MikyM.Discord.Interfaces;
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 
 [UsedImplicitly]
-public class DiscordCloseInactiveTicketsCommandHandler : ICommandHandler<CloseInactiveTicketsCommand>
+public class CloseInactiveTicketsCommandHandler : ICommandHandler<CloseInactiveTicketsCommand>
 {
     private readonly IDiscordService _discord;
     private readonly IGuildDataService _guildDataService;
-    private readonly ILogger<DiscordCloseInactiveTicketsCommandHandler> _logger;
+    private readonly ILogger<CloseInactiveTicketsCommandHandler> _logger;
     private readonly ICommandHandler<ConfirmCloseTicketCommand> _closeTicketCommandHandler;
 
-    public DiscordCloseInactiveTicketsCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
-        ILogger<DiscordCloseInactiveTicketsCommandHandler> logger, ICommandHandler<ConfirmCloseTicketCommand> closeTicketCommandHandler)
+    public CloseInactiveTicketsCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
+        ILogger<CloseInactiveTicketsCommandHandler> logger, ICommandHandler<ConfirmCloseTicketCommand> closeTicketCommandHandler)
     {
         _discord = discord;
         _guildDataService = guildDataService;

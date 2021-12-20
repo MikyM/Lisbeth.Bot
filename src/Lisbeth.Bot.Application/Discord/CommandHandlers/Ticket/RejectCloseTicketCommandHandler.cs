@@ -15,10 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus;
-using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.Ticket;
-using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Buttons;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Microsoft.Extensions.Logging;
 using MikyM.Common.Application.CommandHandlers;
@@ -26,19 +23,19 @@ using MikyM.Common.Application.CommandHandlers;
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 
 [UsedImplicitly]
-public class DiscordCloseTicketCommandHandler : ICommandHandler<CloseTicketCommand>
+public class RejectCloseTicketCommandHandler : ICommandHandler<RejectCloseTicketCommand>
 {
     private readonly IGuildDataService _guildDataService;
-    private readonly ILogger<DiscordCloseTicketCommandHandler> _logger;
+    private readonly ILogger<CloseTicketCommandHandler> _logger;
 
-    public DiscordCloseTicketCommandHandler(IGuildDataService guildDataService,
-        ILogger<DiscordCloseTicketCommandHandler> logger)
+    public RejectCloseTicketCommandHandler(IGuildDataService guildDataService,
+        ILogger<CloseTicketCommandHandler> logger)
     {
         _guildDataService = guildDataService;
         _logger = logger;
     }
 
-    public async Task<Result> HandleAsync(CloseTicketCommand command)
+    public async Task<Result> HandleAsync(RejectCloseTicketCommand command)
     {
         var guildRes =
             await _guildDataService.GetSingleBySpecAsync(
@@ -49,16 +46,8 @@ public class DiscordCloseTicketCommandHandler : ICommandHandler<CloseTicketComma
         if (guildCfg.TicketingConfig is null)
             return new DisabledEntityError($"Guild with Id:{command.Interaction.Guild.Id} doesn't have ticketing enabled.");
 
-        var confirmButton = new DiscordButtonComponent(ButtonStyle.Success, nameof(TicketButton.TicketCloseConfirm),
-            "Yes");
+        await command.Interaction.Channel.DeleteMessageAsync(command.Message);
 
-        var embed = new DiscordEmbedBuilder().WithColor(new DiscordColor(guildCfg.EmbedHexColor))
-            .WithDescription("Are you sure you want to close this ticket?")
-            .Build();
-
-        await command.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(embed)
-            .AddComponents(confirmButton));
-        
         return Result.FromSuccess();
     }
 }

@@ -33,16 +33,16 @@ using MikyM.Discord.Interfaces;
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 
 [UsedImplicitly]
-public class DiscordConfirmCloseTicketCommandHandler : ICommandHandler<ConfirmCloseTicketCommand>
+public class ConfirmCloseTicketCommandHandler : ICommandHandler<ConfirmCloseTicketCommand>
 {
     private readonly IDiscordService _discord;
     private readonly IGuildDataService _guildDataService;
     private readonly ITicketDataService _ticketDataService;
-    private readonly ILogger<DiscordConfirmCloseTicketCommandHandler> _logger;
+    private readonly ILogger<ConfirmCloseTicketCommandHandler> _logger;
     private readonly IAsyncExecutor _asyncExecutor;
 
-    public DiscordConfirmCloseTicketCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
-        ITicketDataService ticketDataService, ILogger<DiscordConfirmCloseTicketCommandHandler> logger,
+    public ConfirmCloseTicketCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
+        ITicketDataService ticketDataService, ILogger<ConfirmCloseTicketCommandHandler> logger,
         IAsyncExecutor asyncExecutor)
     {
         _discord = discord;

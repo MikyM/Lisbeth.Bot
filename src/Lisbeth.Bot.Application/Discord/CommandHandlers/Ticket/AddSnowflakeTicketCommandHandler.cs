@@ -1,17 +1,17 @@
 ﻿// This file is part of Lisbeth.Bot project
 //
 // Copyright (C) 2021 Krzysztof Kupisz - MikyM
-//
+// 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-//
+// 
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-//
+// 
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
@@ -28,17 +28,18 @@ using MikyM.Discord.Interfaces;
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 
 [UsedImplicitly]
-public class DiscordRemoveSnowflakeTicketCommandHandler : ICommandHandler<RemoveSnowflakeFromTicketCommand, DiscordEmbed>
+public class AddSnowflakeTicketCommandHandler : ICommandHandler<AddSnowflakeToTicketCommand,  DiscordEmbed>
 {
     private readonly IGuildDataService _guildDataService;
     private readonly ITicketDataService _ticketDataService;
-    private readonly ILogger<DiscordRemoveSnowflakeTicketCommandHandler> _logger;
+    private readonly ILogger<AddSnowflakeTicketCommandHandler> _logger;
     private readonly IDiscordService _discord;
     private readonly ICommandHandler<PrivacyCheckTicketCommand, bool> _privacyCheckHandler;
 
-    public DiscordRemoveSnowflakeTicketCommandHandler(IGuildDataService guildDataService,
-        ILogger<DiscordRemoveSnowflakeTicketCommandHandler> logger, IDiscordService discord,
-        ITicketDataService ticketDataService, ICommandHandler<PrivacyCheckTicketCommand, bool> privacyCheckHandler)
+    public AddSnowflakeTicketCommandHandler(IGuildDataService guildDataService,
+        ILogger<AddSnowflakeTicketCommandHandler> logger, IDiscordService discord,
+        ITicketDataService ticketDataService,
+        ICommandHandler<PrivacyCheckTicketCommand, bool> privacyCheckHandler)
     {
         _guildDataService = guildDataService;
         _logger = logger;
@@ -47,7 +48,7 @@ public class DiscordRemoveSnowflakeTicketCommandHandler : ICommandHandler<Remove
         _privacyCheckHandler = privacyCheckHandler;
     }
 
-    public async Task<Result<DiscordEmbed>> HandleAsync(RemoveSnowflakeFromTicketCommand command)
+    public async Task<Result<DiscordEmbed>> HandleAsync(AddSnowflakeToTicketCommand command)
     {
         if (command is null) throw new ArgumentNullException(nameof(command));
 
@@ -83,19 +84,30 @@ public class DiscordRemoveSnowflakeTicketCommandHandler : ICommandHandler<Remove
 
         if (targetRole is null && targetMember is not null)
         {
-            await ticketChannel.AddOverwriteAsync(targetMember, deny: Permissions.AccessChannels);
+            await ticketChannel.AddOverwriteAsync(targetMember, Permissions.AccessChannels);
+
+            // give discord half a second and refresh channel
+            await Task.Delay(1000);
+            ticketChannel = guild.GetChannel(ticket.ChannelId);
 
             await _ticketDataService.SetAddedUsersAsync(ticket,
-                ticketChannel.Users.Select(x => x.Id).TakeWhile(x => x != targetMember.Id));
+                ticketChannel.Users.Any(x => x.Id == targetMember.Id)
+                    ? ticketChannel.Users.Select(x => x.Id)
+                    : ticketChannel.Users.Select(x => x.Id).Append(targetMember.Id));
 
             var privacyRes = await _privacyCheckHandler.HandleAsync(new PrivacyCheckTicketCommand(guild, ticket));
 
             if (privacyRes.IsDefined(out var isPrivate))
-                await _ticketDataService.SetPrivacyAsync(ticket, isPrivate, true);
+
+            await _ticketDataService.SetPrivacyAsync(ticket, isPrivate, true);
         }
         else if (targetRole is not null)
         {
-            await ticketChannel.AddOverwriteAsync(targetRole, deny: Permissions.AccessChannels);
+            await ticketChannel.AddOverwriteAsync(targetRole, Permissions.AccessChannels);
+
+            // give discord half a second and refresh channel
+            await Task.Delay(1000);
+            ticketChannel = guild.GetChannel(ticket.ChannelId);
 
             List<ulong> roleIds = new();
             foreach (var overwrite in ticketChannel.PermissionOverwrites)
@@ -119,22 +131,24 @@ public class DiscordRemoveSnowflakeTicketCommandHandler : ICommandHandler<Remove
                 await Task.Delay(500);
             }
 
-            roleIds.RemoveAll(x => x == targetRole.Id);
+            if (roleIds.All(x => x != targetRole.Id))
+                roleIds.Add(targetRole.Id);
 
             await _ticketDataService.SetAddedRolesAsync(ticket, roleIds);
 
             var privacyRes = await _privacyCheckHandler.HandleAsync(new PrivacyCheckTicketCommand(guild, ticket));
 
             if (privacyRes.IsDefined(out var isPrivate))
+
                 await _ticketDataService.SetPrivacyAsync(ticket, isPrivate, true);
         }
 
         var embed = new DiscordEmbedBuilder();
 
         embed.WithColor(new DiscordColor(guildCfg.EmbedHexColor));
-        embed.WithAuthor($"Ticket moderation | Remove {(targetRole is null ? "member" : "role")} action log");
+        embed.WithAuthor($"Ticket moderation | Add {(targetRole is null ? "member" : "role")} action log");
         embed.AddField("Moderator", requestingMember.Mention);
-        embed.AddField("Removed", $"{targetRole?.Mention ?? targetMember?.Mention}");
+        embed.AddField("Added", $"{targetRole?.Mention ?? targetMember?.Mention}");
         embed.WithFooter($"Ticket Id: {ticket.GuildSpecificId}");
 
         return embed.Build();

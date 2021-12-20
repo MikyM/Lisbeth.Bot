@@ -23,11 +23,11 @@ using MikyM.Discord.Interfaces;
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 
 [UsedImplicitly]
-public class DiscordPrivacyCheckTicketCommandHandler : ICommandHandler<PrivacyCheckTicketCommand, bool>
+public class PrivacyCheckTicketCommandHandler : ICommandHandler<PrivacyCheckTicketCommand, bool>
 {
     private readonly IDiscordService _discord;
 
-    public DiscordPrivacyCheckTicketCommandHandler(IDiscordService discord)
+    public PrivacyCheckTicketCommandHandler(IDiscordService discord)
     {
         _discord = discord;
     }

@@ -25,14 +25,14 @@ using MikyM.Discord.Interfaces;
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 
 [UsedImplicitly]
-public class DiscordCleanClosedTicketsCommandHandler : ICommandHandler<CleanClosedTicketsCommand>
+public class CleanClosedTicketsCommandHandler : ICommandHandler<CleanClosedTicketsCommand>
 {
     private readonly IDiscordService _discord;
     private readonly IGuildDataService _guildDataService;
-    private readonly ILogger<DiscordCleanClosedTicketsCommandHandler> _logger;
+    private readonly ILogger<CleanClosedTicketsCommandHandler> _logger;
 
-    public DiscordCleanClosedTicketsCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
-        ILogger<DiscordCleanClosedTicketsCommandHandler> logger)
+    public CleanClosedTicketsCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
+        ILogger<CleanClosedTicketsCommandHandler> logger)
     {
         _discord = discord;
         _guildDataService = guildDataService;

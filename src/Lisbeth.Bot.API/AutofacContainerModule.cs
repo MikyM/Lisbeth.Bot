@@ -51,10 +51,10 @@ public class AutofacContainerModule : Module
             .Where(t => t.Name.EndsWith("Service"))
             .AsImplementedInterfaces()
             .InstancePerLifetimeScope();
-        builder.RegisterAssemblyTypes(typeof(DiscordCloseTicketCommandHandler).Assembly)
+        builder.RegisterAssemblyTypes(typeof(CloseTicketCommandHandler).Assembly)
             .AsClosedTypesOf(typeof(ICommandHandler<>))
             .InstancePerLifetimeScope();
-        builder.RegisterAssemblyTypes(typeof(DiscordCloseTicketCommandHandler).Assembly)
+        builder.RegisterAssemblyTypes(typeof(CloseTicketCommandHandler).Assembly)
             .AsClosedTypesOf(typeof(ICommandHandler<,>))
             .InstancePerLifetimeScope();
 

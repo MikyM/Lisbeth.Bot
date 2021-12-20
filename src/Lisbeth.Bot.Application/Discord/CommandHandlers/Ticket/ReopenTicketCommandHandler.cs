@@ -28,15 +28,15 @@ using MikyM.Discord.Interfaces;
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 
 [UsedImplicitly]
-public class DiscordReopenTicketCommandHandler : ICommandHandler<ReopenTicketCommand, DiscordMessageBuilder>
+public class ReopenTicketCommandHandler : ICommandHandler<ReopenTicketCommand, DiscordMessageBuilder>
 {
     private readonly IDiscordService _discord;
     private readonly IGuildDataService _guildDataService;
     private readonly ITicketDataService _ticketDataService;
-    private readonly ILogger<DiscordConfirmCloseTicketCommandHandler> _logger;
+    private readonly ILogger<ConfirmCloseTicketCommandHandler> _logger;
 
-    public DiscordReopenTicketCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
-        ITicketDataService ticketDataService, ILogger<DiscordConfirmCloseTicketCommandHandler> logger)
+    public ReopenTicketCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
+        ITicketDataService ticketDataService, ILogger<ConfirmCloseTicketCommandHandler> logger)
     {
         _discord = discord;
         _guildDataService = guildDataService;

@@ -29,16 +29,16 @@ using Lisbeth.Bot.Application.Discord.Commands.Ticket;
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 
 [UsedImplicitly]
-public class DiscordOpenTicketCommandHandler : ICommandHandler<OpenTicketCommand>
+public class OpenTicketCommandHandler : ICommandHandler<OpenTicketCommand>
 {
     private readonly IDiscordService _discord;
     private readonly IGuildDataService _guildDataService;
     private readonly ITicketDataService _ticketDataService;
-    private readonly ILogger<DiscordOpenTicketCommandHandler> _logger;
+    private readonly ILogger<OpenTicketCommandHandler> _logger;
     private readonly ICommandHandler<GetTicketWelcomeEmbedCommand, DiscordMessageBuilder> _welcomeEmbedCommandHandler;
 
-    public DiscordOpenTicketCommandHandler(IGuildDataService guildDataService, ITicketDataService ticketDataService,
-        IDiscordService discord, ILogger<DiscordOpenTicketCommandHandler> logger,
+    public OpenTicketCommandHandler(IGuildDataService guildDataService, ITicketDataService ticketDataService,
+        IDiscordService discord, ILogger<OpenTicketCommandHandler> logger,
         ICommandHandler<GetTicketWelcomeEmbedCommand, DiscordMessageBuilder> welcomeEmbedCommandHandler)
     {
         _guildDataService = guildDataService;

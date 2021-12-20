@@ -197,7 +197,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddSwaggerGen(options =>
         {
-            options.SwaggerDoc("v1", new OpenApiInfo { Title = "EclipseBot", Version = "v1" });
+            options.SwaggerDoc("v1", new OpenApiInfo { Title = "LisbethBot", Version = "v1" });
             var securityScheme = new OpenApiSecurityScheme
             {
                 Reference = new OpenApiReference
@@ -224,14 +224,13 @@ public static class ServiceCollectionExtensions
         //services.AddOptions<BotSettings>().BindConfiguration(sp.GetRequiredService<IWebHostEnvironment>().IsDevelopment() ? "BotSettings:Dev" : "BotSettings:Prod", options => options.BindNonPublicProperties = true);
     }
 
-    public static void ConfigureHealthChecks(this IServiceCollection services)
+    public static void ConfigureHealthChecks(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddHealthChecks()
-            .AddNpgSql(
-                "User ID=lisbethbot;Password=lisbethbot;Host=localhost;Port=5438;Database=lisbeth_bot_test;",
+            .AddNpgSql(configuration.GetConnectionString("MainDb"),
                 name: "Base DB")
             .AddNpgSql(
-                "User ID=lisbethbot;Password=lisbethbot;Host=localhost;Port=5438;Database=lisbeth_bot_hangfire_test;",
+                configuration.GetConnectionString("HangfireDb"),
                 name: "Hangfire DB")
             .AddHangfire(options =>
             {

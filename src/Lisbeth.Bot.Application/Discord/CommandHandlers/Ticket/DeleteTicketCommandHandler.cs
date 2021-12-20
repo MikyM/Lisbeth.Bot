@@ -22,7 +22,7 @@ using MikyM.Common.Application.CommandHandlers;
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 
 [UsedImplicitly]
-public class DiscordDeleteTicketCommandHandler : ICommandHandler<DeleteTicketCommand>
+public class DeleteTicketCommandHandler : ICommandHandler<DeleteTicketCommand>
 {
     public async Task<Result> HandleAsync(DeleteTicketCommand command)
     {
