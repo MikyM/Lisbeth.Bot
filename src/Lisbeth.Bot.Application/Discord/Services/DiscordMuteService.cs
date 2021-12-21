@@ -200,12 +200,6 @@ public class DiscordMuteService : IDiscordMuteService
                 var req = new MuteRevokeReqDto(x.UserId, x.GuildId, _discord.Client.CurrentUser.Id);
                 await UnmuteAsync(req);
             });
-
-            /*foreach (var mute in res.Entity)
-            {
-                var req = new MuteRevokeReqDto(mute.UserId, mute.GuildId, _discord.Client.CurrentUser.Id);
-                await UnmuteAsync(req);
-            }*/
         }
         catch (Exception ex)
         {

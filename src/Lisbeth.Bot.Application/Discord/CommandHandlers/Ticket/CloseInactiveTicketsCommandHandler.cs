@@ -49,15 +49,16 @@ public class CloseInactiveTicketsCommandHandler : ICommandHandler<CloseInactiveT
     {
         try
         {
-            foreach (var (guildId, guild) in _discord.Client.Guilds)
+            await Parallel.ForEachAsync(_discord.Client.Guilds, async (x, _) =>
             {
+                var (guildId, _) = x;
                 var res = await _guildDataService.GetSingleBySpecAsync(
                     new ActiveGuildByDiscordIdWithTicketingAndTicketsSpecifications(guildId));
 
-                if (!res.IsDefined(out var guildCfg)) continue;
+                if (!res.IsDefined(out var guildCfg)) return;
 
-                if (guildCfg.TicketingConfig?.CloseAfter is null) continue;
-                if (guildCfg.Tickets?.Count == 0) continue;
+                if (guildCfg.TicketingConfig?.CloseAfter is null) return;
+                if (guildCfg.Tickets?.Count == 0) return;
 
                 DiscordChannel openedCat;
                 try
@@ -68,7 +69,7 @@ public class CloseInactiveTicketsCommandHandler : ICommandHandler<CloseInactiveT
                 {
                     _logger.LogInformation(
                         $"Guild with Id: {guildId} has non-existing opened ticket category set with Id: {guildCfg.TicketingConfig.OpenedCategoryId}.");
-                    continue;
+                    return;
                 }
 
                 foreach (var openedTicketChannel in openedCat.Children)
@@ -101,7 +102,7 @@ public class CloseInactiveTicketsCommandHandler : ICommandHandler<CloseInactiveT
                 }
 
                 await Task.Delay(500);
-            }
+            });
         }
         catch (Exception ex)
         {
