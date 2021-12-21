@@ -172,7 +172,7 @@ public class DiscordMuteService : IDiscordMuteService
         if (req is null) throw new ArgumentNullException(nameof(req));
 
         return await GetSpecificUserGuildMuteAsync(ctx.Guild,
-            (DiscordMember)ctx.ResolvedUserMentions[0],
+           ctx.ResolvedUserMentions[0],
             ctx.Member, req);
     }
 
@@ -311,7 +311,7 @@ public class DiscordMuteService : IDiscordMuteService
             .Build();
     }
 
-    private async Task<Result<DiscordEmbed>> GetSpecificUserGuildMuteAsync(DiscordGuild guild, DiscordMember target,
+    private async Task<Result<DiscordEmbed>> GetSpecificUserGuildMuteAsync(DiscordGuild guild, DiscordUser target,
         DiscordMember moderator, MuteGetReqDto req)
     {
         if (guild is null) throw new ArgumentNullException(nameof(guild));
