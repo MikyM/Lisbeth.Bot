@@ -60,17 +60,21 @@ public static class ServiceCollectionExtensions
 
         services.AddDiscordSlashCommands(_ => { }, extension =>
         {
-            extension?.RegisterCommands<MuteApplicationCommands>(790631933758799912);
-            extension?.RegisterCommands<BanApplicationCommands>(790631933758799912);
-            extension?.RegisterCommands<TicketSlashCommands>(790631933758799912);
-            extension?.RegisterCommands<OwnerUtilSlashCommands>(790631933758799912);
-            extension?.RegisterCommands<PruneApplicationCommands>(790631933758799912);
-            extension?.RegisterCommands<AdminUtilSlashCommands>(790631933758799912);
-            extension?.RegisterCommands<ModUtilSlashCommands>(790631933758799912);
-            extension?.RegisterCommands<TagSlashCommands>(790631933758799912);
-            extension?.RegisterCommands<ReminderSlashCommands>(790631933758799912);
-            extension?.RegisterCommands<EmbedConfigSlashCommands>(790631933758799912);
-            extension?.RegisterCommands<RoleMenuSlashCommands>(790631933758799912);
+            ulong? guildId = configuration.GetValue<bool>("BotOptions:GlobalRegister")
+                ? null
+                : configuration.GetValue<ulong>("BotOptions:TestGuildId");
+
+            extension?.RegisterCommands<MuteApplicationCommands>(guildId);
+            extension?.RegisterCommands<BanApplicationCommands>(guildId);
+            extension?.RegisterCommands<TicketSlashCommands>(guildId);
+            extension?.RegisterCommands<OwnerUtilSlashCommands>(guildId);
+            extension?.RegisterCommands<PruneApplicationCommands>(guildId);
+            extension?.RegisterCommands<AdminUtilSlashCommands>(guildId);
+            extension?.RegisterCommands<ModUtilSlashCommands>(guildId);
+            extension?.RegisterCommands<TagSlashCommands>(guildId);
+            extension?.RegisterCommands<ReminderSlashCommands>(guildId);
+            extension?.RegisterCommands<EmbedConfigSlashCommands>(guildId);
+            extension?.RegisterCommands<RoleMenuSlashCommands>(guildId);
         });
         services.AddDiscordInteractivity(options =>
         {

@@ -42,14 +42,14 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
         switch (action)
         {
             case TicketCenterActionType.Get:
-                var builderGet = await this._discordTicketService.HandleAsync(new GetTicketCenterEmbedCommand(ctx));
+                var builderGet = await _discordTicketService.HandleAsync(new GetTicketCenterEmbedCommand(ctx));
                 await ctx.Channel.SendMessageAsync(builderGet.Entity);
                 await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
                     .AddEmbed(base.GetSuccessfulActionEmbed(ctx.Client, "Message sent successfully"))
                     .AsEphemeral(true));
                 return;
             case TicketCenterActionType.ConfigureEmbed:
-                var partial = await this._embedConfiguratorService.ConfigureAsync(ctx, x => x.CenterEmbedConfig,
+                var partial = await _embedConfiguratorService.ConfigureAsync(ctx, x => x.CenterEmbedConfig,
                     x => x.CenterEmbedConfigId);
                 if (!partial.IsDefined(out var embed))
                     await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
@@ -68,7 +68,7 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
                         .AddEmbed(GetSuccessfulActionEmbed(ctx.Client, "You have to provide a channel")));
                     return;
                 }
-                var builderSend = await this._discordTicketService.HandleAsync(new GetTicketCenterEmbedCommand(ctx));
+                var builderSend = await _discordTicketService.HandleAsync(new GetTicketCenterEmbedCommand(ctx));
                 await channel.SendMessageAsync(builderSend.Entity);
                 await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
                     .AddEmbed(base.GetSuccessfulActionEmbed(ctx.Client, "Message sent successfully"))
@@ -151,7 +151,7 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
 
                         var enableTicketingValidator = new TicketingConfigReqValidator(ctx.Client);
                         await enableTicketingValidator.ValidateAndThrowAsync(enableTicketingReq);
-                        result = await this._discordGuildService!.CreateModuleAsync(ctx, enableTicketingReq);
+                        result = await _discordGuildService.CreateModuleAsync(ctx, enableTicketingReq);
                         break;
                     case ModuleActionType.Repair:
                         var repairTicketingReq = new TicketingConfigRepairReqDto
@@ -161,7 +161,7 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
                         };
                         var repairTicketingValidator = new TicketingConfigRepairReqValidator(ctx.Client);
                         await repairTicketingValidator.ValidateAndThrowAsync(repairTicketingReq);
-                        result = await this._discordGuildService!.RepairConfigAsync(ctx, repairTicketingReq);
+                        result = await _discordGuildService.RepairConfigAsync(ctx, repairTicketingReq);
                         break;
                     case ModuleActionType.Edit:
                         break;
@@ -173,7 +173,7 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
                         };
                         var disableTicketingValidator = new TicketingConfigDisableReqValidator(ctx.Client);
                         await disableTicketingValidator.ValidateAndThrowAsync(disableTicketingReq);
-                        result = await this._discordGuildService!.DisableModuleAsync(ctx, disableTicketingReq);
+                        result = await _discordGuildService.DisableModuleAsync(ctx, disableTicketingReq);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException(nameof(action), action, null);
@@ -191,7 +191,7 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
                         };
                         var enableModerationValidator = new ModerationConfigReqValidator(ctx.Client);
                         await enableModerationValidator.ValidateAndThrowAsync(enableModerationReq);
-                        result = await this._discordGuildService!.CreateModuleAsync(ctx, enableModerationReq);
+                        result = await _discordGuildService.CreateModuleAsync(ctx, enableModerationReq);
                         break;
                     case ModuleActionType.Repair:
                         var repairModerationReq = new ModerationConfigRepairReqDto
@@ -201,7 +201,7 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
                         };
                         var repairModerationValidator = new ModerationConfigRepairReqValidator(ctx.Client);
                         await repairModerationValidator.ValidateAndThrowAsync(repairModerationReq);
-                        result = await this._discordGuildService!.RepairConfigAsync(ctx, repairModerationReq);
+                        result = await _discordGuildService.RepairConfigAsync(ctx, repairModerationReq);
                         break;
                     case ModuleActionType.Edit:
                         break;
@@ -213,7 +213,7 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
                         };
                         var disableModerationValidator = new ModerationConfigDisableReqValidator(ctx.Client);
                         await disableModerationValidator.ValidateAndThrowAsync(disableModerationReq);
-                        result = await this._discordGuildService!.DisableModuleAsync(ctx, disableModerationReq);
+                        result = await _discordGuildService.DisableModuleAsync(ctx, disableModerationReq);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException(nameof(action), action, null);

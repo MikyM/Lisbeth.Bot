@@ -23,4 +23,6 @@ public class BotOptions
     public string? ImgurApiKey { get; private set; }
     public string? LisbethBotToken { get; private set; }
     public string? EmbedHexColor { get; private set; }
+    public ulong TestGuildId { get; private set; }
+    public bool GlobalRegister { get; private set; }
 }

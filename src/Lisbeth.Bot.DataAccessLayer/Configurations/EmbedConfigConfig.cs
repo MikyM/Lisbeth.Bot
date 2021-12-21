@@ -83,47 +83,5 @@ public class EmbedConfigConfig : IEntityTypeConfiguration<EmbedConfig>
         builder.Property(x => x.ThumbnailWidth)
             .HasColumnName("thumbnail_width")
             .HasColumnType("integer");
-
-/*            builder.HasOne(x => x.Reminder)
-                .WithOne(x => x.EmbedConfig)
-                .HasForeignKey<Reminder>(x => x.EmbedConfigId)
-                .HasPrincipalKey<EmbedConfig>(x => x.Id)
-                .IsRequired(false);
-
-            builder.HasOne(x => x.RecurringReminder)
-                .WithOne(x => x.EmbedConfig)
-                .HasForeignKey<RecurringReminder>(x => x.EmbedConfigId)
-                .HasPrincipalKey<EmbedConfig>(x => x.Id)
-                .IsRequired(false);
-
-            builder.HasOne(x => x.Tag)
-                .WithOne(x => x.EmbedConfig)
-                .HasForeignKey<Tag>(x => x.EmbedConfigId)
-                .HasPrincipalKey<EmbedConfig>(x => x.Id)
-                .IsRequired(false);
-
-            builder.HasOne(x => x.RoleMenu)
-                .WithOne(x => x.EmbedConfig)
-                .HasForeignKey<RoleMenu>(x => x.EmbedConfigId)
-                .HasPrincipalKey<EmbedConfig>(x => x.Id)
-                .IsRequired(false);
-
-            builder.HasOne(x => x.TicketingConfigWithCenterMessage)
-                .WithOne(x => x.CenterEmbedConfig)
-                .HasForeignKey<TicketingConfig>(x => x.CenterEmbedConfigId)
-                .HasPrincipalKey<EmbedConfig>(x => x.Id)
-                .IsRequired(false);
-
-            builder.HasOne(x => x.TicketingConfigWithWelcomeMessage)
-                .WithOne(x => x.WelcomeEmbedConfig)
-                .HasForeignKey<TicketingConfig>(x => x.WelcomeEmbedConfigId)
-                .HasPrincipalKey<EmbedConfig>(x => x.Id)
-                .IsRequired(false);
-
-            builder.HasOne(x => x.ModerationConfig)
-                .WithOne(x => x.MemberWelcomeEmbedConfig)
-                .HasForeignKey<ModerationConfig>(x => x.MemberWelcomeEmbedConfigId)
-                .HasPrincipalKey<EmbedConfig>(x => x.Id)
-                .IsRequired(false);*/
     }
 }
