@@ -58,15 +58,15 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
 
     [SlashCooldown(20, 120, CooldownBucketType.Guild)]
     [UsedImplicitly]
-    [SlashCommand("tag", "Allows working with tags.")]
+    [SlashCommand("tag", "Allows working with tags")]
     public async Task TagCommand(InteractionContext ctx,
         [Option("action", "Type of action to perform")]
         TagActionType action,
         [Option("name", "Name of the tag")]
         string idOrName,
-        [Option("snowflake", "Channel to send the tag to or a role/member to add/revoke permissions for.")]
+        [Option("snowflake", "Channel to send the tag to or a role/member to add/revoke permissions for")]
         SnowflakeObject? snowflake = null,
-        [Option("text", "Base text for the tag.")]
+        [Option("text", "Base text for the tag")]
         string text = "")
     {
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
