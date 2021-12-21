@@ -311,9 +311,16 @@ public class DiscordGuildService : IDiscordGuildService
                 var cmds = _options.Value.GlobalRegister ? await _discord.Client.GetGlobalApplicationCommandsAsync() : await guild.GetApplicationCommandsAsync();
                 cmds = cmds.Where(x => x.ApplicationId == _discord.Client.CurrentApplication.Id).ToList();
 
-                var modCmds = cmds.Where(x => x.Name is "ban" or "mute" or "identity").ToList();
-                var messageCmds = cmds.Where(x => x.Name is "prune").ToList();
-                var admCmds = cmds.Where(x => x.Name is "role-menu" or "ticket" || x.Name.Contains("admin-util")).ToList();
+                var modCmds = cmds.Where(x =>
+                        x.Name is "ban" or "identity" ||
+                        x.Name.Contains("mute", StringComparison.InvariantCultureIgnoreCase))
+                    .ToList();
+                var messageCmds = cmds.Where(x =>
+                        x.Name.Contains("prune", StringComparison.InvariantCultureIgnoreCase) &&
+                        !x.Name.Contains("mute", StringComparison.InvariantCultureIgnoreCase))
+                    .ToList();
+                var admCmds = cmds.Where(x => x.Name is "role-menu" or "ticket" || x.Name.Contains("admin-util"))
+                    .ToList();
                 var ownerCmds = cmds.Where(x => x.Name is "owner").ToList();
 
                 var update = modCmds.Select(modCmd => new DiscordGuildApplicationCommandPermissions(modCmd.Id, userPerms))
