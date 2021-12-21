@@ -66,7 +66,7 @@ public class GetWelcomeEmbedTicketCommandHandler : ICommandHandler<GetTicketWelc
             embed.WithColor(new DiscordColor(guild.EmbedHexColor));
         }
 
-        embed.WithFooter($"To close this ticket press on the button below");
+        embed.WithFooter($"Click on the button below to close this ticket");
 
         var btn = new DiscordButtonComponent(ButtonStyle.Primary, nameof(TicketButton.TicketClose), "Close this ticket", false,
             new DiscordComponentEmoji(lockEmoji));

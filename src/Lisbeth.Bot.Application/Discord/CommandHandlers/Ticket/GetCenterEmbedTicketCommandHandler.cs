@@ -60,7 +60,7 @@ public class GetCenterEmbedTicketCommandHandler : ICommandHandler<GetTicketCente
             embed.WithColor(new DiscordColor(guild.EmbedHexColor));
         }
 
-        embed.WithFooter("Click on the button below to create a ticket");
+        embed.WithFooter("Click on the button below to open a ticket");
 
         var btn = new DiscordButtonComponent(ButtonStyle.Primary, nameof(TicketButton.TicketOpen), "Open a ticket", false,
             new DiscordComponentEmoji(envelopeEmoji));
