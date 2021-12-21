@@ -66,6 +66,8 @@ public class CleanClosedTicketsCommandHandler : ICommandHandler<CleanClosedTicke
                     return;
                 }
 
+                if (closedCat is null) return;
+
                 foreach (var closedTicketChannel in closedCat.Children)
                 {
                     if ((guildCfg.Tickets ?? throw new InvalidOperationException()).All(x =>

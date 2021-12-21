@@ -72,6 +72,8 @@ public class CloseInactiveTicketsCommandHandler : ICommandHandler<CloseInactiveT
                     return;
                 }
 
+                if (openedCat is null) return;
+
                 foreach (var openedTicketChannel in openedCat.Children)
                 {
                     if ((guildCfg.Tickets ?? throw new InvalidOperationException()).All(x =>
