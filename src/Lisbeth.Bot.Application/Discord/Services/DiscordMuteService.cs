@@ -195,11 +195,17 @@ public class DiscordMuteService : IDiscordMuteService
 
             if (!res.IsDefined() || res.Entity.Count == 0) return Result.FromSuccess();
 
-            foreach (var mute in res.Entity)
+            await Parallel.ForEachAsync(res.Entity, async (x, _) =>
+            {
+                var req = new MuteRevokeReqDto(x.UserId, x.GuildId, _discord.Client.CurrentUser.Id);
+                await UnmuteAsync(req);
+            });
+
+            /*foreach (var mute in res.Entity)
             {
                 var req = new MuteRevokeReqDto(mute.UserId, mute.GuildId, _discord.Client.CurrentUser.Id);
                 await UnmuteAsync(req);
-            }
+            }*/
         }
         catch (Exception ex)
         {
