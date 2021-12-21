@@ -50,7 +50,7 @@ public class EmbedConfigConfig : IEntityTypeConfiguration<EmbedConfig>
         builder.Property(x => x.AuthorUrl)
             .HasColumnName("author_url")
             .HasColumnType("varchar(1000)")
-            .HasMaxLength(200);
+            .HasMaxLength(1000);
         builder.Property(x => x.Footer).HasColumnName("footer").HasColumnType("varchar(2048)").HasMaxLength(200);
         builder.Property(x => x.FooterImageUrl)
             .HasColumnName("footer_image_url")
@@ -75,8 +75,8 @@ public class EmbedConfigConfig : IEntityTypeConfiguration<EmbedConfig>
         builder.Property(x => x.Timestamp).HasColumnName("Timestamp").HasColumnType("timestamptz");
         builder.Property(x => x.Thumbnail)
             .HasColumnName("thumbnail")
-            .HasColumnType("varchar(100)")
-            .HasMaxLength(100);
+            .HasColumnType("varchar(1000)")
+            .HasMaxLength(1000);
         builder.Property(x => x.ThumbnailHeight)
             .HasColumnName("thumbnail_height")
             .HasColumnType("integer");
