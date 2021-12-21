@@ -34,6 +34,8 @@ using System.Net.Http;
 using System.Text;
 using Lisbeth.Bot.Application.Discord.Exceptions;
 using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
+using Lisbeth.Bot.Domain;
+using Microsoft.Extensions.Options;
 using MikyM.Discord.Extensions.BaseExtensions;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands;
@@ -46,13 +48,15 @@ public class OwnerUtilSlashCommands : ExtendedApplicationCommandModule
     private readonly LisbethBotDbContext _ctx;
     private readonly IReadOnlyService<AuditLog, LisbethBotDbContext> _service;
     private readonly IDiscordGuildService _discordGuildService;
+    private readonly IOptions<BotOptions> _options;
 
     public OwnerUtilSlashCommands(LisbethBotDbContext ctx, IReadOnlyService<AuditLog, LisbethBotDbContext> service,
-        IDiscordGuildService discordGuildService)
+        IDiscordGuildService discordGuildService, IOptions<BotOptions> options)
     {
         _ctx = ctx;
         _service = service;
         _discordGuildService = discordGuildService;
+        _options = options;
     }
 
     [UsedImplicitly]
@@ -132,7 +136,7 @@ public class OwnerUtilSlashCommands : ExtendedApplicationCommandModule
             {
                 Title = "Given query produced no results.",
                 Description = string.Concat("Query: ", Formatter.InlineCode(query), "."),
-                Color = new DiscordColor(0x007FFF)
+                Color = new DiscordColor(_options.Value.EmbedHexColor)
             };
             await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
             return;
@@ -145,7 +149,7 @@ public class OwnerUtilSlashCommands : ExtendedApplicationCommandModule
             Title = string.Concat("Results: ", dat.Count.ToString("#,##0")),
             Description = string.Concat("Showing ", dat.Count > 24 ? "first 24" : "all", " results for query ",
                 Formatter.InlineCode(query), ":"),
-            Color = new DiscordColor(0x18315C)
+            Color = new DiscordColor(_options.Value.EmbedHexColor)
         };
         var adat = dat.Take(24);
 
@@ -188,7 +192,7 @@ public class OwnerUtilSlashCommands : ExtendedApplicationCommandModule
 
         code = code[cs1..cs2];
 
-        var embed = new DiscordEmbedBuilder { Title = "Evaluating...", Color = new DiscordColor(0xD091B2) };
+        var embed = new DiscordEmbedBuilder { Title = "Evaluating...", Color = new DiscordColor(_options.Value.EmbedHexColor) };
         await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
 
         var globals = new EvaluationEnvironment(ctx);
@@ -262,7 +266,7 @@ public class OwnerUtilSlashCommands : ExtendedApplicationCommandModule
         }
 
         // execution succeeded
-        embed = new DiscordEmbedBuilder { Title = "Evaluation successful", Color = new DiscordColor(0xD091B2) };
+        embed = new DiscordEmbedBuilder { Title = "Evaluation successful", Color = new DiscordColor(_options.Value.EmbedHexColor) };
         embed.WithDescription(code);
 
         embed.AddField("Result", css?.ReturnValue is not null ? css.ReturnValue.ToString() : "No value returned")
