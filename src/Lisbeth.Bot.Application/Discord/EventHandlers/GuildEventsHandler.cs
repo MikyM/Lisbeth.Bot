@@ -64,14 +64,14 @@ public class GuildEventsHandler : BaseEventHandler, IDiscordGuildEventsSubscribe
         return Task.CompletedTask;
     }
 
-    public async Task DiscordOnGuildDownloadCompleted(DiscordClient sender, GuildDownloadCompletedEventArgs args)
+    public Task DiscordOnGuildDownloadCompleted(DiscordClient sender, GuildDownloadCompletedEventArgs args)
     {
         _ = AsyncExecutor.ExecuteAsync<IDiscordGuildService>(async x =>
             await x.PrepareSlashPermissionsAsync(args.Guilds.Values));
-        await sender.UpdateStatusAsync(new DiscordActivity("you closely.", ActivityType.Watching));
+        _ = AsyncExecutor.ExecuteAsync<IDiscordGuildService>(async x =>
+            await x.PrepareBot(args.Guilds.Keys));
 
-        foreach (var key in args.Guilds.Keys)
-            _ticketQueueService.AddGuildQueue(key);
+        return Task.CompletedTask;
     }
 
     public Task DiscordOnGuildEmojisUpdated(DiscordClient sender, GuildEmojisUpdateEventArgs args)
