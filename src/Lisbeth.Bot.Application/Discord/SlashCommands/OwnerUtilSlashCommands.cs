@@ -33,6 +33,7 @@ using System.Diagnostics;
 using System.Net.Http;
 using System.Text;
 using Lisbeth.Bot.Application.Discord.Exceptions;
+using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
 using MikyM.Discord.Extensions.BaseExtensions;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands;
@@ -40,15 +41,35 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 [SlashCommandGroup("owner", "Owner util commands", false)]
 [SlashModuleLifespan(SlashModuleLifespan.Scoped)]
 [UsedImplicitly]
-public class OwnerUtilSlashCommands : ApplicationCommandModule
+public class OwnerUtilSlashCommands : ExtendedApplicationCommandModule
 {
     private readonly LisbethBotDbContext _ctx;
     private readonly IReadOnlyService<AuditLog, LisbethBotDbContext> _service;
+    private readonly IDiscordGuildService _discordGuildService;
 
-    public OwnerUtilSlashCommands(LisbethBotDbContext ctx, IReadOnlyService<AuditLog, LisbethBotDbContext> service)
+    public OwnerUtilSlashCommands(LisbethBotDbContext ctx, IReadOnlyService<AuditLog, LisbethBotDbContext> service,
+        IDiscordGuildService discordGuildService)
     {
         _ctx = ctx;
         _service = service;
+        _discordGuildService = discordGuildService;
+    }
+
+    [UsedImplicitly]
+    [SlashRequireOwner]
+    [SlashCommand("re-register-commands", "A command that allows re-registering bot slashies", false)]
+    public async Task RegisterSlashiesCommand(InteractionContext ctx)
+    {
+        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
+            new DiscordInteractionResponseBuilder().AsEphemeral(true));
+
+        var res = await _discordGuildService.PrepareSlashPermissionsAsync(ctx.Client.Guilds.Values);
+
+        if (!res.IsSuccess)
+            await ctx.EditResponseAsync(
+                new DiscordWebhookBuilder().AddEmbed(GetUnsuccessfulResultEmbed(res, ctx.Client)));
+        else
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(GetSuccessfulActionEmbed(ctx.Client)));
     }
 
     [UsedImplicitly]
