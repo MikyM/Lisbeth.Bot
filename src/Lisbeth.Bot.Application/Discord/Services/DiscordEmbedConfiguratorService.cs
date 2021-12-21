@@ -140,32 +140,31 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
             var result = choice switch
             {
                 nameof(EmbedConfigSelectValue.EmbedConfigSetAuthorValue) => await SetModuleAsync(
-                    EmbedConfigModuleType.Author, ctx, intr, resultEmbed, entity, embed, embedIdProperty),
+                    EmbedConfigModuleType.Author, ctx, intr, resultEmbed, entity, embed, embedIdProperty, guildCfg.EmbedHexColor),
                 nameof(EmbedConfigSelectValue.EmbedConfigSetFooterValue) => await SetModuleAsync(
-                    EmbedConfigModuleType.Footer, ctx, intr, resultEmbed, entity, embed, embedIdProperty),
+                    EmbedConfigModuleType.Footer, ctx, intr, resultEmbed, entity, embed, embedIdProperty, guildCfg.EmbedHexColor),
                 nameof(EmbedConfigSelectValue.EmbedConfigSetDescValue) => await SetModuleAsync(
-                    EmbedConfigModuleType.Description, ctx, intr, resultEmbed, entity, embed, embedIdProperty),
+                    EmbedConfigModuleType.Description, ctx, intr, resultEmbed, entity, embed, embedIdProperty, guildCfg.EmbedHexColor),
                 nameof(EmbedConfigSelectValue.EmbedConfigSetFieldValue) => await SetModuleAsync(
-                    EmbedConfigModuleType.Field, ctx, intr, resultEmbed, entity, embed, embedIdProperty),
+                    EmbedConfigModuleType.Field, ctx, intr, resultEmbed, entity, embed, embedIdProperty, guildCfg.EmbedHexColor),
                 nameof(EmbedConfigSelectValue.EmbedConfigDeleteFieldValue) => await SetModuleAsync(
-                    EmbedConfigModuleType.RemoveField, ctx, intr, resultEmbed, entity, embed, embedIdProperty),
+                    EmbedConfigModuleType.RemoveField, ctx, intr, resultEmbed, entity, embed, embedIdProperty, guildCfg.EmbedHexColor),
                 nameof(EmbedConfigSelectValue.EmbedConfigSetImageValue) => await SetModuleAsync(
-                    EmbedConfigModuleType.Image, ctx, intr, resultEmbed, entity, embed, embedIdProperty),
+                    EmbedConfigModuleType.Image, ctx, intr, resultEmbed, entity, embed, embedIdProperty, guildCfg.EmbedHexColor),
                 nameof(EmbedConfigSelectValue.EmbedConfigSetColorValue) => await SetModuleAsync(
-                    EmbedConfigModuleType.Color, ctx, intr, resultEmbed, entity, embed, embedIdProperty),
+                    EmbedConfigModuleType.Color, ctx, intr, resultEmbed, entity, embed, embedIdProperty, guildCfg.EmbedHexColor),
                 nameof(EmbedConfigSelectValue.EmbedConfigSetTitleValue) => await SetModuleAsync(
-                    EmbedConfigModuleType.Title, ctx, intr, resultEmbed, entity, embed, embedIdProperty),
+                    EmbedConfigModuleType.Title, ctx, intr, resultEmbed, entity, embed, embedIdProperty, guildCfg.EmbedHexColor),
                 nameof(EmbedConfigSelectValue.EmbedConfigSetThumbnailValue) => await SetModuleAsync(
-                    EmbedConfigModuleType.Thumbnail, ctx, intr, resultEmbed, entity, embed, embedIdProperty),
+                    EmbedConfigModuleType.Thumbnail, ctx, intr, resultEmbed, entity, embed, embedIdProperty, guildCfg.EmbedHexColor),
                 nameof(EmbedConfigSelectValue.EmbedConfigSetTimestampValue) => await SetModuleAsync(
-                    EmbedConfigModuleType.Timestamp, ctx, intr, resultEmbed, entity, embed, embedIdProperty),
+                    EmbedConfigModuleType.Timestamp, ctx, intr, resultEmbed, entity, embed, embedIdProperty, guildCfg.EmbedHexColor),
                 _ => new Result<DiscordEmbedBuilder>()
             };
 
             if (result.IsDefined())
             {
                 resultEmbed = result.Entity;
-                if (!resultEmbed.Color.HasValue) resultEmbed.WithColor(new DiscordColor(guildCfg.EmbedHexColor));
             }
             else
             {
@@ -198,7 +197,7 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
     }
 
     private async Task<Result<DiscordEmbedBuilder>> SetModuleAsync(EmbedConfigModuleType action,
-        InteractionContext ctx, InteractivityExtension intr, DiscordEmbedBuilder currentResult, T foundEntity, EmbedConfig? config, Expression<Func<T, long?>> idProp)
+        InteractionContext ctx, InteractivityExtension intr, DiscordEmbedBuilder currentResult, T foundEntity, EmbedConfig? config, Expression<Func<T, long?>> idProp, string embedHex)
     {
         var embed = new DiscordEmbedBuilder().WithFooter($"Parent Id: {foundEntity.Id}");
 
@@ -480,6 +479,8 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
                 new DiscordWebhookBuilder().AddEmbed(GetTimedOutEmbed(foundEntity.Id.ToString())));
             return Result<DiscordEmbedBuilder>.FromError(new DiscordTimedOutError());
         }
+
+        if (!currentResult.Color.HasValue) currentResult.WithColor(new DiscordColor(embedHex));
 
         switch (btnWaitResult.Result.Id)
         {
