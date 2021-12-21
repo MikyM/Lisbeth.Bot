@@ -30,7 +30,7 @@ public class HtmlChatBuilder : IAsyncHtmlBuilder
     }
 
     public HtmlChatBuilder(List<DiscordUser>? users, List<DiscordMessage>? messages, DiscordChannel? channel,
-        string? js, string? css, BotOptions? options)
+        string? js, string? css, BotOptions? options, DiscordGuild? guild)
     {
         Users = users ?? throw new ArgumentNullException(nameof(users));
         Messages = messages ?? throw new ArgumentNullException(nameof(messages));
@@ -38,6 +38,7 @@ public class HtmlChatBuilder : IAsyncHtmlBuilder
         Js = js ?? throw new ArgumentNullException(nameof(js));
         Css = css ?? throw new ArgumentNullException(nameof(css));
         Options = options ?? throw new ArgumentNullException(nameof(options));
+        Guild = guild ?? throw new ArgumentNullException(nameof(guild));
     }
 
     public List<DiscordUser>? Users { get; private set; }
@@ -46,6 +47,7 @@ public class HtmlChatBuilder : IAsyncHtmlBuilder
     public string? Js { get; private set; }
     public string? Css { get; private set; }
     public BotOptions? Options { get; private set; }
+    public DiscordGuild? Guild { get; private set; }
 
     public async Task<string> BuildAsync()
     {
@@ -58,7 +60,7 @@ public class HtmlChatBuilder : IAsyncHtmlBuilder
         return "<!DOCTYPE html>" +
                "<html lang=\"en\">" +
                "<head>" +
-               $"<title>Eclipse - {Channel.Name}</title>" +
+               $"<title>{Guild?.Name} - {Channel.Name}</title>" +
                "<meta charset=\"utf-8\">" +
                "<meta name=\"viewport\" content=\"width=device-width\">" +
                "<link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css\" rel=\"stylesheet\" integrity=\"sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl\" crossorigin=\"anonymous\">" +
@@ -102,6 +104,13 @@ public class HtmlChatBuilder : IAsyncHtmlBuilder
     public HtmlChatBuilder WithJs(string js)
     {
         Js ??= js ?? throw new ArgumentNullException(nameof(js));
+
+        return this;
+    }
+
+    public HtmlChatBuilder WithGuild(DiscordGuild guild)
+    {
+        Guild ??= guild ?? throw new ArgumentNullException(nameof(guild));
 
         return this;
     }

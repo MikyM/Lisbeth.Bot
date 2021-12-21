@@ -241,7 +241,8 @@ public class DiscordChatExportService : IDiscordChatExportService
                 .WithMessages(messages)
                 .WithCss(css)
                 .WithJs(js)
-                .WithOptions(_options.Value);
+                .WithOptions(_options.Value)
+                .WithGuild(guild);
             string html = await htmlChatBuilder.BuildAsync();
 
             var parser = new MarkdownParser(html, users, guild, _discord);
