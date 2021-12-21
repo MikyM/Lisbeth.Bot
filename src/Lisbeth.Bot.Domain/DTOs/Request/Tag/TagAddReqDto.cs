@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Generic;
+
 namespace Lisbeth.Bot.Domain.DTOs.Request.Tag;
 
 public class TagAddReqDto
@@ -24,4 +26,6 @@ public class TagAddReqDto
     public ulong GuildId { get; set; }
     public EmbedConfigDto? EmbedConfig { get; set; }
     public string? Text { get; set; }
+    public List<ulong> AllowedRoleIds { get; set; } = new();
+    public List<ulong> AllowedUserIds { get; set; } = new();
 }
