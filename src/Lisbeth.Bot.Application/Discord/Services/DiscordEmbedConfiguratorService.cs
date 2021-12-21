@@ -19,6 +19,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
+using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
+using Microsoft.AspNetCore.Mvc.Formatters;
 
 namespace Lisbeth.Bot.Application.Discord.Services;
 
@@ -28,20 +30,27 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
     private readonly IDiscordEmbedProvider _embedProvider;
     private readonly IMapper _mapper;
     private readonly ICrudService<T, LisbethBotDbContext> _service;
+    private readonly IGuildDataService _guildDataService;
 
     public DiscordEmbedConfiguratorService(ICrudService<T, LisbethBotDbContext> service, IMapper mapper,
-        IDiscordEmbedProvider embedProvider, IEmbedConfigService embedConfigService)
+        IDiscordEmbedProvider embedProvider, IEmbedConfigService embedConfigService, IGuildDataService guildDataService)
     {
         _service = service;
         _mapper = mapper;
         _embedProvider = embedProvider;
         _embedConfigService = embedConfigService;
+        _guildDataService = guildDataService;
     }
 
     public async Task<Result<DiscordEmbed>> ConfigureAsync<TEmbedProperty>(InteractionContext ctx,
         Expression<Func<T, TEmbedProperty?>> embedToConfigure, Expression<Func<T, long?>> embedIdProperty, string? idOrName = null) where TEmbedProperty : EmbedConfig
     {
         if (ctx is null) throw new ArgumentNullException(nameof(ctx));
+
+        var guildRes = await _guildDataService.GetSingleBySpecAsync(new ActiveGuildByIdSpec(ctx.Guild.Id));
+
+        if (!guildRes.IsDefined(out var guildCfg))
+            return new NotFoundError("Guild not found");
 
         var entityResult = await _service.GetSingleBySpecAsync<T>(
             new ActiveSnowflakeWithGivenEmbedSpec<T, TEmbedProperty?>(embedToConfigure, ctx.Guild.Id));
@@ -156,6 +165,7 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
             if (result.IsDefined())
             {
                 resultEmbed = result.Entity;
+                if (!resultEmbed.Color.HasValue) resultEmbed.WithColor(new DiscordColor(guildCfg.EmbedHexColor));
             }
             else
             {
