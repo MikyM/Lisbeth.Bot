@@ -62,10 +62,10 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
     public async Task TagCommand(InteractionContext ctx,
         [Option("action", "Type of action to perform")]
         TagActionType action,
+        [Option("name", "Name of the tag")]
+        string idOrName,
         [Option("snowflake", "Channel to send the tag to or a role/member to add/revoke permissions for.")]
         SnowflakeObject? snowflake = null,
-        [Option("name", "Name of the tag")]
-        string idOrName = "",
         [Option("text", "Base text for the tag.")]
         string text = "")
     {

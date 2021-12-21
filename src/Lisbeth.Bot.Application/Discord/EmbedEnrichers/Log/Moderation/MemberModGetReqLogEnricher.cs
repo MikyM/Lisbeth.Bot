@@ -32,8 +32,8 @@ public class MemberModGetReqLogEnricher : EmbedEnricher<IGetInfractionReq>
 
     public override void Enrich(IDiscordEmbedBuilderWrapper embedBuilder)
     {
-        embedBuilder.AddField("Moderator", ExtendedFormatter.Mention(this.PrimaryEnricher.RequestedOnBehalfOfId, DiscordEntity.Member),
-            true);
+        embedBuilder.AddField("Moderator",
+            ExtendedFormatter.Mention(this.PrimaryEnricher.RequestedOnBehalfOfId, DiscordEntity.Member), true);
 
         var args = this.PrimaryEnricher.ToDictionary();
 
@@ -41,7 +41,11 @@ public class MemberModGetReqLogEnricher : EmbedEnricher<IGetInfractionReq>
         {
             var value = argumentValue?.ToString();
 
-            if (value is not null) embedBuilder.AddField(argumentName.SplitByCapitalAndConcat(), argumentName == "TargetUserId" ? ExtendedFormatter.Mention(ulong.Parse(value), DiscordEntity.User) : value);
+            if (value is not null)
+                embedBuilder.AddField(argumentName.SplitByCapitalAndConcat(),
+                    argumentName == "TargetUserId"
+                        ? ExtendedFormatter.Mention(ulong.Parse(value), DiscordEntity.User)
+                        : value);
         }
     }
 }
