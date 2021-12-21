@@ -59,8 +59,8 @@ public class DiscordGuildService : IDiscordGuildService
         {
             await _guildDataService.AddAsync(new Guild { GuildId = args.Guild.Id, UserId = args.Guild.OwnerId }, true);
             var embedResult = await _embedConfigService.GetAsync(1);
-            if (!embedResult.IsDefined()) return Result.FromSuccess();
-            await args.Guild.Owner.SendMessageAsync(_embedProvider.GetEmbedFromConfig(embedResult.Entity).Build());
+            if (embedResult.IsDefined())
+                await args.Guild.Owner.SendMessageAsync(_embedProvider.GetEmbedFromConfig(embedResult.Entity).Build());
         }
         else
         {
@@ -69,8 +69,8 @@ public class DiscordGuildService : IDiscordGuildService
             await _guildDataService.CommitAsync();
 
             var embedResult = await _embedConfigService.GetAsync(2);
-            if (!embedResult.IsDefined()) return Result.FromSuccess();
-            await args.Guild.Owner.SendMessageAsync(_embedProvider.GetEmbedFromConfig(embedResult.Entity).Build());
+            if (embedResult.IsDefined())
+                await args.Guild.Owner.SendMessageAsync(_embedProvider.GetEmbedFromConfig(embedResult.Entity).Build());
         }
         _ = await this.PrepareSlashPermissionsAsync(args.Guild);
 
