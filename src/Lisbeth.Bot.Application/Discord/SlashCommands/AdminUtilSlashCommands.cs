@@ -7,7 +7,6 @@ using Lisbeth.Bot.Application.Discord.Commands.Ticket;
 using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
 using Lisbeth.Bot.Application.Validation.ModerationConfig;
 using Lisbeth.Bot.Application.Validation.TicketingConfig;
-using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
 using MikyM.Common.Application.CommandHandlers;
@@ -19,15 +18,14 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 [SlashModuleLifespan(SlashModuleLifespan.Scoped)]
 public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
 {
-    private readonly IGuildDataService _guildDataService;
     private readonly IDiscordGuildService _discordGuildService;
     private readonly ICommandHandler<GetTicketCenterEmbedCommand, DiscordMessageBuilder> _discordTicketService;
     private readonly IDiscordEmbedConfiguratorService<TicketingConfig> _embedConfiguratorService;
 
-    public AdminUtilSlashCommands(IGuildDataService guildDataService, IDiscordGuildService discordGuildService,
-        ICommandHandler<GetTicketCenterEmbedCommand, DiscordMessageBuilder> discordTicketService, IDiscordEmbedConfiguratorService<TicketingConfig> embedConfiguratorService)
+    public AdminUtilSlashCommands(IDiscordGuildService discordGuildService,
+        ICommandHandler<GetTicketCenterEmbedCommand, DiscordMessageBuilder> discordTicketService,
+        IDiscordEmbedConfiguratorService<TicketingConfig> embedConfiguratorService)
     {
-        _guildDataService = guildDataService;
         _discordGuildService = discordGuildService;
         _discordTicketService = discordTicketService;
         _embedConfiguratorService = embedConfiguratorService;
@@ -232,51 +230,5 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
         else
             await ctx.EditResponseAsync(
                 new DiscordWebhookBuilder().AddEmbed(GetUnsuccessfulResultEmbed(result, ctx.Client)));
-    }
-
-    [UsedImplicitly]
-    [SlashRequireUserPermissions(Permissions.Administrator)]
-    [SlashCommand("moderation-config", "A command that allows setting moderation module up", false)]
-    public async Task ModConfigCommand(InteractionContext ctx,
-        [Option("deleted", "Channel for message deletion logs")]
-        DiscordChannel deletedChannel,
-        [Option("updated", "Channel for message update logs")] DiscordChannel updatedChannel,
-        [Option("mute", "Mute role Id")] string muteRoleId)
-    {
-        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
-            new DiscordInteractionResponseBuilder().AsEphemeral(true));
-
-        var res = await this._guildDataService!.GetSingleBySpecAsync<Guild>(
-            new ActiveGuildByDiscordIdWithTicketingSpecifications(ctx.Guild.Id));
-        if (!res.IsDefined()) throw new ArgumentException("Guild not found in database");
-
-        var guild = res.Entity;
-
-        var modConfig = new ModerationConfig
-        {
-            MuteRoleId = ulong.Parse(muteRoleId), MessageDeletedEventsLogChannelId = deletedChannel.Id,
-            MessageUpdatedEventsLogChannelId = updatedChannel.Id
-        };
-
-        this._guildDataService.BeginUpdate(guild);
-        guild.SetModerationConfig(modConfig);
-        await this._guildDataService.CommitAsync();
-
-        await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("Done"));
-    }
-
-    [UsedImplicitly]
-    [SlashRequireOwner]
-    [SlashCommand("guild-add", "A command that adds current guild to bot's database.", false)]
-    public async Task TestGuild(InteractionContext ctx)
-    {
-        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
-            new DiscordInteractionResponseBuilder().AsEphemeral(true));
-
-        var guild = new Guild { GuildId = ctx.Guild.Id, UserId = ctx.User.Id, IsDisabled = false };
-
-        await this._guildDataService!.AddAsync(guild, true);
-
-        await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("Done"));
     }
 }

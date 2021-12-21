@@ -21,6 +21,7 @@ using Lisbeth.Bot.Application.Discord.Commands.Tag;
 using Lisbeth.Bot.Domain.DTOs.Request.Tag;
 using MikyM.Common.Application.CommandHandlers;
 using MikyM.Discord.Enums;
+using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Tag;
@@ -56,6 +57,9 @@ public class SendTagCommandHandler : ICommandHandler<SendTagCommand>
             return new DiscordNotFoundError(DiscordEntity.User);
         if (channel is null)
             return new DiscordNotFoundError(DiscordEntity.Channel);
+
+        if (!requestingUser.IsModerator())
+            return new DiscordNotAuthorizedError();
 
         var partial =
             await _commandHandler.HandleAsync(new GetTagCommand(_mapper.Map<TagGetReqDto>(command.Dto), command.Ctx));

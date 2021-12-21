@@ -21,6 +21,8 @@ using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
 using FluentValidation;
 using Lisbeth.Bot.Application.Validation.Mute;
+using Lisbeth.Bot.Application.Validation.Prune;
+using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.DTOs.Request.Mute;
 
 // ReSharper disable once CheckNamespace
@@ -141,18 +143,15 @@ public partial class MuteApplicationCommands
         var muteReqValidator = new MuteReqValidator(ctx.Client);
         await muteReqValidator.ValidateAndThrowAsync(muteReq);
 
+        var pruneReq = new PruneReqDto(ctx.Guild.Id, ctx.Channel.Id, ctx.User.Id, null, null,
+            ctx.TargetMessage.Author.Id);
+        var pruneReqValidator = new PruneReqValidator(ctx.Client);
+        await pruneReqValidator.ValidateAndThrowAsync(pruneReq);
+
         var result = await _discordMuteService!.MuteAsync(ctx, muteReq);
+        var pruneResult = await _discordMessageService.PruneAsync(ctx, pruneReq);
 
-        //await _discordMessageService.PruneAsync()
-
-        var msgs = await ctx.Channel.GetMessagesAsync();
-
-        var msgsToDel = msgs.Where(x => x.Author.Id == ctx.TargetMessage.Author.Id)
-            .OrderByDescending(x => x.Timestamp).Take(10);
-
-        await ctx.Channel.DeleteMessagesAsync(msgsToDel);
-
-        if (result.IsDefined())
+        if (result.IsDefined() && pruneResult.IsDefined())
             await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
                 .AddEmbed(result.Entity)
                 .AsEphemeral(true));
