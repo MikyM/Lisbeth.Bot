@@ -28,7 +28,9 @@ using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.Interfaces;
 using System.Collections.Generic;
 using System.Text.Json;
+using Lisbeth.Bot.Domain;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using MikyM.Common.Utilities.Extensions;
 
 namespace Lisbeth.Bot.Application.Discord.Services;
@@ -42,10 +44,11 @@ public class DiscordGuildService : IDiscordGuildService
     private readonly IGuildDataService _guildDataService;
     private readonly ILogger<DiscordGuildService> _logger;
     private readonly ITicketQueueService _ticketQueueService;
+    private readonly IOptions<BotOptions> _options;
 
     public DiscordGuildService(IEmbedConfigService embedConfigService, IDiscordEmbedProvider embedProvider,
         IGuildDataService guildDataService, IDiscordService discord, ILogger<DiscordGuildService> logger,
-        ITicketQueueService ticketQueueService)
+        ITicketQueueService ticketQueueService, IOptions<BotOptions> options)
     {
         _embedConfigService = embedConfigService;
         _embedProvider = embedProvider;
@@ -53,6 +56,7 @@ public class DiscordGuildService : IDiscordGuildService
         _discord = discord;
         _logger = logger;
         _ticketQueueService = ticketQueueService;
+        _options = options;
     }
 
     public async Task<Result> HandleGuildCreateAsync(GuildCreateEventArgs args)
@@ -304,7 +308,7 @@ public class DiscordGuildService : IDiscordGuildService
                     .Select(userRole => new DiscordApplicationCommandPermission(userRole, true))
                     .ToList();
 
-                var cmds = await guild.GetApplicationCommandsAsync();
+                var cmds = _options.Value.GlobalRegister ? await _discord.Client.GetGlobalApplicationCommandsAsync() : await guild.GetApplicationCommandsAsync();
                 _logger.LogInformation($"Commands ({cmds.Count}) : {string.Join(" ", cmds.Select(x => x.Name + " " + x.Description))}");
                 cmds = cmds.Where(x => x.ApplicationId == _discord.Client.CurrentApplication.Id).ToList();
 

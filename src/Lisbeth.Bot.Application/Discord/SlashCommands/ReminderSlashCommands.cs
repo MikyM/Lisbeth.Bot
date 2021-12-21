@@ -55,11 +55,11 @@ public class ReminderSlashCommands : ExtendedApplicationCommandModule
         Domain.Enums.ReminderType reminderType,
         [Option("text", "What to remind about")]
         string text = "default",
-        [Option("for-time", "Datetime, cron expression or string a representation")]
+        [Option("for-time", "Datetime, cron expression or a string representation of time (1h, 1d etc)")]
         string time = "",
         [Option("mentions", "Role, channel or user mentions - defaults to creator mention")]
         string mentions = "",
-        [Option("name-or-id", "Reminder's name")]
+        [Option("name", "Reminder's name")]
         string name = "",
         [Option("channel", "Channel to send the message to")]
         DiscordChannel? channel = null)
@@ -182,8 +182,8 @@ public class ReminderSlashCommands : ExtendedApplicationCommandModule
     }
 
     [UsedImplicitly]
-    [SlashCommand("cron-help", "Single reminder command", false)]
-    public async Task SingleReminderCommand(InteractionContext ctx,
+    [SlashCommand("cron-help", "Command that parses and verifies a given cron expression", false)]
+    public async Task CronHelpCommand(InteractionContext ctx,
         [Option("cron-expression", "Crone to parse")]
         string cron)
     {
