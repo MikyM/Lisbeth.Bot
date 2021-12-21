@@ -53,12 +53,14 @@ public class DiscordGuildService : IDiscordGuildService
 
     public async Task<Result> HandleGuildCreateAsync(GuildCreateEventArgs args)
     {
+        _logger.LogInformation($"New guild spotted: {args.Guild.Id}");
+
         var result = await _guildDataService.GetSingleBySpecAsync(new GuildByIdSpec(args.Guild.Id));
 
         if (!result.IsDefined())
         {
             await _guildDataService.AddAsync(new Guild { GuildId = args.Guild.Id, UserId = args.Guild.OwnerId }, true);
-            var embedResult = await _embedConfigService.GetAsync(1);
+            var embedResult = await _embedConfigService.GetAsync((long)1);
             if (embedResult.IsDefined())
                 await args.Guild.Owner.SendMessageAsync(_embedProvider.GetEmbedFromConfig(embedResult.Entity).Build());
         }
@@ -68,12 +70,13 @@ public class DiscordGuildService : IDiscordGuildService
             result.Entity.IsDisabled = false;
             await _guildDataService.CommitAsync();
 
-            var embedResult = await _embedConfigService.GetAsync(2);
+            var embedResult = await _embedConfigService.GetAsync((long)2);
             if (embedResult.IsDefined())
                 await args.Guild.Owner.SendMessageAsync(_embedProvider.GetEmbedFromConfig(embedResult.Entity).Build());
         }
         _ = await this.PrepareSlashPermissionsAsync(args.Guild);
 
+        _logger.LogInformation($"Add process for guild with Id: {args.Guild.Id} finished");
         return Result.FromSuccess();
     }
 
