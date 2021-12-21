@@ -441,9 +441,9 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
                     break;
                 case EmbedConfigModuleType.Thumbnail:
                     string thumbnail = waitResult.Result.Content.Trim();
-                    string thumbnailUrl = waitResult.Result.Content.GetStringBetween("@url@", "@endUrl@").Trim();
-                    string height = waitResult.Result.Content.GetStringBetween("@height@", "@endHeight@").Trim();
-                    string width = waitResult.Result.Content.GetStringBetween("@width@", "@endWidth@").Trim();
+                    string thumbnailUrl = thumbnail.GetStringBetween("@url@", "@endUrl@").Trim();
+                    string height = thumbnail.GetStringBetween("@height@", "@endHeight@").Trim();
+                    string width = thumbnail.GetStringBetween("@width@", "@endWidth@").Trim();
 
                     if (string.IsNullOrWhiteSpace(thumbnailUrl))
                         return Result<DiscordEmbedBuilder>.FromError(
@@ -457,7 +457,7 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
                     if (!string.IsNullOrWhiteSpace(height)) isHeightValid = int.TryParse(height, out parsedHeight);
                     if (!string.IsNullOrWhiteSpace(width)) isWidthValid = int.TryParse(height, out parsedWidth);
 
-                    currentResult.WithThumbnail(thumbnail, isHeightValid ? parsedHeight : 0,
+                    currentResult.WithThumbnail(thumbnailUrl, isHeightValid ? parsedHeight : 0,
                         isWidthValid ? parsedWidth : 0);
                     break;
                 default:
