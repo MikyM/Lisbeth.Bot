@@ -22,6 +22,7 @@ using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Tag;
 using Microsoft.Extensions.Logging;
 using MikyM.Common.Application.CommandHandlers;
+using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Tag;
@@ -67,7 +68,7 @@ public class RevokeSnowflakePermissionTagCommandHandler : ICommandHandler<Revoke
         // data req
         DiscordGuild guild = command.Ctx?.Guild ?? await _discord.Client.GetGuildAsync(command.Dto.GuildId);
         DiscordMember requestingMember = command.Ctx?.Member ?? await guild.GetMemberAsync(command.Dto.RequestedOnBehalfOfId);
-        if (!requestingMember.Permissions.HasPermission(Permissions.BanMembers))
+        if (!requestingMember.IsModerator())
             return new DiscordNotAuthorizedError("Requesting member doesn't have moderator rights.");
 
         DiscordRole? targetRole = command.Ctx?.ResolvedRoleMentions?[0] ?? guild.GetRole(command.Dto.SnowflakeId);
