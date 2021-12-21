@@ -402,7 +402,7 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
                     break;
                 case EmbedConfigModuleType.Color:
                     string colorToSet = waitResult.Result.Content.Trim();
-                    bool isValid = new Regex("^#?[0-9A-F]{6}$").IsMatch(colorToSet);
+                    bool isValid = new Regex("^#?[0-9A-Fa-f]{6}$").IsMatch(colorToSet);
 
                     if (!isValid)
                         return Result<DiscordEmbedBuilder>.FromError(
