@@ -305,6 +305,8 @@ public class DiscordGuildService : IDiscordGuildService
                     .ToList();
 
                 var cmds = await guild.GetApplicationCommandsAsync();
+                _logger.LogInformation(JsonSerializer.Serialize(cmds));
+                cmds = cmds.Where(x => x.ApplicationId == _discord.Client.CurrentApplication.Id).ToList();
 
                 var modCmds = cmds.Where(x => x.Name is "ban" or "mute" or "identity").ToList();
                 var messageCmds = cmds.Where(x => x.Name is "prune").ToList();
@@ -323,6 +325,7 @@ public class DiscordGuildService : IDiscordGuildService
 
                 await guild.BatchEditApplicationCommandPermissionsAsync(update);
 
+                _logger.LogInformation(JsonSerializer.Serialize(cmds));
                 _logger.LogInformation(JsonSerializer.Serialize(update));
                 _logger.LogInformation(
                     $"{guild.Id} found roles: Admin roles: {string.Join(" ", adminRoles.Select(x => x.Id))}, Message roles: {string.Join(" ", manageMessagesRoles.Select(x => x.Id))}, Mod roles: {string.Join(" ", userManageRoles.Select(x => x.Id))}, Owner: {botOwner?.Id}");
