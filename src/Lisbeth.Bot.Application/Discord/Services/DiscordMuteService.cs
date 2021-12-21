@@ -302,7 +302,7 @@ public class DiscordMuteService : IDiscordMuteService
         if (!res.IsDefined(out var foundMute)) return Result<DiscordEmbed>.FromError(res);
 
         return _embedBuilder
-            .WithType(DiscordModeration.Mute)
+            .WithType(DiscordModeration.Unmute)
             .EnrichFrom(new MemberModDisableReqResponseEnricher(req, target))
             .WithCase(foundMute.Id)
             .WithEmbedColor(new DiscordColor(guildEntity.EmbedHexColor))
@@ -341,7 +341,7 @@ public class DiscordMuteService : IDiscordMuteService
         if (!res.IsDefined(out var foundMute)) return new NotFoundError();
 
         return _embedBuilder
-            .WithType(DiscordModeration.Mute)
+            .WithType(DiscordModeration.MuteGet)
             .EnrichFrom(new MemberModGetReqResponseEnricher(foundMute))
             .WithCase(foundMute.Id)
             .WithEmbedColor(new DiscordColor(guildEntity.EmbedHexColor))
