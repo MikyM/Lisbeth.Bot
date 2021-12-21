@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Globalization;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using Lisbeth.Bot.Application.Discord.Helpers;
@@ -81,8 +82,8 @@ public class DiscordMemberService : IDiscordMemberService
         embed.WithTitle("Member has left the guild");
         embed.AddField("Member's identity", $"{args.Member.GetFullUsername()}", true);
         embed.AddField("Member's mention", $"{args.Member.Mention}", true);
-        embed.AddField("Joined guild", $"{args.Member.JoinedAt}");
-        embed.AddField("Account created", $"{args.Member.CreationTimestamp}");
+        embed.AddField("Joined guild", $"{args.Member.JoinedAt.ToString(CultureInfo.CurrentCulture)}");
+        embed.AddField("Account created", $"{args.Member.CreationTimestamp.ToString(CultureInfo.CurrentCulture)}");
         embed.WithColor(new DiscordColor(res.Entity.EmbedHexColor));
         embed.WithFooter($"Member ID: {args.Member.Id}");
 

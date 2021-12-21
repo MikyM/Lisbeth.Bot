@@ -1,4 +1,5 @@
-﻿using DSharpPlus;
+﻿using System.Globalization;
+using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
@@ -41,8 +42,8 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
         embed.WithThumbnail(member.AvatarUrl);
         embed.WithTitle("Member information");
         embed.AddField("Member's identity", $"{user.GetFullUsername()}", true);
-        embed.AddField("Joined guild", $"{member.JoinedAt}");
-        embed.AddField("Account created", $"{member.CreationTimestamp}");
+        embed.AddField("Joined guild", $"{member.JoinedAt.ToString(CultureInfo.CurrentCulture)}");
+        embed.AddField("Account created", $"{member.CreationTimestamp.ToString(CultureInfo.CurrentCulture)}");
         embed.WithColor(new DiscordColor(res.Entity.EmbedHexColor));
         embed.WithFooter($"Member Id: {member.Id}");
 

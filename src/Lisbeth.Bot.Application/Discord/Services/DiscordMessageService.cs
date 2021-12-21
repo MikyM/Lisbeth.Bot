@@ -28,6 +28,7 @@ using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.Interfaces;
 using System.Collections.Generic;
 using System.Dynamic;
+using System.Globalization;
 using System.Text.Json;
 using AutoMapper;
 
@@ -203,7 +204,7 @@ public class DiscordMessageService : IDiscordMessageService
         embed.AddField("Author", $"{args.Author.GetFullUsername()}", true);
         embed.AddField("Author mention", $"{args.Message.Author.Mention}", true);
         embed.AddField("Channel", $"{args.Channel.Mention}", true);
-        embed.AddField("Date sent", $"{args.Message.Timestamp}");
+        embed.AddField("Date sent", $"{args.Message.Timestamp.ToString(CultureInfo.CurrentCulture)}");
         embed.AddField("Old content", oldContent);
         embed.AddField("Old attachments", oldAttachmentsString);
         embed.AddField("New content", newContent);
@@ -285,7 +286,7 @@ public class DiscordMessageService : IDiscordMessageService
             embed.AddField("Deleted by", $"{deletedBy.Mention}");
         }
 
-        embed.AddField("Date sent", $"{args.Message.Timestamp}");
+        embed.AddField("Date sent", $"{args.Message.Timestamp.ToString(CultureInfo.CurrentCulture)}");
         embed.AddField("Content", content);
         embed.AddField("Attachments", attachmentsString);
         embed.WithFooter($"Message Id: {args.Message.Id} || Author Id: {args.Message.Author.Id}");
@@ -367,7 +368,7 @@ public class DiscordMessageService : IDiscordMessageService
                 embed.AddField("Pruned by", "Unknown");
             }
 
-            embed.AddField("Date sent", $"{msg.Timestamp}");
+            embed.AddField("Date sent", $"{msg.Timestamp.ToString(CultureInfo.CurrentCulture)}");
             embed.AddField("Content", content);
             embed.AddField("Attachments", attachmentsString);
             embed.WithFooter($"Message ID: {msg.Id} || Author ID: {msg.Author.Id}");
