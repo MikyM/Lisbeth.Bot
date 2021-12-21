@@ -60,7 +60,7 @@ public class Program
             var builder = WebApplication.CreateBuilder(args);
 
             // Set culture
-            CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
+            CultureInfo.DefaultThreadCurrentCulture = CultureInfo.CreateSpecificCulture("en-GB");
 
             // Configuration
             builder.Configuration.SetBasePath(AppDomain.CurrentDomain.BaseDirectory);
