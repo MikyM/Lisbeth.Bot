@@ -56,6 +56,7 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
     private readonly ICommandHandler<AddSnowflakePermissionTagCommand> _addPermissionHandler;
     private readonly ICommandHandler<RevokeSnowflakePermissionTagCommand> _removePermissionHandler;
 
+    [SlashCooldown(20, 120, CooldownBucketType.Guild)]
     [UsedImplicitly]
     [SlashCommand("tag", "Allows working with tags.")]
     public async Task TagCommand(InteractionContext ctx,

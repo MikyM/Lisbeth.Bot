@@ -23,26 +23,26 @@ public class MuteBaseGetSpecifications : Specification<Domain.Entities.Mute>
 {
     public MuteBaseGetSpecifications(long? id = null, ulong? userId = null, ulong? guildId = null,
         ulong? appliedById = null, DateTime? liftedOn = null, DateTime? appliedOn = null, ulong? liftedById = null,
-        int limit = 0, bool isDisabled = false)
+        int limit = 1, bool? isDisabled = null)
     {
         if (id is not null)
-            Where(x => x.Id == id);
+            Where(x => x.Id == id.Value);
         if (userId is not null)
-            Where(x => x.UserId == userId);
+            Where(x => x.UserId == userId.Value);
         if (guildId is not null)
-            Where(x => x.GuildId == guildId);
+            Where(x => x.GuildId == guildId.Value);
         if (appliedById is not null)
-            Where(x => x.AppliedById == appliedById);
+            Where(x => x.AppliedById == appliedById.Value);
         if (liftedById is not null)
-            Where(x => x.LiftedById == liftedById);
+            Where(x => x.LiftedById == liftedById.Value);
         if (liftedOn is not null)
-            Where(x => x.LiftedOn == liftedOn);
+            Where(x => x.LiftedOn == liftedOn.Value);
         if (appliedOn is not null)
-            Where(x => x.CreatedAt == appliedOn);
+            Where(x => x.CreatedAt == appliedOn.Value);
         if (liftedById is not null)
-            Where(x => x.LiftedById == liftedById);
+            Where(x => x.LiftedById == liftedById.Value);
 
-        Where(x => x.IsDisabled == isDisabled);
+        if (isDisabled.HasValue) Where(x => x.IsDisabled == isDisabled.Value);
 
         OrderByDescending(x => x.CreatedAt);
 

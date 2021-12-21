@@ -18,6 +18,7 @@
 using Emzi0767.Utilities;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Domain.DTOs.Request.Base;
+using MikyM.Discord.EmbedBuilders;
 using MikyM.Discord.EmbedBuilders.Wrappers;
 using MikyM.Discord.Enums;
 
@@ -40,7 +41,7 @@ public class MemberModGetReqLogEnricher : EmbedEnricher<IGetInfractionReq>
         {
             var value = argumentValue?.ToString();
 
-            if (value is not null) embedBuilder.AddField(argumentName, value);
+            if (value is not null) embedBuilder.AddField(argumentName.SplitByCapitalAndConcat(), argumentName == "TargetUserId" ? ExtendedFormatter.Mention(ulong.Parse(value), DiscordEntity.User) : value);
         }
     }
 }

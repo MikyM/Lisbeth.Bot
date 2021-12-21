@@ -172,7 +172,7 @@ public class DiscordMuteService : IDiscordMuteService
         if (req is null) throw new ArgumentNullException(nameof(req));
 
         return await GetSpecificUserGuildMuteAsync(ctx.Guild,
-            await ctx.Guild.GetMemberAsync(ctx.ResolvedUserMentions[0].Id),
+            (DiscordMember)ctx.ResolvedUserMentions[0],
             ctx.Member, req);
     }
 
@@ -332,7 +332,7 @@ public class DiscordMuteService : IDiscordMuteService
         if (!guildEntity.IsModerationModuleEnabled)
             return new DisabledGuildModuleError(GuildModule.Moderation);
 
-        var res = await _muteService.GetSingleBySpecAsync<Mute>(
+        var res = await _muteService.GetSingleBySpecAsync(
             new MuteBaseGetSpecifications(req.Id, req.TargetUserId, req.GuildId, req.AppliedById, req.LiftedOn,
                 req.AppliedOn, req.LiftedById));
 
