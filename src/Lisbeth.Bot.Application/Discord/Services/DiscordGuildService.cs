@@ -305,7 +305,7 @@ public class DiscordGuildService : IDiscordGuildService
                     .ToList();
 
                 var cmds = await guild.GetApplicationCommandsAsync();
-                _logger.LogInformation($"Commands {string.Join(" ", cmds.Select(x => x.Name + " " + x.Description))}");
+                _logger.LogInformation($"Commands ({cmds.Count}) : {string.Join(" ", cmds.Select(x => x.Name + " " + x.Description))}");
                 cmds = cmds.Where(x => x.ApplicationId == _discord.Client.CurrentApplication.Id).ToList();
 
                 var modCmds = cmds.Where(x => x.Name is "ban" or "mute" or "identity").ToList();
@@ -325,7 +325,7 @@ public class DiscordGuildService : IDiscordGuildService
 
                 await guild.BatchEditApplicationCommandPermissionsAsync(update);
 
-                _logger.LogInformation($"Commands after being filtered {string.Join(" ", cmds.Select(x => x.Name + " " + x.Description))}");
+                _logger.LogInformation($"Commands after being filtered ({cmds.Count}) : {string.Join(" ", cmds.Select(x => x.Name + " " + x.Description))}");
                 _logger.LogInformation($"Update {string.Join(" ", update.Select(x => x.Guild.Id))}");
                 _logger.LogInformation(
                     $"{guild.Id} found roles: Admin roles: {string.Join(" ", adminRoles.Select(x => x.Id))}, Message roles: {string.Join(" ", manageMessagesRoles.Select(x => x.Id))}, Mod roles: {string.Join(" ", userManageRoles.Select(x => x.Id))}, Owner: {botOwner?.Id}");
