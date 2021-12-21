@@ -27,6 +27,7 @@ using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
 using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.Interfaces;
 using System.Collections.Generic;
+using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using MikyM.Common.Utilities.Extensions;
 
@@ -309,7 +310,10 @@ public class DiscordGuildService : IDiscordGuildService
 
                 await guild.BatchEditApplicationCommandPermissionsAsync(update);
 
-                _logger.LogDebug($"Overwriting slashies done for {guild.Id}");
+                _logger.LogInformation(JsonSerializer.Serialize(update));
+                _logger.LogInformation(
+                    $"{guild.Id} found roles: Admin roles: {string.Join(" ", adminRoles.Select(x => x.Id))}, Message roles: {string.Join(" ", manageMessagesRoles.Select(x => x.Id))}, Mod roles: {string.Join(" ", userManageRoles.Select(x => x.Id))}, Owner: {botOwner?.Id}");
+                _logger.LogInformation($"Overwriting slashies done for {guild.Id}");
 
                 await Task.Delay(2000);
             }
