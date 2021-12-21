@@ -28,6 +28,6 @@ public class Tag : EmbedConfigEntity
 
     [NotMapped] public bool IsRestricted => AllowedRoleIds.Count != 0 || AllowedUserIds.Count != 0;
 
-    public List<ulong> AllowedRoleIds { get; set; }
-    public List<ulong> AllowedUserIds { get; set; }
+    public List<ulong> AllowedRoleIds { get; set; } = new();
+    public List<ulong> AllowedUserIds { get; set; } = new();
 }
