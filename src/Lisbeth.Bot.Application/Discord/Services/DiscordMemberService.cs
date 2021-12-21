@@ -47,10 +47,10 @@ public class DiscordMemberService : IDiscordMemberService
     {
         if (args is null) throw new ArgumentNullException(nameof(args));
 
-        var res = await _guildDataService.GetSingleBySpecAsync(new ActiveGuildByIdSpec(args.Guild.Id));
+        var res = await _guildDataService.GetSingleBySpecAsync(new ActiveGuildByDiscordIdWithModerationSpec(args.Guild.Id));
 
-        if (!res.IsDefined() || res.Entity.ModerationConfig is null) return Result.FromSuccess();
-        if (!args.Guild.Channels.TryGetValue(res.Entity.ModerationConfig.MemberEventsLogChannelId,
+        if (!res.IsDefined(out var guildCfg) || guildCfg.ModerationConfig is null) return Result.FromSuccess();
+        if (!args.Guild.Channels.TryGetValue(guildCfg.ModerationConfig.MemberEventsLogChannelId,
                 out var logChannel)) return Result.FromSuccess();
 
         string reasonLeft = "No reason found";
