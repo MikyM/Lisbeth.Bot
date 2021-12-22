@@ -38,7 +38,7 @@ public class HtmlImage : IAsyncHtmlBuilder
             ImageEndpoint imageEndpoint = new(apiClient, imgurHttpClient);
             imageUpload = await imageEndpoint.UploadImageAsync(stream);
         }
-        catch (ImgurException)
+        catch (Exception)
         {
             return "";
         }
