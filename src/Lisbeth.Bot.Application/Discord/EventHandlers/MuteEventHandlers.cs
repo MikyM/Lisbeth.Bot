@@ -18,6 +18,7 @@
 using DSharpPlus;
 using DSharpPlus.EventArgs;
 using Lisbeth.Bot.Application.Discord.Commands.Mute;
+using Lisbeth.Bot.Application.Discord.Commands.Timeout;
 using Lisbeth.Bot.Application.Discord.EventHandlers.Base;
 using MikyM.Common.Application.CommandHandlers;
 using MikyM.Common.Utilities;
@@ -46,6 +47,9 @@ public class MuteEventHandlers : BaseEventHandler, IDiscordGuildMemberEventsSubs
     {
         _ = AsyncExecutor.ExecuteAsync<ICommandHandler<CheckNonBotMuteActionCommand>>(x =>
             x.HandleAsync(new CheckNonBotMuteActionCommand(args.Member, args.RolesBefore, args.RolesAfter)));
+        _ = AsyncExecutor.ExecuteAsync<ICommandHandler<LogTimeoutCommand>>(x =>
+            x.HandleAsync(new LogTimeoutCommand(args.Member, args.CommunicationDisabledUntilBefore,
+                args.CommunicationDisabledUntilAfter)));
         return Task.CompletedTask;
     }
 
