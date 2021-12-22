@@ -225,9 +225,7 @@ public class DiscordEmbedProvider : IDiscordEmbedProvider
         long? caseId = null, string hexColor = "#26296e")
     {
         var data = GetUnderlyingNameAndPastTense(req);
-        var target = req.TargetUserId.HasValue
-            ? ExtendedFormatter.Mention(req.TargetUserId.Value, DiscordEntity.User)
-            : $"Entity: {req.Id}";
+        var target = ExtendedFormatter.Mention(req.TargetUserId, DiscordEntity.User);
 
         var embed = new DiscordEmbedBuilder();
         embed.WithColor(new DiscordColor(hexColor));

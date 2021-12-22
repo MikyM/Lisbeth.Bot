@@ -20,6 +20,7 @@ using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
 using FluentValidation;
+using Lisbeth.Bot.Application.Discord.Commands.Mute;
 using Lisbeth.Bot.Application.Validation.Mute;
 using Lisbeth.Bot.Application.Validation.Prune;
 using Lisbeth.Bot.Domain.DTOs.Request;
@@ -45,7 +46,7 @@ public partial class MuteApplicationCommands
         var muteReqValidator = new MuteReqValidator(ctx.Client);
         await muteReqValidator.ValidateAndThrowAsync(muteReq);
 
-        var result = await _discordMuteService.MuteAsync(ctx, muteReq);
+        var result = await _applyHandler.HandleAsync(new ApplyMuteCommand(muteReq, ctx));
 
         if (result.IsDefined())
             await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
@@ -68,7 +69,7 @@ public partial class MuteApplicationCommands
         var muteDisableReqValidator = new MuteDisableReqValidator(ctx.Client);
         await muteDisableReqValidator.ValidateAndThrowAsync(muteDisableReq);
 
-        var result = await _discordMuteService!.UnmuteAsync(ctx, muteDisableReq);
+        var result = await _revokeHandler.HandleAsync(new RevokeMuteCommand(muteDisableReq, ctx));
 
         if (result.IsDefined())
             await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
@@ -91,7 +92,7 @@ public partial class MuteApplicationCommands
         var muteGetReqValidator = new MuteGetReqValidator(ctx.Client);
         await muteGetReqValidator.ValidateAndThrowAsync(muteGetReq);
 
-        var result = await _discordMuteService!.GetSpecificUserGuildMuteAsync(ctx, muteGetReq);
+        var result = await _getHandler.HandleAsync(new GetMuteInfoCommand(muteGetReq, ctx));
 
         if (result.IsDefined())
             await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
@@ -119,7 +120,7 @@ public partial class MuteApplicationCommands
         var muteReqValidator = new MuteReqValidator(ctx.Client);
         await muteReqValidator.ValidateAndThrowAsync(muteReq);
 
-        var result = await _discordMuteService!.MuteAsync(ctx, muteReq);
+        var result = await _applyHandler.HandleAsync(new ApplyMuteCommand(muteReq, ctx));
 
         if (result.IsDefined())
             await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
@@ -148,7 +149,7 @@ public partial class MuteApplicationCommands
         var pruneReqValidator = new PruneReqValidator(ctx.Client);
         await pruneReqValidator.ValidateAndThrowAsync(pruneReq);
 
-        var result = await _discordMuteService!.MuteAsync(ctx, muteReq);
+        var result = await _applyHandler.HandleAsync(new ApplyMuteCommand(muteReq, ctx));
         var pruneResult = await _discordMessageService.PruneAsync(ctx, pruneReq);
 
         if (result.IsDefined() && pruneResult.IsDefined())

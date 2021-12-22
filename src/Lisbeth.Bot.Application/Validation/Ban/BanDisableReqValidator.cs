@@ -34,14 +34,11 @@ public class BanDisableReqValidator : AbstractValidator<BanRevokeReqDto>
     {
         CascadeMode = CascadeMode.Stop;
 
-        RuleFor(x => x.Id).NotEmpty().When(x => !x.TargetUserId.HasValue);
-
         RuleFor(x => x.GuildId)
             .NotEmpty()
             .DependentRules(x => x.SetAsyncValidator(new DiscordGuildIdValidator<BanRevokeReqDto>(discord)));
         RuleFor(x => x.TargetUserId)
             .NotEmpty()
-            .When(x => !x.Id.HasValue)
             .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<BanRevokeReqDto>(discord, true)));
 
         RuleFor(x => x.RequestedOnBehalfOfId)

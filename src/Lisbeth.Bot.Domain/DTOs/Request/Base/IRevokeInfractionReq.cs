@@ -16,13 +16,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using Lisbeth.Bot.Domain.Enums;
 
 namespace Lisbeth.Bot.Domain.DTOs.Request.Base;
 
 public interface IRevokeInfractionReq : IBaseModAuthReq
 {
     public long? Id { get; set; }
-    public ulong? TargetUserId { get; set; }
+    public ulong TargetUserId { get; set; }
     public DateTime LiftedOn { get; set; }
 }

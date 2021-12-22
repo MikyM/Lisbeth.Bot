@@ -15,13 +15,32 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
-using DSharpPlus.Entities;
+using DSharpPlus.SlashCommands;
+using Lisbeth.Bot.Domain.DTOs.Request.Mute;
+using MikyM.Common.Application.CommandHandlers;
 
-namespace Lisbeth.Bot.Application.Services.Interfaces;
+namespace Lisbeth.Bot.Application.Discord.Commands.Mute;
 
-public interface IMuteCheckService
+public class GetMuteInfoCommand : CommandBase
 {
-    Task<Result> CheckForNonBotMuteActionAsync(ulong targetId, ulong guildId, ulong requestedOnBehalfOfId,
-        IReadOnlyList<DiscordRole> rolesBefore, IReadOnlyList<DiscordRole> rolesAfter);
+    public GetMuteInfoCommand(MuteGetReqDto dto)
+    {
+        Dto = dto;
+    }
+
+    public GetMuteInfoCommand(MuteGetReqDto dto, InteractionContext ctx)
+    {
+        Dto = dto;
+        Ctx = ctx;
+    }
+
+    public GetMuteInfoCommand(MuteGetReqDto dto, ContextMenuContext ctx)
+    {
+        Dto = dto;
+        MenuCtx = ctx;
+    }
+
+    public MuteGetReqDto Dto { get; set; }
+    public InteractionContext? Ctx { get; set; }
+    public ContextMenuContext? MenuCtx { get; set; }
 }

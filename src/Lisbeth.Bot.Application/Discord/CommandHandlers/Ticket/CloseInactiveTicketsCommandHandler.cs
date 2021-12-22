@@ -49,9 +49,8 @@ public class CloseInactiveTicketsCommandHandler : ICommandHandler<CloseInactiveT
     {
         try
         {
-            await Parallel.ForEachAsync(_discord.Client.Guilds, async (x, _) =>
+            await Parallel.ForEachAsync(_discord.Client.Guilds.Keys, async (guildId, _) =>
             {
-                var (guildId, _) = x;
                 var res = await _guildDataService.GetSingleBySpecAsync(
                     new ActiveGuildByDiscordIdWithTicketingAndTicketsSpecifications(guildId));
 
@@ -83,7 +82,7 @@ public class CloseInactiveTicketsCommandHandler : ICommandHandler<CloseInactiveT
                     var msg = lastMessage?.FirstOrDefault();
                     if (msg is null) continue;
 
-                    if (!((DiscordMember)msg.Author).IsModerator()) continue;
+                    if (msg.Author is DiscordMember member && !member.IsModerator()) continue;
 
                     var timeDifference = DateTime.UtcNow.Subtract(msg.Timestamp.UtcDateTime);
 

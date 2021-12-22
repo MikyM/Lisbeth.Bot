@@ -47,7 +47,7 @@ public class AutofacContainerModule : Module
         builder.AddApplicationLayer();
 
         // bulk register custom services - follow naming convention
-        builder.RegisterAssemblyTypes(typeof(MuteService).Assembly)
+        builder.RegisterAssemblyTypes(typeof(MuteDataService).Assembly)
             .Where(t => t.Name.EndsWith("Service"))
             .AsImplementedInterfaces()
             .InstancePerLifetimeScope();

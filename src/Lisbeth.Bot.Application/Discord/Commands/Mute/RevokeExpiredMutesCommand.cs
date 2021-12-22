@@ -15,13 +15,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Lisbeth.Bot.DataAccessLayer;
-using Lisbeth.Bot.Domain.DTOs.Request.Mute;
+using MikyM.Common.Application.CommandHandlers;
 
-namespace Lisbeth.Bot.Application.Services.Database.Interfaces;
+namespace Lisbeth.Bot.Application.Discord.Commands.Mute;
 
-public interface IMuteDataService : ICrudService<Mute, LisbethBotDbContext>
+public class RevokeExpiredMutesCommand : CommandBase
 {
-    Task<Result<(long Id, Mute? FoundEntity)>> AddOrExtendAsync(MuteApplyReqDto req, bool shouldSave = false);
-    Task<Result<Mute>> DisableAsync(MuteRevokeReqDto entry, bool shouldSave = false);
 }

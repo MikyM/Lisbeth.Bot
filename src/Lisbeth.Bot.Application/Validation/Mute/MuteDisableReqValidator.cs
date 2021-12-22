@@ -34,14 +34,11 @@ public class MuteDisableReqValidator : AbstractValidator<MuteRevokeReqDto>
     {
         CascadeMode = CascadeMode.Stop;
 
-        RuleFor(x => x.Id).NotEmpty().When(x => !x.TargetUserId.HasValue);
-
         RuleFor(x => x.GuildId)
             .NotEmpty()
             .DependentRules(x => x.SetAsyncValidator(new DiscordGuildIdValidator<MuteRevokeReqDto>(discord)));
         RuleFor(x => x.TargetUserId)
             .NotEmpty()
-            .When(x => x.Id.HasValue)
             .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<MuteRevokeReqDto>(discord)));
 
         RuleFor(x => x.RequestedOnBehalfOfId)

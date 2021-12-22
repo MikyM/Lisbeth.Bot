@@ -32,13 +32,13 @@ public class DiscordMemberService : IDiscordMemberService
     private readonly IDiscordService _discord;
     private readonly IDiscordEmbedProvider _embedProvider;
     private readonly IGuildDataService _guildDataService;
-    private readonly IMuteService _muteService;
+    private readonly IMuteDataService _muteDataService;
 
-    public DiscordMemberService(IDiscordService discord, IGuildDataService guildDataService, IMuteService muteService,
+    public DiscordMemberService(IDiscordService discord, IGuildDataService guildDataService, IMuteDataService muteDataService,
         IDiscordEmbedProvider embedProvider)
     {
         _guildDataService = guildDataService;
-        _muteService = muteService;
+        _muteDataService = muteDataService;
         _discord = discord;
         _embedProvider = embedProvider;
     }
@@ -139,7 +139,7 @@ public class DiscordMemberService : IDiscordMemberService
     {
         if (args is null) throw new ArgumentNullException(nameof(args));
 
-        var res = await _muteService.GetSingleBySpecAsync<Mute>(
+        var res = await _muteDataService.GetSingleBySpecAsync<Mute>(
             new ActiveMutesByGuildAndUserSpecifications(args.Guild.Id, args.Member.Id));
 
         if (!res.IsDefined() || res.Entity.Guild?.ModerationConfig is null)

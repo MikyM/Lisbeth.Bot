@@ -43,9 +43,8 @@ public class CleanClosedTicketsCommandHandler : ICommandHandler<CleanClosedTicke
     {
         try
         {
-            await Parallel.ForEachAsync(_discord.Client.Guilds, async (x, _) =>
+            await Parallel.ForEachAsync(_discord.Client.Guilds.Keys, async (guildId, _) =>
             {
-                var (guildId, _) = x;
                 var res = await _guildDataService.GetSingleBySpecAsync(
                     new ActiveGuildByDiscordIdWithTicketingAndInactiveTicketsSpecifications(guildId));
 

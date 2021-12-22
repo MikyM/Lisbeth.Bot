@@ -63,7 +63,7 @@ public class BanService : CrudService<Ban, LisbethBotDbContext>, IBanService
         if (req is null) throw new ArgumentNullException(nameof(req));
 
         var result = await base.GetSingleBySpecAsync(new ActiveBanSpec(
-            req.TargetUserId ?? throw new InvalidOperationException("Id was null, validate the request first"),
+            req.TargetUserId,
             req.GuildId));
         if (!result.IsDefined()) return Result<Ban>.FromError(new NotFoundError(), result);
 

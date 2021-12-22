@@ -20,6 +20,7 @@ using DSharpPlus.SlashCommands;
 using Hangfire;
 using Lisbeth.Bot.Application.Discord.EmbedBuilders;
 using Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response.Infractions;
+using Lisbeth.Bot.Application.Discord.Exceptions;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Ban;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.Domain.DTOs.Request.Ban;
@@ -117,8 +118,8 @@ public class DiscordBanService : IDiscordBanService
     {
         if (req is null) throw new ArgumentNullException(nameof(req));
 
-        DiscordGuild guild;
-        DiscordMember target;
+        DiscordGuild? guild = null;
+        DiscordMember? target = null;
 
         if (req.Id.HasValue)
         {
@@ -127,15 +128,13 @@ public class DiscordBanService : IDiscordBanService
             req.GuildId = res.Entity.GuildId;
             req.TargetUserId = res.Entity.UserId;
         }
-        if (req.TargetUserId.HasValue)
-        {
-            guild = await _discord.Client.GetGuildAsync(req.GuildId);
-            target = await guild.GetMemberAsync(req.TargetUserId.Value);
-        }
         else
         {
-            throw new InvalidOperationException();
+            guild = await _discord.Client.GetGuildAsync(req.GuildId);
+            target = await guild.GetMemberAsync(req.TargetUserId);
         }
+
+        if (guild is null || target is null) throw new DiscordNotFoundException();
 
         DiscordMember moderator = await guild.GetMemberAsync(req.RequestedOnBehalfOfId);
 
@@ -154,11 +153,7 @@ public class DiscordBanService : IDiscordBanService
         else
             try
             {
-                if (req.TargetUserId is not null)
-                {
-                    target = await _discord.Client.GetUserAsync(req.TargetUserId.Value);
-                }
-                else
+                if (req.Id is not null)
                 {
                     var res = await _banService.GetAsync(req.Id ?? throw new InvalidOperationException());
 
@@ -166,6 +161,10 @@ public class DiscordBanService : IDiscordBanService
                         target = await _discord.Client.GetUserAsync(res.Entity.UserId);
                     else
                         return Result<DiscordEmbed>.FromError(res);
+                }
+                else
+                {
+                    target = await _discord.Client.GetUserAsync(req.TargetUserId);
                 }
             }
             catch (Exception)

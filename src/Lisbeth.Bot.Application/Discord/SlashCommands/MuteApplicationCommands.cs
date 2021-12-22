@@ -20,10 +20,12 @@ using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
 using FluentValidation;
+using Lisbeth.Bot.Application.Discord.Commands.Mute;
 using Lisbeth.Bot.Application.Discord.SlashCommands;
 using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
 using Lisbeth.Bot.Application.Validation.Mute;
 using Lisbeth.Bot.Domain.DTOs.Request.Mute;
+using MikyM.Common.Application.CommandHandlers;
 
 // ReSharper disable once CheckNamespace
 namespace Lisbeth.Bot.Application.Discord.ApplicationCommands;
@@ -32,13 +34,20 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands;
 [UsedImplicitly]
 public partial class MuteApplicationCommands : ExtendedApplicationCommandModule
 {
-    private readonly IDiscordMuteService _discordMuteService;
     private readonly IDiscordMessageService _discordMessageService;
+    private readonly ICommandHandler<ApplyMuteCommand, DiscordEmbed> _applyHandler;
+    private readonly ICommandHandler<RevokeMuteCommand, DiscordEmbed> _revokeHandler;
+    private readonly ICommandHandler<GetMuteInfoCommand, DiscordEmbed> _getHandler;
 
-    public MuteApplicationCommands(IDiscordMuteService discordMuteService, IDiscordMessageService discordMessageService)
+    public MuteApplicationCommands(IDiscordMessageService discordMessageService,
+        ICommandHandler<ApplyMuteCommand, DiscordEmbed> applyHandler,
+        ICommandHandler<RevokeMuteCommand, DiscordEmbed> revokeHandler,
+        ICommandHandler<GetMuteInfoCommand, DiscordEmbed> getHandler)
     {
-        _discordMuteService = discordMuteService;
         _discordMessageService = discordMessageService;
+        _applyHandler = applyHandler;
+        _revokeHandler = revokeHandler;
+        _getHandler = getHandler;
     }
 
     [SlashRequireUserPermissions(Permissions.BanMembers)]
@@ -68,21 +77,21 @@ public partial class MuteApplicationCommands : ExtendedApplicationCommandModule
                 var muteReqValidator = new MuteReqValidator(ctx.Client);
                 await muteReqValidator.ValidateAndThrowAsync(muteReq);
 
-                result = await this._discordMuteService!.MuteAsync(ctx, muteReq);
+                result = await _applyHandler.HandleAsync(new ApplyMuteCommand(muteReq, ctx));
                 break;
             case MuteActionType.Remove:
                 var muteDisableReq = new MuteRevokeReqDto(user.Id, ctx.Guild.Id, ctx.User.Id);
                 var muteDisableReqValidator = new MuteDisableReqValidator(ctx.Client);
                 await muteDisableReqValidator.ValidateAndThrowAsync(muteDisableReq);
 
-                result = await this._discordMuteService!.UnmuteAsync(ctx, muteDisableReq);
+                result = await _revokeHandler.HandleAsync(new RevokeMuteCommand(muteDisableReq, ctx));
                 break;
             case MuteActionType.Get:
                 var muteGetReq = new MuteGetReqDto(ctx.User.Id, ctx.Guild.Id, null, user.Id);
                 var muteGetReqValidator = new MuteGetReqValidator(ctx.Client);
                 await muteGetReqValidator.ValidateAndThrowAsync(muteGetReq);
 
-                result = await this._discordMuteService!.GetSpecificUserGuildMuteAsync(ctx, muteGetReq);
+                result = await _getHandler.HandleAsync(new GetMuteInfoCommand(muteGetReq, ctx));
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(actionType), actionType, null);

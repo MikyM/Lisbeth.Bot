@@ -15,25 +15,23 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Lisbeth.Bot.Application.Discord.Helpers;
-using Lisbeth.Bot.Domain.DTOs.Request.Base;
-using MikyM.Discord.EmbedBuilders.Wrappers;
-using MikyM.Discord.Enums;
+using System.Collections.Generic;
+using DSharpPlus.Entities;
+using MikyM.Common.Application.CommandHandlers;
 
-namespace Lisbeth.Bot.Application.Discord.EmbedEnrichers.Log.Moderation;
+namespace Lisbeth.Bot.Application.Discord.Commands.Mute;
 
-public class MemberModDisableReqLogEnricher : EmbedEnricher<IRevokeInfractionReq>
+public class CheckNonBotMuteActionCommand : CommandBase
 {
-    public MemberModDisableReqLogEnricher(IRevokeInfractionReq request) : base(request)
+    public CheckNonBotMuteActionCommand(DiscordMember member, IReadOnlyList<DiscordRole> rolesBefore,
+        IReadOnlyList<DiscordRole> rolesAfter)
     {
+        Member = member;
+        RolesBefore = rolesBefore;
+        RolesAfter = rolesAfter;
     }
 
-    public override void Enrich(IDiscordEmbedBuilderWrapper embedBuilder)
-    {
-        embedBuilder.AddField("Moderator",
-            ExtendedFormatter.Mention(this.PrimaryEnricher.RequestedOnBehalfOfId, DiscordEntity.User), true);
-
-        embedBuilder.AddField("Target",
-            ExtendedFormatter.Mention(this.PrimaryEnricher.TargetUserId, DiscordEntity.User), true);
-    }
+    public DiscordMember Member { get; set; }
+    public IReadOnlyList<DiscordRole> RolesBefore { get; set; }
+    public IReadOnlyList<DiscordRole> RolesAfter { get; set; }
 }

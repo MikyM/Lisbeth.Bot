@@ -26,7 +26,7 @@ public class BanRevokeReqDto : BaseAuthWithGuildReqDto, IRevokeInfractionReq
     {
     }
 
-    public BanRevokeReqDto(ulong? targetUserId, ulong guildId, ulong requestedOnBehalfOfId)
+    public BanRevokeReqDto(ulong targetUserId, ulong guildId, ulong requestedOnBehalfOfId)
     {
         TargetUserId = targetUserId;
         GuildId = guildId;
@@ -34,6 +34,6 @@ public class BanRevokeReqDto : BaseAuthWithGuildReqDto, IRevokeInfractionReq
     }
 
     public long? Id { get; set; }
-    public ulong? TargetUserId { get; set; }
+    public ulong TargetUserId { get; set; }
     public DateTime LiftedOn { get; set; } = DateTime.UtcNow;
 }

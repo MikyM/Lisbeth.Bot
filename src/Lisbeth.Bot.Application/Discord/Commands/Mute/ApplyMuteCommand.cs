@@ -15,25 +15,32 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Lisbeth.Bot.Application.Discord.Helpers;
-using Lisbeth.Bot.Domain.DTOs.Request.Base;
-using MikyM.Discord.EmbedBuilders.Wrappers;
-using MikyM.Discord.Enums;
+using DSharpPlus.SlashCommands;
+using Lisbeth.Bot.Domain.DTOs.Request.Mute;
+using MikyM.Common.Application.CommandHandlers;
 
-namespace Lisbeth.Bot.Application.Discord.EmbedEnrichers.Log.Moderation;
+namespace Lisbeth.Bot.Application.Discord.Commands.Mute;
 
-public class MemberModDisableReqLogEnricher : EmbedEnricher<IRevokeInfractionReq>
+public class ApplyMuteCommand : CommandBase
 {
-    public MemberModDisableReqLogEnricher(IRevokeInfractionReq request) : base(request)
+    public ApplyMuteCommand(MuteApplyReqDto dto)
     {
+        Dto = dto;
     }
 
-    public override void Enrich(IDiscordEmbedBuilderWrapper embedBuilder)
+    public ApplyMuteCommand(MuteApplyReqDto dto, InteractionContext ctx)
     {
-        embedBuilder.AddField("Moderator",
-            ExtendedFormatter.Mention(this.PrimaryEnricher.RequestedOnBehalfOfId, DiscordEntity.User), true);
-
-        embedBuilder.AddField("Target",
-            ExtendedFormatter.Mention(this.PrimaryEnricher.TargetUserId, DiscordEntity.User), true);
+        Dto = dto;
+        Ctx = ctx;
     }
+
+    public ApplyMuteCommand(MuteApplyReqDto dto, ContextMenuContext ctx)
+    {
+        Dto = dto;
+        MenuCtx = ctx;
+    }
+
+    public MuteApplyReqDto Dto { get; set; }
+    public InteractionContext? Ctx { get; set; }
+    public ContextMenuContext? MenuCtx { get; set; }
 }

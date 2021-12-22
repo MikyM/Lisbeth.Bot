@@ -18,6 +18,7 @@
 using Hangfire;
 using Serilog;
 using System.Collections.Generic;
+using Lisbeth.Bot.Application.Discord.Commands.Mute;
 using Lisbeth.Bot.Application.Discord.Commands.Ticket;
 using MikyM.Common.Application.CommandHandlers;
 
@@ -29,8 +30,8 @@ public static class RecurringJobHelper
 
     public static void ScheduleAutomaticUnmute()
     {
-        RecurringJob.AddOrUpdate<IDiscordMuteService>("unmute", x => x.UnmuteCheckAsync(), Cron.Minutely,
-            TimeZoneInfo.Utc, "moderation");
+        RecurringJob.AddOrUpdate<ICommandHandler<RevokeExpiredMutesCommand>>("unmute", x => x.HandleAsync(new RevokeExpiredMutesCommand()), Cron.Minutely,
+             TimeZoneInfo.Utc, "moderation");
         JobIds.Add("unmute");
     }
 
