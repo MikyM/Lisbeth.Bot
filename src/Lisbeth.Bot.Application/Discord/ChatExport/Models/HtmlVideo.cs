@@ -29,11 +29,18 @@ public class HtmlVideo : IAsyncHtmlBuilder
 
         using (HttpClient httpClient = ChatExportHttpClientFactory.Build())
         {
-            using HttpRequestMessage req = new (HttpMethod.Get, DiscordLink);
-            using HttpResponseMessage response = await httpClient.SendAsync(req);
-            Stream stream = await response.Content.ReadAsStreamAsync();
-            request = await client.UploadEntireFileAsync(new BinaryContent(stream,
-                "application/x-www-form-urlencoded"));
+            try
+            {
+                using HttpRequestMessage req = new(HttpMethod.Get, DiscordLink);
+                using HttpResponseMessage response = await httpClient.SendAsync(req);
+                Stream stream = await response.Content.ReadAsStreamAsync();
+                request = await client.UploadEntireFileAsync(new BinaryContent(stream,
+                    "application/x-www-form-urlencoded"));
+            }
+            catch (Exception)
+            {
+                return "";
+            }
         }
 
         return $"https://player.vimeo.com/video/{request.ClipUri.Split('/').Last()}";
