@@ -48,7 +48,8 @@ public class MuteEventHandlers : BaseEventHandler, IDiscordGuildMemberEventsSubs
         _ = AsyncExecutor.ExecuteAsync<ICommandHandler<CheckNonBotMuteActionCommand>>(x =>
             x.HandleAsync(new CheckNonBotMuteActionCommand(args.Member, args.RolesBefore, args.RolesAfter)));
 
-        if (!args.CommunicationDisabledUntilAfter.HasValue && !args.CommunicationDisabledUntilBefore.HasValue)
+        if (!args.CommunicationDisabledUntilAfter.HasValue && !args.CommunicationDisabledUntilBefore.HasValue ||
+            args.CommunicationDisabledUntilAfter.HasValue && args.CommunicationDisabledUntilBefore.HasValue)
             return Task.CompletedTask;
 
         _ = AsyncExecutor.ExecuteAsync<ICommandHandler<LogTimeoutCommand>>(x =>

@@ -43,13 +43,12 @@ public class LogTimeoutCommandHandler : ICommandHandler<LogTimeoutCommand>
     {
         if (command is null) throw new ArgumentNullException(nameof(command));
 
-        if (!command.CommunicationDisabledUntilAfter.HasValue && !command.CommunicationDisabledUntilBefore.HasValue)
+        if (!command.CommunicationDisabledUntilAfter.HasValue && !command.CommunicationDisabledUntilBefore.HasValue ||
+            command.CommunicationDisabledUntilAfter.HasValue && command.CommunicationDisabledUntilBefore.HasValue)
             return Result.FromSuccess();
 
-        var wasTimeouted = !command.CommunicationDisabledUntilBefore.HasValue ||
-                           command.CommunicationDisabledUntilBefore.Value.ToUniversalTime() < DateTimeOffset.UtcNow;
-        var isTimeouted = command.CommunicationDisabledUntilAfter.HasValue &&
-                          command.CommunicationDisabledUntilAfter.Value.ToUniversalTime() > DateTimeOffset.UtcNow;
+        var wasTimeoutApplied = !command.CommunicationDisabledUntilBefore.HasValue && command.CommunicationDisabledUntilAfter.HasValue;
+        var wasTimeoutRevoked = command.CommunicationDisabledUntilBefore.HasValue && !command.CommunicationDisabledUntilAfter.HasValue;
 
         var auditLogs = await command.Member.Guild.GetAuditLogsAsync(1, null, AuditLogActionType.MemberUpdate);
         await Task.Delay(500);
@@ -63,31 +62,30 @@ public class LogTimeoutCommandHandler : ICommandHandler<LogTimeoutCommand>
             ? null
             : filtered.First().Reason ?? null;
 
-        switch (wasTimeouted)
+        if (wasTimeoutApplied)
         {
-            case true when !isTimeouted:
-                var revokeDto =
-                    new MuteRevokeReqDto
-                    {
-                        GuildId = command.Member.Guild.Id,
-                        RequestedOnBehalfOfId = requestingUser.Id,
-                        TargetUserId = command.Member.Id
-                    };
-                await _revokeMuteHandler.HandleAsync(new RevokeMuteCommand(revokeDto));
-                break;
-            case false when isTimeouted:
-                if (!command.CommunicationDisabledUntilAfter.HasValue) return Result.FromSuccess();
-                var applyDto =
-                    new MuteApplyReqDto()
-                    {
-                        GuildId = command.Member.Guild.Id,
-                        RequestedOnBehalfOfId = requestingUser.Id,
-                        TargetUserId = command.Member.Id,
-                        Reason = reason is "" or " " ? null : reason,
-                        AppliedUntil = command.CommunicationDisabledUntilAfter.Value.UtcDateTime
-                    };
-                await _applyMuteHandler.HandleAsync(new ApplyMuteCommand(applyDto));
-                break;
+            if (!command.CommunicationDisabledUntilAfter.HasValue) return Result.FromSuccess();
+            var applyDto =
+                new MuteApplyReqDto()
+                {
+                    GuildId = command.Member.Guild.Id,
+                    RequestedOnBehalfOfId = requestingUser.Id,
+                    TargetUserId = command.Member.Id,
+                    Reason = reason is "" or " " ? null : reason,
+                    AppliedUntil = command.CommunicationDisabledUntilAfter.Value.UtcDateTime
+                };
+            await _applyMuteHandler.HandleAsync(new ApplyMuteCommand(applyDto));
+        }
+        else if (wasTimeoutRevoked)
+        {
+            var revokeDto =
+                new MuteRevokeReqDto
+                {
+                    GuildId = command.Member.Guild.Id,
+                    RequestedOnBehalfOfId = requestingUser.Id,
+                    TargetUserId = command.Member.Id
+                };
+            await _revokeMuteHandler.HandleAsync(new RevokeMuteCommand(revokeDto));
         }
 
         return Result.FromSuccess();
