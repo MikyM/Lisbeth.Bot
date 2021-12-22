@@ -35,6 +35,9 @@ public class MuteEventHandlers : BaseEventHandler, IDiscordGuildMemberEventsSubs
 
     public Task DiscordOnGuildMemberAdded(DiscordClient sender, GuildMemberAddEventArgs args)
     {
+        _ = AsyncExecutor.ExecuteAsync<ICommandHandler<CheckMuteStateForNewUserCommand>>(x =>
+            x.HandleAsync(new CheckMuteStateForNewUserCommand(args.Member)));
+
         return Task.CompletedTask;
     }
 

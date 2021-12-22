@@ -96,6 +96,7 @@ public static class ServiceCollectionExtensions
         services.AddDiscordMiscEventsSubscriber<EmbedConfigEventHandler>();
         services.AddDiscordGuildEventsSubscriber<GuildEventsHandler>();
         services.AddDiscordMiscEventsSubscriber<RoleMenuEventHandler>();
+        services.AddDiscordGuildMemberEventsSubscriber<MuteEventHandlers>();
 
         #endregion
     }

@@ -54,7 +54,7 @@ public class LogTimeoutCommandHandler : ICommandHandler<LogTimeoutCommand>
         await Task.Delay(500);
         var filtered = auditLogs.Where(m =>
             m.CreationTimestamp.UtcDateTime > DateTime.UtcNow.Subtract(new TimeSpan(0, 0, 4)))
-            .ToList();
+            .OrderByDescending(x => x.CreationTimestamp).ToList();
         var requestingUser = filtered.Count == 0
             ? _discord.Client.CurrentUser
             : filtered.First().UserResponsible ?? _discord.Client.CurrentUser;
