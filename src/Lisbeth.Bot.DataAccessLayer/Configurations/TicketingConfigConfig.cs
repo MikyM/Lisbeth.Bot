@@ -54,11 +54,11 @@ public class TicketingConfigConfig : IEntityTypeConfiguration<TicketingConfig>
         builder.Property(x => x.CleanAfter)
             .HasColumnName("clean_after")
             .HasColumnType("bigint")
-            .HasConversion(x => x.Value.Ticks, x => TimeSpan.FromTicks(x));
+            .HasConversion(x => x.Value.TotalHours, x => TimeSpan.FromHours(x));
         builder.Property(x => x.CloseAfter)
             .HasColumnName("close_after")
             .HasColumnType("bigint")
-            .HasConversion(x => x.Value.Ticks, x => TimeSpan.FromTicks(x));
+            .HasConversion(x => x.Value.TotalHours, x => TimeSpan.FromHours(x));
         builder.Property(x => x.BaseCenterMessage)
             .HasColumnName("center_message_description")
             .HasColumnType("text");

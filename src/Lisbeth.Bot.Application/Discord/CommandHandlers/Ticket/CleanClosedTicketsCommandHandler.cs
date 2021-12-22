@@ -77,7 +77,7 @@ public class CleanClosedTicketsCommandHandler : ICommandHandler<CleanClosedTicke
                     if (lastMessage is null || lastMessage.Count == 0) continue;
 
                     var timeDifference = DateTime.UtcNow.Subtract(lastMessage[0].Timestamp.UtcDateTime);
-                    if (timeDifference.TotalHours >= guildCfg.TicketingConfig.CleanAfter.Value.Hours)
+                    if (timeDifference.TotalHours >= guildCfg.TicketingConfig.CleanAfter.Value.TotalHours)
                     {
                         await closedTicketChannel.DeleteAsync();
                         _logger.LogDebug($"Deleting channel Id: {closedTicketChannel.Id} with name: {closedTicketChannel.Name}");

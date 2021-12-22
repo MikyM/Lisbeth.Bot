@@ -87,7 +87,7 @@ public class CloseInactiveTicketsCommandHandler : ICommandHandler<CloseInactiveT
 
                     var timeDifference = DateTime.UtcNow.Subtract(msg.Timestamp.UtcDateTime);
 
-                    if (timeDifference.TotalHours >= guildCfg.TicketingConfig.CloseAfter.Value.Hours)
+                    if (timeDifference.TotalHours >= guildCfg.TicketingConfig.CloseAfter.Value.TotalHours)
                     {
                         var req = new TicketCloseReqDto(null, guildId, openedTicketChannel.Id,
                             _discord.Client.CurrentUser.Id);
