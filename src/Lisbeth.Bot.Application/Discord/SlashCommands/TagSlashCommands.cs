@@ -272,15 +272,15 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
 
                 var paginationButtons = new PaginationButtons();
                 paginationButtons.Left = new DiscordButtonComponent(ButtonStyle.Primary, "left_pagination", "", false,
-                    new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":arrow_left")));
+                    new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":arrow_left:")));
                 paginationButtons.Right = new DiscordButtonComponent(ButtonStyle.Primary, "right_pagination", "", false,
-                    new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":arrow_right")));
+                    new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":arrow_right:")));
                 paginationButtons.SkipRight = new DiscordButtonComponent(ButtonStyle.Primary, "skip_right_pagination", "", false,
-                    new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":next_track")));
+                    new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":next_track:")));
                 paginationButtons.SkipLeft = new DiscordButtonComponent(ButtonStyle.Primary, "skip_left_pagination", "", false,
-                    new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":previous_track")));
+                    new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":previous_track:")));
                 paginationButtons.Stop = new DiscordButtonComponent(ButtonStyle.Primary, "stop_pagination", "", false,
-                    new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":stop_button")));
+                    new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":stop_button:")));
 
                 if (getAllRes.IsDefined(out var pages))
                 {
