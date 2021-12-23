@@ -71,7 +71,7 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
         [Option("action", "Type of action to perform")]
         TagActionType action,
         [Option("name", "Name of the tag")]
-        string idOrName,
+        string idOrName = "",
         [Option("snowflake", "Channel to send the tag to or a role/member to add/revoke permissions for")]
         SnowflakeObject? snowflake = null,
         [Option("text", "Base text for the tag")]
@@ -130,6 +130,8 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
             case TagActionType.Edit:
                 if (string.IsNullOrWhiteSpace(idOrName))
                     throw new ArgumentException("You must supply a valid Id or name");
+                if (string.IsNullOrWhiteSpace(text))
+                    throw new ArgumentException("You must supply a text");
 
                 var editReq = new TagEditReqDto
                 {
@@ -257,9 +259,6 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
                         new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(revokePermRes, ctx.Client)));
                 break;
             case TagActionType.List:
-                if (string.IsNullOrWhiteSpace(idOrName))
-                    throw new ArgumentException("You must supply name.");
-
                 var getAllReq = new TagGetAllReqDto()
                 {
                     GuildId = ctx.Guild.Id,
