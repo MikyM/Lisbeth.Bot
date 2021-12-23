@@ -270,10 +270,22 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
 
                 var getAllRes = await _getAllHandler.HandleAsync(new GetAllTagsCommand(getAllReq, ctx));
 
+                var paginationButtons = new PaginationButtons();
+                paginationButtons.Left = new DiscordButtonComponent(ButtonStyle.Primary, "left_pagination", "", false,
+                    new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":arrow_left")));
+                paginationButtons.Right = new DiscordButtonComponent(ButtonStyle.Primary, "right_pagination", "", false,
+                    new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":arrow_right")));
+                paginationButtons.SkipRight = new DiscordButtonComponent(ButtonStyle.Primary, "skip_right_pagination", "", false,
+                    new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":next_track")));
+                paginationButtons.SkipLeft = new DiscordButtonComponent(ButtonStyle.Primary, "skip_left_pagination", "", false,
+                    new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":previous_track")));
+                paginationButtons.Stop = new DiscordButtonComponent(ButtonStyle.Primary, "stop_pagination", "", false,
+                    new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":stop_button")));
+
                 if (getAllRes.IsDefined(out var pages))
                 {
                     var intr = ctx.Client.GetInteractivity();
-                    await intr.SendPaginatedResponseAsync(ctx.Interaction, false, ctx.User, pages, null,
+                    await intr.SendPaginatedResponseAsync(ctx.Interaction, false, ctx.User, pages, paginationButtons,
                         PaginationBehaviour.WrapAround, ButtonPaginationBehavior.Disable, default, true);
                 }
                 else
