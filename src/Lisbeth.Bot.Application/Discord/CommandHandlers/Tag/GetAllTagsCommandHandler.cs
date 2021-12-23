@@ -72,13 +72,15 @@ public class GetAllTagsCommandHandler : ICommandHandler<GetAllTagsCommand, List<
         if (tags is null || !tags.Any()) return new NotFoundError("This guild has no tags created yet!");
 
         var pages = new List<Page>();
-        var chunked = tags.ChunkBy(10).OrderByDescending(x => x.Count);
+        var chunked = tags.ChunkBy(10).OrderByDescending(x => x.Count).ToList();
 
+        int pageNumber = 1;
         foreach (var chunk in chunked)
         {
             var embedBuilder = new DiscordEmbedBuilder()
                 .WithColor(new DiscordColor(guildCfg.EmbedHexColor))
-                .WithTitle("Available tags");
+                .WithTitle("Available tags")
+                .WithFooter($"Current page: {pageNumber} | Total pages: {chunked.Count}");
 
             foreach (var tag in chunk)
             {
@@ -87,6 +89,7 @@ public class GetAllTagsCommandHandler : ICommandHandler<GetAllTagsCommand, List<
             }
 
             pages.Add(new Page("", embedBuilder));
+            pageNumber++;
         }
 
         return pages;
