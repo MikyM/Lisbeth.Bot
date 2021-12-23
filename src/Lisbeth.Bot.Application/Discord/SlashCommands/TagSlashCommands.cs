@@ -276,9 +276,9 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
                 paginationButtons.Right = new DiscordButtonComponent(ButtonStyle.Primary, "right_pagination", "", false,
                     new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":arrow_right:")));
                 paginationButtons.SkipRight = new DiscordButtonComponent(ButtonStyle.Primary, "skip_right_pagination", "", false,
-                    new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":next_track:")));
+                    new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":track_next:")));
                 paginationButtons.SkipLeft = new DiscordButtonComponent(ButtonStyle.Primary, "skip_left_pagination", "", false,
-                    new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":previous_track:")));
+                    new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":track_previous:")));
                 paginationButtons.Stop = new DiscordButtonComponent(ButtonStyle.Primary, "stop_pagination", "", false,
                     new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":stop_button:")));
 
