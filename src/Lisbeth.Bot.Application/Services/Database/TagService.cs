@@ -40,7 +40,7 @@ public class TagDataService : CrudService<Tag, LisbethBotDbContext>, ITagDataSer
         return Result.FromSuccess();
     }
 
-    public async Task<Result> UpdateTagEmbedConfigAsync(TagEditReqDto req, bool shouldSave = false)
+    public async Task<Result> UpdateTagTextAsync(TagEditReqDto req, bool shouldSave = false)
     {
         Result<Tag> tagRes;
         if (req.Name is not null && req.Name != "")
@@ -55,9 +55,7 @@ public class TagDataService : CrudService<Tag, LisbethBotDbContext>, ITagDataSer
                 "Can't update embed config for a disabled tag, enable the tag first.");
 
         base.BeginUpdate(tag);
-        if (req.EmbedConfig is not null) tag.EmbedConfig = Mapper.Map<EmbedConfig>(req.EmbedConfig);
         tag.LastEditById = req.RequestedOnBehalfOfId;
-        if (!string.IsNullOrWhiteSpace(req.Name)) tag.Name = req.Name;
         if (!string.IsNullOrWhiteSpace(req.Text)) tag.Text = req.Text;
 
         if (shouldSave) await base.CommitAsync();

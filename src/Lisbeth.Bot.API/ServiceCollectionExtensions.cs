@@ -39,6 +39,9 @@ using MikyM.Discord.Extensions.SlashCommands;
 using OpenTracing;
 using OpenTracing.Mock;
 using System.Security.Claims;
+using DSharpPlus.Entities;
+using DSharpPlus.Interactivity.EventHandling;
+using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.API;
 
@@ -76,11 +79,27 @@ public static class ServiceCollectionExtensions
             extension?.RegisterCommands<EmbedConfigSlashCommands>(guildId);
             extension?.RegisterCommands<RoleMenuSlashCommands>(guildId);
         });
+
+        var client = services.BuildServiceProvider().GetRequiredService<IDiscordService>();
+
         services.AddDiscordInteractivity(options =>
         {
             options.PaginationBehaviour = PaginationBehaviour.WrapAround;
             options.ResponseBehavior = InteractionResponseBehavior.Ack;
             options.Timeout = TimeSpan.FromMinutes(2);
+            var paginationButtons = new PaginationButtons();
+            paginationButtons.Left = new DiscordButtonComponent(ButtonStyle.Primary, "left_pagination", "", false,
+                new DiscordComponentEmoji(DiscordEmoji.FromName(client.Client, ":arrow_left")));
+            paginationButtons.Right = new DiscordButtonComponent(ButtonStyle.Primary, "right_pagination", "", false,
+                new DiscordComponentEmoji(DiscordEmoji.FromName(client.Client, ":arrow_right")));
+            paginationButtons.SkipRight = new DiscordButtonComponent(ButtonStyle.Primary, "skip_right_pagination", "", false,
+                new DiscordComponentEmoji(DiscordEmoji.FromName(client.Client, ":next_track")));
+            paginationButtons.SkipLeft = new DiscordButtonComponent(ButtonStyle.Primary, "skip_left_pagination", "", false,
+                new DiscordComponentEmoji(DiscordEmoji.FromName(client.Client, ":previous_track")));
+            paginationButtons.Stop = new DiscordButtonComponent(ButtonStyle.Primary, "stop_pagination", "", false,
+                new DiscordComponentEmoji(DiscordEmoji.FromName(client.Client, ":stop_button")));
+
+            options.PaginationButtons = paginationButtons;
         });
 
         #endregion

@@ -15,10 +15,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Generic;
+using System.Globalization;
 using DSharpPlus.Entities;
+using DSharpPlus.Interactivity;
 using Lisbeth.Bot.Application.Discord.Commands.Tag;
+using Lisbeth.Bot.Application.Discord.Extensions;
+using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
+using Lisbeth.Bot.DataAccessLayer.Specifications.Tag;
 using MikyM.Common.Application.CommandHandlers;
+using MikyM.Common.Utilities.Extensions;
 using MikyM.Discord.Enums;
 using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.Interfaces;
@@ -26,21 +33,18 @@ using MikyM.Discord.Interfaces;
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Tag;
 
 [UsedImplicitly]
-public class EditTagCommandHandler : ICommandHandler<EditTagCommand>
+public class GetAllTagsCommandHandler : ICommandHandler<GetAllTagsCommand, List<Page>>
 {
     private readonly IDiscordService _discord;
     private readonly IGuildDataService _guildDataService;
-    private readonly ITagDataService _tagDataService;
 
-    public EditTagCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
-        ITagDataService tagDataService)
+    public GetAllTagsCommandHandler(IDiscordService discord, IGuildDataService guildDataService)
     {
         _discord = discord;
         _guildDataService = guildDataService;
-        _tagDataService = tagDataService;
     }
 
-    public async Task<Result> HandleAsync(EditTagCommand command)
+    public async Task<Result<List<Page>>> HandleAsync(GetAllTagsCommand command)
     {
         if (command is null) throw new ArgumentNullException(nameof(command));
 
@@ -54,15 +58,37 @@ public class EditTagCommandHandler : ICommandHandler<EditTagCommand>
         if (requestingUser is null)
             return new DiscordNotFoundError(DiscordEntity.User);
 
-        var guildCfg =
-            await _guildDataService.GetSingleBySpecAsync<Guild>(
+        var guildRes =
+            await _guildDataService.GetSingleBySpecAsync(
                 new ActiveGuildByDiscordIdWithTagsSpecifications(guild.Id));
-        if (!guildCfg.IsDefined())
-            return Result.FromError(guildCfg);
 
-        if (!requestingUser.IsModerator())
-            return new DiscordNotAuthorizedError("You are not authorized to edit tags");
+        if (!guildRes.IsDefined(out var guildCfg))
+            return Result<List<Page>>.FromError(guildRes);
 
-        return await _tagDataService.UpdateTagTextAsync(command.Dto, true);
+        if (requestingUser.Guild.Id != guild.Id) return new DiscordNotAuthorizedError();
+
+        var tags = guildCfg.Tags?.ToList();
+
+        if (tags is null || !tags.Any()) return new NotFoundError("This guild has no tags created yet!");
+
+        var pages = new List<Page>();
+        var chunked = tags.ChunkBy(10).OrderByDescending(x => x.Count);
+
+        foreach (var chunk in chunked)
+        {
+            var embedBuilder = new DiscordEmbedBuilder()
+                .WithColor(new DiscordColor(guildCfg.EmbedHexColor))
+                .WithTitle("Available tags");
+
+            foreach (var tag in chunk)
+            {
+                embedBuilder.AddField(tag.Name,
+                    $"Created by {ExtendedFormatter.Mention(tag.CreatorId, DiscordEntity.User)} on {(tag.CreatedAt.HasValue ? tag.CreatedAt.Value.ToString(CultureInfo.CurrentCulture) : "unknown")}");
+            }
+
+            pages.Add(new Page("", embedBuilder));
+        }
+
+        return pages;
     }
 }

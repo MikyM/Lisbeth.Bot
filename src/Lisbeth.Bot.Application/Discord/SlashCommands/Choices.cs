@@ -64,6 +64,7 @@ public enum ReminderActionType
 public enum TagActionType
 {
     [ChoiceName("get")] Get,
+    [ChoiceName("list")] List,
     [ChoiceName("send")] Send,
     [ChoiceName("create")] Create,
     [ChoiceName("add-permission-for")] AddPermissionFor,

@@ -15,8 +15,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Generic;
 using DSharpPlus;
 using DSharpPlus.Entities;
+using DSharpPlus.Interactivity;
+using DSharpPlus.Interactivity.Enums;
+using DSharpPlus.Interactivity.EventHandling;
+using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
 using FluentValidation;
 using Lisbeth.Bot.Application.Discord.Commands.Tag;
@@ -35,7 +40,8 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
         ICommandHandler<GetTagCommand, DiscordMessageBuilder> getHandler, ICommandHandler<SendTagCommand> sendHandler,
         ICommandHandler<CreateTagCommand> createHandler, ICommandHandler<EditTagCommand> editHandler,
         ICommandHandler<DisableTagCommand> disableHandler, ICommandHandler<AddSnowflakePermissionTagCommand> addPermissionHandler,
-        ICommandHandler<RevokeSnowflakePermissionTagCommand> removePermissionHandler)
+        ICommandHandler<RevokeSnowflakePermissionTagCommand> removePermissionHandler,
+        ICommandHandler<GetAllTagsCommand, List<Page>> getAllHandler)
     {
         _discordEmbedTagConfiguratorService = discordEmbedTagConfiguratorService;
         _getHandler = getHandler;
@@ -45,6 +51,7 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
         _disableHandler = disableHandler;
         _addPermissionHandler = addPermissionHandler;
         _removePermissionHandler = removePermissionHandler;
+        _getAllHandler = getAllHandler;
     }
 
     private readonly IDiscordEmbedConfiguratorService<Tag> _discordEmbedTagConfiguratorService;
@@ -55,6 +62,7 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
     private readonly ICommandHandler<DisableTagCommand> _disableHandler;
     private readonly ICommandHandler<AddSnowflakePermissionTagCommand> _addPermissionHandler;
     private readonly ICommandHandler<RevokeSnowflakePermissionTagCommand> _removePermissionHandler;
+    private readonly ICommandHandler<GetAllTagsCommand, List<Page>> _getAllHandler;
 
     [SlashCooldown(20, 120, CooldownBucketType.Guild)]
     [UsedImplicitly]
@@ -247,6 +255,31 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
                 else
                     await ctx.EditResponseAsync(
                         new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(revokePermRes, ctx.Client)));
+                break;
+            case TagActionType.List:
+                if (string.IsNullOrWhiteSpace(idOrName))
+                    throw new ArgumentException("You must supply name.");
+
+                var getAllReq = new TagGetAllReqDto()
+                {
+                    GuildId = ctx.Guild.Id,
+                    RequestedOnBehalfOfId = ctx.User.Id
+                };
+
+                var getAllValidator = new TagGetAllReqValidator(ctx.Client);
+                await getAllValidator.ValidateAndThrowAsync(getAllReq);
+
+                var getAllRes = await _getAllHandler.HandleAsync(new GetAllTagsCommand(getAllReq, ctx));
+
+                if (getAllRes.IsDefined(out var pages))
+                {
+                    var intr = ctx.Client.GetInteractivity();
+                    await intr.SendPaginatedResponseAsync(ctx.Interaction, false, ctx.User, pages, null,
+                        PaginationBehaviour.WrapAround, ButtonPaginationBehavior.Disable, default, true);
+                }
+                else
+                    await ctx.EditResponseAsync(
+                        new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(getAllRes, ctx.Client)));
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(action), action, null);

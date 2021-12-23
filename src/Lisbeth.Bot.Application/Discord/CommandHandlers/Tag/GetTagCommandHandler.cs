@@ -59,7 +59,7 @@ public class GetTagCommandHandler : ICommandHandler<GetTagCommand, DiscordMessag
         if (requestingUser is null)
             return new DiscordNotFoundError(DiscordEntity.User);
 
-        Domain.Entities.Tag? tag;
+        Domain.Entities.Tag tag;
         if (requestingUser.IsBotOwner(_discord.Client))
         {
             Result<Domain.Entities.Tag> partial;
@@ -75,15 +75,17 @@ public class GetTagCommandHandler : ICommandHandler<GetTagCommand, DiscordMessag
         {
             var guildCfg =
                 await _guildDataService.GetSingleBySpecAsync(
-                    new ActiveGuildByDiscordIdWithTagsSpecifications(guild.Id));
+                    new ActiveGuildByIdSpec(guild.Id));
             if (!guildCfg.IsDefined())
                 return Result<DiscordMessageBuilder>.FromError(guildCfg);
 
             if (requestingUser.Guild.Id != guild.Id) return new DiscordNotAuthorizedError();
 
-            tag = command.Dto.Id.HasValue
-                ? guildCfg.Entity.Tags?.FirstOrDefault(x => x.Id == command.Dto.Id)
-                : guildCfg.Entity.Tags?.FirstOrDefault(x => x.Name == command.Dto.Name);
+            var partial = await _tagDataService.GetSingleBySpecAsync<Domain.Entities.Tag>(new ActiveTagByGuildAndNameSpec(command.Dto.Name, command.Dto.GuildId));
+
+            if (!partial.IsDefined()) return Result<DiscordMessageBuilder>.FromError(partial);
+
+            tag = partial.Entity;
         }
 
         if (tag is null) return new NotFoundError("Tag not found");
