@@ -84,7 +84,9 @@ public static class ServiceCollectionExtensions
         {
             options.PaginationBehaviour = PaginationBehaviour.WrapAround;
             options.ResponseBehavior = InteractionResponseBehavior.Ack;
+            options.AckPaginationButtons = true;
             options.Timeout = TimeSpan.FromMinutes(2);
+            options.ResponseMessage = "You can't control paginated responses that are not meant for you!";
         });
 
         #endregion
