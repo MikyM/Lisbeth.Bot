@@ -69,10 +69,10 @@ public class CleanClosedTicketsCommandHandler : ICommandHandler<CleanClosedTicke
 
                 foreach (var closedTicketChannel in closedCat.Children)
                 {
-                    if ((guildCfg.Tickets ?? throw new InvalidOperationException()).All(x =>
-                            x.ChannelId != closedTicketChannel.Id)) continue;
                     if (closedTicketChannel.Id == guildCfg.TicketingConfig.LogChannelId)
                         continue;
+                    if ((guildCfg.Tickets ?? throw new InvalidOperationException()).All(x =>
+                            x.ChannelId != closedTicketChannel.Id)) continue;
 
                     var lastMessage = await closedTicketChannel.GetMessagesAsync(1);
                     if (lastMessage is null || lastMessage.Count == 0) continue;
