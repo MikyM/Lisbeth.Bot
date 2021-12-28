@@ -21,36 +21,37 @@ using MikyM.Discord.EmbedBuilders.Enums;
 
 namespace Lisbeth.Bot.Application.Discord.EmbedBuilders;
 
-public sealed class ResponseDiscordEmbedBuilder : EnrichedDiscordEmbedBuilder, IResponseDiscordEmbedBuilder
+[UsedImplicitly]
+public sealed class ResponseDiscordEmbedBuilder<TAction> : EnrichedDiscordEmbedBuilder, IResponseDiscordEmbedBuilder<TAction> where TAction : System.Enum
 {
-    public DiscordModeration? Moderation { get; private set; }
+    public TAction? ResponseAction { get; private set; }
 
     public ResponseDiscordEmbedBuilder() { }
 
     public ResponseDiscordEmbedBuilder(EnhancedDiscordEmbedBuilder enhanced) : base(enhanced) { }
 
-    public ResponseDiscordEmbedBuilder(DiscordModeration moderation)
-        => this.Moderation = moderation;
+    public ResponseDiscordEmbedBuilder(TAction action)
+        => this.ResponseAction = action;
 
-    public IResponseDiscordEmbedBuilder WithType(DiscordModeration moderation)
+    public IResponseDiscordEmbedBuilder<TAction> WithType(TAction action)
     {
-        this.Moderation = moderation;
+        this.ResponseAction = action;
         return this;
     }
 
-    public static implicit operator DiscordEmbed(ResponseDiscordEmbedBuilder builder)
+    public static implicit operator DiscordEmbed(ResponseDiscordEmbedBuilder<TAction> builder)
         => builder.Build();
 
     protected override void Evaluate()
     {
-        if (this.Moderation is not null or 0) // if not default
-            base.WithAction(this.Moderation.Value);
+        if (this.ResponseAction is not null or 0) // if not default
+            base.WithAction(this.ResponseAction);
         base.WithActionType(DiscordBotAction.Response);
 
         base.Evaluate();
     }
 
-    public override IResponseDiscordEmbedBuilder EnrichFrom<TEnricher>(TEnricher enricher)
+    public override IResponseDiscordEmbedBuilder<TAction> EnrichFrom<TEnricher>(TEnricher enricher)
     {
         enricher.Enrich(this.Current);
         return this;

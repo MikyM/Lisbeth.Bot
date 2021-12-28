@@ -40,11 +40,11 @@ public class DiscordBanService : IDiscordBanService
     private readonly IDiscordService _discord;
     private readonly IGuildDataService _guildDataService;
     private readonly ILogger<DiscordBanService> _logger;
-    private readonly IResponseDiscordEmbedBuilder _embedBuilder;
+    private readonly IResponseDiscordEmbedBuilder<DiscordModeration> _embedBuilder;
     private readonly IDiscordGuildLoggerService _guildLogger;
 
     public DiscordBanService(IBanService banService, IDiscordService discord, IGuildDataService guildDataService,
-        ILogger<DiscordBanService> logger, IResponseDiscordEmbedBuilder embedBuilder, IDiscordGuildLoggerService guildLogger)
+        ILogger<DiscordBanService> logger, IResponseDiscordEmbedBuilder<DiscordModeration> embedBuilder, IDiscordGuildLoggerService guildLogger)
     {
         _banService = banService;
         _discord = discord;
@@ -404,7 +404,7 @@ public class DiscordBanService : IDiscordBanService
             .WithEmbedColor(new DiscordColor(guildEntity.EmbedHexColor))
             .WithAuthorSnowflakeInfo(target)
             .WithFooterSnowflakeInfo(target)
-            .AsEnriched<ResponseDiscordEmbedBuilder>()
+            .AsEnriched<ResponseDiscordEmbedBuilder<DiscordModeration>>()
             .WithType(DiscordModeration.Mute)
             .EnrichFrom(new MemberModGetReqResponseEnricher(foundBan))
             .Build();

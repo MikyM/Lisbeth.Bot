@@ -39,11 +39,11 @@ public class RevokeMuteCommandHandler : ICommandHandler<RevokeMuteCommand, Disco
     private readonly ILogger<RevokeMuteCommandHandler> _logger;
     private readonly IMuteDataService _muteDataService;
     private readonly IDiscordGuildLoggerService _guildLogger;
-    private readonly IResponseDiscordEmbedBuilder _embedBuilder;
+    private readonly IResponseDiscordEmbedBuilder<DiscordModeration> _embedBuilder;
 
     public RevokeMuteCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
         ILogger<RevokeMuteCommandHandler> logger, IMuteDataService muteDataService,
-        IDiscordGuildLoggerService guildLogger, IResponseDiscordEmbedBuilder embedBuilder)
+        IDiscordGuildLoggerService guildLogger, IResponseDiscordEmbedBuilder<DiscordModeration> embedBuilder)
     {
         _discord = discord;
         _guildDataService = guildDataService;

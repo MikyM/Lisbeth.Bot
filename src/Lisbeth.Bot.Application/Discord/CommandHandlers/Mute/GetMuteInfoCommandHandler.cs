@@ -38,11 +38,11 @@ public class GetMuteInfoCommandHandler : ICommandHandler<GetMuteInfoCommand, Dis
     private readonly ILogger<GetMuteInfoCommandHandler> _logger;
     private readonly IMuteDataService _muteDataService;
     private readonly IDiscordGuildLoggerService _guildLogger;
-    private readonly IResponseDiscordEmbedBuilder _embedBuilder;
+    private readonly IResponseDiscordEmbedBuilder<DiscordModeration> _embedBuilder;
 
     public GetMuteInfoCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
         ILogger<GetMuteInfoCommandHandler> logger, IMuteDataService muteDataService,
-        IDiscordGuildLoggerService guildLogger, IResponseDiscordEmbedBuilder embedBuilder)
+        IDiscordGuildLoggerService guildLogger, IResponseDiscordEmbedBuilder<DiscordModeration> embedBuilder)
     {
         _discord = discord;
         _guildDataService = guildDataService;

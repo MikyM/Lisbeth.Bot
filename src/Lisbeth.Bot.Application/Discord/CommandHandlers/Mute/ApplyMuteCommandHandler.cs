@@ -39,11 +39,11 @@ public class ApplyMuteCommandHandler : ICommandHandler<ApplyMuteCommand, Discord
     private readonly ILogger<ApplyMuteCommandHandler> _logger;
     private readonly IMuteDataService _muteDataService;
     private readonly IDiscordGuildLoggerService _guildLogger;
-    private readonly IResponseDiscordEmbedBuilder _embedBuilder;
+    private readonly IResponseDiscordEmbedBuilder<DiscordModeration> _embedBuilder;
 
     public ApplyMuteCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
         ILogger<ApplyMuteCommandHandler> logger, IMuteDataService muteDataService,
-        IDiscordGuildLoggerService guildLogger, IResponseDiscordEmbedBuilder embedBuilder)
+        IDiscordGuildLoggerService guildLogger, IResponseDiscordEmbedBuilder<DiscordModeration> embedBuilder)
     {
         _discord = discord;
         _guildDataService = guildDataService;

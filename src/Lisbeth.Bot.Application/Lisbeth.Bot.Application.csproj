@@ -52,7 +52,6 @@
     <Folder Include="Discord\EmbedEnrichers\Response\RoleMenu\" />
     <Folder Include="Discord\EmbedEnrichers\Response\Tag\" />
     <Folder Include="Discord\EmbedEnrichers\Response\Ticket\" />
-    <Folder Include="Discord\EmbedEnrichers\Response\Reminder\" />
     <Folder Include="Helpers\" />
     <Folder Include="Util\" />
   </ItemGroup>

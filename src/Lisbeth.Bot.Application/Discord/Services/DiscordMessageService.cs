@@ -15,10 +15,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using AutoMapper;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.SlashCommands;
-using Lisbeth.Bot.Application.Discord.EmbedBuilders;
 using Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response.Prune;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.Domain.DTOs.Request;
@@ -27,10 +27,8 @@ using MikyM.Discord.EmbedBuilders.Enums;
 using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.Interfaces;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.Globalization;
-using System.Text.Json;
-using AutoMapper;
+using Lisbeth.Bot.Application.Discord.EmbedBuilders;
 
 namespace Lisbeth.Bot.Application.Discord.Services;
 
@@ -41,12 +39,12 @@ public class DiscordMessageService : IDiscordMessageService
     private readonly IGuildDataService _guildDataService;
     private readonly IPruneService _pruneService;
     private readonly ILogger<DiscordMessageService> _logger;
-    private readonly IResponseDiscordEmbedBuilder _embedBuilder;
+    private readonly IResponseDiscordEmbedBuilder<DiscordModeration> _embedBuilder;
     private readonly IDiscordGuildLoggerService _discordGuildLogger;
     private readonly IMapper _mapper;
 
     public DiscordMessageService(IDiscordService discord, IPruneService pruneService, IGuildDataService guildDataService,
-        ILogger<DiscordMessageService> logger, IResponseDiscordEmbedBuilder embedBuilder,
+        ILogger<DiscordMessageService> logger, IResponseDiscordEmbedBuilder<DiscordModeration> embedBuilder,
         IDiscordGuildLoggerService discordGuildLogger, IMapper mapper)
     {
         _pruneService = pruneService;
