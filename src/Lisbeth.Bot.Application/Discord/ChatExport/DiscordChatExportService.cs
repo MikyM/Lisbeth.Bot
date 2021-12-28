@@ -198,9 +198,12 @@ public class DiscordChatExportService : IDiscordChatExportService
             {
                 await Task.Delay(1000);
                 var newMessages = await target.GetMessagesBeforeAsync(messages.Last().Id);
-                if (newMessages.Count == 0 || newMessages.Any(x => x.Id == ticket.MessageOpenId)) break;
+                if (newMessages.Count == 0) break;
 
                 messages.AddRange(newMessages);
+
+                if (newMessages.Any(x => x.Id == ticket.MessageOpenId))
+                    break;
             }
 
             messages.Reverse();
