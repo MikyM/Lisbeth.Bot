@@ -21,6 +21,7 @@ using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.ChatExport;
 using Lisbeth.Bot.Application.Discord.Commands.Ticket;
 using Lisbeth.Bot.Application.Discord.Exceptions;
+using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Selects;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.SelectValues;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
@@ -28,6 +29,7 @@ using Lisbeth.Bot.DataAccessLayer.Specifications.Ticket;
 using Microsoft.Extensions.Logging;
 using MikyM.Common.Application.CommandHandlers;
 using MikyM.Common.Utilities;
+using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
@@ -127,6 +129,26 @@ public class ConfirmCloseTicketCommandHandler : ICommandHandler<ConfirmCloseTick
                 : await guild.GetMemberAsync(ticket.UserId);
 
             await target.AddOverwriteAsync(owner, deny: Permissions.AccessChannels);
+
+            if (ticket.AddedUserIds is not null)
+                foreach (var userId in ticket.AddedUserIds)
+                {
+                    var member = await guild.GetMemberAsync(userId);
+                    await Task.Delay(150);
+                    if (member is null || member.IsModerator()) continue;
+
+                    await target.AddOverwriteAsync(member, deny: Permissions.AccessChannels);
+                    await Task.Delay(250);
+                }
+            if (ticket.AddedRoleIds is not null)
+                foreach (var roleId in ticket.AddedRoleIds)
+                {
+                    var role = guild.GetRole(roleId);
+                    if (role is null || role.IsModeratorRole()) continue;
+
+                    await target.AddOverwriteAsync(role, deny: Permissions.AccessChannels);
+                    await Task.Delay(250);
+                }
         }
         catch
         {

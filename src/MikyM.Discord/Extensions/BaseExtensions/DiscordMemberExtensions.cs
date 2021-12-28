@@ -15,10 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Linq;
-using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
+using System.Linq;
 
 namespace MikyM.Discord.Extensions.BaseExtensions;
 
@@ -37,9 +36,12 @@ public static class DiscordMemberExtensions
     public static bool IsModerator(this DiscordMember member)
     {
         return member.Roles.Any(x =>
-                   x.Permissions.HasPermission(Permissions.BanMembers)) ||
+                   x.Permissions.HasPermission(Permissions.BanMembers) ||
+                   x.Permissions.HasPermission(Permissions.Administrator) ||
+                   x.Permissions.HasPermission(Permissions.All)) ||
                member.Permissions.HasPermission(Permissions.BanMembers) ||
                member.Permissions.HasPermission(Permissions.All) ||
+               member.Permissions.HasPermission(Permissions.Administrator) ||
                member.IsOwner;
     }
 

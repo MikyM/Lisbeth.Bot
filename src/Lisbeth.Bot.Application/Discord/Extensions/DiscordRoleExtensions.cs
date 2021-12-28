@@ -15,16 +15,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using MikyM.Discord.EmbedBuilders.Builders;
-using MikyM.Discord.EmbedBuilders.Enrichers;
+using DSharpPlus;
+using DSharpPlus.Entities;
 
-namespace Lisbeth.Bot.Application.Discord.EmbedBuilders;
+namespace Lisbeth.Bot.Application.Discord.Extensions;
 
-public interface IResponseDiscordEmbedBuilder<TAction> : IEnrichedDiscordEmbedBuilder where TAction : Enum
+public static class DiscordRoleExtensions
 {
-    public TAction? ResponseType { get; }
-
-    IResponseDiscordEmbedBuilder<TAction> WithType(TAction action);
-
-    new IResponseDiscordEmbedBuilder<TAction> EnrichFrom<TEnricher>(TEnricher enricher) where TEnricher : IEmbedEnricher;
+    public static bool IsModeratorRole(this DiscordRole role)
+        => role.Permissions.HasPermission(Permissions.BanMembers) ||
+           role.Permissions.HasPermission(Permissions.All) ||
+           role.Permissions.HasPermission(Permissions.Administrator);
 }
