@@ -17,6 +17,7 @@
 
 
 using MikyM.Common.DataAccessLayer.Specifications;
+using MikyM.Common.DataAccessLayer.Specifications.Builders;
 
 namespace Lisbeth.Bot.DataAccessLayer.Specifications.Mute;
 
@@ -29,6 +30,6 @@ public class ActiveMutesByGuildAndUserSpecifications : Specification<Domain.Enti
         Where(x => x.Guild.GuildId == guildId);
         Where(x => x.AppliedUntil > DateTime.UtcNow);
         Where(x => x.UserId == userId);
-        Include(x => x.Guild);
+        Include(x => x.Guild).ThenInclude(x => x.ModerationConfig);
     }
 }
