@@ -28,6 +28,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Lisbeth.Bot.Domain;
 using Microsoft.Extensions.Options;
+using MikyM.Discord.Extensions.BaseExtensions;
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport;
 
@@ -173,9 +174,9 @@ public class DiscordChatExportService : IDiscordChatExportService
             {
                 owner ??= await _discord.Client.GetUserAsync(ticket.UserId);
             }
-            catch (Exception)
+            catch
             {
-                return new DiscordNotFoundError($"User with Id: {ticket.UserId} doesn't exist.");
+                // ignored
             }
 
             if (guild.Id != target.GuildId)
@@ -204,7 +205,7 @@ public class DiscordChatExportService : IDiscordChatExportService
 
             messages.Reverse();
 
-            foreach (var msg in messages.Where(msg => !users.Contains(msg.Author))) users.Add(msg.Author);
+            foreach (var msg in messages.Where(msg => !users.Contains(msg.Author) && msg.Author is not null)) {users.Add(msg.Author);}
 
             string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Discord", "ChatExport",
                 "ChatExport.css");
@@ -255,8 +256,8 @@ public class DiscordChatExportService : IDiscordChatExportService
             embedBuilder.WithFooter(
                 $"This transcript was saved by {requestingMember.Username}#{requestingMember.Discriminator}");
 
-            embedBuilder.WithAuthor($"Transcript | {owner.Username}#{owner.Discriminator}", null, owner.AvatarUrl);
-            embedBuilder.AddField("Ticket Owner", owner.Mention, true);
+            embedBuilder.WithAuthor($"Transcript | {owner?.GetFullUsername() ?? "Deleted user"}", null, owner?.AvatarUrl);
+            embedBuilder.AddField("Ticket Owner", owner?.Mention ?? "Deleted user", true);
             embedBuilder.AddField("Ticket Name", $"ticket-{Regex.Replace(target.Name, @"[^\d]", "")}", true);
             embedBuilder.AddField("Channel", target.Mention, true);
             embedBuilder.AddField("Users in transcript", usersString);

@@ -1,6 +1,7 @@
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.ChatExport.Wrappers;
 using Lisbeth.Bot.Domain;
+using MikyM.Discord.Extensions.BaseExtensions;
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport.Models;
 
@@ -17,7 +18,7 @@ public class HtmlUser : IAsyncHtmlBuilder
 
     public Task<string> BuildAsync()
     {
-        return Task.FromResult($"<div class=\"user-info\">{User.Username}#{User.Discriminator} ID: {User.Id}</div>");
+        return Task.FromResult($"<div class=\"user-info\">{User.GetFullUsername()} ID: {User.Id}</div>");
     }
 
     public async Task<string> BuildAvatar()

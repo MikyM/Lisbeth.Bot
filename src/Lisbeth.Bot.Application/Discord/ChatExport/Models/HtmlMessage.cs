@@ -23,7 +23,7 @@ public class HtmlMessage : IAsyncHtmlBuilder
         string reactionsHtml = "";
 
         var messageTop =
-            $"<span class=\"nickname\">{Msg.Author.Username}</span> <span class=\"message-info-details\">{Msg.Timestamp} message ID: {Msg.Id}</span>";
+            $"<span class=\"nickname\">{Msg.Author?.Username ?? "Deleted user"}</span> <span class=\"message-info-details\">{Msg.Timestamp} message ID: {Msg.Id}</span>";
 
         messageTop = $"<div class=\"message-info\">{messageTop}</div>";
 
