@@ -133,21 +133,35 @@ public class ConfirmCloseTicketCommandHandler : ICommandHandler<ConfirmCloseTick
             if (ticket.AddedUserIds is not null)
                 foreach (var userId in ticket.AddedUserIds)
                 {
-                    var member = await guild.GetMemberAsync(userId);
-                    await Task.Delay(150);
-                    if (member is null || member.IsModerator()) continue;
+                    try
+                    {
+                        var member = await guild.GetMemberAsync(userId);
+                        await Task.Delay(150);
+                        if (member is null || member.IsModerator()) continue;
 
-                    await target.AddOverwriteAsync(member, deny: Permissions.AccessChannels);
-                    await Task.Delay(250);
+                        await target.AddOverwriteAsync(member, deny: Permissions.AccessChannels);
+                        await Task.Delay(250);
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
                 }
             if (ticket.AddedRoleIds is not null)
                 foreach (var roleId in ticket.AddedRoleIds)
                 {
-                    var role = guild.GetRole(roleId);
-                    if (role is null || role.IsModeratorRole()) continue;
+                    try
+                    {
+                        var role = guild.GetRole(roleId);
+                        if (role is null || role.IsModeratorRole()) continue;
 
-                    await target.AddOverwriteAsync(role, deny: Permissions.AccessChannels);
-                    await Task.Delay(250);
+                        await target.AddOverwriteAsync(role, deny: Permissions.AccessChannels);
+                        await Task.Delay(250);
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
                 }
         }
         catch
