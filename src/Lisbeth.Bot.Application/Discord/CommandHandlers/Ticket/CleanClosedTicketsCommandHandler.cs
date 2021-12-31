@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Generic;
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.Ticket;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
@@ -74,13 +75,29 @@ public class CleanClosedTicketsCommandHandler : ICommandHandler<CleanClosedTicke
                     if ((guildCfg.Tickets ?? throw new InvalidOperationException()).All(x =>
                             x.ChannelId != closedTicketChannel.Id)) continue;
 
-                    var lastMessage = await closedTicketChannel.GetMessagesAsync(1);
-                    if (lastMessage is null || lastMessage.Count == 0) continue;
+                    IReadOnlyList<DiscordMessage> lastMessages;
+                    try
+                    {
+                        lastMessages = await closedTicketChannel.GetMessagesAsync(1);
+                    }
+                    catch
+                    {
+                        continue;
+                    }
 
-                    var timeDifference = DateTime.UtcNow.Subtract(lastMessage[0].Timestamp.UtcDateTime);
+                    if (lastMessages is null || lastMessages.Count == 0) continue;
+
+                    var timeDifference = DateTime.UtcNow.Subtract(lastMessages[0].Timestamp.UtcDateTime);
                     if (timeDifference.TotalHours >= guildCfg.TicketingConfig.CleanAfter.Value.TotalHours)
                     {
-                        await closedTicketChannel.DeleteAsync();
+                        try
+                        {
+                            await closedTicketChannel.DeleteAsync();
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError($"Failed to delete channel cause: {ex}");
+                        }
                         _logger.LogDebug($"Deleting channel Id: {closedTicketChannel.Id} with name: {closedTicketChannel.Name}");
                     }
                     await Task.Delay(500);

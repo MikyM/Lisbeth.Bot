@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Generic;
 using DSharpPlus.Entities;
 using FluentValidation;
 using Lisbeth.Bot.Application.Discord.Commands.Ticket;
@@ -78,8 +79,17 @@ public class CloseInactiveTicketsCommandHandler : ICommandHandler<CloseInactiveT
                     if ((guildCfg.Tickets ?? throw new InvalidOperationException()).All(x =>
                             x.ChannelId != openedTicketChannel.Id)) continue;
 
-                    var lastMessage = await openedTicketChannel.GetMessagesAsync(1);
-                    var msg = lastMessage?.FirstOrDefault();
+                    IReadOnlyList<DiscordMessage> lastMessages;
+                    try
+                    {
+                        lastMessages = await openedTicketChannel.GetMessagesAsync(1);
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+
+                    var msg = lastMessages?.FirstOrDefault();
                     if (msg is null) continue;
 
                     if (msg.Author is DiscordMember member && !member.IsModerator()) continue;
