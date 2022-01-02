@@ -51,6 +51,8 @@ public class DiscordSendReminderService : IDiscordSendReminderService
         List<string>? mentions;
         DiscordChannel channel;
         ulong? channelId;
+        DiscordGuild discordGuild;
+        ulong guildId;
 
         switch (type)
         {
@@ -63,6 +65,7 @@ public class DiscordSendReminderService : IDiscordSendReminderService
                 text = rem.Entity.Text;
                 mentions = rem.Entity.Mentions;
                 channelId = rem.Entity.ChannelId;
+                guildId = rem.Entity.GuildId;
                 break;
             case ReminderType.Recurring:
                 var recRem = await _reminderService.GetSingleBySpecAsync(
@@ -74,6 +77,7 @@ public class DiscordSendReminderService : IDiscordSendReminderService
                 text = recRem.Entity.Text;
                 mentions = recRem.Entity.Mentions;
                 channelId = recRem.Entity.ChannelId;
+                guildId = recRem.Entity.GuildId;
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(type), type, null);
@@ -81,11 +85,27 @@ public class DiscordSendReminderService : IDiscordSendReminderService
 
         try
         {
-            channel = channelId.HasValue ? await _discord.Client.GetChannelAsync(channelId.Value) : await _discord.Client.GetChannelAsync(guild.ReminderChannelId.Value);
+            discordGuild = _discord.Client.Guilds[guildId];
         }
         catch (Exception)
         {
-            // ignore
+            return Result.FromError(new DiscordNotFoundError(DiscordEntity.Guild));
+        }
+
+        try
+        {
+            if (channelId.HasValue)
+                channel = discordGuild.GetChannel(channelId.Value);
+            else if (!guild.ReminderChannelId.HasValue)
+                return new ArgumentError(nameof(guild.ReminderChannelId),"Guild doesn't have a set reminder channel");
+            else 
+                channel = discordGuild.GetChannel(guild.ReminderChannelId.Value);
+
+            if (channel is null)
+                return Result.FromError(new DiscordNotFoundError(DiscordEntity.Channel));
+        }
+        catch (Exception)
+        {
             return Result.FromError(new DiscordNotFoundError(DiscordEntity.Channel));
         }
 
