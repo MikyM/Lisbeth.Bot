@@ -52,7 +52,9 @@ public class ReminderConfig : IEntityTypeConfiguration<Reminder>
             .HasColumnType("bigint")
             .IsRequired();
         builder.Property(x => x.Text).HasColumnName("text").HasColumnType("text");
-        builder.Property(x => x.SetFor).HasColumnName("set_for").HasColumnType("timestamptz").IsRequired();
+        builder.Property(x => x.SetFor).HasColumnName("set_for").HasColumnType("timestamptz");
+        builder.Property(x => x.SetFor).HasColumnName("cron_expression").HasColumnType("varchar(200)")
+            .HasMaxLength(200);
         builder.Property(x => x.EmbedConfigId).HasColumnName("embed_config_id").HasColumnType("bigint");
         builder.Property(x => x.IsGuildReminder)
             .HasColumnName("is_guild_reminder")
@@ -63,9 +65,7 @@ public class ReminderConfig : IEntityTypeConfiguration<Reminder>
         builder.Property(x => x.Name)
             .HasColumnName("name")
             .HasColumnType("varchar(100)")
-            .HasMaxLength(100)
-            .IsRequired()
-            .ValueGeneratedOnAdd();
+            .HasMaxLength(100);
 
         builder.HasOne(x => x.EmbedConfig)
             .WithOne(x => x.Reminder)

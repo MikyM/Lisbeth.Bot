@@ -17,18 +17,27 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using Lisbeth.Bot.Domain.Entities.Base;
 
 namespace Lisbeth.Bot.Domain.Entities;
 
 public class Reminder : EmbedConfigEntity
 {
-    public DateTime SetFor { get; set; }
+    public DateTime? SetFor { get; set; }
+    public string? CronExpression { get; set; }
     public string? Text { get; set; }
     public string? HangfireId { get; set; }
     public ulong? ChannelId { get; set; }
     public List<string>? Mentions { get; set; }
     public bool IsGuildReminder { get; set; }
+
+    [NotMapped]
+    public bool IsRecurring => !SetFor.HasValue && CronExpression is null
+        ? throw new InvalidOperationException("Unable to determine reminder type, both values are null")
+        : SetFor.HasValue && CronExpression is not null
+            ? throw new InvalidOperationException("Unable to determine reminder type, both values are not null")
+            : !string.IsNullOrWhiteSpace(CronExpression);
 
     public Guild? Guild { get; set; }
 }

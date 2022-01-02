@@ -34,17 +34,14 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 public class ReminderSlashCommands : ExtendedApplicationCommandModule
 {
     public ReminderSlashCommands(IDiscordReminderService reminderService,
-        IDiscordEmbedConfiguratorService<Reminder> reminderEmbedConfiguratorService,
-        IDiscordEmbedConfiguratorService<RecurringReminder> recurringReminderEmbedConfiguratorService)
+        IDiscordEmbedConfiguratorService<Reminder> reminderEmbedConfiguratorService)
     {
         _reminderService = reminderService;
         _reminderEmbedConfiguratorService = reminderEmbedConfiguratorService;
-        _recurringReminderEmbedConfiguratorService = recurringReminderEmbedConfiguratorService;
     }
 
     private readonly IDiscordReminderService _reminderService;
     private readonly IDiscordEmbedConfiguratorService<Reminder> _reminderEmbedConfiguratorService;
-    private readonly IDiscordEmbedConfiguratorService<RecurringReminder> _recurringReminderEmbedConfiguratorService;
 
     [UsedImplicitly]
     [SlashCommand("reminder", "Command that allows working with reminders.", false)]
@@ -148,7 +145,7 @@ public class ReminderSlashCommands : ExtendedApplicationCommandModule
                                             GetUnsuccessfulResultEmbed(res, ctx.Client)));
                                 return;
                             case ReminderType.Recurring:
-                                var resRec = await this._recurringReminderEmbedConfiguratorService!.ConfigureAsync(ctx,
+                                var resRec = await this._reminderEmbedConfiguratorService!.ConfigureAsync(ctx,
                                     x => x.EmbedConfig, x => x.EmbedConfigId, name);
                                 if (resRec.IsDefined())
                                     await ctx.EditResponseAsync(

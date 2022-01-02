@@ -34,7 +34,6 @@ public sealed class Guild : SnowflakeEntity
     private readonly HashSet<GuildServerBooster>? guildServerBoosters;
     private readonly HashSet<Mute>? mutes;
     private readonly HashSet<Prune>? prunes;
-    private readonly HashSet<RecurringReminder>? recurringReminders;
     private readonly HashSet<Reminder>? reminders;
     private readonly HashSet<RoleMenu>? roleMenus;
     private readonly HashSet<Tag>? tags;
@@ -46,7 +45,6 @@ public sealed class Guild : SnowflakeEntity
         guildServerBoosters ??= new HashSet<GuildServerBooster>();
         mutes ??= new HashSet<Mute>();
         prunes ??= new HashSet<Prune>();
-        recurringReminders ??= new HashSet<RecurringReminder>();
         reminders ??= new HashSet<Reminder>();
         tickets ??= new HashSet<Ticket>();
         tags ??= new HashSet<Tag>();
@@ -65,7 +63,6 @@ public sealed class Guild : SnowflakeEntity
     public IReadOnlyCollection<Ticket>? Tickets => tickets;
     public IReadOnlyCollection<GuildServerBooster>? GuildServerBoosters => guildServerBoosters;
     public IReadOnlyCollection<Reminder>? Reminders => reminders;
-    public IReadOnlyCollection<RecurringReminder>? RecurringReminders => recurringReminders;
     public IReadOnlyCollection<Tag>? Tags => tags;
     public IReadOnlyCollection<RoleMenu>? RoleMenus => roleMenus;
 
@@ -135,16 +132,4 @@ public sealed class Guild : SnowflakeEntity
     [MemberNotNullWhen(true, nameof(ModerationConfig))]
     public bool IsModerationModuleEnabled
         => this.ModerationConfig is not null;
-
-
-    /*[MemberNotNullWhen()]
-    public bool IsModuleEnabled(GuildModule module)
-    {
-        return module switch
-        {
-            GuildModule.Ticketing => this.TicketingConfig is not null,
-            GuildModule.Moderation => this.ModerationConfig is not null,
-            _ => throw new ArgumentOutOfRangeException(nameof(module), module, null)
-        };
-    }*/
 }

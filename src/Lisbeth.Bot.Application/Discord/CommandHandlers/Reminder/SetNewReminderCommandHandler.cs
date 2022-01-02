@@ -1,5 +1,8 @@
 ﻿using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.Reminder;
+using Lisbeth.Bot.Application.Discord.EmbedBuilders;
+using Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response.Reminder;
+using Lisbeth.Bot.Application.Discord.SlashCommands;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using MikyM.Common.Application.CommandHandlers;
 using MikyM.Discord.Enums;
@@ -14,13 +17,15 @@ public class SetNewReminderCommandHandler : ICommandHandler<SetNewReminderComman
     private readonly IGuildDataService _guildDataService;
     private readonly IDiscordService _discord;
     private readonly IMainReminderService _reminderService;
+    private readonly IResponseDiscordEmbedBuilder<RegularUserInteraction> _embedBuilder;
 
     public SetNewReminderCommandHandler(IGuildDataService guildDataService, IDiscordService discord,
-        IMainReminderService reminderService)
+        IMainReminderService reminderService, IResponseDiscordEmbedBuilder<RegularUserInteraction> embedBuilder)
     {
         _guildDataService = guildDataService;
         _discord = discord;
         _reminderService = reminderService;
+        _embedBuilder = embedBuilder;
     }
 
     public async Task<Result<DiscordEmbed>> HandleAsync(SetNewReminderCommand command)
@@ -44,20 +49,17 @@ public class SetNewReminderCommandHandler : ICommandHandler<SetNewReminderComman
 
         if (!result.IsDefined()) return Result<DiscordEmbed>.FromError(result);
 
-        if (command.Dto.ChannelId.HasValue && !requestingUser.IsModerator()) return new DiscordNotAuthorizedError("Only moderators can set specific channel reminders.");
+        if (command.Dto.ChannelId.HasValue && !requestingUser.IsModerator()) return new DiscordNotAuthorizedError("Only moderators can set channel specific reminders.");
 
         var res = await _reminderService.SetNewReminderAsync(command.Dto);
 
         if (!res.IsDefined(out var reminder)) return Result<DiscordEmbed>.FromError(res);
 
-        var embed = new DiscordEmbedBuilder().WithColor(new DiscordColor(result.Entity.EmbedHexColor))
-            .WithAuthor("Lisbeth reminder service")
-            .WithDescription("Reminder set successfully")
-            .AddField("Reminder's id", res.Entity.Id.ToString())
-            .AddField("Reminder's name", res.Entity.Name)
-            .AddField("Next occurrence", res.Entity.NextOccurrence.ToUniversalTime().ToString("dd/MM/yyyy hh:mm tt") + " UTC")
-            .AddField("Mentions", string.Join(", ", res.Entity.Mentions ?? throw new InvalidOperationException()));
-
-        return embed.Build();
+        return _embedBuilder
+            .WithType(RegularUserInteraction.Reminder)
+            .EnrichFrom(new ReminderEmbedEnricher(reminder, ReminderActionType.Set))
+            .WithEmbedColor(new DiscordColor(result.Entity.EmbedHexColor))
+            .WithAuthorSnowflakeInfo(requestingUser)
+            .Build();
     }
 }

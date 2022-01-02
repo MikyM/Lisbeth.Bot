@@ -34,7 +34,6 @@ public sealed class LisbethBotDbContext : AuditableDbContext
     public DbSet<TicketingConfig> TicketingConfigs { get; set; }
     public DbSet<ModerationConfig> ModerationConfigs { get; set; }
     public DbSet<Tag> Tags { get; set; }
-    public DbSet<RecurringReminder> RecurringReminders { get; set; }
     public DbSet<Reminder> Reminders { get; set; }
     public DbSet<RoleMenu> RoleMenus { get; set; }
     public DbSet<EmbedConfig> EmbedConfigs { get; set; }

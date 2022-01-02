@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Globalization;
-using DSharpPlus.Entities;
+﻿using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.Reminder;
 using Lisbeth.Bot.Application.Discord.EmbedBuilders;
+using Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response.Infractions;
+using Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response.Reminder;
+using Lisbeth.Bot.Application.Discord.SlashCommands;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using MikyM.Common.Application.CommandHandlers;
-using MikyM.Discord.EmbedBuilders.Builders;
 using MikyM.Discord.Enums;
 using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.Interfaces;
@@ -18,10 +18,10 @@ public class RescheduleReminderCommandHandler : ICommandHandler<RescheduleRemind
     private readonly IGuildDataService _guildDataService;
     private readonly IDiscordService _discord;
     private readonly IMainReminderService _reminderService;
-    private readonly IResponseDiscordEmbedBuilder<UserInteraction> _embedBuilder;
+    private readonly IResponseDiscordEmbedBuilder<RegularUserInteraction> _embedBuilder;
 
     public RescheduleReminderCommandHandler(IGuildDataService guildDataService, IDiscordService discord,
-        IMainReminderService reminderService, IResponseDiscordEmbedBuilder<UserInteraction> embedBuilder)
+        IMainReminderService reminderService, IResponseDiscordEmbedBuilder<RegularUserInteraction> embedBuilder)
     {
         _guildDataService = guildDataService;
         _discord = discord;
@@ -46,7 +46,7 @@ public class RescheduleReminderCommandHandler : ICommandHandler<RescheduleRemind
         if (!string.IsNullOrWhiteSpace(command.Dto.CronExpression) && !requestingUser.IsModerator())
             return new DiscordNotAuthorizedError();
 
-        var result = await _guildDataService.GetSingleBySpecAsync<Guild>(new ActiveGuildByIdSpec(command.Dto.GuildId));
+        var result = await _guildDataService.GetSingleBySpecAsync(new ActiveGuildByIdSpec(command.Dto.GuildId));
 
         if (!result.IsDefined()) return Result<DiscordEmbed>.FromError(result);
 
@@ -54,6 +54,11 @@ public class RescheduleReminderCommandHandler : ICommandHandler<RescheduleRemind
 
         if (!res.IsDefined()) return Result<DiscordEmbed>.FromError(res);
 
-        return new DiscordEmbedBuilder().Build();
+        return _embedBuilder
+            .WithType(RegularUserInteraction.Reminder)
+            .EnrichFrom(new ReminderEmbedEnricher(res.Entity, ReminderActionType.Reschedule))
+            .WithEmbedColor(new DiscordColor(result.Entity.EmbedHexColor))
+            .WithAuthorSnowflakeInfo(requestingUser)
+            .Build();
     }
 }

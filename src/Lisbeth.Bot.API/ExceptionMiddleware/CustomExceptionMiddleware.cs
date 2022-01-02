@@ -47,7 +47,7 @@ public class CustomExceptionMiddleware
 
     private Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
-        _logger.LogError(exception, exception.GetFullMessage());
+        _logger.LogError(exception, exception.ToFormattedString());
 
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;

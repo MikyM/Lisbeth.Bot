@@ -20,11 +20,11 @@ using MikyM.Discord.EmbedBuilders.Enrichers;
 
 namespace Lisbeth.Bot.Application.Discord.EmbedBuilders;
 
-public interface IResponseDiscordEmbedBuilder<TAction> : IEnrichedDiscordEmbedBuilder where TAction : Enum
+public interface IResponseDiscordEmbedBuilder<TType> : IEnrichedDiscordEmbedBuilder where TType : Enum
 {
-    public TAction? ResponseType { get; }
+    public TType? ResponseType { get; }
 
-    IResponseDiscordEmbedBuilder<TAction> WithType(TAction action);
+    IResponseDiscordEmbedBuilder<TType> WithType(TType action);
 
-    new IResponseDiscordEmbedBuilder<TAction> EnrichFrom<TEnricher>(TEnricher enricher) where TEnricher : IEmbedEnricher;
+    new IResponseDiscordEmbedBuilder<TType> EnrichFrom<TEnricher>(TEnricher enricher) where TEnricher : IEmbedEnricher;
 }

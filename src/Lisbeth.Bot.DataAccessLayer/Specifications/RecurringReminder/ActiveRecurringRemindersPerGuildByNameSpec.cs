@@ -19,12 +19,13 @@ using MikyM.Common.DataAccessLayer.Specifications;
 
 namespace Lisbeth.Bot.DataAccessLayer.Specifications.RecurringReminder;
 
-public class ActiveRecurringRemindersPerGuildByNameSpec : Specification<Domain.Entities.RecurringReminder>
+public class ActiveRecurringRemindersPerGuildByNameSpec : Specification<Domain.Entities.Reminder>
 {
     public ActiveRecurringRemindersPerGuildByNameSpec(ulong guildId, string name)
     {
         Where(x => x.GuildId == guildId);
         Where(x => x.Name == name);
         Where(x => !x.IsDisabled);
+        Where(x => x.CronExpression != null);
     }
 }

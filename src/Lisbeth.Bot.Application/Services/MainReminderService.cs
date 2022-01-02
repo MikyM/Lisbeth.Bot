@@ -27,14 +27,11 @@ namespace Lisbeth.Bot.Application.Services;
 public class MainReminderService : IMainReminderService
 {
     private readonly IBackgroundJobClient _backgroundJobClient;
-    private readonly IRecurringReminderService _recurringReminderService;
-    private readonly IReminderService _reminderService;
+    private readonly IReminderDataService _reminderService;
 
-    public MainReminderService(IReminderService reminderService, IRecurringReminderService recurringReminderService,
-        IBackgroundJobClient backgroundJobClient)
+    public MainReminderService(IReminderDataService reminderService, IBackgroundJobClient backgroundJobClient)
     {
         _reminderService = reminderService;
-        _recurringReminderService = recurringReminderService;
         _backgroundJobClient = backgroundJobClient;
     }
 
@@ -44,11 +41,11 @@ public class MainReminderService : IMainReminderService
 
         var reUser =
             await _reminderService.LongCountAsync(new ActiveRemindersPerUserSpec(req.RequestedOnBehalfOfId));
-        var recUser = await _recurringReminderService.LongCountAsync(
+        var recUser = await _reminderService.LongCountAsync(
             new ActiveRecurringRemindersPerUserSpec(req.RequestedOnBehalfOfId));
         long remindersPerUser = reUser.Entity + recUser.Entity;
 
-        var reGuild = await _recurringReminderService.LongCountAsync(
+        var reGuild = await _reminderService.LongCountAsync(
             new ActiveRecurringRemindersPerGuildSpec(req.RequestedOnBehalfOfId));
         var recGuild =
             await _reminderService.LongCountAsync(new ActiveRemindersPerGuildSpec(req.RequestedOnBehalfOfId));
@@ -77,12 +74,14 @@ public class MainReminderService : IMainReminderService
                 setFor = req.SetFor ?? throw new InvalidOperationException();
             }
 
+            req.CronExpression = null; // clean cron expression just in case, single takes precedence
+
             if (string.IsNullOrWhiteSpace(req.Name))
                 req.Name = $"{req.GuildId}_{req.RequestedOnBehalfOfId}_{DateTime.UtcNow}";
 
             var partial = await _reminderService.AddAsync(req, true);
             string hangfireId = _backgroundJobClient.Schedule(
-                (IDiscordSendReminderService x) => x.SendReminderAsync(partial.Entity, Domain.Enums.ReminderType.Single), setFor.ToUniversalTime(),
+                (IDiscordSendReminderService x) => x.SendReminderAsync(partial.Entity, ReminderType.Single), setFor.ToUniversalTime(),
                 "reminder");
             await _reminderService.SetHangfireIdAsync(partial.Entity, hangfireId, true);
 
@@ -105,7 +104,7 @@ public class MainReminderService : IMainReminderService
                 return new DiscordArgumentError(nameof(recGuild.Entity),
                     "Cron expressions with more than 12 occurrences per hour (more frequent than every 5 minutes) are not allowed");
 
-            var count = await _recurringReminderService.LongCountAsync(
+            var count = await _reminderService.LongCountAsync(
                 new ActiveRecurringRemindersPerGuildByNameSpec(req.GuildId, req.Name));
             if (count.Entity != 0)
                 return new DiscordArgumentError(nameof(recGuild.Entity),
@@ -113,11 +112,14 @@ public class MainReminderService : IMainReminderService
 
             string jobName = $"{req.GuildId}_{req.Name}";
 
-            var partial = await _recurringReminderService.AddAsync(req, true);
+            req.SetFor = null;
+            req.TimeSpanExpression = null; // clean these just in case
+
+            var partial = await _reminderService.AddAsync(req, true);
             RecurringJob.AddOrUpdate<IDiscordSendReminderService>(jobName,
-                x => x.SendReminderAsync(partial.Entity, Domain.Enums.ReminderType.Recurring), req.CronExpression,
+                x => x.SendReminderAsync(partial.Entity, ReminderType.Recurring), req.CronExpression,
                 TimeZoneInfo.Utc, "reminder");
-            await _recurringReminderService.SetHangfireIdAsync(partial.Entity, jobName, true);
+            await _reminderService.SetHangfireIdAsync(partial.Entity, jobName, true);
 
             return new ReminderResDto(partial.Entity, req.Name,
                 parsed?.GetNextOccurrence(DateTime.UtcNow).ToUniversalTime() ??
@@ -133,9 +135,12 @@ public class MainReminderService : IMainReminderService
 
         if (req.SetFor.HasValue || !string.IsNullOrWhiteSpace(req.TimeSpanExpression)) // handle single reminder
         {
-            var result = await _reminderService.GetSingleBySpecAsync<Reminder>(
+            var result = await _reminderService.GetSingleBySpecAsync(
                 new ActiveReminderByNameOrIdAndGuildSpec(req.Name, req.GuildId, req.ReminderId));
-            if (!result.IsDefined()) return Result<ReminderResDto>.FromError(result);
+            if (!result.IsDefined(out var reminder)) return Result<ReminderResDto>.FromError(result);
+
+            if (req.RequestedOnBehalfOfId != reminder.CreatorId)
+                return new DiscordNotAuthorizedError("Only the creator of a reminder can make changes to it.");
 
             DateTime setFor;
             if (!string.IsNullOrWhiteSpace(req.TimeSpanExpression))
@@ -154,7 +159,7 @@ public class MainReminderService : IMainReminderService
             if (!res) return new HangfireError("Hangfire failed to delete the job");
 
             string hangfireId = _backgroundJobClient.Schedule(
-                (IDiscordSendReminderService x) => x.SendReminderAsync((long)result.Entity.Id, Domain.Enums.ReminderType.Single), setFor.ToUniversalTime(),
+                (IDiscordSendReminderService x) => x.SendReminderAsync((long)result.Entity.Id, ReminderType.Single), setFor.ToUniversalTime(),
                 "reminder");
 
             req.NewHangfireId = long.Parse(hangfireId);
@@ -171,17 +176,20 @@ public class MainReminderService : IMainReminderService
             return new DiscordArgumentError(nameof(req.CronExpression),
                 "Cron expressions with more than 12 occurrences per hour (more frequent than every 5 minutes) are not allowed");
 
-        var partial = await _recurringReminderService.GetSingleBySpecAsync<RecurringReminder>(
+        var partial = await _reminderService.GetSingleBySpecAsync(
             new ActiveRecurringReminderByNameOrIdAndGuildSpec(req.Name, req.GuildId, req.ReminderId));
-        if (!partial.IsDefined()) return Result<ReminderResDto>.FromError(partial);
+        if (!partial.IsDefined(out var recurringReminder)) return Result<ReminderResDto>.FromError(partial);
+
+        if (req.RequestedOnBehalfOfId != recurringReminder.CreatorId)
+            return new DiscordNotAuthorizedError("Only the creator of a reminder can make changes to it.");
 
         string jobName = $"{partial.Entity.GuildId}_{partial.Entity.Name}";
 
         RecurringJob.AddOrUpdate<IDiscordSendReminderService>(jobName,
-            x => x.SendReminderAsync(partial.Entity.Id, Domain.Enums.ReminderType.Recurring), req.CronExpression,
+            x => x.SendReminderAsync(partial.Entity.Id, ReminderType.Recurring), req.CronExpression,
             TimeZoneInfo.Utc, "reminder");
 
-        await _recurringReminderService.RescheduleAsync(req, true);
+        await _reminderService.RescheduleAsync(req, true);
 
         return new ReminderResDto(partial.Entity.Id, partial.Entity.Name, parsed.GetNextOccurrence(DateTime.UtcNow),
             partial.Entity.Mentions);
@@ -193,27 +201,33 @@ public class MainReminderService : IMainReminderService
 
         switch (req.Type)
         {
-            case Domain.Enums.ReminderType.Single:
-                var singleResult = await _reminderService.GetSingleBySpecAsync<Domain.Entities.Reminder>(
-                    (MikyM.Common.DataAccessLayer.Specifications.ISpecification<Domain.Entities.Reminder>)new ActiveReminderByNameOrIdAndGuildSpec((string?)req.Name, (ulong?)req.GuildId, (long?)req.ReminderId));
-                if (!singleResult.IsDefined()) return Result<ReminderResDto>.FromError((Result<Domain.Entities.Reminder>)singleResult);
+            case ReminderType.Single:
+                var singleResult = await _reminderService.GetSingleBySpecAsync(
+                    new ActiveReminderByNameOrIdAndGuildSpec(req.Name, (ulong?)req.GuildId, (long?)req.ReminderId));
+                if (!singleResult.IsDefined(out var reminder)) return Result<ReminderResDto>.FromError(singleResult);
 
-                bool res = BackgroundJob.Delete((string?)singleResult.Entity.HangfireId);
+                if (req.RequestedOnBehalfOfId != reminder.CreatorId)
+                    return new DiscordNotAuthorizedError("Only the creator of a reminder can make changes to it.");
+
+                bool res = BackgroundJob.Delete(singleResult.Entity.HangfireId);
 
                 if (!res) throw new Exception("Hangfire failed to delete a scheduled job");
 
                 await _reminderService.DisableAsync(req, true);
 
                 return new ReminderResDto((long)singleResult.Entity.Id, (string?)singleResult.Entity.Name, DateTime.MinValue,
-                    (System.Collections.Generic.List<string>?)singleResult.Entity.Mentions);
-            case Domain.Enums.ReminderType.Recurring:
-                var recurringResult = await _recurringReminderService.GetSingleBySpecAsync<RecurringReminder>(
+                    singleResult.Entity.Mentions);
+            case ReminderType.Recurring:
+                var recurringResult = await _reminderService.GetSingleBySpecAsync(
                     new ActiveRecurringReminderByNameOrIdAndGuildSpec(req.Name, req.GuildId, req.ReminderId));
-                if (!recurringResult.IsDefined()) return Result<ReminderResDto>.FromError(recurringResult);
+                if (!recurringResult.IsDefined(out var recurringReminder)) return Result<ReminderResDto>.FromError(recurringResult);
+
+                if (req.RequestedOnBehalfOfId != recurringReminder.CreatorId)
+                    return new DiscordNotAuthorizedError("Only the creator of a reminder can make changes to it.");
 
                 RecurringJob.RemoveIfExists(recurringResult.Entity.HangfireId);
 
-                await _recurringReminderService.DisableAsync(req, true);
+                await _reminderService.DisableAsync(req, true);
 
                 return new ReminderResDto(recurringResult.Entity.Id, recurringResult.Entity.Name, DateTime.MinValue,
                     recurringResult.Entity.Mentions);

@@ -46,8 +46,6 @@ internal class GuildConfig : IEntityTypeConfiguration<Guild>
         builder.Metadata.FindNavigation(nameof(Guild.GuildServerBoosters))
             .SetPropertyAccessMode(PropertyAccessMode.Field);
         builder.Metadata.FindNavigation(nameof(Guild.Reminders)).SetPropertyAccessMode(PropertyAccessMode.Field);
-        builder.Metadata.FindNavigation(nameof(Guild.RecurringReminders))
-            .SetPropertyAccessMode(PropertyAccessMode.Field);
 
         builder.HasIndex(x => x.GuildId)
             .IsUnique();
@@ -91,13 +89,6 @@ internal class GuildConfig : IEntityTypeConfiguration<Guild>
             .WithOne(x => x.Guild)
             .HasForeignKey(x => x.GuildId)
             .HasPrincipalKey(x => x.GuildId);
-
-        builder
-            .HasMany(x => x.RecurringReminders)
-            .WithOne(x => x.Guild)
-            .HasForeignKey(x => x.GuildId)
-            .HasPrincipalKey(x => x.GuildId)
-            .IsRequired(false);
 
         builder
             .HasMany(x => x.Reminders)

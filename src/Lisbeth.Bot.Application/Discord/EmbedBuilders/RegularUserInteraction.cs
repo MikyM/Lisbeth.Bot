@@ -1,6 +1,6 @@
 ﻿namespace Lisbeth.Bot.Application.Discord.EmbedBuilders;
 
-public enum UserInteraction
+public enum RegularUserInteraction
 {
     Tag,
     Reminder

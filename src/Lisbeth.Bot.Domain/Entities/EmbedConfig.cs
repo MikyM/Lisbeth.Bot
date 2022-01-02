@@ -41,7 +41,6 @@ public class EmbedConfig : SnowflakeEntity
     public List<DiscordField>? Fields { get; set; }
 
     public Reminder? Reminder { get; set; }
-    public RecurringReminder? RecurringReminder { get; set; }
     public Tag? Tag { get; set; }
     public RoleMenu? RoleMenu { get; set; }
     public TicketingConfig? TicketingConfigWithCenterMessage { get; set; }

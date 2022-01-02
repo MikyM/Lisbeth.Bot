@@ -19,7 +19,7 @@ using MikyM.Common.DataAccessLayer.Specifications;
 
 namespace Lisbeth.Bot.DataAccessLayer.Specifications.RecurringReminder;
 
-public class ActiveRecurringReminderByNameOrIdAndGuildSpec : Specification<Domain.Entities.RecurringReminder>
+public class ActiveRecurringReminderByNameOrIdAndGuildSpec : Specification<Domain.Entities.Reminder>
 {
     public ActiveRecurringReminderByNameOrIdAndGuildSpec(long id) : this("", null, id)
     {
@@ -41,5 +41,6 @@ public class ActiveRecurringReminderByNameOrIdAndGuildSpec : Specification<Domai
             Where(x => x.GuildId == guildId);
             Where(x => x.Name == name);
         }
+        Where(x => x.CronExpression != null);
     }
 }

@@ -19,11 +19,12 @@ using MikyM.Common.DataAccessLayer.Specifications;
 
 namespace Lisbeth.Bot.DataAccessLayer.Specifications.RecurringReminder;
 
-public class ActiveRecurringRemindersPerUserSpec : Specification<Domain.Entities.RecurringReminder>
+public class ActiveRecurringRemindersPerUserSpec : Specification<Domain.Entities.Reminder>
 {
     public ActiveRecurringRemindersPerUserSpec(ulong userId)
     {
         Where(x => x.CreatorId == userId);
         Where(x => !x.IsDisabled);
+        Where(x => x.CronExpression != null);
     }
 }

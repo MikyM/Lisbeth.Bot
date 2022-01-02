@@ -31,22 +31,19 @@ public class DiscordSendReminderService : IDiscordSendReminderService
 {
     private readonly IDiscordService _discord;
     private readonly IDiscordEmbedProvider _embedProvider;
-    private readonly IRecurringReminderService _recurringReminderService;
-    private readonly IReminderService _reminderService;
+    private readonly IReminderDataService _reminderService;
 
-    public DiscordSendReminderService(IReminderService reminderService,
-        IRecurringReminderService recurringReminderService, IDiscordService discord,
+    public DiscordSendReminderService(IReminderDataService reminderService, IDiscordService discord,
         IDiscordEmbedProvider embedProvider)
     {
         _reminderService = reminderService;
-        _recurringReminderService = recurringReminderService;
         _discord = discord;
         _embedProvider = embedProvider;
     }
 
     [Queue("reminder")]
     [PreserveOriginalQueue]
-    public async Task<Result> SendReminderAsync(long reminderId, Domain.Enums.ReminderType type)
+    public async Task<Result> SendReminderAsync(long reminderId, ReminderType type)
     {
         Guild guild;
         EmbedConfig? embedConfig;
@@ -57,8 +54,8 @@ public class DiscordSendReminderService : IDiscordSendReminderService
 
         switch (type)
         {
-            case Domain.Enums.ReminderType.Single:
-                var rem = await _reminderService.GetSingleBySpecAsync<Domain.Entities.Reminder>(new ActiveReminderByIdWithEmbedSpec((long)reminderId));
+            case ReminderType.Single:
+                var rem = await _reminderService.GetSingleBySpecAsync(new ActiveReminderByIdWithEmbedSpec((long)reminderId));
                 if (!rem.IsDefined() || rem.Entity.Guild?.ReminderChannelId is null)
                     return Result.FromError(new NotFoundError());
                 guild = rem.Entity.Guild;
@@ -67,8 +64,8 @@ public class DiscordSendReminderService : IDiscordSendReminderService
                 mentions = rem.Entity.Mentions;
                 channelId = rem.Entity.ChannelId;
                 break;
-            case Domain.Enums.ReminderType.Recurring:
-                var recRem = await _recurringReminderService.GetSingleBySpecAsync<RecurringReminder>(
+            case ReminderType.Recurring:
+                var recRem = await _reminderService.GetSingleBySpecAsync(
                     new ActiveRecurringReminderByIdWithEmbedSpec(reminderId));
                 if (!recRem.IsDefined() || recRem.Entity.Guild?.ReminderChannelId is null)
                     return Result.FromError(new NotFoundError());

@@ -502,7 +502,6 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
 
                     // we null cause EF core doesn't detach children objects when detaching parent and we face an ex
                     entity.Tag = null;
-                    entity.RecurringReminder = null;
                     entity.Reminder = null;
                     entity.RoleMenu = null;
 
