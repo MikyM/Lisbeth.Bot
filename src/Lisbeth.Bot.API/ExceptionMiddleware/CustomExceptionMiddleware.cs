@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.IO;
 using System.Net;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -37,6 +38,7 @@ public class CustomExceptionMiddleware
     {
         try
         {
+            httpContext.Request.EnableBuffering();
             await _next(httpContext);
         }
         catch (Exception ex)
@@ -45,16 +47,25 @@ public class CustomExceptionMiddleware
         }
     }
 
-    private Task HandleExceptionAsync(HttpContext context, Exception exception)
+    private async Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
-        _logger.LogError(exception, exception.ToFormattedString());
+        _logger.LogError(exception,
+            $"Headers: {string.Join(" ", context.Request.Headers)}\nRoute values: {string.Join(" ", context.Request.RouteValues)}\nQuery params: {string.Join(" ", context.Request.Query)}\nBody: {await GetRequestBody(context)} , Exception details: {exception.ToFormattedString()}");
 
         context.Response.ContentType = "application/json";
-        context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-        return context.Response.WriteAsync(new ErrorDetails
+        context.Response.StatusCode = (int) HttpStatusCode.InternalServerError;
+
+        await context.Response.WriteAsync(new ErrorDetails
         {
-            StatusCode = context.Response.StatusCode,
-            Message = "Internal Server Error"
+            StatusCode = context.Response.StatusCode, Message = "Internal Server Error"
         }.ToString());
+    }
+
+    private async Task<string> GetRequestBody(HttpContext context)
+    {
+        if (context.Request.Body.Length == 0) return "";
+
+        context.Request.Body.Seek(0, SeekOrigin.Begin);
+        return await new StreamReader(context.Request.Body).ReadToEndAsync();
     }
 }
