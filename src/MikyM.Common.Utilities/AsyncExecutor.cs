@@ -47,7 +47,8 @@ public class AsyncExecutor : IAsyncExecutor
                 var service = scope.Resolve<T>();
                 await func(service);
             })
-            .ContinueWith(x => _lifetimeScope.Resolve<ILogger<T>>().LogError(x.Exception?.ToFormattedString()),
+            .ContinueWith(
+                x => _lifetimeScope.Resolve<ILogger<T>>().LogError(x.Exception, x.Exception?.ToFormattedString()),
                 TaskContinuationOptions.OnlyOnFaulted);
     }
 }

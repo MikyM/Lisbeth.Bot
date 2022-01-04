@@ -26,7 +26,7 @@ public interface IDiscordMessageService
 {
     Task<Result<DiscordEmbed>> PruneAsync(InteractionContext ctx, PruneReqDto req);
     Task<Result<DiscordEmbed>> PruneAsync(ContextMenuContext ctx, PruneReqDto req);
-    Task<Result<DiscordEmbed>> PruneAsync(PruneReqDto req, DiscordChannel channel, DiscordGuild guild,
+    Task<Result<DiscordEmbed>> PruneAsync(PruneReqDto req, DiscordChannel channel, DiscordGuild discordGuild,
         DiscordMember moderator, ulong? interactionId = null);
 
     Task LogMessageUpdatedEventAsync(MessageUpdateEventArgs args);
