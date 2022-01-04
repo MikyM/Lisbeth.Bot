@@ -73,18 +73,24 @@ public class DiscordMessageService : IDiscordMessageService
         return await PruneAsync(req, ctx.Channel, ctx.Guild, ctx.Member, ctx.InteractionId);
     }
 
-    public async Task<Result<DiscordEmbed>> PruneAsync(PruneReqDto req, DiscordChannel channel, DiscordGuild guild,
+    public async Task<Result<DiscordEmbed>> PruneAsync(PruneReqDto req, DiscordChannel channel, DiscordGuild discordGuild,
         DiscordMember moderator, ulong? interactionId = null)
     {
         if (channel is null) throw new ArgumentNullException(nameof(channel));
-        if (guild is null) throw new ArgumentNullException(nameof(guild));
+        if (discordGuild is null) throw new ArgumentNullException(nameof(discordGuild));
         if (moderator is null) throw new ArgumentNullException(nameof(moderator));
         if (req is null) throw new ArgumentNullException(nameof(req));
 
         if (!moderator.IsModerator())
             return new DiscordNotAuthorizedError();
 
-        await _discordGuildLogger.LogToDiscordAsync(guild, req, DiscordModeration.Prune, moderator);
+        var guildRes =
+            await _guildDataService.GetSingleBySpecAsync(new ActiveGuildByDiscordIdWithModerationSpec(discordGuild.Id));
+
+        if (!guildRes.IsDefined(out var guild) || !guild.IsModerationModuleEnabled)
+            return new NotFoundError("Guild not found or it does not have moderation enabled");
+
+        await _discordGuildLogger.LogToDiscordAsync(discordGuild, req, DiscordModeration.Prune, moderator);
 
         int count = 0;
 
@@ -151,6 +157,7 @@ public class DiscordMessageService : IDiscordMessageService
 
         return _embedBuilder.WithType(DiscordModeration.Prune)
             .EnrichFrom(new PruneReqResponseEnricher(req, count))
+            .WithEmbedColor(new DiscordColor(guild.EmbedHexColor))
             .WithCase(id)
             .Build();
     }
