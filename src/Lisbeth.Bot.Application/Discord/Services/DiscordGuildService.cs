@@ -22,16 +22,17 @@ using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
-using Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig;
-using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
-using MikyM.Discord.Extensions.BaseExtensions;
-using MikyM.Discord.Interfaces;
-using System.Collections.Generic;
-using System.Text.Json;
 using Lisbeth.Bot.Domain;
+using Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig;
+using Lisbeth.Bot.Domain.DTOs.Request.ReminderConfig;
+using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MikyM.Common.Utilities.Extensions;
+using MikyM.Discord.Enums;
+using MikyM.Discord.Extensions.BaseExtensions;
+using MikyM.Discord.Interfaces;
+using System.Collections.Generic;
 
 namespace Lisbeth.Bot.Application.Discord.Services;
 
@@ -132,6 +133,23 @@ public class DiscordGuildService : IDiscordGuildService
         return await this.CreateModerationModuleAsync(ctx.Guild, ctx.Member, req);
     }
 
+    public async Task<Result<DiscordEmbed>> CreateModuleAsync(ReminderConfigReqDto req)
+    {
+        if (req is null) throw new ArgumentNullException(nameof(req));
+
+        DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
+
+        return await this.CreateReminderModuleAsync(guild, await guild.GetMemberAsync(req.RequestedOnBehalfOfId), req);
+    }
+
+    public async Task<Result<DiscordEmbed>> CreateModuleAsync(InteractionContext ctx, ReminderConfigReqDto req)
+    {
+        if (ctx is null) throw new ArgumentNullException(nameof(ctx));
+        if (req is null) throw new ArgumentNullException(nameof(req));
+
+        return await this.CreateReminderModuleAsync(ctx.Guild, ctx.Member, req);
+    }
+
     public async Task<Result<DiscordEmbed>> RepairConfigAsync(InteractionContext ctx,
         ModerationConfigRepairReqDto req)
     {
@@ -170,6 +188,25 @@ public class DiscordGuildService : IDiscordGuildService
         return await this.RepairConfigAsync(ctx.Guild, GuildModule.Ticketing, ctx.Member);
     }
 
+    public async Task<Result<DiscordEmbed>> RepairConfigAsync(ReminderConfigRepairReqDto req)
+    {
+        if (req is null) throw new ArgumentNullException(nameof(req));
+
+        DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
+
+        return await this.RepairConfigAsync(guild, GuildModule.Reminders,
+            await guild.GetMemberAsync(req.RequestedOnBehalfOfId), req);
+    }
+
+    public async Task<Result<DiscordEmbed>> RepairConfigAsync(InteractionContext ctx,
+        ReminderConfigRepairReqDto req)
+    {
+        if (req is null) throw new ArgumentNullException(nameof(req));
+        if (ctx is null) throw new ArgumentNullException(nameof(ctx));
+
+        return await this.RepairConfigAsync(ctx.Guild, GuildModule.Reminders, ctx.Member, req);
+    }
+
     public async Task<Result<DiscordEmbed>> DisableModuleAsync(ModerationConfigDisableReqDto req)
     {
         if (req is null) throw new ArgumentNullException(nameof(req));
@@ -206,6 +243,25 @@ public class DiscordGuildService : IDiscordGuildService
         if (ctx is null) throw new ArgumentNullException(nameof(ctx));
 
         return await this.DisableModuleAsync(ctx.Guild, ctx.Member, GuildModule.Ticketing);
+    }
+
+    public async Task<Result<DiscordEmbed>> DisableModuleAsync(InteractionContext ctx,
+        ReminderConfigDisableReqDto req)
+    {
+        if (req is null) throw new ArgumentNullException(nameof(req));
+        if (ctx is null) throw new ArgumentNullException(nameof(ctx));
+
+        return await this.DisableModuleAsync(ctx.Guild, ctx.Member, GuildModule.Reminders);
+    }
+
+    public async Task<Result<DiscordEmbed>> DisableModuleAsync(ReminderConfigDisableReqDto req)
+    {
+        if (req is null) throw new ArgumentNullException(nameof(req));
+
+        DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
+
+        return await this.DisableModuleAsync(guild, await guild.GetMemberAsync(req.RequestedOnBehalfOfId),
+            GuildModule.Reminders);
     }
 
     public async Task<Result<int>> CreateOverwritesForMutedRoleAsync(CreateMuteOverwritesReqDto req)
@@ -350,6 +406,29 @@ public class DiscordGuildService : IDiscordGuildService
         return Result.FromSuccess();
     }
 
+    private async Task<Result<DiscordEmbed>> CreateReminderModuleAsync(DiscordGuild guild,
+        DiscordMember requestingMember, ReminderConfigReqDto req)
+    {
+        if (guild is null) throw new ArgumentNullException(nameof(guild));
+        if (requestingMember is null) throw new ArgumentNullException(nameof(requestingMember));
+        if (req is null) throw new ArgumentNullException(nameof(req));
+
+        if (!requestingMember.IsAdmin()) return new DiscordNotAuthorizedError();
+
+        var guildRes = await _guildDataService.AddConfigAsync(req, true);
+        if (!guildRes.IsDefined(out var foundGuild)) return Result<DiscordEmbed>.FromError(guildRes);
+
+        var embed = new DiscordEmbedBuilder();
+        embed.WithColor(new DiscordColor(foundGuild.EmbedHexColor));
+        embed.WithAuthor("Reminder configuration");
+        embed.WithDescription("Process completed successfully");
+        embed.AddField("Reminder channel", ExtendedFormatter.Mention(req.ChannelId, DiscordEntity.Channel));
+        embed.WithFooter(
+            $"Lisbeth configuration requested by {requestingMember.GetFullDisplayName()} | Id: {requestingMember.Id}");
+
+        return embed.Build();
+    }
+
     private async Task<Result<DiscordEmbed>> CreateTicketingModuleAsync(DiscordGuild guild,
         DiscordMember requestingMember, TicketingConfigReqDto req)
     {
@@ -443,7 +522,7 @@ public class DiscordGuildService : IDiscordGuildService
     }
 
     private async Task<Result<DiscordEmbed>> RepairConfigAsync(DiscordGuild discordGuild,
-        GuildModule type, DiscordMember requestingMember)
+        GuildModule type, DiscordMember requestingMember, ReminderConfigRepairReqDto? reminderDto = null)
     {
         if (discordGuild is null) throw new ArgumentNullException(nameof(discordGuild));
         if (requestingMember is null) throw new ArgumentNullException(nameof(requestingMember));
@@ -660,6 +739,25 @@ public class DiscordGuildService : IDiscordGuildService
                 }
 
                 break;
+            case GuildModule.Reminders:
+                if (reminderDto is null)
+                    throw new ArgumentNullException(nameof(reminderDto));
+
+                guildResult = await _guildDataService.GetSingleBySpecAsync(
+                    new ActiveGuildByIdSpec(discordGuild.Id));
+
+                if (!guildResult.IsDefined() || guildResult.Entity.ModerationConfig is null)
+                    return Result<DiscordEmbed>.FromError(guildResult);
+                if (!guildResult.Entity.IsReminderModuleEnabled)
+                    return new DisabledEntityError(nameof(guildResult.Entity.ReminderChannelId));
+
+                guild = guildResult.Entity;
+
+                var partial = await _guildDataService.RepairModuleConfigAsync(reminderDto, true);
+
+                if (!partial.IsSuccess)
+                    return Result<DiscordEmbed>.FromError(partial);
+                break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(type), type, null);
         }
@@ -697,6 +795,14 @@ public class DiscordGuildService : IDiscordGuildService
                     return new InvalidOperationError();
 
                 await _guildDataService.DisableConfigAsync(discordGuild.Id, GuildModule.Moderation, true);
+                break;
+            case GuildModule.Reminders:
+                if (!guildResult.IsDefined())
+                    return Result<DiscordEmbed>.FromError(guildResult);
+                if (!guildResult.Entity.IsReminderModuleEnabled)
+                    return new InvalidOperationError("Reminder module is already disabled");
+
+                await _guildDataService.DisableConfigAsync(discordGuild.Id, GuildModule.Reminders, true);
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(type), type, null);

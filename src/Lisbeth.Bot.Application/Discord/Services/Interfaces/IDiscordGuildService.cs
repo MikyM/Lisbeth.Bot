@@ -20,6 +20,7 @@ using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig;
+using Lisbeth.Bot.Domain.DTOs.Request.ReminderConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
 
 namespace Lisbeth.Bot.Application.Discord.Services.Interfaces;
@@ -32,12 +33,18 @@ public interface IDiscordGuildService
     Task<Result<DiscordEmbed>> CreateModuleAsync(InteractionContext ctx, ModerationConfigReqDto req);
     Task<Result<DiscordEmbed>> CreateModuleAsync(InteractionContext ctx, TicketingConfigReqDto req);
     Task<Result<DiscordEmbed>> CreateModuleAsync(TicketingConfigReqDto req);
+    Task<Result<DiscordEmbed>> CreateModuleAsync(ReminderConfigReqDto req);
+    Task<Result<DiscordEmbed>> CreateModuleAsync(InteractionContext ctx, ReminderConfigReqDto req);
     Task<Result<DiscordEmbed>> DisableModuleAsync(ModerationConfigDisableReqDto req);
     Task<Result<DiscordEmbed>> DisableModuleAsync(TicketingConfigDisableReqDto req);
+    Task<Result<DiscordEmbed>> DisableModuleAsync(ReminderConfigDisableReqDto req);
+    Task<Result<DiscordEmbed>> DisableModuleAsync(InteractionContext ctx, ReminderConfigDisableReqDto req);
     Task<Result<DiscordEmbed>> DisableModuleAsync(InteractionContext ctx, ModerationConfigDisableReqDto req);
     Task<Result<DiscordEmbed>> DisableModuleAsync(InteractionContext ctx, TicketingConfigDisableReqDto req);
     Task<Result<DiscordEmbed>> RepairConfigAsync(ModerationConfigRepairReqDto req);
     Task<Result<DiscordEmbed>> RepairConfigAsync(TicketingConfigRepairReqDto req);
+    Task<Result<DiscordEmbed>> RepairConfigAsync(ReminderConfigRepairReqDto req);
+    Task<Result<DiscordEmbed>> RepairConfigAsync(InteractionContext ctx, ReminderConfigRepairReqDto req);
     Task<Result<DiscordEmbed>> RepairConfigAsync(InteractionContext ctx, ModerationConfigRepairReqDto req);
     Task<Result<DiscordEmbed>> RepairConfigAsync(InteractionContext ctx, TicketingConfigRepairReqDto req);
     Task<Result<int>> CreateOverwritesForMutedRoleAsync(CreateMuteOverwritesReqDto req);

@@ -19,6 +19,7 @@ using Autofac;
 using EFCoreSecondLevelCacheInterceptor;
 using IdGen;
 using Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
+using Lisbeth.Bot.Application.Discord.EmbedBuilders;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Application.Discord.Services;
 using Lisbeth.Bot.Application.Services;
@@ -61,41 +62,54 @@ public class AutofacContainerModule : Module
         // pagination stuff
         builder.RegisterType<HttpContextAccessor>().As<IHttpContextAccessor>().SingleInstance();
         builder.Register(x =>
-        {
-            var accessor = x.Resolve<IHttpContextAccessor>();
-            var request = accessor?.HttpContext?.Request;
-            var uri = string.Concat(request?.Scheme, "://", request?.Host.ToUriComponent());
-            return new UriService(uri);
-        }).As<IUriService>().SingleInstance();
+            {
+                var accessor = x.Resolve<IHttpContextAccessor>();
+                var request = accessor?.HttpContext?.Request;
+                var uri = string.Concat(request?.Scheme, "://", request?.Host.ToUriComponent());
+                return new UriService(uri);
+            })
+            .As<IUriService>()
+            .SingleInstance();
 
         builder.RegisterType<AsyncExecutor>().As<IAsyncExecutor>().SingleInstance();
         builder.RegisterType<TicketQueueService>().As<ITicketQueueService>().SingleInstance();
 
+        builder.RegisterGeneric(typeof(ResponseDiscordEmbedBuilder<>))
+            .As(typeof(IResponseDiscordEmbedBuilder<>))
+            .InstancePerDependency();
+
         // Register Entity Framework
         builder.Register(x =>
-        {
-            var optionsBuilder = new DbContextOptionsBuilder<LisbethBotDbContext>();
-            //optionsBuilder.UseInMemoryDatabase("testdb");
-            optionsBuilder.AddInterceptors(x.Resolve<SecondLevelCacheInterceptor>());
-            //optionsBuilder.EnableSensitiveDataLogging();
-            //optionsBuilder.UseLoggerFactory(x.Resolve<ILoggerFactory>());
-            optionsBuilder.UseNpgsql(x.Resolve<IConfiguration>().GetConnectionString("MainDb"));
-            return new LisbethBotDbContext(optionsBuilder.Options);
-        }).AsSelf().InstancePerLifetimeScope();
+            {
+                var optionsBuilder = new DbContextOptionsBuilder<LisbethBotDbContext>();
+                //optionsBuilder.UseInMemoryDatabase("testdb");
+                optionsBuilder.AddInterceptors(x.Resolve<SecondLevelCacheInterceptor>());
+                //optionsBuilder.EnableSensitiveDataLogging();
+                //optionsBuilder.UseLoggerFactory(x.Resolve<ILoggerFactory>());
+                optionsBuilder.UseNpgsql(x.Resolve<IConfiguration>().GetConnectionString("MainDb"));
+                return new LisbethBotDbContext(optionsBuilder.Options);
+            })
+            .AsSelf()
+            .InstancePerLifetimeScope();
 
         builder.Register(_ =>
-        {
-            var epoch = new DateTime(2021, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-            var structure = new IdStructure(45, 2, 16);
-            var options = new IdGeneratorOptions(structure, new DefaultTimeSource(epoch),
-                SequenceOverflowStrategy.SpinWait);
-            return new IdGenerator(0, options);
-        }).AsSelf().SingleInstance();
+            {
+                var epoch = new DateTime(2021, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+                var structure = new IdStructure(45, 2, 16);
+                var options = new IdGeneratorOptions(structure, new DefaultTimeSource(epoch),
+                    SequenceOverflowStrategy.SpinWait);
+                return new IdGenerator(0, options);
+            })
+            .AsSelf()
+            .SingleInstance();
 
         builder.RegisterType<DiscordEmbedProvider>().As<IDiscordEmbedProvider>().SingleInstance();
-        builder.RegisterType<SpecificationEvaluator>().As<ISpecificationEvaluator>().UsingConstructor()
+        builder.RegisterType<SpecificationEvaluator>()
+            .As<ISpecificationEvaluator>()
+            .UsingConstructor()
             .SingleInstance();
         builder.RegisterGeneric(typeof(DiscordEmbedConfiguratorService<>))
-            .As(typeof(IDiscordEmbedConfiguratorService<>)).InstancePerLifetimeScope();
+            .As(typeof(IDiscordEmbedConfiguratorService<>))
+            .InstancePerLifetimeScope();
     }
 }

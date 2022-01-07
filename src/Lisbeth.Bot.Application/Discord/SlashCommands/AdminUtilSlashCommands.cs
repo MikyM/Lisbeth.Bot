@@ -1,4 +1,21 @@
-﻿using DSharpPlus;
+﻿// This file is part of Lisbeth.Bot project
+//
+// Copyright (C) 2021-2022 Krzysztof Kupisz - MikyM
+// 
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+// 
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
@@ -6,8 +23,10 @@ using FluentValidation;
 using Lisbeth.Bot.Application.Discord.Commands.Ticket;
 using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
 using Lisbeth.Bot.Application.Validation.ModerationConfig;
+using Lisbeth.Bot.Application.Validation.ReminderConfig;
 using Lisbeth.Bot.Application.Validation.TicketingConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig;
+using Lisbeth.Bot.Domain.DTOs.Request.ReminderConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
 using MikyM.Common.Application.CommandHandlers;
 
@@ -108,7 +127,9 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
         [Option("clean-after", "After how many hours should inactive closed tickets be cleared")]
         string? cleanAfter = "",
         [Option("close-after", "After how many hours should inactive opened tickets be closed")]
-        string? closeAfter = "")
+        string? closeAfter = "",
+        [Option("reminder-channel", "Channel to send general reminders to")]
+        DiscordChannel? reminderChannel = null)
     {
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
             new DiscordInteractionResponseBuilder().AsEphemeral(true));
@@ -214,6 +235,47 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
                         var disableModerationValidator = new ModerationConfigDisableReqValidator(ctx.Client);
                         await disableModerationValidator.ValidateAndThrowAsync(disableModerationReq);
                         result = await _discordGuildService.DisableModuleAsync(ctx, disableModerationReq);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(action), action, null);
+                }
+
+                break;
+            case GuildModule.Reminders:
+                switch (action)
+                {
+                    case ModuleActionType.Enable:
+                        var enableReminderReq = new ReminderConfigReqDto
+                        {
+                            GuildId = ctx.Guild.Id,
+                            RequestedOnBehalfOfId = ctx.Member.Id
+
+                        };
+                        var enableReminderValidator = new ReminderConfigReqValidator(ctx.Client);
+                        await enableReminderValidator.ValidateAndThrowAsync(enableReminderReq);
+                        result = await _discordGuildService.CreateModuleAsync(ctx, enableReminderReq);
+                        break;
+                    case ModuleActionType.Repair:
+                        var repairReminderReq = new ReminderConfigRepairReqDto
+                        {
+                            GuildId = ctx.Guild.Id,
+                            RequestedOnBehalfOfId = ctx.Member.Id
+                        };
+                        var repairReminderValidator = new ReminderConfigRepairReqValidator(ctx.Client);
+                        await repairReminderValidator.ValidateAndThrowAsync(repairReminderReq);
+                        result = await _discordGuildService.RepairConfigAsync(ctx, repairReminderReq);
+                        break;
+                    case ModuleActionType.Edit:
+                        break;
+                    case ModuleActionType.Disable:
+                        var disableReminderReq = new ReminderConfigDisableReqDto
+                        {
+                            GuildId = ctx.Guild.Id,
+                            RequestedOnBehalfOfId = ctx.Member.Id
+                        };
+                        var disableReminderValidator = new ReminderConfigDisableReqValidator(ctx.Client);
+                        await disableReminderValidator.ValidateAndThrowAsync(disableReminderReq);
+                        result = await _discordGuildService.DisableModuleAsync(ctx, disableReminderReq);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException(nameof(action), action, null);

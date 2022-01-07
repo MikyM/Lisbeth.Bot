@@ -32,8 +32,12 @@ public class ModerationConfigDisableReqValidator : AbstractValidator<ModerationC
     public ModerationConfigDisableReqValidator(DiscordClient client)
     {
         RuleFor(x => x.GuildId)
-            .SetAsyncValidator(new DiscordGuildIdValidator<ModerationConfigDisableReqDto>(client));
+            .NotEmpty()
+            .DependentRules(
+                x => x.SetAsyncValidator(new DiscordGuildIdValidator<ModerationConfigDisableReqDto>(client)));
         RuleFor(x => x.RequestedOnBehalfOfId)
-            .SetAsyncValidator(new DiscordUserIdValidator<ModerationConfigDisableReqDto>(client));
+            .NotEmpty()
+            .DependentRules(x =>
+                x.SetAsyncValidator(new DiscordUserIdValidator<ModerationConfigDisableReqDto>(client)));
     }
 }

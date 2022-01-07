@@ -132,4 +132,9 @@ public sealed class Guild : SnowflakeEntity
     [MemberNotNullWhen(true, nameof(ModerationConfig))]
     public bool IsModerationModuleEnabled
         => this.ModerationConfig is not null;
+
+
+    [MemberNotNullWhen(true, nameof(ModerationConfig))]
+    public bool IsReminderModuleEnabled
+        => this.ReminderChannelId is not null;
 }

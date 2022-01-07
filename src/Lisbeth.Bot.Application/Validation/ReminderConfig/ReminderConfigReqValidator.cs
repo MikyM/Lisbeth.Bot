@@ -1,6 +1,6 @@
 ﻿// This file is part of Lisbeth.Bot project
 //
-// Copyright (C) 2021 Krzysztof Kupisz - MikyM
+// Copyright (C) 2021-2022 Krzysztof Kupisz - MikyM
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -18,25 +18,29 @@
 using DSharpPlus;
 using FluentValidation;
 using Lisbeth.Bot.Application.Validation.ReusablePropertyValidation;
-using Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig;
+using Lisbeth.Bot.Domain.DTOs.Request.ReminderConfig;
 using MikyM.Discord.Interfaces;
 
-namespace Lisbeth.Bot.Application.Validation.ModerationConfig;
+namespace Lisbeth.Bot.Application.Validation.ReminderConfig;
 
-public class ModerationConfigRepairReqValidator : AbstractValidator<ModerationConfigRepairReqDto>
+public class ReminderConfigReqValidator : AbstractValidator<ReminderConfigReqDto>
 {
-    public ModerationConfigRepairReqValidator(IDiscordService discord) : this(discord.Client)
+    public ReminderConfigReqValidator(IDiscordService discord) : this(discord.Client)
     {
     }
 
-    public ModerationConfigRepairReqValidator(DiscordClient client)
+    public ReminderConfigReqValidator(DiscordClient client)
     {
+        CascadeMode = CascadeMode.Stop;
+
         RuleFor(x => x.GuildId)
             .NotEmpty()
-            .DependentRules(x =>
-                x.SetAsyncValidator(new DiscordGuildIdValidator<ModerationConfigRepairReqDto>(client)));
+            .DependentRules(x => x.SetAsyncValidator(new DiscordGuildIdValidator<ReminderConfigReqDto>(client)));
         RuleFor(x => x.RequestedOnBehalfOfId)
             .NotEmpty()
-            .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<ModerationConfigRepairReqDto>(client)));
+            .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<ReminderConfigReqDto>(client)));
+        RuleFor(x => x.ChannelId)
+            .NotEmpty()
+            .DependentRules(x => x.SetAsyncValidator(new DiscordChannelIdValidator<ReminderConfigReqDto>(client)));
     }
 }

@@ -22,7 +22,7 @@ namespace Lisbeth.Bot.Application.Discord.Extensions;
 
 public static class DiscordMemberExtensions
 {
-    public static async Task<Result> MuteAsync(this DiscordMember member, ulong roleId)
+    public static async Task<Result> GrantMuteRoleAsync(this DiscordMember member, ulong roleId)
     {
         if (member.IsModerator()) return new DiscordNotAuthorizedError();
 
@@ -40,7 +40,7 @@ public static class DiscordMemberExtensions
         return Result.FromSuccess();
     }
 
-    public static async Task<Result> UnmuteAsync(this DiscordMember member, ulong roleId)
+    public static async Task<Result> RevokeMuteRoleAsync(this DiscordMember member, ulong roleId)
     {
         if (member.IsModerator()) return new DiscordNotAuthorizedError();
 
@@ -49,6 +49,54 @@ public static class DiscordMemberExtensions
         try
         {
             await member.RevokeRoleAsync(mutedRole);
+        }
+        catch (Exception ex)
+        {
+            return ex;
+        }
+
+        return Result.FromSuccess();
+    }
+
+    public static async Task<Result> TimeoutAsync(this DiscordMember member, DateTimeOffset timeoutUntil)
+    {
+        if (member.IsModerator()) return new DiscordNotAuthorizedError();
+
+        try
+        {
+            await member.ModifyAsync(x => x.CommunicationDisabledUntil = timeoutUntil);
+        }
+        catch (Exception ex)
+        {
+            return ex;
+        }
+
+        return Result.FromSuccess();
+    }
+
+    public static async Task<Result> MuteAsync(this DiscordMember member, ulong roleId)
+    {
+        if (member.IsModerator()) return new DiscordNotAuthorizedError();
+
+        try
+        {
+            await member.GrantMuteRoleAsync(roleId);
+        }
+        catch (Exception ex)
+        {
+            return ex;
+        }
+
+        return Result.FromSuccess();
+    }
+
+    public static async Task<Result> UnmuteAsync(this DiscordMember member, ulong roleId)
+    {
+        if (member.IsModerator()) return new DiscordNotAuthorizedError();
+
+        try
+        {
+            await member.RevokeMuteRoleAsync(roleId);
         }
         catch (Exception ex)
         {

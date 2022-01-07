@@ -16,11 +16,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using AutoMapper;
-using Lisbeth.Bot.Application.Enums;
 using Lisbeth.Bot.Application.Exceptions;
 using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig;
+using Lisbeth.Bot.Domain.DTOs.Request.ReminderConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.RoleMenu;
 using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
@@ -59,6 +59,22 @@ public class GuildDataService : CrudService<Guild, LisbethBotDbContext>, IGuildD
         return result.Entity;
     }
 
+    public async Task<Result<Guild>> AddConfigAsync(ReminderConfigReqDto req, bool shouldSave = false)
+    {
+        var result = await base.GetSingleBySpecAsync(
+            new ActiveGuildByIdSpec(req.GuildId));
+        if (!result.IsDefined(out var guild)) return Result<Guild>.FromError(result);
+        if (guild.IsReminderModuleEnabled)
+            return new InvalidOperationError("Reminder module is already enabled");
+
+        this.BeginUpdate(guild);
+        guild.ReminderChannelId = req.ChannelId;
+
+        if (shouldSave) await this.CommitAsync();
+
+        return await this.EnableConfigAsync(req.GuildId, GuildModule.Reminders, shouldSave);
+    }
+
     public async Task<Result<Guild>> AddConfigAsync(ModerationConfigReqDto req, bool shouldSave = false)
     {
         var result = await base.GetSingleBySpecAsync<Guild>(
@@ -80,7 +96,7 @@ public class GuildDataService : CrudService<Guild, LisbethBotDbContext>, IGuildD
         switch (type)
         {
             case GuildModule.Ticketing:
-                result = await base.GetSingleBySpecAsync<Guild>(
+                result = await base.GetSingleBySpecAsync(
                     new ActiveGuildByDiscordIdWithTicketingSpecifications(guildId));
                 if (!result.IsDefined() || result.Entity.TicketingConfig is null)
                     return Result.FromError(new NotFoundError());
@@ -90,7 +106,7 @@ public class GuildDataService : CrudService<Guild, LisbethBotDbContext>, IGuildD
                 await _ticketingService.DisableAsync(result.Entity.TicketingConfig, shouldSave);
                 break;
             case GuildModule.Moderation:
-                result = await base.GetSingleBySpecAsync<Guild>(
+                result = await base.GetSingleBySpecAsync(
                     new ActiveGuildByDiscordIdWithModerationSpec(guildId));
                 if (!result.IsDefined() || result.Entity.ModerationConfig is null)
                     return Result.FromError(new NotFoundError());
@@ -98,6 +114,18 @@ public class GuildDataService : CrudService<Guild, LisbethBotDbContext>, IGuildD
                     return Result.FromError(new DisabledEntityError(nameof(result.Entity.ModerationConfig)));
 
                 await _moderationService.DisableAsync(result.Entity.ModerationConfig, shouldSave);
+                break;
+            case GuildModule.Reminders:
+                result = await base.GetSingleBySpecAsync(
+                    new ActiveGuildByIdSpec(guildId));
+                if (!result.IsDefined(out var guild))
+                    return Result.FromError(result);
+                if (!guild.IsReminderModuleEnabled)
+                    return new DisabledEntityError(nameof(guild.ReminderChannelId));
+
+                this.BeginUpdate(guild);
+                guild.ReminderChannelId = null;
+                if (shouldSave) await base.CommitAsync();
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(type), type, null);
@@ -112,7 +140,7 @@ public class GuildDataService : CrudService<Guild, LisbethBotDbContext>, IGuildD
         switch (type)
         {
             case GuildModule.Ticketing:
-                result = await base.GetSingleBySpecAsync<Guild>(
+                result = await base.GetSingleBySpecAsync(
                     new ActiveGuildByDiscordIdWithTicketingSpecifications(guildId));
                 if (!result.IsDefined() || result.Entity.TicketingConfig is null)
                     return Result<Guild>.FromError(new NotFoundError());
@@ -125,7 +153,7 @@ public class GuildDataService : CrudService<Guild, LisbethBotDbContext>, IGuildD
                 if (shouldSave) await _ticketingService.CommitAsync();
                 break;
             case GuildModule.Moderation:
-                result = await base.GetSingleBySpecAsync<Guild>(
+                result = await base.GetSingleBySpecAsync(
                     new ActiveGuildByDiscordIdWithModerationSpec(guildId));
                 if (!result.IsDefined() || result.Entity.ModerationConfig is null)
                     return Result<Guild>.FromError(new NotFoundError());
@@ -136,6 +164,11 @@ public class GuildDataService : CrudService<Guild, LisbethBotDbContext>, IGuildD
                 result.Entity.ModerationConfig.IsDisabled = false;
 
                 if (shouldSave) await _moderationService.CommitAsync();
+                break;
+            case GuildModule.Reminders:
+                result = await base.GetSingleBySpecAsync(
+                    new ActiveGuildByIdSpec(guildId));
+                // ignored for now
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(type), type, null);
@@ -179,6 +212,23 @@ public class GuildDataService : CrudService<Guild, LisbethBotDbContext>, IGuildD
         if (req.OpenedCategoryId is not null)
             result.Entity.TicketingConfig.OpenedCategoryId = req.OpenedCategoryId.Value;
         if (req.LogChannelId is not null) result.Entity.TicketingConfig.LogChannelId = req.LogChannelId.Value;
+
+        if (shouldSave) await _ticketingService.CommitAsync();
+
+        return Result.FromSuccess();
+    }
+
+    public async Task<Result> RepairModuleConfigAsync(ReminderConfigRepairReqDto req, bool shouldSave = false)
+    {
+        var result = await base.GetSingleBySpecAsync<Guild>(
+            new ActiveGuildByDiscordIdWithTicketingSpecifications(req.GuildId));
+        if (!result.IsDefined() || result.Entity.TicketingConfig is null)
+            return Result.FromError(new NotFoundError());
+        if (result.Entity.TicketingConfig.IsDisabled)
+            return Result.FromError(new DisabledEntityError(nameof(result.Entity.ReminderChannelId)));
+
+        base.BeginUpdate(result.Entity);
+        result.Entity.ReminderChannelId = req.ChannelId;
 
         if (shouldSave) await _ticketingService.CommitAsync();
 

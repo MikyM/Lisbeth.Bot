@@ -15,17 +15,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using Lisbeth.Bot.Domain.DTOs.Request.Base;
 
-using FluentValidation;
+namespace Lisbeth.Bot.Domain.DTOs.Request.ReminderConfig;
 
-namespace Lisbeth.Bot.Application.Validation;
-
-public static class FluentValidationExtensions
+public class ReminderConfigDisableReqDto : BaseAuthWithGuildReqDto
 {
-    public static IRuleBuilderOptions<T, TProperty> DependentRules<T, TProperty>(
-        this IRuleBuilderOptions<T, TProperty> currentRule,
-        Action<IRuleBuilderOptions<T, TProperty>> action)
-    {
-        return currentRule.DependentRules(() => action(currentRule));
-    }
+
 }

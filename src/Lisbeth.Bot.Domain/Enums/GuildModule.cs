@@ -20,5 +20,6 @@ namespace Lisbeth.Bot.Domain.Enums;
 public enum GuildModule
 {
     Ticketing,
-    Moderation
+    Moderation,
+    Reminders
 }
