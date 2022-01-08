@@ -245,10 +245,13 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
                 switch (action)
                 {
                     case ModuleActionType.Enable:
+                        if (reminderChannel is null)
+                            throw new ArgumentNullException(nameof(reminderChannel));
                         var enableReminderReq = new ReminderConfigReqDto
                         {
                             GuildId = ctx.Guild.Id,
-                            RequestedOnBehalfOfId = ctx.Member.Id
+                            RequestedOnBehalfOfId = ctx.Member.Id,
+                            ChannelId = reminderChannel.Id
 
                         };
                         var enableReminderValidator = new ReminderConfigReqValidator(ctx.Client);
@@ -256,10 +259,13 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
                         result = await _discordGuildService.CreateModuleAsync(ctx, enableReminderReq);
                         break;
                     case ModuleActionType.Repair:
+                        if (reminderChannel is null)
+                            throw new ArgumentNullException(nameof(reminderChannel));
                         var repairReminderReq = new ReminderConfigRepairReqDto
                         {
                             GuildId = ctx.Guild.Id,
-                            RequestedOnBehalfOfId = ctx.Member.Id
+                            RequestedOnBehalfOfId = ctx.Member.Id,
+                            ChannelId = reminderChannel.Id
                         };
                         var repairReminderValidator = new ReminderConfigRepairReqValidator(ctx.Client);
                         await repairReminderValidator.ValidateAndThrowAsync(repairReminderReq);

@@ -15,8 +15,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Lisbeth.Bot.DataAccessLayer.Repositories.Interfaces;
+using Lisbeth.Bot.DataAccessLayer;
 
-public interface IReminderRepository : IRepository<Reminder>
+namespace Lisbeth.Bot.Application.Services.Database.Interfaces;
+
+public interface IPruneDataService : ICrudDataService<Prune, LisbethBotDbContext>
 {
 }

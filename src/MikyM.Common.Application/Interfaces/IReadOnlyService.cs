@@ -20,7 +20,7 @@ using MikyM.Common.DataAccessLayer.Specifications;
 
 namespace MikyM.Common.Application.Interfaces;
 
-public interface IReadOnlyService<TEntity, TContext> : IServiceBase<TContext>
+public interface IReadOnlyDataService<TEntity, TContext> : IDataServiceBase<TContext>
     where TEntity : AggregateRootEntity where TContext : DbContext
 {
     Task<Result<TEntity>> GetAsync(params object[] keyValues);

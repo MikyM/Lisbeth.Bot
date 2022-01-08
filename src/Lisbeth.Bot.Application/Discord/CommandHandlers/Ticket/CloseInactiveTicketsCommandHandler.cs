@@ -33,15 +33,15 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 public class CloseInactiveTicketsCommandHandler : ICommandHandler<CloseInactiveTicketsCommand>
 {
     private readonly IDiscordService _discord;
-    private readonly IGuildDataService _guildDataService;
+    private readonly IGuildDataDataService _guildDataDataService;
     private readonly ILogger<CloseInactiveTicketsCommandHandler> _logger;
     private readonly ICommandHandler<ConfirmCloseTicketCommand> _closeTicketCommandHandler;
 
-    public CloseInactiveTicketsCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
+    public CloseInactiveTicketsCommandHandler(IDiscordService discord, IGuildDataDataService guildDataDataService,
         ILogger<CloseInactiveTicketsCommandHandler> logger, ICommandHandler<ConfirmCloseTicketCommand> closeTicketCommandHandler)
     {
         _discord = discord;
-        _guildDataService = guildDataService;
+        _guildDataDataService = guildDataDataService;
         _logger = logger;
         _closeTicketCommandHandler = closeTicketCommandHandler;
     }
@@ -52,13 +52,13 @@ public class CloseInactiveTicketsCommandHandler : ICommandHandler<CloseInactiveT
         {
             await Parallel.ForEachAsync(_discord.Client.Guilds.Keys, async (guildId, _) =>
             {
-                var res = await _guildDataService.GetSingleBySpecAsync(
+                var res = await _guildDataDataService.GetSingleBySpecAsync(
                     new ActiveGuildByDiscordIdWithTicketingAndTicketsSpecifications(guildId));
 
                 if (!res.IsDefined(out var guildCfg)) return;
 
                 if (guildCfg.TicketingConfig?.CloseAfter is null) return;
-                if (guildCfg.Tickets?.Count == 0) return;
+                if (guildCfg.Tickets?.Count() == 0) return;
 
                 DiscordChannel openedCat;
                 try

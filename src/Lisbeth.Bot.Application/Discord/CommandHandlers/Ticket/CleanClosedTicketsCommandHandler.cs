@@ -29,14 +29,14 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 public class CleanClosedTicketsCommandHandler : ICommandHandler<CleanClosedTicketsCommand>
 {
     private readonly IDiscordService _discord;
-    private readonly IGuildDataService _guildDataService;
+    private readonly IGuildDataDataService _guildDataDataService;
     private readonly ILogger<CleanClosedTicketsCommandHandler> _logger;
 
-    public CleanClosedTicketsCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
+    public CleanClosedTicketsCommandHandler(IDiscordService discord, IGuildDataDataService guildDataDataService,
         ILogger<CleanClosedTicketsCommandHandler> logger)
     {
         _discord = discord;
-        _guildDataService = guildDataService;
+        _guildDataDataService = guildDataDataService;
         _logger = logger;
     }
 
@@ -46,13 +46,13 @@ public class CleanClosedTicketsCommandHandler : ICommandHandler<CleanClosedTicke
         {
             await Parallel.ForEachAsync(_discord.Client.Guilds.Keys, async (guildId, _) =>
             {
-                var res = await _guildDataService.GetSingleBySpecAsync(
+                var res = await _guildDataDataService.GetSingleBySpecAsync(
                     new ActiveGuildByDiscordIdWithTicketingAndInactiveTicketsSpecifications(guildId));
 
                 if (!res.IsDefined(out var guildCfg)) return;
 
                 if (guildCfg.TicketingConfig?.CleanAfter is null) return;
-                if (guildCfg.Tickets?.Count == 0) return;
+                if (guildCfg.Tickets?.Count() == 0) return;
 
                 DiscordChannel closedCat;
                 try

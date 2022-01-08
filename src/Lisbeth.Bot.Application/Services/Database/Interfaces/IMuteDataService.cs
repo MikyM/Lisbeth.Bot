@@ -15,8 +15,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Lisbeth.Bot.DataAccessLayer.Repositories.Interfaces;
+using Lisbeth.Bot.DataAccessLayer;
+using Lisbeth.Bot.Domain.DTOs.Request.Mute;
 
-public interface IBanRepository : IRepository<Ban>
+namespace Lisbeth.Bot.Application.Services.Database.Interfaces;
+
+public interface IMuteDataService : ICrudDataService<Mute, LisbethBotDbContext>
 {
+    Task<Result<(long Id, Mute? FoundEntity)>> AddOrExtendAsync(MuteApplyReqDto req, bool shouldSave = false);
+    Task<Result<Mute>> DisableAsync(MuteRevokeReqDto entry, bool shouldSave = false);
 }

@@ -25,7 +25,7 @@ using System.Collections.Generic;
 namespace Lisbeth.Bot.Application.Services.Database;
 
 [UsedImplicitly]
-public class TicketDataService : CrudService<Ticket, LisbethBotDbContext>, ITicketDataService
+public class TicketDataService : CrudDataService<Ticket, LisbethBotDbContext>, ITicketDataService
 {
     public TicketDataService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
     {

@@ -18,22 +18,19 @@
 using Autofac;
 using EFCoreSecondLevelCacheInterceptor;
 using IdGen;
-using Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 using Lisbeth.Bot.Application.Discord.EmbedBuilders;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Application.Discord.Services;
 using Lisbeth.Bot.Application.Services;
-using Lisbeth.Bot.Application.Services.Database;
 using Lisbeth.Bot.DataAccessLayer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using MikyM.Common.Application;
-using MikyM.Common.Application.CommandHandlers;
+using MikyM.Common.Application.CommandHandlers.Helpers;
 using MikyM.Common.DataAccessLayer;
-using MikyM.Common.DataAccessLayer.Specifications;
-using MikyM.Common.DataAccessLayer.Specifications.Evaluators;
 using MikyM.Common.Utilities;
+using Module = Autofac.Module;
 
 namespace Lisbeth.Bot.API;
 
@@ -46,18 +43,8 @@ public class AutofacContainerModule : Module
 
         builder.AddDataAccessLayer();
         builder.AddApplicationLayer();
-
-        // bulk register custom services - follow naming convention
-        builder.RegisterAssemblyTypes(typeof(MuteDataService).Assembly)
-            .Where(t => t.Name.EndsWith("Service"))
-            .AsImplementedInterfaces()
-            .InstancePerLifetimeScope();
-        builder.RegisterAssemblyTypes(typeof(CloseTicketCommandHandler).Assembly)
-            .AsClosedTypesOf(typeof(ICommandHandler<>))
-            .InstancePerLifetimeScope();
-        builder.RegisterAssemblyTypes(typeof(CloseTicketCommandHandler).Assembly)
-            .AsClosedTypesOf(typeof(ICommandHandler<,>))
-            .InstancePerLifetimeScope();
+        builder.AddCommandHandlers();
+        builder.AddAsyncExecutor();
 
         // pagination stuff
         builder.RegisterType<HttpContextAccessor>().As<IHttpContextAccessor>().SingleInstance();
@@ -71,9 +58,8 @@ public class AutofacContainerModule : Module
             .As<IUriService>()
             .SingleInstance();
 
-        builder.RegisterType<AsyncExecutor>().As<IAsyncExecutor>().SingleInstance();
-        builder.RegisterType<TicketQueueService>().As<ITicketQueueService>().SingleInstance();
 
+        builder.RegisterType<TicketQueueService>().As<ITicketQueueService>().SingleInstance();
         builder.RegisterGeneric(typeof(ResponseDiscordEmbedBuilder<>))
             .As(typeof(IResponseDiscordEmbedBuilder<>))
             .InstancePerDependency();
@@ -104,10 +90,7 @@ public class AutofacContainerModule : Module
             .SingleInstance();
 
         builder.RegisterType<DiscordEmbedProvider>().As<IDiscordEmbedProvider>().SingleInstance();
-        builder.RegisterType<SpecificationEvaluator>()
-            .As<ISpecificationEvaluator>()
-            .UsingConstructor()
-            .SingleInstance();
+
         builder.RegisterGeneric(typeof(DiscordEmbedConfiguratorService<>))
             .As(typeof(IDiscordEmbedConfiguratorService<>))
             .InstancePerLifetimeScope();

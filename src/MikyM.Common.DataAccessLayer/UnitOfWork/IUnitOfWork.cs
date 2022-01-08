@@ -20,7 +20,7 @@ namespace MikyM.Common.DataAccessLayer.UnitOfWork;
 public interface IUnitOfWork<TContext> : IDisposable where TContext : DbContext
 {
     TContext Context { get; }
-    TRepository? GetRepository<TRepository>() where TRepository : IBaseRepository;
+    TRepository GetRepository<TRepository>() where TRepository : class, IBaseRepository;
     Task<int> CommitAsync();
     Task<int> CommitAsync(long userId);
     Task RollbackAsync();

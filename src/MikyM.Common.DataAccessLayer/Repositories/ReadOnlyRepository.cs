@@ -26,7 +26,7 @@ public class ReadOnlyRepository<TEntity> : IReadOnlyRepository<TEntity> where TE
     protected readonly DbContext Context;
     private readonly ISpecificationEvaluator _specificationEvaluator;
 
-    public ReadOnlyRepository(DbContext context, ISpecificationEvaluator specificationEvaluator)
+    internal ReadOnlyRepository(DbContext context, ISpecificationEvaluator specificationEvaluator)
     {
         this.Context = context ?? throw new ArgumentNullException(nameof(context));
         this._specificationEvaluator = specificationEvaluator;

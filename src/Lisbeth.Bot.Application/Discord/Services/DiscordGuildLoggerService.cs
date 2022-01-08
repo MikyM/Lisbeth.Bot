@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Data.Entity.Core.Metadata.Edm;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using Lisbeth.Bot.Application.Discord.EmbedBuilders;
@@ -34,16 +33,16 @@ public class DiscordGuildLoggerService : IDiscordGuildLoggerService
 {
     private readonly IDiscordGuildLogSenderService _logSender;
     private readonly IDiscordService _discord;
-    private readonly IGuildDataService _guildDataService;
+    private readonly IGuildDataDataService _guildDataDataService;
     private readonly ILogDiscordEmbedBuilder _embedBuilder;
 
     public DiscordGuildLoggerService(ILogDiscordEmbedBuilder embedBuilder, IDiscordGuildLogSenderService logSender,
-        IDiscordService discord, IGuildDataService guildDataService)
+        IDiscordService discord, IGuildDataDataService guildDataDataService)
     {
         _embedBuilder = embedBuilder;
         _logSender = logSender;
         _discord = discord;
-        _guildDataService = guildDataService;
+        _guildDataDataService = guildDataDataService;
     }
 
     public async Task<Result> LogToDiscordAsync<TRequest>(DiscordGuild discordGuild, TRequest req, DiscordModeration moderation, DiscordUser? moderator = null, SnowflakeObject? target = null, string hexColor = "#26296e", long? caseId = null) where TRequest : class, IBaseModAuthReq
@@ -98,7 +97,7 @@ public class DiscordGuildLoggerService : IDiscordGuildLoggerService
     public async Task<Result> LogToDiscordAsync<TRequest>(long guildId, TRequest req, DiscordModeration moderation, DiscordUser? moderator = null, SnowflakeObject? target = null, string hexColor = "#26296e", long? caseId = null) where TRequest : class, IBaseModAuthReq
     {
         var guildRes =
-            await _guildDataService.GetAsync(guildId);
+            await _guildDataDataService.GetAsync(guildId);
 
         if (!guildRes.IsDefined()) return new NotFoundError();
 
@@ -135,7 +134,7 @@ public class DiscordGuildLoggerService : IDiscordGuildLoggerService
     public async Task<Result> LogToDiscordAsync<TEvent>(long guildId, TEvent discordEvent, DiscordLog log, string hexColor = "#26296e") where TEvent : DiscordEventArgs
     {
         var guildRes =
-            await _guildDataService.GetAsync(guildId);
+            await _guildDataDataService.GetAsync(guildId);
 
         if (!guildRes.IsDefined()) return new NotFoundError();
 

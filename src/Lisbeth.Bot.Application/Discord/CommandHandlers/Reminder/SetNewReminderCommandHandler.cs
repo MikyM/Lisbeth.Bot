@@ -32,15 +32,15 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Reminder;
 [UsedImplicitly]
 public class SetNewReminderCommandHandler : ICommandHandler<SetNewReminderCommand, DiscordEmbed>
 {
-    private readonly IGuildDataService _guildDataService;
+    private readonly IGuildDataDataService _guildDataDataService;
     private readonly IDiscordService _discord;
     private readonly IMainReminderService _reminderService;
     private readonly IResponseDiscordEmbedBuilder<RegularUserInteraction> _embedBuilder;
 
-    public SetNewReminderCommandHandler(IGuildDataService guildDataService, IDiscordService discord,
+    public SetNewReminderCommandHandler(IGuildDataDataService guildDataDataService, IDiscordService discord,
         IMainReminderService reminderService, IResponseDiscordEmbedBuilder<RegularUserInteraction> embedBuilder)
     {
-        _guildDataService = guildDataService;
+        _guildDataDataService = guildDataDataService;
         _discord = discord;
         _reminderService = reminderService;
         _embedBuilder = embedBuilder;
@@ -59,14 +59,15 @@ public class SetNewReminderCommandHandler : ICommandHandler<SetNewReminderComman
         if (requestingUser is null) return new DiscordNotFoundError(DiscordEntity.User);
 
         if (!string.IsNullOrWhiteSpace(command.Dto.CronExpression) && !requestingUser.IsModerator())
-            return Result<DiscordEmbed>.FromError(new DiscordNotAuthorizedError());
+            return new DiscordNotAuthorizedError("Only moderators can create recurring reminders");
+        if (command.Dto.ChannelId.HasValue && !requestingUser.IsModerator())
+            return new DiscordNotAuthorizedError("Only moderators can set channel specific reminders");
 
-        var result = await _guildDataService.GetSingleBySpecAsync<Guild>(new ActiveGuildByIdSpec(command.Dto.GuildId));
+        var result = await _guildDataDataService.GetSingleBySpecAsync(new ActiveGuildByIdSpec(command.Dto.GuildId));
 
         if (!result.IsDefined()) return Result<DiscordEmbed>.FromError(result);
-
-        if (command.Dto.ChannelId.HasValue && !requestingUser.IsModerator())
-            return new DiscordNotAuthorizedError("Only moderators can set channel specific reminders.");
+        if (!result.Entity.IsReminderModuleEnabled)
+            return new DisabledGuildModuleError(GuildModule.Reminders);
 
         var res = await _reminderService.SetNewReminderAsync(command.Dto);
 

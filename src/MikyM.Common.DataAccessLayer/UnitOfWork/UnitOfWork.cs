@@ -16,14 +16,15 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Microsoft.EntityFrameworkCore.Storage;
-using MikyM.Common.DataAccessLayer.Helpers;
 using System.Collections.Generic;
+using Autofac;
+using Autofac.Core;
 
 namespace MikyM.Common.DataAccessLayer.UnitOfWork;
 
 public sealed class UnitOfWork<TContext> : IUnitOfWork<TContext> where TContext : AuditableDbContext
 {
-    private readonly ISpecificationEvaluator _specificationEvaluator;
+    private readonly ILifetimeScope _lifetimeScope;
 
     // To detect redundant calls
     private bool _disposed;
@@ -31,10 +32,10 @@ public sealed class UnitOfWork<TContext> : IUnitOfWork<TContext> where TContext 
     private Dictionary<string, IBaseRepository>? _repositories;
     private IDbContextTransaction? _transaction;
 
-    public UnitOfWork(TContext context, ISpecificationEvaluator specificationEvaluator)
+    public UnitOfWork(TContext context, ILifetimeScope lifetimeScope)
     {
         Context = context;
-        _specificationEvaluator = specificationEvaluator;
+        _lifetimeScope = lifetimeScope;
     }
 
     public TContext Context { get; }
@@ -44,7 +45,7 @@ public sealed class UnitOfWork<TContext> : IUnitOfWork<TContext> where TContext 
         _transaction ??= await Context.Database.BeginTransactionAsync();
     }
 
-    public TRepository? GetRepository<TRepository>() where TRepository : IBaseRepository
+    public TRepository GetRepository<TRepository>() where TRepository : class, IBaseRepository
     {
         _repositories ??= new Dictionary<string, IBaseRepository>();
 
@@ -53,25 +54,13 @@ public sealed class UnitOfWork<TContext> : IUnitOfWork<TContext> where TContext 
 
         if (_repositories.TryGetValue(name, out var repository)) return (TRepository) repository;
 
-        if (UoFCache.CachedTypes.TryGetValue(name, out var concrete) && type.IsAssignableFrom(concrete))
-        {
-            string? concreteName = concrete.FullName ?? throw new InvalidOperationException();
-
-            if (_repositories.TryGetValue(concreteName, out var concreteRepo)) return (TRepository) concreteRepo;
-
-            if (_repositories.TryAdd(concreteName,
-                    (TRepository) Activator.CreateInstance(concrete, Context, _specificationEvaluator)! ?? throw new InvalidOperationException()))
-                return (TRepository) _repositories[concreteName];
-            throw new ArgumentException(
-                $"Concrete repository of type {concreteName} couldn't be added to and/or retrieved from cache.");
-        }
-
         if (_repositories.TryAdd(name,
-                (TRepository) Activator.CreateInstance(type, Context, _specificationEvaluator)! ?? throw new InvalidOperationException()))
-            return (TRepository) _repositories[name]!;
+                _lifetimeScope.Resolve<TRepository>(new ResolvedParameter(
+                    (pi, _) => pi.ParameterType.IsAssignableTo(typeof(DbContext)), (_, _) => Context))))
+            return (TRepository)_repositories[name];
 
-        throw new ArgumentException(
-            $"Concrete repository of type {name} couldn't be added to and/or retrieved from cache.");
+        throw new InvalidOperationException(
+            $"Concrete repository of type {name} couldn't be added to and/or retrieved.");
     }
 
     public async Task RollbackAsync()
@@ -107,7 +96,7 @@ public sealed class UnitOfWork<TContext> : IUnitOfWork<TContext> where TContext 
 
         if (disposing)
         {
-            Context?.Dispose();
+            Context.Dispose();
             _transaction?.Dispose();
         }
 

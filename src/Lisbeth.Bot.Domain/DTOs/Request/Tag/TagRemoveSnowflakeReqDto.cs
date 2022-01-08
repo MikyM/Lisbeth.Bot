@@ -22,5 +22,5 @@ namespace Lisbeth.Bot.Domain.DTOs.Request.Tag;
 public class TagRevokeSnowflakePermissionReqDto :  BaseAuthWithGuildReqDto
 {
     public string? Name { get; set; }
-    public ulong SnowflakeId { get; set; }
+    public ulong? SnowflakeId { get; set; }
 }

@@ -31,15 +31,15 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 public class ReopenTicketCommandHandler : ICommandHandler<ReopenTicketCommand, DiscordMessageBuilder>
 {
     private readonly IDiscordService _discord;
-    private readonly IGuildDataService _guildDataService;
+    private readonly IGuildDataDataService _guildDataDataService;
     private readonly ITicketDataService _ticketDataService;
     private readonly ILogger<ConfirmCloseTicketCommandHandler> _logger;
 
-    public ReopenTicketCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
+    public ReopenTicketCommandHandler(IDiscordService discord, IGuildDataDataService guildDataDataService,
         ITicketDataService ticketDataService, ILogger<ConfirmCloseTicketCommandHandler> logger)
     {
         _discord = discord;
-        _guildDataService = guildDataService;
+        _guildDataDataService = guildDataDataService;
         _ticketDataService = ticketDataService;
         _logger = logger;
     }
@@ -49,7 +49,7 @@ public class ReopenTicketCommandHandler : ICommandHandler<ReopenTicketCommand, D
         if (command is null) throw new ArgumentNullException(nameof(command));
 
         var guildRes =
-            await _guildDataService.GetSingleBySpecAsync<Guild>(
+            await _guildDataDataService.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(command.Dto.GuildId));
 
         if (!guildRes.IsDefined(out var guildCfg)) return Result<DiscordMessageBuilder>.FromError(guildRes);

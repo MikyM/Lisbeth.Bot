@@ -22,9 +22,9 @@ using MikyM.Common.DataAccessLayer.UnitOfWork;
 namespace Lisbeth.Bot.Application.Services.Database;
 
 [UsedImplicitly]
-public class RoleMenuDataService : CrudService<RoleMenu, LisbethBotDbContext>, IRoleMenuDataService
+public class RoleMenuDataDataService : CrudDataService<RoleMenu, LisbethBotDbContext>, IRoleMenuDataDataService
 {
-    public RoleMenuDataService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
+    public RoleMenuDataDataService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
     {
     }
 }

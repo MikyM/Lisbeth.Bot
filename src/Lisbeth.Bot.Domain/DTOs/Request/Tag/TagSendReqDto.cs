@@ -19,5 +19,5 @@ namespace Lisbeth.Bot.Domain.DTOs.Request.Tag;
 
 public class TagSendReqDto : TagGetReqDto
 {
-    public ulong ChannelId { get; set; }
+    public ulong? ChannelId { get; set; }
 }

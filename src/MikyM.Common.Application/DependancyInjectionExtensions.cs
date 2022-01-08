@@ -27,8 +27,8 @@ public static class DependancyInjectionExtensions
 {
     public static void AddApplicationLayer(this IServiceCollection services)
     {
-        services.AddScoped(typeof(IReadOnlyService<,>), typeof(ReadOnlyService<,>));
-        services.AddScoped(typeof(CrudService<,>), typeof(CrudService<,>));
+        services.AddScoped(typeof(IReadOnlyDataService<,>), typeof(ReadOnlyDataService<,>));
+        services.AddScoped(typeof(CrudDataService<,>), typeof(CrudDataService<,>));
         services.AddAutoMapper(x =>
         {
             x.AddExpressionMapping();
@@ -38,10 +38,22 @@ public static class DependancyInjectionExtensions
 
     public static void AddApplicationLayer(this ContainerBuilder builder)
     {
-        builder.RegisterGeneric(typeof(ReadOnlyService<,>)).As(typeof(IReadOnlyService<,>))
+        builder.RegisterGeneric(typeof(ReadOnlyDataService<,>)).As(typeof(IReadOnlyDataService<,>))
             .InstancePerLifetimeScope();
-        builder.RegisterGeneric(typeof(CrudService<,>)).As(typeof(ICrudService<,>))
+        builder.RegisterGeneric(typeof(CrudDataService<,>)).As(typeof(ICrudDataService<,>))
             .InstancePerLifetimeScope();
         builder.RegisterAutoMapper(opt => opt.AddExpressionMapping(), AppDomain.CurrentDomain.GetAssemblies());
+
+        foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+        {
+            var subSet = assembly.GetTypes()
+                .Where(x => x.GetInterfaces()
+                    .Any(y => y == typeof(IServiceBase)) && x.IsClass)
+                .ToList();
+
+            builder.RegisterTypes(subSet.ToArray())
+                .AsImplementedInterfaces()
+                .InstancePerLifetimeScope();
+        }
     }
 }

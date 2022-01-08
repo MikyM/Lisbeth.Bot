@@ -49,7 +49,7 @@ public class SendTagCommandHandler : ICommandHandler<SendTagCommand>
         DiscordGuild guild = command.Ctx?.Guild ?? await _discord.Client.GetGuildAsync(command.Dto.GuildId);
         DiscordMember requestingUser = command.Ctx?.User as DiscordMember ??
                                        await guild.GetMemberAsync(command.Dto.RequestedOnBehalfOfId);
-        DiscordChannel channel = command.Ctx?.ResolvedChannelMentions?[0] ?? guild.GetChannel(command.Dto.ChannelId);
+        DiscordChannel channel = command.Ctx?.ResolvedChannelMentions?[0] ?? guild.GetChannel(command.Dto.ChannelId!.Value);
         
         if (guild is null)
             return new DiscordNotFoundError(DiscordEntity.Guild);

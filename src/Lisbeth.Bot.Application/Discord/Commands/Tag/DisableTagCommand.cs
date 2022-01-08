@@ -18,6 +18,7 @@
 using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Domain.DTOs.Request.Tag;
 using MikyM.Common.Application.CommandHandlers;
+using MikyM.Common.Application.CommandHandlers.Commands;
 
 namespace Lisbeth.Bot.Application.Discord.Commands.Tag;
 

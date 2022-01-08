@@ -29,15 +29,15 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Tag;
 public class EditTagCommandHandler : ICommandHandler<EditTagCommand>
 {
     private readonly IDiscordService _discord;
-    private readonly IGuildDataService _guildDataService;
-    private readonly ITagDataService _tagDataService;
+    private readonly IGuildDataDataService _guildDataDataService;
+    private readonly ITagDataDataService _tagDataDataService;
 
-    public EditTagCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
-        ITagDataService tagDataService)
+    public EditTagCommandHandler(IDiscordService discord, IGuildDataDataService guildDataDataService,
+        ITagDataDataService tagDataDataService)
     {
         _discord = discord;
-        _guildDataService = guildDataService;
-        _tagDataService = tagDataService;
+        _guildDataDataService = guildDataDataService;
+        _tagDataDataService = tagDataDataService;
     }
 
     public async Task<Result> HandleAsync(EditTagCommand command)
@@ -55,7 +55,7 @@ public class EditTagCommandHandler : ICommandHandler<EditTagCommand>
             return new DiscordNotFoundError(DiscordEntity.User);
 
         var guildCfg =
-            await _guildDataService.GetSingleBySpecAsync<Guild>(
+            await _guildDataDataService.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithTagsSpecifications(guild.Id));
         if (!guildCfg.IsDefined())
             return Result.FromError(guildCfg);
@@ -63,6 +63,6 @@ public class EditTagCommandHandler : ICommandHandler<EditTagCommand>
         if (!requestingUser.IsModerator())
             return new DiscordNotAuthorizedError("You are not authorized to edit tags");
 
-        return await _tagDataService.UpdateTagTextAsync(command.Dto, true);
+        return await _tagDataDataService.UpdateTagTextAsync(command.Dto, true);
     }
 }

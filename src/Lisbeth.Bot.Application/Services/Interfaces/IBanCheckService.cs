@@ -17,7 +17,7 @@
 
 namespace Lisbeth.Bot.Application.Services.Interfaces;
 
-public interface IBanCheckService
+public interface IBanCheckService : IServiceBase
 {
     Task CheckForNonBotBanAsync(ulong targetId, ulong guildId, ulong requestedOnBehalfOfId);
     Task CheckForNonBotUnbanAsync(ulong targetId, ulong guildId, ulong requestedOnBehalfOfId);

@@ -15,16 +15,21 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using MikyM.Common.Application.CommandHandlers.Commands;
 using MikyM.Common.Application.Results;
 
 namespace MikyM.Common.Application.CommandHandlers;
 
-public interface ICommandHandler<TCommand> where TCommand : ICommand
+public interface ICommandHandler
+{
+}
+
+public interface ICommandHandler<TCommand> : ICommandHandler where TCommand : class, ICommand
 {
     Task<Result> HandleAsync(TCommand command);
 }
 
-public interface ICommandHandler<TCommand, TResult> where TCommand : ICommand
+public interface ICommandHandler<TCommand, TResult> : ICommandHandler where TCommand : class, ICommand
 {
     Task<Result<TResult>> HandleAsync(TCommand command);
 }

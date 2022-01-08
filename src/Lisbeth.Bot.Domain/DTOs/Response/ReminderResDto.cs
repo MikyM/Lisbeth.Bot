@@ -26,16 +26,21 @@ public class ReminderResDto
     {
     }
 
-    public ReminderResDto(long id, string? name, DateTime nextOccurrence, List<string>? mentions)
+    public ReminderResDto(long id, string? name, DateTime nextOccurrence, List<string>? mentions, string text,
+        bool isRecurring = false)
     {
         Id = id;
         Name = name;
         NextOccurrence = nextOccurrence;
         Mentions = mentions;
+        Text = text;
+        IsRecurring = isRecurring;
     }
 
     public long Id { get; set; }
     public string? Name { get; set; }
     public DateTime NextOccurrence { get; set; }
     public List<string>? Mentions { get; set; }
+    public string Text { get; set; }
+    public bool IsRecurring { get; set; }
 }

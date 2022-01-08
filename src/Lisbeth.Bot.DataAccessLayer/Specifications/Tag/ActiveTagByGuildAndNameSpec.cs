@@ -23,7 +23,7 @@ public class ActiveTagByGuildAndNameSpec : Specification<Domain.Entities.Tag>
 {
     public ActiveTagByGuildAndNameSpec(string name, ulong guildId)
     {
-        Where(x => x.Name == name);
+        Where(x => x.Name.ToLower() == name.ToLower());
         Where(x => x.GuildId == guildId);
         Where(x => !x.IsDisabled);
         Where(x => !x.Guild.IsDisabled);

@@ -17,6 +17,8 @@
 
 using Autofac;
 using Microsoft.Extensions.DependencyInjection;
+using MikyM.Common.DataAccessLayer.Specifications;
+using MikyM.Common.Utilities.Autofac;
 
 namespace MikyM.Common.DataAccessLayer;
 
@@ -31,10 +33,22 @@ public static class DependancyInjectionExtensions
 
     public static void AddDataAccessLayer(this ContainerBuilder builder)
     {
-        builder.RegisterGeneric(typeof(ReadOnlyRepository<>)).As(typeof(IReadOnlyRepository<>))
+        builder.RegisterGeneric(typeof(ReadOnlyRepository<>))
+            .As(typeof(IReadOnlyRepository<>))
+            .AsSelf()
+            .FindConstructorsWith(new AllConstructorsFinder())
             .InstancePerLifetimeScope();
-        builder.RegisterGeneric(typeof(Repository<>)).As(typeof(IRepository<>))
+        builder.RegisterGeneric(typeof(Repository<>))
+            .As(typeof(IRepository<>))
+            .AsSelf()
+            .FindConstructorsWith(new AllConstructorsFinder())
             .InstancePerLifetimeScope();
-        builder.RegisterGeneric(typeof(UnitOfWork<>)).As(typeof(IUnitOfWork<>)).InstancePerLifetimeScope();
+        builder.RegisterGeneric(typeof(UnitOfWork<>)).As(typeof(IUnitOfWork<>)).AsSelf().InstancePerLifetimeScope();
+
+        builder.RegisterType<SpecificationEvaluator>()
+            .As<ISpecificationEvaluator>()
+            .AsSelf()
+            .UsingConstructor()
+            .SingleInstance();
     }
 }

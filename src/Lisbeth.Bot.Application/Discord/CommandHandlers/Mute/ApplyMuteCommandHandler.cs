@@ -35,18 +35,18 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Mute;
 public class ApplyMuteCommandHandler : ICommandHandler<ApplyMuteCommand, DiscordEmbed>
 {
     private readonly IDiscordService _discord;
-    private readonly IGuildDataService _guildDataService;
+    private readonly IGuildDataDataService _guildDataDataService;
     private readonly ILogger<ApplyMuteCommandHandler> _logger;
     private readonly IMuteDataService _muteDataService;
     private readonly IDiscordGuildLoggerService _guildLogger;
     private readonly IResponseDiscordEmbedBuilder<DiscordModeration> _embedBuilder;
 
-    public ApplyMuteCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
+    public ApplyMuteCommandHandler(IDiscordService discord, IGuildDataDataService guildDataDataService,
         ILogger<ApplyMuteCommandHandler> logger, IMuteDataService muteDataService,
         IDiscordGuildLoggerService guildLogger, IResponseDiscordEmbedBuilder<DiscordModeration> embedBuilder)
     {
         _discord = discord;
-        _guildDataService = guildDataService;
+        _guildDataDataService = guildDataDataService;
         _logger = logger;
         _muteDataService = muteDataService;
         _guildLogger = guildLogger;
@@ -75,7 +75,7 @@ public class ApplyMuteCommandHandler : ICommandHandler<ApplyMuteCommand, Discord
             return new DiscordError("Bot doesn't have manage roles permission.");
 
         var result =
-            await _guildDataService.GetSingleBySpecAsync(new ActiveGuildByDiscordIdWithModerationSpec(guild.Id));
+            await _guildDataDataService.GetSingleBySpecAsync(new ActiveGuildByDiscordIdWithModerationSpec(guild.Id));
 
         if (!result.IsDefined(out var guildEntity)) return new DiscordNotFoundError(DiscordEntity.Guild);
 

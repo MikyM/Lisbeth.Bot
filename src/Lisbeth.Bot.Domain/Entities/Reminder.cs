@@ -15,10 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using Lisbeth.Bot.Domain.Entities.Base;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using Lisbeth.Bot.Domain.Entities.Base;
 
 namespace Lisbeth.Bot.Domain.Entities;
 
@@ -32,7 +31,6 @@ public class Reminder : EmbedConfigEntity
     public List<string>? Mentions { get; set; }
     public bool IsGuildReminder { get; set; }
 
-    [NotMapped]
     public bool IsRecurring => !SetFor.HasValue && CronExpression is null
         ? throw new InvalidOperationException("Unable to determine reminder type, both values are null")
         : SetFor.HasValue && CronExpression is not null

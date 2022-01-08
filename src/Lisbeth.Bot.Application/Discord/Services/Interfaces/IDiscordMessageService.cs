@@ -22,7 +22,7 @@ using Lisbeth.Bot.Domain.DTOs.Request;
 
 namespace Lisbeth.Bot.Application.Discord.Services.Interfaces;
 
-public interface IDiscordMessageService
+public interface IDiscordMessageService : IServiceBase
 {
     Task<Result<DiscordEmbed>> PruneAsync(InteractionContext ctx, PruneReqDto req);
     Task<Result<DiscordEmbed>> PruneAsync(ContextMenuContext ctx, PruneReqDto req);

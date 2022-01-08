@@ -24,9 +24,9 @@ using MikyM.Common.DataAccessLayer.UnitOfWork;
 namespace Lisbeth.Bot.Application.Services.Database;
 
 [UsedImplicitly]
-public class TagDataService : CrudService<Tag, LisbethBotDbContext>, ITagDataService
+public class TagDataDataService : CrudDataService<Tag, LisbethBotDbContext>, ITagDataDataService
 {
-    public TagDataService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
+    public TagDataDataService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
     {
     }
 
@@ -78,7 +78,7 @@ public class TagDataService : CrudService<Tag, LisbethBotDbContext>, ITagDataSer
                 "Can't update a disabled tag, enable the tag first.");
 
         base.BeginUpdate(tag, true);
-        tag.AllowedUserIds = tag.AllowedUserIds.Select(x => x).Append(permissionReq.SnowflakeId).ToList();
+        tag.AllowedUserIds = tag.AllowedUserIds.Select(x => x).Append(permissionReq.SnowflakeId!.Value).ToList();
 
         if (shouldSave) await base.CommitAsync();
 
@@ -144,7 +144,7 @@ public class TagDataService : CrudService<Tag, LisbethBotDbContext>, ITagDataSer
                 "Can't update a disabled tag, enable the tag first.");
 
         base.BeginUpdate(tag, true);
-        tag.AllowedRoleIds = tag.AllowedRoleIds.Select(x => x).Append(permissionReq.SnowflakeId).ToList();
+        tag.AllowedRoleIds = tag.AllowedRoleIds.Select(x => x).Append(permissionReq.SnowflakeId!.Value).ToList();
 
         if (shouldSave) await base.CommitAsync();
 

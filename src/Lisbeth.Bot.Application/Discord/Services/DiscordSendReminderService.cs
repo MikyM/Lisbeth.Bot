@@ -31,12 +31,12 @@ public class DiscordSendReminderService : IDiscordSendReminderService
 {
     private readonly IDiscordService _discord;
     private readonly IDiscordEmbedProvider _embedProvider;
-    private readonly IReminderDataService _reminderService;
+    private readonly IReminderDataDataService _reminderDataService;
 
-    public DiscordSendReminderService(IReminderDataService reminderService, IDiscordService discord,
+    public DiscordSendReminderService(IReminderDataDataService reminderDataService, IDiscordService discord,
         IDiscordEmbedProvider embedProvider)
     {
-        _reminderService = reminderService;
+        _reminderDataService = reminderDataService;
         _discord = discord;
         _embedProvider = embedProvider;
     }
@@ -57,7 +57,7 @@ public class DiscordSendReminderService : IDiscordSendReminderService
         switch (type)
         {
             case ReminderType.Single:
-                var rem = await _reminderService.GetSingleBySpecAsync(new ActiveReminderByIdWithEmbedSpec((long)reminderId));
+                var rem = await _reminderDataService.GetSingleBySpecAsync(new ActiveReminderByIdWithEmbedSpec((long)reminderId));
                 if (!rem.IsDefined() || rem.Entity.Guild?.ReminderChannelId is null)
                     return Result.FromError(new NotFoundError());
                 guild = rem.Entity.Guild;
@@ -68,7 +68,7 @@ public class DiscordSendReminderService : IDiscordSendReminderService
                 guildId = rem.Entity.GuildId;
                 break;
             case ReminderType.Recurring:
-                var recRem = await _reminderService.GetSingleBySpecAsync(
+                var recRem = await _reminderDataService.GetSingleBySpecAsync(
                     new ActiveRecurringReminderByIdWithEmbedSpec(reminderId));
                 if (!recRem.IsDefined() || recRem.Entity.Guild?.ReminderChannelId is null)
                     return Result.FromError(new NotFoundError());

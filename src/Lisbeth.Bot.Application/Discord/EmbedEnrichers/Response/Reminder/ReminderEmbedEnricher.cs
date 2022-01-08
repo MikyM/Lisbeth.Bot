@@ -22,14 +22,19 @@ public class ReminderEmbedEnricher : EmbedEnricherBase<ReminderResDto, ReminderA
         };
 
         embedBuilder.WithAuthor("Lisbeth reminder service")
-            .WithDescription($"Reminder {action} successfully")
-            .AddField("Reminder's id", this.PrimaryEnricher.Id.ToString())
-            .AddField("Reminder's name", this.PrimaryEnricher.Name ?? "Unknown");
+            .WithDescription($"Reminder {action} successfully");
+
+        if (this.PrimaryEnricher.IsRecurring)
+            embedBuilder.AddField("Name", this.PrimaryEnricher.Name ?? "Unknown");
 
         if (this.SecondaryEnricher is not ReminderActionType.Disable)
         {
-            embedBuilder.AddField("Next occurrence", this.PrimaryEnricher.NextOccurrence.ToUniversalTime().ToString("dd/MM/yyyy hh:mm tt") + " UTC")
-                .AddField("Mentions", string.Join(", ", this.PrimaryEnricher.Mentions ?? throw new InvalidOperationException()));
+            embedBuilder.AddField("Next occurrence",
+                    this.PrimaryEnricher.NextOccurrence.ToUniversalTime().ToString("dd/MM/yyyy hh:mm tt").ToUpper() +
+                    " UTC", true)
+                .AddField("Mentions",
+                    string.Join(", ", this.PrimaryEnricher.Mentions ?? throw new InvalidOperationException()), true)
+                .AddField("Text", this.PrimaryEnricher.Text);
         }
     }
 }

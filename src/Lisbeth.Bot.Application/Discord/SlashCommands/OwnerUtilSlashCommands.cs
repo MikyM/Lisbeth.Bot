@@ -46,15 +46,15 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 public class OwnerUtilSlashCommands : ExtendedApplicationCommandModule
 {
     private readonly LisbethBotDbContext _ctx;
-    private readonly IReadOnlyService<AuditLog, LisbethBotDbContext> _service;
+    private readonly IReadOnlyDataService<AuditLog, LisbethBotDbContext> _dataService;
     private readonly IDiscordGuildService _discordGuildService;
     private readonly IOptions<BotOptions> _options;
 
-    public OwnerUtilSlashCommands(LisbethBotDbContext ctx, IReadOnlyService<AuditLog, LisbethBotDbContext> service,
+    public OwnerUtilSlashCommands(LisbethBotDbContext ctx, IReadOnlyDataService<AuditLog, LisbethBotDbContext> dataService,
         IDiscordGuildService discordGuildService, IOptions<BotOptions> options)
     {
         _ctx = ctx;
-        _service = service;
+        _dataService = dataService;
         _discordGuildService = discordGuildService;
         _options = options;
     }
@@ -88,7 +88,7 @@ public class OwnerUtilSlashCommands : ExtendedApplicationCommandModule
         if (!ctx.User.IsBotOwner(ctx.Client))
             throw new DiscordNotAuthorizedException();
 
-        var res = await this._service!.GetAllAsync<AuditLog>();
+        var res = await this._dataService!.GetAllAsync<AuditLog>();
 
         if (!res.IsDefined()) throw new InvalidOperationException();
 

@@ -19,9 +19,11 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using FluentValidation;
+using Lisbeth.Bot.Application.Discord.Commands.Reminder;
 using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
 using Lisbeth.Bot.Application.Validation.Reminder;
 using Lisbeth.Bot.Domain.DTOs.Request.Reminder;
+using MikyM.Common.Application.CommandHandlers;
 using NCrontab;
 using System.Collections.Generic;
 using System.Globalization;
@@ -33,26 +35,32 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 [SlashModuleLifespan(SlashModuleLifespan.Scoped)]
 public class ReminderSlashCommands : ExtendedApplicationCommandModule
 {
-    public ReminderSlashCommands(IDiscordReminderService reminderService,
+    public ReminderSlashCommands(ICommandHandler<SetNewReminderCommand, DiscordEmbed> setNewHandler,
+        ICommandHandler<RescheduleReminderCommand, DiscordEmbed> rescheduleHandler,
+        ICommandHandler<DisableReminderCommand, DiscordEmbed> disableHandler,
         IDiscordEmbedConfiguratorService<Reminder> reminderEmbedConfiguratorService)
     {
-        _reminderService = reminderService;
+        _setNewHandler = setNewHandler;
+        _rescheduleHandler = rescheduleHandler;
+        _disableHandler = disableHandler;
         _reminderEmbedConfiguratorService = reminderEmbedConfiguratorService;
     }
 
-    private readonly IDiscordReminderService _reminderService;
+    private readonly ICommandHandler<SetNewReminderCommand, DiscordEmbed> _setNewHandler;
+    private readonly ICommandHandler<RescheduleReminderCommand, DiscordEmbed> _rescheduleHandler;
+    private readonly ICommandHandler<DisableReminderCommand, DiscordEmbed> _disableHandler;
     private readonly IDiscordEmbedConfiguratorService<Reminder> _reminderEmbedConfiguratorService;
 
     [UsedImplicitly]
-    [SlashCommand("reminder", "Command that allows working with reminders.", false)]
+    [SlashCommand("reminder", "Command that allows working with reminders.")]
     public async Task SingleReminderCommand(InteractionContext ctx,
         [Option("action", "Action to perform")]
         ReminderActionType actionType,
         [Option("reminder-type", "Type of the reminder")]
-        Domain.Enums.ReminderType reminderType,
+        ReminderType reminderType,
         [Option("text", "What to remind about")]
         string text = "default",
-        [Option("for-time", "Datetime, cron expression or a string representation of time (1h, 1d etc)")]
+        [Option("time", "Datetime, cron expression or a string representation of time (1h, 1d etc)")]
         string time = "",
         [Option("mentions", "Role, channel or user mentions - defaults to creator mention")]
         string mentions = "",
@@ -61,16 +69,25 @@ public class ReminderSlashCommands : ExtendedApplicationCommandModule
         [Option("channel", "Channel to send the message to")]
         DiscordChannel? channel = null)
     {
-        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
+            new DiscordInteractionResponseBuilder().AsEphemeral(true));
         Result<DiscordEmbed> result;
 
-        bool isValidDateTime = DateTime.TryParseExact(time, "dd/MM/yyyy hh:mm tt", DateTimeFormatInfo.InvariantInfo,
+        /*
+        bool isValidDateTime = DateTime.TryParseExact(time, "d/M/yyyy hh:mm tt", DateTimeFormatInfo.InvariantInfo,
+            DateTimeStyles.None, out DateTime parsedDateTime);*/
+        bool isValidDateTime = DateTime.TryParse(time, DateTimeFormatInfo.InvariantInfo,
             DateTimeStyles.None, out DateTime parsedDateTime);
-        bool isValidTime = DateTime.TryParseExact(time, "hh:mm tt", DateTimeFormatInfo.InvariantInfo,
+        bool isValidTime = DateTime.TryParse(time, DateTimeFormatInfo.InvariantInfo,
             DateTimeStyles.None, out DateTime parsedTime);
+        /*if (!isValidTime) isValidTime = DateTime.TryParse(time, DateTimeFormatInfo.InvariantInfo,
+            DateTimeStyles.None, out parsedTime);*/
         bool isValidStringRep = time.TryParseToDurationAndNextOccurrence(out _, out _);
         bool isValidCron = true;
         string exMessage = "";
+
+        parsedDateTime = DateTime.SpecifyKind(parsedDateTime, DateTimeKind.Utc);
+        parsedTime = DateTime.SpecifyKind(parsedTime, DateTimeKind.Utc);
 
         try
         {
@@ -102,26 +119,26 @@ public class ReminderSlashCommands : ExtendedApplicationCommandModule
             case ReminderActionType.Set or ReminderActionType.Reschedule
                 when !isValidCron && !isValidDateTime && !isValidStringRep && !isValidTime:
                 throw new ArgumentException("Couldn't parse given time representation", nameof(time));
-            case ReminderActionType.Set or ReminderActionType.Reschedule when reminderType is Domain.Enums.ReminderType.Single &&
+            case ReminderActionType.Set or ReminderActionType.Reschedule when reminderType is ReminderType.Single &&
                                                                               isValidCron && !isValidDateTime && !isValidStringRep && !isValidTime:
                 throw new ArgumentException("Single reminders can't take a cron expression as an argument",
                     nameof(time));
             case ReminderActionType.Set or ReminderActionType.Reschedule
-                when reminderType is Domain.Enums.ReminderType.Recurring && !isValidCron && (isValidDateTime || isValidStringRep || isValidTime):
+                when reminderType is ReminderType.Recurring && !isValidCron && (isValidDateTime || isValidStringRep || isValidTime):
                 throw new ArgumentException($"Recurring reminders only accepts a valid cron expression as an argument. \n {exMessage}",
                     nameof(time));
             default:
                 switch (actionType)
                 {
                     case ReminderActionType.Set:
-                        if (reminderType is ReminderType.Single && name is "") name = $"{ctx.Guild.Id}_{ctx.User.Id}_{DateTime.UtcNow}";
+                        if (reminderType is ReminderType.Single && name is "") name = $"{ctx.Guild.Id}_{ctx.User.Id}_{DateTime.UtcNow.ToString("s")}";
 
                         var setReq = new SetReminderReqDto(name, isValidCron && !isValidDateTime && !isValidTime ? time : null,
-                            isValidDateTime ? parsedDateTime : isValidTime ? global::System.DateTime.UtcNow.Date.Add(parsedTime.TimeOfDay) : null, isValidStringRep ? time : null, text,
+                            isValidDateTime ? parsedDateTime : isValidTime ? DateTime.UtcNow.Date.Add(parsedTime.TimeOfDay) : null, isValidStringRep ? time : null, text,
                             mentionList, ctx.Guild.Id, ctx.Member.Id, channel?.Id);
                         var setReqValidator = new SetReminderReqValidator(ctx.Client);
                         await setReqValidator.ValidateAndThrowAsync(setReq);
-                        result = await this._reminderService!.SetNewReminderAsync(ctx, setReq);
+                        result = await _setNewHandler.HandleAsync(new SetNewReminderCommand(setReq, ctx));
                         break;
                     case ReminderActionType.Reschedule:
                         var rescheduleReq = new RescheduleReminderReqDto(name, isValidCron ? time : null,
@@ -129,13 +146,13 @@ public class ReminderSlashCommands : ExtendedApplicationCommandModule
                             ctx.Member.Id, name.IsDigitsOnly() ? long.Parse(name) : null);
                         var rescheduleReqValidator = new RescheduleReminderReqValidator(ctx.Client);
                         await rescheduleReqValidator.ValidateAndThrowAsync(rescheduleReq);
-                        result = await this._reminderService!.RescheduleReminderAsync(ctx, rescheduleReq);
+                        result = await _rescheduleHandler.HandleAsync(new RescheduleReminderCommand(rescheduleReq, ctx));
                         break;
                     case ReminderActionType.ConfigureEmbed:
                         switch (reminderType)
                         {
                             case ReminderType.Single:
-                                var res = await this._reminderEmbedConfiguratorService!.ConfigureAsync(ctx,
+                                var res = await this._reminderEmbedConfiguratorService.ConfigureAsync(ctx,
                                     x => x.EmbedConfig, x => x.EmbedConfigId, name);
                                 if (res.IsDefined())
                                     await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(res.Entity));
@@ -145,7 +162,7 @@ public class ReminderSlashCommands : ExtendedApplicationCommandModule
                                             GetUnsuccessfulResultEmbed(res, ctx.Client)));
                                 return;
                             case ReminderType.Recurring:
-                                var resRec = await this._reminderEmbedConfiguratorService!.ConfigureAsync(ctx,
+                                var resRec = await this._reminderEmbedConfiguratorService.ConfigureAsync(ctx,
                                     x => x.EmbedConfig, x => x.EmbedConfigId, name);
                                 if (resRec.IsDefined())
                                     await ctx.EditResponseAsync(
@@ -163,7 +180,7 @@ public class ReminderSlashCommands : ExtendedApplicationCommandModule
                             name.IsDigitsOnly() ? long.Parse(name) : null);
                         var disableReqValidator = new DisableReminderReqValidator(ctx.Client);
                         await disableReqValidator.ValidateAndThrowAsync(disableReq);
-                        result = await this._reminderService!.DisableReminderAsync(ctx, disableReq);
+                        result = await _disableHandler.HandleAsync(new DisableReminderCommand(disableReq, ctx));
                         break;
                     default:
                         throw new ArgumentOutOfRangeException(nameof(actionType), actionType, null);
@@ -172,23 +189,27 @@ public class ReminderSlashCommands : ExtendedApplicationCommandModule
                 break;
         }
 
-        if (result.IsDefined()) await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(result.Entity));
+        if (result.IsDefined())
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(result.Entity));
         else
-            await ctx.EditResponseAsync(
-                new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(result, ctx.Client)));
+            await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder()
+                .AddEmbed(base.GetUnsuccessfulResultEmbed(result, ctx.Client))
+                .AsEphemeral(true));
     }
 
     [UsedImplicitly]
-    [SlashCommand("cron-help", "Command that parses and verifies a given cron expression", false)]
+    [SlashCommand("cron-help", "Command that parses and verifies a given cron expression")]
     public async Task CronHelpCommand(InteractionContext ctx,
-        [Option("cron-expression", "Crone to parse")]
+        [Option("cron-expression", "Cron to parse")]
         string cron)
     {
-        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
+            new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
         var schedule = CrontabSchedule.TryParse(cron);
         var scheduleOpt = CrontabSchedule.TryParse(cron, new CrontabSchedule.ParseOptions { IncludingSeconds = true });
-        var scheduleOptN = CrontabSchedule.TryParse(cron, new CrontabSchedule.ParseOptions { IncludingSeconds = false });
+        var scheduleOptN =
+            CrontabSchedule.TryParse(cron, new CrontabSchedule.ParseOptions { IncludingSeconds = false });
 
         await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent(
             $"Schedule: {(schedule is null ? "null" : $"{schedule.GetNextOccurrence(DateTime.UtcNow)}")} \n\n Schedule: {(scheduleOpt is null ? "null" : $"{scheduleOpt.GetNextOccurrence(DateTime.UtcNow)}")} \n\n Schedule: {(scheduleOptN is null ? "null" : $"{scheduleOptN.GetNextOccurrence(DateTime.UtcNow)}")}"));

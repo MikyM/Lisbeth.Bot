@@ -30,15 +30,15 @@ namespace Lisbeth.Bot.Application.Discord.Services;
 public class DiscordReminderService : IDiscordReminderService
 {
     private readonly IDiscordService _discord;
-    private readonly IGuildDataService _guildDataService;
+    private readonly IGuildDataDataService _guildDataDataService;
     private readonly IMainReminderService _reminderService;
 
     public DiscordReminderService(IDiscordService discord, IMainReminderService reminderService,
-        IGuildDataService guildDataService)
+        IGuildDataDataService guildDataDataService)
     {
         _discord = discord;
         _reminderService = reminderService;
-        _guildDataService = guildDataService;
+        _guildDataDataService = guildDataDataService;
     }
 
     public async Task<Result<DiscordEmbed>> SetNewReminderAsync(SetReminderReqDto req)
@@ -106,7 +106,7 @@ public class DiscordReminderService : IDiscordReminderService
         if (!string.IsNullOrWhiteSpace(req.CronExpression) && !requestingMember.IsModerator())
             return Result<DiscordEmbed>.FromError(new DiscordNotAuthorizedError());
 
-        var result = await _guildDataService.GetSingleBySpecAsync<Guild>(new ActiveGuildByIdSpec(req.GuildId));
+        var result = await _guildDataDataService.GetSingleBySpecAsync<Guild>(new ActiveGuildByIdSpec(req.GuildId));
 
         if (!result.IsDefined()) return Result<DiscordEmbed>.FromError(result);
 
@@ -138,7 +138,7 @@ public class DiscordReminderService : IDiscordReminderService
         if (req.Type is Domain.Enums.ReminderType.Recurring && !requestingMember.IsModerator())
             return Result<DiscordEmbed>.FromError(new DiscordNotAuthorizedError());
 
-        var result = await _guildDataService.GetSingleBySpecAsync<Guild>(new ActiveGuildByIdSpec(req.GuildId));
+        var result = await _guildDataDataService.GetSingleBySpecAsync<Guild>(new ActiveGuildByIdSpec(req.GuildId));
 
         if (!result.IsDefined()) return Result<DiscordEmbed>.FromError(result);
 
@@ -166,7 +166,7 @@ public class DiscordReminderService : IDiscordReminderService
         if (!string.IsNullOrWhiteSpace(req.CronExpression) && !requestingMember.IsModerator())
             return Result<DiscordEmbed>.FromError(new DiscordNotAuthorizedError());
 
-        var result = await _guildDataService.GetSingleBySpecAsync<Guild>(new ActiveGuildByIdSpec(req.GuildId));
+        var result = await _guildDataDataService.GetSingleBySpecAsync<Guild>(new ActiveGuildByIdSpec(req.GuildId));
 
         if (!result.IsDefined()) return Result<DiscordEmbed>.FromError(result);
 

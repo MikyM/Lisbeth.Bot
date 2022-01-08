@@ -496,6 +496,9 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("guild_id");
 
+                    b.Property<long?>("GuildId1")
+                        .HasColumnType("bigint");
+
                     b.Property<string>("HangfireId")
                         .HasMaxLength(300)
                         .HasColumnType("varchar(300)")
@@ -535,10 +538,9 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EmbedConfigId")
-                        .IsUnique();
+                    b.HasIndex("EmbedConfigId");
 
-                    b.HasIndex("GuildId");
+                    b.HasIndex("GuildId1");
 
                     b.ToTable("recurring_reminder", (string)null);
                 });
@@ -565,6 +567,11 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     b.Property<long>("CreatorId")
                         .HasColumnType("bigint")
                         .HasColumnName("creator_id");
+
+                    b.Property<string>("CronExpression")
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)")
+                        .HasColumnName("cron_expression");
 
                     b.Property<long?>("EmbedConfigId")
                         .HasColumnType("bigint")
@@ -596,13 +603,11 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                         .HasColumnName("tags");
 
                     b.Property<string>("Name")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)")
                         .HasColumnName("name");
 
-                    b.Property<DateTime>("SetFor")
+                    b.Property<DateTime?>("SetFor")
                         .HasColumnType("timestamptz")
                         .HasColumnName("set_for");
 
@@ -997,11 +1002,11 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("center_embed_config_id");
 
-                    b.Property<long?>("CleanAfter")
+                    b.Property<double?>("CleanAfter")
                         .HasColumnType("bigint")
                         .HasColumnName("clean_after");
 
-                    b.Property<long?>("CloseAfter")
+                    b.Property<double?>("CloseAfter")
                         .HasColumnType("bigint")
                         .HasColumnName("close_after");
 
@@ -1224,13 +1229,12 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
             modelBuilder.Entity("Lisbeth.Bot.Domain.Entities.RecurringReminder", b =>
                 {
                     b.HasOne("Lisbeth.Bot.Domain.Entities.EmbedConfig", "EmbedConfig")
-                        .WithOne("RecurringReminder")
-                        .HasForeignKey("Lisbeth.Bot.Domain.Entities.RecurringReminder", "EmbedConfigId");
+                        .WithMany()
+                        .HasForeignKey("EmbedConfigId");
 
                     b.HasOne("Lisbeth.Bot.Domain.Entities.Guild", "Guild")
-                        .WithMany("RecurringReminders")
-                        .HasForeignKey("GuildId")
-                        .HasPrincipalKey("GuildId");
+                        .WithMany()
+                        .HasForeignKey("GuildId1");
 
                     b.Navigation("EmbedConfig");
 
@@ -1338,8 +1342,6 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                 {
                     b.Navigation("ModerationConfig");
 
-                    b.Navigation("RecurringReminder");
-
                     b.Navigation("Reminder");
 
                     b.Navigation("RoleMenu");
@@ -1362,8 +1364,6 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     b.Navigation("Mutes");
 
                     b.Navigation("Prunes");
-
-                    b.Navigation("RecurringReminders");
 
                     b.Navigation("Reminders");
 

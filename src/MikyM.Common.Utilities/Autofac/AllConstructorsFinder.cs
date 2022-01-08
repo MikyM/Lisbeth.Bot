@@ -15,12 +15,22 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Lisbeth.Bot.DataAccessLayer.Repositories;
+using System.Collections.Concurrent;
+using System.Reflection;
+using Autofac.Core.Activators.Reflection;
 
-public class PruneRepository : Repository<Prune>, IPruneRepository
+namespace MikyM.Common.Utilities.Autofac;
+
+public class AllConstructorsFinder : IConstructorFinder
 {
-    public PruneRepository(LisbethBotDbContext context, ISpecificationEvaluator evaluator) : base(context,
-        evaluator)
+    private static readonly ConcurrentDictionary<Type, ConstructorInfo[]> Cache = new();
+
+
+    public ConstructorInfo[] FindConstructors(Type targetType)
     {
+        var result = Cache.GetOrAdd(targetType,
+            t => t.GetTypeInfo().DeclaredConstructors.Where(c => !c.IsStatic).ToArray());
+
+        return result.Length > 0 ? result : throw new NoConstructorsFoundException(targetType);
     }
 }

@@ -22,10 +22,10 @@ using MikyM.Common.DataAccessLayer.Specifications;
 
 namespace MikyM.Common.Application.Services;
 
-public class ReadOnlyService<TEntity, TContext> : ServiceBase<TContext>, IReadOnlyService<TEntity, TContext>
+public class ReadOnlyDataService<TEntity, TContext> : DataServiceBase<TContext>, IReadOnlyDataService<TEntity, TContext>
     where TEntity : AggregateRootEntity where TContext : DbContext
 {
-    public ReadOnlyService(IMapper mapper, IUnitOfWork<TContext> uof) : base(mapper, uof)
+    public ReadOnlyDataService(IMapper mapper, IUnitOfWork<TContext> uof) : base(mapper, uof)
     {
     }
 

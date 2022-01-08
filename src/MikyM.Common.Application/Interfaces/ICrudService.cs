@@ -19,7 +19,7 @@ using MikyM.Common.Application.Results;
 
 namespace MikyM.Common.Application.Interfaces;
 
-public interface ICrudService<TEntity, TContext> : IReadOnlyService<TEntity, TContext>
+public interface ICrudDataService<TEntity, TContext> : IReadOnlyDataService<TEntity, TContext>
     where TEntity : AggregateRootEntity where TContext : DbContext
 {
     Task<Result<long>> AddAsync<TPost>(TPost entry, bool shouldSave = false) where TPost : class;

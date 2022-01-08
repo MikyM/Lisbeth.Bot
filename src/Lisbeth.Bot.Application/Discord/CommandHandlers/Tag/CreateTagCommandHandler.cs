@@ -30,15 +30,15 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Tag;
 public class CreateTagCommandHandler : ICommandHandler<CreateTagCommand>
 {
     private readonly IDiscordService _discord;
-    private readonly IGuildDataService _guildDataService;
-    private readonly ITagDataService _tagDataService;
+    private readonly IGuildDataDataService _guildDataDataService;
+    private readonly ITagDataDataService _tagDataDataService;
 
-    public CreateTagCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
-        ITagDataService tagDataService)
+    public CreateTagCommandHandler(IDiscordService discord, IGuildDataDataService guildDataDataService,
+        ITagDataDataService tagDataDataService)
     {
         _discord = discord;
-        _guildDataService = guildDataService;
-        _tagDataService = tagDataService;
+        _guildDataDataService = guildDataDataService;
+        _tagDataDataService = tagDataDataService;
     }
 
     public async Task<Result> HandleAsync(CreateTagCommand command)
@@ -56,7 +56,7 @@ public class CreateTagCommandHandler : ICommandHandler<CreateTagCommand>
             return new DiscordNotFoundError(DiscordEntity.User);
 
         var guildCfg =
-            await _guildDataService.GetSingleBySpecAsync(
+            await _guildDataDataService.GetSingleBySpecAsync(
                 new ActiveGuildByDiscordIdWithTagsSpecifications(command.Dto.GuildId));
         if (!guildCfg.IsDefined())
             return Result.FromError(guildCfg);
@@ -64,11 +64,12 @@ public class CreateTagCommandHandler : ICommandHandler<CreateTagCommand>
         if (!requestingUser.IsModerator())
             return new DiscordNotAuthorizedError();
 
-        var check = await _tagDataService.LongCountAsync(new ActiveTagByGuildAndNameSpec(command.Dto.Name, command.Dto.GuildId));
+        var check = await _tagDataDataService.LongCountAsync(new ActiveTagByGuildAndNameSpec(command.Dto.Name, command.Dto.GuildId));
 
         if (check.IsDefined(out var count) && count > 0) return new SameEntityNamePerGuildError("Tag", command.Dto.Name!);
 
-        var res = await _tagDataService.AddAsync(command.Dto, true);
+        command.Dto.Name = command.Dto.Name?.ToLower();
+        var res = await _tagDataDataService.AddAsync(command.Dto, true);
 
         return res;
     }

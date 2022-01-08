@@ -26,12 +26,12 @@ namespace Lisbeth.Bot.Application.Discord.Services;
 [UsedImplicitly]
 public class DiscordGuildLogSenderService : IDiscordGuildLogSenderService
 {
-    private readonly IGuildDataService _guildDataService;
+    private readonly IGuildDataDataService _guildDataDataService;
     private readonly IDiscordService _discordService;
 
-    public DiscordGuildLogSenderService(IGuildDataService guildDataService, IDiscordService discordService)
+    public DiscordGuildLogSenderService(IGuildDataDataService guildDataDataService, IDiscordService discordService)
     {
-        _guildDataService = guildDataService;
+        _guildDataDataService = guildDataDataService;
         _discordService = discordService;
     }
 
@@ -43,7 +43,7 @@ public class DiscordGuildLogSenderService : IDiscordGuildLogSenderService
     public async Task<Result> SendAsync(long guildId, DiscordLog type, DiscordEmbed embed)
     {
         var guildRes =
-            await _guildDataService.GetAsync(guildId);
+            await _guildDataDataService.GetAsync(guildId);
 
         if (!guildRes.IsDefined()) return new NotFoundError();
 
@@ -53,7 +53,7 @@ public class DiscordGuildLogSenderService : IDiscordGuildLogSenderService
     public async Task<Result> SendAsync(DiscordGuild discordGuild, DiscordLog type, DiscordEmbed embed)
     {
         var guildRes =
-            await _guildDataService.GetSingleBySpecAsync(new ActiveGuildByDiscordIdWithModerationSpec(discordGuild.Id));
+            await _guildDataDataService.GetSingleBySpecAsync(new ActiveGuildByDiscordIdWithModerationSpec(discordGuild.Id));
 
         if (!guildRes.IsDefined()) return Result.FromError(guildRes);
         if (guildRes.Entity.ModerationConfig is null || guildRes.Entity.ModerationConfig.IsDisabled)

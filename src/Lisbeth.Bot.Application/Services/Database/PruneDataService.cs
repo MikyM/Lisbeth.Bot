@@ -15,8 +15,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Lisbeth.Bot.DataAccessLayer.Repositories.Interfaces;
+using AutoMapper;
+using Lisbeth.Bot.DataAccessLayer;
+using MikyM.Common.DataAccessLayer.UnitOfWork;
 
-public interface IMuteRepository : IRepository<Mute>
+namespace Lisbeth.Bot.Application.Services.Database;
+
+[UsedImplicitly]
+public class PruneDataService : CrudDataService<Prune, LisbethBotDbContext>, IPruneDataService
 {
+    public PruneDataService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
+    {
+    }
 }

@@ -39,9 +39,6 @@ using MikyM.Discord.Extensions.SlashCommands;
 using OpenTracing;
 using OpenTracing.Mock;
 using System.Security.Claims;
-using DSharpPlus.Entities;
-using DSharpPlus.Interactivity.EventHandling;
-using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.API;
 
@@ -83,7 +80,7 @@ public static class ServiceCollectionExtensions
         services.AddDiscordInteractivity(options =>
         {
             options.PaginationBehaviour = PaginationBehaviour.WrapAround;
-            options.ResponseBehavior = InteractionResponseBehavior.Ack;
+            options.ResponseBehavior = InteractionResponseBehavior.Respond;
             options.ButtonBehavior = ButtonPaginationBehavior.Disable;
             options.AckPaginationButtons = true;
             options.Timeout = TimeSpan.FromMinutes(1);
@@ -104,7 +101,6 @@ public static class ServiceCollectionExtensions
         services.AddDiscordGuildEventsSubscriber<GuildEventsHandler>();
         services.AddDiscordMiscEventsSubscriber<RoleMenuEventHandler>();
         services.AddDiscordGuildMemberEventsSubscriber<MuteEventHandlers>();
-        services.AddDiscordMiscEventsSubscriber<PaginationEventsHandler>();
 
         #endregion
     }

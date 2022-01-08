@@ -15,8 +15,20 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Lisbeth.Bot.DataAccessLayer.Repositories.Interfaces;
+namespace MikyM.Common.Application.CommandHandlers.Helpers;
 
-public interface ITicketRepository : IRepository<Ticket>
+internal static class ProviderCache
 {
+    static ProviderCache()
+    {
+        CachedTypes ??= AppDomain.CurrentDomain.GetAssemblies()
+            .SelectMany(x => x.GetTypes()
+                .Where(t => t.GetInterfaces().Any(y => y == typeof(ICommandHandler)) && !t.IsAbstract && t.IsClass &&
+                            !t.IsGenericType))
+            .ToDictionary(x =>
+                x.GetInterfaces().FirstOrDefault(y => y.IsGenericType)?.GenericTypeArguments ??
+                throw new InvalidOperationException("Found an invalid command handler"));
+    }
+
+    internal static Dictionary<Type[], Type> CachedTypes { get; }
 }

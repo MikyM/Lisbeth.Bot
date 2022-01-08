@@ -33,12 +33,17 @@ public class TagAddReqValidator : AbstractValidator<TagAddReqDto>
     {
         CascadeMode = CascadeMode.Stop;
 
-        RuleFor(x => x.Name).NotEmpty();
-        RuleFor(x => x.GuildId).NotEmpty().DependentRules(x =>
-            x.SetAsyncValidator(new DiscordGuildIdValidator<TagAddReqDto>(discord)));
-        RuleFor(x => x.RequestedOnBehalfOfId).NotEmpty()
+        RuleFor(x => x.Name)
+            .NotEmpty()
+            .DependentRules(x =>
+                x.Must(value => !(value ?? " ").All(char.IsWhiteSpace)).WithMessage("Tag names can't have spaces"));
+        RuleFor(x => x.GuildId)
+            .NotEmpty()
+            .DependentRules(x => x.SetAsyncValidator(new DiscordGuildIdValidator<TagAddReqDto>(discord)));
+        RuleFor(x => x.RequestedOnBehalfOfId)
+            .NotEmpty()
             .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<TagAddReqDto>(discord)));
         RuleFor(x => x.Text).NotEmpty().When(x => x.EmbedConfig is null);
-        RuleFor(x => x.EmbedConfig).NotEmpty().When(x => x.Text is null or "");
+        RuleFor(x => x.EmbedConfig).NotEmpty().When(x => string.IsNullOrWhiteSpace(x.Text));
     }
 }

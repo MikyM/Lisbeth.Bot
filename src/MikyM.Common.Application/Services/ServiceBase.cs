@@ -20,13 +20,13 @@ using MikyM.Common.Application.Results;
 
 namespace MikyM.Common.Application.Services;
 
-public abstract class ServiceBase<TContext> : IServiceBase<TContext> where TContext : DbContext
+public abstract class DataServiceBase<TContext> : IDataServiceBase<TContext> where TContext : DbContext
 {
     protected readonly IMapper Mapper;
     protected readonly IUnitOfWork<TContext> UnitOfWork;
     private bool _disposed;
 
-    protected ServiceBase(IMapper mapper, IUnitOfWork<TContext> uof)
+    protected DataServiceBase(IMapper mapper, IUnitOfWork<TContext> uof)
     {
         Mapper = mapper;
         UnitOfWork = uof;
@@ -66,7 +66,7 @@ public abstract class ServiceBase<TContext> : IServiceBase<TContext> where TCont
     {
         if (_disposed) return;
 
-        if (disposing) UnitOfWork?.Dispose();
+        if (disposing) UnitOfWork.Dispose();
 
         _disposed = true;
     }

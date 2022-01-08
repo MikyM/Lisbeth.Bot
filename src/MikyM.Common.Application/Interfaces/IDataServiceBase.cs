@@ -15,13 +15,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Lisbeth.Bot.DataAccessLayer;
-using Lisbeth.Bot.Domain.DTOs.Request.Mute;
+using MikyM.Common.Application.Results;
 
-namespace Lisbeth.Bot.Application.Services.Database.Interfaces;
+namespace MikyM.Common.Application.Interfaces;
 
-public interface IMuteDataService : ICrudService<Mute, LisbethBotDbContext>
+public interface IDataServiceBase<TContext> : IServiceBase, IDisposable where TContext : DbContext
 {
-    Task<Result<(long Id, Mute? FoundEntity)>> AddOrExtendAsync(MuteApplyReqDto req, bool shouldSave = false);
-    Task<Result<Mute>> DisableAsync(MuteRevokeReqDto entry, bool shouldSave = false);
+    Task<Result<int>> CommitAsync();
+    Task<Result<int>> CommitAsync(long auditUserId);
+    Task<Result> RollbackAsync();
+    Task<Result> BeginTransactionAsync();
 }

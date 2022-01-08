@@ -21,7 +21,7 @@ using Lisbeth.Bot.Domain.DTOs.Request.Ban;
 
 namespace Lisbeth.Bot.Application.Discord.Services.Interfaces;
 
-public interface IDiscordBanService
+public interface IDiscordBanService : IServiceBase
 {
     Task<Result<DiscordEmbed>> BanAsync(BanApplyReqDto req);
     Task<Result<DiscordEmbed>> BanAsync(InteractionContext ctx, BanApplyReqDto req);

@@ -15,13 +15,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using Lisbeth.Bot.Domain.Entities.Base;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq.Expressions;
-using Lisbeth.Bot.Domain.Entities.Base;
-using Lisbeth.Bot.Domain.Enums;
-using MikyM.Common.Domain.Entities;
+using System.Linq;
 
 // ReSharper disable CollectionNeverUpdated.Local
 // ReSharper disable InconsistentNaming
@@ -57,19 +55,14 @@ public sealed class Guild : SnowflakeEntity
     public TicketingConfig? TicketingConfig { get; private set; }
     public ModerationConfig? ModerationConfig { get; private set; }
     public string EmbedHexColor { get; set; } = "#26296e";
-    public IReadOnlyCollection<Mute>? Mutes => mutes;
-    public IReadOnlyCollection<Ban>? Bans => bans;
-    public IReadOnlyCollection<Prune>? Prunes => prunes;
-    public IReadOnlyCollection<Ticket>? Tickets => tickets;
-    public IReadOnlyCollection<GuildServerBooster>? GuildServerBoosters => guildServerBoosters;
-    public IReadOnlyCollection<Reminder>? Reminders => reminders;
-    public IReadOnlyCollection<Tag>? Tags => tags;
-    public IReadOnlyCollection<RoleMenu>? RoleMenus => roleMenus;
-
-/*        public Guild()
-        {
-            tags ??= new HashSet<Tag>();
-        }*/
+    public IEnumerable<Mute>? Mutes => mutes?.AsEnumerable();
+    public IEnumerable<Ban>? Bans => bans?.AsEnumerable();
+    public IEnumerable<Prune>? Prunes => prunes?.AsEnumerable();
+    public IEnumerable<Ticket>? Tickets => tickets?.AsEnumerable();
+    public IEnumerable<GuildServerBooster>? GuildServerBoosters => guildServerBoosters?.AsEnumerable();
+    public IEnumerable<Reminder>? Reminders => reminders?.AsEnumerable();
+    public IEnumerable<Tag>? Tags => tags?.AsEnumerable();
+    public IEnumerable<RoleMenu>? RoleMenus => roleMenus?.AsEnumerable();
 
     public void AddMute(Mute mute)
     {
@@ -104,11 +97,17 @@ public sealed class Guild : SnowflakeEntity
     public bool RemoveTag(string name)
     {
         if (name is "") throw new ArgumentException("Name can't be empty", nameof(name));
-        var res = tags?.RemoveWhere(x => x.Name == name);
-        return res > 0;
+
+        var tag = Tags?.FirstOrDefault(x => x.Name == name);
+
+        if (tag is null) return false;
+
+        tag.IsDisabled = true;
+
+        return true;
     }
 
-    public bool EditTag(Tag tag)
+    public bool ReplaceTag(Tag tag)
     {
         if (tag is null) throw new ArgumentNullException(nameof(tag));
         var res = tags?.RemoveWhere(x => x.Name == tag.Name);

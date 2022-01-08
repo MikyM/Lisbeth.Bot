@@ -15,20 +15,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
-using System.Globalization;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using Lisbeth.Bot.Application.Discord.Commands.Tag;
-using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
-using Lisbeth.Bot.DataAccessLayer.Specifications.Tag;
 using MikyM.Common.Application.CommandHandlers;
 using MikyM.Common.Utilities.Extensions;
 using MikyM.Discord.Enums;
-using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.Interfaces;
+using System.Collections.Generic;
+using System.Globalization;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Tag;
 
@@ -36,12 +33,12 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Tag;
 public class GetAllTagsCommandHandler : ICommandHandler<GetAllTagsCommand, List<Page>>
 {
     private readonly IDiscordService _discord;
-    private readonly IGuildDataService _guildDataService;
+    private readonly IGuildDataDataService _guildDataDataService;
 
-    public GetAllTagsCommandHandler(IDiscordService discord, IGuildDataService guildDataService)
+    public GetAllTagsCommandHandler(IDiscordService discord, IGuildDataDataService guildDataDataService)
     {
         _discord = discord;
-        _guildDataService = guildDataService;
+        _guildDataDataService = guildDataDataService;
     }
 
     public async Task<Result<List<Page>>> HandleAsync(GetAllTagsCommand command)
@@ -59,7 +56,7 @@ public class GetAllTagsCommandHandler : ICommandHandler<GetAllTagsCommand, List<
             return new DiscordNotFoundError(DiscordEntity.User);
 
         var guildRes =
-            await _guildDataService.GetSingleBySpecAsync(
+            await _guildDataDataService.GetSingleBySpecAsync(
                 new ActiveGuildByDiscordIdWithTagsSpecifications(guild.Id));
 
         if (!guildRes.IsDefined(out var guildCfg))
@@ -74,16 +71,14 @@ public class GetAllTagsCommandHandler : ICommandHandler<GetAllTagsCommand, List<
         var pages = new List<Page>();
         var chunked = tags.Where(x => !x.IsDisabled)
             .OrderByDescending(x => x.CreatedAt)
-            .ToList()
-            .ChunkBy(10)
-            .OrderByDescending(x => x.Count)
+            .Chunk(10)
+            .OrderByDescending(x => x.Length)
             .ToList();
 
         int pageNumber = 1;
         foreach (var chunk in chunked)
         {
-            var embedBuilder = new DiscordEmbedBuilder()
-                .WithColor(new DiscordColor(guildCfg.EmbedHexColor))
+            var embedBuilder = new DiscordEmbedBuilder().WithColor(new DiscordColor(guildCfg.EmbedHexColor))
                 .WithTitle("Available tags")
                 .WithFooter($"Current page: {pageNumber} | Total pages: {chunked.Count}");
 

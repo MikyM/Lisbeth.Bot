@@ -2,11 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Lisbeth.Bot.Domain\Lisbeth.Bot.Domain.csproj" />
     <ProjectReference Include="..\MikyM.Common.DataAccessLayer\MikyM.Common.DataAccessLayer.csproj" />
+    <ProjectReference Include="..\MikyM.Common.Utilities\MikyM.Common.Utilities.csproj" />
   </ItemGroup>
 
   <ItemGroup>

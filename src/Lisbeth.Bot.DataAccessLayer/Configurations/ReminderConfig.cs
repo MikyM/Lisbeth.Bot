@@ -53,7 +53,7 @@ public class ReminderConfig : IEntityTypeConfiguration<Reminder>
             .IsRequired();
         builder.Property(x => x.Text).HasColumnName("text").HasColumnType("text");
         builder.Property(x => x.SetFor).HasColumnName("set_for").HasColumnType("timestamptz");
-        builder.Property(x => x.SetFor).HasColumnName("cron_expression").HasColumnType("varchar(200)")
+        builder.Property(x => x.CronExpression).HasColumnName("cron_expression").HasColumnType("varchar(200)")
             .HasMaxLength(200);
         builder.Property(x => x.EmbedConfigId).HasColumnName("embed_config_id").HasColumnType("bigint");
         builder.Property(x => x.IsGuildReminder)

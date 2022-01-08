@@ -36,23 +36,23 @@ namespace Lisbeth.Bot.Application.Discord.Services;
 [UsedImplicitly]
 public class DiscordBanService : IDiscordBanService
 {
-    private readonly IBanService _banService;
+    private readonly IBanDataService _banDataService;
     private readonly IDiscordService _discord;
-    private readonly IGuildDataService _guildDataService;
+    private readonly IGuildDataDataService _guildDataDataService;
     private readonly ILogger<DiscordBanService> _logger;
     private readonly IResponseDiscordEmbedBuilder<DiscordModeration> _embedBuilder;
     private readonly IDiscordGuildLoggerService _guildLogger;
 
-    public DiscordBanService(IBanService banService, IDiscordService discord, IGuildDataService guildDataService,
+    public DiscordBanService(IBanDataService banDataService, IDiscordService discord, IGuildDataDataService guildDataDataService,
         ILogger<DiscordBanService> logger, IResponseDiscordEmbedBuilder<DiscordModeration> embedBuilder, IDiscordGuildLoggerService guildLogger)
     {
-        _banService = banService;
+        _banDataService = banDataService;
         _discord = discord;
-        _guildDataService = guildDataService;
+        _guildDataDataService = guildDataDataService;
         _logger = logger;
         _embedBuilder = embedBuilder;
         _guildLogger = guildLogger;
-        _guildDataService = guildDataService;
+        _guildDataDataService = guildDataDataService;
     }
 
     [Queue("moderation")]
@@ -61,7 +61,7 @@ public class DiscordBanService : IDiscordBanService
     {
         try
         {
-            var res = await _banService.GetBySpecAsync<Ban>(
+            var res = await _banDataService.GetBySpecAsync<Ban>(
                 new ActiveExpiredBansInActiveGuildsSpecifications());
 
             if (!res.IsDefined()) return Result.FromSuccess();
@@ -123,7 +123,7 @@ public class DiscordBanService : IDiscordBanService
 
         if (req.Id.HasValue)
         {
-            var res = await _banService.GetAsync(req.Id.Value);
+            var res = await _banDataService.GetAsync(req.Id.Value);
             if (!res.IsDefined()) return Result<DiscordEmbed>.FromError(res);
             req.GuildId = res.Entity.GuildId;
             req.TargetUserId = res.Entity.UserId;
@@ -155,7 +155,7 @@ public class DiscordBanService : IDiscordBanService
             {
                 if (req.Id is not null)
                 {
-                    var res = await _banService.GetAsync(req.Id ?? throw new InvalidOperationException());
+                    var res = await _banDataService.GetAsync(req.Id ?? throw new InvalidOperationException());
 
                     if (res.IsDefined())
                         target = await _discord.Client.GetUserAsync(res.Entity.UserId);
@@ -185,7 +185,7 @@ public class DiscordBanService : IDiscordBanService
 
         if (req.Id.HasValue)
         {
-            var ban = await _banService.GetAsync(req.Id.Value);
+            var ban = await _banDataService.GetAsync(req.Id.Value);
             if (!ban.IsDefined()) return Result<DiscordEmbed>.FromError(ban);
             req.GuildId = ban.Entity.GuildId;
             req.TargetUserId = ban.Entity.UserId;
@@ -227,7 +227,7 @@ public class DiscordBanService : IDiscordBanService
                 }
                 else
                 {
-                    var res = await _banService.GetAsync(req.Id ?? throw new InvalidOperationException());
+                    var res = await _banDataService.GetAsync(req.Id ?? throw new InvalidOperationException());
 
                     if (res.IsDefined())
                         target = await _discord.Client.GetUserAsync(res.Entity.UserId);
@@ -272,7 +272,7 @@ public class DiscordBanService : IDiscordBanService
         DiscordBan? ban;
 
         var guildCfg =
-            await _guildDataService.GetSingleBySpecAsync<Guild>(
+            await _guildDataDataService.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithModerationSpec(guild.Id));
 
         if (!guildCfg.IsDefined(out var guildEntity))
@@ -294,7 +294,7 @@ public class DiscordBanService : IDiscordBanService
 
         if (ban is null) await guild.BanMemberAsync(target.Id, 1, req.Reason);
 
-        var partial = await _banService.AddOrExtendAsync(req, true);
+        var partial = await _banDataService.AddOrExtendAsync(req, true);
 
         if (!partial.IsDefined(out var idEntityPair)) return Result<DiscordEmbed>.FromError(partial);
 
@@ -320,7 +320,7 @@ public class DiscordBanService : IDiscordBanService
         DiscordBan? ban;
 
         var result =
-            await _guildDataService.GetSingleBySpecAsync<Guild>(
+            await _guildDataDataService.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithModerationSpec(guild.Id));
 
         if (!result.IsDefined(out var guildEntity))
@@ -353,7 +353,7 @@ public class DiscordBanService : IDiscordBanService
                 return new DiscordError("Failed to unban");
             }
 
-        var res = await _banService.DisableAsync(req, true);
+        var res = await _banDataService.DisableAsync(req, true);
 
         if (!res.IsDefined(out var foundBan)) return Result<DiscordEmbed>.FromError(res);
 
@@ -381,7 +381,7 @@ public class DiscordBanService : IDiscordBanService
             return new DiscordNotAuthorizedError();
 
         var result =
-            await _guildDataService.GetSingleBySpecAsync<Guild>(
+            await _guildDataDataService.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithModerationSpec(guild.Id));
 
         if (!result.IsDefined(out var guildEntity))
@@ -392,7 +392,7 @@ public class DiscordBanService : IDiscordBanService
 
         await _guildLogger.LogToDiscordAsync(guild, req, DiscordModeration.BanGet, moderator, target, guildEntity.EmbedHexColor);
 
-        var res = await _banService.GetSingleBySpecAsync<Ban>(
+        var res = await _banDataService.GetSingleBySpecAsync<Ban>(
             new BanBaseGetSpecifications(req.Id, req.TargetUserId, req.GuildId, req.AppliedById, req.LiftedOn,
                 req.AppliedOn, req.LiftedById));
 

@@ -17,12 +17,11 @@
 
 
 using DSharpPlus.Entities;
-using Lisbeth.Bot.Application.Enums;
 using MikyM.Discord.EmbedBuilders.Enums;
 
 namespace Lisbeth.Bot.Application.Discord.Services.Interfaces;
 
-public interface IDiscordGuildLogSenderService
+public interface IDiscordGuildLogSenderService : IServiceBase
 {
     Task<Result> SendAsync(DiscordGuild discordGuild, DiscordLog type, DiscordEmbed embed);
     Task<Result> SendAsync(ulong discordGuildId, DiscordLog type, DiscordEmbed embed);

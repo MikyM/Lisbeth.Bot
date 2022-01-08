@@ -15,8 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Lisbeth.Bot.DataAccessLayer.Repositories.Interfaces;
+namespace MikyM.Common.Application.CommandHandlers.Commands;
 
-public interface ITagRepository : IRepository<Tag>
+public interface ICommand
 {
+    
 }

@@ -30,19 +30,19 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Tag;
 [UsedImplicitly]
 public class RevokeSnowflakePermissionTagCommandHandler : ICommandHandler<RevokeSnowflakePermissionTagCommand>
 {
-    private readonly IGuildDataService _guildDataService;
-    private readonly ITagDataService _tagDataService;
+    private readonly IGuildDataDataService _guildDataDataService;
+    private readonly ITagDataDataService _tagDataDataService;
     private readonly ILogger<RevokeSnowflakePermissionTagCommand> _logger;
     private readonly IDiscordService _discord;
 
-    public RevokeSnowflakePermissionTagCommandHandler(IGuildDataService guildDataService,
+    public RevokeSnowflakePermissionTagCommandHandler(IGuildDataDataService guildDataDataService,
         ILogger<RevokeSnowflakePermissionTagCommand> logger, IDiscordService discord,
-        ITagDataService tagDataService)
+        ITagDataDataService tagDataDataService)
     {
-        _guildDataService = guildDataService;
+        _guildDataDataService = guildDataDataService;
         _logger = logger;
         _discord = discord;
-        _tagDataService = tagDataService;
+        _tagDataDataService = tagDataDataService;
     }
 
     public async Task<Result> HandleAsync(RevokeSnowflakePermissionTagCommand command)
@@ -50,13 +50,13 @@ public class RevokeSnowflakePermissionTagCommandHandler : ICommandHandler<Revoke
         if (command is null) throw new ArgumentNullException(nameof(command));
 
         var guildRes =
-            await _guildDataService.GetSingleBySpecAsync(
+            await _guildDataDataService.GetSingleBySpecAsync(
                 new ActiveGuildByIdSpec(command.Dto.GuildId));
 
         if (!guildRes.IsDefined()) return Result.FromError(guildRes);
 
         var tagRes =
-            await _tagDataService.GetSingleBySpecAsync(new ActiveTagByGuildAndNameSpec(command.Dto.Name,
+            await _tagDataDataService.GetSingleBySpecAsync(new ActiveTagByGuildAndNameSpec(command.Dto.Name,
                 command.Dto.GuildId));
 
         if (!tagRes.IsDefined(out var tag)) return Result.FromError(tagRes);
@@ -71,8 +71,8 @@ public class RevokeSnowflakePermissionTagCommandHandler : ICommandHandler<Revoke
         if (!requestingMember.IsModerator())
             return new DiscordNotAuthorizedError("Requesting member doesn't have moderator rights.");
 
-        DiscordRole? targetRole = command.Ctx?.ResolvedRoleMentions?[0] ?? guild.GetRole(command.Dto.SnowflakeId);
-        DiscordMember? targetMember = command.Ctx?.ResolvedUserMentions?[0] as DiscordMember ?? await guild.GetMemberAsync(command.Dto.SnowflakeId);
+        DiscordRole? targetRole = command.Ctx?.ResolvedRoleMentions?[0] ?? guild.GetRole(command.Dto.SnowflakeId!.Value);
+        DiscordMember? targetMember = command.Ctx?.ResolvedUserMentions?[0] as DiscordMember ?? await guild.GetMemberAsync(command.Dto.SnowflakeId!.Value);
 
         if (targetMember is null && targetRole is null)
             return new DiscordNotFoundError("Didn't find any roles or members with given snowflake Id");
@@ -80,11 +80,11 @@ public class RevokeSnowflakePermissionTagCommandHandler : ICommandHandler<Revoke
         Result result;
         if (targetRole is null && targetMember is not null)
         {
-            result = await _tagDataService.RemoveAllowedUserAsync(command.Dto, true);
+            result = await _tagDataDataService.RemoveAllowedUserAsync(command.Dto, true);
         }
         else if (targetRole is not null)
         {
-            result = await _tagDataService.RemoveAllowedRoleAsync(command.Dto, true);
+            result = await _tagDataDataService.RemoveAllowedRoleAsync(command.Dto, true);
         }
         else
         {

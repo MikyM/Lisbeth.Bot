@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MikyM.Common.DataAccessLayer\MikyM.Common.DataAccessLayer.csproj" />
+    <ProjectReference Include="..\MikyM.Common.Utilities\MikyM.Common.Utilities.csproj" />
   </ItemGroup>
 
 </Project>

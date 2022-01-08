@@ -18,12 +18,11 @@
 
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Domain.DTOs.Request.Base;
-using MikyM.Discord.EmbedBuilders.Enrichers;
 using MikyM.Discord.EmbedBuilders.Enums;
 
 namespace Lisbeth.Bot.Application.Discord.Services.Interfaces;
 
-public interface IDiscordGuildLoggerService
+public interface IDiscordGuildLoggerService : IServiceBase
 {
     Task<Result> LogToDiscordAsync<TRequest>(DiscordGuild discordGuild, TRequest req,
         DiscordModeration moderation, DiscordUser? moderator = null, SnowflakeObject? target = null, string hexColor = "#26296e", long? caseId = null)

@@ -23,7 +23,7 @@ public class TagByNameSpec : Specification<Domain.Entities.Tag>
 {
     public TagByNameSpec(string name)
     {
-        Where(x => x.Name == name);
+        Where(x => x.Name.ToLower() == name.ToLower());
         Include(x => x.EmbedConfig);
     }
 }

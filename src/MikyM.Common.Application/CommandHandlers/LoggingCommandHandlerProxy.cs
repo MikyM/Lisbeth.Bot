@@ -16,12 +16,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Microsoft.Extensions.Logging;
+using MikyM.Common.Application.CommandHandlers.Commands;
 using MikyM.Common.Application.Results;
 
 namespace MikyM.Common.Application.CommandHandlers;
 
 [UsedImplicitly]
-public class LoggingCommandHandlerProxy<TRequest> : ICommandHandler<TRequest> where TRequest : ICommand
+public class LoggingCommandHandlerProxy<TRequest> : ICommandHandler<TRequest> where TRequest : class, ICommand
 {
     private readonly ILogger<LoggingCommandHandlerProxy<TRequest>> _logger;
     private readonly ICommandHandler<TRequest> _commandHandler;
@@ -40,12 +41,13 @@ public class LoggingCommandHandlerProxy<TRequest> : ICommandHandler<TRequest> wh
 }
 
 [UsedImplicitly]
-public class LoggingCommandHandler<TRequest, TResult> : ICommandHandler<TRequest, TResult> where TRequest : ICommand
+public class LoggingCommandHandler<TRequest, TResult> : ICommandHandler<TRequest, TResult> where TRequest : class, ICommand
 {
     private readonly ILogger<LoggingCommandHandler<TRequest, TResult>> _logger;
     private readonly ICommandHandler<TRequest, TResult> _commandHandler;
 
-    public LoggingCommandHandler(ILogger<LoggingCommandHandler<TRequest, TResult>> logger, ICommandHandler<TRequest, TResult> commandHandler)
+    public LoggingCommandHandler(ILogger<LoggingCommandHandler<TRequest, TResult>> logger,
+        ICommandHandler<TRequest, TResult> commandHandler)
     {
         _logger = logger;
         _commandHandler = commandHandler;
