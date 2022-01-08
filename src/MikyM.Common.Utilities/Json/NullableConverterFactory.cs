@@ -1,8 +1,8 @@
-﻿using MikyM.Common.Application.Extensions;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
+using MikyM.Common.Utilities.Extensions;
 
-namespace MikyM.Common.Application.Json;
+namespace MikyM.Common.Utilities.Json;
 
 /// <summary>
 /// Creates instances of <see cref="NullableConverter{TValue}"/>.
@@ -14,7 +14,7 @@ public class NullableConverterFactory : JsonConverterFactory
     {
         return typeToConvert.IsNullable();
     }
-
+    
     /// <inheritdoc />
     public override JsonConverter CreateConverter(Type typeToConvert, JsonSerializerOptions options)
     {

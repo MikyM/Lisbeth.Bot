@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace MikyM.Common.Application.Json;
+namespace MikyM.Common.Utilities.Json;
 
 /// <summary>
 /// Converts from to and from <see cref="Nullable{T}"/>.

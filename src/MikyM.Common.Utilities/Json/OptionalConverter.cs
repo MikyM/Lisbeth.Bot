@@ -1,8 +1,8 @@
-﻿using MikyM.Common.Domain.Optional;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
+using MikyM.Common.Utilities.Optionals;
 
-namespace MikyM.Common.Application.Json;
+namespace MikyM.Common.Utilities.Json;
 
 /// <summary>
 /// Converts optional fields to their JSON representation.

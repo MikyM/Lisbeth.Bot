@@ -67,7 +67,8 @@ public class CommandHandlerUnitOfWorkManager : ICommandHandlerUnitOfWorkManager
         var generic = typeof(ICommandHandler<,>).MakeGenericType(commandType);
         string genericName = generic.FullName ?? throw new InvalidOperationException();
 
-        if (_commandHandlers.TryGetValue(genericName, out var handler)) return (ICommandHandler<TCommand>) handler;
+        if (_commandHandlers.TryGetValue(genericName, out var handler)) 
+            return (ICommandHandler<TCommand>) handler;
 
         if (_commandHandlers.TryAdd(genericName, _lifetimeScope.Resolve<ICommandHandler<TCommand>>()))
             return (ICommandHandler<TCommand>)_commandHandlers[genericName];
@@ -86,7 +87,8 @@ public class CommandHandlerUnitOfWorkManager : ICommandHandlerUnitOfWorkManager
         var generic = typeof(ICommandHandler<,>).MakeGenericType(commandType, resultType);
         string genericName = generic.FullName ?? throw new InvalidOperationException();
 
-        if (_commandHandlers.TryGetValue(genericName, out var handler)) return (ICommandHandler<TCommand, TResult>) handler;
+        if (_commandHandlers.TryGetValue(genericName, out var handler)) 
+            return (ICommandHandler<TCommand, TResult>) handler;
 
         if (_commandHandlers.TryAdd(genericName, _lifetimeScope.Resolve<ICommandHandler<TCommand, TResult>>()))
             return (ICommandHandler<TCommand, TResult>) _commandHandlers[genericName];

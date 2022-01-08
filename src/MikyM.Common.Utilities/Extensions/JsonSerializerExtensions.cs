@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace MikyM.Common.Application.Extensions;
+namespace MikyM.Common.Utilities.Extensions;
 
 public static class JsonSerializerExtensions
 {

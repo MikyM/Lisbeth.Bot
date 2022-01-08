@@ -20,12 +20,10 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
-namespace MikyM.Common.Domain.Optional;
+namespace MikyM.Common.Utilities.Optionals;
 
 /// <summary>
 /// Represents an optional value. This is mainly used for JSON de/serializalization where a value can be either

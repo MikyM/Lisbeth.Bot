@@ -20,7 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace MikyM.Common.Domain.Optional;
+namespace MikyM.Common.Utilities.Optionals;
 
 /// <summary>
 /// Defines basic functionality for an optional.
