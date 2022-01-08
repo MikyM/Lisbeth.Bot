@@ -39,6 +39,11 @@ public readonly struct Optional<TValue> : IOptional
     private readonly TValue _value;
 
     /// <summary>
+    /// Gets an initialized instance of <see cref="Optional{T}"/> which has no value set.
+    /// </summary>
+    public static Optional<TValue> Default { get; } = new();
+
+    /// <summary>
     /// Gets the value contained in the optional.
     /// </summary>
     /// <exception cref="InvalidOperationException">Thrown if the optional does not contain a value.</exception>
@@ -151,4 +156,35 @@ public readonly struct Optional<TValue> : IOptional
             ? $"{{{_value?.ToString() ?? "null"}}}"
             : "Empty";
     }
+}
+
+/// <summary>
+/// Utilities for creation of optional properties.
+/// </summary>
+public static class Optional
+{
+    /// <summary>
+    /// Creates a new <see cref="Optional{T}"/> from a value of type <typeparamref name="T"/>.
+    /// </summary>
+    /// <typeparam name="T">Type of the value to create an optional property for.</typeparam>
+    /// <param name="value">Value to set the property to.</param>
+    /// <returns>Created optional property, which has a specified value set.</returns>
+    public static Optional<T> FromValue<T>(T value)
+        => new(value);
+
+    /// <summary>
+    /// Creates a new <see cref="Optional{T}"/> from a default value for type <typeparamref name="T"/>.
+    /// </summary>
+    /// <typeparam name="T">Type of the value to create an optional property for.</typeparam>
+    /// <returns>Created optional property, which has a default value for <typeparamref name="T"/> set.</returns>
+    public static Optional<T?> FromDefaultValue<T>()
+        => new(default);
+
+    /// <summary>
+    /// Creates a new <see cref="Optional{T}"/> which has no value.
+    /// </summary>
+    /// <typeparam name="T">Type of the value to create an optional property for.</typeparam>
+    /// <returns>Created optional property, which has no value set.</returns>
+    public static Optional<T> FromNoValue<T>()
+        => Optional<T>.Default;
 }

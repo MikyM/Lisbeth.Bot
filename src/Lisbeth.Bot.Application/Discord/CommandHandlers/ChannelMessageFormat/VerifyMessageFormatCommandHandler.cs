@@ -26,7 +26,7 @@ using MikyM.Discord.Interfaces;
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.ChannelMessageFormat;
 
 [UsedImplicitly]
-public class VerifyMessageFormatCommandHandler : ICommandHandler<VerifyMessageFormatCommand>
+public class VerifyMessageFormatCommandHandler : ICommandHandler<VerifyMessageFormatCommand, VerifyMessageFormatResDto>
 {
     private readonly IDiscordService _discord;
     private readonly IGuildDataService _guildDataService;
@@ -37,7 +37,7 @@ public class VerifyMessageFormatCommandHandler : ICommandHandler<VerifyMessageFo
         _guildDataService = guildDataService;
     }
 
-    public async Task<Result> HandleAsync(VerifyMessageFormatCommand command)
+    public async Task<Result<VerifyMessageFormatResDto>> HandleAsync(VerifyMessageFormatCommand command)
     {
         if (command is null) throw new ArgumentNullException(nameof(command));
 
@@ -73,7 +73,7 @@ public class VerifyMessageFormatCommandHandler : ICommandHandler<VerifyMessageFo
                 new ActiveGuildByDiscordIdWithChannelMessageFormatsSpec(command.Dto.GuildId));
 
         if (!guildRes.IsDefined(out var guildCfg))
-            return Result.FromError(guildRes);
+            return Result<VerifyMessageFormatResDto>.FromError(guildRes);
 
         var format = guildCfg.ChannelMessageFormats?.FirstOrDefault(x => x.ChannelId == command.Dto.ChannelId);
         if (format is null)
@@ -83,10 +83,19 @@ public class VerifyMessageFormatCommandHandler : ICommandHandler<VerifyMessageFo
         var isCompliant = format.IsTextCompliant(target.Content ?? string.Empty);
 
         if (isCompliant)
-            return Result.FromSuccess();
+            return new VerifyMessageFormatResDto(true);
 
-        await channel.DeleteMessageAsync(target, "Message not compliant with channel message format");
+        bool isDeleted = false;
+        try
+        {
+            await channel.DeleteMessageAsync(target, "Message not compliant with channel message format");
+            isDeleted = true;
+        }
+        catch
+        {
+            // ignored
+        }
 
-        return Result.FromSuccess();
+        return new VerifyMessageFormatResDto(false, isDeleted);
     }
 }
