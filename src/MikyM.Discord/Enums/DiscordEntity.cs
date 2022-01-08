@@ -24,5 +24,6 @@ public enum DiscordEntity
     Channel,
     Member,
     User,
-    Role
+    Role,
+    Message
 }

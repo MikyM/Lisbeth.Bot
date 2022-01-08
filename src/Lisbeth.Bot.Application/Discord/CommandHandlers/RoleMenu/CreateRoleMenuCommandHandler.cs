@@ -37,16 +37,16 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.RoleMenu;
 [UsedImplicitly]
 public class CreateRoleMenuCommandHandler : ICommandHandler<CreateRoleMenuCommand, DiscordMessageBuilder>
 {
-    private readonly IGuildDataDataService _guildDataDataService;
+    private readonly IGuildDataService _guildDataService;
     private readonly IRoleMenuDataDataService _roleMenuDataDataService;
     private readonly ILogger<CreateRoleMenuCommandHandler> _logger;
     private readonly IDiscordService _discord;
     private readonly IDiscordEmbedProvider _discordEmbedProvider;
 
-    public CreateRoleMenuCommandHandler(IGuildDataDataService guildDataDataService, IRoleMenuDataDataService roleMenuDataDataService,
+    public CreateRoleMenuCommandHandler(IGuildDataService guildDataService, IRoleMenuDataDataService roleMenuDataDataService,
         ILogger<CreateRoleMenuCommandHandler> logger, IDiscordService discord, IDiscordEmbedProvider discordEmbedProvider)
     {
-        _guildDataDataService = guildDataDataService;
+        _guildDataService = guildDataService;
         _roleMenuDataDataService = roleMenuDataDataService;
         _logger = logger;
         _discord = discord;
@@ -69,7 +69,7 @@ public class CreateRoleMenuCommandHandler : ICommandHandler<CreateRoleMenuComman
 
         if (!requestingUser.IsAdmin()) return new DiscordNotAuthorizedError();
 
-        var guildResult = await _guildDataDataService.GetSingleBySpecAsync(new ActiveGuildByIdSpec(command.Dto.GuildId));
+        var guildResult = await _guildDataService.GetSingleBySpecAsync(new ActiveGuildByIdSpec(command.Dto.GuildId));
         if (!guildResult.IsDefined()) return Result<DiscordMessageBuilder>.FromError(guildResult);
 
         var count = await _roleMenuDataDataService.LongCountAsync(

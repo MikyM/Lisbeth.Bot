@@ -29,14 +29,14 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Tag;
 public class EditTagCommandHandler : ICommandHandler<EditTagCommand>
 {
     private readonly IDiscordService _discord;
-    private readonly IGuildDataDataService _guildDataDataService;
+    private readonly IGuildDataService _guildDataService;
     private readonly ITagDataDataService _tagDataDataService;
 
-    public EditTagCommandHandler(IDiscordService discord, IGuildDataDataService guildDataDataService,
+    public EditTagCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
         ITagDataDataService tagDataDataService)
     {
         _discord = discord;
-        _guildDataDataService = guildDataDataService;
+        _guildDataService = guildDataService;
         _tagDataDataService = tagDataDataService;
     }
 
@@ -55,7 +55,7 @@ public class EditTagCommandHandler : ICommandHandler<EditTagCommand>
             return new DiscordNotFoundError(DiscordEntity.User);
 
         var guildCfg =
-            await _guildDataDataService.GetSingleBySpecAsync<Guild>(
+            await _guildDataService.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithTagsSpecifications(guild.Id));
         if (!guildCfg.IsDefined())
             return Result.FromError(guildCfg);

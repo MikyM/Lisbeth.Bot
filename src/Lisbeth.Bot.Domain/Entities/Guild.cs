@@ -36,6 +36,7 @@ public sealed class Guild : SnowflakeEntity
     private readonly HashSet<RoleMenu>? roleMenus;
     private readonly HashSet<Tag>? tags;
     private readonly HashSet<Ticket>? tickets;
+    private readonly HashSet<ChannelMessageFormat>? channelMessageFormats;
 
     public Guild()
     {
@@ -47,6 +48,7 @@ public sealed class Guild : SnowflakeEntity
         tickets ??= new HashSet<Ticket>();
         tags ??= new HashSet<Tag>();
         roleMenus ??= new HashSet<RoleMenu>();
+        channelMessageFormats ??= new HashSet<ChannelMessageFormat>();
     }
 
     public ulong GuildId { get; set; }
@@ -63,6 +65,7 @@ public sealed class Guild : SnowflakeEntity
     public IEnumerable<Reminder>? Reminders => reminders?.AsEnumerable();
     public IEnumerable<Tag>? Tags => tags?.AsEnumerable();
     public IEnumerable<RoleMenu>? RoleMenus => roleMenus?.AsEnumerable();
+    public IEnumerable<ChannelMessageFormat>? ChannelMessageFormats => channelMessageFormats?.AsEnumerable();
 
     public void AddMute(Mute mute)
     {

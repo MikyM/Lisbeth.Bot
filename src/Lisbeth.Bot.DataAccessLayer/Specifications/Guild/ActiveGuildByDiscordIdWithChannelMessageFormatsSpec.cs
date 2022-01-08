@@ -15,20 +15,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus.Entities;
-using MikyM.Common.Application.CommandHandlers.Commands;
-using System.Collections.Generic;
+using MikyM.Common.DataAccessLayer.Specifications;
 
-namespace Lisbeth.Bot.Application.Discord.Commands.RoleMenu;
+namespace Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 
-public class GetRoleMenuSelectCommand : CommandBase
+public class ActiveGuildByDiscordIdWithChannelMessageFormatsSpec : Specification<Domain.Entities.Guild>
 {
-    public GetRoleMenuSelectCommand(Domain.Entities.RoleMenu roleMenu, IEnumerable<DiscordRole> memberRoles)
+    public ActiveGuildByDiscordIdWithChannelMessageFormatsSpec(ulong discordGuildId)
     {
-        RoleMenu = roleMenu;
-        MemberRoles = memberRoles;
+        Where(x => !x.IsDisabled);
+        Where(x => x.GuildId == discordGuildId);
+        Include(x => x.ChannelMessageFormats);
     }
-
-    public Domain.Entities.RoleMenu RoleMenu { get; set; }
-    public IEnumerable<DiscordRole> MemberRoles { get; set; }
 }

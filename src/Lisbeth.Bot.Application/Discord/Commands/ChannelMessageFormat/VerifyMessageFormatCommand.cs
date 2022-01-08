@@ -15,20 +15,20 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus.Entities;
+using DSharpPlus.EventArgs;
+using Lisbeth.Bot.Domain.DTOs.Request.ChannelMessageFormat;
 using MikyM.Common.Application.CommandHandlers.Commands;
-using System.Collections.Generic;
 
-namespace Lisbeth.Bot.Application.Discord.Commands.RoleMenu;
+namespace Lisbeth.Bot.Application.Discord.Commands.ChannelMessageFormat;
 
-public class GetRoleMenuSelectCommand : CommandBase
+public class VerifyMessageFormatCommand : CommandBase
 {
-    public GetRoleMenuSelectCommand(Domain.Entities.RoleMenu roleMenu, IEnumerable<DiscordRole> memberRoles)
-    {
-        RoleMenu = roleMenu;
-        MemberRoles = memberRoles;
-    }
+    public MessageCreateEventArgs? EventArgs { get; set; }
+    public VerifyMessageFormatReqDto Dto { get; set; }
 
-    public Domain.Entities.RoleMenu RoleMenu { get; set; }
-    public IEnumerable<DiscordRole> MemberRoles { get; set; }
+    public VerifyMessageFormatCommand(VerifyMessageFormatReqDto dto, MessageCreateEventArgs? eventArgs = null)
+    {
+        Dto = dto;
+        EventArgs = eventArgs;
+    }
 }

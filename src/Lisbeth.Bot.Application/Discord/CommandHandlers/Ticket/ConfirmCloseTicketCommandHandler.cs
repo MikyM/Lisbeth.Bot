@@ -38,17 +38,17 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 public class ConfirmCloseTicketCommandHandler : ICommandHandler<ConfirmCloseTicketCommand>
 {
     private readonly IDiscordService _discord;
-    private readonly IGuildDataDataService _guildDataDataService;
+    private readonly IGuildDataService _guildDataService;
     private readonly ITicketDataService _ticketDataService;
     private readonly ILogger<ConfirmCloseTicketCommandHandler> _logger;
     private readonly IAsyncExecutor _asyncExecutor;
 
-    public ConfirmCloseTicketCommandHandler(IDiscordService discord, IGuildDataDataService guildDataDataService,
+    public ConfirmCloseTicketCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
         ITicketDataService ticketDataService, ILogger<ConfirmCloseTicketCommandHandler> logger,
         IAsyncExecutor asyncExecutor)
     {
         _discord = discord;
-        _guildDataDataService = guildDataDataService;
+        _guildDataService = guildDataService;
         _ticketDataService = ticketDataService;
         _logger = logger;
         _asyncExecutor = asyncExecutor;
@@ -59,7 +59,7 @@ public class ConfirmCloseTicketCommandHandler : ICommandHandler<ConfirmCloseTick
         if (command is null) throw new ArgumentNullException(nameof(command));
 
         var guildRes =
-            await _guildDataDataService.GetSingleBySpecAsync<Guild>(
+            await _guildDataService.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(command.Dto.GuildId));
 
         if (!guildRes.IsDefined(out var guildCfg)) return Result.FromError(guildRes);

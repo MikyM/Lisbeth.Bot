@@ -29,21 +29,21 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 [UsedImplicitly]
 public class GetWelcomeEmbedTicketCommandHandler : ICommandHandler<GetTicketWelcomeEmbedCommand, DiscordMessageBuilder>
 {
-    private readonly IGuildDataDataService _guildDataDataService;
+    private readonly IGuildDataService _guildDataService;
     private readonly IDiscordEmbedProvider _embedProvider;
     private readonly IDiscordService _discord;
 
-    public GetWelcomeEmbedTicketCommandHandler(IGuildDataDataService guildDataDataService, IDiscordEmbedProvider embedProvider,
+    public GetWelcomeEmbedTicketCommandHandler(IGuildDataService guildDataService, IDiscordEmbedProvider embedProvider,
         IDiscordService discord)
     {
-        _guildDataDataService = guildDataDataService;
+        _guildDataService = guildDataService;
         _embedProvider = embedProvider;
         _discord = discord;
     }
 
     public async Task<Result<DiscordMessageBuilder>> HandleAsync(GetTicketWelcomeEmbedCommand command)
     {
-        var res = await _guildDataDataService.GetSingleBySpecAsync<Guild>(
+        var res = await _guildDataService.GetSingleBySpecAsync<Guild>(
             new ActiveGuildByDiscordIdWithTicketingSpecifications(command.GuildId));
 
         if (!res.IsDefined(out var guild)) return Result<DiscordMessageBuilder>.FromError(res);

@@ -27,14 +27,14 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Mute;
 public class CheckNonBotMuteActionCommandHandler : ICommandHandler<CheckNonBotMuteActionCommand>
 {
     private readonly IMuteDataService _muteDataService;
-    private readonly IGuildDataDataService _guildDataDataService;
+    private readonly IGuildDataService _guildDataService;
     private readonly IDiscordService _discord;
 
-    public CheckNonBotMuteActionCommandHandler(IMuteDataService muteDataService, IGuildDataDataService guildDataDataService,
+    public CheckNonBotMuteActionCommandHandler(IMuteDataService muteDataService, IGuildDataService guildDataService,
         IDiscordService discord)
     {
         _muteDataService = muteDataService;
-        _guildDataDataService = guildDataDataService;
+        _guildDataService = guildDataService;
         _discord = discord;
     }
 
@@ -44,7 +44,7 @@ public class CheckNonBotMuteActionCommandHandler : ICommandHandler<CheckNonBotMu
 
         await Task.Delay(1000);
 
-        var result = await _guildDataDataService.GetSingleBySpecAsync(
+        var result = await _guildDataService.GetSingleBySpecAsync(
             new ActiveGuildByDiscordIdWithModerationSpec(command.Member.Guild.Id));
 
         if (!result.IsDefined() || result.Entity.ModerationConfig is null)

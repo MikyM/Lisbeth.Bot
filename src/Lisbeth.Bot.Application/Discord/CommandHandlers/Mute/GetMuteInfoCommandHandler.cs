@@ -34,18 +34,18 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Mute;
 public class GetMuteInfoCommandHandler : ICommandHandler<GetMuteInfoCommand, DiscordEmbed>
 {
     private readonly IDiscordService _discord;
-    private readonly IGuildDataDataService _guildDataDataService;
+    private readonly IGuildDataService _guildDataService;
     private readonly ILogger<GetMuteInfoCommandHandler> _logger;
     private readonly IMuteDataService _muteDataService;
     private readonly IDiscordGuildLoggerService _guildLogger;
     private readonly IResponseDiscordEmbedBuilder<DiscordModeration> _embedBuilder;
 
-    public GetMuteInfoCommandHandler(IDiscordService discord, IGuildDataDataService guildDataDataService,
+    public GetMuteInfoCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
         ILogger<GetMuteInfoCommandHandler> logger, IMuteDataService muteDataService,
         IDiscordGuildLoggerService guildLogger, IResponseDiscordEmbedBuilder<DiscordModeration> embedBuilder)
     {
         _discord = discord;
-        _guildDataDataService = guildDataDataService;
+        _guildDataService = guildDataService;
         _logger = logger;
         _muteDataService = muteDataService;
         _guildLogger = guildLogger;
@@ -66,7 +66,7 @@ public class GetMuteInfoCommandHandler : ICommandHandler<GetMuteInfoCommand, Dis
             return new DiscordNotAuthorizedError();
 
         var result =
-            await _guildDataDataService.GetSingleBySpecAsync(new ActiveGuildByDiscordIdWithModerationSpec(guild.Id));
+            await _guildDataService.GetSingleBySpecAsync(new ActiveGuildByDiscordIdWithModerationSpec(guild.Id));
 
         if (!result.IsDefined(out var guildEntity))
             return new DiscordNotFoundError(DiscordEntity.Guild);

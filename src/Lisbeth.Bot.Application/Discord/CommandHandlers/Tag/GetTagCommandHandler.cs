@@ -32,15 +32,15 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Tag;
 public class GetTagCommandHandler : ICommandHandler<GetTagCommand, DiscordMessageBuilder>
 {
     private readonly IDiscordService _discord;
-    private readonly IGuildDataDataService _guildDataDataService;
+    private readonly IGuildDataService _guildDataService;
     private readonly ITagDataDataService _tagDataDataService;
     private readonly IDiscordEmbedProvider _embedProvider;
 
-    public GetTagCommandHandler(IDiscordService discord, IGuildDataDataService guildDataDataService,
+    public GetTagCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
         ITagDataDataService tagDataDataService, IDiscordEmbedProvider embedProvider)
     {
         _discord = discord;
-        _guildDataDataService = guildDataDataService;
+        _guildDataService = guildDataService;
         _tagDataDataService = tagDataDataService;
         _embedProvider = embedProvider;
     }
@@ -74,7 +74,7 @@ public class GetTagCommandHandler : ICommandHandler<GetTagCommand, DiscordMessag
         else
         {
             var guildCfg =
-                await _guildDataDataService.GetSingleBySpecAsync(
+                await _guildDataService.GetSingleBySpecAsync(
                     new ActiveGuildByIdSpec(guild.Id));
             if (!guildCfg.IsDefined())
                 return Result<DiscordMessageBuilder>.FromError(guildCfg);

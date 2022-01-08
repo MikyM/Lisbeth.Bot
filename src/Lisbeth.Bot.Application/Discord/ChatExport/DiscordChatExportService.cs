@@ -36,16 +36,16 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport;
 public class DiscordChatExportService : IDiscordChatExportService
 {
     private readonly IDiscordService _discord;
-    private readonly IGuildDataDataService _guildDataDataService;
+    private readonly IGuildDataService _guildDataService;
     private readonly ILogger<DiscordChatExportService> _logger;
     private readonly ITicketDataService _ticketDataService;
     private readonly IOptions<BotOptions> _options;
 
-    public DiscordChatExportService(IDiscordService discord, IGuildDataDataService guildDataDataService,
+    public DiscordChatExportService(IDiscordService discord, IGuildDataService guildDataService,
         ITicketDataService ticketDataService, ILogger<DiscordChatExportService> logger, IOptions<BotOptions> options)
     {
         _discord = discord;
-        _guildDataDataService = guildDataDataService;
+        _guildDataService = guildDataService;
         _ticketDataService = ticketDataService;
         _logger = logger;
         _options = options;
@@ -140,7 +140,7 @@ public class DiscordChatExportService : IDiscordChatExportService
             if (requestingMember is null) throw new ArgumentNullException(nameof(requestingMember));
 
             var resGuild =
-                await _guildDataDataService.GetSingleBySpecAsync(new ActiveGuildByDiscordIdWithTicketingSpecifications(guild.Id));
+                await _guildDataService.GetSingleBySpecAsync(new ActiveGuildByDiscordIdWithTicketingSpecifications(guild.Id));
 
             if (!resGuild.IsDefined()) return new NotFoundError("Guild doesn't exist in database.");
 

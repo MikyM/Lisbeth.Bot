@@ -32,16 +32,16 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 public class OpenTicketCommandHandler : ICommandHandler<OpenTicketCommand>
 {
     private readonly IDiscordService _discord;
-    private readonly IGuildDataDataService _guildDataDataService;
+    private readonly IGuildDataService _guildDataService;
     private readonly ITicketDataService _ticketDataService;
     private readonly ILogger<OpenTicketCommandHandler> _logger;
     private readonly ICommandHandler<GetTicketWelcomeEmbedCommand, DiscordMessageBuilder> _welcomeEmbedCommandHandler;
 
-    public OpenTicketCommandHandler(IGuildDataDataService guildDataDataService, ITicketDataService ticketDataService,
+    public OpenTicketCommandHandler(IGuildDataService guildDataService, ITicketDataService ticketDataService,
         IDiscordService discord, ILogger<OpenTicketCommandHandler> logger,
         ICommandHandler<GetTicketWelcomeEmbedCommand, DiscordMessageBuilder> welcomeEmbedCommandHandler)
     {
-        _guildDataDataService = guildDataDataService;
+        _guildDataService = guildDataService;
         _ticketDataService = ticketDataService;
         _discord = discord;
         _logger = logger;
@@ -60,7 +60,7 @@ public class OpenTicketCommandHandler : ICommandHandler<OpenTicketCommand>
         if (owner.Guild.Id != guild.Id) return new DiscordNotAuthorizedError(nameof(owner));
 
         var guildRes =
-            await _guildDataDataService.GetSingleBySpecAsync(
+            await _guildDataService.GetSingleBySpecAsync(
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(guild.Id));
 
         if (!guildRes.IsDefined(out var guildCfg)) return Result.FromError(guildRes);
@@ -82,9 +82,9 @@ public class OpenTicketCommandHandler : ICommandHandler<OpenTicketCommand>
             return new InvalidOperationError("Member already has an opened ticket in this guild.");
         }
         
-        _guildDataDataService.BeginUpdate(guildCfg);
+        _guildDataService.BeginUpdate(guildCfg);
         guildCfg.TicketingConfig.LastTicketId++;
-        await _guildDataDataService.CommitAsync();
+        await _guildDataService.CommitAsync();
 
         var msgRes =
             await _welcomeEmbedCommandHandler.HandleAsync(new GetTicketWelcomeEmbedCommand(guild.Id,

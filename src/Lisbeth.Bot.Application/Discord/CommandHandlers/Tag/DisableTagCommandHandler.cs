@@ -29,14 +29,14 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Tag;
 public class DisableTagCommandHandler : ICommandHandler<DisableTagCommand>
 {
     private readonly IDiscordService _discord;
-    private readonly IGuildDataDataService _guildDataDataService;
+    private readonly IGuildDataService _guildDataService;
     private readonly ITagDataDataService _tagDataDataService;
 
-    public DisableTagCommandHandler(IDiscordService discord, IGuildDataDataService guildDataDataService,
+    public DisableTagCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
         ITagDataDataService tagDataDataService)
     {
         _discord = discord;
-        _guildDataDataService = guildDataDataService;
+        _guildDataService = guildDataService;
         _tagDataDataService = tagDataDataService;
     }
 
@@ -55,7 +55,7 @@ public class DisableTagCommandHandler : ICommandHandler<DisableTagCommand>
             return new DiscordNotFoundError(DiscordEntity.User);
 
         var guildCfg =
-            await _guildDataDataService.GetSingleBySpecAsync(
+            await _guildDataService.GetSingleBySpecAsync(
                 new ActiveGuildByDiscordIdWithTagsSpecifications(guild.Id));
         if (!guildCfg.IsDefined())
             return Result.FromError(guildCfg);

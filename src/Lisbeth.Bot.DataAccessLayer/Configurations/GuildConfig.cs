@@ -38,14 +38,15 @@ internal class GuildConfig : IEntityTypeConfiguration<Guild>
             .HasMaxLength(40).IsRequired();
         builder.Property(x => x.ReminderChannelId).HasColumnName("reminder_channel_id").HasColumnType("bigint");
 
-        builder.Metadata.FindNavigation(nameof(Guild.Tags)).SetPropertyAccessMode(PropertyAccessMode.Field);
-        builder.Metadata.FindNavigation(nameof(Guild.Bans)).SetPropertyAccessMode(PropertyAccessMode.Field);
-        builder.Metadata.FindNavigation(nameof(Guild.Mutes)).SetPropertyAccessMode(PropertyAccessMode.Field);
-        builder.Metadata.FindNavigation(nameof(Guild.Prunes)).SetPropertyAccessMode(PropertyAccessMode.Field);
-        builder.Metadata.FindNavigation(nameof(Guild.RoleMenus)).SetPropertyAccessMode(PropertyAccessMode.Field);
-        builder.Metadata.FindNavigation(nameof(Guild.GuildServerBoosters))
+        builder.Metadata.FindNavigation(nameof(Guild.Tags))?.SetPropertyAccessMode(PropertyAccessMode.Field);
+        builder.Metadata.FindNavigation(nameof(Guild.Bans))?.SetPropertyAccessMode(PropertyAccessMode.Field);
+        builder.Metadata.FindNavigation(nameof(Guild.Mutes))?.SetPropertyAccessMode(PropertyAccessMode.Field);
+        builder.Metadata.FindNavigation(nameof(Guild.Prunes))?.SetPropertyAccessMode(PropertyAccessMode.Field);
+        builder.Metadata.FindNavigation(nameof(Guild.RoleMenus))?.SetPropertyAccessMode(PropertyAccessMode.Field);
+        builder.Metadata.FindNavigation(nameof(Guild.GuildServerBoosters))?
             .SetPropertyAccessMode(PropertyAccessMode.Field);
-        builder.Metadata.FindNavigation(nameof(Guild.Reminders)).SetPropertyAccessMode(PropertyAccessMode.Field);
+        builder.Metadata.FindNavigation(nameof(Guild.Reminders))?.SetPropertyAccessMode(PropertyAccessMode.Field);
+        builder.Metadata.FindNavigation(nameof(Guild.ChannelMessageFormats))?.SetPropertyAccessMode(PropertyAccessMode.Field);
 
         builder.HasIndex(x => x.GuildId)
             .IsUnique();
@@ -86,6 +87,12 @@ internal class GuildConfig : IEntityTypeConfiguration<Guild>
 
         builder
             .HasMany(x => x.RoleMenus)
+            .WithOne(x => x.Guild)
+            .HasForeignKey(x => x.GuildId)
+            .HasPrincipalKey(x => x.GuildId);
+
+        builder
+            .HasMany(x => x.ChannelMessageFormats)
             .WithOne(x => x.Guild)
             .HasForeignKey(x => x.GuildId)
             .HasPrincipalKey(x => x.GuildId);

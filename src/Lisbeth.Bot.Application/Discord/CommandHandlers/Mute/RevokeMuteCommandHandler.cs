@@ -35,18 +35,18 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Mute;
 public class RevokeMuteCommandHandler : ICommandHandler<RevokeMuteCommand, DiscordEmbed>
 {
     private readonly IDiscordService _discord;
-    private readonly IGuildDataDataService _guildDataDataService;
+    private readonly IGuildDataService _guildDataService;
     private readonly ILogger<RevokeMuteCommandHandler> _logger;
     private readonly IMuteDataService _muteDataService;
     private readonly IDiscordGuildLoggerService _guildLogger;
     private readonly IResponseDiscordEmbedBuilder<DiscordModeration> _embedBuilder;
 
-    public RevokeMuteCommandHandler(IDiscordService discord, IGuildDataDataService guildDataDataService,
+    public RevokeMuteCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
         ILogger<RevokeMuteCommandHandler> logger, IMuteDataService muteDataService,
         IDiscordGuildLoggerService guildLogger, IResponseDiscordEmbedBuilder<DiscordModeration> embedBuilder)
     {
         _discord = discord;
-        _guildDataDataService = guildDataDataService;
+        _guildDataService = guildDataService;
         _logger = logger;
         _muteDataService = muteDataService;
         _guildLogger = guildLogger;
@@ -70,7 +70,7 @@ public class RevokeMuteCommandHandler : ICommandHandler<RevokeMuteCommand, Disco
             return new DiscordNotAuthorizedError();
 
         var result =
-            await _guildDataDataService.GetSingleBySpecAsync<Guild>(new ActiveGuildByDiscordIdWithModerationSpec(guild.Id));
+            await _guildDataService.GetSingleBySpecAsync<Guild>(new ActiveGuildByDiscordIdWithModerationSpec(guild.Id));
 
         if (!result.IsDefined(out var guildEntity))
             return new DiscordNotFoundError(DiscordEntity.Guild);

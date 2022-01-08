@@ -28,20 +28,20 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 [UsedImplicitly]
 public class CloseTicketCommandHandler : ICommandHandler<CloseTicketCommand>
 {
-    private readonly IGuildDataDataService _guildDataDataService;
+    private readonly IGuildDataService _guildDataService;
     private readonly ILogger<CloseTicketCommandHandler> _logger;
 
-    public CloseTicketCommandHandler(IGuildDataDataService guildDataDataService,
+    public CloseTicketCommandHandler(IGuildDataService guildDataService,
         ILogger<CloseTicketCommandHandler> logger)
     {
-        _guildDataDataService = guildDataDataService;
+        _guildDataService = guildDataService;
         _logger = logger;
     }
 
     public async Task<Result> HandleAsync(CloseTicketCommand command)
     {
         var guildRes =
-            await _guildDataDataService.GetSingleBySpecAsync(
+            await _guildDataService.GetSingleBySpecAsync(
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(command.Interaction.Guild.Id));
 
         if (!guildRes.IsDefined(out var guildCfg)) return Result.FromError(guildRes);

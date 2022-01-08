@@ -36,20 +36,20 @@ namespace Lisbeth.Bot.Application.Discord.Services;
 public class DiscordMessageService : IDiscordMessageService
 {
     private readonly IDiscordService _discord;
-    private readonly IGuildDataDataService _guildDataDataService;
+    private readonly IGuildDataService _guildDataService;
     private readonly IPruneDataService _pruneDataService;
     private readonly ILogger<DiscordMessageService> _logger;
     private readonly IResponseDiscordEmbedBuilder<DiscordModeration> _embedBuilder;
     private readonly IDiscordGuildLoggerService _discordGuildLogger;
     private readonly IMapper _mapper;
 
-    public DiscordMessageService(IDiscordService discord, IPruneDataService pruneDataService, IGuildDataDataService guildDataDataService,
+    public DiscordMessageService(IDiscordService discord, IPruneDataService pruneDataService, IGuildDataService guildDataService,
         ILogger<DiscordMessageService> logger, IResponseDiscordEmbedBuilder<DiscordModeration> embedBuilder,
         IDiscordGuildLoggerService discordGuildLogger, IMapper mapper)
     {
         _pruneDataService = pruneDataService;
         _discord = discord;
-        _guildDataDataService = guildDataDataService;
+        _guildDataService = guildDataService;
         _logger = logger;
         _embedBuilder = embedBuilder;
         _discordGuildLogger = discordGuildLogger;
@@ -85,12 +85,17 @@ public class DiscordMessageService : IDiscordMessageService
             return new DiscordNotAuthorizedError();
 
         var guildRes =
-            await _guildDataDataService.GetSingleBySpecAsync(new ActiveGuildByDiscordIdWithModerationSpec(discordGuild.Id));
+            await _guildDataService.GetSingleBySpecAsync(new ActiveGuildByDiscordIdWithModerationSpec(discordGuild.Id));
 
         if (!guildRes.IsDefined(out var guild) || !guild.IsModerationModuleEnabled)
             return new NotFoundError("Guild not found or it does not have moderation enabled");
 
-        await _discordGuildLogger.LogToDiscordAsync(discordGuild, req, DiscordModeration.Prune, moderator);
+        DiscordUser? targetAuthor = null;
+        if (req.TargetAuthorId.HasValue)
+            targetAuthor = await _discord.Client.GetUserAsync(req.TargetAuthorId.Value);
+
+        await _discordGuildLogger.LogToDiscordAsync(discordGuild, req, DiscordModeration.Prune, moderator, targetAuthor,
+            guild.EmbedHexColor);
 
         int count = 0;
 
@@ -169,7 +174,7 @@ public class DiscordMessageService : IDiscordMessageService
         if (args.Author.IsBot || args.MessageBefore.Content == args.Message.Content &&
             args.MessageBefore.Attachments.Count == args.Message.Attachments.Count) return;
 
-        var res = await _guildDataDataService.GetSingleBySpecAsync<Guild>(
+        var res = await _guildDataService.GetSingleBySpecAsync<Guild>(
             new ActiveGuildByDiscordIdWithModerationSpec(args.Guild.Id));
 
         if (!res.IsDefined()) throw new ArgumentException();
@@ -233,7 +238,7 @@ public class DiscordMessageService : IDiscordMessageService
 
         if (args.Message.Author.IsBot) return;
 
-        var res = await _guildDataDataService.GetSingleBySpecAsync<Guild>(
+        var res = await _guildDataService.GetSingleBySpecAsync<Guild>(
             new ActiveGuildByDiscordIdWithModerationSpec(args.Guild.Id));
 
         if (!res.IsDefined()) throw new ArgumentException();
@@ -311,7 +316,7 @@ public class DiscordMessageService : IDiscordMessageService
     {
         if (args is null) throw new ArgumentNullException(nameof(args));
 
-        var res = await _guildDataDataService.GetSingleBySpecAsync<Guild>(
+        var res = await _guildDataService.GetSingleBySpecAsync<Guild>(
             new ActiveGuildByDiscordIdWithModerationSpec(args.Guild.Id));
 
         if (!res.IsDefined()) throw new ArgumentException();

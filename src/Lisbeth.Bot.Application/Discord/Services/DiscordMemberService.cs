@@ -31,13 +31,13 @@ public class DiscordMemberService : IDiscordMemberService
 {
     private readonly IDiscordService _discord;
     private readonly IDiscordEmbedProvider _embedProvider;
-    private readonly IGuildDataDataService _guildDataDataService;
+    private readonly IGuildDataService _guildDataService;
     private readonly IMuteDataService _muteDataService;
 
-    public DiscordMemberService(IDiscordService discord, IGuildDataDataService guildDataDataService, IMuteDataService muteDataService,
+    public DiscordMemberService(IDiscordService discord, IGuildDataService guildDataService, IMuteDataService muteDataService,
         IDiscordEmbedProvider embedProvider)
     {
-        _guildDataDataService = guildDataDataService;
+        _guildDataService = guildDataService;
         _muteDataService = muteDataService;
         _discord = discord;
         _embedProvider = embedProvider;
@@ -47,7 +47,7 @@ public class DiscordMemberService : IDiscordMemberService
     {
         if (args is null) throw new ArgumentNullException(nameof(args));
 
-        var res = await _guildDataDataService.GetSingleBySpecAsync(new ActiveGuildByDiscordIdWithModerationSpec(args.Guild.Id));
+        var res = await _guildDataService.GetSingleBySpecAsync(new ActiveGuildByDiscordIdWithModerationSpec(args.Guild.Id));
 
         if (!res.IsDefined(out var guildCfg) || guildCfg.ModerationConfig is null) return Result.FromSuccess();
         if (!args.Guild.Channels.TryGetValue(guildCfg.ModerationConfig.MemberEventsLogChannelId,
@@ -105,7 +105,7 @@ public class DiscordMemberService : IDiscordMemberService
     {
         if (args is null) throw new ArgumentNullException(nameof(args));
 
-        var result = await _guildDataDataService.GetSingleBySpecAsync<Guild>(
+        var result = await _guildDataService.GetSingleBySpecAsync<Guild>(
             new ActiveGuildByDiscordIdWithModerationSpec(args.Guild.Id));
 
 

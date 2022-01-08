@@ -30,16 +30,16 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Tag;
 [UsedImplicitly]
 public class RevokeSnowflakePermissionTagCommandHandler : ICommandHandler<RevokeSnowflakePermissionTagCommand>
 {
-    private readonly IGuildDataDataService _guildDataDataService;
+    private readonly IGuildDataService _guildDataService;
     private readonly ITagDataDataService _tagDataDataService;
     private readonly ILogger<RevokeSnowflakePermissionTagCommand> _logger;
     private readonly IDiscordService _discord;
 
-    public RevokeSnowflakePermissionTagCommandHandler(IGuildDataDataService guildDataDataService,
+    public RevokeSnowflakePermissionTagCommandHandler(IGuildDataService guildDataService,
         ILogger<RevokeSnowflakePermissionTagCommand> logger, IDiscordService discord,
         ITagDataDataService tagDataDataService)
     {
-        _guildDataDataService = guildDataDataService;
+        _guildDataService = guildDataService;
         _logger = logger;
         _discord = discord;
         _tagDataDataService = tagDataDataService;
@@ -50,7 +50,7 @@ public class RevokeSnowflakePermissionTagCommandHandler : ICommandHandler<Revoke
         if (command is null) throw new ArgumentNullException(nameof(command));
 
         var guildRes =
-            await _guildDataDataService.GetSingleBySpecAsync(
+            await _guildDataService.GetSingleBySpecAsync(
                 new ActiveGuildByIdSpec(command.Dto.GuildId));
 
         if (!guildRes.IsDefined()) return Result.FromError(guildRes);

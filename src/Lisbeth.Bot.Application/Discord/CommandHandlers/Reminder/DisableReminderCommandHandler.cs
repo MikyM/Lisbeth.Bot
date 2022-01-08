@@ -31,15 +31,15 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Reminder;
 [UsedImplicitly]
 public class DisableReminderCommandHandler : ICommandHandler<DisableReminderCommand, DiscordEmbed>
 {
-    private readonly IGuildDataDataService _guildDataDataService;
+    private readonly IGuildDataService _guildDataService;
     private readonly IDiscordService _discord;
     private readonly IMainReminderService _reminderService;
     private readonly IResponseDiscordEmbedBuilder<RegularUserInteraction> _embedBuilder;
 
-    public DisableReminderCommandHandler(IGuildDataDataService guildDataDataService, IDiscordService discord,
+    public DisableReminderCommandHandler(IGuildDataService guildDataService, IDiscordService discord,
         IMainReminderService reminderService, IResponseDiscordEmbedBuilder<RegularUserInteraction> embedBuilder)
     {
-        _guildDataDataService = guildDataDataService;
+        _guildDataService = guildDataService;
         _discord = discord;
         _reminderService = reminderService;
         _embedBuilder = embedBuilder;
@@ -62,7 +62,7 @@ public class DisableReminderCommandHandler : ICommandHandler<DisableReminderComm
         if (command.Dto.Type is ReminderType.Recurring && !requestingUser.IsModerator())
             return new DiscordNotAuthorizedError();
 
-        var result = await _guildDataDataService.GetSingleBySpecAsync(new ActiveGuildByIdSpec(command.Dto.GuildId));
+        var result = await _guildDataService.GetSingleBySpecAsync(new ActiveGuildByIdSpec(command.Dto.GuildId));
 
         if (!result.IsDefined()) return Result<DiscordEmbed>.FromError(result);
         if (!result.Entity.IsReminderModuleEnabled)

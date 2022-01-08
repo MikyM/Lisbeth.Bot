@@ -30,16 +30,16 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
     private readonly IDiscordEmbedProvider _embedProvider;
     private readonly IMapper _mapper;
     private readonly ICrudDataService<T, LisbethBotDbContext> _dataService;
-    private readonly IGuildDataDataService _guildDataDataService;
+    private readonly IGuildDataService _guildDataService;
 
     public DiscordEmbedConfiguratorService(ICrudDataService<T, LisbethBotDbContext> dataService, IMapper mapper,
-        IDiscordEmbedProvider embedProvider, IEmbedConfigDataService embedConfigDataService, IGuildDataDataService guildDataDataService)
+        IDiscordEmbedProvider embedProvider, IEmbedConfigDataService embedConfigDataService, IGuildDataService guildDataService)
     {
         _dataService = dataService;
         _mapper = mapper;
         _embedProvider = embedProvider;
         _embedConfigDataService = embedConfigDataService;
-        _guildDataDataService = guildDataDataService;
+        _guildDataService = guildDataService;
     }
 
     public async Task<Result<DiscordEmbed>> ConfigureAsync<TEmbedProperty>(InteractionContext ctx,
@@ -47,7 +47,7 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
     {
         if (ctx is null) throw new ArgumentNullException(nameof(ctx));
 
-        var guildRes = await _guildDataDataService.GetSingleBySpecAsync(new ActiveGuildByIdSpec(ctx.Guild.Id));
+        var guildRes = await _guildDataService.GetSingleBySpecAsync(new ActiveGuildByIdSpec(ctx.Guild.Id));
 
         if (!guildRes.IsDefined(out var guildCfg))
             return new NotFoundError("Guild not found");

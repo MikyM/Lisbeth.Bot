@@ -30,18 +30,18 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 [UsedImplicitly]
 public class AddSnowflakeTicketCommandHandler : ICommandHandler<AddSnowflakeToTicketCommand,  DiscordEmbed>
 {
-    private readonly IGuildDataDataService _guildDataDataService;
+    private readonly IGuildDataService _guildDataService;
     private readonly ITicketDataService _ticketDataService;
     private readonly ILogger<AddSnowflakeTicketCommandHandler> _logger;
     private readonly IDiscordService _discord;
     private readonly ICommandHandler<PrivacyCheckTicketCommand, bool> _privacyCheckHandler;
 
-    public AddSnowflakeTicketCommandHandler(IGuildDataDataService guildDataDataService,
+    public AddSnowflakeTicketCommandHandler(IGuildDataService guildDataService,
         ILogger<AddSnowflakeTicketCommandHandler> logger, IDiscordService discord,
         ITicketDataService ticketDataService,
         ICommandHandler<PrivacyCheckTicketCommand, bool> privacyCheckHandler)
     {
-        _guildDataDataService = guildDataDataService;
+        _guildDataService = guildDataService;
         _logger = logger;
         _discord = discord;
         _ticketDataService = ticketDataService;
@@ -53,7 +53,7 @@ public class AddSnowflakeTicketCommandHandler : ICommandHandler<AddSnowflakeToTi
         if (command is null) throw new ArgumentNullException(nameof(command));
 
         var guildRes =
-            await _guildDataDataService.GetSingleBySpecAsync<Guild>(
+            await _guildDataService.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(command.Dto.GuildId));
 
         if (!guildRes.IsDefined(out var guildCfg)) return Result<DiscordEmbed>.FromError(guildRes);

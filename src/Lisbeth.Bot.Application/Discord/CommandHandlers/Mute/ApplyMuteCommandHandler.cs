@@ -35,18 +35,18 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Mute;
 public class ApplyMuteCommandHandler : ICommandHandler<ApplyMuteCommand, DiscordEmbed>
 {
     private readonly IDiscordService _discord;
-    private readonly IGuildDataDataService _guildDataDataService;
+    private readonly IGuildDataService _guildDataService;
     private readonly ILogger<ApplyMuteCommandHandler> _logger;
     private readonly IMuteDataService _muteDataService;
     private readonly IDiscordGuildLoggerService _guildLogger;
     private readonly IResponseDiscordEmbedBuilder<DiscordModeration> _embedBuilder;
 
-    public ApplyMuteCommandHandler(IDiscordService discord, IGuildDataDataService guildDataDataService,
+    public ApplyMuteCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
         ILogger<ApplyMuteCommandHandler> logger, IMuteDataService muteDataService,
         IDiscordGuildLoggerService guildLogger, IResponseDiscordEmbedBuilder<DiscordModeration> embedBuilder)
     {
         _discord = discord;
-        _guildDataDataService = guildDataDataService;
+        _guildDataService = guildDataService;
         _logger = logger;
         _muteDataService = muteDataService;
         _guildLogger = guildLogger;
@@ -55,16 +55,16 @@ public class ApplyMuteCommandHandler : ICommandHandler<ApplyMuteCommand, Discord
 
     public async Task<Result<DiscordEmbed>> HandleAsync(ApplyMuteCommand command)
     {
-        if (command is null) throw new ArgumentNullException(nameof(command));
+            if (command is null) throw new ArgumentNullException(nameof(command));
 
-        // data req
-        DiscordGuild guild = command.Ctx?.Guild ??
-                             command.MenuCtx?.Guild ?? await _discord.Client.GetGuildAsync(command.Dto.GuildId);
-        DiscordMember requestingUser = command.Ctx?.User as DiscordMember ?? command.MenuCtx?.User as DiscordMember ??
-            await guild.GetMemberAsync(command.Dto.RequestedOnBehalfOfId);
-        DiscordMember target = command.Ctx?.ResolvedUserMentions[0] as DiscordMember ?? command.MenuCtx?.TargetMember ??
-            command.MenuCtx?.TargetMessage.Author as DiscordMember ??
-            await guild.GetMemberAsync(command.Dto.TargetUserId);
+            // data req
+            DiscordGuild guild = command.Ctx?.Guild ??
+                                 command.MenuCtx?.Guild ?? await _discord.Client.GetGuildAsync(command.Dto.GuildId);
+            DiscordMember requestingUser = command.Ctx?.User as DiscordMember ?? command.MenuCtx?.User as DiscordMember ??
+                await guild.GetMemberAsync(command.Dto.RequestedOnBehalfOfId);
+            DiscordMember target = command.Ctx?.ResolvedUserMentions[0] as DiscordMember ?? command.MenuCtx?.TargetMember ??
+                command.MenuCtx?.TargetMessage.Author as DiscordMember ??
+                await guild.GetMemberAsync(command.Dto.TargetUserId);
 
         if (command.Dto.AppliedUntil < DateTime.UtcNow)
             return new ArgumentOutOfRangeError(nameof(command.Dto.AppliedUntil));
@@ -75,7 +75,7 @@ public class ApplyMuteCommandHandler : ICommandHandler<ApplyMuteCommand, Discord
             return new DiscordError("Bot doesn't have manage roles permission.");
 
         var result =
-            await _guildDataDataService.GetSingleBySpecAsync(new ActiveGuildByDiscordIdWithModerationSpec(guild.Id));
+            await _guildDataService.GetSingleBySpecAsync(new ActiveGuildByDiscordIdWithModerationSpec(guild.Id));
 
         if (!result.IsDefined(out var guildEntity)) return new DiscordNotFoundError(DiscordEntity.Guild);
 
