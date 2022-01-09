@@ -117,6 +117,30 @@ public sealed class Guild : SnowflakeEntity
         return tags is not null && res != 0 && tags.Add(tag);
     }
 
+    public bool AddChannelMessageFormat(ChannelMessageFormat format)
+    {
+        if (format is null) throw new ArgumentNullException(nameof(format));
+        return channelMessageFormats is not null && channelMessageFormats.Add(format);
+    }
+
+    public bool RemoveChannelMessageFormat(ulong channelId)
+    {
+        var format = ChannelMessageFormats?.FirstOrDefault(x => x.ChannelId == channelId);
+
+        if (format is null) return false;
+
+        format.IsDisabled = true;
+
+        return true;
+    }
+
+    public bool ReplaceChannelMessageFormat(ChannelMessageFormat format)
+    {
+        if (format is null) throw new ArgumentNullException(nameof(format));
+        var res = channelMessageFormats?.RemoveWhere(x => x.ChannelId == format.ChannelId);
+        return channelMessageFormats is not null && res != 0 && channelMessageFormats.Add(format);
+    }
+
     public void SetTicketingConfig(TicketingConfig config)
     {
         TicketingConfig = config ?? throw new ArgumentNullException(nameof(config));

@@ -38,6 +38,6 @@ public static class DependancyInjectionExtensions
                 .InstancePerLifetimeScope();
         }
 
-        builder.RegisterType<CommandHandlerUnitOfWorkManager>().As<ICommandHandlerUnitOfWorkManager>().InstancePerLifetimeScope();
+        builder.RegisterType<CommandHandlerProvider>().As<ICommandHandlerProvider>().InstancePerLifetimeScope();
     }
 }

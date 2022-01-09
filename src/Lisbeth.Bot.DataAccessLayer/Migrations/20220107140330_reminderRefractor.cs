@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -39,18 +38,6 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_recurring_reminder_guild_GuildId1",
-                table: "recurring_reminder");
-
-            migrationBuilder.DropIndex(
-                name: "IX_recurring_reminder_embed_config_id",
-                table: "recurring_reminder");
-
-            migrationBuilder.DropIndex(
-                name: "IX_recurring_reminder_GuildId1",
-                table: "recurring_reminder");
-
             migrationBuilder.DropColumn(
                 name: "cron_expression",
                 table: "reminder");
@@ -80,24 +67,6 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                 oldType: "varchar(100)",
                 oldMaxLength: 100,
                 oldNullable: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_recurring_reminder_embed_config_id",
-                table: "recurring_reminder",
-                column: "embed_config_id",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_recurring_reminder_guild_id",
-                table: "recurring_reminder",
-                column: "guild_id");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_recurring_reminder_guild_guild_id",
-                table: "recurring_reminder",
-                column: "guild_id",
-                principalTable: "guild",
-                principalColumn: "guild_id");
         }
     }
 }

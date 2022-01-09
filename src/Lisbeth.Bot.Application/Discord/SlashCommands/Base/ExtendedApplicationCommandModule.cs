@@ -26,7 +26,7 @@ public abstract class ExtendedApplicationCommandModule : ApplicationCommandModul
     protected DiscordEmbed GetUnsuccessfulResultEmbed(IResult result, DiscordClient discord)
     {
         return GetUnsuccessfulResultEmbed(
-            result.Error ?? throw new InvalidOperationException("Given result does not contain an error"), discord);
+            result.Error ?? new InvalidOperationError("Unknown error occurred"), discord);
     }
 
     protected DiscordEmbed GetUnsuccessfulResultEmbed(IResultError error, DiscordClient discord)

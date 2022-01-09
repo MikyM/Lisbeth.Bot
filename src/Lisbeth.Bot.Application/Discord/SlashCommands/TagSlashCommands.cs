@@ -38,14 +38,14 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 public class TagSlashCommands : ExtendedApplicationCommandModule
 {
     public TagSlashCommands(IDiscordEmbedConfiguratorService<Tag> discordEmbedTagConfiguratorService,
-        ICommandHandlerUnitOfWorkManager commandHandlerUnitOfWorkManager)
+        ICommandHandlerProvider commandHandlerProvider)
     {
         _discordEmbedTagConfiguratorService = discordEmbedTagConfiguratorService;
-        _commandHandlerUnitOfWorkManager = commandHandlerUnitOfWorkManager;
+        _commandHandlerProvider = commandHandlerProvider;
     }
 
     private readonly IDiscordEmbedConfiguratorService<Tag> _discordEmbedTagConfiguratorService;
-    private readonly ICommandHandlerUnitOfWorkManager _commandHandlerUnitOfWorkManager;
+    private readonly ICommandHandlerProvider _commandHandlerProvider;
 
     [SlashCooldown(20, 120, CooldownBucketType.Guild)]
     [UsedImplicitly]
@@ -73,7 +73,7 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
                 var getValidator = new TagGetReqValidator(ctx.Client);
                 await getValidator.ValidateAndThrowAsync(getReq);
 
-                var getRes = await _commandHandlerUnitOfWorkManager.GetHandler<GetTagCommandHandler>()
+                var getRes = await _commandHandlerProvider.GetHandler<GetTagCommandHandler>()
                     .HandleAsync(new GetTagCommand(getReq, ctx));
                 
                 /*
@@ -100,7 +100,7 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
                 var addValidator = new TagAddReqValidator(ctx.Client);
                 await addValidator.ValidateAndThrowAsync(addReq);
 
-                var createRes = await _commandHandlerUnitOfWorkManager.GetHandler<CreateTagCommandHandler>()
+                var createRes = await _commandHandlerProvider.GetHandler<CreateTagCommandHandler>()
                     .HandleAsync(new CreateTagCommand(addReq, ctx));
 
                 if (createRes.IsSuccess)
@@ -119,7 +119,7 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
                 var editValidator = new TagEditReqValidator(ctx.Client);
                 await editValidator.ValidateAndThrowAsync(editReq);
 
-                var editRes = await _commandHandlerUnitOfWorkManager.GetHandler<EditTagCommandHandler>()
+                var editRes = await _commandHandlerProvider.GetHandler<EditTagCommandHandler>()
                     .HandleAsync(new EditTagCommand(editReq, ctx));
 
                 if (editRes.IsSuccess)
@@ -138,7 +138,7 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
                 var disableValidator = new TagDisableReqValidator(ctx.Client);
                 await disableValidator.ValidateAndThrowAsync(removeReq);
 
-                var disableRes = await _commandHandlerUnitOfWorkManager.GetHandler<DisableTagCommandHandler>()
+                var disableRes = await _commandHandlerProvider.GetHandler<DisableTagCommandHandler>()
                     .HandleAsync(new DisableTagCommand(removeReq, ctx));
 
                 if (disableRes.IsSuccess)
@@ -171,7 +171,7 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
                 var sendValidator = new TagSendReqValidator(ctx.Client);
                 await sendValidator.ValidateAndThrowAsync(sendReq);
 
-                var sendRes = await _commandHandlerUnitOfWorkManager.GetHandler<SendTagCommandHandler>()
+                var sendRes = await _commandHandlerProvider.GetHandler<SendTagCommandHandler>()
                     .HandleAsync(new SendTagCommand(sendReq, ctx));
 
                 if (sendRes.IsSuccess)
@@ -193,7 +193,7 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
                 var addPermValidator = new TagAddPermissionReqValidator(ctx.Client);
                 await addPermValidator.ValidateAndThrowAsync(addPermReq);
 
-                var addPermRes = await _commandHandlerUnitOfWorkManager.GetHandler<AddSnowflakePermissionTagCommandHandler>()
+                var addPermRes = await _commandHandlerProvider.GetHandler<AddSnowflakePermissionTagCommandHandler>()
                     .HandleAsync(new AddSnowflakePermissionTagCommand(addPermReq, ctx));
 
                 if (addPermRes.IsSuccess)
@@ -215,7 +215,7 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
                 var revokePermValidator = new TagRevokePermissionReqValidator(ctx.Client);
                 await revokePermValidator.ValidateAndThrowAsync(revokePermReq);
 
-                var revokePermRes = await _commandHandlerUnitOfWorkManager
+                var revokePermRes = await _commandHandlerProvider
                     .GetHandler<RevokeSnowflakePermissionTagCommandHandler>()
                     .HandleAsync(new RevokeSnowflakePermissionTagCommand(revokePermReq, ctx));
 
@@ -233,32 +233,15 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
                 var getAllValidator = new TagGetAllReqValidator(ctx.Client);
                 await getAllValidator.ValidateAndThrowAsync(getAllReq);
 
-                /*var getAllRes = await _getAllHandler.HandleAsync(new GetAllTagsCommand(getAllReq, ctx));*/
-                var getAllRes = await _commandHandlerUnitOfWorkManager
+                var getAllRes = await _commandHandlerProvider
                     .GetHandler<GetAllTagsCommandHandler>()
                     .HandleAsync(new GetAllTagsCommand(getAllReq, ctx));
-
-                var paginationButtons = new PaginationButtons
-                {
-                    Left = new DiscordButtonComponent(ButtonStyle.Primary, "left_pagination", null, false,
-                        new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":arrow_left:"))),
-                    Right = new DiscordButtonComponent(ButtonStyle.Primary, "right_pagination", null, false,
-                        new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":arrow_right:"))),
-                    SkipRight = new DiscordButtonComponent(ButtonStyle.Primary, "skip_right_pagination",
-                        null, false, new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":track_next:"))),
-                    SkipLeft = new DiscordButtonComponent(ButtonStyle.Primary, "skip_left_pagination", null,
-                        false, new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":track_previous:"))),
-                    Stop = new DiscordButtonComponent(ButtonStyle.Primary, "stop_pagination", null, false,
-                        new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":stop_button:")))
-                };
-
-                var tcs = new CancellationTokenSource();
 
                 if (getAllRes.IsDefined(out var pages))
                 {
                     var intr = ctx.Client.GetInteractivity();
-                    await intr.SendPaginatedResponseAsync(ctx.Interaction, false, ctx.User, pages, paginationButtons,
-                        PaginationBehaviour.WrapAround, ButtonPaginationBehavior.Disable, tcs.Token, true);
+                    await intr.SendPaginatedResponseAsync(ctx.Interaction, false, ctx.User, pages, null,
+                        null, null, default, true);
                 }
                 else
                     await ctx.EditResponseAsync(

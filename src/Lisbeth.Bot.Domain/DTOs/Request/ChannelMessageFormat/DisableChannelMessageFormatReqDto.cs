@@ -19,14 +19,7 @@ using Lisbeth.Bot.Domain.DTOs.Request.Base;
 
 namespace Lisbeth.Bot.Domain.DTOs.Request.ChannelMessageFormat;
 
-public class VerifyMessageFormatReqDto : BaseAuthWithGuildReqDto
+public class DisableChannelMessageFormatReqDto : BaseAuthWithGuildReqDto
 {
     public ulong ChannelId { get; set; }
-    public ulong MessageId { get; set; }
-
-    public VerifyMessageFormatReqDto(ulong channelId, ulong messageId, ulong guildId, ulong userId) : base(guildId, userId)
-    {
-        ChannelId = channelId;
-        MessageId = messageId;
-    }
 }

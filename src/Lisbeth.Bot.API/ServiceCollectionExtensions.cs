@@ -39,6 +39,8 @@ using MikyM.Discord.Extensions.SlashCommands;
 using OpenTracing;
 using OpenTracing.Mock;
 using System.Security.Claims;
+using DSharpPlus.Entities;
+using DSharpPlus.Interactivity.EventHandling;
 
 namespace Lisbeth.Bot.API;
 
@@ -79,12 +81,26 @@ public static class ServiceCollectionExtensions
 
         services.AddDiscordInteractivity(options =>
         {
-            options.PaginationBehaviour = PaginationBehaviour.WrapAround;
+            options.PaginationBehaviour = PaginationBehaviour.Ignore;
             options.ResponseBehavior = InteractionResponseBehavior.Respond;
             options.ButtonBehavior = ButtonPaginationBehavior.Disable;
             options.AckPaginationButtons = true;
-            options.Timeout = TimeSpan.FromMinutes(1);
-            options.ResponseMessage = "You can't control paginated responses that are not meant for you!";
+            options.Timeout = TimeSpan.FromSeconds(10);
+            options.ResponseMessage = "Sorry, but this wasn't a valid option, or does not belong to you!";
+
+            options.PaginationButtons = new PaginationButtons()
+            {
+                Stop = new DiscordButtonComponent(ButtonStyle.Danger, "stop", null, false,
+                    new DiscordComponentEmoji(862259725785497620)),
+                Left = new DiscordButtonComponent(ButtonStyle.Secondary, "left", null, false,
+                    new DiscordComponentEmoji(862259522478800916)),
+                Right = new DiscordButtonComponent(ButtonStyle.Secondary, "right", null, false,
+                    new DiscordComponentEmoji(862259691212242974)),
+                SkipLeft = new DiscordButtonComponent(ButtonStyle.Primary, "skipl", null, false,
+                    new DiscordComponentEmoji(862259605464023060)),
+                SkipRight = new DiscordButtonComponent(ButtonStyle.Primary, "skipr", null, false,
+                    new DiscordComponentEmoji(862259654403031050))
+            };
         });
 
         #endregion
@@ -101,6 +117,7 @@ public static class ServiceCollectionExtensions
         services.AddDiscordGuildEventsSubscriber<GuildEventsHandler>();
         services.AddDiscordMiscEventsSubscriber<RoleMenuEventHandler>();
         services.AddDiscordGuildMemberEventsSubscriber<MuteEventHandlers>();
+        services.AddDiscordMessageEventsSubscriber<ChannelMessageFormatEventHandler>();
 
         #endregion
     }

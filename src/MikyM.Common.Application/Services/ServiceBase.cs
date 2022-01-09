@@ -32,7 +32,7 @@ public abstract class DataServiceBase<TContext> : IDataServiceBase<TContext> whe
         UnitOfWork = uof;
     }
 
-    public virtual async Task<Result<int>> CommitAsync(long auditUserId)
+    public virtual async Task<Result<int>> CommitAsync(string? auditUserId)
     {
         return await UnitOfWork.CommitAsync(auditUserId);
     }

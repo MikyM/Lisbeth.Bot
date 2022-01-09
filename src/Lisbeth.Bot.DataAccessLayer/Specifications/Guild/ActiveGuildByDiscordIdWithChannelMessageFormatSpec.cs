@@ -15,18 +15,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Lisbeth.Bot.Domain.DTOs.Request.Base;
+using MikyM.Common.DataAccessLayer.Specifications;
 
-namespace Lisbeth.Bot.Domain.DTOs.Request.ChannelMessageFormat;
-
-public class VerifyMessageFormatReqDto : BaseAuthWithGuildReqDto
+namespace Lisbeth.Bot.DataAccessLayer.Specifications.Guild
 {
-    public ulong ChannelId { get; set; }
-    public ulong MessageId { get; set; }
-
-    public VerifyMessageFormatReqDto(ulong channelId, ulong messageId, ulong guildId, ulong userId) : base(guildId, userId)
+    public class ActiveGuildByDiscordIdWithChannelMessageFormatSpec : Specification<Domain.Entities.Guild>
     {
-        ChannelId = channelId;
-        MessageId = messageId;
+        public ActiveGuildByDiscordIdWithChannelMessageFormatSpec(ulong discordGuildId, ulong channelId)
+        {
+            Where(x => !x.IsDisabled);
+            Where(x => x.GuildId == discordGuildId);
+            Include(x => x.ChannelMessageFormats.Where(y => y.ChannelId == channelId));
+        }
     }
 }

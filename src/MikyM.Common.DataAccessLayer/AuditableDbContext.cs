@@ -23,7 +23,7 @@ namespace MikyM.Common.DataAccessLayer;
 
 public abstract class AuditableDbContext : DbContext
 {
-    private long? AuditUserId { get; set; }
+    private string? AuditUserId { get; set; }
 
     protected AuditableDbContext(DbContextOptions options) : base(options)
     {
@@ -32,13 +32,13 @@ public abstract class AuditableDbContext : DbContext
     // ReSharper disable once MemberCanBePrivate.Global
     public DbSet<AuditLog> AuditLogs { get; set; } = null!;
 
-    public async Task<int> SaveChangesAsync(long auditUserId, bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+    public async Task<int> SaveChangesAsync(string? auditUserId, bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {
         this.AuditUserId = auditUserId;
         return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
     }
 
-    public async Task<int> SaveChangesAsync(long auditUserId, CancellationToken cancellationToken = default)
+    public async Task<int> SaveChangesAsync(string? auditUserId, CancellationToken cancellationToken = default)
     {
         this.AuditUserId = auditUserId;
         return await base.SaveChangesAsync(true, cancellationToken);
@@ -47,11 +47,11 @@ public abstract class AuditableDbContext : DbContext
     public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess,
         CancellationToken cancellationToken = default)
     {
-        OnBeforeSaveChanges(this.AuditUserId?.ToString() ?? "unknown");
+        OnBeforeSaveChanges(this.AuditUserId);
         return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
     }
 
-    private void OnBeforeSaveChanges(string userId)
+    private void OnBeforeSaveChanges(string? userId)
     {
         ChangeTracker.DetectChanges();
         var auditEntries = new List<AuditEntry>();

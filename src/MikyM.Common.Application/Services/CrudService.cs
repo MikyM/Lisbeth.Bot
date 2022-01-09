@@ -27,7 +27,7 @@ public class CrudDataService<TEntity, TContext> : ReadOnlyDataService<TEntity, T
     {
     }
 
-    public virtual async Task<Result<long>> AddAsync<TPost>(TPost entry, bool shouldSave = false) where TPost : class
+    public virtual async Task<Result<long>> AddAsync<TPost>(TPost entry, bool shouldSave = false, string? userId = null) where TPost : class
     {
         if (entry  is null) throw new ArgumentNullException(nameof(entry));
 
@@ -44,12 +44,12 @@ public class CrudDataService<TEntity, TContext> : ReadOnlyDataService<TEntity, T
         }
 
         if (!shouldSave) return 0;
-        await CommitAsync();
+        await CommitAsync(userId);
         return Result<long>.FromSuccess(entity.Id);
     }
 
     public virtual async Task<Result<IEnumerable<long>>> AddRangeAsync<TPost>(IEnumerable<TPost> entries,
-        bool shouldSave = false) where TPost : class
+        bool shouldSave = false, string? userId = null) where TPost : class
     {
         if (entries  is null) throw new ArgumentNullException(nameof(entries));
 
@@ -67,7 +67,7 @@ public class CrudDataService<TEntity, TContext> : ReadOnlyDataService<TEntity, T
         }
 
         if (!shouldSave) return new List<long>();
-        await CommitAsync();
+        await CommitAsync(userId);
         return Result<IEnumerable<long>>.FromSuccess(entities.Select(e => e.Id).ToList());
     }
 
@@ -96,7 +96,7 @@ public class CrudDataService<TEntity, TContext> : ReadOnlyDataService<TEntity, T
         return Result.FromSuccess();
     }
 
-    public virtual async Task<Result> DeleteAsync<TDelete>(TDelete entry, bool shouldSave = false) where TDelete : class
+    public virtual async Task<Result> DeleteAsync<TDelete>(TDelete entry, bool shouldSave = false, string? userId = null) where TDelete : class
     {
         if (entry  is null) throw new ArgumentNullException(nameof(entry));
 
@@ -105,32 +105,32 @@ public class CrudDataService<TEntity, TContext> : ReadOnlyDataService<TEntity, T
         else
             UnitOfWork.GetRepository<Repository<TEntity>>()?.Delete(Mapper.Map<TEntity>(entry));
 
-        if (shouldSave) await CommitAsync();
+        if (shouldSave) await CommitAsync(userId);
 
         return Result.FromSuccess();
     }
 
-    public virtual async Task<Result> DeleteAsync(long id, bool shouldSave = false)
+    public virtual async Task<Result> DeleteAsync(long id, bool shouldSave = false, string? userId = null)
     {
         UnitOfWork.GetRepository<Repository<TEntity>>()?.Delete(id);
 
-        if (shouldSave) await CommitAsync();
+        if (shouldSave) await CommitAsync(userId);
 
         return Result.FromSuccess();
     }
 
-    public virtual async Task<Result> DeleteRangeAsync(IEnumerable<long> ids, bool shouldSave = false)
+    public virtual async Task<Result> DeleteRangeAsync(IEnumerable<long> ids, bool shouldSave = false, string? userId = null)
     {
         if (ids  is null) throw new ArgumentNullException(nameof(ids));
 
         UnitOfWork.GetRepository<Repository<TEntity>>()?.DeleteRange(ids);
 
-        if (shouldSave) await CommitAsync();
+        if (shouldSave) await CommitAsync(userId);
 
         return Result.FromSuccess();
     }
 
-    public virtual async Task<Result> DeleteRangeAsync<TDelete>(IEnumerable<TDelete> entries, bool shouldSave = false)
+    public virtual async Task<Result> DeleteRangeAsync<TDelete>(IEnumerable<TDelete> entries, bool shouldSave = false, string? userId = null)
         where TDelete : class
     {
         if (entries  is null) throw new ArgumentNullException(nameof(entries));
@@ -141,22 +141,22 @@ public class CrudDataService<TEntity, TContext> : ReadOnlyDataService<TEntity, T
             UnitOfWork.GetRepository<Repository<TEntity>>()?
                 .DeleteRange(Mapper.Map<IEnumerable<TEntity>>(entries));
 
-        if (shouldSave) await CommitAsync();
+        if (shouldSave) await CommitAsync(userId);
 
         return Result.FromSuccess();
     }
 
-    public virtual async Task<Result> DisableAsync(long id, bool shouldSave = false)
+    public virtual async Task<Result> DisableAsync(long id, bool shouldSave = false, string? userId = null)
     {
         await UnitOfWork.GetRepository<Repository<TEntity>>()?
             .DisableAsync(id)!;
 
-        if (shouldSave) await CommitAsync();
+        if (shouldSave) await CommitAsync(userId);
 
         return Result.FromSuccess();
     }
 
-    public virtual async Task<Result> DisableAsync<TDisable>(TDisable entry, bool shouldSave = false) where TDisable : class
+    public virtual async Task<Result> DisableAsync<TDisable>(TDisable entry, bool shouldSave = false, string? userId = null) where TDisable : class
     {
         if (entry  is null) throw new ArgumentNullException(nameof(entry));
 
@@ -165,24 +165,24 @@ public class CrudDataService<TEntity, TContext> : ReadOnlyDataService<TEntity, T
         else
             UnitOfWork.GetRepository<Repository<TEntity>>()?.Disable(Mapper.Map<TEntity>(entry));
 
-        if (shouldSave) await CommitAsync();
+        if (shouldSave) await CommitAsync(userId);
 
         return Result.FromSuccess();
     }
 
-    public virtual async Task<Result> DisableRangeAsync(IEnumerable<long> ids, bool shouldSave = false)
+    public virtual async Task<Result> DisableRangeAsync(IEnumerable<long> ids, bool shouldSave = false, string? userId = null)
     {
         if (ids  is null) throw new ArgumentNullException(nameof(ids));
 
         await UnitOfWork.GetRepository<Repository<TEntity>>()
             ?.DisableRangeAsync(ids)!;
 
-        if (shouldSave) await CommitAsync();
+        if (shouldSave) await CommitAsync(userId);
 
         return Result.FromSuccess();
     }
 
-    public virtual async Task<Result> DisableRangeAsync<TDisable>(IEnumerable<TDisable> entries, bool shouldSave = false)
+    public virtual async Task<Result> DisableRangeAsync<TDisable>(IEnumerable<TDisable> entries, bool shouldSave = false, string? userId = null)
         where TDisable : class
     {
         if (entries  is null) throw new ArgumentNullException(nameof(entries));
@@ -193,7 +193,7 @@ public class CrudDataService<TEntity, TContext> : ReadOnlyDataService<TEntity, T
             UnitOfWork.GetRepository<Repository<TEntity>>()?
                 .DeleteRange(Mapper.Map<IEnumerable<TEntity>>(entries));
 
-        if (shouldSave) await CommitAsync();
+        if (shouldSave) await CommitAsync(userId);
 
         return Result.FromSuccess();
     }

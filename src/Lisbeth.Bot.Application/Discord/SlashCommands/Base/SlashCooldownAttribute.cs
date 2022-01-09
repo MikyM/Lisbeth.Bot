@@ -77,7 +77,7 @@ public sealed class SlashCooldownAttribute : SlashCheckBaseAttribute
     /// </summary>
     /// <param name="ctx">Command context to get cooldown bucket for.</param>
     /// <returns>Requested cooldown bucket, or null if one wasn't present.</returns>
-    public CommandCooldownBucket GetBucket(InteractionContext ctx)
+    public CommandCooldownBucket? GetBucket(InteractionContext ctx)
     {
         var bid = GetBucketId(ctx, out _, out _, out _);
         Buckets.TryGetValue(bid, out var bucket);
@@ -170,7 +170,7 @@ public enum CooldownBucketType
 /// </summary>
 public sealed class CommandCooldownBucket : IEquatable<CommandCooldownBucket>
 {
-    private int _remaining_uses;
+    private int _remainingUses;
 
     /// <summary>
     ///     Creates a new command cooldown bucket.
@@ -183,7 +183,7 @@ public sealed class CommandCooldownBucket : IEquatable<CommandCooldownBucket>
     internal CommandCooldownBucket(int maxUses, TimeSpan resetAfter, ulong userId = 0, ulong channelId = 0,
         ulong guildId = 0)
     {
-        _remaining_uses = maxUses;
+        _remainingUses = maxUses;
         MaxUses = maxUses;
         ResetsAt = DateTimeOffset.UtcNow + resetAfter;
         Reset = resetAfter;
@@ -218,7 +218,7 @@ public sealed class CommandCooldownBucket : IEquatable<CommandCooldownBucket>
     ///     Gets the remaining number of uses before the cooldown is triggered.
     /// </summary>
     public int RemainingUses
-        => Volatile.Read(ref _remaining_uses);
+        => Volatile.Read(ref _remainingUses);
 
     /// <summary>
     ///     Gets the maximum number of times this command can be used in given timespan.
@@ -245,14 +245,12 @@ public sealed class CommandCooldownBucket : IEquatable<CommandCooldownBucket>
     /// </summary>
     /// <param name="other"><see cref="CommandCooldownBucket" /> to compare to.</param>
     /// <returns>Whether the <see cref="CommandCooldownBucket" /> is equal to this <see cref="CommandCooldownBucket" />.</returns>
-    public bool Equals(CommandCooldownBucket other)
+    public bool Equals(CommandCooldownBucket? other)
     {
-        if (other is null)
-            return false;
+        if (other is null) return false;
 
-        return ReferenceEquals(this, other)
-            ? true
-            : UserId == other.UserId && ChannelId == other.ChannelId && GuildId == other.GuildId;
+        return ReferenceEquals(this, other) ||
+               UserId == other.UserId && ChannelId == other.ChannelId && GuildId == other.GuildId;
     }
 
     /// <summary>
@@ -268,7 +266,7 @@ public sealed class CommandCooldownBucket : IEquatable<CommandCooldownBucket>
         if (now >= ResetsAt)
         {
             // ...do the reset and set a new reset time
-            Interlocked.Exchange(ref _remaining_uses, MaxUses);
+            Interlocked.Exchange(ref _remainingUses, MaxUses);
             ResetsAt = now + Reset;
         }
 
@@ -277,7 +275,7 @@ public sealed class CommandCooldownBucket : IEquatable<CommandCooldownBucket>
         if (RemainingUses > 0)
         {
             // ...decrement, and return success...
-            Interlocked.Decrement(ref _remaining_uses);
+            Interlocked.Decrement(ref _remainingUses);
             success = true;
         }
 
@@ -300,7 +298,7 @@ public sealed class CommandCooldownBucket : IEquatable<CommandCooldownBucket>
     /// </summary>
     /// <param name="obj">Object to compare to.</param>
     /// <returns>Whether the object is equal to this <see cref="CommandCooldownBucket" />.</returns>
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         return Equals(obj as CommandCooldownBucket);
     }
@@ -326,15 +324,14 @@ public sealed class CommandCooldownBucket : IEquatable<CommandCooldownBucket>
     /// <param name="bucket1">First bucket to compare.</param>
     /// <param name="bucket2">Second bucket to compare.</param>
     /// <returns>Whether the two buckets are equal.</returns>
-    public static bool operator ==(CommandCooldownBucket bucket1, CommandCooldownBucket bucket2)
+    public static bool operator ==(CommandCooldownBucket? bucket1, CommandCooldownBucket? bucket2)
     {
         var null1 = bucket1 is null;
         var null2 = bucket2 is null;
 
-        if (null1 && null2)
-            return true;
+        if (null1 && null2) return true;
 
-        return null1 != null2 ? false : null1.Equals(null2);
+        return null1 == null2 && null1.Equals(null2);
     }
 
     /// <summary>

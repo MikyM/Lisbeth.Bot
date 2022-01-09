@@ -15,18 +15,20 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Lisbeth.Bot.Domain.DTOs.Request.Base;
+using DSharpPlus.SlashCommands;
+using Lisbeth.Bot.Domain.DTOs.Request.ChannelMessageFormat;
+using MikyM.Common.Application.CommandHandlers.Commands;
 
-namespace Lisbeth.Bot.Domain.DTOs.Request.ChannelMessageFormat;
+namespace Lisbeth.Bot.Application.Discord.Commands.ChannelMessageFormat;
 
-public class VerifyMessageFormatReqDto : BaseAuthWithGuildReqDto
+public class EditMessageFormatCommand : CommandBase
 {
-    public ulong ChannelId { get; set; }
-    public ulong MessageId { get; set; }
+    public InteractionContext? Ctx { get; set; }
+    public EditChannelMessageFormatReqDto Dto { get; set; }
 
-    public VerifyMessageFormatReqDto(ulong channelId, ulong messageId, ulong guildId, ulong userId) : base(guildId, userId)
+    public EditMessageFormatCommand(EditChannelMessageFormatReqDto dto, InteractionContext? ctx = null)
     {
-        ChannelId = channelId;
-        MessageId = messageId;
+        Ctx = ctx;
+        Dto = dto;
     }
 }

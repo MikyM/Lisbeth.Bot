@@ -32,9 +32,8 @@ public class AuditLogConfig : IEntityTypeConfiguration<AuditLog>
             .ValueGeneratedOnAdd().IsRequired();
         builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz").IsRequired();
 
-        builder.Property(x => x.UserId).HasColumnName("user_id").HasColumnType("varchar(100)").HasMaxLength(100)
-            .ValueGeneratedOnAdd()
-            .IsRequired();
+        builder.Property(x => x.UserId).HasColumnName("user_id").HasColumnType("varchar(200)").HasMaxLength(200)
+            .ValueGeneratedOnAdd();
         builder.Property(x => x.Type).HasColumnName("type").HasColumnType("varchar(100)").HasMaxLength(100)
             .IsRequired().ValueGeneratedOnAdd();
         builder.Property(x => x.TableName).HasColumnName("table_name").HasColumnType("varchar(200)")

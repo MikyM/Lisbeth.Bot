@@ -37,6 +37,7 @@ public sealed class LisbethBotDbContext : AuditableDbContext
     public DbSet<Reminder> Reminders { get; set; }
     public DbSet<RoleMenu> RoleMenus { get; set; }
     public DbSet<EmbedConfig> EmbedConfigs { get; set; }
+    public DbSet<ChannelMessageFormat> ChannelMessageFormats { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

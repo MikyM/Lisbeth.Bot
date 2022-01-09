@@ -75,7 +75,7 @@ public sealed class UnitOfWork<TContext> : IUnitOfWork<TContext> where TContext 
         return result;
     }
 
-    public async Task<int> CommitAsync(long userId)
+    public async Task<int> CommitAsync(string? userId)
     {
         int result = await Context.SaveChangesAsync(userId);
         if (_transaction is not null) await _transaction.CommitAsync();

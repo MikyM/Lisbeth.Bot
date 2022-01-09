@@ -28,14 +28,13 @@ using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.ChannelMessageFormat;
 
-[UsedImplicitly]
-public class VerifyMessageFormatCommandHandler : ICommandHandler<VerifyMessageFormatCommand, VerifyMessageFormatResDto>
+public class EditMessageFormatCommandHandler : ICommandHandler<EditMessageFormatCommand, DiscordEmbed>
 {
     private readonly IDiscordService _discord;
     private readonly IGuildDataService _guildDataService;
     private readonly IResponseDiscordEmbedBuilder<RegularUserInteraction> _embedBuilder;
 
-    public VerifyMessageFormatCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
+    public EditMessageFormatCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
         IResponseDiscordEmbedBuilder<RegularUserInteraction> embedBuilder)
     {
         _discord = discord;
@@ -43,30 +42,23 @@ public class VerifyMessageFormatCommandHandler : ICommandHandler<VerifyMessageFo
         _embedBuilder = embedBuilder;
     }
 
-    public async Task<Result<VerifyMessageFormatResDto>> HandleAsync(VerifyMessageFormatCommand command)
+    public async Task<Result<DiscordEmbed>> HandleAsync(EditMessageFormatCommand command)
     {
         if (command is null) throw new ArgumentNullException(nameof(command));
 
         // data req
         DiscordMember? requestingUser;
         DiscordChannel? channel;
-        DiscordMessage? target;
 
         try
         {
-            var guild = command.EventArgs?.Guild ??
-                        command.Ctx?.Guild ?? await _discord.Client.GetGuildAsync(command.Dto.GuildId);
+            var guild = command.Ctx?.Guild ?? await _discord.Client.GetGuildAsync(command.Dto.GuildId);
 
-            if (guild is null) return new DiscordNotFoundError(DiscordEntity.Guild);
+            if (guild is null)
+                return new DiscordNotFoundError(DiscordEntity.Guild);
 
-            requestingUser = command.Ctx?.Member ?? await guild.GetMemberAsync(command.Dto.RequestedOnBehalfOfId);
-
-            channel = command.EventArgs?.Channel ??
-                      command.Ctx?.ResolvedChannelMentions[0] ?? guild.GetChannel(command.Dto.ChannelId);
-
-            if (channel is null) return new DiscordNotFoundError(DiscordEntity.Channel);
-
-            target = command.EventArgs?.Message ?? await channel.GetMessageAsync(command.Dto.MessageId);
+            requestingUser = command.Ctx?.User as DiscordMember ?? await guild.GetMemberAsync(command.Dto.RequestedOnBehalfOfId);
+            channel = command.Ctx?.Channel ?? guild.GetChannel(command.Dto.ChannelId);
         }
         catch (Exception ex)
         {
@@ -75,8 +67,8 @@ public class VerifyMessageFormatCommandHandler : ICommandHandler<VerifyMessageFo
 
         if (requestingUser is null)
             return new DiscordNotFoundError(DiscordEntity.Member);
-        if (target is null)
-            return new DiscordNotFoundError(DiscordEntity.Message);
+        if (channel is null)
+            return new DiscordNotFoundError(DiscordEntity.Channel);
 
         if (!requestingUser.IsModerator())
             return new DiscordNotAuthorizedError();
@@ -86,36 +78,25 @@ public class VerifyMessageFormatCommandHandler : ICommandHandler<VerifyMessageFo
                 new ActiveGuildByDiscordIdWithChannelMessageFormatsSpec(command.Dto.GuildId));
 
         if (!guildRes.IsDefined(out var guildCfg))
-            return Result<VerifyMessageFormatResDto>.FromError(guildRes);
+            return Result<DiscordEmbed>.FromError(guildRes);
 
         var format = guildCfg.ChannelMessageFormats?.FirstOrDefault(x => x.ChannelId == command.Dto.ChannelId);
         if (format is null)
             return new ArgumentError(nameof(command.Dto.ChannelId),
                 "There's no message format registered for this channel");
         if (format.IsDisabled)
-            return new DisabledEntityError("Message format is currently disabled for this channel, enable it first");
+            return new DisabledEntityError("Message format is currently disabled for this channel");
 
-        var embed = _embedBuilder
+        _guildDataService.BeginUpdate(guildCfg);
+        format.MessageFormat = command.Dto.MessageFormat;
+        format.LastEditById = command.Dto.RequestedOnBehalfOfId;
+        await _guildDataService.CommitAsync(requestingUser.Id.ToString());
+
+        return _embedBuilder
             .WithType(RegularUserInteraction.ChannelMessageFormat)
-            .EnrichFrom(new ChannelMessageFormatEmbedEnricher(format, ChannelMessageFormatActionType.Verify))
+            .EnrichFrom(new ChannelMessageFormatEmbedEnricher(format, ChannelMessageFormatActionType.Edit))
             .WithEmbedColor(new DiscordColor(guildCfg.EmbedHexColor))
             .WithAuthorSnowflakeInfo(requestingUser)
             .Build();
-
-        var isCompliant = format.IsTextCompliant(target.Content ?? string.Empty);
-
-        if (isCompliant)
-            return new VerifyMessageFormatResDto(true, embed);
-
-        try
-        {
-            await channel.DeleteMessageAsync(target, "Message not compliant with channel message format");
-        }
-        catch
-        {
-            return new VerifyMessageFormatResDto(false, embed);
-        }
-
-        return new VerifyMessageFormatResDto(false, true, embed);
     }
 }

@@ -46,8 +46,19 @@ public class ChannelMessageFormatConfig : IEntityTypeConfiguration<ChannelMessag
             .IsRequired();
         builder.Property(x => x.MessageFormat)
             .HasColumnName("message_format")
-            .HasColumnType("varchar(max)")
-            .HasMaxLength(int.MaxValue)
+            .HasColumnType("varchar(2000)")
+            .HasMaxLength(2000)
             .IsRequired();
+        builder.Property(x => x.CreatorId)
+            .HasColumnName("creator_id")
+            .HasColumnType("bigint")
+            .ValueGeneratedOnAdd()
+            .IsRequired();
+        builder.Property(x => x.LastEditById)
+            .HasColumnName("last_edit_by_id")
+            .HasColumnType("bigint")
+            .IsRequired();
+
+        builder.HasIndex(x => x.ChannelId);
     }
 }

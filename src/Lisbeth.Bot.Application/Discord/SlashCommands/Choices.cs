@@ -61,6 +61,15 @@ public enum ReminderActionType
     [ChoiceName("remove")] Disable
 }
 
+public enum ChannelMessageFormatActionType
+{
+    [ChoiceName("create")] Create,
+    [ChoiceName("edit")] Edit,
+    [ChoiceName("get")] Get,
+    [ChoiceName("disable")] Disable,
+    [ChoiceName("verify")] Verify
+}
+
 public enum TagActionType
 {
     [ChoiceName("get")] Get,

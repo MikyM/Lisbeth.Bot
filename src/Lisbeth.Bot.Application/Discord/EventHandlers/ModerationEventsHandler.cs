@@ -33,7 +33,6 @@ public class ModerationEventsHandler : BaseEventHandler, IDiscordMessageEventsSu
     public Task DiscordOnGuildMemberAdded(DiscordClient sender, GuildMemberAddEventArgs args)
     {
         _ = AsyncExecutor.ExecuteAsync<IDiscordMemberService>(async x => await x.SendWelcomeMessageAsync(args));
-        //_ = AsyncExecutor.ExecuteAsync<IDiscordMemberService>(async x => await x.MemberMuteCheckAsync(args));
         return Task.CompletedTask;
     }
 

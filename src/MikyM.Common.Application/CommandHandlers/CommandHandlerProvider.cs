@@ -20,19 +20,19 @@ using MikyM.Common.Application.CommandHandlers.Commands;
 
 namespace MikyM.Common.Application.CommandHandlers;
 
-public interface ICommandHandlerUnitOfWorkManager
+public interface ICommandHandlerProvider
 {
     TCommandHandler GetHandler<TCommandHandler>() where TCommandHandler : ICommandHandler;
     ICommandHandler<TCommand, TResult> GetHandlerFor<TCommand, TResult>() where TCommand : class, ICommand;
     ICommandHandler<TCommand> GetHandlerFor<TCommand>() where TCommand : class, ICommand;
 }
 
-public class CommandHandlerUnitOfWorkManager : ICommandHandlerUnitOfWorkManager
+public class CommandHandlerProvider : ICommandHandlerProvider
 {
     private Dictionary<string, ICommandHandler>? _commandHandlers;
     private readonly ILifetimeScope _lifetimeScope;
 
-    public CommandHandlerUnitOfWorkManager(ILifetimeScope lifetimeScope)
+    public CommandHandlerProvider(ILifetimeScope lifetimeScope)
     {
         _lifetimeScope = lifetimeScope;
     }

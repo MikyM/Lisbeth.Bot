@@ -16,20 +16,36 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Text.Json.Serialization;
+using DSharpPlus.Entities;
 
 namespace Lisbeth.Bot.Domain.DTOs.Response;
 
 public class VerifyMessageFormatResDto
 {
+    [JsonIgnore]
+    public DiscordEmbed? Embed { get; set; }
+
     public bool IsCompliant { get; set; }
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public bool? IsDeleted { get; set; }
 
-    public VerifyMessageFormatResDto(bool isCompliant, bool isDeleted = false)
+    public VerifyMessageFormatResDto(bool isCompliant, bool isDeleted = false, DiscordEmbed? embed = null)
     {
         IsCompliant = isCompliant;
         IsDeleted = isDeleted;
+        Embed = embed;
+    }
+
+    public VerifyMessageFormatResDto(bool isCompliant, DiscordEmbed? embed = null)
+    {
+        IsCompliant = isCompliant;
+        Embed = embed;
+    }
+
+    public VerifyMessageFormatResDto(bool isCompliant)
+    {
+        IsCompliant = isCompliant;
     }
 
     public VerifyMessageFormatResDto()

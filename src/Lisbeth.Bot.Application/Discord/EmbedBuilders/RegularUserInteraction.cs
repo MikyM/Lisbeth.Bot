@@ -3,5 +3,6 @@
 public enum RegularUserInteraction
 {
     Tag,
-    Reminder
+    Reminder,
+    ChannelMessageFormat
 }

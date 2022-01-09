@@ -20,6 +20,7 @@ using DSharpPlus.Entities;
 using Lisbeth.Bot.Domain.DTOs;
 using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.DTOs.Request.Ban;
+using Lisbeth.Bot.Domain.DTOs.Request.ChannelMessageFormat;
 using Lisbeth.Bot.Domain.DTOs.Request.Guild;
 using Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.Mute;
@@ -64,6 +65,14 @@ public class AutoMapperProfile : Profile
         CreateMap<TagEditReqDto, Tag>()
             .ForMember(dest => dest.LastEditById, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
         CreateMap<TagDisableReqDto, Tag>()
+            .ForMember(dest => dest.LastEditById, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
+
+        CreateMap<CreateChannelMessageFormatReqDto, ChannelMessageFormat>()
+            .ForMember(dest => dest.LastEditById, source => source.MapFrom(x => x.RequestedOnBehalfOfId))
+            .ForMember(dest => dest.CreatorId, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
+        CreateMap<DisableChannelMessageFormatReqDto, ChannelMessageFormat>()
+            .ForMember(dest => dest.LastEditById, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
+        CreateMap<EditChannelMessageFormatReqDto, ChannelMessageFormat>()
             .ForMember(dest => dest.LastEditById, source => source.MapFrom(x => x.RequestedOnBehalfOfId));
 
         CreateMap<RoleMenuOptionReqDto, RoleMenuOption>();

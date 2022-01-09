@@ -17,21 +17,32 @@
 
 using DSharpPlus;
 using DSharpPlus.EventArgs;
+using Lisbeth.Bot.Application.Discord.CommandHandlers.ChannelMessageFormat;
+using Lisbeth.Bot.Application.Discord.Commands.ChannelMessageFormat;
 using Lisbeth.Bot.Application.Discord.EventHandlers.Base;
+using Lisbeth.Bot.Domain.DTOs.Request.ChannelMessageFormat;
 using MikyM.Common.Utilities;
 using MikyM.Discord.Events;
+using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.EventHandlers;
 
 public class ChannelMessageFormatEventHandler : BaseEventHandler, IDiscordMessageEventsSubscriber
 {
-    public ChannelMessageFormatEventHandler(IAsyncExecutor asyncExecutor) : base(asyncExecutor)
+    private readonly IDiscordService _discord;
+
+    public ChannelMessageFormatEventHandler(IAsyncExecutor asyncExecutor, IDiscordService discord) : base(asyncExecutor)
     {
+        _discord = discord;
     }
 
-    public async Task DiscordOnMessageCreated(DiscordClient sender, MessageCreateEventArgs args)
+    public Task DiscordOnMessageCreated(DiscordClient sender, MessageCreateEventArgs args)
     {
-        
+        _ = AsyncExecutor.ExecuteAsync<VerifyMessageFormatCommandHandler>(async x =>
+            await x.HandleAsync(new VerifyMessageFormatCommand(new VerifyMessageFormatReqDto(args.Channel.Id,
+                args.Message.Id, args.Guild.Id, _discord.Client.CurrentUser.Id), args)));
+
+        return Task.CompletedTask;
     }
 
     public Task DiscordOnMessageAcknowledged(DiscordClient sender, MessageAcknowledgeEventArgs args)

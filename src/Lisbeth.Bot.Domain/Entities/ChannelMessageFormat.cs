@@ -24,6 +24,8 @@ namespace Lisbeth.Bot.Domain.Entities;
 public class ChannelMessageFormat : SnowflakeDiscordEntity
 {
     public ulong ChannelId { get; set; }
+    public ulong CreatorId { get; set; }
+    public ulong LastEditById { get; set; }
     public string? MessageFormat { get; set; }
 
     private string[] FormatParts =>
