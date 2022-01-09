@@ -31,18 +31,19 @@ public class ChannelMessageFormat : SnowflakeDiscordEntity
     private string[] FormatParts =>
         MessageFormat is null
             ? Array.Empty<string>()
-            : MessageFormat.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
+            : MessageFormat.Split('\n', StringSplitOptions.RemoveEmptyEntries);
 
     public Guild? Guild { get; set; }
 
     public bool IsTextCompliant(string messageContent)
     {
-        if (!messageContent.Contains(this.MessageFormat ?? string.Empty, StringComparison.InvariantCultureIgnoreCase))
+        if (FormatParts.Any(formatPart =>
+                !messageContent.Contains(formatPart, StringComparison.InvariantCultureIgnoreCase)))
             return false;
 
-        var parts = messageContent.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
+        var parts = messageContent.Split('\n', StringSplitOptions.RemoveEmptyEntries);
 
-        return !parts.Any(part => this.FormatParts.Any(formatPart =>
+        return parts.All(part => !FormatParts.Any(formatPart =>
             part.Contains(formatPart) && string.IsNullOrWhiteSpace(part.Replace(formatPart, ""))));
     }
 }

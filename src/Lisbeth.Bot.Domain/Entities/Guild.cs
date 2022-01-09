@@ -120,6 +120,7 @@ public sealed class Guild : SnowflakeEntity
     public bool AddChannelMessageFormat(ChannelMessageFormat format)
     {
         if (format is null) throw new ArgumentNullException(nameof(format));
+        //format.Guild = this;
         return channelMessageFormats is not null && channelMessageFormats.Add(format);
     }
 

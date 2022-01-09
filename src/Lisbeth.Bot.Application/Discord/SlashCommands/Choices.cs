@@ -67,6 +67,7 @@ public enum ChannelMessageFormatActionType
     [ChoiceName("edit")] Edit,
     [ChoiceName("get")] Get,
     [ChoiceName("disable")] Disable,
+    [ChoiceName("enable")] Enable,
     [ChoiceName("verify")] Verify
 }
 

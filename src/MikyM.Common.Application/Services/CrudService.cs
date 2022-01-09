@@ -78,7 +78,7 @@ public class CrudDataService<TEntity, TContext> : ReadOnlyDataService<TEntity, T
         if (entry is TEntity rootEntity)
             UnitOfWork.GetRepository<Repository<TEntity>>()?.BeginUpdate(rootEntity, shouldSwapAttached);
         else
-            UnitOfWork.GetRepository<Repository<TEntity>>()?.BeginUpdate(Mapper.Map<TEntity>(entry));
+            UnitOfWork.GetRepository<Repository<TEntity>>()?.BeginUpdate(Mapper.Map<TEntity>(entry), shouldSwapAttached);
 
         return Result.FromSuccess();
     }
@@ -91,7 +91,7 @@ public class CrudDataService<TEntity, TContext> : ReadOnlyDataService<TEntity, T
             UnitOfWork.GetRepository<Repository<TEntity>>()?.BeginUpdateRange(rootEntities, shouldSwapAttached);
         else
             UnitOfWork.GetRepository<Repository<TEntity>>()
-                ?.BeginUpdateRange(Mapper.Map<IEnumerable<TEntity>>(entries));
+                ?.BeginUpdateRange(Mapper.Map<IEnumerable<TEntity>>(entries), shouldSwapAttached);
 
         return Result.FromSuccess();
     }

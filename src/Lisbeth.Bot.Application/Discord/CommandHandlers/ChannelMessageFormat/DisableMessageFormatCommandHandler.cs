@@ -76,7 +76,7 @@ public class DisableMessageFormatCommandHandler : ICommandHandler<DisableMessage
 
         var guildRes =
             await _guildDataService.GetSingleBySpecAsync(
-                new ActiveGuildByDiscordIdWithChannelMessageFormatsSpec(command.Dto.GuildId));
+                new ActiveGuildByDiscordIdWithChannelMessageFormatSpec(command.Dto.GuildId, channel.Id));
 
         if (!guildRes.IsDefined(out var guildCfg))
             return Result<DiscordEmbed>.FromError(guildRes);
@@ -85,11 +85,12 @@ public class DisableMessageFormatCommandHandler : ICommandHandler<DisableMessage
         if (format is null)
             return new ArgumentError(nameof(command.Dto.ChannelId),
                 "There's no message format registered for this channel");
-        if (format.IsDisabled)
-            return new DisabledEntityError("Message format is currently disabled for this channel");
+        if (format.IsDisabled == command.Dto.IsDisabled)
+            return new ArgumentError(nameof(format.IsDisabled),
+                $"Entity is already {(format.IsDisabled ? "disabled" : "enabled")}");
 
         _guildDataService.BeginUpdate(guildCfg);
-        format.IsDisabled = true;
+        format.IsDisabled = command.Dto.IsDisabled;
         format.LastEditById = command.Dto.RequestedOnBehalfOfId;
         await _guildDataService.CommitAsync(requestingUser.Id.ToString());
 

@@ -16,10 +16,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using DSharpPlus.Entities;
+using DSharpPlus.Interactivity.Extensions;
+using FluentValidation;
 using Lisbeth.Bot.Application.Discord.Commands.ChannelMessageFormat;
 using Lisbeth.Bot.Application.Discord.EmbedBuilders;
 using Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response.ChannelMessageFormat;
 using Lisbeth.Bot.Application.Discord.SlashCommands;
+using Lisbeth.Bot.Application.Validation.ChannelMessageFormat;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using MikyM.Common.Application.CommandHandlers;
 using MikyM.Discord.Enums;
@@ -28,6 +31,7 @@ using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.ChannelMessageFormat;
 
+[UsedImplicitly]
 public class EditMessageFormatCommandHandler : ICommandHandler<EditMessageFormatCommand, DiscordEmbed>
 {
     private readonly IDiscordService _discord;
@@ -75,7 +79,7 @@ public class EditMessageFormatCommandHandler : ICommandHandler<EditMessageFormat
 
         var guildRes =
             await _guildDataService.GetSingleBySpecAsync(
-                new ActiveGuildByDiscordIdWithChannelMessageFormatsSpec(command.Dto.GuildId));
+                new ActiveGuildByDiscordIdWithChannelMessageFormatSpec(command.Dto.GuildId, channel.Id));
 
         if (!guildRes.IsDefined(out var guildCfg))
             return Result<DiscordEmbed>.FromError(guildRes);
@@ -86,6 +90,27 @@ public class EditMessageFormatCommandHandler : ICommandHandler<EditMessageFormat
                 "There's no message format registered for this channel");
         if (format.IsDisabled)
             return new DisabledEntityError("Message format is currently disabled for this channel");
+
+        if (command.Ctx is not null)
+        {
+            await command.Ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(new DiscordEmbedBuilder()
+                .WithTitle("Message format configuration")
+                .WithDescription("Please reply to this message with your desired message format")
+                .WithFooter($"Caller Id: {requestingUser.Id}")
+                .WithColor(new DiscordColor(guildCfg.EmbedHexColor))));
+
+            var intrRes = await command.Ctx.Client.GetInteractivity()
+                .WaitForMessageAsync(x => x.Author.Id == command.Ctx.User.Id, TimeSpan.FromMinutes(1));
+
+            if (intrRes.TimedOut)
+                return new DiscordTimedOutError();
+
+            command.Dto.MessageFormat = intrRes.Result.Content;
+
+            // make sure to validate again
+            var validator = new EditMessageFormatReqValidator(command.Ctx.Client);
+            await validator.ValidateAndThrowAsync(command.Dto);
+        }
 
         _guildDataService.BeginUpdate(guildCfg);
         format.MessageFormat = command.Dto.MessageFormat;

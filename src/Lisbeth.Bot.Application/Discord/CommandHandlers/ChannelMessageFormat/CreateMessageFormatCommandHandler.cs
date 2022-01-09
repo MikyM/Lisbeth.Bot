@@ -17,10 +17,13 @@
 
 using AutoMapper;
 using DSharpPlus.Entities;
+using DSharpPlus.Interactivity.Extensions;
+using FluentValidation;
 using Lisbeth.Bot.Application.Discord.Commands.ChannelMessageFormat;
 using Lisbeth.Bot.Application.Discord.EmbedBuilders;
 using Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response.ChannelMessageFormat;
 using Lisbeth.Bot.Application.Discord.SlashCommands;
+using Lisbeth.Bot.Application.Validation.ChannelMessageFormat;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using MikyM.Common.Application.CommandHandlers;
 using MikyM.Discord.Enums;
@@ -29,6 +32,7 @@ using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.ChannelMessageFormat;
 
+[UsedImplicitly]
 public class CreateMessageFormatCommandHandler : ICommandHandler<CreateMessageFormatCommand, DiscordEmbed>
 {
     private readonly IDiscordService _discord;
@@ -78,7 +82,7 @@ public class CreateMessageFormatCommandHandler : ICommandHandler<CreateMessageFo
 
         var guildRes =
             await _guildDataService.GetSingleBySpecAsync(
-                new ActiveGuildByDiscordIdWithChannelMessageFormatsSpec(command.Dto.GuildId));
+                new ActiveGuildByDiscordIdWithChannelMessageFormatSpec(command.Dto.GuildId, channel.Id));
 
         if (!guildRes.IsDefined(out var guildCfg))
             return Result<DiscordEmbed>.FromError(guildRes);
@@ -87,6 +91,27 @@ public class CreateMessageFormatCommandHandler : ICommandHandler<CreateMessageFo
         if (format is not null)
             return new ArgumentError(nameof(command.Dto.ChannelId),
                 $"There already is a{(format.IsDisabled ? " disabled" : "")} message format registered for this channel");
+
+        if (command.Ctx is not null)
+        {
+            await command.Ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(new DiscordEmbedBuilder()
+                .WithTitle("Message format configuration")
+                .WithDescription("Please reply to this message with your desired message format")
+                .WithFooter($"Caller Id: {requestingUser.Id}")
+                .WithColor(new DiscordColor(guildCfg.EmbedHexColor))));
+
+            var intrRes = await command.Ctx.Client.GetInteractivity()
+                .WaitForMessageAsync(x => x.Author.Id == command.Ctx.User.Id, TimeSpan.FromMinutes(1));
+
+            if (intrRes.TimedOut)
+                return new DiscordTimedOutError();
+
+            command.Dto.MessageFormat = intrRes.Result.Content;
+
+            // make sure to validate again
+            var validator = new CreateMessageFormatReqValidator(command.Ctx.Client);
+            await validator.ValidateAndThrowAsync(command.Dto);
+        }
 
         _guildDataService.BeginUpdate(guildCfg);
         var mapped = _mapper.Map<Domain.Entities.ChannelMessageFormat>(command.Dto);

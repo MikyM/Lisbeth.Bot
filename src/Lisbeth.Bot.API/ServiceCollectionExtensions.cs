@@ -193,19 +193,14 @@ public static class ServiceCollectionExtensions
         services.AddEFSecondLevelCache(options =>
         {
             options.UseEasyCachingCoreProvider("InMemoryCache").DisableLogging(true).UseCacheKeyPrefix("EF_");
-            options.CacheQueriesContainingTypes(
-                CacheExpirationMode.Sliding, TimeSpan.FromMinutes(30),
-                typeof(Guild)
-            );
+            options.CacheQueriesContainingTypes(CacheExpirationMode.Sliding, TimeSpan.FromMinutes(30), typeof(Guild),
+                typeof(ChannelMessageFormat), typeof(TicketingConfig), typeof(ModerationConfig));
         });
         services.AddEasyCaching(options =>
         {
             options.UseInMemory(config =>
             {
-                config.DBConfig = new InMemoryCachingOptions
-                {
-                    SizeLimit = 1000
-                };
+                config.DBConfig = new InMemoryCachingOptions { SizeLimit = 1000 };
                 config.EnableLogging = false;
             }, "InMemoryCache");
         });
@@ -229,8 +224,7 @@ public static class ServiceCollectionExtensions
             {
                 Reference = new OpenApiReference
                 {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = ApiKeyDefaults.AuthenticationScheme
+                    Type = ReferenceType.SecurityScheme, Id = ApiKeyDefaults.AuthenticationScheme
                 },
                 In = ParameterLocation.Header,
                 Description =

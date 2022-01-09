@@ -23,7 +23,6 @@ using FluentValidation;
 using Lisbeth.Bot.Application.Discord.CommandHandlers.ChannelMessageFormat;
 using Lisbeth.Bot.Application.Discord.Commands.ChannelMessageFormat;
 using Lisbeth.Bot.Application.Discord.Commands.Ticket;
-using Lisbeth.Bot.Application.Discord.EmbedBuilders;
 using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
 using Lisbeth.Bot.Application.Validation.ChannelMessageFormat;
 using Lisbeth.Bot.Application.Validation.ModerationConfig;
@@ -34,7 +33,6 @@ using Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.ReminderConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
 using MikyM.Common.Application.CommandHandlers;
-using MikyM.Discord.EmbedBuilders;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 
@@ -112,7 +110,6 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
     [SlashCommand("message-format", "A command that allows working with channel message formats", false)]
     public async Task ChannelMessageFormatCommand(InteractionContext ctx, [Option("action", "Action to perform")] ChannelMessageFormatActionType action, 
         [Option("channel", "Channel to configure format for")] DiscordChannel channel,
-        [Option("format", "Message format")] string? format = null,
         [Option("message-id", "Message to verify on demand")] string? messageId = null)
     {
         await ctx.DeferAsync(true);
@@ -138,7 +135,7 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
                 return;
             case ChannelMessageFormatActionType.Create:
                 var createReq = new CreateChannelMessageFormatReqDto
-                    { ChannelId = channel.Id, GuildId = ctx.Guild.Id, RequestedOnBehalfOfId = ctx.User.Id, MessageFormat = format};
+                    { ChannelId = channel.Id, GuildId = ctx.Guild.Id, RequestedOnBehalfOfId = ctx.User.Id, MessageFormat = "placeholder"};
 
                 var createReqValidator = new CreateMessageFormatReqValidator(ctx.Client);
                 await createReqValidator.ValidateAndThrowAsync(createReq);
@@ -155,7 +152,7 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
                 return;
             case ChannelMessageFormatActionType.Edit:
                 var editReq = new EditChannelMessageFormatReqDto
-                    { ChannelId = channel.Id, GuildId = ctx.Guild.Id, RequestedOnBehalfOfId = ctx.User.Id, MessageFormat = format };
+                    { ChannelId = channel.Id, GuildId = ctx.Guild.Id, RequestedOnBehalfOfId = ctx.User.Id, MessageFormat = "placeholder" };
 
                 var editReqValidator = new EditMessageFormatReqValidator(ctx.Client);
                 await editReqValidator.ValidateAndThrowAsync(editReq);
@@ -172,7 +169,7 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
                 return;
             case ChannelMessageFormatActionType.Disable:
                 var disableReq = new DisableChannelMessageFormatReqDto
-                    { ChannelId = channel.Id, GuildId = ctx.Guild.Id, RequestedOnBehalfOfId = ctx.User.Id };
+                    { ChannelId = channel.Id, GuildId = ctx.Guild.Id, RequestedOnBehalfOfId = ctx.User.Id, IsDisabled = true};
 
                 var disableReqValidator = new DisableMessageFormatReqValidator(ctx.Client);
                 await disableReqValidator.ValidateAndThrowAsync(disableReq);
@@ -206,6 +203,23 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
                 else
                     await ctx.EditResponseAsync(new DiscordWebhookBuilder()
                         .AddEmbed(base.GetUnsuccessfulResultEmbed(verifyRes, ctx.Client)));
+                return;
+            case ChannelMessageFormatActionType.Enable:
+                var enableReq = new DisableChannelMessageFormatReqDto
+                    { ChannelId = channel.Id, GuildId = ctx.Guild.Id, RequestedOnBehalfOfId = ctx.User.Id, IsDisabled = false};
+
+                var enableReqValidator = new DisableMessageFormatReqValidator(ctx.Client);
+                await enableReqValidator.ValidateAndThrowAsync(enableReq);
+
+                var enableRes = await _commandHandlerProvider.GetHandler<DisableMessageFormatCommandHandler>()
+                    .HandleAsync(new DisableMessageFormatCommand(enableReq, ctx));
+
+                if (enableRes.IsDefined(out var enableEmbed))
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder()
+                        .AddEmbed(enableEmbed));
+                else
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder()
+                        .AddEmbed(base.GetUnsuccessfulResultEmbed(enableRes, ctx.Client)));
                 return;
             default:
                 throw new ArgumentOutOfRangeException(nameof(action), action, null);

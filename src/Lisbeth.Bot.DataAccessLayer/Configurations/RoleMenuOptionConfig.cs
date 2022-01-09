@@ -25,7 +25,7 @@ public class RoleMenuOptionConfig : IEntityTypeConfiguration<RoleMenuOption>
     {
         builder.ToTable("role_menu_option");
 
-        builder.Property(x => x.Id).HasColumnName("id").HasColumnType("bigint").ValueGeneratedOnAdd().IsRequired();
+        builder.Property(x => x.Id).HasColumnName("id").HasColumnType("bigint").ValueGeneratedNever().IsRequired();
         builder.Property(x => x.IsDisabled).HasColumnName("is_disabled").HasColumnType("boolean").IsRequired();
         builder.Property(x => x.CreatedAt)
             .HasColumnName("created_at")

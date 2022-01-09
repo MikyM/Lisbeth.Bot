@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using MikyM.Common.Domain.Entities;
+using MikyM.Common.Utilities.Extensions;
 
 namespace MikyM.Common.DataAccessLayer;
 
@@ -43,7 +44,7 @@ public class AuditEntry
         return new AuditLog
         {
             UserId = UserId,
-            Type = AuditType.ToString(),
+            Type = AuditType.ToString().ToSnakeCase(),
             TableName = TableName,
             PrimaryKey = JsonSerializer.Serialize(KeyValues),
             OldValues = OldValues.Count is 0 ? null : JsonSerializer.Serialize(OldValues),

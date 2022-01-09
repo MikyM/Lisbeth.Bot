@@ -171,6 +171,9 @@ public class DiscordMessageService : IDiscordMessageService
     {
         if (args is null) throw new ArgumentNullException(nameof(args));
 
+        if (args.Message?.Author is null)
+            return;
+
         if (args.Author.IsBot || args.MessageBefore.Content == args.Message.Content &&
             args.MessageBefore.Attachments.Count == args.Message.Attachments.Count) return;
 
@@ -235,6 +238,9 @@ public class DiscordMessageService : IDiscordMessageService
     public async Task LogMessageDeletedEventAsync(MessageDeleteEventArgs args)
     {
         if (args is null) throw new ArgumentNullException(nameof(args));
+
+        if (args.Message?.Author is null)
+            return;
 
         if (args.Message.Author.IsBot) return;
 

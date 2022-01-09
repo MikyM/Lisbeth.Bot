@@ -27,10 +27,13 @@ namespace Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response.ChannelMessage
 public class ChannelMessageFormatEmbedEnricher : EmbedEnricherBase<Domain.Entities.ChannelMessageFormat, ChannelMessageFormatActionType>
 {
     private readonly VerifyMessageFormatResDto? _resDto;
+    private readonly string? _content;
+
     public ChannelMessageFormatEmbedEnricher(Domain.Entities.ChannelMessageFormat entity,
-        ChannelMessageFormatActionType actionType, VerifyMessageFormatResDto? verifyRes = null) : base(entity, actionType)
+        ChannelMessageFormatActionType actionType, VerifyMessageFormatResDto? verifyRes = null, string? messageContent = null) : base(entity, actionType)
     {
         _resDto = verifyRes;
+        _content = messageContent;
     }
 
     public override void Enrich(IDiscordEmbedBuilderWrapper embedBuilder)
@@ -40,7 +43,7 @@ public class ChannelMessageFormatEmbedEnricher : EmbedEnricherBase<Domain.Entiti
             ChannelMessageFormatActionType.Create => "created",
             ChannelMessageFormatActionType.Get => "retrieved",
             ChannelMessageFormatActionType.Edit => "edited",
-            ChannelMessageFormatActionType.Disable => "disabled",
+            ChannelMessageFormatActionType.Disable => this.PrimaryEnricher.IsDisabled ? "disabled" : "enabled",
             ChannelMessageFormatActionType.Verify => "verified",
             _ => throw new ArgumentOutOfRangeException()
         };
@@ -68,5 +71,8 @@ public class ChannelMessageFormatEmbedEnricher : EmbedEnricherBase<Domain.Entiti
 
         if (_resDto.IsDeleted.HasValue)
             embedBuilder.AddField("Message status", _resDto.IsDeleted.Value ? "Deleted" : "Not deleted", true);
+
+        if (_content is not null)
+            embedBuilder.AddField("Message content", _content);
     }
 }

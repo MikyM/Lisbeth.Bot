@@ -16,13 +16,16 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using AutoMapper;
+using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Exceptions;
 using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
+using Lisbeth.Bot.Domain.DTOs.Request.ChannelMessageFormat;
 using Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.ReminderConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.RoleMenu;
 using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
+using Microsoft.EntityFrameworkCore;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
 
 namespace Lisbeth.Bot.Application.Services.Database;
@@ -43,6 +46,27 @@ public class GuildDataService : CrudDataService<Guild, LisbethBotDbContext>, IGu
         _ticketingDataService = ticketingDataService;
         _roleMenuDataService = roleMenuDataService;
     }
+
+    /*public async Task<Result<Guild>> AddMessageFormatAsync(CreateChannelMessageFormatReqDto dto, bool shouldSave = false)
+    {
+        var guildRes =
+            await base.GetSingleBySpecAsync(
+                new ActiveGuildByDiscordIdWithChannelMessageFormatsSpec(dto.GuildId));
+
+        if (!guildRes.IsDefined(out var guildCfg))
+            return guildRes;
+
+        var format = guildCfg.ChannelMessageFormats?.FirstOrDefault(x => x.ChannelId == dto.ChannelId);
+        if (format is not null)
+            return new ArgumentError(nameof(dto.ChannelId),
+                $"There already is a{(format.IsDisabled ? " disabled" : "")} message format registered for this channel");
+
+        var mapped = Mapper.Map<ChannelMessageFormat>(dto);
+        guildCfg.AddChannelMessageFormat(mapped);
+
+        base.UnitOfWork.Context.Entry(guildCfg.ChannelMessageFormats).State = EntityState.Modified;
+        await _guildDataService.CommitAsync(requestingUser.Id.ToString());
+    }*/
 
     public async Task<Result<Guild>> AddConfigAsync(TicketingConfigReqDto req, bool shouldSave = false)
     {

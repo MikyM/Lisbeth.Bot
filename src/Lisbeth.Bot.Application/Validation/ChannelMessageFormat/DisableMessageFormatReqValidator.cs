@@ -45,5 +45,6 @@ public class DisableMessageFormatReqValidator : AbstractValidator<DisableChannel
             .NotEmpty()
             .DependentRules(x =>
                 x.SetAsyncValidator(new DiscordUserIdValidator<DisableChannelMessageFormatReqDto>(discord)));
+        RuleFor(x => x.IsDisabled).NotNull();
     }
 }

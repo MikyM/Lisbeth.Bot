@@ -83,7 +83,7 @@ public class VerifyMessageFormatCommandHandler : ICommandHandler<VerifyMessageFo
 
         var guildRes =
             await _guildDataService.GetSingleBySpecAsync(
-                new ActiveGuildByDiscordIdWithChannelMessageFormatsSpec(command.Dto.GuildId));
+                new ActiveGuildByDiscordIdWithChannelMessageFormatSpec(command.Dto.GuildId, channel.Id));
 
         if (!guildRes.IsDefined(out var guildCfg))
             return Result<VerifyMessageFormatResDto>.FromError(guildRes);
@@ -95,27 +95,39 @@ public class VerifyMessageFormatCommandHandler : ICommandHandler<VerifyMessageFo
         if (format.IsDisabled)
             return new DisabledEntityError("Message format is currently disabled for this channel, enable it first");
 
+        var isCompliant = format.IsTextCompliant(target.Content ?? string.Empty);
+
+        VerifyMessageFormatResDto? res = null;
+
+        switch (isCompliant)
+        {
+            case true:
+                res = new VerifyMessageFormatResDto(isCompliant);
+                break;
+            case false:
+                try
+                {
+                    await channel.DeleteMessageAsync(target, "Message not compliant with channel message format");
+                }
+                catch
+                {
+                    res = new VerifyMessageFormatResDto(isCompliant, false);
+                }
+
+                break;
+        }
+
+        res ??= new VerifyMessageFormatResDto(isCompliant, true);
+
         var embed = _embedBuilder
             .WithType(RegularUserInteraction.ChannelMessageFormat)
-            .EnrichFrom(new ChannelMessageFormatEmbedEnricher(format, ChannelMessageFormatActionType.Verify))
+            .EnrichFrom(new ChannelMessageFormatEmbedEnricher(format, ChannelMessageFormatActionType.Verify, res, target.Content ?? ""))
             .WithEmbedColor(new DiscordColor(guildCfg.EmbedHexColor))
             .WithAuthorSnowflakeInfo(requestingUser)
             .Build();
 
-        var isCompliant = format.IsTextCompliant(target.Content ?? string.Empty);
+        res.Embed = embed;
 
-        if (isCompliant)
-            return new VerifyMessageFormatResDto(true, embed);
-
-        try
-        {
-            await channel.DeleteMessageAsync(target, "Message not compliant with channel message format");
-        }
-        catch
-        {
-            return new VerifyMessageFormatResDto(false, embed);
-        }
-
-        return new VerifyMessageFormatResDto(false, true, embed);
+        return res;
     }
 }

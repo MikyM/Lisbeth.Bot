@@ -76,7 +76,7 @@ public class GetMessageFormatCommandHandler : ICommandHandler<GetMessageFormatCo
 
         var guildRes =
             await _guildDataService.GetSingleBySpecAsync(
-                new ActiveGuildByDiscordIdWithChannelMessageFormatsSpec(command.Dto.GuildId));
+                new ActiveGuildByDiscordIdWithChannelMessageFormatSpec(command.Dto.GuildId, channel.Id));
 
         if (!guildRes.IsDefined(out var guildCfg))
             return Result<DiscordEmbed>.FromError(guildRes);

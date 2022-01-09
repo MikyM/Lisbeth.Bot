@@ -22,4 +22,5 @@ namespace Lisbeth.Bot.Domain.DTOs.Request.ChannelMessageFormat;
 public class DisableChannelMessageFormatReqDto : BaseAuthWithGuildReqDto
 {
     public ulong ChannelId { get; set; }
+    public bool IsDisabled { get; set; }
 }

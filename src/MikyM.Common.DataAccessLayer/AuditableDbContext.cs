@@ -35,13 +35,13 @@ public abstract class AuditableDbContext : DbContext
     public async Task<int> SaveChangesAsync(string? auditUserId, bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {
         this.AuditUserId = auditUserId;
-        return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+        return await this.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
     }
 
     public async Task<int> SaveChangesAsync(string? auditUserId, CancellationToken cancellationToken = default)
     {
         this.AuditUserId = auditUserId;
-        return await base.SaveChangesAsync(true, cancellationToken);
+        return await this.SaveChangesAsync(true, cancellationToken);
     }
 
     public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess,
