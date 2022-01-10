@@ -153,8 +153,14 @@ public class DiscordMessageService : IDiscordMessageService
                     messagesToDelete.RemoveAll(
                         x => x.Interaction is not null && x.Interaction.Id == interactionId.Value);
 
-                foreach (var batch in messagesToDelete.Chunk(100))
-                    await channel.DeleteMessagesAsync(batch);
+                try
+                {
+                    await channel.DeleteMessagesAsync(messagesToDelete);
+                }
+                catch (DSharpPlus.Exceptions.BadRequestException)
+                {
+                    return new InvalidOperationError("Can't batch delete messages older than 14 days");
+                }
 
                 count += messagesToDelete.Count;
                 cycles++;
