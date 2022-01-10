@@ -15,9 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Linq;
+using DSharpPlus;
 using Lisbeth.Bot.Domain.Entities.Base;
+using System;
 
 namespace Lisbeth.Bot.Domain.Entities;
 
@@ -37,13 +37,38 @@ public class ChannelMessageFormat : SnowflakeDiscordEntity
 
     public bool IsTextCompliant(string messageContent)
     {
-        if (FormatParts.Any(formatPart =>
+        /*if (FormatParts.Any(formatPart =>
                 !messageContent.Contains(formatPart, StringComparison.InvariantCultureIgnoreCase)))
-            return false;
-
+            return false;*/
+        messageContent = Formatter.Strip(messageContent);
         var parts = messageContent.Split('\n', StringSplitOptions.RemoveEmptyEntries);
 
-        return parts.All(part => !FormatParts.Any(formatPart =>
-            part.Contains(formatPart) && string.IsNullOrWhiteSpace(part.Replace(formatPart, ""))));
+        foreach (var formatPart in FormatParts)
+        {
+            if (!messageContent.Contains(formatPart))
+                return false;
+
+            foreach (var part in parts)
+            {
+                if (part.Contains(formatPart) && string.IsNullOrWhiteSpace(part.Replace(formatPart, "")))
+                    return false;
+
+                if (part.Contains(formatPart) && !part.StartsWith(formatPart))
+                    return false;
+            }
+        }
+
+        /*foreach (var part in parts)
+        {
+            foreach (var formatPart in FormatParts)
+            {
+                if (part.Contains(formatPart) && string.IsNullOrWhiteSpace(part.Replace(formatPart, "")))
+                    return false;
+            }
+        }*/
+
+        return true;
+        /*return parts.All(part => !FormatParts.Any(formatPart =>
+            part.Contains(formatPart) && string.IsNullOrWhiteSpace(part.Replace(formatPart, ""))));*/
     }
 }

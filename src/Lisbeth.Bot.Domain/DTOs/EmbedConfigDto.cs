@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Generic;
 
 namespace Lisbeth.Bot.Domain.DTOs;
@@ -28,5 +29,13 @@ public class EmbedConfigDto
     public string? FooterImageUrl { get; set; }
     public string? AuthorImageUrl { get; set; }
     public string? Description { get; set; }
+    public string? Thumbnail { get; set; }
+    public int? ThumbnailHeight { get; set; }
+    public int? ThumbnailWidth { get; set; }
+    public string? Title { get; set; }
+    public ulong CreatorId { get; set; }
+    public ulong LastEditById { get; set; }
+    public DateTime? Timestamp { get; set; }
+    public string HexColor { get; set; } = "#7d7d7d";
     public List<DiscordFieldDto>? Fields { get; set; }
 }

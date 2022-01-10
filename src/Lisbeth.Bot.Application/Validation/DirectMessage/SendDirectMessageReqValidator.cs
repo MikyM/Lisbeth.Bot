@@ -15,39 +15,37 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+
 using DSharpPlus;
 using FluentValidation;
 using Lisbeth.Bot.Application.Validation.ReusablePropertyValidation;
-using Lisbeth.Bot.Domain.DTOs.Request;
-using Lisbeth.Bot.Domain.DTOs.Request.Prune;
+using Lisbeth.Bot.Domain.DTOs.Request.DirectMessage;
 using MikyM.Discord.Interfaces;
 
-namespace Lisbeth.Bot.Application.Validation.Prune;
+namespace Lisbeth.Bot.Application.Validation.DirectMessage;
 
-public class PruneReqValidator : AbstractValidator<PruneReqDto>
+public class SendDirectMessageReqValidator : AbstractValidator<SendDirectMessageReqDto>
 {
-    public PruneReqValidator(IDiscordService discordService) : this(discordService.Client)
+    public SendDirectMessageReqValidator(IDiscordService discord) : this(discord.Client)
     {
     }
 
-    public PruneReqValidator(DiscordClient discord)
+    public SendDirectMessageReqValidator(DiscordClient client)
     {
-        CascadeMode = CascadeMode.Stop;
-
         RuleFor(x => x.GuildId)
             .NotEmpty()
-            .DependentRules(x => x.SetAsyncValidator(new DiscordGuildIdValidator<PruneReqDto>(discord)));
-        RuleFor(x => x.ChannelId)
-            .NotEmpty()
-            .DependentRules(x => x.SetAsyncValidator(new DiscordChannelIdValidator<PruneReqDto>(discord)));
-        RuleFor(x => x.TargetAuthorId)
-            .SetAsyncValidator(new DiscordUserIdValidator<PruneReqDto>(discord));
-        RuleFor(x => x.MessageId)
-            .SetAsyncValidator(new DiscordUserIdValidator<PruneReqDto>(discord));
+            .SetAsyncValidator(new DiscordGuildIdValidator<SendDirectMessageReqDto>(client));
         RuleFor(x => x.RequestedOnBehalfOfId)
             .NotEmpty()
-            .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<PruneReqDto>(discord)));
-        RuleFor(x => x.Count)
-            .InclusiveBetween(1, 99);
+            .SetAsyncValidator(new DiscordUserIdValidator<SendDirectMessageReqDto>(client));
+        RuleFor(x => x.RecipientUserId)
+            .NotEmpty()
+            .SetAsyncValidator(new DiscordUserIdValidator<SendDirectMessageReqDto>(client));
+        RuleFor(x => x.Content)
+            .NotEmpty()
+            .When(x => x.EmbedConfig is null);
+        RuleFor(x => x.EmbedConfig)
+            .NotEmpty()
+            .When(x => string.IsNullOrWhiteSpace(x.Content));
     }
 }

@@ -38,6 +38,9 @@ public class ChannelMessageFormatEventHandler : BaseEventHandler, IDiscordMessag
 
     public Task DiscordOnMessageCreated(DiscordClient sender, MessageCreateEventArgs args)
     {
+        if (args.Channel is null || args.Guild is null)
+            return Task.CompletedTask;
+
         _ = AsyncExecutor.ExecuteAsync<VerifyMessageFormatCommandHandler>(async x =>
             await x.HandleAsync(new VerifyMessageFormatCommand(new VerifyMessageFormatReqDto(args.Channel.Id,
                 args.Message.Id, args.Guild.Id, _discord.Client.CurrentUser.Id), args)));

@@ -16,19 +16,21 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using DSharpPlus.Entities;
+using Lisbeth.Bot.Domain.DTOs;
 using Lisbeth.Bot.Domain.DTOs.Request.Base;
 using Lisbeth.Bot.Domain.Entities.Base;
-using MikyM.Discord.EmbedBuilders.Enums;
+using MikyM.Discord.Enums;
 using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.Interfaces;
 using System.Globalization;
-using MikyM.Discord.Enums;
+using AutoMapper;
 
 namespace Lisbeth.Bot.Application.Discord.Helpers;
 
 public interface IDiscordEmbedProvider
 {
     DiscordEmbedBuilder GetEmbedFromConfig(EmbedConfig config);
+    DiscordEmbedBuilder GetEmbedFromConfig(EmbedConfigDto config);
     DiscordEmbedBuilder GetUnsuccessfulActionEmbed(IResult result);
     DiscordEmbedBuilder GetUnsuccessfulActionEmbed(IResultError error);
     DiscordEmbedBuilder GetUnsuccessfulActionEmbed(string error);
@@ -51,10 +53,12 @@ public interface IDiscordEmbedProvider
 public class DiscordEmbedProvider : IDiscordEmbedProvider
 {
     private readonly IDiscordService _discord;
+    private readonly IMapper _mapper;
 
-    public DiscordEmbedProvider(IDiscordService discord)
+    public DiscordEmbedProvider(IDiscordService discord, IMapper mapper)
     {
         _discord = discord;
+        _mapper = mapper;
     }
 
     public DiscordEmbedBuilder GetEmbedFromConfig(EmbedConfig config)
@@ -96,6 +100,9 @@ public class DiscordEmbedProvider : IDiscordEmbedProvider
 
         return builder;
     }
+
+    public DiscordEmbedBuilder GetEmbedFromConfig(EmbedConfigDto config)
+        => this.GetEmbedFromConfig(_mapper.Map<EmbedConfig>(config));
 
     public DiscordEmbedBuilder GetUnsuccessfulActionEmbed(IResult result)
     {

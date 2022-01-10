@@ -19,7 +19,7 @@ using System.Collections.Generic;
 using Lisbeth.Bot.Domain.DTOs.Request.Base;
 using Lisbeth.Bot.Domain.Entities;
 
-namespace Lisbeth.Bot.Domain.DTOs.Request;
+namespace Lisbeth.Bot.Domain.DTOs.Request.Prune;
 
 public class PruneReqDto : BaseAuthWithGuildReqDto
 {

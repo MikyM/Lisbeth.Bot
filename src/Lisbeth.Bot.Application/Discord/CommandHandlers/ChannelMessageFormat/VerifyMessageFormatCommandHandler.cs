@@ -15,13 +15,21 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using AutoMapper;
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.ChannelMessageFormat;
+using Lisbeth.Bot.Application.Discord.Commands.DirectMessage;
 using Lisbeth.Bot.Application.Discord.EmbedBuilders;
+using Lisbeth.Bot.Application.Discord.EmbedEnrichers.DirectMessage;
 using Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response.ChannelMessageFormat;
 using Lisbeth.Bot.Application.Discord.SlashCommands;
+using Lisbeth.Bot.Application.Validation.DirectMessage;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
+using Lisbeth.Bot.Domain.DTOs;
+using Lisbeth.Bot.Domain.DTOs.Request.DirectMessage;
+using Microsoft.Extensions.Logging;
 using MikyM.Common.Application.CommandHandlers;
+using MikyM.Common.Utilities.Extensions;
 using MikyM.Discord.Enums;
 using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.Interfaces;
@@ -34,13 +42,21 @@ public class VerifyMessageFormatCommandHandler : ICommandHandler<VerifyMessageFo
     private readonly IDiscordService _discord;
     private readonly IGuildDataService _guildDataService;
     private readonly IResponseDiscordEmbedBuilder<RegularUserInteraction> _embedBuilder;
+    private readonly ICommandHandler<SendDirectMessageCommand> _sendHandler;
+    private readonly IMapper _mapper;
+    private readonly ILogger<VerifyMessageFormatCommandHandler> _logger;
 
     public VerifyMessageFormatCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
-        IResponseDiscordEmbedBuilder<RegularUserInteraction> embedBuilder)
+        IResponseDiscordEmbedBuilder<RegularUserInteraction> embedBuilder,
+        ICommandHandler<SendDirectMessageCommand> sendHandler, IMapper mapper,
+        ILogger<VerifyMessageFormatCommandHandler> logger)
     {
         _discord = discord;
         _guildDataService = guildDataService;
         _embedBuilder = embedBuilder;
+        _sendHandler = sendHandler;
+        _mapper = mapper;
+        _logger = logger;
     }
 
     public async Task<Result<VerifyMessageFormatResDto>> HandleAsync(VerifyMessageFormatCommand command)
@@ -51,10 +67,11 @@ public class VerifyMessageFormatCommandHandler : ICommandHandler<VerifyMessageFo
         DiscordMember? requestingUser;
         DiscordChannel? channel;
         DiscordMessage? target;
+        DiscordGuild? guild;
 
         try
         {
-            var guild = command.EventArgs?.Guild ??
+            guild = command.EventArgs?.Guild ??
                         command.Ctx?.Guild ?? await _discord.Client.GetGuildAsync(command.Dto.GuildId);
 
             if (guild is null) return new DiscordNotFoundError(DiscordEntity.Guild);
@@ -98,6 +115,7 @@ public class VerifyMessageFormatCommandHandler : ICommandHandler<VerifyMessageFo
         var isCompliant = format.IsTextCompliant(target.Content ?? string.Empty);
 
         VerifyMessageFormatResDto? res = null;
+        bool wasAuthorInformed = false;
 
         switch (isCompliant)
         {
@@ -108,16 +126,42 @@ public class VerifyMessageFormatCommandHandler : ICommandHandler<VerifyMessageFo
                 try
                 {
                     await channel.DeleteMessageAsync(target, "Message not compliant with channel message format");
+
+                    var userInfoEmbed = _embedBuilder
+                        .EnrichFrom(new MessageFormatComplianceEmbedEnricher(format, target))
+                        .WithEmbedColor(new DiscordColor(guildCfg.EmbedHexColor))
+                        .DisableTemplating()
+                        .Build();
+
+                    var sendReq = new SendDirectMessageReqDto
+                    {
+                        EmbedConfig = _mapper.Map<EmbedConfigDto>(userInfoEmbed),
+                        GuildId = guild.Id,
+                        RecipientUserId = target.Author.Id,
+                        RequestedOnBehalfOfId = requestingUser.Id
+                    };
+
+                    var validator = new SendDirectMessageReqValidator(_discord.Client);
+
+                    var validationResult = await validator.ValidateAsync(sendReq);
+
+                    if (validationResult.IsValid)
+                    {
+                        var sendRes = await _sendHandler.HandleAsync(new SendDirectMessageCommand(sendReq,
+                            requestingUser, guild, target.Author as DiscordMember));
+
+                        wasAuthorInformed = sendRes.IsSuccess;
+                    }
                 }
                 catch
                 {
-                    res = new VerifyMessageFormatResDto(isCompliant, false);
+                    res = new VerifyMessageFormatResDto(isCompliant, false, wasAuthorInformed);
                 }
 
                 break;
         }
 
-        res ??= new VerifyMessageFormatResDto(isCompliant, true);
+        res ??= new VerifyMessageFormatResDto(isCompliant, true, wasAuthorInformed);
 
         var embed = _embedBuilder
             .WithType(RegularUserInteraction.ChannelMessageFormat)

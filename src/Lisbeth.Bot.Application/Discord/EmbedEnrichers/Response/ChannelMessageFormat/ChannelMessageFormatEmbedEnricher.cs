@@ -72,6 +72,9 @@ public class ChannelMessageFormatEmbedEnricher : EmbedEnricherBase<Domain.Entiti
         if (_resDto.IsDeleted.HasValue)
             embedBuilder.AddField("Message status", _resDto.IsDeleted.Value ? "Deleted" : "Not deleted", true);
 
+        if (_resDto.WasAuthorInformed.HasValue)
+            embedBuilder.AddField("Info status", _resDto.WasAuthorInformed.Value ? "User informed" : "User not informed", true);
+
         if (_content is not null)
             embedBuilder.AddField("Message content", _content);
     }

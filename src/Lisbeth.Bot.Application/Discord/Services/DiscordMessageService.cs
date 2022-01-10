@@ -29,6 +29,7 @@ using MikyM.Discord.Interfaces;
 using System.Collections.Generic;
 using System.Globalization;
 using Lisbeth.Bot.Application.Discord.EmbedBuilders;
+using Lisbeth.Bot.Domain.DTOs.Request.Prune;
 
 namespace Lisbeth.Bot.Application.Discord.Services;
 
@@ -121,16 +122,17 @@ public class DiscordMessageService : IDiscordMessageService
             int cycles = 0;
             bool shouldStop = false;
             var targetMessage = await channel.GetMessageAsync(req.MessageId.Value);
-            if (targetMessage is null) return new DiscordNotFoundError("Message with given Id was not found");
+            if (targetMessage is null) 
+                return new DiscordNotFoundError("Message with given Id was not found");
             var messages = await channel.GetMessagesAsync(1);
             var lastMessage = messages[0];
 
             while (cycles <= 10 && !shouldStop)
             {
                 messagesToDelete.Clear();
-                messagesToDelete.AddRange(
-                    await channel.GetMessagesBeforeAsync(lastMessage.Id));
+                messagesToDelete.AddRange(await channel.GetMessagesBeforeAsync(lastMessage.Id));
                 await Task.Delay(300);
+
                 var target = messagesToDelete.FirstOrDefault(x => x.Id == req.MessageId);
                 if (target is not null)
                 {
@@ -138,12 +140,17 @@ public class DiscordMessageService : IDiscordMessageService
                     messagesToDelete.RemoveRange(index + 1, messagesToDelete.Count - index - 1);
                     shouldStop = true;
                 }
+
                 lastMessage = messagesToDelete.Last();
                 await Task.Delay(600);
+
                 // keep interaction message
                 if (interactionId.HasValue)
-                    messagesToDelete.RemoveAll(x => x.Interaction is not null && x.Interaction.Id == interactionId.Value);
+                    messagesToDelete.RemoveAll(
+                        x => x.Interaction is not null && x.Interaction.Id == interactionId.Value);
+
                 await channel.DeleteMessagesAsync(messagesToDelete);
+
                 count += messagesToDelete.Count;
                 cycles++;
                 req.Messages.AddRange(_mapper.Map<List<MessageLog>>(messagesToDelete));
@@ -186,9 +193,7 @@ public class DiscordMessageService : IDiscordMessageService
 
         if (guild.ModerationConfig?.MessageUpdatedEventsLogChannelId is null) return;
 
-        DiscordChannel logChannel = args.Guild.Channels
-            .FirstOrDefault(x => x.Key == guild.ModerationConfig.MessageUpdatedEventsLogChannelId)
-            .Value;
+        DiscordChannel logChannel = args.Guild.GetChannel(guild.ModerationConfig.MessageUpdatedEventsLogChannelId);
 
         if (logChannel is null) return;
 
@@ -222,7 +227,7 @@ public class DiscordMessageService : IDiscordMessageService
         embed.AddField("Old attachments", oldAttachmentsString);
         embed.AddField("New content", newContent);
         embed.AddField("New attachments", newAttachmentsString);
-        embed.WithFooter($"Message Id: {args.Message.Id} || Author Id: {args.Message.Author.Id}");
+        embed.WithFooter($"Message Id: {args.Message.Id} | Author Id: {args.Message.Author.Id}");
         embed.WithColor(new DiscordColor(guild.EmbedHexColor));
 
         try
@@ -253,9 +258,7 @@ public class DiscordMessageService : IDiscordMessageService
 
         if (guild.ModerationConfig?.MessageDeletedEventsLogChannelId is null) return;
 
-        DiscordChannel logChannel = args.Guild.Channels
-            .FirstOrDefault(x => x.Key == guild.ModerationConfig.MessageDeletedEventsLogChannelId)
-            .Value;
+        DiscordChannel logChannel = args.Guild.GetChannel(guild.ModerationConfig.MessageDeletedEventsLogChannelId);
 
         if (logChannel is null) return;
 
@@ -305,7 +308,7 @@ public class DiscordMessageService : IDiscordMessageService
         embed.AddField("Date sent", $"{args.Message.Timestamp.ToString(CultureInfo.CurrentCulture)}");
         embed.AddField("Content", content);
         embed.AddField("Attachments", attachmentsString);
-        embed.WithFooter($"Message Id: {args.Message.Id} || Author Id: {args.Message.Author.Id}");
+        embed.WithFooter($"Message Id: {args.Message.Id} | Author Id: {args.Message.Author.Id}");
         embed.WithColor(new DiscordColor(guild.EmbedHexColor));
 
         try
@@ -331,9 +334,7 @@ public class DiscordMessageService : IDiscordMessageService
 
         if (guild.ModerationConfig?.MessageDeletedEventsLogChannelId is null) return;
 
-        DiscordChannel logChannel = args.Guild.Channels
-            .FirstOrDefault(x => x.Key == guild.ModerationConfig.MessageDeletedEventsLogChannelId)
-            .Value;
+        DiscordChannel logChannel = args.Guild.GetChannel(guild.ModerationConfig.MessageDeletedEventsLogChannelId);
 
         if (logChannel is null) return;
 
@@ -342,10 +343,10 @@ public class DiscordMessageService : IDiscordMessageService
         var auditLogs = await args.Guild.GetAuditLogsAsync(1, null, AuditLogActionType.Ban);
         var auditBulkLogs = await args.Guild.GetAuditLogsAsync(1, null, AuditLogActionType.MessageBulkDelete);
         var filtered = auditLogs
-            .Where(m => m.CreationTimestamp.LocalDateTime > DateTime.UtcNow.Subtract(new TimeSpan(0, 0, 4)))
+            .Where(m => m.CreationTimestamp.UtcDateTime > DateTime.UtcNow.Subtract(new TimeSpan(0, 0, 4)))
             .ToList();
         var filteredBulk = auditBulkLogs
-            .Where(m => m.CreationTimestamp.LocalDateTime > DateTime.UtcNow.Subtract(new TimeSpan(0, 0, 4)))
+            .Where(m => m.CreationTimestamp.UtcDateTime > DateTime.UtcNow.Subtract(new TimeSpan(0, 0, 4)))
             .ToList();
 
         foreach (var msg in args.Messages)
@@ -368,7 +369,7 @@ public class DiscordMessageService : IDiscordMessageService
             embed.AddField("Author mention", $"{msg.Author.Mention}", true);
             embed.AddField("Channel", $"{args.Channel.Mention}", true);
 
-            if (filtered.Count() != 0)
+            if (filtered.Count != 0)
             {
                 embed.WithTitle("Message has been deleted due to ban prune");
                 embed.AddField("Pruned by", $"{filtered[0].UserResponsible.Mention}");
@@ -387,7 +388,7 @@ public class DiscordMessageService : IDiscordMessageService
             embed.AddField("Date sent", $"{msg.Timestamp.ToString(CultureInfo.CurrentCulture)}");
             embed.AddField("Content", content);
             embed.AddField("Attachments", attachmentsString);
-            embed.WithFooter($"Message ID: {msg.Id} || Author ID: {msg.Author.Id}");
+            embed.WithFooter($"Message ID: {msg.Id} | Author ID: {msg.Author.Id}");
             embed.WithColor(new DiscordColor(guild.EmbedHexColor));
 
             try

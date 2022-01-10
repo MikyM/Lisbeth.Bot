@@ -26,21 +26,24 @@ public class VerifyMessageFormatResDto
     public DiscordEmbed? Embed { get; set; }
 
     public bool IsCompliant { get; set; }
-
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public bool? WasAuthorInformed { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public bool? IsDeleted { get; set; }
 
-    public VerifyMessageFormatResDto(bool isCompliant, bool isDeleted = false, DiscordEmbed? embed = null)
+    public VerifyMessageFormatResDto(bool isCompliant, bool isDeleted = false, bool wasAuthorInformed = false, DiscordEmbed? embed = null)
     {
         IsCompliant = isCompliant;
         IsDeleted = isDeleted;
         Embed = embed;
+        WasAuthorInformed = wasAuthorInformed;
     }
 
-    public VerifyMessageFormatResDto(bool isCompliant, DiscordEmbed? embed = null)
+    public VerifyMessageFormatResDto(bool isCompliant, bool isDeleted, bool wasAuthorInformed)
     {
         IsCompliant = isCompliant;
-        Embed = embed;
+        WasAuthorInformed = wasAuthorInformed;
+        IsDeleted = isDeleted;
     }
 
     public VerifyMessageFormatResDto(bool isCompliant)

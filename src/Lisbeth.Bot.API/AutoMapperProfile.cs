@@ -24,6 +24,7 @@ using Lisbeth.Bot.Domain.DTOs.Request.ChannelMessageFormat;
 using Lisbeth.Bot.Domain.DTOs.Request.Guild;
 using Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.Mute;
+using Lisbeth.Bot.Domain.DTOs.Request.Prune;
 using Lisbeth.Bot.Domain.DTOs.Request.Reminder;
 using Lisbeth.Bot.Domain.DTOs.Request.RoleMenu;
 using Lisbeth.Bot.Domain.DTOs.Request.Tag;
@@ -113,6 +114,29 @@ public class AutoMapperProfile : Profile
             .ForMember(dest => dest.ThumbnailWidth, source => source.PreCondition(x => x.Thumbnail is not null))
             .ForMember(dest => dest.ThumbnailWidth, source => source.MapFrom(x => x.Thumbnail.Width))
             .ForMember(dest => dest.Id, source => source.Ignore());
+
+        CreateMap<DiscordEmbed, EmbedConfigDto>()
+            .ForMember(dest => dest.Author, source => source.MapFrom(x => x.Author.Name))
+            .ForMember(dest => dest.AuthorImageUrl, source => source.MapFrom(x => x.Author.IconUrl))
+            .ForMember(dest => dest.AuthorUrl, source => source.MapFrom(x => x.Author.Url))
+            .ForMember(dest => dest.Footer, source => source.MapFrom(x => x.Footer.Text))
+            .ForMember(dest => dest.FooterImageUrl, source => source.MapFrom(x => x.Footer.IconUrl))
+            .ForMember(dest => dest.Description, source => source.MapFrom(x => x.Description))
+            .ForMember(dest => dest.ImageUrl, source => source.MapFrom(x => x.Image.Url))
+            .ForMember(dest => dest.Fields,
+                source => source.MapFrom(x =>
+                    x.Fields.Select(y => new DiscordFieldDto() { Text = y.Value, Title = y.Name })))
+            .ForMember(dest => dest.Title, source => source.MapFrom(x => x.Title))
+            .ForMember(dest => dest.Timestamp, source => source.PreCondition(x => x.Timestamp.HasValue))
+            .ForMember(dest => dest.Timestamp, source => source.MapFrom(x => x.Timestamp!.Value.DateTime))
+            .ForMember(dest => dest.HexColor, source => source.PreCondition(x => x.Color.HasValue))
+            .ForMember(dest => dest.HexColor, source => source.MapFrom(x => x.Color.Value.ToString()))
+            .ForMember(dest => dest.Thumbnail, source => source.PreCondition(x => x.Thumbnail is not null))
+            .ForMember(dest => dest.Thumbnail, source => source.MapFrom(x => x.Thumbnail.Url.ToString()))
+            .ForMember(dest => dest.ThumbnailHeight, source => source.PreCondition(x => x.Thumbnail is not null))
+            .ForMember(dest => dest.ThumbnailHeight, source => source.MapFrom(x => x.Thumbnail.Height))
+            .ForMember(dest => dest.ThumbnailWidth, source => source.PreCondition(x => x.Thumbnail is not null))
+            .ForMember(dest => dest.ThumbnailWidth, source => source.MapFrom(x => x.Thumbnail.Width));
 
         CreateMap<RoleMenuAddReqDto, RoleMenu>()
             .ForMember(dest => dest.CreatorId, source => source.MapFrom(x => x.RequestedOnBehalfOfId))

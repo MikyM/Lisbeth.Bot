@@ -15,12 +15,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Lisbeth.Bot.Application.Discord.EmbedBuilders;
+using Lisbeth.Bot.Domain.DTOs.Request.Base;
 
-public enum RegularUserInteraction
+namespace Lisbeth.Bot.Domain.DTOs.Request.DirectMessage;
+
+public class SendDirectMessageReqDto : BaseAuthWithGuildReqDto
 {
-    DirectMessage,
-    Tag,
-    Reminder,
-    ChannelMessageFormat
+    public ulong RecipientUserId { get; set; }
+    public string? Content { get; set; }
+    public EmbedConfigDto? EmbedConfig { get; set; }
 }
