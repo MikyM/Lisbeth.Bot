@@ -15,13 +15,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
+using Autofac;
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.Ticket;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Microsoft.Extensions.Logging;
 using MikyM.Common.Application.CommandHandlers;
 using MikyM.Discord.Interfaces;
+using System.Collections.Generic;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 
@@ -29,14 +30,14 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 public class CleanClosedTicketsCommandHandler : ICommandHandler<CleanClosedTicketsCommand>
 {
     private readonly IDiscordService _discord;
-    private readonly IGuildDataService _guildDataService;
     private readonly ILogger<CleanClosedTicketsCommandHandler> _logger;
+    private readonly ILifetimeScope _scope;
 
-    public CleanClosedTicketsCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
+    public CleanClosedTicketsCommandHandler(IDiscordService discord, ILifetimeScope scope,
         ILogger<CleanClosedTicketsCommandHandler> logger)
     {
         _discord = discord;
-        _guildDataService = guildDataService;
+        _scope = scope;
         _logger = logger;
     }
 
@@ -46,64 +47,67 @@ public class CleanClosedTicketsCommandHandler : ICommandHandler<CleanClosedTicke
         {
             await Parallel.ForEachAsync(_discord.Client.Guilds.Keys, async (guildId, _) =>
             {
-                var res = await _guildDataService.GetSingleBySpecAsync(
+                using (var scope = _scope.BeginLifetimeScope())
+                {
+                    var res = await scope.Resolve<IGuildDataService>().GetSingleBySpecAsync(
                     new ActiveGuildByDiscordIdWithTicketingAndInactiveTicketsSpecifications(guildId));
 
-                if (!res.IsDefined(out var guildCfg)) return;
+                    if (!res.IsDefined(out var guildCfg)) return;
 
-                if (guildCfg.TicketingConfig?.CleanAfter is null) return;
-                if (guildCfg.Tickets?.Count() == 0) return;
+                    if (guildCfg.TicketingConfig?.CleanAfter is null) return;
+                    if (guildCfg.Tickets?.Count() == 0) return;
 
-                DiscordChannel closedCat;
-                try
-                {
-                    closedCat = await _discord.Client.GetChannelAsync(guildCfg.TicketingConfig.ClosedCategoryId);
-                }
-                catch (Exception)
-                {
-                    _logger.LogInformation(
-                        $"Guild with Id: {guildId} has non-existing closed ticket category set with Id: {guildCfg.TicketingConfig.ClosedCategoryId}.");
-                    return;
-                }
-
-                if (closedCat is null) return;
-
-                foreach (var closedTicketChannel in closedCat.Children)
-                {
-                    if (closedTicketChannel.Id == guildCfg.TicketingConfig.LogChannelId)
-                        continue;
-                    if ((guildCfg.Tickets ?? throw new InvalidOperationException()).All(x =>
-                            x.ChannelId != closedTicketChannel.Id)) continue;
-
-                    IReadOnlyList<DiscordMessage> lastMessages;
+                    DiscordChannel closedCat;
                     try
                     {
-                        lastMessages = await closedTicketChannel.GetMessagesAsync(1);
+                        closedCat = await _discord.Client.GetChannelAsync(guildCfg.TicketingConfig.ClosedCategoryId);
                     }
-                    catch
+                    catch (Exception)
                     {
-                        continue;
+                        _logger.LogInformation(
+                            $"Guild with Id: {guildId} has non-existing closed ticket category set with Id: {guildCfg.TicketingConfig.ClosedCategoryId}.");
+                        return;
                     }
 
-                    if (lastMessages is null || lastMessages.Count == 0) continue;
+                    if (closedCat is null) return;
 
-                    var timeDifference = DateTime.UtcNow.Subtract(lastMessages[0].Timestamp.UtcDateTime);
-                    if (timeDifference.TotalHours >= guildCfg.TicketingConfig.CleanAfter.Value.TotalHours)
+                    foreach (var closedTicketChannel in closedCat.Children)
                     {
+                        if (closedTicketChannel.Id == guildCfg.TicketingConfig.LogChannelId)
+                            continue;
+                        if ((guildCfg.Tickets ?? throw new InvalidOperationException()).All(x =>
+                                x.ChannelId != closedTicketChannel.Id)) continue;
+
+                        IReadOnlyList<DiscordMessage> lastMessages;
                         try
                         {
-                            await closedTicketChannel.DeleteAsync();
+                            lastMessages = await closedTicketChannel.GetMessagesAsync(1);
                         }
-                        catch (Exception ex)
+                        catch
                         {
-                            _logger.LogError($"Failed to delete channel cause: {ex}");
+                            continue;
                         }
-                        _logger.LogDebug($"Deleting channel Id: {closedTicketChannel.Id} with name: {closedTicketChannel.Name}");
+
+                        if (lastMessages is null || lastMessages.Count == 0) continue;
+
+                        var timeDifference = DateTime.UtcNow.Subtract(lastMessages[0].Timestamp.UtcDateTime);
+                        if (timeDifference.TotalHours >= guildCfg.TicketingConfig.CleanAfter.Value.TotalHours)
+                        {
+                            try
+                            {
+                                await closedTicketChannel.DeleteAsync();
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogError($"Failed to delete channel cause: {ex}");
+                            }
+                            _logger.LogDebug($"Deleting channel Id: {closedTicketChannel.Id} with name: {closedTicketChannel.Name}");
+                        }
+                        await Task.Delay(500);
                     }
+
                     await Task.Delay(500);
                 }
-
-                await Task.Delay(500);
             });
         }
         catch (Exception ex)

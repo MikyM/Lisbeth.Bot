@@ -60,7 +60,7 @@ public class DiscordChatExportService : IDiscordChatExportService
         DiscordUser owner;
         Ticket ticket;
 
-         if (req.OwnerId.HasValue)
+        if (req.OwnerId.HasValue)
         {
             var res = await _ticketDataService.GetSingleBySpecAsync(
                 new TicketBaseGetSpecifications(null, req.OwnerId, req.GuildId, null, null, false, 1));
@@ -208,7 +208,7 @@ public class DiscordChatExportService : IDiscordChatExportService
 
             messages.Reverse();
 
-            foreach (var msg in messages.Where(msg => !users.Contains(msg.Author) && msg.Author is not null)) {users.Add(msg.Author);}
+            foreach (var msg in messages.Where(msg => !users.Contains(msg.Author) && msg.Author is not null)) { users.Add(msg.Author); }
 
             string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Discord", "ChatExport",
                 "ChatExport.css");

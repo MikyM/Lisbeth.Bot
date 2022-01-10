@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Concurrent;
 using Microsoft.EntityFrameworkCore.Storage;
 using System.Collections.Generic;
 using Autofac;
@@ -29,7 +30,7 @@ public sealed class UnitOfWork<TContext> : IUnitOfWork<TContext> where TContext 
     // To detect redundant calls
     private bool _disposed;
     // ReSharper disable once InconsistentNaming
-    private Dictionary<string, IBaseRepository>? _repositories;
+    private ConcurrentDictionary<string, IBaseRepository>? _repositories;
     private IDbContextTransaction? _transaction;
 
     public UnitOfWork(TContext context, ILifetimeScope lifetimeScope)
@@ -47,7 +48,7 @@ public sealed class UnitOfWork<TContext> : IUnitOfWork<TContext> where TContext 
 
     public TRepository GetRepository<TRepository>() where TRepository : class, IBaseRepository
     {
-        _repositories ??= new Dictionary<string, IBaseRepository>();
+        _repositories ??= new ConcurrentDictionary<string, IBaseRepository>();
 
         var type = typeof(TRepository);
         string name = type.FullName ?? throw new InvalidOperationException();
@@ -59,8 +60,10 @@ public sealed class UnitOfWork<TContext> : IUnitOfWork<TContext> where TContext 
                     (pi, _) => pi.ParameterType.IsAssignableTo(typeof(DbContext)), (_, _) => Context))))
             return (TRepository)_repositories[name];
 
+        if (_repositories.TryGetValue(name, out repository)) return (TRepository) repository;
+
         throw new InvalidOperationException(
-            $"Concrete repository of type {name} couldn't be added to and/or retrieved.");
+            $"Repository of type {name} couldn't be added to and/or retrieved.");
     }
 
     public async Task RollbackAsync()

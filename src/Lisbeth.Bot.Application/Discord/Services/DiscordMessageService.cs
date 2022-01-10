@@ -130,6 +130,10 @@ public class DiscordMessageService : IDiscordMessageService
             while (cycles <= 10 && !shouldStop)
             {
                 messagesToDelete.Clear();
+
+                if (cycles == 0)
+                    messagesToDelete.Add(lastMessage);
+
                 messagesToDelete.AddRange(await channel.GetMessagesBeforeAsync(lastMessage.Id));
                 await Task.Delay(300);
 
