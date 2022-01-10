@@ -42,6 +42,10 @@ public class ChannelMessageFormat : SnowflakeDiscordEntity
         messageContent = Formatter.Strip(messageContent);
         var parts = messageContent.Split('\n', StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim()).ToList();
 
+
+        if (!parts.First().Contains(FormatParts.First()))
+            return false;
+
         foreach (var formatPart in FormatParts)
         {
             if (!messageContent.Contains(formatPart))
