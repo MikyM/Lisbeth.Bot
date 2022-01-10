@@ -25,15 +25,13 @@ public static class InteractionContextExtensions
 {
     public static async Task ExtendedFollowUpAsync(this InteractionContext ctx, DiscordFollowupMessageBuilder builder)
     {
-        DiscordMessageBuilder msgBuilder = new DiscordMessageBuilder();
-        if (!string.IsNullOrWhiteSpace(builder.Content)) msgBuilder.WithContent(builder.Content);
-        if (builder.Embeds.Any()) msgBuilder.AddEmbed(builder.Embeds[0]);
-
         await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(new DiscordEmbedBuilder()
             .WithTitle($"{DiscordEmoji.FromName(ctx.Client, ":ok_hand:")} Action successful")
             .WithColor(new DiscordColor("#2ECC71"))));
 
-        await ctx.Channel.SendMessageAsync(msgBuilder);
+        await Task.Delay(300);
+
+        await ctx.FollowUpAsync(builder);
     }
 
     public static async Task ExtendedFollowUpAsync(this InteractionContext ctx)

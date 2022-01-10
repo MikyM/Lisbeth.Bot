@@ -15,17 +15,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Threading;
-using DSharpPlus;
 using DSharpPlus.Entities;
-using DSharpPlus.Interactivity.Enums;
-using DSharpPlus.Interactivity.EventHandling;
 using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
 using FluentValidation;
 using Lisbeth.Bot.Application.Discord.CommandHandlers.Tag;
 using Lisbeth.Bot.Application.Discord.Commands.Tag;
-using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
 using Lisbeth.Bot.Application.Validation.Tag;
 using Lisbeth.Bot.Domain.DTOs.Request.Tag;
@@ -60,7 +55,7 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
         [Option("text", "Base text for the tag")]
         string text = "")
     {
-        await ctx.DeferAsync(true);
+        await ctx.DeferAsync();
 
         switch (action)
         {
@@ -75,8 +70,7 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
 
                 var getRes = await _commandHandlerProvider.GetHandler<GetTagCommandHandler>()
                     .HandleAsync(new GetTagCommand(getReq, ctx));
-                
-                
+
                 if (getRes.IsDefined(out var getBuilder))
                     await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent(getBuilder.Content)
                         .AddEmbeds(getBuilder.Embeds));
@@ -84,11 +78,6 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
                     await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder()
                         .AddEmbed(base.GetUnsuccessfulResultEmbed(getRes, ctx.Client))
                         .AsEphemeral(true));
-                /*if (getRes.IsDefined(out var getBuilder))
-                    await ctx.ExtendedFollowUpAsync(new DiscordFollowupMessageBuilder().WithContent(getBuilder.Content)
-                        .AddEmbeds(getBuilder.Embeds));
-                else
-                    await ctx.ExtendedFollowUpAsync(getRes);*/
                 break;
             case TagActionType.Create:
                 var addReq = new TagAddReqDto
