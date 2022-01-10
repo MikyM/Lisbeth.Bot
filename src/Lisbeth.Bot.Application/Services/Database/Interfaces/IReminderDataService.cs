@@ -20,7 +20,7 @@ using Lisbeth.Bot.Domain.DTOs.Request.Reminder;
 
 namespace Lisbeth.Bot.Application.Services.Database.Interfaces;
 
-public interface IReminderDataDataService : ICrudDataService<Reminder, LisbethBotDbContext>
+public interface IReminderService : ICrudService<Reminder, LisbethBotDbContext>
 {
     Task<Result> SetHangfireIdAsync(long reminderId, string hangfireId, bool shouldSave = false);
     Task<Result> RescheduleAsync(RescheduleReminderReqDto req, bool shouldSave = false);

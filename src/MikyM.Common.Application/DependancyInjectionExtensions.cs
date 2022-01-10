@@ -28,7 +28,7 @@ public static class DependancyInjectionExtensions
     public static void AddApplicationLayer(this IServiceCollection services)
     {
         services.AddScoped(typeof(IReadOnlyDataService<,>), typeof(ReadOnlyDataService<,>));
-        services.AddScoped(typeof(CrudDataService<,>), typeof(CrudDataService<,>));
+        services.AddScoped(typeof(CrudService<,>), typeof(CrudService<,>));
         services.AddAutoMapper(x =>
         {
             x.AddExpressionMapping();
@@ -40,7 +40,7 @@ public static class DependancyInjectionExtensions
     {
         builder.RegisterGeneric(typeof(ReadOnlyDataService<,>)).As(typeof(IReadOnlyDataService<,>))
             .InstancePerLifetimeScope();
-        builder.RegisterGeneric(typeof(CrudDataService<,>)).As(typeof(ICrudDataService<,>))
+        builder.RegisterGeneric(typeof(CrudService<,>)).As(typeof(ICrudService<,>))
             .InstancePerLifetimeScope();
         builder.RegisterAutoMapper(opt => opt.AddExpressionMapping(), AppDomain.CurrentDomain.GetAssemblies());
 

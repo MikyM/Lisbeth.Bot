@@ -32,18 +32,18 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.RoleMenu;
 [UsedImplicitly]
 public class GetRoleMenuCommandHandler : ICommandHandler<GetRoleMenuCommand, DiscordMessageBuilder>
 {
-    private readonly IGuildDataService _guildDataService;
-    private readonly IRoleMenuDataDataService _roleMenuDataDataService;
+    private readonly IGuildService _guildService;
+    private readonly IRoleMenuService _roleMenuService;
     private readonly ILogger<CreateRoleMenuCommandHandler> _logger;
     private readonly IDiscordService _discord;
     private readonly IDiscordEmbedProvider _discordEmbedProvider;
 
-    public GetRoleMenuCommandHandler(IGuildDataService guildDataService, IRoleMenuDataDataService roleMenuDataDataService,
+    public GetRoleMenuCommandHandler(IGuildService guildService, IRoleMenuService roleMenuService,
         ILogger<CreateRoleMenuCommandHandler> logger, IDiscordService discord,
         IDiscordEmbedProvider discordEmbedProvider)
     {
-        _guildDataService = guildDataService;
-        _roleMenuDataDataService = roleMenuDataDataService;
+        _guildService = guildService;
+        _roleMenuService = roleMenuService;
         _logger = logger;
         _discord = discord;
         _discordEmbedProvider = discordEmbedProvider;
@@ -67,13 +67,13 @@ public class GetRoleMenuCommandHandler : ICommandHandler<GetRoleMenuCommand, Dis
 
         if (requestingUser.IsBotOwner(_discord.Client))
         {
-            partial = await _roleMenuDataDataService.GetSingleBySpecAsync<Domain.Entities.RoleMenu>(
+            partial = await _roleMenuService.GetSingleBySpecAsync<Domain.Entities.RoleMenu>(
                 new RoleMenuByNameWithOptionsSpec(command.Dto.Name));
         }
         else
         {
             var guildResult =
-                await _guildDataService.GetSingleBySpecAsync(
+                await _guildService.GetSingleBySpecAsync(
                     new ActiveGuildByIdSpec(guild.Id));
             if (!guildResult.IsDefined())
                 return Result<DiscordMessageBuilder>.FromError(guildResult);
@@ -81,7 +81,7 @@ public class GetRoleMenuCommandHandler : ICommandHandler<GetRoleMenuCommand, Dis
             if (requestingUser.Guild.Id != guild.Id)
                 return new DiscordNotAuthorizedError();
 
-            partial = await _roleMenuDataDataService.GetSingleBySpecAsync<Domain.Entities.RoleMenu>(
+            partial = await _roleMenuService.GetSingleBySpecAsync<Domain.Entities.RoleMenu>(
                 new RoleMenuByNameAndGuildWithOptionsSpec(command.Dto.Name, guild.Id));
         }
 

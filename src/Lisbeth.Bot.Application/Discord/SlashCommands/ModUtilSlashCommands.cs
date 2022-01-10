@@ -14,11 +14,11 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 [SlashModuleLifespan(SlashModuleLifespan.Scoped)]
 public class ModUtilSlashCommands : ExtendedApplicationCommandModule
 {
-    private readonly IGuildDataService _guildDataService;
+    private readonly IGuildService _guildService;
 
-    public ModUtilSlashCommands(IGuildDataService guildDataService)
+    public ModUtilSlashCommands(IGuildService guildService)
     {
-        _guildDataService = guildDataService;
+        _guildService = guildService;
 
     }
     [SlashRequireUserPermissions(Permissions.BanMembers)]
@@ -31,7 +31,7 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
             new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
-        var res = await this._guildDataService!.GetSingleBySpecAsync<Guild>(
+        var res = await this._guildService!.GetSingleBySpecAsync<Guild>(
             new ActiveGuildByDiscordIdWithTicketingSpecifications(ctx.Guild.Id));
 
         if (!res.IsDefined()) throw new ArgumentException("Guild not found in database");

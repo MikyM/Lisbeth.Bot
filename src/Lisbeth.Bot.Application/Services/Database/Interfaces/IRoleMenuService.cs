@@ -19,6 +19,6 @@ using Lisbeth.Bot.DataAccessLayer;
 
 namespace Lisbeth.Bot.Application.Services.Database.Interfaces;
 
-public interface IRoleMenuDataDataService : ICrudDataService<RoleMenu, LisbethBotDbContext>
+public interface IRoleMenuService : ICrudService<RoleMenu, LisbethBotDbContext>
 {
 }

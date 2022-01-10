@@ -22,9 +22,9 @@ using MikyM.Common.DataAccessLayer.UnitOfWork;
 namespace Lisbeth.Bot.Application.Services.Database;
 
 [UsedImplicitly]
-public class EmbedConfigDataService : CrudDataService<EmbedConfig, LisbethBotDbContext>, IEmbedConfigDataService
+public class EmbedConfigService : CrudService<EmbedConfig, LisbethBotDbContext>, IEmbedConfigService
 {
-    public EmbedConfigDataService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
+    public EmbedConfigService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
     {
     }
 }

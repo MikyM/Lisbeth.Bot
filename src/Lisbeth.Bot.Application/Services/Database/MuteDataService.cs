@@ -24,9 +24,9 @@ using MikyM.Common.DataAccessLayer.UnitOfWork;
 namespace Lisbeth.Bot.Application.Services.Database;
 
 [UsedImplicitly]
-public class MuteDataService : CrudDataService<Mute, LisbethBotDbContext>, IMuteDataService
+public class MuteService : CrudService<Mute, LisbethBotDbContext>, IMuteService
 {
-    public MuteDataService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
+    public MuteService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
     {
     }
 

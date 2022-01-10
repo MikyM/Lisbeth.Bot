@@ -18,6 +18,8 @@
 using DSharpPlus;
 using Lisbeth.Bot.Domain.Entities.Base;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Lisbeth.Bot.Domain.Entities;
 
@@ -28,47 +30,36 @@ public class ChannelMessageFormat : SnowflakeDiscordEntity
     public ulong LastEditById { get; set; }
     public string? MessageFormat { get; set; }
 
-    private string[] FormatParts =>
-        MessageFormat is null
-            ? Array.Empty<string>()
-            : MessageFormat.Split('\n', StringSplitOptions.RemoveEmptyEntries);
-
     public Guild? Guild { get; set; }
+
+    private IEnumerable<string> FormatParts =>
+        MessageFormat is null
+            ? Enumerable.Empty<string>()
+            : MessageFormat.Split('\n', StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim());
 
     public bool IsTextCompliant(string messageContent)
     {
-        /*if (FormatParts.Any(formatPart =>
-                !messageContent.Contains(formatPart, StringComparison.InvariantCultureIgnoreCase)))
-            return false;*/
         messageContent = Formatter.Strip(messageContent);
-        var parts = messageContent.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+        var parts = messageContent.Split('\n', StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim()).ToList();
 
         foreach (var formatPart in FormatParts)
         {
             if (!messageContent.Contains(formatPart))
                 return false;
 
-            foreach (var part in parts)
+            foreach (var part in parts.Select((text, index) => new { text, index }))
             {
-                if (part.Contains(formatPart) && string.IsNullOrWhiteSpace(part.Replace(formatPart, "")))
-                    return false;
+                if (part.text.Contains(formatPart) && string.IsNullOrWhiteSpace(part.text.Replace(formatPart, "")))
+                    if (parts.Count - 1 == part.index)
+                        return false;
+                    else if (FormatParts.Any(x => parts[part.index + 1].Contains(x))) 
+                        return false;
 
-                if (part.Contains(formatPart) && !part.StartsWith(formatPart))
+                if (part.text.Contains(formatPart) && !part.text.StartsWith(formatPart))
                     return false;
             }
         }
 
-        /*foreach (var part in parts)
-        {
-            foreach (var formatPart in FormatParts)
-            {
-                if (part.Contains(formatPart) && string.IsNullOrWhiteSpace(part.Replace(formatPart, "")))
-                    return false;
-            }
-        }*/
-
         return true;
-        /*return parts.All(part => !FormatParts.Any(formatPart =>
-            part.Contains(formatPart) && string.IsNullOrWhiteSpace(part.Replace(formatPart, ""))));*/
     }
 }

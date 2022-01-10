@@ -35,20 +35,20 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Mute;
 public class RevokeMuteCommandHandler : ICommandHandler<RevokeMuteCommand, DiscordEmbed>
 {
     private readonly IDiscordService _discord;
-    private readonly IGuildDataService _guildDataService;
+    private readonly IGuildService _guildService;
     private readonly ILogger<RevokeMuteCommandHandler> _logger;
-    private readonly IMuteDataService _muteDataService;
+    private readonly IMuteService _muteService;
     private readonly IDiscordGuildLoggerService _guildLogger;
     private readonly IResponseDiscordEmbedBuilder<DiscordModeration> _embedBuilder;
 
-    public RevokeMuteCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
-        ILogger<RevokeMuteCommandHandler> logger, IMuteDataService muteDataService,
+    public RevokeMuteCommandHandler(IDiscordService discord, IGuildService guildService,
+        ILogger<RevokeMuteCommandHandler> logger, IMuteService muteService,
         IDiscordGuildLoggerService guildLogger, IResponseDiscordEmbedBuilder<DiscordModeration> embedBuilder)
     {
         _discord = discord;
-        _guildDataService = guildDataService;
+        _guildService = guildService;
         _logger = logger;
-        _muteDataService = muteDataService;
+        _muteService = muteService;
         _guildLogger = guildLogger;
         _embedBuilder = embedBuilder;
     }
@@ -70,7 +70,7 @@ public class RevokeMuteCommandHandler : ICommandHandler<RevokeMuteCommand, Disco
             return new DiscordNotAuthorizedError();
 
         var result =
-            await _guildDataService.GetSingleBySpecAsync<Guild>(new ActiveGuildByDiscordIdWithModerationSpec(guild.Id));
+            await _guildService.GetSingleBySpecAsync<Guild>(new ActiveGuildByDiscordIdWithModerationSpec(guild.Id));
 
         if (!result.IsDefined(out var guildEntity))
             return new DiscordNotFoundError(DiscordEntity.Guild);
@@ -92,7 +92,7 @@ public class RevokeMuteCommandHandler : ICommandHandler<RevokeMuteCommand, Disco
             if (!muteRes.IsSuccess) return new DiscordError("Failed to unmute");
         }
 
-        var res = await _muteDataService.DisableAsync(command.Dto, true);
+        var res = await _muteService.DisableAsync(command.Dto, true);
 
         if (!res.IsDefined(out var foundMute)) return Result<DiscordEmbed>.FromError(res);
 

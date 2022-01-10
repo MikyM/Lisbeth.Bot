@@ -32,14 +32,14 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.ChannelMessageFormat;
 public class DisableMessageFormatCommandHandler : ICommandHandler<DisableMessageFormatCommand, DiscordEmbed>
 {
     private readonly IDiscordService _discord;
-    private readonly IGuildDataService _guildDataService;
+    private readonly IGuildService _guildService;
     private readonly IResponseDiscordEmbedBuilder<RegularUserInteraction> _embedBuilder;
 
-    public DisableMessageFormatCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
+    public DisableMessageFormatCommandHandler(IDiscordService discord, IGuildService guildService,
         IResponseDiscordEmbedBuilder<RegularUserInteraction> embedBuilder)
     {
         _discord = discord;
-        _guildDataService = guildDataService;
+        _guildService = guildService;
         _embedBuilder = embedBuilder;
     }
 
@@ -75,7 +75,7 @@ public class DisableMessageFormatCommandHandler : ICommandHandler<DisableMessage
             return new DiscordNotAuthorizedError();
 
         var guildRes =
-            await _guildDataService.GetSingleBySpecAsync(
+            await _guildService.GetSingleBySpecAsync(
                 new ActiveGuildByDiscordIdWithChannelMessageFormatSpec(command.Dto.GuildId, channel.Id));
 
         if (!guildRes.IsDefined(out var guildCfg))
@@ -89,10 +89,10 @@ public class DisableMessageFormatCommandHandler : ICommandHandler<DisableMessage
             return new ArgumentError(nameof(format.IsDisabled),
                 $"Entity is already {(format.IsDisabled ? "disabled" : "enabled")}");
 
-        _guildDataService.BeginUpdate(guildCfg);
+        _guildService.BeginUpdate(guildCfg);
         format.IsDisabled = command.Dto.IsDisabled;
         format.LastEditById = command.Dto.RequestedOnBehalfOfId;
-        await _guildDataService.CommitAsync(requestingUser.Id.ToString());
+        await _guildService.CommitAsync(requestingUser.Id.ToString());
 
         return _embedBuilder
             .WithType(RegularUserInteraction.ChannelMessageFormat)

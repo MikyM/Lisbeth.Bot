@@ -32,17 +32,17 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 public class OpenTicketCommandHandler : ICommandHandler<OpenTicketCommand>
 {
     private readonly IDiscordService _discord;
-    private readonly IGuildDataService _guildDataService;
-    private readonly ITicketDataService _ticketDataService;
+    private readonly IGuildService _guildService;
+    private readonly ITicketService _ticketService;
     private readonly ILogger<OpenTicketCommandHandler> _logger;
     private readonly ICommandHandler<GetTicketWelcomeEmbedCommand, DiscordMessageBuilder> _welcomeEmbedCommandHandler;
 
-    public OpenTicketCommandHandler(IGuildDataService guildDataService, ITicketDataService ticketDataService,
+    public OpenTicketCommandHandler(IGuildService guildService, ITicketService ticketService,
         IDiscordService discord, ILogger<OpenTicketCommandHandler> logger,
         ICommandHandler<GetTicketWelcomeEmbedCommand, DiscordMessageBuilder> welcomeEmbedCommandHandler)
     {
-        _guildDataService = guildDataService;
-        _ticketDataService = ticketDataService;
+        _guildService = guildService;
+        _ticketService = ticketService;
         _discord = discord;
         _logger = logger;
         _welcomeEmbedCommandHandler = welcomeEmbedCommandHandler;
@@ -60,7 +60,7 @@ public class OpenTicketCommandHandler : ICommandHandler<OpenTicketCommand>
         if (owner.Guild.Id != guild.Id) return new DiscordNotAuthorizedError(nameof(owner));
 
         var guildRes =
-            await _guildDataService.GetSingleBySpecAsync(
+            await _guildService.GetSingleBySpecAsync(
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(guild.Id));
 
         if (!guildRes.IsDefined(out var guildCfg)) return Result.FromError(guildRes);
@@ -69,7 +69,7 @@ public class OpenTicketCommandHandler : ICommandHandler<OpenTicketCommand>
             return new DisabledEntityError($"Guild with Id:{guild.Id} doesn't have ticketing enabled.");
 
         command.Dto.GuildSpecificId = guildCfg.TicketingConfig.LastTicketId + 1;
-        var ticketRes = await _ticketDataService.OpenAsync(command.Dto);
+        var ticketRes = await _ticketService.OpenAsync(command.Dto);
         if (!ticketRes.IsDefined(out var ticket))
         {
             var failEmbed = new DiscordEmbedBuilder();
@@ -82,9 +82,9 @@ public class OpenTicketCommandHandler : ICommandHandler<OpenTicketCommand>
             return new InvalidOperationError("Member already has an opened ticket in this guild.");
         }
         
-        _guildDataService.BeginUpdate(guildCfg);
+        _guildService.BeginUpdate(guildCfg);
         guildCfg.TicketingConfig.LastTicketId++;
-        await _guildDataService.CommitAsync();
+        await _guildService.CommitAsync();
 
         var msgRes =
             await _welcomeEmbedCommandHandler.HandleAsync(new GetTicketWelcomeEmbedCommand(guild.Id,
@@ -135,10 +135,10 @@ public class OpenTicketCommandHandler : ICommandHandler<OpenTicketCommand>
                     .AsEphemeral(true));
             }
 
-            _ticketDataService.BeginUpdate(ticket);
+            _ticketService.BeginUpdate(ticket);
             ticket.ChannelId = newTicketChannel.Id;
             ticket.MessageOpenId = msg.Id;
-            await _ticketDataService.SetAddedUsersAsync(ticket, newTicketChannel.Users.Select(x => x.Id));
+            await _ticketService.SetAddedUsersAsync(ticket, newTicketChannel.Users.Select(x => x.Id));
 
             List<ulong> roleIds = new();
             foreach (var overwrite in newTicketChannel.PermissionOverwrites)
@@ -162,8 +162,8 @@ public class OpenTicketCommandHandler : ICommandHandler<OpenTicketCommand>
                 await Task.Delay(500);
             }
 
-            await _ticketDataService.SetAddedRolesAsync(ticket, roleIds);
-            await _ticketDataService.CommitAsync();
+            await _ticketService.SetAddedRolesAsync(ticket, roleIds);
+            await _ticketService.CommitAsync();
         }
         catch (Exception ex)
         {

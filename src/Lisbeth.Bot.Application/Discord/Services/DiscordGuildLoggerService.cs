@@ -34,16 +34,16 @@ public class DiscordGuildLoggerService : IDiscordGuildLoggerService
 {
     private readonly IDiscordGuildLogSenderService _logSender;
     private readonly IDiscordService _discord;
-    private readonly IGuildDataService _guildDataService;
+    private readonly IGuildService _guildService;
     private readonly ILogDiscordEmbedBuilder _embedBuilder;
 
     public DiscordGuildLoggerService(ILogDiscordEmbedBuilder embedBuilder, IDiscordGuildLogSenderService logSender,
-        IDiscordService discord, IGuildDataService guildDataService)
+        IDiscordService discord, IGuildService guildService)
     {
         _embedBuilder = embedBuilder;
         _logSender = logSender;
         _discord = discord;
-        _guildDataService = guildDataService;
+        _guildService = guildService;
     }
 
     public async Task<Result> LogToDiscordAsync<TRequest>(DiscordGuild discordGuild, TRequest req, DiscordModeration moderation, DiscordUser? moderator = null, SnowflakeObject? target = null, string hexColor = "#26296e", long? caseId = null) where TRequest : class, IBaseModAuthReq
@@ -98,7 +98,7 @@ public class DiscordGuildLoggerService : IDiscordGuildLoggerService
     public async Task<Result> LogToDiscordAsync<TRequest>(long guildId, TRequest req, DiscordModeration moderation, DiscordUser? moderator = null, SnowflakeObject? target = null, string hexColor = "#26296e", long? caseId = null) where TRequest : class, IBaseModAuthReq
     {
         var guildRes =
-            await _guildDataService.GetAsync(guildId);
+            await _guildService.GetAsync(guildId);
 
         if (!guildRes.IsDefined()) return new NotFoundError();
 
@@ -135,7 +135,7 @@ public class DiscordGuildLoggerService : IDiscordGuildLoggerService
     public async Task<Result> LogToDiscordAsync<TEvent>(long guildId, TEvent discordEvent, DiscordLog log, string hexColor = "#26296e") where TEvent : DiscordEventArgs
     {
         var guildRes =
-            await _guildDataService.GetAsync(guildId);
+            await _guildService.GetAsync(guildId);
 
         if (!guildRes.IsDefined()) return new NotFoundError();
 

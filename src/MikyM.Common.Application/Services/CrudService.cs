@@ -20,10 +20,10 @@ using MikyM.Common.Application.Results;
 
 namespace MikyM.Common.Application.Services;
 
-public class CrudDataService<TEntity, TContext> : ReadOnlyDataService<TEntity, TContext>, ICrudDataService<TEntity, TContext>
+public class CrudService<TEntity, TContext> : ReadOnlyDataService<TEntity, TContext>, ICrudService<TEntity, TContext>
     where TEntity : AggregateRootEntity where TContext : DbContext
 {
-    public CrudDataService(IMapper mapper, IUnitOfWork<TContext> uof) : base(mapper, uof)
+    public CrudService(IMapper mapper, IUnitOfWork<TContext> uof) : base(mapper, uof)
     {
     }
 

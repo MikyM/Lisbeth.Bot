@@ -38,18 +38,18 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 public class ConfirmCloseTicketCommandHandler : ICommandHandler<ConfirmCloseTicketCommand>
 {
     private readonly IDiscordService _discord;
-    private readonly IGuildDataService _guildDataService;
-    private readonly ITicketDataService _ticketDataService;
+    private readonly IGuildService _guildService;
+    private readonly ITicketService _ticketService;
     private readonly ILogger<ConfirmCloseTicketCommandHandler> _logger;
     private readonly IAsyncExecutor _asyncExecutor;
 
-    public ConfirmCloseTicketCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
-        ITicketDataService ticketDataService, ILogger<ConfirmCloseTicketCommandHandler> logger,
+    public ConfirmCloseTicketCommandHandler(IDiscordService discord, IGuildService guildService,
+        ITicketService ticketService, ILogger<ConfirmCloseTicketCommandHandler> logger,
         IAsyncExecutor asyncExecutor)
     {
         _discord = discord;
-        _guildDataService = guildDataService;
-        _ticketDataService = ticketDataService;
+        _guildService = guildService;
+        _ticketService = ticketService;
         _logger = logger;
         _asyncExecutor = asyncExecutor;
     }
@@ -59,7 +59,7 @@ public class ConfirmCloseTicketCommandHandler : ICommandHandler<ConfirmCloseTick
         if (command is null) throw new ArgumentNullException(nameof(command));
 
         var guildRes =
-            await _guildDataService.GetSingleBySpecAsync<Guild>(
+            await _guildService.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(command.Dto.GuildId));
 
         if (!guildRes.IsDefined(out var guildCfg)) return Result.FromError(guildRes);
@@ -67,7 +67,7 @@ public class ConfirmCloseTicketCommandHandler : ICommandHandler<ConfirmCloseTick
         if (guildCfg.TicketingConfig is null)
             return new DisabledEntityError($"Guild with Id:{command.Dto.GuildId} doesn't have ticketing enabled.");
 
-        var res = await _ticketDataService.GetSingleBySpecAsync(
+        var res = await _ticketService.GetSingleBySpecAsync(
             new TicketByChannelIdOrGuildAndOwnerIdSpec(command.Dto.ChannelId, command.Dto.GuildId, command.Dto.OwnerId));
 
         if (!res.IsDefined(out var ticket)) return new NotFoundError($"Ticket with given params doesn't exist.");
@@ -189,7 +189,7 @@ public class ConfirmCloseTicketCommandHandler : ICommandHandler<ConfirmCloseTick
         await target.ModifyAsync(x => x.Parent = closedCat);
 
         command.Dto.ClosedMessageId = closeMsg.Id;
-        await _ticketDataService.CloseAsync(command.Dto, ticket);
+        await _ticketService.CloseAsync(command.Dto, ticket);
 
         if (ticket.IsPrivate) return Result.FromSuccess();
 

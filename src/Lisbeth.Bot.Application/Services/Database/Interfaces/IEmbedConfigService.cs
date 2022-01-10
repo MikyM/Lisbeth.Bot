@@ -19,6 +19,6 @@ using Lisbeth.Bot.DataAccessLayer;
 
 namespace Lisbeth.Bot.Application.Services.Database.Interfaces;
 
-public interface IEmbedConfigDataService : ICrudDataService<EmbedConfig, LisbethBotDbContext>
+public interface IEmbedConfigService : ICrudService<EmbedConfig, LisbethBotDbContext>
 {
 }

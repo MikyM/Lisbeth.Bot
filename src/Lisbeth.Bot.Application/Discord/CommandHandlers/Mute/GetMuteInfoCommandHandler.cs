@@ -34,20 +34,20 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Mute;
 public class GetMuteInfoCommandHandler : ICommandHandler<GetMuteInfoCommand, DiscordEmbed>
 {
     private readonly IDiscordService _discord;
-    private readonly IGuildDataService _guildDataService;
+    private readonly IGuildService _guildService;
     private readonly ILogger<GetMuteInfoCommandHandler> _logger;
-    private readonly IMuteDataService _muteDataService;
+    private readonly IMuteService _muteService;
     private readonly IDiscordGuildLoggerService _guildLogger;
     private readonly IResponseDiscordEmbedBuilder<DiscordModeration> _embedBuilder;
 
-    public GetMuteInfoCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
-        ILogger<GetMuteInfoCommandHandler> logger, IMuteDataService muteDataService,
+    public GetMuteInfoCommandHandler(IDiscordService discord, IGuildService guildService,
+        ILogger<GetMuteInfoCommandHandler> logger, IMuteService muteService,
         IDiscordGuildLoggerService guildLogger, IResponseDiscordEmbedBuilder<DiscordModeration> embedBuilder)
     {
         _discord = discord;
-        _guildDataService = guildDataService;
+        _guildService = guildService;
         _logger = logger;
-        _muteDataService = muteDataService;
+        _muteService = muteService;
         _guildLogger = guildLogger;
         _embedBuilder = embedBuilder;
     }
@@ -66,7 +66,7 @@ public class GetMuteInfoCommandHandler : ICommandHandler<GetMuteInfoCommand, Dis
             return new DiscordNotAuthorizedError();
 
         var result =
-            await _guildDataService.GetSingleBySpecAsync(new ActiveGuildByDiscordIdWithModerationSpec(guild.Id));
+            await _guildService.GetSingleBySpecAsync(new ActiveGuildByDiscordIdWithModerationSpec(guild.Id));
 
         if (!result.IsDefined(out var guildEntity))
             return new DiscordNotFoundError(DiscordEntity.Guild);
@@ -74,7 +74,7 @@ public class GetMuteInfoCommandHandler : ICommandHandler<GetMuteInfoCommand, Dis
         if (!guildEntity.IsModerationModuleEnabled)
             return new DisabledGuildModuleError(GuildModule.Moderation);
 
-        var res = await _muteDataService.GetSingleBySpecAsync(new MuteBaseGetSpecifications(command.Dto.Id,
+        var res = await _muteService.GetSingleBySpecAsync(new MuteBaseGetSpecifications(command.Dto.Id,
             command.Dto.TargetUserId, command.Dto.GuildId, command.Dto.AppliedById, command.Dto.LiftedOn,
             command.Dto.AppliedOn, command.Dto.LiftedById));
 

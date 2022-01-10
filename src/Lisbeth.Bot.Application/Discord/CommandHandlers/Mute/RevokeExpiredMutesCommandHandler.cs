@@ -29,16 +29,16 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Mute;
 [UsedImplicitly]
 public class RevokeExpiredMutesCommandHandler : ICommandHandler<RevokeExpiredMutesCommand>
 {
-    private readonly IMuteDataService _muteDataService;
+    private readonly IMuteService _muteService;
     private readonly ILogger<RevokeExpiredMutesCommandHandler> _logger;
     private readonly IDiscordService _discord;
     private readonly ICommandHandler<RevokeMuteCommand, DiscordEmbed> _revokeHandler;
 
-    public RevokeExpiredMutesCommandHandler(IMuteDataService muteDataService,
+    public RevokeExpiredMutesCommandHandler(IMuteService muteService,
         ILogger<RevokeExpiredMutesCommandHandler> logger, IDiscordService discord,
         ICommandHandler<RevokeMuteCommand, DiscordEmbed> revokeHandler)
     {
-        _muteDataService = muteDataService;
+        _muteService = muteService;
         _logger = logger;
         _discord = discord;
         _revokeHandler = revokeHandler;
@@ -48,7 +48,7 @@ public class RevokeExpiredMutesCommandHandler : ICommandHandler<RevokeExpiredMut
     {
         try
         {
-            var res = await _muteDataService.GetBySpecAsync(
+            var res = await _muteService.GetBySpecAsync(
                 new ActiveExpiredMutesInActiveGuildsSpecifications());
 
             if (!res.IsDefined() || res.Entity.Count == 0) return Result.FromSuccess();

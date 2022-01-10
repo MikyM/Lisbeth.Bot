@@ -26,15 +26,15 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Mute;
 [UsedImplicitly]
 public class CheckNonBotMuteActionCommandHandler : ICommandHandler<CheckNonBotMuteActionCommand>
 {
-    private readonly IMuteDataService _muteDataService;
-    private readonly IGuildDataService _guildDataService;
+    private readonly IMuteService _muteService;
+    private readonly IGuildService _guildService;
     private readonly IDiscordService _discord;
 
-    public CheckNonBotMuteActionCommandHandler(IMuteDataService muteDataService, IGuildDataService guildDataService,
+    public CheckNonBotMuteActionCommandHandler(IMuteService muteService, IGuildService guildService,
         IDiscordService discord)
     {
-        _muteDataService = muteDataService;
-        _guildDataService = guildDataService;
+        _muteService = muteService;
+        _guildService = guildService;
         _discord = discord;
     }
 
@@ -44,7 +44,7 @@ public class CheckNonBotMuteActionCommandHandler : ICommandHandler<CheckNonBotMu
 
         await Task.Delay(1000);
 
-        var result = await _guildDataService.GetSingleBySpecAsync(
+        var result = await _guildService.GetSingleBySpecAsync(
             new ActiveGuildByDiscordIdWithModerationSpec(command.Member.Guild.Id));
 
         if (!result.IsDefined() || result.Entity.ModerationConfig is null)
@@ -56,11 +56,11 @@ public class CheckNonBotMuteActionCommandHandler : ICommandHandler<CheckNonBotMu
         switch (wasMuted)
         {
             case true when !isMuted:
-                await _muteDataService.DisableAsync(new MuteRevokeReqDto(command.Member.Id, command.Member.Guild.Id,
+                await _muteService.DisableAsync(new MuteRevokeReqDto(command.Member.Id, command.Member.Guild.Id,
                     _discord.Client.CurrentUser.Id));
                 break;
             case false when isMuted:
-                await _muteDataService.AddOrExtendAsync(new MuteApplyReqDto(command.Member.Id, command.Member.Guild.Id,
+                await _muteService.AddOrExtendAsync(new MuteApplyReqDto(command.Member.Id, command.Member.Guild.Id,
                     _discord.Client.CurrentUser.Id, DateTime.MaxValue));
                 break;
         }

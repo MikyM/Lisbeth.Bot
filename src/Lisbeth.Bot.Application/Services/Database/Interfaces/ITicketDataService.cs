@@ -21,7 +21,7 @@ using System.Collections.Generic;
 
 namespace Lisbeth.Bot.Application.Services.Database.Interfaces;
 
-public interface ITicketDataService : ICrudDataService<Ticket, LisbethBotDbContext>
+public interface ITicketService : ICrudService<Ticket, LisbethBotDbContext>
 {
     Task<Result<Ticket>> CloseAsync(TicketCloseReqDto req, bool shouldSave = false);
     Task<Result<Ticket>> CloseAsync(TicketCloseReqDto req, Ticket ticket);

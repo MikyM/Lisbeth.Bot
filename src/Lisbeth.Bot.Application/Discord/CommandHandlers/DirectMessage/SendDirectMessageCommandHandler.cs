@@ -30,14 +30,14 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.DirectMessage;
 public class SendDirectMessageCommandHandler : ICommandHandler<SendDirectMessageCommand>
 {
     private readonly IDiscordService _discord;
-    private readonly IGuildDataService _guildDataService;
+    private readonly IGuildService _guildService;
     private readonly IDiscordEmbedProvider _embedProvider;
 
-    public SendDirectMessageCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
+    public SendDirectMessageCommandHandler(IDiscordService discord, IGuildService guildService,
         IDiscordEmbedProvider embedProvider)
     {
         _discord = discord;
-        _guildDataService = guildDataService;
+        _guildService = guildService;
         _embedProvider = embedProvider;
     }
 
@@ -73,7 +73,7 @@ public class SendDirectMessageCommandHandler : ICommandHandler<SendDirectMessage
             return new DiscordNotAuthorizedError();
 
         var guildRes =
-            await _guildDataService.GetSingleBySpecAsync(
+            await _guildService.GetSingleBySpecAsync(
                 new ActiveGuildByIdSpec(command.Dto.GuildId));
 
         if (!guildRes.IsDefined(out var guildCfg))

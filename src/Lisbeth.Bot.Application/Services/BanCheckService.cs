@@ -23,23 +23,23 @@ namespace Lisbeth.Bot.Application.Services;
 [UsedImplicitly]
 public class BanCheckService : IBanCheckService
 {
-    private readonly IBanDataService _banDataService;
+    private readonly IBanService _banService;
 
-    public BanCheckService(IBanDataService banDataService)
+    public BanCheckService(IBanService banService)
     {
-        _banDataService = banDataService;
+        _banService = banService;
     }
 
     public async Task CheckForNonBotBanAsync(ulong targetId, ulong guildId, ulong requestedOnBehalfOfId)
     {
         await Task.Delay(1000);
 
-        var ban = await _banDataService.GetSingleBySpecAsync(
+        var ban = await _banService.GetSingleBySpecAsync(
             new BanBaseGetSpecifications(null, targetId, guildId));
 
         if (!ban.IsDefined()) return;
 
-        await _banDataService.AddOrExtendAsync(new BanApplyReqDto(targetId, guildId, requestedOnBehalfOfId,
+        await _banService.AddOrExtendAsync(new BanApplyReqDto(targetId, guildId, requestedOnBehalfOfId,
             DateTime.MaxValue));
     }
 
@@ -47,11 +47,11 @@ public class BanCheckService : IBanCheckService
     {
         await Task.Delay(1000);
 
-        var ban = await _banDataService.GetSingleBySpecAsync(
+        var ban = await _banService.GetSingleBySpecAsync(
             new BanBaseGetSpecifications(null, targetId, guildId));
 
         if (!ban.IsDefined()) return;
 
-        await _banDataService.DisableAsync(new BanRevokeReqDto(targetId, guildId, requestedOnBehalfOfId));
+        await _banService.DisableAsync(new BanRevokeReqDto(targetId, guildId, requestedOnBehalfOfId));
     }
 }

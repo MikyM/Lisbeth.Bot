@@ -30,21 +30,21 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 [UsedImplicitly]
 public class AddSnowflakeTicketCommandHandler : ICommandHandler<AddSnowflakeToTicketCommand,  DiscordEmbed>
 {
-    private readonly IGuildDataService _guildDataService;
-    private readonly ITicketDataService _ticketDataService;
+    private readonly IGuildService _guildService;
+    private readonly ITicketService _ticketService;
     private readonly ILogger<AddSnowflakeTicketCommandHandler> _logger;
     private readonly IDiscordService _discord;
     private readonly ICommandHandler<PrivacyCheckTicketCommand, bool> _privacyCheckHandler;
 
-    public AddSnowflakeTicketCommandHandler(IGuildDataService guildDataService,
+    public AddSnowflakeTicketCommandHandler(IGuildService guildService,
         ILogger<AddSnowflakeTicketCommandHandler> logger, IDiscordService discord,
-        ITicketDataService ticketDataService,
+        ITicketService ticketService,
         ICommandHandler<PrivacyCheckTicketCommand, bool> privacyCheckHandler)
     {
-        _guildDataService = guildDataService;
+        _guildService = guildService;
         _logger = logger;
         _discord = discord;
-        _ticketDataService = ticketDataService;
+        _ticketService = ticketService;
         _privacyCheckHandler = privacyCheckHandler;
     }
 
@@ -53,7 +53,7 @@ public class AddSnowflakeTicketCommandHandler : ICommandHandler<AddSnowflakeToTi
         if (command is null) throw new ArgumentNullException(nameof(command));
 
         var guildRes =
-            await _guildDataService.GetSingleBySpecAsync<Guild>(
+            await _guildService.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(command.Dto.GuildId));
 
         if (!guildRes.IsDefined(out var guildCfg)) return Result<DiscordEmbed>.FromError(guildRes);
@@ -61,7 +61,7 @@ public class AddSnowflakeTicketCommandHandler : ICommandHandler<AddSnowflakeToTi
         if (guildCfg.TicketingConfig is null)
             return new DisabledEntityError($"Guild with Id:{command.Dto.GuildId} doesn't have ticketing enabled.");
 
-        var res = await _ticketDataService.GetSingleBySpecAsync<Domain.Entities.Ticket>(
+        var res = await _ticketService.GetSingleBySpecAsync<Domain.Entities.Ticket>(
             new TicketByChannelIdOrGuildAndOwnerIdSpec(command.Dto.ChannelId, command.Dto.GuildId, command.Dto.OwnerId));
 
         if (!res.IsDefined(out var ticket)) return new NotFoundError($"Ticket with given params doesn't exist.");
@@ -90,7 +90,7 @@ public class AddSnowflakeTicketCommandHandler : ICommandHandler<AddSnowflakeToTi
             await Task.Delay(1000);
             ticketChannel = guild.GetChannel(ticket.ChannelId);
 
-            await _ticketDataService.SetAddedUsersAsync(ticket,
+            await _ticketService.SetAddedUsersAsync(ticket,
                 ticketChannel.Users.Any(x => x.Id == targetMember.Id)
                     ? ticketChannel.Users.Select(x => x.Id)
                     : ticketChannel.Users.Select(x => x.Id).Append(targetMember.Id));
@@ -99,7 +99,7 @@ public class AddSnowflakeTicketCommandHandler : ICommandHandler<AddSnowflakeToTi
 
             if (privacyRes.IsDefined(out var isPrivate))
 
-            await _ticketDataService.SetPrivacyAsync(ticket, isPrivate, true);
+            await _ticketService.SetPrivacyAsync(ticket, isPrivate, true);
         }
         else if (targetRole is not null)
         {
@@ -134,13 +134,13 @@ public class AddSnowflakeTicketCommandHandler : ICommandHandler<AddSnowflakeToTi
             if (roleIds.All(x => x != targetRole.Id))
                 roleIds.Add(targetRole.Id);
 
-            await _ticketDataService.SetAddedRolesAsync(ticket, roleIds);
+            await _ticketService.SetAddedRolesAsync(ticket, roleIds);
 
             var privacyRes = await _privacyCheckHandler.HandleAsync(new PrivacyCheckTicketCommand(guild, ticket));
 
             if (privacyRes.IsDefined(out var isPrivate))
 
-                await _ticketDataService.SetPrivacyAsync(ticket, isPrivate, true);
+                await _ticketService.SetPrivacyAsync(ticket, isPrivate, true);
         }
 
         var embed = new DiscordEmbedBuilder();

@@ -27,9 +27,9 @@ namespace Lisbeth.Bot.Application.Services;
 public class MainReminderService : IMainReminderService
 {
     private readonly IBackgroundJobClient _backgroundJobClient;
-    private readonly IReminderDataDataService _reminderDataService;
+    private readonly IReminderService _reminderDataService;
 
-    public MainReminderService(IReminderDataDataService reminderDataService, IBackgroundJobClient backgroundJobClient)
+    public MainReminderService(IReminderService reminderDataService, IBackgroundJobClient backgroundJobClient)
     {
         _reminderDataService = reminderDataService;
         _backgroundJobClient = backgroundJobClient;

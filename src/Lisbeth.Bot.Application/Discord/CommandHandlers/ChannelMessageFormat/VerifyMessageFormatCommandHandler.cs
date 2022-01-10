@@ -40,19 +40,19 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.ChannelMessageFormat;
 public class VerifyMessageFormatCommandHandler : ICommandHandler<VerifyMessageFormatCommand, VerifyMessageFormatResDto>
 {
     private readonly IDiscordService _discord;
-    private readonly IGuildDataService _guildDataService;
+    private readonly IGuildService _guildService;
     private readonly IResponseDiscordEmbedBuilder<RegularUserInteraction> _embedBuilder;
     private readonly ICommandHandler<SendDirectMessageCommand> _sendHandler;
     private readonly IMapper _mapper;
     private readonly ILogger<VerifyMessageFormatCommandHandler> _logger;
 
-    public VerifyMessageFormatCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
+    public VerifyMessageFormatCommandHandler(IDiscordService discord, IGuildService guildService,
         IResponseDiscordEmbedBuilder<RegularUserInteraction> embedBuilder,
         ICommandHandler<SendDirectMessageCommand> sendHandler, IMapper mapper,
         ILogger<VerifyMessageFormatCommandHandler> logger)
     {
         _discord = discord;
-        _guildDataService = guildDataService;
+        _guildService = guildService;
         _embedBuilder = embedBuilder;
         _sendHandler = sendHandler;
         _mapper = mapper;
@@ -99,7 +99,7 @@ public class VerifyMessageFormatCommandHandler : ICommandHandler<VerifyMessageFo
             return new DiscordNotAuthorizedError();
 
         var guildRes =
-            await _guildDataService.GetSingleBySpecAsync(
+            await _guildService.GetSingleBySpecAsync(
                 new ActiveGuildByDiscordIdWithChannelMessageFormatSpec(command.Dto.GuildId, channel.Id));
 
         if (!guildRes.IsDefined(out var guildCfg))

@@ -20,7 +20,7 @@ using Lisbeth.Bot.Domain.DTOs.Request.Mute;
 
 namespace Lisbeth.Bot.Application.Services.Database.Interfaces;
 
-public interface IMuteDataService : ICrudDataService<Mute, LisbethBotDbContext>
+public interface IMuteService : ICrudService<Mute, LisbethBotDbContext>
 {
     Task<Result<(long Id, Mute? FoundEntity)>> AddOrExtendAsync(MuteApplyReqDto req, bool shouldSave = false);
     Task<Result<Mute>> DisableAsync(MuteRevokeReqDto entry, bool shouldSave = false);

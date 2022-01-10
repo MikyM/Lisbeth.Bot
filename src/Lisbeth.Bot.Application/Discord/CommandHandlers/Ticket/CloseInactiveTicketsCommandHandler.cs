@@ -33,15 +33,15 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 public class CloseInactiveTicketsCommandHandler : ICommandHandler<CloseInactiveTicketsCommand>
 {
     private readonly IDiscordService _discord;
-    private readonly IGuildDataService _guildDataService;
+    private readonly IGuildService _guildService;
     private readonly ILogger<CloseInactiveTicketsCommandHandler> _logger;
     private readonly ICommandHandler<ConfirmCloseTicketCommand> _closeTicketCommandHandler;
 
-    public CloseInactiveTicketsCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
+    public CloseInactiveTicketsCommandHandler(IDiscordService discord, IGuildService guildService,
         ILogger<CloseInactiveTicketsCommandHandler> logger, ICommandHandler<ConfirmCloseTicketCommand> closeTicketCommandHandler)
     {
         _discord = discord;
-        _guildDataService = guildDataService;
+        _guildService = guildService;
         _logger = logger;
         _closeTicketCommandHandler = closeTicketCommandHandler;
     }
@@ -52,7 +52,7 @@ public class CloseInactiveTicketsCommandHandler : ICommandHandler<CloseInactiveT
         {
             await Parallel.ForEachAsync(_discord.Client.Guilds.Keys, async (guildId, _) =>
             {
-                var res = await _guildDataService.GetSingleBySpecAsync(
+                var res = await _guildService.GetSingleBySpecAsync(
                     new ActiveGuildByDiscordIdWithTicketingAndTicketsSpecifications(guildId));
 
                 if (!res.IsDefined(out var guildCfg)) return;

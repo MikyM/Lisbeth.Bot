@@ -31,9 +31,9 @@ public class DiscordSendReminderService : IDiscordSendReminderService
 {
     private readonly IDiscordService _discord;
     private readonly IDiscordEmbedProvider _embedProvider;
-    private readonly IReminderDataDataService _reminderDataService;
+    private readonly IReminderService _reminderDataService;
 
-    public DiscordSendReminderService(IReminderDataDataService reminderDataService, IDiscordService discord,
+    public DiscordSendReminderService(IReminderService reminderDataService, IDiscordService discord,
         IDiscordEmbedProvider embedProvider)
     {
         _reminderDataService = reminderDataService;

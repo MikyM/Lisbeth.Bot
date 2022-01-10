@@ -26,20 +26,20 @@ namespace Lisbeth.Bot.Application.Discord.Services;
 
 public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorService<T> where T : SnowflakeDiscordEntity
 {
-    private readonly IEmbedConfigDataService _embedConfigDataService;
+    private readonly IEmbedConfigService _embedConfigService;
     private readonly IDiscordEmbedProvider _embedProvider;
     private readonly IMapper _mapper;
-    private readonly ICrudDataService<T, LisbethBotDbContext> _dataService;
-    private readonly IGuildDataService _guildDataService;
+    private readonly ICrudService<T, LisbethBotDbContext> _service;
+    private readonly IGuildService _guildService;
 
-    public DiscordEmbedConfiguratorService(ICrudDataService<T, LisbethBotDbContext> dataService, IMapper mapper,
-        IDiscordEmbedProvider embedProvider, IEmbedConfigDataService embedConfigDataService, IGuildDataService guildDataService)
+    public DiscordEmbedConfiguratorService(ICrudService<T, LisbethBotDbContext> service, IMapper mapper,
+        IDiscordEmbedProvider embedProvider, IEmbedConfigService embedConfigService, IGuildService guildService)
     {
-        _dataService = dataService;
+        _service = service;
         _mapper = mapper;
         _embedProvider = embedProvider;
-        _embedConfigDataService = embedConfigDataService;
-        _guildDataService = guildDataService;
+        _embedConfigService = embedConfigService;
+        _guildService = guildService;
     }
 
     public async Task<Result<DiscordEmbed>> ConfigureAsync<TEmbedProperty>(InteractionContext ctx,
@@ -47,12 +47,12 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
     {
         if (ctx is null) throw new ArgumentNullException(nameof(ctx));
 
-        var guildRes = await _guildDataService.GetSingleBySpecAsync(new ActiveGuildByIdSpec(ctx.Guild.Id));
+        var guildRes = await _guildService.GetSingleBySpecAsync(new ActiveGuildByIdSpec(ctx.Guild.Id));
 
         if (!guildRes.IsDefined(out var guildCfg))
             return new NotFoundError("Guild not found");
 
-        var entityResult = await _dataService.GetSingleBySpecAsync<T>(
+        var entityResult = await _service.GetSingleBySpecAsync<T>(
             new ActiveSnowflakeWithGivenEmbedSpec<T, TEmbedProperty?>(embedToConfigure, ctx.Guild.Id));
 
         if (!entityResult.IsDefined(out var entity)) return new NotFoundError();
@@ -488,13 +488,13 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
                 var newEmbed = _mapper.Map<EmbedConfig>(currentResult.Build());
                 if (config is null)
                 {
-                    _dataService.BeginUpdate(foundEntity);
+                    _service.BeginUpdate(foundEntity);
                     config = newEmbed;
 
-                    await _embedConfigDataService.AddAsync(config, true);
+                    await _embedConfigService.AddAsync(config, true);
                     var setter = idProp.GetSetter();
                     setter(foundEntity, config.Id);
-                    await _dataService.CommitAsync();
+                    await _service.CommitAsync();
                 }
                 else
                 {
@@ -505,7 +505,7 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
                     entity.Reminder = null;
                     entity.RoleMenu = null;
 
-                    _embedConfigDataService.BeginUpdate(entity);
+                    _embedConfigService.BeginUpdate(entity);
                     entity.Fields = newEmbed.Fields;
                     entity.Author = newEmbed.Author;
                     entity.AuthorImageUrl = newEmbed.AuthorImageUrl;
@@ -520,7 +520,7 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
                     entity.ThumbnailWidth = newEmbed.ThumbnailWidth;
                     entity.Timestamp = newEmbed.Timestamp;
                     entity.Title = newEmbed.Title;
-                    await _embedConfigDataService.CommitAsync();
+                    await _embedConfigService.CommitAsync();
                 }
 
                 return Result<DiscordEmbedBuilder>.FromSuccess(currentResult);

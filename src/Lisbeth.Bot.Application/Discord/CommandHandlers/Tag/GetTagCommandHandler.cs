@@ -32,16 +32,16 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Tag;
 public class GetTagCommandHandler : ICommandHandler<GetTagCommand, DiscordMessageBuilder>
 {
     private readonly IDiscordService _discord;
-    private readonly IGuildDataService _guildDataService;
-    private readonly ITagDataDataService _tagDataDataService;
+    private readonly IGuildService _guildService;
+    private readonly ITagService _tagService;
     private readonly IDiscordEmbedProvider _embedProvider;
 
-    public GetTagCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
-        ITagDataDataService tagDataDataService, IDiscordEmbedProvider embedProvider)
+    public GetTagCommandHandler(IDiscordService discord, IGuildService guildService,
+        ITagService tagService, IDiscordEmbedProvider embedProvider)
     {
         _discord = discord;
-        _guildDataService = guildDataService;
-        _tagDataDataService = tagDataDataService;
+        _guildService = guildService;
+        _tagService = tagService;
         _embedProvider = embedProvider;
     }
 
@@ -63,9 +63,9 @@ public class GetTagCommandHandler : ICommandHandler<GetTagCommand, DiscordMessag
         if (requestingUser.IsBotOwner(_discord.Client))
         {
             Result<Domain.Entities.Tag> partial;
-            if (command.Dto.Id.HasValue) partial = await _tagDataDataService.GetAsync(command.Dto.Id.Value);
+            if (command.Dto.Id.HasValue) partial = await _tagService.GetAsync(command.Dto.Id.Value);
             else
-                partial = await _tagDataDataService.GetSingleBySpecAsync<Domain.Entities.Tag>(new TagByNameSpec(command.Dto.Name));
+                partial = await _tagService.GetSingleBySpecAsync<Domain.Entities.Tag>(new TagByNameSpec(command.Dto.Name));
 
             if (!partial.IsDefined()) return Result<DiscordMessageBuilder>.FromError(partial);
 
@@ -74,14 +74,14 @@ public class GetTagCommandHandler : ICommandHandler<GetTagCommand, DiscordMessag
         else
         {
             var guildCfg =
-                await _guildDataService.GetSingleBySpecAsync(
+                await _guildService.GetSingleBySpecAsync(
                     new ActiveGuildByIdSpec(guild.Id));
             if (!guildCfg.IsDefined())
                 return Result<DiscordMessageBuilder>.FromError(guildCfg);
 
             if (requestingUser.Guild.Id != guild.Id) return new DiscordNotAuthorizedError();
 
-            var partial = await _tagDataDataService.GetSingleBySpecAsync<Domain.Entities.Tag>(new ActiveTagByGuildAndNameSpec(command.Dto.Name, command.Dto.GuildId));
+            var partial = await _tagService.GetSingleBySpecAsync<Domain.Entities.Tag>(new ActiveTagByGuildAndNameSpec(command.Dto.Name, command.Dto.GuildId));
 
             if (!partial.IsDefined()) return Result<DiscordMessageBuilder>.FromError(partial);
 

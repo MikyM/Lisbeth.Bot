@@ -20,7 +20,7 @@ using Lisbeth.Bot.Domain.DTOs.Request.Ban;
 
 namespace Lisbeth.Bot.Application.Services.Database.Interfaces;
 
-public interface IBanDataService : ICrudDataService<Ban, LisbethBotDbContext>
+public interface IBanService : ICrudService<Ban, LisbethBotDbContext>
 {
     Task<Result<(long Id, Ban? FoundEntity)>> AddOrExtendAsync(BanApplyReqDto req, bool shouldSave = false);
     Task<Result<Ban>> DisableAsync(BanRevokeReqDto entry, bool shouldSave = false);

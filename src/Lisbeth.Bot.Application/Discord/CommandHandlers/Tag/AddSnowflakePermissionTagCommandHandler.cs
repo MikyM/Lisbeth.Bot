@@ -30,19 +30,19 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Tag;
 [UsedImplicitly]
 public class AddSnowflakePermissionTagCommandHandler : ICommandHandler<AddSnowflakePermissionTagCommand>
 {
-    private readonly IGuildDataService _guildDataService;
-    private readonly ITagDataDataService _tagDataDataService;
+    private readonly IGuildService _guildService;
+    private readonly ITagService _tagService;
     private readonly ILogger<AddSnowflakePermissionTagCommandHandler> _logger;
     private readonly IDiscordService _discord;
 
-    public AddSnowflakePermissionTagCommandHandler(IGuildDataService guildDataService,
+    public AddSnowflakePermissionTagCommandHandler(IGuildService guildService,
         ILogger<AddSnowflakePermissionTagCommandHandler> logger, IDiscordService discord,
-        ITagDataDataService tagDataDataService)
+        ITagService tagService)
     {
-        _guildDataService = guildDataService;
+        _guildService = guildService;
         _logger = logger;
         _discord = discord;
-        _tagDataDataService = tagDataDataService;
+        _tagService = tagService;
     }
 
     public async Task<Result> HandleAsync(AddSnowflakePermissionTagCommand command)
@@ -50,13 +50,13 @@ public class AddSnowflakePermissionTagCommandHandler : ICommandHandler<AddSnowfl
         if (command is null) throw new ArgumentNullException(nameof(command));
 
         var guildRes =
-            await _guildDataService.GetSingleBySpecAsync(
+            await _guildService.GetSingleBySpecAsync(
                 new ActiveGuildByIdSpec(command.Dto.GuildId));
 
         if (!guildRes.IsDefined()) return Result.FromError(guildRes);
 
         var tagRes =
-            await _tagDataDataService.GetSingleBySpecAsync(new ActiveTagByGuildAndNameSpec(command.Dto.Name,
+            await _tagService.GetSingleBySpecAsync(new ActiveTagByGuildAndNameSpec(command.Dto.Name,
                 command.Dto.GuildId));
 
         if (!tagRes.IsDefined(out var  tag)) return Result.FromError(tagRes);
@@ -80,11 +80,11 @@ public class AddSnowflakePermissionTagCommandHandler : ICommandHandler<AddSnowfl
         Result result;
         if (targetRole is null && targetMember is not null)
         {
-            result = await _tagDataDataService.AddAllowedUserAsync(command.Dto, true);
+            result = await _tagService.AddAllowedUserAsync(command.Dto, true);
         }
         else if (targetRole is not null)
         {
-            result = await _tagDataDataService.AddAllowedRoleAsync(command.Dto, true);
+            result = await _tagService.AddAllowedRoleAsync(command.Dto, true);
         }
         else
         {
