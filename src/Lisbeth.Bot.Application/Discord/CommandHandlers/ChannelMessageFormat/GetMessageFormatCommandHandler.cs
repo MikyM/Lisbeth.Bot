@@ -59,7 +59,7 @@ public class GetMessageFormatCommandHandler : ICommandHandler<GetMessageFormatCo
                 return new DiscordNotFoundError(DiscordEntity.Guild);
 
             requestingUser = command.Ctx?.User as DiscordMember ?? await guild.GetMemberAsync(command.Dto.RequestedOnBehalfOfId);
-            channel = command.Ctx?.Channel ?? guild.GetChannel(command.Dto.ChannelId);
+            channel = command.Ctx?.ResolvedChannelMentions[0] ?? guild.GetChannel(command.Dto.ChannelId);
         }
         catch (Exception ex)
         {
