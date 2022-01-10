@@ -39,9 +39,14 @@ public class ChannelMessageFormat : SnowflakeDiscordEntity
 
     public bool IsTextCompliant(string messageContent)
     {
+        if (string.IsNullOrWhiteSpace(messageContent))
+            return false;
+
         messageContent = Formatter.Strip(messageContent);
         var parts = messageContent.Split('\n', StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim()).ToList();
 
+        if (parts.Count == 0)
+            return false;
 
         if (!parts.First().Contains(FormatParts.First()))
             return false;

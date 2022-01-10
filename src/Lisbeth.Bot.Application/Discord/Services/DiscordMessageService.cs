@@ -153,7 +153,8 @@ public class DiscordMessageService : IDiscordMessageService
                     messagesToDelete.RemoveAll(
                         x => x.Interaction is not null && x.Interaction.Id == interactionId.Value);
 
-                await channel.DeleteMessagesAsync(messagesToDelete);
+                foreach (var batch in messagesToDelete.Chunk(100))
+                    await channel.DeleteMessagesAsync(batch);
 
                 count += messagesToDelete.Count;
                 cycles++;
