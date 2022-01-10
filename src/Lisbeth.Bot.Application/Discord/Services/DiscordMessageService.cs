@@ -178,7 +178,7 @@ public class DiscordMessageService : IDiscordMessageService
     {
         if (args is null) throw new ArgumentNullException(nameof(args));
 
-        if (args.Message?.Author is null)
+        if (args.Message?.Author is null || args.MessageBefore is null)
             return;
 
         if (args.Author.IsBot || args.MessageBefore.Content == args.Message.Content &&
