@@ -35,20 +35,20 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Mute;
 public class ApplyMuteCommandHandler : ICommandHandler<ApplyMuteCommand, DiscordEmbed>
 {
     private readonly IDiscordService _discord;
-    private readonly IGuildService _guildService;
+    private readonly IGuildDataService _guildDataService;
     private readonly ILogger<ApplyMuteCommandHandler> _logger;
-    private readonly IMuteService _muteService;
+    private readonly IMuteDataService _muteDataService;
     private readonly IDiscordGuildLoggerService _guildLogger;
     private readonly IResponseDiscordEmbedBuilder<DiscordModeration> _embedBuilder;
 
-    public ApplyMuteCommandHandler(IDiscordService discord, IGuildService guildService,
-        ILogger<ApplyMuteCommandHandler> logger, IMuteService muteService,
+    public ApplyMuteCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
+        ILogger<ApplyMuteCommandHandler> logger, IMuteDataService muteDataService,
         IDiscordGuildLoggerService guildLogger, IResponseDiscordEmbedBuilder<DiscordModeration> embedBuilder)
     {
         _discord = discord;
-        _guildService = guildService;
+        _guildDataService = guildDataService;
         _logger = logger;
-        _muteService = muteService;
+        _muteDataService = muteDataService;
         _guildLogger = guildLogger;
         _embedBuilder = embedBuilder;
     }
@@ -75,7 +75,7 @@ public class ApplyMuteCommandHandler : ICommandHandler<ApplyMuteCommand, Discord
             return new DiscordError("Bot doesn't have manage roles permission.");
 
         var result =
-            await _guildService.GetSingleBySpecAsync(new ActiveGuildByDiscordIdWithModerationSpec(guild.Id));
+            await _guildDataService.GetSingleBySpecAsync(new ActiveGuildByDiscordIdWithModerationSpec(guild.Id));
 
         if (!result.IsDefined(out var guildEntity)) return new DiscordNotFoundError(DiscordEntity.Guild);
 
@@ -92,7 +92,7 @@ public class ApplyMuteCommandHandler : ICommandHandler<ApplyMuteCommand, Discord
         var resMute = await target.MuteAsync(guildEntity.ModerationConfig.MuteRoleId);
         if (!resMute.IsSuccess) return new DiscordError("Failed to mute.");
 
-        var partial = await _muteService.AddOrExtendAsync(command.Dto, true);
+        var partial = await _muteDataService.AddOrExtendAsync(command.Dto, true);
         if (!partial.IsDefined(out var idEntityPair)) return Result<DiscordEmbed>.FromError(partial);
 
         return _embedBuilder

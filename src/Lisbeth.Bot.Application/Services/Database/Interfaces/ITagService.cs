@@ -20,7 +20,7 @@ using Lisbeth.Bot.Domain.DTOs.Request.Tag;
 
 namespace Lisbeth.Bot.Application.Services.Database.Interfaces;
 
-public interface ITagService : ICrudService<Tag, LisbethBotDbContext>
+public interface ITagDataService : ICrudService<Tag, LisbethBotDbContext>
 {
     Task<Result> AddAsync(TagAddReqDto req, bool shouldSave = false);
     Task<Result> UpdateTagTextAsync(TagEditReqDto req, bool shouldSave = false);

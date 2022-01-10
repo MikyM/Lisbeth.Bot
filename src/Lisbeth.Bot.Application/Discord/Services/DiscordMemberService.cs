@@ -31,14 +31,14 @@ public class DiscordMemberService : IDiscordMemberService
 {
     private readonly IDiscordService _discord;
     private readonly IDiscordEmbedProvider _embedProvider;
-    private readonly IGuildService _guildService;
-    private readonly IMuteService _muteService;
+    private readonly IGuildDataService _guildDataService;
+    private readonly IMuteDataService _muteDataService;
 
-    public DiscordMemberService(IDiscordService discord, IGuildService guildService, IMuteService muteService,
+    public DiscordMemberService(IDiscordService discord, IGuildDataService guildDataService, IMuteDataService muteDataService,
         IDiscordEmbedProvider embedProvider)
     {
-        _guildService = guildService;
-        _muteService = muteService;
+        _guildDataService = guildDataService;
+        _muteDataService = muteDataService;
         _discord = discord;
         _embedProvider = embedProvider;
     }
@@ -47,7 +47,7 @@ public class DiscordMemberService : IDiscordMemberService
     {
         if (args is null) throw new ArgumentNullException(nameof(args));
 
-        var res = await _guildService.GetSingleBySpecAsync(new ActiveGuildByDiscordIdWithModerationSpec(args.Guild.Id));
+        var res = await _guildDataService.GetSingleBySpecAsync(new ActiveGuildByDiscordIdWithModerationSpec(args.Guild.Id));
 
         if (!res.IsDefined(out var guildCfg) || guildCfg.ModerationConfig is null) return Result.FromSuccess();
         if (!args.Guild.Channels.TryGetValue(guildCfg.ModerationConfig.MemberEventsLogChannelId,
@@ -105,7 +105,7 @@ public class DiscordMemberService : IDiscordMemberService
     {
         if (args is null) throw new ArgumentNullException(nameof(args));
 
-        var result = await _guildService.GetSingleBySpecAsync<Guild>(
+        var result = await _guildDataService.GetSingleBySpecAsync<Guild>(
             new ActiveGuildByDiscordIdWithModerationSpec(args.Guild.Id));
 
 
@@ -139,7 +139,7 @@ public class DiscordMemberService : IDiscordMemberService
     {
         if (args is null) throw new ArgumentNullException(nameof(args));
 
-        var res = await _muteService.GetSingleBySpecAsync<Mute>(
+        var res = await _muteDataService.GetSingleBySpecAsync<Mute>(
             new ActiveMutesByGuildAndUserSpecifications(args.Guild.Id, args.Member.Id));
 
         if (!res.IsDefined() || res.Entity.Guild?.ModerationConfig is null)

@@ -32,12 +32,12 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Tag;
 public class GetAllTagsCommandHandler : ICommandHandler<GetAllTagsCommand, List<Page>>
 {
     private readonly IDiscordService _discord;
-    private readonly IGuildService _guildService;
+    private readonly IGuildDataService _guildDataService;
 
-    public GetAllTagsCommandHandler(IDiscordService discord, IGuildService guildService)
+    public GetAllTagsCommandHandler(IDiscordService discord, IGuildDataService guildDataService)
     {
         _discord = discord;
-        _guildService = guildService;
+        _guildDataService = guildDataService;
     }
 
     public async Task<Result<List<Page>>> HandleAsync(GetAllTagsCommand command)
@@ -55,7 +55,7 @@ public class GetAllTagsCommandHandler : ICommandHandler<GetAllTagsCommand, List<
             return new DiscordNotFoundError(DiscordEntity.User);
 
         var guildRes =
-            await _guildService.GetSingleBySpecAsync(
+            await _guildDataService.GetSingleBySpecAsync(
                 new ActiveGuildByDiscordIdWithTagsSpecifications(guild.Id));
 
         if (!guildRes.IsDefined(out var guildCfg))

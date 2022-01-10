@@ -24,9 +24,9 @@ using MikyM.Common.DataAccessLayer.UnitOfWork;
 namespace Lisbeth.Bot.Application.Services.Database;
 
 [UsedImplicitly]
-public class TagService : CrudService<Tag, LisbethBotDbContext>, ITagService
+public class TagDataService : CrudService<Tag, LisbethBotDbContext>, ITagDataService
 {
-    public TagService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
+    public TagDataService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
     {
     }
 

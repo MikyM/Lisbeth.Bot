@@ -15,16 +15,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using AutoMapper;
 using Lisbeth.Bot.DataAccessLayer;
-using MikyM.Common.DataAccessLayer.UnitOfWork;
 
-namespace Lisbeth.Bot.Application.Services.Database;
+namespace Lisbeth.Bot.Application.Services.Database.Interfaces;
 
-[UsedImplicitly]
-public class EmbedConfigService : CrudService<EmbedConfig, LisbethBotDbContext>, IEmbedConfigService
+public interface IEmbedConfigDataService : ICrudService<EmbedConfig, LisbethBotDbContext>
 {
-    public EmbedConfigService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
-    {
-    }
 }

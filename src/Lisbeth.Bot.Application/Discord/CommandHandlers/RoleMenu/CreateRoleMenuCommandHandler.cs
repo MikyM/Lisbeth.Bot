@@ -37,17 +37,17 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.RoleMenu;
 [UsedImplicitly]
 public class CreateRoleMenuCommandHandler : ICommandHandler<CreateRoleMenuCommand, DiscordMessageBuilder>
 {
-    private readonly IGuildService _guildService;
-    private readonly IRoleMenuService _roleMenuService;
+    private readonly IGuildDataService _guildDataService;
+    private readonly IRoleMenuDataService _roleMenuDataService;
     private readonly ILogger<CreateRoleMenuCommandHandler> _logger;
     private readonly IDiscordService _discord;
     private readonly IDiscordEmbedProvider _discordEmbedProvider;
 
-    public CreateRoleMenuCommandHandler(IGuildService guildService, IRoleMenuService roleMenuService,
+    public CreateRoleMenuCommandHandler(IGuildDataService guildDataService, IRoleMenuDataService roleMenuDataService,
         ILogger<CreateRoleMenuCommandHandler> logger, IDiscordService discord, IDiscordEmbedProvider discordEmbedProvider)
     {
-        _guildService = guildService;
-        _roleMenuService = roleMenuService;
+        _guildDataService = guildDataService;
+        _roleMenuDataService = roleMenuDataService;
         _logger = logger;
         _discord = discord;
         _discordEmbedProvider = discordEmbedProvider;
@@ -69,10 +69,10 @@ public class CreateRoleMenuCommandHandler : ICommandHandler<CreateRoleMenuComman
 
         if (!requestingUser.IsAdmin()) return new DiscordNotAuthorizedError();
 
-        var guildResult = await _guildService.GetSingleBySpecAsync(new ActiveGuildByIdSpec(command.Dto.GuildId));
+        var guildResult = await _guildDataService.GetSingleBySpecAsync(new ActiveGuildByIdSpec(command.Dto.GuildId));
         if (!guildResult.IsDefined()) return Result<DiscordMessageBuilder>.FromError(guildResult);
 
-        var count = await _roleMenuService.LongCountAsync(
+        var count = await _roleMenuDataService.LongCountAsync(
             new RoleMenuByNameAndGuildWithOptionsSpec(command.Dto.Name, command.Dto.GuildId));
 
         if (!count.IsDefined(out var countRes) || countRes >= 1)
@@ -153,7 +153,7 @@ public class CreateRoleMenuCommandHandler : ICommandHandler<CreateRoleMenuComman
             await Task.Delay(300);
         }
 
-        await _roleMenuService.AddAsync(roleMenu, true);
+        await _roleMenuDataService.AddAsync(roleMenu, true);
 
         return new DiscordMessageBuilder().AddEmbed(resultEmbed);
     }

@@ -30,19 +30,19 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Tag;
 [UsedImplicitly]
 public class RevokeSnowflakePermissionTagCommandHandler : ICommandHandler<RevokeSnowflakePermissionTagCommand>
 {
-    private readonly IGuildService _guildService;
-    private readonly ITagService _tagService;
+    private readonly IGuildDataService _guildDataService;
+    private readonly ITagDataService _tagDataService;
     private readonly ILogger<RevokeSnowflakePermissionTagCommand> _logger;
     private readonly IDiscordService _discord;
 
-    public RevokeSnowflakePermissionTagCommandHandler(IGuildService guildService,
+    public RevokeSnowflakePermissionTagCommandHandler(IGuildDataService guildDataService,
         ILogger<RevokeSnowflakePermissionTagCommand> logger, IDiscordService discord,
-        ITagService tagService)
+        ITagDataService tagDataService)
     {
-        _guildService = guildService;
+        _guildDataService = guildDataService;
         _logger = logger;
         _discord = discord;
-        _tagService = tagService;
+        _tagDataService = tagDataService;
     }
 
     public async Task<Result> HandleAsync(RevokeSnowflakePermissionTagCommand command)
@@ -50,13 +50,13 @@ public class RevokeSnowflakePermissionTagCommandHandler : ICommandHandler<Revoke
         if (command is null) throw new ArgumentNullException(nameof(command));
 
         var guildRes =
-            await _guildService.GetSingleBySpecAsync(
+            await _guildDataService.GetSingleBySpecAsync(
                 new ActiveGuildByIdSpec(command.Dto.GuildId));
 
         if (!guildRes.IsDefined()) return Result.FromError(guildRes);
 
         var tagRes =
-            await _tagService.GetSingleBySpecAsync(new ActiveTagByGuildAndNameSpec(command.Dto.Name,
+            await _tagDataService.GetSingleBySpecAsync(new ActiveTagByGuildAndNameSpec(command.Dto.Name,
                 command.Dto.GuildId));
 
         if (!tagRes.IsDefined(out var tag)) return Result.FromError(tagRes);
@@ -80,11 +80,11 @@ public class RevokeSnowflakePermissionTagCommandHandler : ICommandHandler<Revoke
         Result result;
         if (targetRole is null && targetMember is not null)
         {
-            result = await _tagService.RemoveAllowedUserAsync(command.Dto, true);
+            result = await _tagDataService.RemoveAllowedUserAsync(command.Dto, true);
         }
         else if (targetRole is not null)
         {
-            result = await _tagService.RemoveAllowedRoleAsync(command.Dto, true);
+            result = await _tagDataService.RemoveAllowedRoleAsync(command.Dto, true);
         }
         else
         {

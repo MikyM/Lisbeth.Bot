@@ -25,18 +25,18 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Mute;
 [UsedImplicitly]
 public class CheckMuteStateForNewUserCommandHandler : ICommandHandler<CheckMuteStateForNewUserCommand>
 {
-    private readonly IMuteService _muteService;
+    private readonly IMuteDataService _muteDataService;
 
-    public CheckMuteStateForNewUserCommandHandler(IMuteService muteService)
+    public CheckMuteStateForNewUserCommandHandler(IMuteDataService muteDataService)
     {
-        _muteService = muteService;
+        _muteDataService = muteDataService;
     }
 
     public async Task<Result> HandleAsync(CheckMuteStateForNewUserCommand command)
     {
         if (command is null) throw new ArgumentNullException(nameof(command));
 
-        var res = await _muteService.GetSingleBySpecAsync<Domain.Entities.Mute>(
+        var res = await _muteDataService.GetSingleBySpecAsync<Domain.Entities.Mute>(
             new ActiveMutesByGuildAndUserSpecifications(command.Member.Guild.Id, command.Member.Id));
 
         if (!res.IsDefined() || res.Entity.Guild?.ModerationConfig is null)

@@ -36,15 +36,15 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.ChannelMessageFormat;
 public class CreateMessageFormatCommandHandler : ICommandHandler<CreateMessageFormatCommand, DiscordEmbed>
 {
     private readonly IDiscordService _discord;
-    private readonly IGuildService _guildService;
+    private readonly IGuildDataService _guildDataService;
     private readonly IResponseDiscordEmbedBuilder<RegularUserInteraction> _embedBuilder;
     private readonly IMapper _mapper;
 
-    public CreateMessageFormatCommandHandler(IDiscordService discord, IGuildService guildService,
+    public CreateMessageFormatCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
         IResponseDiscordEmbedBuilder<RegularUserInteraction> embedBuilder, IMapper mapper)
     {
         _discord = discord;
-        _guildService = guildService;
+        _guildDataService = guildDataService;
         _embedBuilder = embedBuilder;
         _mapper = mapper;
     }
@@ -81,7 +81,7 @@ public class CreateMessageFormatCommandHandler : ICommandHandler<CreateMessageFo
             return new DiscordNotAuthorizedError();
 
         var guildRes =
-            await _guildService.GetSingleBySpecAsync(
+            await _guildDataService.GetSingleBySpecAsync(
                 new ActiveGuildByDiscordIdWithChannelMessageFormatSpec(command.Dto.GuildId, channel.Id));
 
         if (!guildRes.IsDefined(out var guildCfg))
@@ -113,10 +113,10 @@ public class CreateMessageFormatCommandHandler : ICommandHandler<CreateMessageFo
             await validator.ValidateAndThrowAsync(command.Dto);
         }
 
-        _guildService.BeginUpdate(guildCfg);
+        _guildDataService.BeginUpdate(guildCfg);
         var mapped = _mapper.Map<Domain.Entities.ChannelMessageFormat>(command.Dto);
         guildCfg.AddChannelMessageFormat(mapped);
-        await _guildService.CommitAsync(requestingUser.Id.ToString());
+        await _guildDataService.CommitAsync(requestingUser.Id.ToString());
 
         return _embedBuilder
             .WithType(RegularUserInteraction.ChannelMessageFormat)

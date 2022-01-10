@@ -29,15 +29,15 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Tag;
 public class DisableTagCommandHandler : ICommandHandler<DisableTagCommand>
 {
     private readonly IDiscordService _discord;
-    private readonly IGuildService _guildService;
-    private readonly ITagService _tagService;
+    private readonly IGuildDataService _guildDataService;
+    private readonly ITagDataService _tagDataService;
 
-    public DisableTagCommandHandler(IDiscordService discord, IGuildService guildService,
-        ITagService tagService)
+    public DisableTagCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
+        ITagDataService tagDataService)
     {
         _discord = discord;
-        _guildService = guildService;
-        _tagService = tagService;
+        _guildDataService = guildDataService;
+        _tagDataService = tagDataService;
     }
 
     public async Task<Result> HandleAsync(DisableTagCommand command)
@@ -55,7 +55,7 @@ public class DisableTagCommandHandler : ICommandHandler<DisableTagCommand>
             return new DiscordNotFoundError(DiscordEntity.User);
 
         var guildCfg =
-            await _guildService.GetSingleBySpecAsync(
+            await _guildDataService.GetSingleBySpecAsync(
                 new ActiveGuildByDiscordIdWithTagsSpecifications(guild.Id));
         if (!guildCfg.IsDefined())
             return Result.FromError(guildCfg);
@@ -63,6 +63,6 @@ public class DisableTagCommandHandler : ICommandHandler<DisableTagCommand>
         if (!requestingUser.IsModerator())
             return new DiscordNotAuthorizedError("You are not authorized to disable tags");
 
-        return await _tagService.DisableAsync(command.Dto, true);
+        return await _tagDataService.DisableAsync(command.Dto, true);
     }
 }

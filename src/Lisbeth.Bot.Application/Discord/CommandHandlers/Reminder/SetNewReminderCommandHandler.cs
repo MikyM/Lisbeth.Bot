@@ -32,15 +32,15 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Reminder;
 [UsedImplicitly]
 public class SetNewReminderCommandHandler : ICommandHandler<SetNewReminderCommand, DiscordEmbed>
 {
-    private readonly IGuildService _guildService;
+    private readonly IGuildDataService _guildDataService;
     private readonly IDiscordService _discord;
     private readonly IMainReminderService _reminderService;
     private readonly IResponseDiscordEmbedBuilder<RegularUserInteraction> _embedBuilder;
 
-    public SetNewReminderCommandHandler(IGuildService guildService, IDiscordService discord,
+    public SetNewReminderCommandHandler(IGuildDataService guildDataService, IDiscordService discord,
         IMainReminderService reminderService, IResponseDiscordEmbedBuilder<RegularUserInteraction> embedBuilder)
     {
-        _guildService = guildService;
+        _guildDataService = guildDataService;
         _discord = discord;
         _reminderService = reminderService;
         _embedBuilder = embedBuilder;
@@ -63,7 +63,7 @@ public class SetNewReminderCommandHandler : ICommandHandler<SetNewReminderComman
         if (command.Dto.ChannelId.HasValue && !requestingUser.IsModerator())
             return new DiscordNotAuthorizedError("Only moderators can set channel specific reminders");
 
-        var result = await _guildService.GetSingleBySpecAsync(new ActiveGuildByIdSpec(command.Dto.GuildId));
+        var result = await _guildDataService.GetSingleBySpecAsync(new ActiveGuildByIdSpec(command.Dto.GuildId));
 
         if (!result.IsDefined()) return Result<DiscordEmbed>.FromError(result);
         if (!result.Entity.IsReminderModuleEnabled)

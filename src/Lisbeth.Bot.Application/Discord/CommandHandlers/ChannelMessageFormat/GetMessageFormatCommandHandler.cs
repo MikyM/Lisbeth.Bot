@@ -32,14 +32,14 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.ChannelMessageFormat;
 public class GetMessageFormatCommandHandler : ICommandHandler<GetMessageFormatCommand, DiscordEmbed>
 {
     private readonly IDiscordService _discord;
-    private readonly IGuildService _guildService;
+    private readonly IGuildDataService _guildDataService;
     private readonly IResponseDiscordEmbedBuilder<RegularUserInteraction> _embedBuilder;
 
-    public GetMessageFormatCommandHandler(IDiscordService discord, IGuildService guildService,
+    public GetMessageFormatCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
         IResponseDiscordEmbedBuilder<RegularUserInteraction> embedBuilder)
     {
         _discord = discord;
-        _guildService = guildService;
+        _guildDataService = guildDataService;
         _embedBuilder = embedBuilder;
     }
 
@@ -75,7 +75,7 @@ public class GetMessageFormatCommandHandler : ICommandHandler<GetMessageFormatCo
             return new DiscordNotAuthorizedError();
 
         var guildRes =
-            await _guildService.GetSingleBySpecAsync(
+            await _guildDataService.GetSingleBySpecAsync(
                 new ActiveGuildByDiscordIdWithChannelMessageFormatSpec(command.Dto.GuildId, channel.Id));
 
         if (!guildRes.IsDefined(out var guildCfg))

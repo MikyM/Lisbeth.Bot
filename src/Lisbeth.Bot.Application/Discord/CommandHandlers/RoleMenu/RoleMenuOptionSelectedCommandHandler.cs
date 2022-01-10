@@ -31,15 +31,15 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.RoleMenu;
 [UsedImplicitly]
 public class RoleMenuOptionSelectedCommandHandler  : ICommandHandler<RoleMenuOptionSelectedCommand>
 {
-    private readonly IRoleMenuService _roleMenuService;
+    private readonly IRoleMenuDataService _roleMenuDataService;
     private readonly ILogger<RoleMenuOptionSelectedCommandHandler> _logger;
     private readonly ICommandHandler<GetRoleMenuSelectCommand, DiscordSelectComponent> _getSelectHandler;
 
-    public RoleMenuOptionSelectedCommandHandler(IRoleMenuService roleMenuService,
+    public RoleMenuOptionSelectedCommandHandler(IRoleMenuDataService roleMenuDataService,
         ILogger<RoleMenuOptionSelectedCommandHandler> logger,
         ICommandHandler<GetRoleMenuSelectCommand, DiscordSelectComponent> getSelectHandler)
     {
-        _roleMenuService = roleMenuService;
+        _roleMenuDataService = roleMenuDataService;
         _logger = logger;
         _getSelectHandler = getSelectHandler;
     }
@@ -51,7 +51,7 @@ public class RoleMenuOptionSelectedCommandHandler  : ICommandHandler<RoleMenuOpt
         if (!long.TryParse(command.Interaction.Id.Split('_', StringSplitOptions.RemoveEmptyEntries).Last().Trim(),
                         out var parsedRoleMenuId)) return Result.FromError(new DiscordError());
 
-        var res = await _roleMenuService.GetSingleBySpecAsync<Domain.Entities.RoleMenu>(
+        var res = await _roleMenuDataService.GetSingleBySpecAsync<Domain.Entities.RoleMenu>(
             new RoleMenuByIdAndGuildWithOptionsSpec(parsedRoleMenuId, command.Interaction.Guild.Id));
 
         if (!res.IsDefined(out var roleMenu)) return Result.FromError(new NotFoundError());

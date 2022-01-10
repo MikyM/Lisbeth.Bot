@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Lisbeth.Bot.Application.Enums;
 using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.ReminderConfig;
@@ -24,7 +23,7 @@ using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
 
 namespace Lisbeth.Bot.Application.Services.Database.Interfaces;
 
-public interface IGuildService : ICrudService<Guild, LisbethBotDbContext>
+public interface IGuildDataService : ICrudService<Guild, LisbethBotDbContext>
 {
     Task<Result<Guild>> AddConfigAsync(ModerationConfigReqDto req, bool shouldSave = false);
     Task<Result<Guild>> AddConfigAsync(TicketingConfigReqDto req, bool shouldSave = false);

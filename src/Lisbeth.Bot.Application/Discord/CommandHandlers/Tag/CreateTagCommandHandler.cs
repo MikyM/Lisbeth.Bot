@@ -30,15 +30,15 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Tag;
 public class CreateTagCommandHandler : ICommandHandler<CreateTagCommand>
 {
     private readonly IDiscordService _discord;
-    private readonly IGuildService _guildService;
-    private readonly ITagService _tagService;
+    private readonly IGuildDataService _guildDataService;
+    private readonly ITagDataService _tagDataService;
 
-    public CreateTagCommandHandler(IDiscordService discord, IGuildService guildService,
-        ITagService tagService)
+    public CreateTagCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
+        ITagDataService tagDataService)
     {
         _discord = discord;
-        _guildService = guildService;
-        _tagService = tagService;
+        _guildDataService = guildDataService;
+        _tagDataService = tagDataService;
     }
 
     public async Task<Result> HandleAsync(CreateTagCommand command)
@@ -56,7 +56,7 @@ public class CreateTagCommandHandler : ICommandHandler<CreateTagCommand>
             return new DiscordNotFoundError(DiscordEntity.User);
 
         var guildCfg =
-            await _guildService.GetSingleBySpecAsync(
+            await _guildDataService.GetSingleBySpecAsync(
                 new ActiveGuildByDiscordIdWithTagsSpecifications(command.Dto.GuildId));
         if (!guildCfg.IsDefined())
             return Result.FromError(guildCfg);
@@ -64,12 +64,12 @@ public class CreateTagCommandHandler : ICommandHandler<CreateTagCommand>
         if (!requestingUser.IsModerator())
             return new DiscordNotAuthorizedError();
 
-        var check = await _tagService.LongCountAsync(new ActiveTagByGuildAndNameSpec(command.Dto.Name, command.Dto.GuildId));
+        var check = await _tagDataService.LongCountAsync(new ActiveTagByGuildAndNameSpec(command.Dto.Name, command.Dto.GuildId));
 
         if (check.IsDefined(out var count) && count > 0) return new SameEntityNamePerGuildError("Tag", command.Dto.Name!);
 
         command.Dto.Name = command.Dto.Name?.ToLower();
-        var res = await _tagService.AddAsync(command.Dto, true);
+        var res = await _tagDataService.AddAsync(command.Dto, true);
 
         return res;
     }

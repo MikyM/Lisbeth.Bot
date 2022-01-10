@@ -24,9 +24,9 @@ using MikyM.Common.DataAccessLayer.UnitOfWork;
 namespace Lisbeth.Bot.Application.Services.Database;
 
 [UsedImplicitly]
-public class BanService : CrudService<Ban, LisbethBotDbContext>, IBanService
+public class BanDataService : CrudService<Ban, LisbethBotDbContext>, IBanDataService
 {
-    public BanService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
+    public BanDataService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
     {
     }
 

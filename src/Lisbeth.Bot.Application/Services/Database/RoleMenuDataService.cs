@@ -15,10 +15,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using AutoMapper;
 using Lisbeth.Bot.DataAccessLayer;
+using MikyM.Common.DataAccessLayer.UnitOfWork;
 
-namespace Lisbeth.Bot.Application.Services.Database.Interfaces;
+namespace Lisbeth.Bot.Application.Services.Database;
 
-public interface IRoleMenuService : ICrudService<RoleMenu, LisbethBotDbContext>
+[UsedImplicitly]
+public class RoleMenuDataService : CrudService<RoleMenu, LisbethBotDbContext>, IRoleMenuDataService
 {
+    public RoleMenuDataService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
+    {
+    }
 }

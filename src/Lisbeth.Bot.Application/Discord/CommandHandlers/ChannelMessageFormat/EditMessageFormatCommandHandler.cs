@@ -35,14 +35,14 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.ChannelMessageFormat;
 public class EditMessageFormatCommandHandler : ICommandHandler<EditMessageFormatCommand, DiscordEmbed>
 {
     private readonly IDiscordService _discord;
-    private readonly IGuildService _guildService;
+    private readonly IGuildDataService _guildDataService;
     private readonly IResponseDiscordEmbedBuilder<RegularUserInteraction> _embedBuilder;
 
-    public EditMessageFormatCommandHandler(IDiscordService discord, IGuildService guildService,
+    public EditMessageFormatCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
         IResponseDiscordEmbedBuilder<RegularUserInteraction> embedBuilder)
     {
         _discord = discord;
-        _guildService = guildService;
+        _guildDataService = guildDataService;
         _embedBuilder = embedBuilder;
     }
 
@@ -78,7 +78,7 @@ public class EditMessageFormatCommandHandler : ICommandHandler<EditMessageFormat
             return new DiscordNotAuthorizedError();
 
         var guildRes =
-            await _guildService.GetSingleBySpecAsync(
+            await _guildDataService.GetSingleBySpecAsync(
                 new ActiveGuildByDiscordIdWithChannelMessageFormatSpec(command.Dto.GuildId, channel.Id));
 
         if (!guildRes.IsDefined(out var guildCfg))
@@ -112,10 +112,10 @@ public class EditMessageFormatCommandHandler : ICommandHandler<EditMessageFormat
             await validator.ValidateAndThrowAsync(command.Dto);
         }
 
-        _guildService.BeginUpdate(guildCfg);
+        _guildDataService.BeginUpdate(guildCfg);
         format.MessageFormat = command.Dto.MessageFormat;
         format.LastEditById = command.Dto.RequestedOnBehalfOfId;
-        await _guildService.CommitAsync(requestingUser.Id.ToString());
+        await _guildDataService.CommitAsync(requestingUser.Id.ToString());
 
         return _embedBuilder
             .WithType(RegularUserInteraction.ChannelMessageFormat)

@@ -31,16 +31,16 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 public class ReopenTicketCommandHandler : ICommandHandler<ReopenTicketCommand, DiscordMessageBuilder>
 {
     private readonly IDiscordService _discord;
-    private readonly IGuildService _guildService;
-    private readonly ITicketService _ticketService;
+    private readonly IGuildDataService _guildDataService;
+    private readonly ITicketDataService _ticketDataService;
     private readonly ILogger<ConfirmCloseTicketCommandHandler> _logger;
 
-    public ReopenTicketCommandHandler(IDiscordService discord, IGuildService guildService,
-        ITicketService ticketService, ILogger<ConfirmCloseTicketCommandHandler> logger)
+    public ReopenTicketCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
+        ITicketDataService ticketDataService, ILogger<ConfirmCloseTicketCommandHandler> logger)
     {
         _discord = discord;
-        _guildService = guildService;
-        _ticketService = ticketService;
+        _guildDataService = guildDataService;
+        _ticketDataService = ticketDataService;
         _logger = logger;
     }
 
@@ -49,7 +49,7 @@ public class ReopenTicketCommandHandler : ICommandHandler<ReopenTicketCommand, D
         if (command is null) throw new ArgumentNullException(nameof(command));
 
         var guildRes =
-            await _guildService.GetSingleBySpecAsync<Guild>(
+            await _guildDataService.GetSingleBySpecAsync<Guild>(
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(command.Dto.GuildId));
 
         if (!guildRes.IsDefined(out var guildCfg)) return Result<DiscordMessageBuilder>.FromError(guildRes);
@@ -57,7 +57,7 @@ public class ReopenTicketCommandHandler : ICommandHandler<ReopenTicketCommand, D
         if (guildCfg.TicketingConfig is null)
             return new DisabledEntityError($"Guild with Id:{command.Dto.GuildId} doesn't have ticketing enabled.");
 
-        var res = await _ticketService.GetSingleBySpecAsync(
+        var res = await _ticketDataService.GetSingleBySpecAsync(
             new TicketByChannelIdOrGuildAndOwnerIdSpec(command.Dto.ChannelId, command.Dto.GuildId, command.Dto.OwnerId));
 
         if (!res.IsDefined(out var ticket)) return new NotFoundError($"Ticket with given params doesn't exist.");
@@ -130,7 +130,7 @@ public class ReopenTicketCommandHandler : ICommandHandler<ReopenTicketCommand, D
             await target.DeleteMessageAsync(await target.GetMessageAsync(ticket.MessageCloseId.Value));
 
         command.Dto.ReopenMessageId = reopenMsg.Id;
-        await _ticketService.ReopenAsync(command.Dto, ticket);
+        await _ticketDataService.ReopenAsync(command.Dto, ticket);
 
         return msgBuilder;
     }

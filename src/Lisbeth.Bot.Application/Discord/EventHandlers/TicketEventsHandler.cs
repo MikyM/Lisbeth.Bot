@@ -50,7 +50,7 @@ public class TicketEventsHandler : BaseEventHandler, IDiscordMiscEventsSubscribe
 
     public Task DiscordOnChannelDeleted(DiscordClient sender, ChannelDeleteEventArgs args)
     {
-        _ = AsyncExecutor.ExecuteAsync<ITicketService>(async x =>
+        _ = AsyncExecutor.ExecuteAsync<ITicketDataService>(async x =>
             await x.CheckForDeletedTicketChannelAsync(args.Channel.Id, args.Guild.Id, sender.CurrentUser.Id));
         return Task.CompletedTask;
     }
