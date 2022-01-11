@@ -20,7 +20,7 @@ using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport;
 
-public interface IDiscordChatExportService : IServiceBase
+public interface IDiscordChatExportService
 {
     public Task<Result<DiscordEmbed>> ExportToHtmlAsync(DiscordInteraction intr);
     public Task<Result<DiscordEmbed>> ExportToHtmlAsync(TicketExportReqDto req);

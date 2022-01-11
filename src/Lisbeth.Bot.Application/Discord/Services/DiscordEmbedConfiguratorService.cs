@@ -11,6 +11,7 @@ using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.SelectValues;
 using Lisbeth.Bot.Application.Enums;
 using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.DataAccessLayer.Specifications.EmbedConfig;
+using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.Domain.Entities.Base;
 using MikyM.Common.Utilities.ExpressionHelpers;
 using MikyM.Discord.EmbedBuilders;
@@ -19,11 +20,11 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
-using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
-using Microsoft.AspNetCore.Mvc.Formatters;
 
 namespace Lisbeth.Bot.Application.Discord.Services;
 
+[UsedImplicitly]
+[AutofacLifetimeScope(LifetimeScope.InstancePerLifetimeScope)]
 public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorService<T> where T : SnowflakeDiscordEntity
 {
     private readonly IEmbedConfigDataService _embedConfigDataService;

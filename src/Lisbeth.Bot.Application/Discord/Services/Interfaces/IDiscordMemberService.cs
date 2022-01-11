@@ -19,7 +19,7 @@ using DSharpPlus.EventArgs;
 
 namespace Lisbeth.Bot.Application.Discord.Services.Interfaces;
 
-public interface IDiscordMemberService : IServiceBase
+public interface IDiscordMemberService
 {
     Task<Result> LogMemberRemovedEventAsync(GuildMemberRemoveEventArgs args);
     Task<Result> SendWelcomeMessageAsync(GuildMemberAddEventArgs args);

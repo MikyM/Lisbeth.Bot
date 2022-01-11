@@ -27,6 +27,7 @@ using System.Collections.Generic;
 namespace Lisbeth.Bot.Application.Discord.Services;
 
 [UsedImplicitly]
+[AutofacLifetimeScope(LifetimeScope.InstancePerLifetimeScope)]
 public class DiscordSendReminderService : IDiscordSendReminderService
 {
     private readonly IDiscordService _discord;

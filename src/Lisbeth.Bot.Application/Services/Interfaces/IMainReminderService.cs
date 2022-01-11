@@ -19,7 +19,7 @@ using Lisbeth.Bot.Domain.DTOs.Request.Reminder;
 
 namespace Lisbeth.Bot.Application.Services.Interfaces;
 
-public interface IMainReminderService : IServiceBase
+public interface IMainReminderService
 {
     Task<Result<ReminderResDto>> SetNewReminderAsync(SetReminderReqDto req);
     Task<Result<ReminderResDto>> RescheduleReminderAsync(RescheduleReminderReqDto req);

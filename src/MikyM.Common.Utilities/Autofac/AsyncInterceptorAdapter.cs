@@ -15,9 +15,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace MikyM.Common.Application.Interfaces;
+using Castle.DynamicProxy;
 
-public interface IServiceBase
+namespace MikyM.Common.Utilities.Autofac;
+
+public class AsyncInterceptorAdapter<TAsyncInterceptor> : AsyncDeterminationInterceptor
+    where TAsyncInterceptor : IAsyncInterceptor
 {
-
+    public AsyncInterceptorAdapter(TAsyncInterceptor asyncInterceptor)
+        : base(asyncInterceptor)
+    { }
 }

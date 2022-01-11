@@ -22,7 +22,7 @@ using MikyM.Discord.EmbedBuilders.Enums;
 
 namespace Lisbeth.Bot.Application.Discord.Services.Interfaces;
 
-public interface IDiscordGuildLoggerService : IServiceBase
+public interface IDiscordGuildLoggerService
 {
     Task<Result> LogToDiscordAsync<TRequest>(DiscordGuild discordGuild, TRequest req,
         DiscordModeration moderation, DiscordUser? moderator = null, SnowflakeObject? target = null, string hexColor = "#26296e", long? caseId = null)

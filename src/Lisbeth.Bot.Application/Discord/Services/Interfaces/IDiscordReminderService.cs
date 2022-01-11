@@ -21,7 +21,7 @@ using Lisbeth.Bot.Domain.DTOs.Request.Reminder;
 
 namespace Lisbeth.Bot.Application.Discord.Services.Interfaces;
 
-public interface IDiscordReminderService : IServiceBase
+public interface IDiscordReminderService
 {
     Task<Result<DiscordEmbed>> SetNewReminderAsync(SetReminderReqDto req);
     Task<Result<DiscordEmbed>> SetNewReminderAsync(InteractionContext ctx, SetReminderReqDto req);

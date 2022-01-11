@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using Autofac.Extras.DynamicProxy;
 using AutoMapper;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
@@ -24,8 +25,6 @@ using Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response.Prune;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.Domain.DTOs.Request.Prune;
 using Microsoft.Extensions.Logging;
-using MikyM.Common.Utilities.Autofac;
-using MikyM.Common.Utilities.Autofac.Attributes;
 using MikyM.Discord.EmbedBuilders.Enums;
 using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.Interfaces;
@@ -35,6 +34,7 @@ using System.Globalization;
 namespace Lisbeth.Bot.Application.Discord.Services;
 
 [UsedImplicitly]
+[Intercept(typeof(AsyncInterceptorAdapter<LoggingInterceptor>))]
 [AutofacLifetimeScope(LifetimeScope.InstancePerLifetimeScope)]
 public class DiscordMessageService : IDiscordMessageService
 {

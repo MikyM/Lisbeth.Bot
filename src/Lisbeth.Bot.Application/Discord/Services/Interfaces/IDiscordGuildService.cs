@@ -25,7 +25,7 @@ using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
 
 namespace Lisbeth.Bot.Application.Discord.Services.Interfaces;
 
-public interface IDiscordGuildService : IServiceBase
+public interface IDiscordGuildService
 {
     Task<Result> HandleGuildCreateAsync(GuildCreateEventArgs args);
     Task<Result> HandleGuildDeleteAsync(GuildDeleteEventArgs args);

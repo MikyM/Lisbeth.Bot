@@ -15,10 +15,21 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Lisbeth.Bot.Application.Services.Interfaces;
+namespace MikyM.Common.Utilities.Extensions;
 
-public interface IBanCheckService
+public static class ObjectExtensions
 {
-    Task CheckForNonBotBanAsync(ulong targetId, ulong guildId, ulong requestedOnBehalfOfId);
-    Task CheckForNonBotUnbanAsync(ulong targetId, ulong guildId, ulong requestedOnBehalfOfId);
+    public static T CastObject<T>(this object input)
+    {
+        return (T)input;
+    }
+
+    public static T ConvertObject<T>(this object input)
+    {
+        return (T)Convert.ChangeType(input, typeof(T));
+    }
+    public static T ConvertObject<T>(this object input, T type) where T : Type
+    {
+        return (T)Convert.ChangeType(input, type);
+    }
 }

@@ -19,3 +19,6 @@ global using System;
 global using System.Linq;
 global using System.Threading.Tasks;
 global using JetBrains.Annotations;
+
+global using MikyM.Common.Utilities.Autofac;
+global using MikyM.Common.Utilities.Autofac.Attributes;

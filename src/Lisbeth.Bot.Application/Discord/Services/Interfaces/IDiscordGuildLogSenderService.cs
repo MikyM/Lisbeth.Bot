@@ -21,7 +21,7 @@ using MikyM.Discord.EmbedBuilders.Enums;
 
 namespace Lisbeth.Bot.Application.Discord.Services.Interfaces;
 
-public interface IDiscordGuildLogSenderService : IServiceBase
+public interface IDiscordGuildLogSenderService
 {
     Task<Result> SendAsync(DiscordGuild discordGuild, DiscordLog type, DiscordEmbed embed);
     Task<Result> SendAsync(ulong discordGuildId, DiscordLog type, DiscordEmbed embed);

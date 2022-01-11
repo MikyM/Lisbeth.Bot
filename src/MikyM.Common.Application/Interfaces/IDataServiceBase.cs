@@ -19,7 +19,7 @@ using MikyM.Common.Application.Results;
 
 namespace MikyM.Common.Application.Interfaces;
 
-public interface IDataServiceBase<TContext> : IServiceBase, IDisposable where TContext : DbContext
+public interface IDataServiceBase<TContext> : IDisposable where TContext : DbContext
 {
     Task<Result<int>> CommitAsync();
     Task<Result<int>> CommitAsync(string? auditUserId);
