@@ -111,9 +111,21 @@ public class DiscordMessageService : IDiscordMessageService
         }
         else if (req.IsTargetedMessageDelete.HasValue && req.IsTargetedMessageDelete.Value && req.MessageId is not null)
         {
-            var message = await channel.GetMessageAsync(req.MessageId.Value);
-            await channel.DeleteMessageAsync(message);
-            req.Messages = _mapper.Map<List<MessageLog>>(new List<DiscordMessage>{ message });
+            DiscordMessage? targetMessage;
+
+            try
+            {
+                targetMessage = await channel.GetMessageAsync(req.MessageId.Value);
+            }
+            catch (DSharpPlus.Exceptions.NotFoundException)
+            {
+                return new DiscordNotFoundError("Message with given Id was not found");
+            }
+            if (targetMessage is null)
+                return new DiscordNotFoundError("Message with given Id was not found");
+
+            await channel.DeleteMessageAsync(targetMessage);
+            req.Messages = _mapper.Map<List<MessageLog>>(new List<DiscordMessage>{ targetMessage });
             count++;
         }
         else if (req.MessageId is not null)
@@ -121,9 +133,19 @@ public class DiscordMessageService : IDiscordMessageService
             List<DiscordMessage> messagesToDelete = new();
             int cycles = 0;
             bool shouldStop = false;
-            var targetMessage = await channel.GetMessageAsync(req.MessageId.Value);
+            DiscordMessage? targetMessage;
+
+            try
+            {
+                targetMessage = await channel.GetMessageAsync(req.MessageId.Value);
+            }
+            catch (DSharpPlus.Exceptions.NotFoundException)
+            {
+                return new DiscordNotFoundError("Message with given Id was not found");
+            }
             if (targetMessage is null) 
                 return new DiscordNotFoundError("Message with given Id was not found");
+
             var messages = await channel.GetMessagesAsync(1);
             var lastMessage = messages[0];
 
