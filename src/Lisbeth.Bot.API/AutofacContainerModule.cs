@@ -46,9 +46,6 @@ public class AutofacContainerModule : Module
         builder.AddDataAccessLayer();
         builder.AddApplicationLayer(opt =>
         {
-            opt.AddInterceptor(x => new LoggingInterceptor(x.Resolve<ILoggerFactory>().CreateLogger<DiscordMessageService>()));
-            //opt.AddDataServiceInterceptor(x =>
-              //  new LoggingInterceptor(x.Resolve<ILoggerFactory>().CreateLogger<DiscordMessageService>()));
         });
 
         builder.AddCommandHandlers();

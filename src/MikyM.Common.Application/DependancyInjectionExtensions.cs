@@ -35,7 +35,7 @@ public static class DependancyInjectionExtensions
         //register async interceptor adapter
         builder.RegisterGeneric(typeof(AsyncInterceptorAdapter<>));
         //register async interceptor
-        //builder.Register(x => new LoggingInterceptor(x.Resolve<ILoggerFactory>().CreateLogger(nameof(LoggingInterceptor))));
+        builder.Register(x => new LoggingInterceptor(x.Resolve<ILoggerFactory>().CreateLogger(nameof(LoggingInterceptor))));
 
         var config = new RegistrationConfiguration();
         configuration(config);
