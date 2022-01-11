@@ -22,8 +22,8 @@
 
   <ItemGroup>
     <PackageReference Include="CronExpressionDescriptor" Version="2.16.0" />
-    <PackageReference Include="FluentValidation.AspNetCore" Version="10.3.5" />
-    <PackageReference Include="Hangfire.Core" Version="1.7.27" />
+    <PackageReference Include="FluentValidation.AspNetCore" Version="10.3.6" />
+    <PackageReference Include="Hangfire.Core" Version="1.7.28" />
     <PackageReference Include="Imgur.API" Version="5.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
     <PackageReference Include="Microsoft.CodeAnalysis" Version="4.0.1" />

@@ -15,19 +15,22 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace MikyM.Common.Utilities.Extensions;
+namespace MikyM.Common.Utilities.Autofac.Attributes;
 
-/// <summary>
-/// Helper methods for the lists.
-/// </summary>
-public static class ListExtensions
+[AttributeUsage(AttributeTargets.Class)]
+public class AutofacLifetimeScopeAttribute : Attribute
 {
-    public static List<List<T>> ChunkBy<T>(this List<T> source, int chunkSize)
+    public LifetimeScope Scope { get; set; }
+    public Type? Owned { get; set; }
+
+    public AutofacLifetimeScopeAttribute(LifetimeScope scope)
     {
-        return source
-            .Select((x, i) => new { Index = i, Value = x })
-            .GroupBy(x => x.Index / chunkSize)
-            .Select(x => x.Select(v => v.Value).ToList())
-            .ToList();
+        Scope = scope;
+    }
+
+    public AutofacLifetimeScopeAttribute(LifetimeScope scope, Type owned)
+    {
+        Scope = scope;
+        Owned = owned;
     }
 }

@@ -18,12 +18,11 @@
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.SlashCommands;
-using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.DTOs.Request.Prune;
 
 namespace Lisbeth.Bot.Application.Discord.Services.Interfaces;
 
-public interface IDiscordMessageService : IServiceBase
+public interface IDiscordMessageService
 {
     Task<Result<DiscordEmbed>> PruneAsync(InteractionContext ctx, PruneReqDto req);
     Task<Result<DiscordEmbed>> PruneAsync(ContextMenuContext ctx, PruneReqDto req);
