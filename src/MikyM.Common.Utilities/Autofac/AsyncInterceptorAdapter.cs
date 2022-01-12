@@ -19,7 +19,7 @@ using Castle.DynamicProxy;
 
 namespace MikyM.Common.Utilities.Autofac;
 
-public class AsyncInterceptorAdapter<TAsyncInterceptor> : AsyncDeterminationInterceptor
+public sealed class AsyncInterceptorAdapter<TAsyncInterceptor> : AsyncDeterminationInterceptor
     where TAsyncInterceptor : IAsyncInterceptor
 {
     public AsyncInterceptorAdapter(TAsyncInterceptor asyncInterceptor)

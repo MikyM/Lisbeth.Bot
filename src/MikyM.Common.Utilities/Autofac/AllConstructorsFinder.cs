@@ -21,7 +21,7 @@ using Autofac.Core.Activators.Reflection;
 
 namespace MikyM.Common.Utilities.Autofac;
 
-public class AllConstructorsFinder : IConstructorFinder
+public sealed class AllConstructorsFinder : IConstructorFinder
 {
     private static readonly ConcurrentDictionary<Type, ConstructorInfo[]> Cache = new();
 

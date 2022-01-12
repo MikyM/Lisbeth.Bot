@@ -21,7 +21,7 @@ using MikyM.Common.Utilities.Autofac;
 
 namespace MikyM.Common.Application;
 
-public class RegistrationConfiguration
+public sealed class RegistrationConfiguration
 {
     public Lifetime BaseGenericDataServiceLifetime { get; set; } = Lifetime.InstancePerLifetimeScope;
     public Lifetime DataServiceLifetime { get; set; } = Lifetime.InstancePerLifetimeScope;
