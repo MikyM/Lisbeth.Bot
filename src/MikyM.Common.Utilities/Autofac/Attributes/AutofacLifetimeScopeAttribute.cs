@@ -18,7 +18,7 @@
 namespace MikyM.Common.Utilities.Autofac.Attributes;
 
 [AttributeUsage(AttributeTargets.Class)]
-public class AutofacLifetimeAttribute : Attribute
+public sealed class AutofacLifetimeAttribute : Attribute
 {
     public Lifetime Scope { get; private set; }
     public Type? Owned { get; private set; }

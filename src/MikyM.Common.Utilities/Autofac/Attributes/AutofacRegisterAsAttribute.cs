@@ -18,7 +18,7 @@
 namespace MikyM.Common.Utilities.Autofac.Attributes;
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-public class AutofacRegisterAsAttribute : Attribute
+public sealed class AutofacRegisterAsAttribute : Attribute
 {
     public Type? RegisterAsType { get; private set; }
 

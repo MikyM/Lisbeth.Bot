@@ -18,7 +18,7 @@
 namespace MikyM.Common.Utilities.Autofac.Attributes;
 
 [AttributeUsage(AttributeTargets.Class)]
-public class AutofacServiceAttribute : Attribute
+public sealed class AutofacServiceAttribute : Attribute
 {
     public AutofacServiceAttribute()
     {

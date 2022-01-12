@@ -20,7 +20,7 @@ using Castle.DynamicProxy;
 namespace MikyM.Common.Utilities.Autofac.Attributes;
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-public class AutofacInterceptedByAttribute : Attribute
+public sealed class AutofacInterceptedByAttribute : Attribute
 {
     public Type Interceptor { get; private set; }
     public bool IsAsync { get; private set; }
