@@ -26,7 +26,7 @@ public class RegistrationConfiguration
     public LifetimeScope BaseGenericDataServiceLifetimeScope { get; set; } = LifetimeScope.InstancePerLifetimeScope;
     public LifetimeScope DataServiceLifetimeScope { get; set; } = LifetimeScope.InstancePerLifetimeScope;
     internal Dictionary<Type, object> InterceptorDelegates { get; private set; } = new();
-    internal Dictionary<Type, Tuple<object, Action<DataServiceRegistrationConfiguration>?>> DataInterceptorDelegates { get; private set; } = new();
+    internal Dictionary<Type, Tuple<object, DataInterceptorConfiguration>> DataInterceptorDelegates { get; private set; } = new();
 
     public RegistrationConfiguration AddInterceptor<T>(Func<IComponentContext, T> factoryMethod) where T : notnull
     {
@@ -35,16 +35,18 @@ public class RegistrationConfiguration
     }
 
     public RegistrationConfiguration AddDataServiceInterceptor<T>(Func<IComponentContext, T> factoryMethod,
-        Action<DataServiceRegistrationConfiguration>? configuration = null) where T : notnull
+        DataInterceptorConfiguration configuration = DataInterceptorConfiguration.CrudAndReadOnly)
+        where T : notnull
     {
         DataInterceptorDelegates.TryAdd(typeof(T),
-            new Tuple<object, Action<DataServiceRegistrationConfiguration>?>(factoryMethod, configuration));
+            new Tuple<object, DataInterceptorConfiguration>(factoryMethod, configuration));
         return this;
     }
 }
 
-public class DataServiceRegistrationConfiguration
+public enum DataInterceptorConfiguration
 {
-    public bool ShouldRegisterForCrudServices { get; set; } = true;
-    public bool ShouldRegisterForReadOnlyServices { get; set; } = true;
+    CrudAndReadOnly,
+    Crud,
+    ReadOnly
 }

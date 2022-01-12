@@ -33,9 +33,4 @@ public class AutofacRegisterAsAttribute : Attribute
     {
         RegisterAsOption = registerAs;
     }
-
-    public AutofacRegisterAsAttribute()
-    {
-        RegisterAsOption = RegisterAs.AsSelf;
-    }
 }

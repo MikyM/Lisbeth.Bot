@@ -32,6 +32,8 @@ public static class DependancyInjectionExtensions
 {
     public static void AddApplicationLayer(this ContainerBuilder builder, Action<RegistrationConfiguration> configuration)
     {
+        // register automapper
+        builder.RegisterAutoMapper(opt => opt.AddExpressionMapping(), false, AppDomain.CurrentDomain.GetAssemblies());
         //register async interceptor adapter
         builder.RegisterGeneric(typeof(AsyncInterceptorAdapter<>));
         //register async interceptor
@@ -41,8 +43,8 @@ public static class DependancyInjectionExtensions
         configuration(config);
 
         var method = typeof(Autofac.RegistrationExtensions).GetMethods().First(x =>
-            x.Name == "Register" && x.GetGenericArguments().Count() == 1 &&
-            x.GetParameters().Count() == 2);
+            x.Name == "Register" && x.GetGenericArguments().Length == 1 &&
+            x.GetParameters().Length == 2);
         MethodInfo? registerMethod;
 
         IRegistrationBuilder<object, ReflectionActivatorData, DynamicRegistrationStyle> registReadOnlyBuilder;
@@ -88,17 +90,21 @@ public static class DependancyInjectionExtensions
 
         foreach (var (interceptorType, (action, dataConfig)) in config.DataInterceptorDelegates)
         {
-            var act = new DataServiceRegistrationConfiguration();
-            dataConfig?.Invoke(act);
-
-            if (!act.ShouldRegisterForReadOnlyServices && !act.ShouldRegisterForCrudServices)
-                throw new InvalidOperationException();
-
-            if (act.ShouldRegisterForCrudServices)
-                registCrudBuilder.InterceptedBy(interceptorType);
-
-            if (act.ShouldRegisterForReadOnlyServices)
-                registReadOnlyBuilder.InterceptedBy(interceptorType);
+            switch (dataConfig)
+            {
+                case DataInterceptorConfiguration.CrudAndReadOnly:
+                    registCrudBuilder.InterceptedBy(interceptorType);
+                    registReadOnlyBuilder.InterceptedBy(interceptorType);
+                    break;
+                case DataInterceptorConfiguration.Crud:
+                    registCrudBuilder.InterceptedBy(interceptorType);
+                    break;
+                case DataInterceptorConfiguration.ReadOnly:
+                    registReadOnlyBuilder.InterceptedBy(interceptorType);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
 
             registerMethod = method.MakeGenericMethod(interceptorType);
             registerMethod.Invoke(null, new[] { builder, action });
@@ -112,8 +118,6 @@ public static class DependancyInjectionExtensions
 
         var excluded = new[] { typeof(DataServiceBase<>), typeof(CrudService<,>), typeof(ReadOnlyDataService<,>) };
 
-        builder.RegisterAutoMapper(opt => opt.AddExpressionMapping(), false, AppDomain.CurrentDomain.GetAssemblies());
-
         foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
         {
             var subSet = assembly.GetTypes()
@@ -126,322 +130,114 @@ public static class DependancyInjectionExtensions
                     .Any(y => y.IsGenericType && y.GetGenericTypeDefinition() == typeof(IDataServiceBase<>)) && x.IsClass && !x.IsAbstract)
                 .ToList();
 
-            subSet.RemoveAll(x => excluded.Any(y => y == x));
+            subSet.RemoveAll(x => excluded.Any(y => y == x) || dataSubSet.Any(y => y == x));
             dataSubSet.RemoveAll(x => excluded.Any(y => y == x));
 
+            // handle data services
             foreach (var dataType in dataSubSet)
             {
-                var overrideAttr = dataType.GetCustomAttribute<AutofacLifetimeScopeAttribute>();
-                var dataIntrAttr = dataType.GetCustomAttributes<InterceptAttribute>(false).ToList();
-                bool dataIsIntercepted = dataIntrAttr.Any();
-                if (overrideAttr is not null)
+                var scopeOverrideAttr = dataType.GetCustomAttribute<AutofacLifetimeScopeAttribute>();
+                var intrAttrs = dataType.GetCustomAttributes<AutofacInterceptedByAttribute>(false).ToList();
+                var asAttr = dataType.GetCustomAttributes<AutofacRegisterAsAttribute>(false).ToList();
+                bool isIntercepted = intrAttrs.Any();
+
+                var scope = scopeOverrideAttr?.Scope ?? config.DataServiceLifetimeScope;
+
+                var registerAsTypes = asAttr.Where(x => x.RegisterAsType is not null)
+                    .Select(x => x.RegisterAsType)
+                    .Distinct()
+                    .ToList();
+                var shouldAsSelf = !asAttr.Any() || asAttr.Any(x => x.RegisterAsOption == RegisterAs.AsSelf) &&
+                    asAttr.All(x => x.RegisterAsType != dataType);
+                var shouldAsInterfaces = asAttr.Any(x => x.RegisterAsOption == RegisterAs.AsImplementedInterfaces);
+
+                IRegistrationBuilder<object, ReflectionActivatorData, DynamicRegistrationStyle>? registrationGenericBuilder = null;
+                IRegistrationBuilder<object, ReflectionActivatorData, SingleRegistrationStyle>? registrationBuilder = null;
+
+                if (dataType.IsGenericType && dataType.IsGenericTypeDefinition)
                 {
-                    switch (overrideAttr.Scope)
-                    {
-                        case LifetimeScope.Singleton:
-                            if (dataIsIntercepted)
-                            {
-                                if (dataType.IsGenericType && dataType.IsGenericTypeDefinition)
-                                    builder.RegisterGeneric(dataType)
-                                        .AsImplementedInterfaces()
-                                        .EnableInterfaceInterceptors()
-                                        .SingleInstance();
-                                else
-                                    builder.RegisterType(dataType)
-                                        .AsImplementedInterfaces()
-                                        .EnableInterfaceInterceptors()
-                                        .SingleInstance();
-                            }
-                            else
-                            {
-                                if (dataType.IsGenericType)
-                                    builder.RegisterGeneric(dataType)
-                                        .AsImplementedInterfaces()
-                                        .SingleInstance();
-                                else
-                                    builder.RegisterType(dataType)
-                                        .AsImplementedInterfaces()
-                                        .SingleInstance();
-                            }
-                            break;
-                        case LifetimeScope.InstancePerRequest:
-                            if (dataIsIntercepted)
-                            {
-                                if (dataType.IsGenericType && dataType.IsGenericTypeDefinition)
-                                    builder.RegisterGeneric(dataType)
-                                        .AsImplementedInterfaces()
-                                        .EnableInterfaceInterceptors()
-                                        .InstancePerRequest();
-                                else
-                                    builder.RegisterType(dataType)
-                                        .AsImplementedInterfaces()
-                                        .EnableInterfaceInterceptors()
-                                        .InstancePerRequest();
-                            }
-                            else
-                            {
-                                if (dataType.IsGenericType && dataType.IsGenericTypeDefinition)
-                                    builder.RegisterGeneric(dataType)
-                                        .AsImplementedInterfaces()
-                                        .InstancePerRequest();
-                                else
-                                    builder.RegisterType(dataType)
-                                        .AsImplementedInterfaces()
-                                        .InstancePerRequest();
-                            }
-                            break;
-                        case LifetimeScope.InstancePerLifetimeScope:
-                            if (dataIsIntercepted)
-                            {
-                                if (dataType.IsGenericType && dataType.IsGenericTypeDefinition)
-                                    builder.RegisterGeneric(dataType)
-                                        .AsImplementedInterfaces()
-                                        .EnableInterfaceInterceptors()
-                                        .InstancePerLifetimeScope();
-                                else
-                                    builder.RegisterType(dataType)
-                                        .AsImplementedInterfaces()
-                                        .EnableInterfaceInterceptors()
-                                        .InstancePerLifetimeScope();
-                            }
-                            else
-                            {
-                                if (dataType.IsGenericType && dataType.IsGenericTypeDefinition)
-                                    builder.RegisterGeneric(dataType)
-                                        .AsImplementedInterfaces()
-                                        .InstancePerLifetimeScope();
-                                else
-                                    builder.RegisterType(dataType)
-                                        .AsImplementedInterfaces()
-                                        .InstancePerLifetimeScope();
-                            }
-                            break;
-                        case LifetimeScope.InstancePerDependancy:
-                            if (dataIsIntercepted)
-                            {
-                                if (dataType.IsGenericType && dataType.IsGenericTypeDefinition)
-                                    builder.RegisterGeneric(dataType)
-                                        .AsImplementedInterfaces()
-                                        .EnableInterfaceInterceptors()
-                                        .InstancePerDependency();
-                                else
-                                    builder.RegisterType(dataType)
-                                        .AsImplementedInterfaces()
-                                        .EnableInterfaceInterceptors()
-                                        .InstancePerDependency();
-                            }
-                            else
-                            {
-                                if (dataType.IsGenericType && dataType.IsGenericTypeDefinition)
-                                    builder.RegisterGeneric(dataType)
-                                        .AsImplementedInterfaces()
-                                        .InstancePerDependency();
-                                else
-                                    builder.RegisterType(dataType)
-                                        .AsImplementedInterfaces()
-                                        .InstancePerDependency();
-                            }
-                            break;
-                        case LifetimeScope.InstancePerMatchingLifetimeScope:
-                            if (dataIsIntercepted)
-                            {
-                                if (dataType.IsGenericType && dataType.IsGenericTypeDefinition)
-                                    builder.RegisterGeneric(dataType)
-                                        .AsImplementedInterfaces()
-                                        .EnableInterfaceInterceptors()
-                                        .InstancePerMatchingLifetimeScope();
-                                else
-                                    builder.RegisterType(dataType)
-                                        .AsImplementedInterfaces()
-                                        .EnableInterfaceInterceptors()
-                                        .InstancePerMatchingLifetimeScope();
-                            }
-                            else
-                            {
-                                if (dataType.IsGenericType && dataType.IsGenericTypeDefinition)
-                                    builder.RegisterGeneric(dataType)
-                                        .AsImplementedInterfaces()
-                                        .InstancePerMatchingLifetimeScope();
-                                else
-                                    builder.RegisterType(dataType)
-                                        .AsImplementedInterfaces()
-                                        .InstancePerMatchingLifetimeScope();
-                            }
-                            break;
-                        case LifetimeScope.InstancePerOwned:
-                            if (overrideAttr.Owned is null)
-                                throw new InvalidOperationException("Owned type was null");
-                            if (dataIsIntercepted)
-                            {
-                                if (dataType.IsGenericType && dataType.IsGenericTypeDefinition)
-                                    builder.RegisterGeneric(dataType)
-                                        .AsImplementedInterfaces()
-                                        .EnableInterfaceInterceptors()
-                                        .InstancePerOwned(overrideAttr.Owned);
-                                else
-                                    builder.RegisterType(dataType)
-                                        .AsImplementedInterfaces()
-                                        .EnableInterfaceInterceptors()
-                                        .InstancePerOwned(overrideAttr.Owned);
-                            }
-                            else
-                            {
-                                if (dataType.IsGenericType && dataType.IsGenericTypeDefinition)
-                                    builder.RegisterGeneric(dataType)
-                                        .AsImplementedInterfaces()
-                                        .InstancePerOwned(overrideAttr.Owned);
-                                else
-                                    builder.RegisterType(dataType)
-                                        .AsImplementedInterfaces()
-                                        .InstancePerOwned(overrideAttr.Owned);
-                            }
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException();
-                    }
+                    registrationGenericBuilder = shouldAsInterfaces
+                        ? builder.RegisterGeneric(dataType).AsImplementedInterfaces()
+                        : builder.RegisterGeneric(dataType);
                 }
                 else
                 {
-                    switch (config.DataServiceLifetimeScope)
+                    registrationBuilder = shouldAsInterfaces
+                        ? builder.RegisterType(dataType).AsImplementedInterfaces()
+                        : builder.RegisterType(dataType);
+                }
+
+                if (shouldAsSelf)
+                {
+                    registrationBuilder = registrationBuilder?.As(dataType);
+                    registrationGenericBuilder = registrationGenericBuilder?.AsSelf();
+                }
+
+                foreach (var asType in registerAsTypes)
+                {
+                    if (asType is null)
+                        throw new InvalidOperationException("Type was null during registration");
+
+                    registrationBuilder = registrationBuilder?.As(asType);
+                    registrationGenericBuilder = registrationGenericBuilder?.As(asType);
+                }
+
+                switch (scope)
+                {
+                    case LifetimeScope.Singleton:
+                        registrationBuilder = registrationBuilder?.SingleInstance();
+                        registrationGenericBuilder = registrationGenericBuilder?.SingleInstance();
+                        break;
+                    case LifetimeScope.InstancePerRequest:
+                        registrationBuilder = registrationBuilder?.InstancePerRequest();
+                        registrationGenericBuilder = registrationGenericBuilder?.InstancePerRequest();
+                        break;
+                    case LifetimeScope.InstancePerLifetimeScope:
+                        registrationBuilder = registrationBuilder?.InstancePerLifetimeScope();
+                        registrationGenericBuilder = registrationGenericBuilder?.InstancePerLifetimeScope();
+                        break;
+                    case LifetimeScope.InstancePerDependancy:
+                        registrationBuilder = registrationBuilder?.InstancePerDependency();
+                        registrationGenericBuilder = registrationGenericBuilder?.InstancePerDependency();
+                        break;
+                    case LifetimeScope.InstancePerMatchingLifetimeScope:
+                        registrationBuilder =
+                            registrationBuilder?.InstancePerMatchingLifetimeScope(scopeOverrideAttr?.Tags.ToArray() ??
+                                Array.Empty<object>());
+                        registrationGenericBuilder =
+                            registrationGenericBuilder?.InstancePerMatchingLifetimeScope(scopeOverrideAttr?.Tags.ToArray() ??
+                                Array.Empty<object>());
+                        break;
+                    case LifetimeScope.InstancePerOwned:
+                        if (scopeOverrideAttr?.Owned is null) throw new InvalidOperationException("Owned type was null");
+
+                        registrationBuilder = registrationBuilder?.InstancePerOwned(scopeOverrideAttr.Owned);
+                        registrationGenericBuilder = registrationGenericBuilder?.InstancePerOwned(scopeOverrideAttr.Owned);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+
+                if (isIntercepted)
+                {
+                    registrationBuilder = registrationBuilder?.EnableInterfaceInterceptors();
+                    registrationGenericBuilder = registrationGenericBuilder?.EnableInterfaceInterceptors();
+
+                    foreach (var attr in intrAttrs)
                     {
-                        case LifetimeScope.Singleton:
-                            if (dataIsIntercepted)
-                            {
-                                if (dataType.IsGenericType && dataType.IsGenericTypeDefinition)
-                                    builder.RegisterGeneric(dataType)
-                                        .AsImplementedInterfaces()
-                                        .EnableInterfaceInterceptors()
-                                        .SingleInstance();
-                                else
-                                    builder.RegisterType(dataType)
-                                        .AsImplementedInterfaces()
-                                        .EnableInterfaceInterceptors()
-                                        .SingleInstance();
-                            }
-                            else
-                            {
-                                if (dataType.IsGenericType)
-                                    builder.RegisterGeneric(dataType)
-                                        .AsImplementedInterfaces()
-                                        .SingleInstance();
-                                else
-                                    builder.RegisterType(dataType)
-                                        .AsImplementedInterfaces()
-                                        .SingleInstance();
-                            }
-                            break;
-                        case LifetimeScope.InstancePerRequest:
-                            if (dataIsIntercepted)
-                            {
-                                if (dataType.IsGenericType && dataType.IsGenericTypeDefinition)
-                                    builder.RegisterGeneric(dataType)
-                                        .AsImplementedInterfaces()
-                                        .EnableInterfaceInterceptors()
-                                        .InstancePerRequest();
-                                else
-                                    builder.RegisterType(dataType)
-                                        .AsImplementedInterfaces()
-                                        .EnableInterfaceInterceptors()
-                                        .InstancePerRequest();
-                            }
-                            else
-                            {
-                                if (dataType.IsGenericType && dataType.IsGenericTypeDefinition)
-                                    builder.RegisterGeneric(dataType)
-                                        .AsImplementedInterfaces()
-                                        .InstancePerRequest();
-                                else
-                                    builder.RegisterType(dataType)
-                                        .AsImplementedInterfaces()
-                                        .InstancePerRequest();
-                            }
-                            break;
-                        case LifetimeScope.InstancePerLifetimeScope:
-                            if (dataIsIntercepted)
-                            {
-                                if (dataType.IsGenericType && dataType.IsGenericTypeDefinition)
-                                    builder.RegisterGeneric(dataType)
-                                        .AsImplementedInterfaces()
-                                        .EnableInterfaceInterceptors()
-                                        .InstancePerLifetimeScope();
-                                else
-                                    builder.RegisterType(dataType)
-                                        .AsImplementedInterfaces()
-                                        .EnableInterfaceInterceptors()
-                                        .InstancePerLifetimeScope();
-                            }
-                            else
-                            {
-                                if (dataType.IsGenericType && dataType.IsGenericTypeDefinition)
-                                    builder.RegisterGeneric(dataType)
-                                        .AsImplementedInterfaces()
-                                        .InstancePerLifetimeScope();
-                                else
-                                    builder.RegisterType(dataType)
-                                        .AsImplementedInterfaces()
-                                        .InstancePerLifetimeScope();
-                            }
-                            break;
-                        case LifetimeScope.InstancePerDependancy:
-                            if (dataIsIntercepted)
-                            {
-                                if (dataType.IsGenericType && dataType.IsGenericTypeDefinition)
-                                    builder.RegisterGeneric(dataType)
-                                        .AsImplementedInterfaces()
-                                        .EnableInterfaceInterceptors()
-                                        .InstancePerDependency();
-                                else
-                                    builder.RegisterType(dataType)
-                                        .AsImplementedInterfaces()
-                                        .EnableInterfaceInterceptors()
-                                        .InstancePerDependency();
-                            }
-                            else
-                            {
-                                if (dataType.IsGenericType && dataType.IsGenericTypeDefinition)
-                                    builder.RegisterGeneric(dataType)
-                                        .AsImplementedInterfaces()
-                                        .InstancePerDependency();
-                                else
-                                    builder.RegisterType(dataType)
-                                        .AsImplementedInterfaces()
-                                        .InstancePerDependency();
-                            }
-                            break;
-                        case LifetimeScope.InstancePerMatchingLifetimeScope:
-                            if (dataIsIntercepted)
-                            {
-                                if (dataType.IsGenericType && dataType.IsGenericTypeDefinition)
-                                    builder.RegisterGeneric(dataType)
-                                        .AsImplementedInterfaces()
-                                        .EnableInterfaceInterceptors()
-                                        .InstancePerMatchingLifetimeScope();
-                                else
-                                    builder.RegisterType(dataType)
-                                        .AsImplementedInterfaces()
-                                        .EnableInterfaceInterceptors()
-                                        .InstancePerMatchingLifetimeScope();
-                            }
-                            else
-                            {
-                                if (dataType.IsGenericType && dataType.IsGenericTypeDefinition)
-                                    builder.RegisterGeneric(dataType)
-                                        .AsImplementedInterfaces()
-                                        .InstancePerMatchingLifetimeScope();
-                                else
-                                    builder.RegisterType(dataType)
-                                        .AsImplementedInterfaces()
-                                        .InstancePerMatchingLifetimeScope();
-                            }
-                            break;
-                        case LifetimeScope.InstancePerOwned:
-                            throw new NotSupportedException();
-                        default:
-                            throw new ArgumentOutOfRangeException();
+                        registrationBuilder = attr.IsAsync
+                            ? registrationBuilder?.InterceptedBy(
+                                typeof(AsyncInterceptorAdapter<>).MakeGenericType(attr.Interceptor))
+                            : registrationBuilder?.InterceptedBy(attr.Interceptor);
+                        registrationGenericBuilder = attr.IsAsync
+                            ? registrationGenericBuilder?.InterceptedBy(
+                                typeof(AsyncInterceptorAdapter<>).MakeGenericType(attr.Interceptor))
+                            : registrationGenericBuilder?.InterceptedBy(attr.Interceptor);
                     }
                 }
             }
 
+            // handle regular services
             foreach (var type in subSet)
             {
                 var intrAttrs = type.GetCustomAttributes<AutofacInterceptedByAttribute>(false).ToList();
@@ -450,8 +246,12 @@ public static class DependancyInjectionExtensions
 
                 var scope = scopeAttr?.Scope ?? LifetimeScope.InstancePerLifetimeScope;
 
-                var registerAsTypes = asAttrs.Where(x => x.RegisterAsType is not null).Select(x => x.RegisterAsType).ToList();
-                var shouldAsSelf = !asAttrs.Any() || asAttrs.Any(x => x.RegisterAsOption == RegisterAs.AsSelf);
+                var registerAsTypes = asAttrs.Where(x => x.RegisterAsType is not null)
+                    .Select(x => x.RegisterAsType)
+                    .Distinct()
+                    .ToList();
+                var shouldAsSelf = !asAttrs.Any() || asAttrs.Any(x => x.RegisterAsOption == RegisterAs.AsSelf) &&
+                    asAttrs.All(x => x.RegisterAsType != type);
                 var shouldAsInterfaces = asAttrs.Any(x => x.RegisterAsOption == RegisterAs.AsImplementedInterfaces);
 
                 bool isIntercepted = intrAttrs.Any();
@@ -541,9 +341,6 @@ public static class DependancyInjectionExtensions
                     }
                 }
             }
-            /*builder.RegisterTypes(subSet.ToArray())
-                .AsImplementedInterfaces()
-                .InstancePerLifetimeScope();*/
         }
     }
 }
