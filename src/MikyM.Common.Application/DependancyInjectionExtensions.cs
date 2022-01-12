@@ -88,8 +88,12 @@ public static class DependancyInjectionExtensions
                 throw new ArgumentOutOfRangeException(nameof(config.BaseGenericDataServiceLifetime), config.BaseGenericDataServiceLifetime, null);
         }
 
-        foreach (var (interceptorType, (action, dataConfig)) in config.DataInterceptorDelegates)
+        foreach (var (interceptorType, dataConfig) in config.DataInterceptorDelegates)
         {
+            if (!config.InterceptorDelegates.TryGetValue(interceptorType, out _))
+                throw new ArgumentException(
+                    $"You must first register {interceptorType.Name} interceptor with .AddInterceptor method");
+
             switch (dataConfig)
             {
                 case DataInterceptorConfiguration.CrudAndReadOnly:
@@ -105,9 +109,6 @@ public static class DependancyInjectionExtensions
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-
-            registerMethod = method.MakeGenericMethod(interceptorType);
-            registerMethod.Invoke(null, new[] { builder, action });
         }
 
         foreach (var (interceptorType, action) in config.InterceptorDelegates)
