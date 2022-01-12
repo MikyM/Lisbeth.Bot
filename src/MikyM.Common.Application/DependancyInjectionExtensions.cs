@@ -88,7 +88,10 @@ public static class DependancyInjectionExtensions
                 throw new ArgumentOutOfRangeException(nameof(config.BaseGenericDataServiceLifetime), config.BaseGenericDataServiceLifetime, null);
         }
 
-        foreach (var (interceptorType, dataConfig) in config.DataInterceptorDelegates)
+        // base data interceptors
+        bool crudEnabled = false;
+        bool readEnabled = false;
+        foreach (var (interceptorType, dataConfig) in config.DataInterceptors)
         {
             if (!config.InterceptorDelegates.TryGetValue(interceptorType, out _))
                 throw new ArgumentException(
@@ -97,14 +100,35 @@ public static class DependancyInjectionExtensions
             switch (dataConfig)
             {
                 case DataInterceptorConfiguration.CrudAndReadOnly:
-                    registCrudBuilder.EnableInterfaceInterceptors().InterceptedBy(interceptorType);
-                    registReadOnlyBuilder.EnableInterfaceInterceptors().InterceptedBy(interceptorType);
+                    registCrudBuilder = registCrudBuilder.InterceptedBy(interceptorType);
+                    registReadOnlyBuilder = registReadOnlyBuilder.InterceptedBy(interceptorType);
+
+                    if (!crudEnabled)
+                    {
+                        registCrudBuilder = registCrudBuilder.EnableInterfaceInterceptors();
+                        crudEnabled = true;
+                    }
+                    if (!readEnabled)
+                    {
+                        registReadOnlyBuilder = registCrudBuilder.EnableInterfaceInterceptors();
+                        readEnabled = true;
+                    }
                     break;
                 case DataInterceptorConfiguration.Crud:
-                    registCrudBuilder.EnableInterfaceInterceptors().InterceptedBy(interceptorType);
+                    registCrudBuilder = registCrudBuilder.InterceptedBy(interceptorType);
+                    if (!crudEnabled)
+                    {
+                        registCrudBuilder = registCrudBuilder.EnableInterfaceInterceptors();
+                        crudEnabled = true;
+                    }
                     break;
                 case DataInterceptorConfiguration.ReadOnly:
-                    registReadOnlyBuilder.EnableInterfaceInterceptors().InterceptedBy(interceptorType);
+                    registReadOnlyBuilder = registReadOnlyBuilder.InterceptedBy(interceptorType);
+                    if (!readEnabled)
+                    {
+                        registReadOnlyBuilder = registCrudBuilder.EnableInterfaceInterceptors();
+                        readEnabled = true;
+                    }
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

@@ -26,7 +26,7 @@ public sealed class RegistrationConfiguration
     public Lifetime BaseGenericDataServiceLifetime { get; set; } = Lifetime.InstancePerLifetimeScope;
     public Lifetime DataServiceLifetime { get; set; } = Lifetime.InstancePerLifetimeScope;
     internal Dictionary<Type, object> InterceptorDelegates { get; private set; } = new();
-    internal Dictionary<Type, DataInterceptorConfiguration> DataInterceptorDelegates { get; private set; } = new();
+    internal Dictionary<Type, DataInterceptorConfiguration> DataInterceptors { get; private set; } = new();
 
     public RegistrationConfiguration AddInterceptor<T>(Func<IComponentContext, T> factoryMethod) where T : notnull
     {
@@ -36,13 +36,13 @@ public sealed class RegistrationConfiguration
 
     public RegistrationConfiguration AddDataServiceInterceptor(Type interceptor, DataInterceptorConfiguration configuration = DataInterceptorConfiguration.CrudAndReadOnly)
     {
-        DataInterceptorDelegates.TryAdd(interceptor, configuration);
+        DataInterceptors.TryAdd(interceptor, configuration);
         return this;
     }
 
     public RegistrationConfiguration AddDataServiceInterceptor<T>(DataInterceptorConfiguration configuration = DataInterceptorConfiguration.CrudAndReadOnly) where T : notnull
     {
-        DataInterceptorDelegates.TryAdd(typeof(T), configuration);
+        DataInterceptors.TryAdd(typeof(T), configuration);
         return this;
     }
 }
