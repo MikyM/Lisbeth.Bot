@@ -34,6 +34,8 @@ using MikyM.Discord.Interfaces;
 namespace Lisbeth.Bot.Application.Discord.Services;
 
 [UsedImplicitly]
+[AutofacService]
+[AutofacRegisterAs(typeof(IDiscordBanService))]
 [AutofacLifetimeScope(LifetimeScope.InstancePerLifetimeScope)]
 public class DiscordBanService : IDiscordBanService
 {

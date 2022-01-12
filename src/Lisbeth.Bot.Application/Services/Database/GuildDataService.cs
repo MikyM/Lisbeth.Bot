@@ -16,16 +16,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using AutoMapper;
-using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Exceptions;
 using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
-using Lisbeth.Bot.Domain.DTOs.Request.ChannelMessageFormat;
 using Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.ReminderConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.RoleMenu;
 using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
-using Microsoft.EntityFrameworkCore;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
 
 namespace Lisbeth.Bot.Application.Services.Database;

@@ -18,6 +18,7 @@
 using Castle.DynamicProxy;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
+using System.Dynamic;
 using System.Text.Json;
 
 namespace MikyM.Common.Utilities.Autofac;
@@ -37,17 +38,27 @@ public class LoggingInterceptor : AsyncInterceptorBase
         var sw = new Stopwatch();
         var args = new List<string>();
 
-        foreach (var arg in invocation.Arguments)
+        foreach (var arg in invocation.Arguments.Select((x, i) => new { i, x }))
         {
+            string str = string.Empty;
+            dynamic obj = new ExpandoObject();
+            obj.Index = arg.i;
+            obj.ArgumentType = arg.x.GetType().Name;
+
             try
             {
-                args.Add(JsonSerializer.Serialize(arg));
+                str = JsonSerializer.Serialize(arg);
             }
             catch
             {
-                continue;
+                obj.Value = "Couldnt serialize";
+                args.Add(JsonSerializer.Serialize(obj));
             }
+
+            obj.Value = str;
+            args.Add(JsonSerializer.Serialize(obj));
         }
+
         args.Insert(0, "{[");
         args.Add("]}");
         var serializedArgs = string.Join(" ", args);
@@ -76,17 +87,27 @@ public class LoggingInterceptor : AsyncInterceptorBase
         var sw = new Stopwatch();
         var args = new List<string>();
 
-        foreach (var arg in invocation.Arguments)
+        foreach (var arg in invocation.Arguments.Select((x, i) => new { i, x }))
         {
+            string str = string.Empty;
+            dynamic obj = new ExpandoObject();
+            obj.Index = arg.i;
+            obj.ArgumentType = arg.x.GetType().Name;
+
             try
             {
-                args.Add(JsonSerializer.Serialize(arg));
+                str = JsonSerializer.Serialize(arg);
             }
             catch
             {
-                continue;
+                obj.Value = "Couldnt serialize";
+                args.Add(JsonSerializer.Serialize(obj));
             }
+
+            obj.Value = str;
+            args.Add(JsonSerializer.Serialize(obj));
         }
+
         args.Insert(0, "{[");
         args.Add("]}");
         var serializedArgs = string.Join(" ", args);

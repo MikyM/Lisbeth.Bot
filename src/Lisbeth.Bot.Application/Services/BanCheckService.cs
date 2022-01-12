@@ -21,6 +21,8 @@ using Lisbeth.Bot.Domain.DTOs.Request.Ban;
 namespace Lisbeth.Bot.Application.Services;
 
 [UsedImplicitly]
+[AutofacService]
+[AutofacRegisterAs(typeof(IBanCheckService))]
 [AutofacLifetimeScope(LifetimeScope.InstancePerLifetimeScope)]
 public class BanCheckService : IBanCheckService
 {

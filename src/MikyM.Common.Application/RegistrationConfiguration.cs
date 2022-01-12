@@ -28,13 +28,9 @@ public class RegistrationConfiguration
     internal Dictionary<Type, object> InterceptorDelegates { get; private set; } = new();
     internal Dictionary<Type, Tuple<object, Action<DataServiceRegistrationConfiguration>?>> DataInterceptorDelegates { get; private set; } = new();
 
-    public RegistrationConfiguration AddInterceptor<T>(Func<IComponentContext, T> @delegate) where T : notnull
+    public RegistrationConfiguration AddInterceptor<T>(Func<IComponentContext, T> factoryMethod) where T : notnull
     {
-        InterceptorDelegates.TryAdd(typeof(T), @delegate);
-        /*if (InterceptorDelegates.TryGetValue(typeof(T), out var found))
-            found.Add(@delegate);
-        else
-            InterceptorDelegates.Add(typeof(T), new List<object> { @delegate });*/
+        InterceptorDelegates.TryAdd(typeof(T), factoryMethod);
         return this;
     }
 
@@ -43,7 +39,6 @@ public class RegistrationConfiguration
     {
         DataInterceptorDelegates.TryAdd(typeof(T),
             new Tuple<object, Action<DataServiceRegistrationConfiguration>?>(factoryMethod, configuration));
-
         return this;
     }
 }

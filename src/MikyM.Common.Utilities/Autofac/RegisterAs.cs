@@ -15,22 +15,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace MikyM.Common.Utilities.Autofac.Attributes;
 
-[AttributeUsage(AttributeTargets.Class)]
-public class AutofacLifetimeScopeAttribute : Attribute
+namespace MikyM.Common.Utilities.Autofac;
+
+public enum RegisterAs
 {
-    public LifetimeScope Scope { get; set; }
-    public Type? Owned { get; set; }
-
-    public AutofacLifetimeScopeAttribute(LifetimeScope scope)
-    {
-        Scope = scope;
-    }
-
-    public AutofacLifetimeScopeAttribute(LifetimeScope scope, Type owned)
-    {
-        Scope = scope;
-        Owned = owned;
-    }
+    AsSelf,
+    AsImplementedInterfaces
 }

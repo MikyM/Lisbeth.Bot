@@ -27,6 +27,8 @@ using MikyM.Discord.Interfaces;
 namespace Lisbeth.Bot.Application.Discord.Services;
 
 [UsedImplicitly]
+[AutofacService]
+[AutofacRegisterAs(typeof(IDiscordMemberService))]
 [AutofacLifetimeScope(LifetimeScope.InstancePerLifetimeScope)]
 public class DiscordMemberService : IDiscordMemberService
 {

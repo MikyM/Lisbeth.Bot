@@ -24,6 +24,8 @@ using NCrontab;
 namespace Lisbeth.Bot.Application.Services;
 
 [UsedImplicitly]
+[AutofacService]
+[AutofacRegisterAs(typeof(IMainReminderService))]
 [AutofacLifetimeScope(LifetimeScope.InstancePerLifetimeScope)]
 public class MainReminderService : IMainReminderService
 {

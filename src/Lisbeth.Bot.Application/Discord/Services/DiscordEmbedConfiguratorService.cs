@@ -24,6 +24,8 @@ using System.Text.RegularExpressions;
 namespace Lisbeth.Bot.Application.Discord.Services;
 
 [UsedImplicitly]
+[AutofacService]
+[AutofacRegisterAs(typeof(IDiscordEmbedConfiguratorService<>))]
 [AutofacLifetimeScope(LifetimeScope.InstancePerLifetimeScope)]
 public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorService<T> where T : SnowflakeDiscordEntity
 {

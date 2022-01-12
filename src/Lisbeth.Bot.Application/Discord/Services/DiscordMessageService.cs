@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Autofac.Extras.DynamicProxy;
 using AutoMapper;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
@@ -34,8 +33,10 @@ using System.Globalization;
 namespace Lisbeth.Bot.Application.Discord.Services;
 
 [UsedImplicitly]
-[Intercept(typeof(AsyncInterceptorAdapter<LoggingInterceptor>))]
+[AutofacService]
+[AutofacRegisterAs(typeof(IDiscordMessageService))]
 [AutofacLifetimeScope(LifetimeScope.InstancePerLifetimeScope)]
+[AutofacInterceptedBy(typeof(LoggingInterceptor), true)]
 public class DiscordMessageService : IDiscordMessageService
 {
     private readonly IDiscordService _discord;
