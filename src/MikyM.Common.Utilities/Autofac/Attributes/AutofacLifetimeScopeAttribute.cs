@@ -32,24 +32,28 @@ public class AutofacLifetimeScopeAttribute : Attribute
     public AutofacLifetimeScopeAttribute(LifetimeScope scope, Type owned)
     {
         Scope = scope;
-        Owned = owned;
+        Owned = owned ?? throw new ArgumentNullException(nameof(owned));
     }
 
     public AutofacLifetimeScopeAttribute(LifetimeScope scope, IEnumerable<object> tags)
     {
         Scope = scope;
-        Tags = tags;
+        Tags = tags ?? throw new ArgumentNullException(nameof(tags));
+        if (!tags.Any())
+            throw new ArgumentException("You must pass at least one tag");
     }
 
     public AutofacLifetimeScopeAttribute(Type owned)
     {
         Scope = LifetimeScope.InstancePerOwned;
-        Owned = owned;
+        Owned = owned ?? throw new ArgumentNullException(nameof(owned));
     }
 
     public AutofacLifetimeScopeAttribute(IEnumerable<object> tags)
     {
         Scope = LifetimeScope.InstancePerMatchingLifetimeScope;
-        Tags = tags;
+        Tags = tags ?? throw new ArgumentNullException(nameof(tags));
+        if (!tags.Any())
+            throw new ArgumentException("You must pass at least one tag");
     }
 }

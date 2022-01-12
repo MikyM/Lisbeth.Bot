@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using Castle.DynamicProxy;
+
 namespace MikyM.Common.Utilities.Autofac.Attributes;
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
@@ -27,12 +29,9 @@ public class AutofacInterceptedByAttribute : Attribute
 
     public AutofacInterceptedByAttribute(Type interceptor)
     {
-        Interceptor = interceptor;
-    }
+        Interceptor = interceptor ?? throw new ArgumentNullException(nameof(interceptor));
 
-    public AutofacInterceptedByAttribute(Type interceptor, bool isAsync = false)
-    {
-        Interceptor = interceptor;
-        IsAsync = isAsync;
+        if (interceptor.GetInterfaces().Any(x => x == typeof(IAsyncInterceptor)))
+            IsAsync = true;
     }
 }

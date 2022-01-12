@@ -26,7 +26,7 @@ public class AutofacRegisterAsAttribute : Attribute
 
     public AutofacRegisterAsAttribute(Type registerAs)
     {
-        RegisterAsType = registerAs;
+        RegisterAsType = registerAs ?? throw new ArgumentNullException(nameof(registerAs));
     }
 
     public AutofacRegisterAsAttribute(RegisterAs registerAs)
