@@ -18,24 +18,24 @@
 namespace MikyM.Common.Utilities.Autofac.Attributes;
 
 [AttributeUsage(AttributeTargets.Class)]
-public class AutofacLifetimeScopeAttribute : Attribute
+public class AutofacLifetimeAttribute : Attribute
 {
-    public LifetimeScope Scope { get; private set; }
+    public Lifetime Scope { get; private set; }
     public Type? Owned { get; private set; }
     public IEnumerable<object> Tags { get; private set; } = new List<string>();
 
-    public AutofacLifetimeScopeAttribute(LifetimeScope scope)
+    public AutofacLifetimeAttribute(Lifetime scope)
     {
         Scope = scope;
     }
 
-    public AutofacLifetimeScopeAttribute(LifetimeScope scope, Type owned)
+    public AutofacLifetimeAttribute(Lifetime scope, Type owned)
     {
         Scope = scope;
         Owned = owned ?? throw new ArgumentNullException(nameof(owned));
     }
 
-    public AutofacLifetimeScopeAttribute(LifetimeScope scope, IEnumerable<object> tags)
+    public AutofacLifetimeAttribute(Lifetime scope, IEnumerable<object> tags)
     {
         Scope = scope;
         Tags = tags ?? throw new ArgumentNullException(nameof(tags));
@@ -43,15 +43,15 @@ public class AutofacLifetimeScopeAttribute : Attribute
             throw new ArgumentException("You must pass at least one tag");
     }
 
-    public AutofacLifetimeScopeAttribute(Type owned)
+    public AutofacLifetimeAttribute(Type owned)
     {
-        Scope = LifetimeScope.InstancePerOwned;
+        Scope = Lifetime.InstancePerOwned;
         Owned = owned ?? throw new ArgumentNullException(nameof(owned));
     }
 
-    public AutofacLifetimeScopeAttribute(IEnumerable<object> tags)
+    public AutofacLifetimeAttribute(IEnumerable<object> tags)
     {
-        Scope = LifetimeScope.InstancePerMatchingLifetimeScope;
+        Scope = Lifetime.InstancePerMatchingLifetimeScope;
         Tags = tags ?? throw new ArgumentNullException(nameof(tags));
         if (!tags.Any())
             throw new ArgumentException("You must pass at least one tag");

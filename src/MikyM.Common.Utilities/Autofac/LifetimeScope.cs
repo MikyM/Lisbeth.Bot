@@ -17,7 +17,7 @@
 
 namespace MikyM.Common.Utilities.Autofac;
 
-public enum LifetimeScope
+public enum Lifetime
 {
     Singleton,
     InstancePerRequest,

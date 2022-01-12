@@ -26,7 +26,7 @@ namespace Lisbeth.Bot.Application.Discord.Services;
 [UsedImplicitly]
 [AutofacService]
 [AutofacRegisterAs(typeof(IDiscordGuildLogSenderService))]
-[AutofacLifetimeScope(LifetimeScope.InstancePerLifetimeScope)]
+[AutofacLifetime(Lifetime.InstancePerLifetimeScope)]
 public class DiscordGuildLogSenderService : IDiscordGuildLogSenderService
 {
     private readonly IGuildDataService _guildDataService;

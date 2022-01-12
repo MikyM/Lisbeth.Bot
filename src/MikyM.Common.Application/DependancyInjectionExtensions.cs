@@ -50,42 +50,42 @@ public static class DependancyInjectionExtensions
         IRegistrationBuilder<object, ReflectionActivatorData, DynamicRegistrationStyle> registReadOnlyBuilder;
         IRegistrationBuilder<object, ReflectionActivatorData, DynamicRegistrationStyle> registCrudBuilder;
 
-        switch (config.BaseGenericDataServiceLifetimeScope)
+        switch (config.BaseGenericDataServiceLifetime)
         {
-            case LifetimeScope.Singleton:
+            case Lifetime.Singleton:
                 registReadOnlyBuilder = builder.RegisterGeneric(typeof(ReadOnlyDataService<,>)).As(typeof(IReadOnlyDataService<,>))
                     .SingleInstance();
                 registCrudBuilder = builder.RegisterGeneric(typeof(CrudService<,>)).As(typeof(ICrudService<,>))
                     .SingleInstance();
                 break;
-            case LifetimeScope.InstancePerRequest:
+            case Lifetime.InstancePerRequest:
                 registReadOnlyBuilder = builder.RegisterGeneric(typeof(ReadOnlyDataService<,>)).As(typeof(IReadOnlyDataService<,>))
                     .InstancePerRequest();
                 registCrudBuilder = builder.RegisterGeneric(typeof(CrudService<,>)).As(typeof(ICrudService<,>))
                     .InstancePerRequest();
                 break;
-            case LifetimeScope.InstancePerLifetimeScope:
+            case Lifetime.InstancePerLifetimeScope:
                 registReadOnlyBuilder = builder.RegisterGeneric(typeof(ReadOnlyDataService<,>)).As(typeof(IReadOnlyDataService<,>))
                     .InstancePerLifetimeScope();
                 registCrudBuilder = builder.RegisterGeneric(typeof(CrudService<,>)).As(typeof(ICrudService<,>))
                     .InstancePerLifetimeScope();
                 break;
-            case LifetimeScope.InstancePerMatchingLifetimeScope:
+            case Lifetime.InstancePerMatchingLifetimeScope:
                 registReadOnlyBuilder = builder.RegisterGeneric(typeof(ReadOnlyDataService<,>)).As(typeof(IReadOnlyDataService<,>))
                     .InstancePerMatchingLifetimeScope();
                 registCrudBuilder = builder.RegisterGeneric(typeof(CrudService<,>)).As(typeof(ICrudService<,>))
                     .InstancePerMatchingLifetimeScope();
                 break;
-            case LifetimeScope.InstancePerDependancy:
+            case Lifetime.InstancePerDependancy:
                 registReadOnlyBuilder = builder.RegisterGeneric(typeof(ReadOnlyDataService<,>)).As(typeof(IReadOnlyDataService<,>))
                     .InstancePerDependency();
                 registCrudBuilder = builder.RegisterGeneric(typeof(CrudService<,>)).As(typeof(ICrudService<,>))
                     .InstancePerDependency();
                 break;
-            case LifetimeScope.InstancePerOwned:
+            case Lifetime.InstancePerOwned:
                 throw new NotSupportedException();
             default:
-                throw new ArgumentOutOfRangeException(nameof(config.BaseGenericDataServiceLifetimeScope), config.BaseGenericDataServiceLifetimeScope, null);
+                throw new ArgumentOutOfRangeException(nameof(config.BaseGenericDataServiceLifetime), config.BaseGenericDataServiceLifetime, null);
         }
 
         foreach (var (interceptorType, (action, dataConfig)) in config.DataInterceptorDelegates)
@@ -136,12 +136,12 @@ public static class DependancyInjectionExtensions
             // handle data services
             foreach (var dataType in dataSubSet)
             {
-                var scopeOverrideAttr = dataType.GetCustomAttribute<AutofacLifetimeScopeAttribute>();
+                var scopeOverrideAttr = dataType.GetCustomAttribute<AutofacLifetimeAttribute>();
                 var intrAttrs = dataType.GetCustomAttributes<AutofacInterceptedByAttribute>(false).ToList();
                 var asAttr = dataType.GetCustomAttributes<AutofacRegisterAsAttribute>(false).ToList();
                 bool isIntercepted = intrAttrs.Any();
 
-                var scope = scopeOverrideAttr?.Scope ?? config.DataServiceLifetimeScope;
+                var scope = scopeOverrideAttr?.Scope ?? config.DataServiceLifetime;
 
                 var registerAsTypes = asAttr.Where(x => x.RegisterAsType is not null)
                     .Select(x => x.RegisterAsType)
@@ -184,23 +184,23 @@ public static class DependancyInjectionExtensions
 
                 switch (scope)
                 {
-                    case LifetimeScope.Singleton:
+                    case Lifetime.Singleton:
                         registrationBuilder = registrationBuilder?.SingleInstance();
                         registrationGenericBuilder = registrationGenericBuilder?.SingleInstance();
                         break;
-                    case LifetimeScope.InstancePerRequest:
+                    case Lifetime.InstancePerRequest:
                         registrationBuilder = registrationBuilder?.InstancePerRequest();
                         registrationGenericBuilder = registrationGenericBuilder?.InstancePerRequest();
                         break;
-                    case LifetimeScope.InstancePerLifetimeScope:
+                    case Lifetime.InstancePerLifetimeScope:
                         registrationBuilder = registrationBuilder?.InstancePerLifetimeScope();
                         registrationGenericBuilder = registrationGenericBuilder?.InstancePerLifetimeScope();
                         break;
-                    case LifetimeScope.InstancePerDependancy:
+                    case Lifetime.InstancePerDependancy:
                         registrationBuilder = registrationBuilder?.InstancePerDependency();
                         registrationGenericBuilder = registrationGenericBuilder?.InstancePerDependency();
                         break;
-                    case LifetimeScope.InstancePerMatchingLifetimeScope:
+                    case Lifetime.InstancePerMatchingLifetimeScope:
                         registrationBuilder =
                             registrationBuilder?.InstancePerMatchingLifetimeScope(scopeOverrideAttr?.Tags.ToArray() ??
                                 Array.Empty<object>());
@@ -208,7 +208,7 @@ public static class DependancyInjectionExtensions
                             registrationGenericBuilder?.InstancePerMatchingLifetimeScope(scopeOverrideAttr?.Tags.ToArray() ??
                                 Array.Empty<object>());
                         break;
-                    case LifetimeScope.InstancePerOwned:
+                    case Lifetime.InstancePerOwned:
                         if (scopeOverrideAttr?.Owned is null) throw new InvalidOperationException("Owned type was null");
 
                         registrationBuilder = registrationBuilder?.InstancePerOwned(scopeOverrideAttr.Owned);
@@ -241,10 +241,10 @@ public static class DependancyInjectionExtensions
             foreach (var type in subSet)
             {
                 var intrAttrs = type.GetCustomAttributes<AutofacInterceptedByAttribute>(false).ToList();
-                var scopeAttr = type.GetCustomAttribute<AutofacLifetimeScopeAttribute>();
+                var scopeAttr = type.GetCustomAttribute<AutofacLifetimeAttribute>();
                 var asAttrs = type.GetCustomAttributes<AutofacRegisterAsAttribute>().ToList();
 
-                var scope = scopeAttr?.Scope ?? LifetimeScope.InstancePerLifetimeScope;
+                var scope = scopeAttr?.Scope ?? Lifetime.InstancePerLifetimeScope;
 
                 var registerAsTypes = asAttrs.Where(x => x.RegisterAsType is not null)
                     .Select(x => x.RegisterAsType)
@@ -289,23 +289,23 @@ public static class DependancyInjectionExtensions
 
                 switch (scope)
                 {
-                    case LifetimeScope.Singleton:
+                    case Lifetime.Singleton:
                         registrationBuilder = registrationBuilder?.SingleInstance();
                         registrationGenericBuilder = registrationGenericBuilder?.SingleInstance();
                         break;
-                    case LifetimeScope.InstancePerRequest:
+                    case Lifetime.InstancePerRequest:
                         registrationBuilder = registrationBuilder?.InstancePerRequest();
                         registrationGenericBuilder = registrationGenericBuilder?.InstancePerRequest();
                         break;
-                    case LifetimeScope.InstancePerLifetimeScope:
+                    case Lifetime.InstancePerLifetimeScope:
                         registrationBuilder = registrationBuilder?.InstancePerLifetimeScope();
                         registrationGenericBuilder = registrationGenericBuilder?.InstancePerLifetimeScope();
                         break;
-                    case LifetimeScope.InstancePerDependancy:
+                    case Lifetime.InstancePerDependancy:
                         registrationBuilder = registrationBuilder?.InstancePerDependency();
                         registrationGenericBuilder = registrationGenericBuilder?.InstancePerDependency();
                         break;
-                    case LifetimeScope.InstancePerMatchingLifetimeScope:
+                    case Lifetime.InstancePerMatchingLifetimeScope:
                         registrationBuilder =
                             registrationBuilder?.InstancePerMatchingLifetimeScope(scopeAttr?.Tags.ToArray() ??
                                 Array.Empty<object>());
@@ -313,7 +313,7 @@ public static class DependancyInjectionExtensions
                             registrationGenericBuilder?.InstancePerMatchingLifetimeScope(scopeAttr?.Tags.ToArray() ??
                                 Array.Empty<object>());
                         break;
-                    case LifetimeScope.InstancePerOwned:
+                    case Lifetime.InstancePerOwned:
                         if (scopeAttr?.Owned is null) throw new InvalidOperationException("Owned type was null");
 
                         registrationBuilder = registrationBuilder?.InstancePerOwned(scopeAttr.Owned);

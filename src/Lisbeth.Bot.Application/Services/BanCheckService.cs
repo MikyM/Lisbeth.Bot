@@ -23,7 +23,7 @@ namespace Lisbeth.Bot.Application.Services;
 [UsedImplicitly]
 [AutofacService]
 [AutofacRegisterAs(typeof(IBanCheckService))]
-[AutofacLifetimeScope(LifetimeScope.InstancePerLifetimeScope)]
+[AutofacLifetime(Lifetime.InstancePerLifetimeScope)]
 public class BanCheckService : IBanCheckService
 {
     private readonly IBanDataService _banDataService;

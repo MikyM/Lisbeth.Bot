@@ -26,7 +26,7 @@ namespace Lisbeth.Bot.Application.Services;
 [UsedImplicitly]
 [AutofacService]
 [AutofacRegisterAs(typeof(IMainReminderService))]
-[AutofacLifetimeScope(LifetimeScope.InstancePerLifetimeScope)]
+[AutofacLifetime(Lifetime.InstancePerLifetimeScope)]
 public class MainReminderService : IMainReminderService
 {
     private readonly IBackgroundJobClient _backgroundJobClient;

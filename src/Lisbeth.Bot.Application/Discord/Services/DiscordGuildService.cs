@@ -39,7 +39,7 @@ namespace Lisbeth.Bot.Application.Discord.Services;
 [UsedImplicitly]
 [AutofacService]
 [AutofacRegisterAs(typeof(IDiscordGuildService))]
-[AutofacLifetimeScope(LifetimeScope.InstancePerLifetimeScope)]
+[AutofacLifetime(Lifetime.InstancePerLifetimeScope)]
 public class DiscordGuildService : IDiscordGuildService
 {
     private readonly IDiscordService _discord;

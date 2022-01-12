@@ -29,7 +29,7 @@ namespace Lisbeth.Bot.Application.Discord.Services;
 [UsedImplicitly]
 [AutofacService]
 [AutofacRegisterAs(typeof(IDiscordMemberService))]
-[AutofacLifetimeScope(LifetimeScope.InstancePerLifetimeScope)]
+[AutofacLifetime(Lifetime.InstancePerLifetimeScope)]
 public class DiscordMemberService : IDiscordMemberService
 {
     private readonly IDiscordService _discord;

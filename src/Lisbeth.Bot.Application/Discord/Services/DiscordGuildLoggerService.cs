@@ -31,7 +31,7 @@ namespace Lisbeth.Bot.Application.Discord.Services;
 [UsedImplicitly]
 [AutofacService]
 [AutofacRegisterAs(typeof(IDiscordGuildLoggerService))]
-[AutofacLifetimeScope(LifetimeScope.InstancePerLifetimeScope)]
+[AutofacLifetime(Lifetime.InstancePerLifetimeScope)]
 public class DiscordGuildLoggerService : IDiscordGuildLoggerService
 {
     private readonly IDiscordGuildLogSenderService _logSender;

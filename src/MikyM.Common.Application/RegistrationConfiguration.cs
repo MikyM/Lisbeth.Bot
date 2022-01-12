@@ -23,8 +23,8 @@ namespace MikyM.Common.Application;
 
 public class RegistrationConfiguration
 {
-    public LifetimeScope BaseGenericDataServiceLifetimeScope { get; set; } = LifetimeScope.InstancePerLifetimeScope;
-    public LifetimeScope DataServiceLifetimeScope { get; set; } = LifetimeScope.InstancePerLifetimeScope;
+    public Lifetime BaseGenericDataServiceLifetime { get; set; } = Lifetime.InstancePerLifetimeScope;
+    public Lifetime DataServiceLifetime { get; set; } = Lifetime.InstancePerLifetimeScope;
     internal Dictionary<Type, object> InterceptorDelegates { get; private set; } = new();
     internal Dictionary<Type, Tuple<object, DataInterceptorConfiguration>> DataInterceptorDelegates { get; private set; } = new();
 
