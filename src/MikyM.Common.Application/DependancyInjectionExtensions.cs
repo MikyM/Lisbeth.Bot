@@ -97,14 +97,14 @@ public static class DependancyInjectionExtensions
             switch (dataConfig)
             {
                 case DataInterceptorConfiguration.CrudAndReadOnly:
-                    registCrudBuilder.InterceptedBy(interceptorType);
-                    registReadOnlyBuilder.InterceptedBy(interceptorType);
+                    registCrudBuilder.EnableInterfaceInterceptors().InterceptedBy(interceptorType);
+                    registReadOnlyBuilder.EnableInterfaceInterceptors().InterceptedBy(interceptorType);
                     break;
                 case DataInterceptorConfiguration.Crud:
-                    registCrudBuilder.InterceptedBy(interceptorType);
+                    registCrudBuilder.EnableInterfaceInterceptors().InterceptedBy(interceptorType);
                     break;
                 case DataInterceptorConfiguration.ReadOnly:
-                    registReadOnlyBuilder.InterceptedBy(interceptorType);
+                    registReadOnlyBuilder.EnableInterfaceInterceptors().InterceptedBy(interceptorType);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
