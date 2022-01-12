@@ -17,6 +17,9 @@
 
 namespace MikyM.Common.Utilities.Autofac;
 
+/// <summary>
+/// Interception types
+/// </summary>
 public enum Intercept
 {
     Interfaces,

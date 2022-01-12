@@ -23,6 +23,9 @@ using System.Text.Json;
 
 namespace MikyM.Common.Utilities.Autofac;
 
+/// <summary>
+/// Base logging interceptor
+/// </summary>
 public class LoggingInterceptor : AsyncInterceptorBase
 {
     private readonly ILogger _logger;

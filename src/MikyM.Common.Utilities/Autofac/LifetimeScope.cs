@@ -17,6 +17,9 @@
 
 namespace MikyM.Common.Utilities.Autofac;
 
+/// <summary>
+/// Lifetime types
+/// </summary>
 public enum Lifetime
 {
     Singleton,

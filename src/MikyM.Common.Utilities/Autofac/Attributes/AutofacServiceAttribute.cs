@@ -17,6 +17,9 @@
 
 namespace MikyM.Common.Utilities.Autofac.Attributes;
 
+/// <summary>
+/// Marks a class for registration as a service
+/// </summary>
 [AttributeUsage(AttributeTargets.Class)]
 public sealed class AutofacServiceAttribute : Attribute
 {

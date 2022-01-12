@@ -21,6 +21,9 @@ using Autofac.Core.Activators.Reflection;
 
 namespace MikyM.Common.Utilities.Autofac;
 
+/// <summary>
+/// Constructor finder that finds all constructors
+/// </summary>
 public sealed class AllConstructorsFinder : IConstructorFinder
 {
     private static readonly ConcurrentDictionary<Type, ConstructorInfo[]> Cache = new();

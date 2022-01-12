@@ -19,6 +19,9 @@ using Castle.DynamicProxy;
 
 namespace MikyM.Common.Utilities.Autofac.Attributes;
 
+/// <summary>
+/// Defines with what interceptors should the service be intercepted
+/// </summary>
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
 public sealed class AutofacInterceptedByAttribute : Attribute
 {

@@ -17,6 +17,9 @@
 
 namespace MikyM.Common.Utilities.Autofac.Attributes;
 
+/// <summary>
+/// Defines with which lifetime should the service be registered
+/// </summary>
 [AttributeUsage(AttributeTargets.Class)]
 public sealed class AutofacLifetimeAttribute : Attribute
 {

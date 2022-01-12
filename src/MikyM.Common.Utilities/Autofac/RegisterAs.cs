@@ -18,6 +18,9 @@
 
 namespace MikyM.Common.Utilities.Autofac;
 
+/// <summary>
+/// Registration types
+/// </summary>
 public enum RegisterAs
 {
     AsSelf,

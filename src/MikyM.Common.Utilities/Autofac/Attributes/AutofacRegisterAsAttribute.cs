@@ -17,6 +17,9 @@
 
 namespace MikyM.Common.Utilities.Autofac.Attributes;
 
+/// <summary>
+/// Defines as what should the service be registered
+/// </summary>
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
 public sealed class AutofacRegisterAsAttribute : Attribute
 {
