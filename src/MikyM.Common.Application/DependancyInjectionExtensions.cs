@@ -158,6 +158,15 @@ public static class DependancyInjectionExtensions
             subSet.RemoveAll(x => excluded.Any(y => y == x) || dataSubSet.Any(y => y == x));
             dataSubSet.RemoveAll(x => excluded.Any(y => y == x));
 
+            if (dataSubSet.Any())
+            {
+                var a = 3;
+            }
+            if (subSet.Any())
+            {
+                var a = 3;
+            }
+
             // handle data services
             foreach (var dataType in dataSubSet)
             {
@@ -172,9 +181,9 @@ public static class DependancyInjectionExtensions
                     .Select(x => x.RegisterAsType)
                     .Distinct()
                     .ToList();
-                var shouldAsSelf = !asAttr.Any() || asAttr.Any(x => x.RegisterAsOption == RegisterAs.AsSelf) &&
+                var shouldAsSelf = asAttr.Any(x => x.RegisterAsOption == RegisterAs.AsSelf) &&
                     asAttr.All(x => x.RegisterAsType != dataType);
-                var shouldAsInterfaces = asAttr.Any(x => x.RegisterAsOption == RegisterAs.AsImplementedInterfaces);
+                var shouldAsInterfaces = !asAttr.Any() || asAttr.Any(x => x.RegisterAsOption == RegisterAs.AsImplementedInterfaces);
 
                 IRegistrationBuilder<object, ReflectionActivatorData, DynamicRegistrationStyle>? registrationGenericBuilder = null;
                 IRegistrationBuilder<object, ReflectionActivatorData, SingleRegistrationStyle>? registrationBuilder = null;
@@ -275,9 +284,9 @@ public static class DependancyInjectionExtensions
                     .Select(x => x.RegisterAsType)
                     .Distinct()
                     .ToList();
-                var shouldAsSelf = !asAttrs.Any() || asAttrs.Any(x => x.RegisterAsOption == RegisterAs.AsSelf) &&
+                var shouldAsSelf = asAttrs.Any(x => x.RegisterAsOption == RegisterAs.AsSelf) &&
                     asAttrs.All(x => x.RegisterAsType != type);
-                var shouldAsInterfaces = asAttrs.Any(x => x.RegisterAsOption == RegisterAs.AsImplementedInterfaces);
+                var shouldAsInterfaces = !asAttrs.Any() || asAttrs.Any(x => x.RegisterAsOption == RegisterAs.AsImplementedInterfaces);
 
                 bool isIntercepted = intrAttrs.Any();
 
