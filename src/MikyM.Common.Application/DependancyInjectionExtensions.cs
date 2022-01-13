@@ -67,7 +67,7 @@ public static class DependancyInjectionExtensions
 
         switch (config.BaseGenericDataServiceLifetime)
         {
-            case Lifetime.Singleton:
+            case Lifetime.SingleInstance:
                 registReadOnlyBuilder = builder.RegisterGeneric(typeof(ReadOnlyDataService<,>))
                     .As(typeof(IReadOnlyDataService<,>))
                     .SingleInstance();
@@ -274,7 +274,7 @@ public static class DependancyInjectionExtensions
 
                 switch (scope)
                 {
-                    case Lifetime.Singleton:
+                    case Lifetime.SingleInstance:
                         registrationBuilder = registrationBuilder?.SingleInstance();
                         registrationGenericBuilder = registrationGenericBuilder?.SingleInstance();
                         break;

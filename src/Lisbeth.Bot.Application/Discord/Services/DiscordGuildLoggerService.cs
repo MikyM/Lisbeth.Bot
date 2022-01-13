@@ -109,7 +109,7 @@ public class DiscordGuildLoggerService : IDiscordGuildLoggerService
 
     public async Task<Result> LogToDiscordAsync<TEvent>(DiscordGuild discordGuild, TEvent discordEvent, DiscordLog log, string hexColor = "#26296e") where TEvent : DiscordEventArgs
     {
-        IEmbedEnricher enricher = null;
+        IEmbedEnricher? enricher = null;
 
         var embed = _embedBuilder
             .WithEmbedColor(new DiscordColor(hexColor))

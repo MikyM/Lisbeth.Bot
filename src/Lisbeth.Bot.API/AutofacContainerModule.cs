@@ -45,10 +45,9 @@ public class AutofacContainerModule : Module
         {
             x.AddCommandHandlers();
             x.AddServices();
+            x.AddAsyncExecutor();
         });
-
-        builder.AddAsyncExecutor();
-
+        
         // pagination stuff
         builder.RegisterType<HttpContextAccessor>().As<IHttpContextAccessor>().SingleInstance();
         builder.Register(x =>
@@ -61,8 +60,6 @@ public class AutofacContainerModule : Module
             .As<IUriService>()
             .SingleInstance();
 
-
-        builder.RegisterType<TicketQueueService>().As<ITicketQueueService>().SingleInstance();
 
         // Register Entity Framework
         builder.Register(x =>
@@ -89,10 +86,9 @@ public class AutofacContainerModule : Module
             .AsSelf()
             .SingleInstance();
 
-        builder.RegisterType<DiscordEmbedProvider>().As<IDiscordEmbedProvider>().SingleInstance();
 
-        builder.RegisterGeneric(typeof(DiscordEmbedConfiguratorService<>))
+        /*builder.RegisterGeneric(typeof(DiscordEmbedConfiguratorService<>))
             .As(typeof(IDiscordEmbedConfiguratorService<>))
-            .InstancePerLifetimeScope();
+            .InstancePerLifetimeScope();*/
     }
 }

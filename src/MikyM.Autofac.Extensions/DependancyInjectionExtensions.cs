@@ -96,7 +96,7 @@ namespace MikyM.Autofac.Extensions
                                 Intercept.Class => shouldAsInterfaces
                                     ? builder.RegisterType(type).AsImplementedInterfaces().EnableClassInterceptors()
                                     : builder.RegisterType(type).EnableClassInterceptors(),
-                                _ => throw new ArgumentOutOfRangeException()
+                                _ => throw new ArgumentOutOfRangeException(nameof(intrEnableAttr.Intercept))
                             };
                         }
                         else
@@ -123,7 +123,7 @@ namespace MikyM.Autofac.Extensions
 
                     switch (scope)
                     {
-                        case Lifetime.Singleton:
+                        case Lifetime.SingleInstance:
                             registrationBuilder = registrationBuilder?.SingleInstance();
                             registrationGenericBuilder = registrationGenericBuilder?.SingleInstance();
                             break;
@@ -154,7 +154,7 @@ namespace MikyM.Autofac.Extensions
                             registrationGenericBuilder = registrationGenericBuilder?.InstancePerOwned(scopeAttr.Owned);
                             break;
                         default:
-                            throw new ArgumentOutOfRangeException();
+                            throw new ArgumentOutOfRangeException(nameof(scope));
                     }
 
                     foreach (var attr in intrAttrs)

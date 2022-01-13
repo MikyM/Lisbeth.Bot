@@ -34,6 +34,9 @@ public interface ITicketQueueService
     bool RemoveGuildQueue(ulong guildId);
 }
 
+[Service]
+[RegisterAs(typeof(ITicketQueueService))]
+[Lifetime(Lifetime.SingleInstance)]
 public class TicketQueueService : ITicketQueueService
 {
     private readonly ConcurrentDictionary<ulong, ConcurrentTaskQueue> _guildQueues = new();

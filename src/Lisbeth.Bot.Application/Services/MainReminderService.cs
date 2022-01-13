@@ -235,7 +235,7 @@ public class MainReminderService : IMainReminderService
                 return new ReminderResDto(recurringResult.Entity.Id, recurringResult.Entity.Name, DateTime.MinValue,
                     recurringResult.Entity.Mentions, recurringResult.Entity.Text ?? "Text not set", true);
             default:
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException(nameof(req.Type));
         }
     }
 }

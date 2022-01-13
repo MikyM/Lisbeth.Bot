@@ -68,7 +68,7 @@ public class GetRoleMenuCommandHandler : ICommandHandler<GetRoleMenuCommand, Dis
         if (requestingUser.IsBotOwner(_discord.Client))
         {
             partial = await _roleMenuDataService.GetSingleBySpecAsync<Domain.Entities.RoleMenu>(
-                new RoleMenuByNameWithOptionsSpec(command.Dto.Name));
+                new RoleMenuByNameWithOptionsSpec(command.Dto.Name!));
         }
         else
         {
@@ -82,7 +82,7 @@ public class GetRoleMenuCommandHandler : ICommandHandler<GetRoleMenuCommand, Dis
                 return new DiscordNotAuthorizedError();
 
             partial = await _roleMenuDataService.GetSingleBySpecAsync<Domain.Entities.RoleMenu>(
-                new RoleMenuByNameAndGuildWithOptionsSpec(command.Dto.Name, guild.Id));
+                new RoleMenuByNameAndGuildWithOptionsSpec(command.Dto.Name!, guild.Id));
         }
 
         if (!partial.IsDefined())
@@ -101,7 +101,7 @@ public class GetRoleMenuCommandHandler : ICommandHandler<GetRoleMenuCommand, Dis
 
         if (partial.Entity.EmbedConfig is null)
             return builder.WithContent(partial.Entity.Text + "\n\nClick on the button below to manage your roles!" ??
-                                       throw new ArgumentNullException());
+                                       throw new ArgumentNullException(nameof(partial.Entity.Text)));
 
         var embed = _discordEmbedProvider.GetEmbedFromConfig(partial.Entity.EmbedConfig)
             .WithFooter("Click on the button below to manage your roles!")

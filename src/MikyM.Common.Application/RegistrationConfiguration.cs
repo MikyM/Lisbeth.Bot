@@ -17,6 +17,7 @@
 
 
 using Autofac;
+using MikyM.Common.Utilities;
 
 namespace MikyM.Common.Application;
 
@@ -41,6 +42,15 @@ public sealed class RegistrationConfiguration
     {
         Builder.Register(factoryMethod);
 
+        return this;
+    }
+
+    /// <summary>
+    /// Registers an async executor with the container
+    /// <returns>Current instance of the <see cref="RegistrationConfiguration"/></returns>
+    public RegistrationConfiguration AddAsyncExecutor()
+    {
+        Builder.AddAsyncExecutor();
         return this;
     }
 }

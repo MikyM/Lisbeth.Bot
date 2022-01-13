@@ -50,6 +50,9 @@ public interface IDiscordEmbedProvider
 }
 
 [UsedImplicitly]
+[Service]
+[RegisterAs(typeof(IDiscordEmbedProvider))]
+[Lifetime(Lifetime.SingleInstance)]
 public class DiscordEmbedProvider : IDiscordEmbedProvider
 {
     private readonly IDiscordService _discord;
@@ -136,7 +139,7 @@ public class DiscordEmbedProvider : IDiscordEmbedProvider
         return embed;
     }
 
-    public DiscordEmbedBuilder GetSuccessfulActionEmbed()
+    public static DiscordEmbedBuilder GetSuccessfulActionEmbed()
     {
         var embed = new DiscordEmbedBuilder();
         embed.WithTitle("Action succeeded");
@@ -151,14 +154,14 @@ public class DiscordEmbedProvider : IDiscordEmbedProvider
     public DiscordEmbedBuilder GetEmbedResponseFrom(IApplyInfractionReq req, DiscordMember target, long? caseId = null,
         string hexColor = "#26296e", IModEntity? previous = null)
     {
-        var data = GetUnderlyingNameAndPastTense(req);
+        var (name, pastTense) = GetUnderlyingNameAndPastTense(req);
 
         bool isOverlapping = previous is not null && previous.AppliedUntil > req.AppliedUntil && !previous.IsDisabled;
 
         var embed = new DiscordEmbedBuilder();
         embed.WithColor(new DiscordColor(hexColor));
         embed.WithAuthor(
-            $" {(previous is not null && !isOverlapping ? "Extend " : "")}{data.Name} {(previous is not null && isOverlapping ? "failed " : "")}| {target.GetFullDisplayName()}",
+            $" {(previous is not null && !isOverlapping ? "Extend " : "")}{name} {(previous is not null && isOverlapping ? "failed " : "")}| {target.GetFullDisplayName()}",
             null, target.AvatarUrl);
 
         if (previous is not null)
@@ -166,12 +169,12 @@ public class DiscordEmbedProvider : IDiscordEmbedProvider
             if (isOverlapping)
             {
                 embed.WithDescription(
-                    $"This user has already been {data.PastTense.ToLower()} until {previous.AppliedUntil} by {ExtendedFormatter.Mention(req.RequestedOnBehalfOfId, DiscordEntity.User)}");
+                    $"This user has already been {pastTense.ToLower()} until {previous.AppliedUntil} by {ExtendedFormatter.Mention(req.RequestedOnBehalfOfId, DiscordEntity.User)}");
                 embed.WithFooter($"Previous case Id: {previous.Id} | Member Id: {previous.UserId}");
                 return embed;
             }
 
-            embed.AddField($"Previous {data.Name.ToLower()} until", previous.AppliedUntil.ToString(CultureInfo.CurrentCulture), true);
+            embed.AddField($"Previous {name.ToLower()} until", previous.AppliedUntil.ToString(CultureInfo.CurrentCulture), true);
             embed.AddField("Previous moderator",
                 $"{ExtendedFormatter.Mention(previous.AppliedById, DiscordEntity.User)}", true);
             embed.AddField("Previous reason", previous.Reason, true);
@@ -187,7 +190,7 @@ public class DiscordEmbedProvider : IDiscordEmbedProvider
             : $"{duration.Days} days, {duration.Hours} hrs, {duration.Minutes} mins";
 
         embed.AddField("Length", lengthString, true);
-        embed.AddField($"{data.PastTense} until", req.AppliedUntil.ToString(CultureInfo.CurrentCulture), true);
+        embed.AddField($"{pastTense} until", req.AppliedUntil.ToString(CultureInfo.CurrentCulture), true);
         embed.AddField("Reason", req.Reason);
         embed.WithFooter($"Case Id: {(caseId is null ? "Unknown" : caseId)} | Member Id: {req.TargetUserId}");
 
@@ -197,15 +200,15 @@ public class DiscordEmbedProvider : IDiscordEmbedProvider
     public DiscordEmbedBuilder GetEmbedResponseFrom(IModEntity entity, DiscordMember target,
         long? caseId = null, string hexColor = "#26296e")
     {
-        var data = GetUnderlyingNameAndPastTense(entity);
+        var (name, pastTense) = GetUnderlyingNameAndPastTense(entity);
 
         var embed = new DiscordEmbedBuilder();
         embed.WithColor(new DiscordColor(hexColor));
 
-        embed.WithAuthor($"{data.Name} Info | {target.GetFullDisplayName()}", null, target.AvatarUrl);
+        embed.WithAuthor($"{name} Info | {target.GetFullDisplayName()}", null, target.AvatarUrl);
         embed.AddField("User mention", target.Mention, true);
         embed.AddField("Moderator", ExtendedFormatter.Mention(entity.AppliedById, DiscordEntity.User), true);
-        embed.AddField($"{data.PastTense} until", entity.AppliedUntil.ToString(), true);
+        embed.AddField($"{pastTense} until", entity.AppliedUntil.ToString(), true);
         embed.AddField("Reason", entity.Reason);
 
         return embed;
@@ -214,15 +217,15 @@ public class DiscordEmbedProvider : IDiscordEmbedProvider
     public DiscordEmbedBuilder GetEmbedResponseFrom(IRevokeInfractionReq req, DiscordMember target,
         long? caseId = null, string hexColor = "#26296e")
     {
-        var data = GetUnderlyingNameAndPastTense(req);
+        var (name, pastTense) = GetUnderlyingNameAndPastTense(req);
 
         var embed = new DiscordEmbedBuilder();
         embed.WithColor(new DiscordColor(hexColor));
 
-        embed.WithAuthor($"Un{data.Name.ToLower()} | {target.GetFullDisplayName()}", null, target.AvatarUrl);
+        embed.WithAuthor($"Un{name.ToLower()} | {target.GetFullDisplayName()}", null, target.AvatarUrl);
         embed.AddField("Moderator", ExtendedFormatter.Mention(req.RequestedOnBehalfOfId, DiscordEntity.User), true);
         embed.AddField("User mention", target.Mention, true);
-        embed.WithDescription($"Successfully un{data.PastTense.ToLower()}");
+        embed.WithDescription($"Successfully un{pastTense.ToLower()}");
         embed.WithFooter($"Case Id: {(caseId is null ? "Unknown" : caseId)} | Member ID: {target.Id}");
 
         return embed;
@@ -231,7 +234,7 @@ public class DiscordEmbedProvider : IDiscordEmbedProvider
     public DiscordEmbedBuilder GetModerationEmbedLogFrom(IRevokeInfractionReq req, DiscordMember moderator,
         long? caseId = null, string hexColor = "#26296e")
     {
-        var data = GetUnderlyingNameAndPastTense(req);
+        var (name, _) = GetUnderlyingNameAndPastTense(req);
         var target = ExtendedFormatter.Mention(req.TargetUserId, DiscordEntity.User);
 
         var embed = new DiscordEmbedBuilder();
@@ -239,7 +242,7 @@ public class DiscordEmbedProvider : IDiscordEmbedProvider
 
         embed.WithAuthor("Moderation log", null, moderator.AvatarUrl);
         embed.AddField("Moderator", ExtendedFormatter.Mention(req.RequestedOnBehalfOfId, DiscordEntity.User), true);
-        embed.AddField("Action", $"Un{data.Name}", true);
+        embed.AddField("Action", $"Un{name}", true);
         embed.AddField("Target", target, true);
         embed.WithFooter($"Case Id: {(caseId is null ? "Unknown" : caseId)}");
 
@@ -249,7 +252,7 @@ public class DiscordEmbedProvider : IDiscordEmbedProvider
     public DiscordEmbedBuilder GetModerationEmbedLogFrom(IApplyInfractionReq req, DiscordMember moderator,
         long? caseId = null, string hexColor = "#26296e")
     {
-        var data = GetUnderlyingNameAndPastTense(req);
+        var (name, pastTense) = GetUnderlyingNameAndPastTense(req);
 
         var embed = new DiscordEmbedBuilder();
         embed.WithColor(new DiscordColor(hexColor));
@@ -261,10 +264,10 @@ public class DiscordEmbedProvider : IDiscordEmbedProvider
 
         embed.WithAuthor("Moderation log", null, moderator.AvatarUrl);
         embed.AddField("Moderator", ExtendedFormatter.Mention(req.RequestedOnBehalfOfId, DiscordEntity.User), true);
-        embed.AddField("Action", data.Name, true);
+        embed.AddField("Action", name, true);
         embed.AddField("Target", ExtendedFormatter.Mention(req.TargetUserId, DiscordEntity.Member), true);
         embed.AddField("Length", lengthString, true);
-        embed.AddField($"{data.PastTense} until", req.AppliedUntil.ToString(CultureInfo.CurrentCulture), true);
+        embed.AddField($"{pastTense} until", req.AppliedUntil.ToString(CultureInfo.CurrentCulture), true);
         embed.AddField("Reason", req.Reason, true);
         embed.WithFooter($"Case Id: {(caseId is null ? "Unknown" : caseId)}");
 
@@ -274,14 +277,14 @@ public class DiscordEmbedProvider : IDiscordEmbedProvider
     public DiscordEmbedBuilder GetModerationEmbedLogFrom(IGetInfractionReq req, DiscordMember moderator,
         long? caseId = null, string hexColor = "#26296e")
     {
-        var data = GetUnderlyingNameAndPastTense(req);
+        var (name, _) = GetUnderlyingNameAndPastTense(req);
 
         var embed = new DiscordEmbedBuilder();
         embed.WithColor(new DiscordColor(hexColor));
 
         embed.WithAuthor("Moderation log", null, moderator.AvatarUrl);
         embed.AddField("Moderator", ExtendedFormatter.Mention(req.RequestedOnBehalfOfId, DiscordEntity.User), true);
-        embed.AddField("Action", $"Get {data.Name.ToLower()}", true);
+        embed.AddField("Action", $"Get {name.ToLower()}", true);
 
         string reqParams = req.ToString();
         if (reqParams.Length <= 4096) embed.WithDescription(reqParams);

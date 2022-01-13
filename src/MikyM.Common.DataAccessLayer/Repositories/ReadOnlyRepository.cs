@@ -97,7 +97,7 @@ public class ReadOnlyRepository<TEntity> : IReadOnlyRepository<TEntity> where TE
     protected virtual IQueryable<TEntity> ApplySpecification(ISpecification<TEntity>? specification,
         bool evaluateCriteriaOnly = false)
     {
-        if (specification is null) throw new ArgumentNullException("Specification is required");
+        if (specification is null) throw new ArgumentNullException(nameof(specification), "Specification is required");
 
         return this._specificationEvaluator.GetQuery(Context.Set<TEntity>().AsQueryable(), specification,
             evaluateCriteriaOnly);
@@ -116,7 +116,7 @@ public class ReadOnlyRepository<TEntity> : IReadOnlyRepository<TEntity> where TE
     protected virtual IQueryable<TResult> ApplySpecification<TResult>(
         ISpecification<TEntity, TResult>? specification) where TResult : class
     {
-        if (specification is null) throw new ArgumentNullException("Specification is required");
+        if (specification is null) throw new ArgumentNullException(nameof(specification), "Specification is required");
 
         return this._specificationEvaluator.GetQuery(Context.Set<TEntity>().AsQueryable(), specification);
     }

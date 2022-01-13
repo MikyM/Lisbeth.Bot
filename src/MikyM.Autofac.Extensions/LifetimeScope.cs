@@ -22,7 +22,7 @@ namespace MikyM.Autofac.Extensions;
 /// </summary>
 public enum Lifetime
 {
-    Singleton,
+    SingleInstance,
     InstancePerRequest,
     InstancePerLifetimeScope,
     InstancePerMatchingLifetimeScope,

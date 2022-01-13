@@ -67,7 +67,7 @@ public static class DependancyInjectionExtensions
 
                 switch (scope)
                 {
-                    case Lifetime.Singleton:
+                    case Lifetime.SingleInstance:
                         registrationBuilder = registrationBuilder.SingleInstance();
                         break;
                     case Lifetime.InstancePerRequest:
@@ -161,7 +161,7 @@ public static class DependancyInjectionExtensions
 
                 switch (scope)
                 {
-                    case Lifetime.Singleton:
+                    case Lifetime.SingleInstance:
                         registrationBuilder = registrationBuilder.SingleInstance();
                         break;
                     case Lifetime.InstancePerRequest:
@@ -249,7 +249,7 @@ public static class DependancyInjectionExtensions
             {
                 switch (config.DefaultLifetime)
                 {
-                    case Lifetime.Singleton:
+                    case Lifetime.SingleInstance:
                         builder.RegisterTypes(commandSet.ToArray())
                             .AsClosedInterfacesOf(typeof(ICommandHandler<>))
                             .SingleInstance();
@@ -281,7 +281,7 @@ public static class DependancyInjectionExtensions
             {
                 switch (config.DefaultLifetime)
                 {
-                    case Lifetime.Singleton:
+                    case Lifetime.SingleInstance:
                         builder.RegisterTypes(commandResultSet.ToArray())
                             .AsClosedInterfacesOf(typeof(ICommandHandler<,>))
                             .SingleInstance();

@@ -65,7 +65,7 @@ public class GetTagCommandHandler : ICommandHandler<GetTagCommand, DiscordMessag
             Result<Domain.Entities.Tag> partial;
             if (command.Dto.Id.HasValue) partial = await _tagDataService.GetAsync(command.Dto.Id.Value);
             else
-                partial = await _tagDataService.GetSingleBySpecAsync<Domain.Entities.Tag>(new TagByNameSpec(command.Dto.Name));
+                partial = await _tagDataService.GetSingleBySpecAsync<Domain.Entities.Tag>(new TagByNameSpec(command.Dto.Name!));
 
             if (!partial.IsDefined()) return Result<DiscordMessageBuilder>.FromError(partial);
 
@@ -81,7 +81,7 @@ public class GetTagCommandHandler : ICommandHandler<GetTagCommand, DiscordMessag
 
             if (requestingUser.Guild.Id != guild.Id) return new DiscordNotAuthorizedError();
 
-            var partial = await _tagDataService.GetSingleBySpecAsync<Domain.Entities.Tag>(new ActiveTagByGuildAndNameSpec(command.Dto.Name, command.Dto.GuildId));
+            var partial = await _tagDataService.GetSingleBySpecAsync<Domain.Entities.Tag>(new ActiveTagByGuildAndNameSpec(command.Dto.Name!, command.Dto.GuildId));
 
             if (!partial.IsDefined()) return Result<DiscordMessageBuilder>.FromError(partial);
 

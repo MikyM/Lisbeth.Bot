@@ -23,5 +23,5 @@ public class EmbedConfigEntity : SnowflakeDiscordEntity
     public EmbedConfig? EmbedConfig { get; set; }
     public ulong CreatorId { get; set; }
     public ulong LastEditById { get; set; }
-    public string? Name { get; set; }
+    public string Name { get; set; } = null!;
 }

@@ -32,7 +32,7 @@ public class ReadOnlyDataService<TEntity, TContext> : DataServiceBase<TContext>,
     public virtual async Task<Result<TGetResult>> GetAsync<TGetResult>(bool shouldProject = false, params object[] keyValues) where TGetResult : class
     {
         var res = await this.GetAsync(keyValues);
-        return res.IsDefined() ? Result<TGetResult>.FromError(new NotFoundError()) : Result<TGetResult>.FromSuccess(this.Mapper.Map<TGetResult>(res.Entity));
+        return !res.IsDefined() ? Result<TGetResult>.FromError(new NotFoundError()) : Result<TGetResult>.FromSuccess(this.Mapper.Map<TGetResult>(res.Entity));
     }
 
     public virtual async Task<Result<TEntity>> GetAsync(params object[] keyValues)
@@ -51,7 +51,7 @@ public class ReadOnlyDataService<TEntity, TContext> : DataServiceBase<TContext>,
     public virtual async Task<Result<TGetResult>> GetSingleBySpecAsync<TGetResult>(ISpecification<TEntity> specification) where TGetResult : class
     {
         var res = await this.GetSingleBySpecAsync(specification);
-        return res.IsDefined() ? Result<TGetResult>.FromError(new NotFoundError()) : Result<TGetResult>.FromSuccess(this.Mapper.Map<TGetResult>(res.Entity));
+        return !res.IsDefined(out var entity) ? Result<TGetResult>.FromError(new NotFoundError()) : Result<TGetResult>.FromSuccess(this.Mapper.Map<TGetResult>(entity));
     }
 
     public virtual async Task<Result<TGetProjectedResult>> GetSingleBySpecAsync<TGetProjectedResult>(ISpecification<TEntity, TGetProjectedResult> specification) where TGetProjectedResult : class
