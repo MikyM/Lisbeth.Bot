@@ -37,8 +37,8 @@ namespace MikyM.Autofac.Extensions
                 foreach (var type in set)
                 {
                     var intrAttrs = type.GetCustomAttributes<InterceptedByAttribute>(false).ToList();
-                    var scopeAttr = type.GetCustomAttribute<LifetimeAttribute>();
-                    var asAttrs = type.GetCustomAttributes<RegisterAsAttribute>().ToList();
+                    var scopeAttr = type.GetCustomAttribute<LifetimeAttribute>(false);
+                    var asAttrs = type.GetCustomAttributes<RegisterAsAttribute>(false).ToList();
 
                     var scope = scopeAttr?.Scope ?? Lifetime.InstancePerLifetimeScope;
 
