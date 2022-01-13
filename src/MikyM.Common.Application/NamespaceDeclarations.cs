@@ -9,4 +9,7 @@ global using MikyM.Common.DataAccessLayer.UnitOfWork;
 global using MikyM.Common.Domain.Entities;
 global using System.Collections.Generic;
 
+global using MikyM.Autofac.Extensions;
+global using MikyM.Autofac.Extensions.Attributes;
+
 global using JetBrains.Annotations;

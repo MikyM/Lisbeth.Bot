@@ -21,3 +21,12 @@ public interface ICommand
 {
     
 }
+
+public interface IResultCommand : ICommand
+{
+
+}
+
+public interface ICommand<TResult> : IResultCommand
+{
+}

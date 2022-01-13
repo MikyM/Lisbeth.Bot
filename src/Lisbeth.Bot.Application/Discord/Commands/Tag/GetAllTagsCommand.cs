@@ -15,14 +15,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using DSharpPlus.Interactivity;
 using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Domain.DTOs.Request.Tag;
-using MikyM.Common.Application.CommandHandlers;
 using MikyM.Common.Application.CommandHandlers.Commands;
+using System.Collections.Generic;
 
 namespace Lisbeth.Bot.Application.Discord.Commands.Tag;
 
-public class GetAllTagsCommand : CommandBase
+public class GetAllTagsCommand : CommandBase<List<Page>>
 {
     public GetAllTagsCommand(TagGetAllReqDto dto, InteractionContext? ctx = null)
     {

@@ -15,17 +15,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Castle.DynamicProxy;
-
-namespace MikyM.Common.Utilities.Autofac;
+namespace MikyM.Autofac.Extensions.Attributes;
 
 /// <summary>
-/// Interceptor adapter that allows registering asynchronous interceptors
+/// Marks a class for registration as a service
 /// </summary>
-public sealed class AsyncInterceptorAdapter<TAsyncInterceptor> : AsyncDeterminationInterceptor
-    where TAsyncInterceptor : IAsyncInterceptor
+[AttributeUsage(AttributeTargets.Class)]
+public sealed class AutofacServiceAttribute : Attribute
 {
-    public AsyncInterceptorAdapter(TAsyncInterceptor asyncInterceptor)
-        : base(asyncInterceptor)
-    { }
+    public AutofacServiceAttribute()
+    {
+    }
 }

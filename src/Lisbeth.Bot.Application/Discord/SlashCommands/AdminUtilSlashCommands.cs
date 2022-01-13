@@ -20,7 +20,6 @@ using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
 using FluentValidation;
-using Lisbeth.Bot.Application.Discord.CommandHandlers.ChannelMessageFormat;
 using Lisbeth.Bot.Application.Discord.Commands.ChannelMessageFormat;
 using Lisbeth.Bot.Application.Discord.Commands.Ticket;
 using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
@@ -44,17 +43,17 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
     private readonly IDiscordGuildService _discordGuildService;
     private readonly ICommandHandler<GetTicketCenterEmbedCommand, DiscordMessageBuilder> _discordTicketService;
     private readonly IDiscordEmbedConfiguratorService<TicketingConfig> _embedConfiguratorService;
-    private readonly ICommandHandlerProvider _commandHandlerProvider;
+    private readonly ICommandHandlerFactory _commandHandlerFactory;
 
     public AdminUtilSlashCommands(IDiscordGuildService discordGuildService,
         ICommandHandler<GetTicketCenterEmbedCommand, DiscordMessageBuilder> discordTicketService,
         IDiscordEmbedConfiguratorService<TicketingConfig> embedConfiguratorService,
-        ICommandHandlerProvider commandHandlerProvider)
+        ICommandHandlerFactory commandHandlerFactory)
     {
         _discordGuildService = discordGuildService;
         _discordTicketService = discordTicketService;
         _embedConfiguratorService = embedConfiguratorService;
-        _commandHandlerProvider = commandHandlerProvider;
+        _commandHandlerFactory = commandHandlerFactory;
     }
 
     [UsedImplicitly]
@@ -108,7 +107,8 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
     [UsedImplicitly]
     [SlashRequireUserPermissions(Permissions.Administrator)]
     [SlashCommand("message-format", "A command that allows working with channel message formats", false)]
-    public async Task ChannelMessageFormatCommand(InteractionContext ctx, [Option("action", "Action to perform")] ChannelMessageFormatActionType action, 
+    public async Task ChannelMessageFormatCommand(InteractionContext ctx,
+        [Option("action", "Action to perform")] ChannelMessageFormatActionType action,
         [Option("channel", "Channel to configure format for")] DiscordChannel channel,
         [Option("message-id", "Message to verify on demand")] string? messageId = null)
     {
@@ -118,108 +118,129 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
         {
             case ChannelMessageFormatActionType.Get:
                 var getReq = new GetChannelMessageFormatReqDto
-                    { ChannelId = channel.Id, GuildId = ctx.Guild.Id, RequestedOnBehalfOfId = ctx.User.Id };
+                {
+                    ChannelId = channel.Id, GuildId = ctx.Guild.Id, RequestedOnBehalfOfId = ctx.User.Id
+                };
 
                 var getReqValidator = new GetMessageFormatReqValidator(ctx.Client);
                 await getReqValidator.ValidateAndThrowAsync(getReq);
 
-                var getRes = await _commandHandlerProvider.GetHandler<GetMessageFormatCommandHandler>()
+                var getRes = await _commandHandlerFactory
+                    .GetHandler<ICommandHandler<GetMessageFormatCommand, DiscordEmbed>>()
                     .HandleAsync(new GetMessageFormatCommand(getReq, ctx));
 
                 if (getRes.IsDefined(out var getEmbed))
-                    await ctx.EditResponseAsync(new DiscordWebhookBuilder()
-                        .AddEmbed(getEmbed));
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(getEmbed));
                 else
-                    await ctx.EditResponseAsync(new DiscordWebhookBuilder()
-                        .AddEmbed(base.GetUnsuccessfulResultEmbed(getRes, ctx.Client)));
+                    await ctx.EditResponseAsync(
+                        new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(getRes, ctx.Client)));
                 return;
             case ChannelMessageFormatActionType.Create:
                 var createReq = new CreateChannelMessageFormatReqDto
-                    { ChannelId = channel.Id, GuildId = ctx.Guild.Id, RequestedOnBehalfOfId = ctx.User.Id, MessageFormat = "placeholder"};
+                {
+                    ChannelId = channel.Id,
+                    GuildId = ctx.Guild.Id,
+                    RequestedOnBehalfOfId = ctx.User.Id,
+                    MessageFormat = "placeholder"
+                };
 
                 var createReqValidator = new CreateMessageFormatReqValidator(ctx.Client);
                 await createReqValidator.ValidateAndThrowAsync(createReq);
 
-                var createRes = await _commandHandlerProvider.GetHandler<CreateMessageFormatCommandHandler>()
+                var createRes = await _commandHandlerFactory
+                    .GetHandler<ICommandHandler<CreateMessageFormatCommand, DiscordEmbed>>()
                     .HandleAsync(new CreateMessageFormatCommand(createReq, ctx));
 
                 if (createRes.IsDefined(out var createEmbed))
-                    await ctx.EditResponseAsync(new DiscordWebhookBuilder()
-                        .AddEmbed(createEmbed));
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(createEmbed));
                 else
-                    await ctx.EditResponseAsync(new DiscordWebhookBuilder()
-                        .AddEmbed(base.GetUnsuccessfulResultEmbed(createRes, ctx.Client)));
+                    await ctx.EditResponseAsync(
+                        new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(createRes, ctx.Client)));
                 return;
             case ChannelMessageFormatActionType.Edit:
                 var editReq = new EditChannelMessageFormatReqDto
-                    { ChannelId = channel.Id, GuildId = ctx.Guild.Id, RequestedOnBehalfOfId = ctx.User.Id, MessageFormat = "placeholder" };
+                {
+                    ChannelId = channel.Id,
+                    GuildId = ctx.Guild.Id,
+                    RequestedOnBehalfOfId = ctx.User.Id,
+                    MessageFormat = "placeholder"
+                };
 
                 var editReqValidator = new EditMessageFormatReqValidator(ctx.Client);
                 await editReqValidator.ValidateAndThrowAsync(editReq);
 
-                var editRes = await _commandHandlerProvider.GetHandler<EditMessageFormatCommandHandler>()
+                var editRes = await _commandHandlerFactory
+                    .GetHandler<ICommandHandler<EditMessageFormatCommand, DiscordEmbed>>()
                     .HandleAsync(new EditMessageFormatCommand(editReq, ctx));
 
                 if (editRes.IsDefined(out var editEmbed))
-                    await ctx.EditResponseAsync(new DiscordWebhookBuilder()
-                        .AddEmbed(editEmbed));
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(editEmbed));
                 else
-                    await ctx.EditResponseAsync(new DiscordWebhookBuilder()
-                        .AddEmbed(base.GetUnsuccessfulResultEmbed(editRes, ctx.Client)));
+                    await ctx.EditResponseAsync(
+                        new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(editRes, ctx.Client)));
                 return;
             case ChannelMessageFormatActionType.Disable:
                 var disableReq = new DisableChannelMessageFormatReqDto
-                    { ChannelId = channel.Id, GuildId = ctx.Guild.Id, RequestedOnBehalfOfId = ctx.User.Id, IsDisabled = true};
+                {
+                    ChannelId = channel.Id,
+                    GuildId = ctx.Guild.Id,
+                    RequestedOnBehalfOfId = ctx.User.Id,
+                    IsDisabled = true
+                };
 
                 var disableReqValidator = new DisableMessageFormatReqValidator(ctx.Client);
                 await disableReqValidator.ValidateAndThrowAsync(disableReq);
 
-                var disableRes = await _commandHandlerProvider.GetHandler<DisableMessageFormatCommandHandler>()
+                var disableRes = await _commandHandlerFactory
+                    .GetHandler<ICommandHandler<DisableMessageFormatCommand, DiscordEmbed>>()
                     .HandleAsync(new DisableMessageFormatCommand(disableReq, ctx));
 
                 if (disableRes.IsDefined(out var disableEmbed))
-                    await ctx.EditResponseAsync(new DiscordWebhookBuilder()
-                        .AddEmbed(disableEmbed));
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(disableEmbed));
                 else
-                    await ctx.EditResponseAsync(new DiscordWebhookBuilder()
-                        .AddEmbed(base.GetUnsuccessfulResultEmbed(disableRes, ctx.Client)));
+                    await ctx.EditResponseAsync(
+                        new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(disableRes, ctx.Client)));
                 return;
             case ChannelMessageFormatActionType.Verify:
 
-                if (!ulong.TryParse(messageId, out var parsed))
-                    throw new ArgumentException("Message Id is not valid");
+                if (!ulong.TryParse(messageId, out var parsed)) throw new ArgumentException("Message Id is not valid");
 
                 var verifyReq = new VerifyMessageFormatReqDto(channel.Id, parsed, ctx.Guild.Id, ctx.Member.Id);
 
                 var verifyReqValidator = new VerifyMessageFormatReqValidator(ctx.Client);
                 await verifyReqValidator.ValidateAndThrowAsync(verifyReq);
 
-                var verifyRes = await _commandHandlerProvider.GetHandler<VerifyMessageFormatCommandHandler>()
+                var verifyRes = await _commandHandlerFactory
+                    .GetHandler<ICommandHandler<VerifyMessageFormatCommand, VerifyMessageFormatResDto>>()
                     .HandleAsync(new VerifyMessageFormatCommand(verifyReq, ctx));
 
                 if (verifyRes.IsDefined(out var verifyResDto) && verifyResDto.Embed is not null)
-                    await ctx.EditResponseAsync(new DiscordWebhookBuilder()
-                        .AddEmbed(verifyResDto.Embed));
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(verifyResDto.Embed));
                 else
-                    await ctx.EditResponseAsync(new DiscordWebhookBuilder()
-                        .AddEmbed(base.GetUnsuccessfulResultEmbed(verifyRes, ctx.Client)));
+                    await ctx.EditResponseAsync(
+                        new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(verifyRes, ctx.Client)));
                 return;
             case ChannelMessageFormatActionType.Enable:
                 var enableReq = new DisableChannelMessageFormatReqDto
-                    { ChannelId = channel.Id, GuildId = ctx.Guild.Id, RequestedOnBehalfOfId = ctx.User.Id, IsDisabled = false};
+                {
+                    ChannelId = channel.Id,
+                    GuildId = ctx.Guild.Id,
+                    RequestedOnBehalfOfId = ctx.User.Id,
+                    IsDisabled = false
+                };
 
                 var enableReqValidator = new DisableMessageFormatReqValidator(ctx.Client);
                 await enableReqValidator.ValidateAndThrowAsync(enableReq);
 
-                var enableRes = await _commandHandlerProvider.GetHandler<DisableMessageFormatCommandHandler>()
+                var enableRes = await _commandHandlerFactory
+                    .GetHandler<ICommandHandler<DisableMessageFormatCommand, DiscordEmbed>>()
                     .HandleAsync(new DisableMessageFormatCommand(enableReq, ctx));
 
                 if (enableRes.IsDefined(out var enableEmbed))
-                    await ctx.EditResponseAsync(new DiscordWebhookBuilder()
-                        .AddEmbed(enableEmbed));
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(enableEmbed));
                 else
-                    await ctx.EditResponseAsync(new DiscordWebhookBuilder()
-                        .AddEmbed(base.GetUnsuccessfulResultEmbed(enableRes, ctx.Client)));
+                    await ctx.EditResponseAsync(
+                        new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(enableRes, ctx.Client)));
                 return;
             default:
                 throw new ArgumentOutOfRangeException(nameof(action), action, null);

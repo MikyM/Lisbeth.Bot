@@ -26,12 +26,10 @@ using Lisbeth.Bot.DataAccessLayer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using MikyM.Common.Application;
 using MikyM.Common.Application.CommandHandlers.Helpers;
 using MikyM.Common.DataAccessLayer;
 using MikyM.Common.Utilities;
-using MikyM.Common.Utilities.Autofac;
 using Module = Autofac.Module;
 
 namespace Lisbeth.Bot.API;
@@ -44,11 +42,12 @@ public class AutofacContainerModule : Module
         // automapper
 
         builder.AddDataAccessLayer();
-        builder.AddApplicationLayer(opt =>
+        builder.AddApplicationLayer(x =>
         {
+            x.AddCommandHandlers();
+            x.AddServices();
         });
 
-        builder.AddCommandHandlers();
         builder.AddAsyncExecutor();
 
         // pagination stuff
@@ -65,9 +64,6 @@ public class AutofacContainerModule : Module
 
 
         builder.RegisterType<TicketQueueService>().As<ITicketQueueService>().SingleInstance();
-        builder.RegisterGeneric(typeof(ResponseDiscordEmbedBuilder<>))
-            .As(typeof(IResponseDiscordEmbedBuilder<>))
-            .InstancePerDependency();
 
         // Register Entity Framework
         builder.Register(x =>

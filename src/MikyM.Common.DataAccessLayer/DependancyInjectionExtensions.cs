@@ -16,21 +16,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Autofac;
-using Microsoft.Extensions.DependencyInjection;
+using MikyM.Autofac.Extensions;
 using MikyM.Common.DataAccessLayer.Specifications;
-using MikyM.Common.Utilities.Autofac;
 
 namespace MikyM.Common.DataAccessLayer;
 
 public static class DependancyInjectionExtensions
 {
-    public static void AddDataAccessLayer(this IServiceCollection services)
-    {
-        services.AddScoped(typeof(IReadOnlyRepository<>), typeof(ReadOnlyRepository<>));
-        services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-        services.AddScoped(typeof(IUnitOfWork<>), typeof(UnitOfWork<>));
-    }
-
     public static void AddDataAccessLayer(this ContainerBuilder builder)
     {
         builder.RegisterGeneric(typeof(ReadOnlyRepository<>))
@@ -43,11 +35,10 @@ public static class DependancyInjectionExtensions
             .AsSelf()
             .FindConstructorsWith(new AllConstructorsFinder())
             .InstancePerLifetimeScope();
-        builder.RegisterGeneric(typeof(UnitOfWork<>)).As(typeof(IUnitOfWork<>)).AsSelf().InstancePerLifetimeScope();
+        builder.RegisterGeneric(typeof(UnitOfWork<>)).As(typeof(IUnitOfWork<>)).InstancePerLifetimeScope();
 
         builder.RegisterType<SpecificationEvaluator>()
             .As<ISpecificationEvaluator>()
-            .AsSelf()
             .UsingConstructor()
             .SingleInstance();
     }

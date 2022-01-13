@@ -25,6 +25,8 @@ using Lisbeth.Bot.DataAccessLayer.Specifications.Ban;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.Domain.DTOs.Request.Ban;
 using Microsoft.Extensions.Logging;
+using MikyM.Autofac.Extensions;
+using MikyM.Autofac.Extensions.Attributes;
 using MikyM.Common.Utilities.Extensions;
 using MikyM.Discord.EmbedBuilders.Enums;
 using MikyM.Discord.Enums;

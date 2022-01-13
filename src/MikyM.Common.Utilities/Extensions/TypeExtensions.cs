@@ -96,4 +96,88 @@ public static class TypeExtensions
 
         return currentType;
     }
+
+    /// <summary>
+    /// Gets a dictionary with interface implementation pairs that implement a given base interface.
+    /// </summary>
+    /// <param name="interfaceToSearchFor">Base interface to search for.</param>
+    public static Dictionary<Type, Type?> GetInterfaceImplementationPairs(this Type interfaceToSearchFor)
+    {
+        var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+        var dict = assemblies
+            .SelectMany(x => x.GetTypes()
+                .Where(t => interfaceToSearchFor.IsDirectAncestor(t) &&
+                            t.IsInterface))
+            .ToDictionary(intr => intr,
+                intr => assemblies.SelectMany(impl => impl.GetTypes())
+                    .FirstOrDefault(impl =>
+                        impl.IsAssignableToWithGenerics(intr) && impl.IsClass &&
+                        intr.IsDirectAncestor(impl)));
+
+        return dict;
+    }
+
+    public static bool IsAssignableToWithGenerics(this Type givenType, Type genericType)
+    {
+        if (!genericType.IsGenericType)
+            return givenType.IsAssignableTo(genericType);
+
+        var interfaceTypes = givenType.GetInterfaces();
+
+        if (interfaceTypes.Any(it => it.IsGenericType && it.GetGenericTypeDefinition() == genericType))
+            return true;
+        
+        if (givenType.IsGenericType && givenType.GetGenericTypeDefinition() == genericType)
+            return true;
+
+        Type? baseType = givenType.BaseType;
+        if (baseType == null) return false;
+
+        return IsAssignableToWithGenerics(baseType, genericType);
+    }
+
+    /// <summary>
+    /// Retrieves the type inheritance tree
+    /// </summary>
+    /// <param name="type">The type to find tree for.</param>
+    /// <returns>The inheritance tree.</returns>
+    public static InheritanceTree GetTypeInheritance(this Type type)
+    {
+        //get all the interfaces for this type
+        var interfaces = type.GetInterfaces();
+
+        //get all the interfaces for the ancestor interfaces
+        var baseInterfaces = interfaces.SelectMany(i => i.GetInterfaces());
+
+        //filter based on only the direct interfaces
+        var directInterfaces = interfaces.Where(i => baseInterfaces.All(b => b != i));
+
+        return new InheritanceTree(type, directInterfaces.Select(GetTypeInheritance).ToList());
+    }
+
+    /// <summary>
+    /// Check if a type is a direct ancestor of given type
+    /// </summary>
+    public static bool IsDirectAncestor(this Type ancestorCandidate, Type type)
+        => type.GetTypeInheritance().IsDirectAncestor(ancestorCandidate);
+
+    /// <summary>
+    /// Inheritance tree
+    /// </summary>
+    public class InheritanceTree
+    {
+        public InheritanceTree(Type node, List<InheritanceTree> ancestors)
+        {
+            Node = node;
+            Ancestors = ancestors;
+        }
+
+        public Type Node { get; set; }
+        public List<InheritanceTree> Ancestors { get; set; }
+
+        public bool IsDirectAncestor(Type type)
+            => Ancestors.Any(x =>
+                (x.Node.IsGenericType ? x.Node.GetGenericTypeDefinition() : x.Node) ==
+                (type.IsGenericType ? type.GetGenericTypeDefinition() : type));
+    }
 }

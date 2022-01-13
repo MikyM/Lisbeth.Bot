@@ -15,25 +15,25 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace MikyM.Common.Utilities.Autofac.Attributes;
+using Castle.DynamicProxy;
+
+namespace MikyM.Autofac.Extensions.Attributes;
 
 /// <summary>
-/// Defines as what should the service be registered
+/// Defines with what interceptors should the service be intercepted
 /// </summary>
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-public sealed class AutofacRegisterAsAttribute : Attribute
+public sealed class AutofacInterceptedByAttribute : Attribute
 {
-    public Type? RegisterAsType { get; private set; }
+    public Type Interceptor { get; private set; }
+    public bool IsAsync { get; private set; }
 
-    public RegisterAs? RegisterAsOption { get; private set; }
 
-    public AutofacRegisterAsAttribute(Type registerAs)
+    public AutofacInterceptedByAttribute(Type interceptor)
     {
-        RegisterAsType = registerAs ?? throw new ArgumentNullException(nameof(registerAs));
-    }
+        Interceptor = interceptor ?? throw new ArgumentNullException(nameof(interceptor));
 
-    public AutofacRegisterAsAttribute(RegisterAs registerAs)
-    {
-        RegisterAsOption = registerAs;
+        if (interceptor.GetInterfaces().Any(x => x == typeof(IAsyncInterceptor)))
+            IsAsync = true;
     }
 }

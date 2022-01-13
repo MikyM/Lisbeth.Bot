@@ -16,13 +16,15 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-namespace MikyM.Common.Utilities.Autofac;
+namespace MikyM.Common.Application.CommandHandlers.Helpers;
 
 /// <summary>
-/// Registration types
+/// Registration extension configuration
 /// </summary>
-public enum RegisterAs
+public sealed class CommandRegistrationConfiguration
 {
-    AsSelf,
-    AsImplementedInterfaces
+    /// <summary>
+    /// Gets or sets the default lifetime for base generic data services
+    /// </summary>
+    public Lifetime DefaultLifetime { get; set; } = Lifetime.InstancePerLifetimeScope;
 }

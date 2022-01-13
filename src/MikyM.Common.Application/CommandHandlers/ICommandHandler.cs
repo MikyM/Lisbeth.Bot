@@ -29,7 +29,7 @@ public interface ICommandHandler<TCommand> : ICommandHandler where TCommand : cl
     Task<Result> HandleAsync(TCommand command);
 }
 
-public interface ICommandHandler<TCommand, TResult> : ICommandHandler where TCommand : class, ICommand
+public interface ICommandHandler<TCommand, TResult> : ICommandHandler where TCommand : class, ICommand<TResult>
 {
     Task<Result<TResult>> HandleAsync(TCommand command);
 }

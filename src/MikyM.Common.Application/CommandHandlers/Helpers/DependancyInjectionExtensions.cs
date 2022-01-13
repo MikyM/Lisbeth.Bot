@@ -16,28 +16,316 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Autofac;
+using System.Reflection;
+using Autofac.Extras.DynamicProxy;
+using MikyM.Autofac.Extensions.Extensions;
 
 namespace MikyM.Common.Application.CommandHandlers.Helpers;
 
 public static class DependancyInjectionExtensions
 {
-    public static void AddCommandHandlers(this ContainerBuilder builder)
+    /// <summary>
+    /// Registers command handlers with the container
+    /// </summary>
+    public static RegistrationConfiguration AddCommandHandlers(this RegistrationConfiguration registrationConfiguration, Action<CommandRegistrationConfiguration>? configuration = null)
     {
+        var config = new CommandRegistrationConfiguration();
+        configuration?.Invoke(config);
+
+        var builder = registrationConfiguration.Builder;
+
         foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
         {
-            var subSet = assembly.GetTypes()
-                .Where(x => x.GetInterfaces().Any(y => y == typeof(ICommandHandler)) && x.IsClass)
+            var commandSet = assembly.GetTypes()
+                .Where(x => x.GetInterfaces().Any(y => y.IsGenericType && y.GetGenericTypeDefinition() == typeof(ICommandHandler<>)) && x.IsClass && !x.IsAbstract)
                 .ToList();
 
-            builder.RegisterTypes(subSet.ToArray())
-                .AsClosedTypesOf(typeof(ICommandHandler<>))
-                .InstancePerLifetimeScope();
+            var commandResultSet = assembly.GetTypes()
+                .Where(x => x.GetInterfaces().Any(y => y.IsGenericType && y.GetGenericTypeDefinition() == typeof(ICommandHandler<,>)) && x.IsClass && !x.IsAbstract)
+                .ToList();
 
-            builder.RegisterTypes(subSet.ToArray())
-                .AsClosedTypesOf(typeof(ICommandHandler<,>))
-                .InstancePerLifetimeScope();
+            var commandSubSet = commandSet
+                .Where(x => x.GetCustomAttribute<AutofacLifetimeAttribute>(false) is not null ||
+                            x.GetCustomAttributes<AutofacInterceptedByAttribute>(false).Count() != 0 && x.IsClass &&
+                            !x.IsAbstract)
+                .ToList();
+
+            var commandResultSubSet = commandResultSet
+                .Where(x => x.GetCustomAttribute<AutofacLifetimeAttribute>(false) is not null ||
+                            x.GetCustomAttributes<AutofacInterceptedByAttribute>(false).Count() != 0 && x.IsClass &&
+                            !x.IsAbstract)
+                .ToList();
+
+            if (commandSet.Any())
+            {
+                var a = 3;
+            }
+
+            foreach (var type in commandSubSet)
+            {
+                var lifeAttr = type.GetCustomAttribute<AutofacLifetimeAttribute>(false);
+                var intrAttrs = type.GetCustomAttributes<AutofacInterceptedByAttribute>(false);
+
+                var registrationBuilder = builder.RegisterTypes(type).AsClosedInterfacesOf(typeof(ICommandHandler<>));
+
+                var scope = lifeAttr?.Scope ?? config.DefaultLifetime;
+
+                switch (scope)
+                {
+                    case Lifetime.Singleton:
+                        registrationBuilder = registrationBuilder.SingleInstance();
+                        break;
+                    case Lifetime.InstancePerRequest:
+                        registrationBuilder = registrationBuilder.InstancePerRequest();
+                        break;
+                    case Lifetime.InstancePerLifetimeScope:
+                        registrationBuilder = registrationBuilder.InstancePerLifetimeScope();
+                        break;
+                    case Lifetime.InstancePerDependancy:
+                        registrationBuilder = registrationBuilder.InstancePerDependency();
+                        break;
+                    case Lifetime.InstancePerMatchingLifetimeScope:
+                        registrationBuilder =
+                            registrationBuilder.InstancePerMatchingLifetimeScope(lifeAttr?.Tags.ToArray() ?? throw new InvalidOperationException());
+                        break;
+                    case Lifetime.InstancePerOwned:
+                        if (lifeAttr?.Owned is null) throw new InvalidOperationException("Owned type was null");
+
+                        registrationBuilder = registrationBuilder.InstancePerOwned(lifeAttr.Owned);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+
+
+                var intrAttr = type.GetCustomAttribute<AutofacEnableInterceptionAttribute>();
+                if (intrAttr is null) continue;
+
+                bool interfaceEnabled = false;
+                //bool classEnabled = false;
+                foreach (var attr in intrAttrs)
+                {
+                    if (!registrationConfiguration.InterceptorDelegates.TryGetValue(attr.Interceptor, out _))
+                        throw new ArgumentException(
+                            $"You must first register {attr.Interceptor.Name} interceptor with .AddInterceptor method");
+
+                    if (!interfaceEnabled)
+                    {
+                        registrationBuilder = registrationBuilder.EnableInterfaceInterceptors();
+                        interfaceEnabled = true;
+                    }
+
+                    /*
+                    switch (attr.Intercept)
+                    {
+                        case Intercept.Interfaces:
+                            if (!interfaceEnabled)
+                            {
+
+                                registrationBuilder = registrationBuilder.EnableInterfaceInterceptors();
+                                interfaceEnabled = true;
+                            }
+                            break;
+                        case Intercept.Classes:
+                            if (!classEnabled)
+                            {
+
+                                registrationBuilder = registrationBuilder.EnableClassInterceptors();
+                                classEnabled = true;
+                            }
+                            break;
+                        case Intercept.InterfacesAndClasses:
+                            if (!classEnabled)
+                            {
+
+                                registrationBuilder = registrationBuilder.EnableClassInterceptors();
+                                classEnabled = true;
+                            }
+                            if (!interfaceEnabled)
+                            {
+
+                                registrationBuilder = registrationBuilder.EnableInterfaceInterceptors();
+                                interfaceEnabled = true;
+                            }
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }*/
+
+                    registrationBuilder = attr.IsAsync
+                        ? registrationBuilder.InterceptedBy(
+                            typeof(AsyncInterceptorAdapter<>).MakeGenericType(attr.Interceptor))
+                        : registrationBuilder.InterceptedBy(attr.Interceptor);
+                }
+            }
+
+            foreach (var type in commandResultSubSet)
+            {
+                var lifeAttr = type.GetCustomAttribute<AutofacLifetimeAttribute>(false);
+                var intrAttrs = type.GetCustomAttributes<AutofacInterceptedByAttribute>(false);
+
+                var registrationBuilder = builder.RegisterTypes(type).AsClosedInterfacesOf(typeof(ICommandHandler<,>));
+
+                var scope = lifeAttr?.Scope ?? config.DefaultLifetime;
+
+                switch (scope)
+                {
+                    case Lifetime.Singleton:
+                        registrationBuilder = registrationBuilder.SingleInstance();
+                        break;
+                    case Lifetime.InstancePerRequest:
+                        registrationBuilder = registrationBuilder.InstancePerRequest();
+                        break;
+                    case Lifetime.InstancePerLifetimeScope:
+                        registrationBuilder = registrationBuilder.InstancePerLifetimeScope();
+                        break;
+                    case Lifetime.InstancePerDependancy:
+                        registrationBuilder = registrationBuilder.InstancePerDependency();
+                        break;
+                    case Lifetime.InstancePerMatchingLifetimeScope:
+                        registrationBuilder =
+                            registrationBuilder.InstancePerMatchingLifetimeScope(lifeAttr?.Tags.ToArray() ?? throw new InvalidOperationException());
+                        break;
+                    case Lifetime.InstancePerOwned:
+                        if (lifeAttr?.Owned is null) throw new InvalidOperationException("Owned type was null");
+
+                        registrationBuilder = registrationBuilder.InstancePerOwned(lifeAttr.Owned);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+
+                var intrAttr = type.GetCustomAttribute<AutofacEnableInterceptionAttribute>();
+                if (intrAttr is null) continue;
+
+                bool interfaceEnabled = false;
+                //bool classEnabled = false;
+                foreach (var attr in intrAttrs)
+                {
+                    if (!registrationConfiguration.InterceptorDelegates.TryGetValue(attr.Interceptor, out _))
+                        throw new ArgumentException(
+                            $"You must first register {attr.Interceptor.Name} interceptor with .AddInterceptor method");
+
+                    if (!interfaceEnabled)
+                    {
+                        registrationBuilder = registrationBuilder.EnableInterfaceInterceptors();
+                        interfaceEnabled = true;
+                    }
+
+                    /*switch (attr.Intercept)
+                        {
+                            case Intercept.Interfaces:
+                                if (!interfaceEnabled)
+                                {
+
+                                    registrationBuilder = registrationBuilder.EnableInterfaceInterceptors();
+                                    interfaceEnabled = true;
+                                }
+                                break;
+                            case Intercept.Classes:
+                                if (!classEnabled)
+                                {
+
+                                    registrationBuilder = registrationBuilder.EnableClassInterceptors();
+                                    classEnabled = true;
+                                }
+                                break;
+                            case Intercept.InterfacesAndClasses:
+                                if (!classEnabled)
+                                {
+
+                                    registrationBuilder = registrationBuilder.EnableClassInterceptors();
+                                    classEnabled = true;
+                                }
+                                if (!interfaceEnabled)
+                                {
+
+                                    registrationBuilder = registrationBuilder.EnableInterfaceInterceptors();
+                                    interfaceEnabled = true;
+                                }
+                                break;
+                            default:
+                                throw new ArgumentOutOfRangeException();
+                        }*/
+
+                    registrationBuilder = attr.IsAsync
+                        ? registrationBuilder.InterceptedBy(
+                            typeof(AsyncInterceptorAdapter<>).MakeGenericType(attr.Interceptor))
+                        : registrationBuilder.InterceptedBy(attr.Interceptor);
+                }
+            }
+
+            commandSet.RemoveAll(x => commandSubSet.Any(y => y == x));
+            commandResultSet.RemoveAll(x => commandResultSubSet.Any(y => y == x));
+
+            if (commandSet.Any())
+            {
+                switch (config.DefaultLifetime)
+                {
+                    case Lifetime.Singleton:
+                        builder.RegisterTypes(commandSet.ToArray())
+                            .AsClosedInterfacesOf(typeof(ICommandHandler<>))
+                            .SingleInstance();
+                        break;
+                    case Lifetime.InstancePerRequest:
+                        builder.RegisterTypes(commandSet.ToArray())
+                            .AsClosedInterfacesOf(typeof(ICommandHandler<>))
+                            .InstancePerRequest();
+                        break;
+                    case Lifetime.InstancePerLifetimeScope:
+                        builder.RegisterTypes(commandSet.ToArray())
+                            .AsClosedInterfacesOf(typeof(ICommandHandler<>))
+                            .InstancePerLifetimeScope();
+                        break;
+                    case Lifetime.InstancePerMatchingLifetimeScope:
+                        throw new NotSupportedException();
+                    case Lifetime.InstancePerDependancy:
+                        builder.RegisterTypes(commandSet.ToArray())
+                            .AsClosedInterfacesOf(typeof(ICommandHandler<>))
+                            .InstancePerDependency();
+                        break;
+                    case Lifetime.InstancePerOwned:
+                        throw new NotSupportedException();
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+            if (commandResultSet.Any())
+            {
+                switch (config.DefaultLifetime)
+                {
+                    case Lifetime.Singleton:
+                        builder.RegisterTypes(commandResultSet.ToArray())
+                            .AsClosedInterfacesOf(typeof(ICommandHandler<,>))
+                            .SingleInstance();
+                        break;
+                    case Lifetime.InstancePerRequest:
+                        builder.RegisterTypes(commandResultSet.ToArray())
+                            .AsClosedInterfacesOf(typeof(ICommandHandler<,>))
+                            .InstancePerRequest();
+                        break;
+                    case Lifetime.InstancePerLifetimeScope:
+                        builder.RegisterTypes(commandResultSet.ToArray())
+                            .AsClosedInterfacesOf(typeof(ICommandHandler<,>))
+                            .InstancePerLifetimeScope();
+                        break;
+                    case Lifetime.InstancePerMatchingLifetimeScope:
+                        throw new NotSupportedException();
+                    case Lifetime.InstancePerDependancy:
+                        builder.RegisterTypes(commandResultSet.ToArray())
+                            .AsClosedInterfacesOf(typeof(ICommandHandler<,>))
+                            .InstancePerDependency();
+                        break;
+                    case Lifetime.InstancePerOwned:
+                        throw new NotSupportedException();
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
         }
 
-        builder.RegisterType<CommandHandlerProvider>().As<ICommandHandlerProvider>().InstancePerLifetimeScope();
+        builder.RegisterType<CommandHandlerFactory>().As<ICommandHandlerFactory>().InstancePerLifetimeScope();
+
+        return registrationConfiguration;
     }
 }

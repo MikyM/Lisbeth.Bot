@@ -17,16 +17,17 @@
 
 using DSharpPlus;
 using DSharpPlus.EventArgs;
-using Lisbeth.Bot.Application.Discord.CommandHandlers.ChannelMessageFormat;
 using Lisbeth.Bot.Application.Discord.Commands.ChannelMessageFormat;
 using Lisbeth.Bot.Application.Discord.EventHandlers.Base;
 using Lisbeth.Bot.Domain.DTOs.Request.ChannelMessageFormat;
+using MikyM.Common.Application.CommandHandlers;
 using MikyM.Common.Utilities;
 using MikyM.Discord.Events;
 using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.EventHandlers;
 
+[UsedImplicitly]
 public class ChannelMessageFormatEventHandler : BaseEventHandler, IDiscordMessageEventsSubscriber
 {
     private readonly IDiscordService _discord;
@@ -41,9 +42,10 @@ public class ChannelMessageFormatEventHandler : BaseEventHandler, IDiscordMessag
         if (args.Channel is null || args.Guild is null)
             return Task.CompletedTask;
 
-        _ = AsyncExecutor.ExecuteAsync<VerifyMessageFormatCommandHandler>(async x =>
-            await x.HandleAsync(new VerifyMessageFormatCommand(new VerifyMessageFormatReqDto(args.Channel.Id,
-                args.Message.Id, args.Guild.Id, _discord.Client.CurrentUser.Id), args)));
+        _ = AsyncExecutor.ExecuteAsync<ICommandHandler<VerifyMessageFormatCommand, VerifyMessageFormatResDto>>(
+            async x => await x.HandleAsync(new VerifyMessageFormatCommand(
+                new VerifyMessageFormatReqDto(args.Channel.Id, args.Message.Id, args.Guild.Id,
+                    _discord.Client.CurrentUser.Id), args)));
 
         return Task.CompletedTask;
     }

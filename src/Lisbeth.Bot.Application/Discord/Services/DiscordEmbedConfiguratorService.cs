@@ -13,6 +13,8 @@ using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.DataAccessLayer.Specifications.EmbedConfig;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.Domain.Entities.Base;
+using MikyM.Autofac.Extensions;
+using MikyM.Autofac.Extensions.Attributes;
 using MikyM.Common.Utilities.ExpressionHelpers;
 using MikyM.Discord.EmbedBuilders;
 using MikyM.Discord.Extensions.BaseExtensions;

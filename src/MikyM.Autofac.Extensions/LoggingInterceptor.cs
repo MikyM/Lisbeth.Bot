@@ -15,13 +15,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Castle.DynamicProxy;
-using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.Dynamic;
 using System.Text.Json;
+using Castle.DynamicProxy;
+using Microsoft.Extensions.Logging;
 
-namespace MikyM.Common.Utilities.Autofac;
+namespace MikyM.Autofac.Extensions;
 
 /// <summary>
 /// Base logging interceptor

@@ -16,12 +16,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using DSharpPlus.Entities;
-using MikyM.Common.Application.CommandHandlers;
 using MikyM.Common.Application.CommandHandlers.Commands;
 
 namespace Lisbeth.Bot.Application.Discord.Commands.Ticket;
 
-public class GetTicketWelcomeEmbedCommand : CommandBase
+public class GetTicketWelcomeEmbedCommand : CommandBase<DiscordMessageBuilder>
 {
     public GetTicketWelcomeEmbedCommand(ulong guildId, long guildSpecificId, DiscordMember owner)
     {

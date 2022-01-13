@@ -15,13 +15,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Domain.DTOs.Request.ChannelMessageFormat;
 using MikyM.Common.Application.CommandHandlers.Commands;
 
 namespace Lisbeth.Bot.Application.Discord.Commands.ChannelMessageFormat;
 
-public class DisableMessageFormatCommand : CommandBase
+public class DisableMessageFormatCommand : CommandBase<DiscordEmbed>
 {
     public InteractionContext? Ctx { get; set; }
     public DisableChannelMessageFormatReqDto Dto { get; set; }

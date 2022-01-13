@@ -1,11 +1,12 @@
-﻿using DSharpPlus.SlashCommands;
+﻿using DSharpPlus.Entities;
+using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Domain.DTOs.Request.Reminder;
 using MikyM.Common.Application.CommandHandlers;
 using MikyM.Common.Application.CommandHandlers.Commands;
 
 namespace Lisbeth.Bot.Application.Discord.Commands.Reminder;
 
-public class RescheduleReminderCommand : CommandBase
+public class RescheduleReminderCommand : CommandBase<DiscordEmbed>
 {
     public RescheduleReminderCommand(RescheduleReminderReqDto dto, InteractionContext? ctx = null)
     {

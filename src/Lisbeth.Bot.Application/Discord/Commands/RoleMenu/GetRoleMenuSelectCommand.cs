@@ -21,7 +21,7 @@ using System.Collections.Generic;
 
 namespace Lisbeth.Bot.Application.Discord.Commands.RoleMenu;
 
-public class GetRoleMenuSelectCommand : CommandBase
+public class GetRoleMenuSelectCommand : CommandBase<DiscordSelectComponent>
 {
     public GetRoleMenuSelectCommand(Domain.Entities.RoleMenu roleMenu, IEnumerable<DiscordRole> memberRoles)
     {

@@ -17,10 +17,8 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using MikyM.Common.Utilities.Extensions;
 using MikyM.Discord.EmbedBuilders.Builders;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace MikyM.Discord.EmbedBuilders;
 
@@ -32,9 +30,7 @@ public static class DependancyInjectionExtensions
     /// </summary>
     public static void AddEnhancedDiscordEmbedBuilders(this IServiceCollection services)
     {
-        services.TryAddTransient<IEnhancedDiscordEmbedBuilder, EnhancedDiscordEmbedBuilder>();
-
-        var pairs = GetInterfaceImplementationPairsByConvention(typeof(IEnhancedDiscordEmbedBuilder));
+        var pairs = typeof(IEnhancedDiscordEmbedBuilder).GetInterfaceImplementationPairs();
 
         if (pairs.Count == 0) return;
 
@@ -54,33 +50,15 @@ public static class DependancyInjectionExtensions
     {
         AddEnhancedDiscordEmbedBuilders(services);
 
-        services.TryAddTransient<IEnrichedDiscordEmbedBuilder, EnrichedDiscordEmbedBuilder>();
-
-        var pairs = GetInterfaceImplementationPairsByConvention(typeof(IEnrichedDiscordEmbedBuilder));
+        var pairs = typeof(IEnrichedDiscordEmbedBuilder).GetInterfaceImplementationPairs();
 
         if (pairs.Count == 0) return;
+
 
         foreach (var (intr, impl) in pairs)
         {
             if (impl is null) continue;
             services.TryAddTransient(intr, impl);
         }
-    }
-
-    /// <summary>
-    /// Gets a dictionary with interface implementation pairs that implement a given base interface.
-    /// </summary>
-    /// <param name="interfaceToSearchFor">Base interface to search for.</param>
-    private static Dictionary<Type, Type?> GetInterfaceImplementationPairsByConvention(Type interfaceToSearchFor)
-    {
-        var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-        var dict = assemblies
-            .SelectMany(x => x.GetTypes()
-                .Where(t => t.GetInterfaces().Contains(interfaceToSearchFor) && t.IsInterface))
-            .ToDictionary(intr => intr,
-                intr => assemblies.SelectMany(impl => impl.GetTypes())
-                    .FirstOrDefault(impl => intr.IsAssignableFrom(impl) && impl.Name == intr.Name[1..] && impl.IsClass));
-
-        return dict;
     }
 }

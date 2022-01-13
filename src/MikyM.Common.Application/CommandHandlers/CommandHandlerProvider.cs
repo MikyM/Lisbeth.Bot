@@ -20,25 +20,28 @@ using MikyM.Common.Application.CommandHandlers.Commands;
 
 namespace MikyM.Common.Application.CommandHandlers;
 
-public interface ICommandHandlerProvider
+public interface ICommandHandlerFactory
 {
-    TCommandHandler GetHandler<TCommandHandler>() where TCommandHandler : ICommandHandler;
-    ICommandHandler<TCommand, TResult> GetHandlerFor<TCommand, TResult>() where TCommand : class, ICommand;
+    TCommandHandler GetHandler<TCommandHandler>() where TCommandHandler : class, ICommandHandler;
+    ICommandHandler<TCommand, TResult> GetHandlerFor<TCommand, TResult>() where TCommand : class, ICommand<TResult>;
     ICommandHandler<TCommand> GetHandlerFor<TCommand>() where TCommand : class, ICommand;
 }
 
-public class CommandHandlerProvider : ICommandHandlerProvider
+public class CommandHandlerFactory : ICommandHandlerFactory
 {
     private Dictionary<string, ICommandHandler>? _commandHandlers;
     private readonly ILifetimeScope _lifetimeScope;
 
-    public CommandHandlerProvider(ILifetimeScope lifetimeScope)
+    public CommandHandlerFactory(ILifetimeScope lifetimeScope)
     {
         _lifetimeScope = lifetimeScope;
     }
 
-    public TCommandHandler GetHandler<TCommandHandler>() where TCommandHandler : ICommandHandler
+    public TCommandHandler GetHandler<TCommandHandler>() where TCommandHandler : class, ICommandHandler
     {
+        if (!typeof(TCommandHandler).IsInterface)
+            throw new ArgumentException("Due to Autofac limitations you must use interfaces");
+
         _commandHandlers ??= new Dictionary<string, ICommandHandler>();
 
         var type = typeof(TCommandHandler);
@@ -76,7 +79,7 @@ public class CommandHandlerProvider : ICommandHandlerProvider
         throw new InvalidOperationException($"Couldn't add nor retrieve handler for type {name}");
     }
 
-    public ICommandHandler<TCommand ,TResult> GetHandlerFor<TCommand, TResult>() where TCommand : class, ICommand
+    public ICommandHandler<TCommand ,TResult> GetHandlerFor<TCommand, TResult>() where TCommand : class, ICommand<TResult>
     {
         _commandHandlers ??= new Dictionary<string, ICommandHandler>();
 

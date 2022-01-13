@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Domain.DTOs.Request.Mute;
 using MikyM.Common.Application.CommandHandlers;
@@ -22,7 +23,7 @@ using MikyM.Common.Application.CommandHandlers.Commands;
 
 namespace Lisbeth.Bot.Application.Discord.Commands.Mute;
 
-public class RevokeMuteCommand : CommandBase
+public class RevokeMuteCommand : CommandBase<DiscordEmbed>
 {
     public RevokeMuteCommand(MuteRevokeReqDto dto)
     {

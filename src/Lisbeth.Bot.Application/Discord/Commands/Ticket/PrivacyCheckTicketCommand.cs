@@ -21,7 +21,7 @@ using MikyM.Common.Application.CommandHandlers.Commands;
 
 namespace Lisbeth.Bot.Application.Discord.Commands.Ticket;
 
-public class PrivacyCheckTicketCommand : ICommand
+public class PrivacyCheckTicketCommand : CommandBase<bool>
 {
     public PrivacyCheckTicketCommand(DiscordGuild guild, Domain.Entities.Ticket ticket)
     {

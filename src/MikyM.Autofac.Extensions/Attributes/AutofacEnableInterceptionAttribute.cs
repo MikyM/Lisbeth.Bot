@@ -15,25 +15,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Concurrent;
-using System.Reflection;
-using Autofac.Core.Activators.Reflection;
-
-namespace MikyM.Common.Utilities.Autofac;
+namespace MikyM.Autofac.Extensions.Attributes;
 
 /// <summary>
-/// Constructor finder that finds all constructors
+/// Defines whether to enable interception for this registration
 /// </summary>
-public sealed class AllConstructorsFinder : IConstructorFinder
+[AttributeUsage(AttributeTargets.Class)]
+public sealed class AutofacEnableInterceptionAttribute : Attribute
 {
-    private static readonly ConcurrentDictionary<Type, ConstructorInfo[]> Cache = new();
-
-
-    public ConstructorInfo[] FindConstructors(Type targetType)
+    public Intercept Intercept { get; private set; }
+    public AutofacEnableInterceptionAttribute(Intercept intercept)
     {
-        var result = Cache.GetOrAdd(targetType,
-            t => t.GetTypeInfo().DeclaredConstructors.Where(c => !c.IsStatic).ToArray());
-
-        return result.Length > 0 ? result : throw new NoConstructorsFoundException(targetType);
+        Intercept = intercept;
     }
 }

@@ -36,6 +36,7 @@ namespace Lisbeth.Bot.Application.Discord.Services;
 [AutofacService]
 [AutofacRegisterAs(typeof(IDiscordMessageService))]
 [AutofacLifetime(Lifetime.InstancePerLifetimeScope)]
+[AutofacEnableInterception(Intercept.Interface)]
 [AutofacInterceptedBy(typeof(LoggingInterceptor))]
 public class DiscordMessageService : IDiscordMessageService
 {

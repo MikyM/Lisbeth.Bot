@@ -20,32 +20,57 @@ using Autofac.Builder;
 using Autofac.Extras.DynamicProxy;
 using AutoMapper.Contrib.Autofac.DependencyInjection;
 using AutoMapper.Extensions.ExpressionMapping;
+using Castle.DynamicProxy;
 using Microsoft.Extensions.Logging;
 using MikyM.Common.Application.Services;
-using MikyM.Common.Utilities.Autofac;
-using MikyM.Common.Utilities.Autofac.Attributes;
 using System.Reflection;
+using RegistrationExtensions = Autofac.RegistrationExtensions;
 
 namespace MikyM.Common.Application;
 
 public static class DependancyInjectionExtensions
 {
-    public static void AddApplicationLayer(this ContainerBuilder builder, Action<RegistrationConfiguration> configuration)
+    /// <summary>
+    /// Registers application layer with the container
+    /// </summary>
+    public static ContainerBuilder AddApplicationLayer(this ContainerBuilder builder, Action<RegistrationConfiguration> action)
     {
         // register automapper
         builder.RegisterAutoMapper(opt => opt.AddExpressionMapping(), false, AppDomain.CurrentDomain.GetAssemblies());
         //register async interceptor adapter
         builder.RegisterGeneric(typeof(AsyncInterceptorAdapter<>));
         //register async interceptor
-        builder.Register(x => new LoggingInterceptor(x.Resolve<ILoggerFactory>().CreateLogger(nameof(LoggingInterceptor))));
 
-        var config = new RegistrationConfiguration();
-        configuration(config);
-
-        var method = typeof(Autofac.RegistrationExtensions).GetMethods().First(x =>
+        var method = typeof(RegistrationExtensions).GetMethods().First(x =>
             x.Name == "Register" && x.GetGenericArguments().Length == 1 &&
             x.GetParameters().Length == 2);
-        MethodInfo? registerMethod;
+
+        var config = new RegistrationConfiguration(builder);
+        config.AddInterceptor(x =>
+            new LoggingInterceptor(x.Resolve<ILoggerFactory>().CreateLogger(nameof(LoggingInterceptor))));
+
+        action(config);
+
+        foreach (var (interceptorType, registration) in config.InterceptorDelegates)
+        {
+            var registerMethod = method.MakeGenericMethod(interceptorType);
+            registerMethod.Invoke(null, new[] { builder, registration });
+        }
+
+        return builder;
+    }
+
+    /// <summary>
+    /// Registers services with the container
+    /// </summary>
+    public static RegistrationConfiguration AddServices(this RegistrationConfiguration registrationConfiguration, Action<ServiceRegistrationConfiguration>? configuration = null)
+    {
+        var builder = registrationConfiguration.Builder;
+
+        builder.RegisterServicesByAttributes();
+
+        var config = new ServiceRegistrationConfiguration();
+        configuration?.Invoke(config);
 
         IRegistrationBuilder<object, ReflectionActivatorData, DynamicRegistrationStyle> registReadOnlyBuilder;
         IRegistrationBuilder<object, ReflectionActivatorData, DynamicRegistrationStyle> registCrudBuilder;
@@ -93,15 +118,21 @@ public static class DependancyInjectionExtensions
         bool readEnabled = false;
         foreach (var (interceptorType, dataConfig) in config.DataInterceptors)
         {
-            if (!config.InterceptorDelegates.TryGetValue(interceptorType, out _))
+            if (!registrationConfiguration.InterceptorDelegates.TryGetValue(interceptorType, out _))
                 throw new ArgumentException(
                     $"You must first register {interceptorType.Name} interceptor with .AddInterceptor method");
 
             switch (dataConfig)
             {
                 case DataInterceptorConfiguration.CrudAndReadOnly:
-                    registCrudBuilder = registCrudBuilder.InterceptedBy(interceptorType);
-                    registReadOnlyBuilder = registReadOnlyBuilder.InterceptedBy(interceptorType);
+                    registCrudBuilder = interceptorType.GetInterfaces().Any(x => x == typeof(IAsyncInterceptor))
+                        ? registCrudBuilder.InterceptedBy(
+                            typeof(AsyncInterceptorAdapter<>).MakeGenericType(interceptorType))
+                        : registCrudBuilder.InterceptedBy(interceptorType);
+                    registReadOnlyBuilder = interceptorType.GetInterfaces().Any(x => x == typeof(IAsyncInterceptor))
+                        ? registReadOnlyBuilder.InterceptedBy(
+                            typeof(AsyncInterceptorAdapter<>).MakeGenericType(interceptorType))
+                        : registReadOnlyBuilder.InterceptedBy(interceptorType);
 
                     if (!crudEnabled)
                     {
@@ -115,15 +146,22 @@ public static class DependancyInjectionExtensions
                     }
                     break;
                 case DataInterceptorConfiguration.Crud:
-                    registCrudBuilder = registCrudBuilder.InterceptedBy(interceptorType);
+                    registCrudBuilder = interceptorType.GetInterfaces().Any(x => x == typeof(IAsyncInterceptor))
+                        ? registCrudBuilder.InterceptedBy(
+                            typeof(AsyncInterceptorAdapter<>).MakeGenericType(interceptorType))
+                        : registCrudBuilder.InterceptedBy(interceptorType);
                     if (!crudEnabled)
                     {
                         registCrudBuilder = registCrudBuilder.EnableInterfaceInterceptors();
                         crudEnabled = true;
                     }
+
                     break;
                 case DataInterceptorConfiguration.ReadOnly:
-                    registReadOnlyBuilder = registReadOnlyBuilder.InterceptedBy(interceptorType);
+                    registReadOnlyBuilder = interceptorType.GetInterfaces().Any(x => x == typeof(IAsyncInterceptor))
+                        ? registReadOnlyBuilder.InterceptedBy(
+                            typeof(AsyncInterceptorAdapter<>).MakeGenericType(interceptorType))
+                        : registReadOnlyBuilder.InterceptedBy(interceptorType);
                     if (!readEnabled)
                     {
                         registReadOnlyBuilder = registCrudBuilder.EnableInterfaceInterceptors();
@@ -133,12 +171,6 @@ public static class DependancyInjectionExtensions
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-        }
-
-        foreach (var (interceptorType, action) in config.InterceptorDelegates)
-        {
-            registerMethod = method.MakeGenericMethod(interceptorType);
-            registerMethod.Invoke(null, new[] { builder, action });
         }
 
         var excluded = new[] { typeof(DataServiceBase<>), typeof(CrudService<,>), typeof(ReadOnlyDataService<,>) };
@@ -158,22 +190,13 @@ public static class DependancyInjectionExtensions
             subSet.RemoveAll(x => excluded.Any(y => y == x) || dataSubSet.Any(y => y == x));
             dataSubSet.RemoveAll(x => excluded.Any(y => y == x));
 
-            if (dataSubSet.Any())
-            {
-                var a = 3;
-            }
-            if (subSet.Any())
-            {
-                var a = 3;
-            }
-
             // handle data services
             foreach (var dataType in dataSubSet)
             {
                 var scopeOverrideAttr = dataType.GetCustomAttribute<AutofacLifetimeAttribute>();
                 var intrAttrs = dataType.GetCustomAttributes<AutofacInterceptedByAttribute>(false).ToList();
                 var asAttr = dataType.GetCustomAttributes<AutofacRegisterAsAttribute>(false).ToList();
-                bool isIntercepted = intrAttrs.Any();
+                var intrEnableAttr = dataType.GetCustomAttribute<AutofacEnableInterceptionAttribute>();
 
                 var scope = scopeOverrideAttr?.Scope ?? config.DataServiceLifetime;
 
@@ -181,24 +204,53 @@ public static class DependancyInjectionExtensions
                     .Select(x => x.RegisterAsType)
                     .Distinct()
                     .ToList();
-                var shouldAsSelf = asAttr.Any(x => x.RegisterAsOption == RegisterAs.AsSelf) &&
+                var shouldAsSelf = asAttr.Any(x => x.RegisterAsOption == RegisterAs.Self) &&
                     asAttr.All(x => x.RegisterAsType != dataType);
-                var shouldAsInterfaces = !asAttr.Any() || asAttr.Any(x => x.RegisterAsOption == RegisterAs.AsImplementedInterfaces);
+                var shouldAsInterfaces = !asAttr.Any() || asAttr.Any(x => x.RegisterAsOption == RegisterAs.ImplementedInterfaces);
 
                 IRegistrationBuilder<object, ReflectionActivatorData, DynamicRegistrationStyle>? registrationGenericBuilder = null;
                 IRegistrationBuilder<object, ReflectionActivatorData, SingleRegistrationStyle>? registrationBuilder = null;
 
                 if (dataType.IsGenericType && dataType.IsGenericTypeDefinition)
                 {
-                    registrationGenericBuilder = shouldAsInterfaces
-                        ? builder.RegisterGeneric(dataType).AsImplementedInterfaces()
-                        : builder.RegisterGeneric(dataType);
+                    if (intrEnableAttr is not null)
+                        registrationGenericBuilder = shouldAsInterfaces
+                            ? builder.RegisterGeneric(dataType).AsImplementedInterfaces().EnableInterfaceInterceptors()
+                            : builder.RegisterGeneric(dataType).EnableInterfaceInterceptors();
+                    else
+                        registrationGenericBuilder = shouldAsInterfaces
+                            ? builder.RegisterGeneric(dataType).AsImplementedInterfaces()
+                            : builder.RegisterGeneric(dataType);
                 }
                 else
                 {
-                    registrationBuilder = shouldAsInterfaces
-                        ? builder.RegisterType(dataType).AsImplementedInterfaces()
-                        : builder.RegisterType(dataType);
+                    if (intrEnableAttr is not null)
+                    {
+                        registrationBuilder = intrEnableAttr.Intercept switch
+                        {
+                            Intercept.InterfaceAndClass => shouldAsInterfaces
+                                ? builder.RegisterType(dataType)
+                                    .AsImplementedInterfaces()
+                                    .EnableClassInterceptors()
+                                    .EnableInterfaceInterceptors()
+                                : builder.RegisterType(dataType)
+                                    .EnableClassInterceptors()
+                                    .EnableInterfaceInterceptors(),
+                            Intercept.Interface => shouldAsInterfaces
+                                ? builder.RegisterType(dataType).AsImplementedInterfaces().EnableInterfaceInterceptors()
+                                : builder.RegisterType(dataType).EnableInterfaceInterceptors(),
+                            Intercept.Class => shouldAsInterfaces
+                                ? builder.RegisterType(dataType).AsImplementedInterfaces().EnableClassInterceptors()
+                                : builder.RegisterType(dataType).EnableClassInterceptors(),
+                            _ => throw new ArgumentOutOfRangeException()
+                        };
+                    }
+                    else
+                    {
+                        registrationBuilder = shouldAsInterfaces
+                            ? builder.RegisterType(dataType).AsImplementedInterfaces()
+                            : builder.RegisterType(dataType);
+                    }
                 }
 
                 if (shouldAsSelf)
@@ -252,129 +304,20 @@ public static class DependancyInjectionExtensions
                         throw new ArgumentOutOfRangeException();
                 }
 
-                if (isIntercepted)
+                foreach (var attr in intrAttrs)
                 {
-                    registrationBuilder = registrationBuilder?.EnableInterfaceInterceptors();
-                    registrationGenericBuilder = registrationGenericBuilder?.EnableInterfaceInterceptors();
-
-                    foreach (var attr in intrAttrs)
-                    {
-                        registrationBuilder = attr.IsAsync
-                            ? registrationBuilder?.InterceptedBy(
-                                typeof(AsyncInterceptorAdapter<>).MakeGenericType(attr.Interceptor))
-                            : registrationBuilder?.InterceptedBy(attr.Interceptor);
-                        registrationGenericBuilder = attr.IsAsync
-                            ? registrationGenericBuilder?.InterceptedBy(
-                                typeof(AsyncInterceptorAdapter<>).MakeGenericType(attr.Interceptor))
-                            : registrationGenericBuilder?.InterceptedBy(attr.Interceptor);
-                    }
-                }
-            }
-
-            // handle regular services
-            foreach (var type in subSet)
-            {
-                var intrAttrs = type.GetCustomAttributes<AutofacInterceptedByAttribute>(false).ToList();
-                var scopeAttr = type.GetCustomAttribute<AutofacLifetimeAttribute>();
-                var asAttrs = type.GetCustomAttributes<AutofacRegisterAsAttribute>().ToList();
-
-                var scope = scopeAttr?.Scope ?? Lifetime.InstancePerLifetimeScope;
-
-                var registerAsTypes = asAttrs.Where(x => x.RegisterAsType is not null)
-                    .Select(x => x.RegisterAsType)
-                    .Distinct()
-                    .ToList();
-                var shouldAsSelf = asAttrs.Any(x => x.RegisterAsOption == RegisterAs.AsSelf) &&
-                    asAttrs.All(x => x.RegisterAsType != type);
-                var shouldAsInterfaces = !asAttrs.Any() || asAttrs.Any(x => x.RegisterAsOption == RegisterAs.AsImplementedInterfaces);
-
-                bool isIntercepted = intrAttrs.Any();
-
-                IRegistrationBuilder<object, ReflectionActivatorData, DynamicRegistrationStyle>? registrationGenericBuilder = null;
-                IRegistrationBuilder<object, ReflectionActivatorData, SingleRegistrationStyle>? registrationBuilder = null;
-
-                if (type.IsGenericType && type.IsGenericTypeDefinition)
-                {
-                    registrationGenericBuilder = shouldAsInterfaces
-                        ? builder.RegisterGeneric(type).AsImplementedInterfaces()
-                        : builder.RegisterGeneric(type);
-                }
-                else
-                {
-                    registrationBuilder = shouldAsInterfaces
-                        ? builder.RegisterType(type).AsImplementedInterfaces()
-                        : builder.RegisterType(type);
-                }
-
-                if (shouldAsSelf)
-                {
-                    registrationBuilder = registrationBuilder?.As(type);
-                    registrationGenericBuilder = registrationGenericBuilder?.AsSelf();
-                }
-
-                foreach (var asType in registerAsTypes)
-                {
-                    if (asType is null)
-                        throw new InvalidOperationException("Type was null during registration");
-
-                    registrationBuilder = registrationBuilder?.As(asType);
-                    registrationGenericBuilder = registrationGenericBuilder?.As(asType);
-                }
-
-                switch (scope)
-                {
-                    case Lifetime.Singleton:
-                        registrationBuilder = registrationBuilder?.SingleInstance();
-                        registrationGenericBuilder = registrationGenericBuilder?.SingleInstance();
-                        break;
-                    case Lifetime.InstancePerRequest:
-                        registrationBuilder = registrationBuilder?.InstancePerRequest();
-                        registrationGenericBuilder = registrationGenericBuilder?.InstancePerRequest();
-                        break;
-                    case Lifetime.InstancePerLifetimeScope:
-                        registrationBuilder = registrationBuilder?.InstancePerLifetimeScope();
-                        registrationGenericBuilder = registrationGenericBuilder?.InstancePerLifetimeScope();
-                        break;
-                    case Lifetime.InstancePerDependancy:
-                        registrationBuilder = registrationBuilder?.InstancePerDependency();
-                        registrationGenericBuilder = registrationGenericBuilder?.InstancePerDependency();
-                        break;
-                    case Lifetime.InstancePerMatchingLifetimeScope:
-                        registrationBuilder =
-                            registrationBuilder?.InstancePerMatchingLifetimeScope(scopeAttr?.Tags.ToArray() ??
-                                Array.Empty<object>());
-                        registrationGenericBuilder =
-                            registrationGenericBuilder?.InstancePerMatchingLifetimeScope(scopeAttr?.Tags.ToArray() ??
-                                Array.Empty<object>());
-                        break;
-                    case Lifetime.InstancePerOwned:
-                        if (scopeAttr?.Owned is null) throw new InvalidOperationException("Owned type was null");
-
-                        registrationBuilder = registrationBuilder?.InstancePerOwned(scopeAttr.Owned);
-                        registrationGenericBuilder = registrationGenericBuilder?.InstancePerOwned(scopeAttr.Owned);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-
-                if (isIntercepted)
-                {
-                    registrationBuilder = registrationBuilder?.EnableInterfaceInterceptors();
-                    registrationGenericBuilder = registrationGenericBuilder?.EnableInterfaceInterceptors();
-
-                    foreach (var attr in intrAttrs)
-                    {
-                        registrationBuilder = attr.IsAsync
-                            ? registrationBuilder?.InterceptedBy(
-                                typeof(AsyncInterceptorAdapter<>).MakeGenericType(attr.Interceptor))
-                            : registrationBuilder?.InterceptedBy(attr.Interceptor);
-                        registrationGenericBuilder = attr.IsAsync
-                            ? registrationGenericBuilder?.InterceptedBy(
-                                typeof(AsyncInterceptorAdapter<>).MakeGenericType(attr.Interceptor))
-                            : registrationGenericBuilder?.InterceptedBy(attr.Interceptor);
-                    }
+                    registrationBuilder = attr.IsAsync
+                        ? registrationBuilder?.InterceptedBy(
+                            typeof(AsyncInterceptorAdapter<>).MakeGenericType(attr.Interceptor))
+                        : registrationBuilder?.InterceptedBy(attr.Interceptor);
+                    registrationGenericBuilder = attr.IsAsync
+                        ? registrationGenericBuilder?.InterceptedBy(
+                            typeof(AsyncInterceptorAdapter<>).MakeGenericType(attr.Interceptor))
+                        : registrationGenericBuilder?.InterceptedBy(attr.Interceptor);
                 }
             }
         }
+        
+        return registrationConfiguration;
     }
 }

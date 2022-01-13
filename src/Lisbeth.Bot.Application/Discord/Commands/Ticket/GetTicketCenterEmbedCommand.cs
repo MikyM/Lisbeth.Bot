@@ -15,13 +15,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
-using MikyM.Common.Application.CommandHandlers;
 using MikyM.Common.Application.CommandHandlers.Commands;
 
 namespace Lisbeth.Bot.Application.Discord.Commands.Ticket;
 
-public class GetTicketCenterEmbedCommand : CommandBase
+public class GetTicketCenterEmbedCommand : CommandBase<DiscordMessageBuilder>
 {
     public GetTicketCenterEmbedCommand(InteractionContext interactionContext)
     {

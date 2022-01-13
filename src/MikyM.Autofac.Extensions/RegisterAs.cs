@@ -15,21 +15,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using Lisbeth.Bot.Domain.DTOs.Request.Tag;
-using MikyM.Common.Application.CommandHandlers.Commands;
 
-namespace Lisbeth.Bot.Application.Discord.Commands.Tag;
+namespace MikyM.Autofac.Extensions;
 
-public class GetTagCommand : CommandBase<DiscordMessageBuilder>
+/// <summary>
+/// Registration types
+/// </summary>
+public enum RegisterAs
 {
-    public GetTagCommand(TagGetReqDto dto, InteractionContext? ctx = null)
-    {
-        Ctx = ctx;
-        Dto = dto;
-    }
-
-    public InteractionContext? Ctx { get; set; }
-    public TagGetReqDto Dto { get; set; }
+    Self,
+    ImplementedInterfaces
 }

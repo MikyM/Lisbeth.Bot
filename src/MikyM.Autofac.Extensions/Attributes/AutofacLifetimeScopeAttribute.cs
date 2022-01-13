@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace MikyM.Common.Utilities.Autofac.Attributes;
+namespace MikyM.Autofac.Extensions.Attributes;
 
 /// <summary>
 /// Defines with which lifetime should the service be registered

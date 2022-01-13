@@ -14,6 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\MikyM.Autofac.Extensions\MikyM.Autofac.Extensions.csproj" />
     <ProjectReference Include="..\MikyM.Common.Domain\MikyM.Common.Domain.csproj" />
     <ProjectReference Include="..\MikyM.Common.Utilities\MikyM.Common.Utilities.csproj" />
   </ItemGroup>

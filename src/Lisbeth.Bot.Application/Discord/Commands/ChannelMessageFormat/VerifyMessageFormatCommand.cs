@@ -22,7 +22,7 @@ using MikyM.Common.Application.CommandHandlers.Commands;
 
 namespace Lisbeth.Bot.Application.Discord.Commands.ChannelMessageFormat;
 
-public class VerifyMessageFormatCommand : CommandBase
+public class VerifyMessageFormatCommand : CommandBase<VerifyMessageFormatResDto>
 {
     public MessageCreateEventArgs? EventArgs { get; set; }
     public InteractionContext? Ctx { get; set; }

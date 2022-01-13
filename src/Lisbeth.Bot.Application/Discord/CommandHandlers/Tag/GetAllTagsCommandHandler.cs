@@ -29,6 +29,8 @@ using System.Globalization;
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Tag;
 
 [UsedImplicitly]
+[AutofacEnableInterception(Intercept.Interface)]
+[AutofacInterceptedBy(typeof(LoggingInterceptor))]
 public class GetAllTagsCommandHandler : ICommandHandler<GetAllTagsCommand, List<Page>>
 {
     private readonly IDiscordService _discord;

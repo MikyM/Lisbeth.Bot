@@ -17,7 +17,6 @@
 
 
 using Autofac;
-using MikyM.Common.Utilities.Autofac;
 
 namespace MikyM.Common.Application;
 
@@ -26,63 +25,26 @@ namespace MikyM.Common.Application;
 /// </summary>
 public sealed class RegistrationConfiguration
 {
-    /// <summary>
-    /// Gets or sets the default lifetime for base generic data services
-    /// </summary>
-    public Lifetime BaseGenericDataServiceLifetime { get; set; } = Lifetime.InstancePerLifetimeScope;
-    /// <summary>
-    /// Gets or sets the default lifetime for custom data services that implement or derive from base data services
-    /// </summary>
-    public Lifetime DataServiceLifetime { get; set; } = Lifetime.InstancePerLifetimeScope;
+    internal ContainerBuilder Builder { get; set; }
+
+    internal  RegistrationConfiguration(ContainerBuilder builder)
+    {
+        this.Builder = builder;
+    }
+
     /// <summary>
     /// Gets interceptor registration delegates
     /// </summary>
     internal Dictionary<Type, object> InterceptorDelegates { get; private set; } = new();
-    /// <summary>
-    /// Gets data interceptor registration delegates
-    /// </summary>
-    internal Dictionary<Type, DataInterceptorConfiguration> DataInterceptors { get; private set; } = new();
+
     /// <summary>
     /// Registers an interceptor with <see cref="ContainerBuilder"/>
     /// </summary>
     /// <param name="factoryMethod">Factory method for the registration</param>
-    /// <returns>Current instance of the <see cref="RegistrationConfiguration"/></returns>
+    /// <returns>Current instance of the <see cref="ServiceRegistrationConfiguration"/></returns>
     public RegistrationConfiguration AddInterceptor<T>(Func<IComponentContext, T> factoryMethod) where T : notnull
     {
         InterceptorDelegates.TryAdd(typeof(T), factoryMethod);
         return this;
     }
-    /// <summary>
-    /// Marks an interceptor of a given type to be used for intercepting base data services.
-    /// Please note you must also add this interceptor using <see cref="AddInterceptor{T}"/>
-    /// </summary>
-    /// <param name="interceptor">Type of the interceptor</param>
-    /// <param name="configuration">Interceptor configuration</param>
-    /// <returns>Current instance of the <see cref="RegistrationConfiguration"/></returns>
-    public RegistrationConfiguration AddDataServiceInterceptor(Type interceptor, DataInterceptorConfiguration configuration = DataInterceptorConfiguration.CrudAndReadOnly)
-    {
-        DataInterceptors.TryAdd(interceptor, configuration);
-        return this;
-    }
-    /// <summary>
-    /// Marks an interceptor of a given type to be used for intercepting base data services.
-    /// Please note you must also add this interceptor using <see cref="AddInterceptor{T}"/>
-    /// </summary>
-    /// <param name="configuration">Interceptor configuration</param>
-    /// <returns>Current instance of the <see cref="RegistrationConfiguration"/></returns>
-    public RegistrationConfiguration AddDataServiceInterceptor<T>(DataInterceptorConfiguration configuration = DataInterceptorConfiguration.CrudAndReadOnly) where T : notnull
-    {
-        DataInterceptors.TryAdd(typeof(T), configuration);
-        return this;
-    }
-}
-
-/// <summary>
-/// Configuration for base data service interceptors
-/// </summary>
-public enum DataInterceptorConfiguration
-{
-    CrudAndReadOnly,
-    Crud,
-    ReadOnly
 }
