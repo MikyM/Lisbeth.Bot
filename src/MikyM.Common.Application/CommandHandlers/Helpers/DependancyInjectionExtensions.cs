@@ -98,7 +98,7 @@ public static class DependancyInjectionExtensions
                 }
 
 
-                var intrAttr = type.GetCustomAttribute<EnableInterceptionAttribute>();
+                var intrAttr = type.GetCustomAttribute<EnableInterceptionAttribute>(false);
                 if (intrAttr is null) continue;
 
                 bool interfaceEnabled = false;
@@ -195,7 +195,7 @@ public static class DependancyInjectionExtensions
                         throw new ArgumentOutOfRangeException();
                 }
 
-                var intrAttr = type.GetCustomAttribute<EnableInterceptionAttribute>();
+                var intrAttr = type.GetCustomAttribute<EnableInterceptionAttribute>(false);
                 if (intrAttr is null) continue;
 
                 bool interfaceEnabled = false;

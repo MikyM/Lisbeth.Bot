@@ -50,7 +50,7 @@ namespace MikyM.Autofac.Extensions
                         asAttrs.All(x => x.RegisterAsType != type);
                     var shouldAsInterfaces = !asAttrs.Any() || asAttrs.Any(x => x.RegisterAsOption == RegisterAs.ImplementedInterfaces);
 
-                    var intrEnableAttr = type.GetCustomAttribute<EnableInterceptionAttribute>();
+                    var intrEnableAttr = type.GetCustomAttribute<EnableInterceptionAttribute>(false);
 
                     IRegistrationBuilder<object, ReflectionActivatorData, DynamicRegistrationStyle>? registrationGenericBuilder = null;
                     IRegistrationBuilder<object, ReflectionActivatorData, SingleRegistrationStyle>? registrationBuilder = null;

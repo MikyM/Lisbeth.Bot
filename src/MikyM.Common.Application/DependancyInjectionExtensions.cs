@@ -193,10 +193,10 @@ public static class DependancyInjectionExtensions
             // handle data services
             foreach (var dataType in dataSubSet)
             {
-                var scopeOverrideAttr = dataType.GetCustomAttribute<LifetimeAttribute>();
+                var scopeOverrideAttr = dataType.GetCustomAttribute<LifetimeAttribute>(false);
                 var intrAttrs = dataType.GetCustomAttributes<InterceptedByAttribute>(false).ToList();
                 var asAttr = dataType.GetCustomAttributes<RegisterAsAttribute>(false).ToList();
-                var intrEnableAttr = dataType.GetCustomAttribute<EnableInterceptionAttribute>();
+                var intrEnableAttr = dataType.GetCustomAttribute<EnableInterceptionAttribute>(false);
 
                 var scope = scopeOverrideAttr?.Scope ?? config.DataServiceLifetime;
 
