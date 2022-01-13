@@ -18,7 +18,6 @@
 using Autofac;
 using EFCoreSecondLevelCacheInterceptor;
 using IdGen;
-using Lisbeth.Bot.Application.Discord.EmbedBuilders;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Application.Discord.Services;
 using Lisbeth.Bot.Application.Services;

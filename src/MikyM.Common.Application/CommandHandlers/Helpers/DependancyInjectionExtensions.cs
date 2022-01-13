@@ -100,10 +100,6 @@ public static class DependancyInjectionExtensions
                 //bool classEnabled = false;
                 foreach (var attr in intrAttrs)
                 {
-                    if (!registrationConfiguration.InterceptorDelegates.TryGetValue(attr.Interceptor, out _))
-                        throw new ArgumentException(
-                            $"You must first register {attr.Interceptor.Name} interceptor with .AddInterceptor method");
-
                     if (!interfaceEnabled)
                     {
                         registrationBuilder = registrationBuilder.EnableInterfaceInterceptors();
@@ -197,10 +193,6 @@ public static class DependancyInjectionExtensions
                 //bool classEnabled = false;
                 foreach (var attr in intrAttrs)
                 {
-                    if (!registrationConfiguration.InterceptorDelegates.TryGetValue(attr.Interceptor, out _))
-                        throw new ArgumentException(
-                            $"You must first register {attr.Interceptor.Name} interceptor with .AddInterceptor method");
-
                     if (!interfaceEnabled)
                     {
                         registrationBuilder = registrationBuilder.EnableInterfaceInterceptors();

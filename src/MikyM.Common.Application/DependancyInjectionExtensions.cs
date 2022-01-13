@@ -24,7 +24,6 @@ using Castle.DynamicProxy;
 using Microsoft.Extensions.Logging;
 using MikyM.Common.Application.Services;
 using System.Reflection;
-using RegistrationExtensions = Autofac.RegistrationExtensions;
 
 namespace MikyM.Common.Application;
 
@@ -41,21 +40,11 @@ public static class DependancyInjectionExtensions
         builder.RegisterGeneric(typeof(AsyncInterceptorAdapter<>));
         //register async interceptor
 
-        var method = typeof(RegistrationExtensions).GetMethods().First(x =>
-            x.Name == "Register" && x.GetGenericArguments().Length == 1 &&
-            x.GetParameters().Length == 2);
-
         var config = new RegistrationConfiguration(builder);
         config.AddInterceptor(x =>
             new LoggingInterceptor(x.Resolve<ILoggerFactory>().CreateLogger(nameof(LoggingInterceptor))));
 
         action(config);
-
-        foreach (var (interceptorType, registration) in config.InterceptorDelegates)
-        {
-            var registerMethod = method.MakeGenericMethod(interceptorType);
-            registerMethod.Invoke(null, new[] { builder, registration });
-        }
 
         return builder;
     }
@@ -67,10 +56,11 @@ public static class DependancyInjectionExtensions
     {
         var builder = registrationConfiguration.Builder;
 
-        builder.RegisterServicesByAttributes();
-
         var config = new ServiceRegistrationConfiguration(registrationConfiguration);
         configuration?.Invoke(config);
+
+        builder.AddAttributeDefinedServices(config.AttributeOptions);
+
 
         IRegistrationBuilder<object, ReflectionActivatorData, DynamicRegistrationStyle> registReadOnlyBuilder;
         IRegistrationBuilder<object, ReflectionActivatorData, DynamicRegistrationStyle> registCrudBuilder;
@@ -118,10 +108,6 @@ public static class DependancyInjectionExtensions
         bool readEnabled = false;
         foreach (var (interceptorType, dataConfig) in config.DataInterceptors)
         {
-            if (!registrationConfiguration.InterceptorDelegates.TryGetValue(interceptorType, out _))
-                throw new ArgumentException(
-                    $"You must first register {interceptorType.Name} interceptor with .AddInterceptor method");
-
             switch (dataConfig)
             {
                 case DataInterceptorConfiguration.CrudAndReadOnly:

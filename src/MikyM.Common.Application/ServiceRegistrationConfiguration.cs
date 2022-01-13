@@ -43,6 +43,8 @@ public sealed class ServiceRegistrationConfiguration
     /// </summary>
     internal Dictionary<Type, DataInterceptorConfiguration> DataInterceptors { get; private set; } = new();
 
+    internal Action<AttributeRegistrationConfiguration>? AttributeOptions { get; private set; }
+
     /// <summary>
     /// Marks an interceptor of a given type to be used for intercepting base data services.
     /// Please note you must also add this interceptor using <see cref="RegistrationConfiguration.AddInterceptor{T}"/>
@@ -64,6 +66,16 @@ public sealed class ServiceRegistrationConfiguration
     public ServiceRegistrationConfiguration AddDataServiceInterceptor<T>(DataInterceptorConfiguration configuration = DataInterceptorConfiguration.CrudAndReadOnly) where T : notnull
     {
         DataInterceptors.TryAdd(typeof(T), configuration);
+        return this;
+    }
+
+    /// <summary>
+    /// Configures attribute services registration options
+    /// </summary>
+    /// <returns>Current instance of the <see cref="ServiceRegistrationConfiguration"/></returns>
+    public ServiceRegistrationConfiguration ConfigureAttributeServices(Action<AttributeRegistrationConfiguration> action)
+    {
+        AttributeOptions = action;
         return this;
     }
 }

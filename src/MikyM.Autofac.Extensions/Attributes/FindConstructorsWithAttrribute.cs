@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Reflection;
 using Autofac.Core.Activators.Reflection;
 
 namespace MikyM.Autofac.Extensions.Attributes;
@@ -23,16 +22,12 @@ namespace MikyM.Autofac.Extensions.Attributes;
 [AttributeUsage(AttributeTargets.Class)]
 public class FindConstructorsWithAttribute : Attribute
 {
-    public IConstructorFinder? ConstructorFinder { get; set; }
-    public Func<Type, ConstructorInfo[]>? FuncConstructorFinder { get; set; }
-
-    public FindConstructorsWithAttribute(IConstructorFinder constructorFinder)
+    public Type ConstructorFinder { get; set; }
+    public FindConstructorsWithAttribute(Type constructorFinder)
     {
-        ConstructorFinder = constructorFinder ?? throw new ArgumentNullException(nameof(constructorFinder));
-    }
-
-    public FindConstructorsWithAttribute(Func<Type, ConstructorInfo[]> constructorFinder)
-    {
-        FuncConstructorFinder = constructorFinder ?? throw new ArgumentNullException(nameof(constructorFinder));
+        if (constructorFinder is null) throw new ArgumentNullException(nameof(constructorFinder));
+        if (!constructorFinder.IsAssignableTo(typeof(IConstructorFinder)))
+            throw new InvalidOperationException("Invalid constructor finder type");
+        ConstructorFinder = constructorFinder;
     }
 }

@@ -36,6 +36,8 @@ namespace Lisbeth.Bot.Application.Discord.Services;
 [Service]
 [RegisterAs(typeof(IDiscordMessageService))]
 [Lifetime(Lifetime.InstancePerLifetimeScope)]
+[EnableInterception(Intercept.Interface)]
+[InterceptedBy(typeof(LoggingInterceptor))]
 public class DiscordMessageService : IDiscordMessageService
 {
     private readonly IDiscordService _discord;

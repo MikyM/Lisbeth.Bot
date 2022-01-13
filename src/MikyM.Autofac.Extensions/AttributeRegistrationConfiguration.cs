@@ -18,16 +18,16 @@
 
 using Autofac;
 
-namespace MikyM.Common.Application;
+namespace MikyM.Autofac.Extensions;
 
 /// <summary>
 /// Registration extension configuration
 /// </summary>
-public sealed class RegistrationConfiguration
+public sealed class AttributeRegistrationConfiguration
 {
     internal ContainerBuilder Builder { get; set; }
 
-    internal  RegistrationConfiguration(ContainerBuilder builder)
+    public AttributeRegistrationConfiguration(ContainerBuilder builder)
     {
         this.Builder = builder;
     }
@@ -36,8 +36,8 @@ public sealed class RegistrationConfiguration
     /// Registers an interceptor with <see cref="ContainerBuilder"/>
     /// </summary>
     /// <param name="factoryMethod">Factory method for the registration</param>
-    /// <returns>Current instance of the <see cref="RegistrationConfiguration"/></returns>
-    public RegistrationConfiguration AddInterceptor<T>(Func<IComponentContext, T> factoryMethod) where T : notnull
+    /// <returns>Current instance of the <see cref="AttributeRegistrationConfiguration"/></returns>
+    public AttributeRegistrationConfiguration AddInterceptor<T>(Func<IComponentContext, T> factoryMethod) where T : notnull
     {
         Builder.Register(factoryMethod);
 

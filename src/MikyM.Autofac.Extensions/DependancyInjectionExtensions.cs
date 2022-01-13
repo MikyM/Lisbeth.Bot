@@ -25,8 +25,23 @@ namespace MikyM.Autofac.Extensions
 {
     public static class DependancyInjectionExtensions
     {
-        public static ContainerBuilder RegisterServicesByAttributes(this ContainerBuilder builder)
+        public static ContainerBuilder AddAttributeDefinedServices(this ContainerBuilder builder, Action<AttributeRegistrationConfiguration>? options = null)
         {
+            var config = new AttributeRegistrationConfiguration(builder);
+            options?.Invoke(config);
+
+            /*
+            var method = typeof(RegistrationExtensions).GetMethods().First(x =>
+                x.Name == "Register" && x.GetGenericArguments().Length == 1 &&
+                x.GetParameters().Length == 2);
+
+            foreach (var (interceptorType, registration) in config.InterceptorDelegates)
+            {
+                var registerMethod = method.MakeGenericMethod(interceptorType);
+                registerMethod.Invoke(null, new[] { builder, registration });
+            }
+            */
+
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
                 var set = assembly.GetTypes()
@@ -164,23 +179,10 @@ namespace MikyM.Autofac.Extensions
                             : registrationGenericBuilder?.InterceptedBy(attr.Interceptor);
                     }
 
-                    if (ctorAttr is not null)
+                    /*if (ctorAttr is not null)
                     {
-                        if (ctorAttr.ConstructorFinder is not null)
-                        {
-                            registrationBuilder = registrationBuilder?.FindConstructorsWith(ctorAttr.ConstructorFinder);
-                            registrationGenericBuilder =
-                                registrationGenericBuilder?.FindConstructorsWith(ctorAttr.ConstructorFinder);
-                        }
-
-                        if (ctorAttr.FuncConstructorFinder is not null)
-                        {
-                            registrationBuilder = registrationBuilder?.FindConstructorsWith(ctorAttr.FuncConstructorFinder);
-                            registrationGenericBuilder =
-                                registrationGenericBuilder?.FindConstructorsWith(ctorAttr.FuncConstructorFinder);
-                        }
-
-                    }
+                        registrationBuilder = registrationBuilder.FindConstructorsWith()
+                    }*/
                 }
             }
 
