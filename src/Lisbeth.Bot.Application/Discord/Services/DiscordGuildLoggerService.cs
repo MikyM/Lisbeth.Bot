@@ -29,9 +29,9 @@ using MikyM.Discord.Interfaces;
 namespace Lisbeth.Bot.Application.Discord.Services;
 
 [UsedImplicitly]
-[AutofacService]
-[AutofacRegisterAs(typeof(IDiscordGuildLoggerService))]
-[AutofacLifetime(Lifetime.InstancePerLifetimeScope)]
+[Service]
+[RegisterAs(typeof(IDiscordGuildLoggerService))]
+[Lifetime(Lifetime.InstancePerLifetimeScope)]
 public class DiscordGuildLoggerService : IDiscordGuildLoggerService
 {
     private readonly IDiscordGuildLogSenderService _logSender;

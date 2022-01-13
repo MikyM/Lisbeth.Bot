@@ -21,24 +21,24 @@ namespace MikyM.Autofac.Extensions.Attributes;
 /// Defines with which lifetime should the service be registered
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
-public sealed class AutofacLifetimeAttribute : Attribute
+public sealed class LifetimeAttribute : Attribute
 {
     public Lifetime Scope { get; private set; }
     public Type? Owned { get; private set; }
     public IEnumerable<object> Tags { get; private set; } = new List<string>();
 
-    public AutofacLifetimeAttribute(Lifetime scope)
+    public LifetimeAttribute(Lifetime scope)
     {
         Scope = scope;
     }
 
-    public AutofacLifetimeAttribute(Lifetime scope, Type owned)
+    public LifetimeAttribute(Lifetime scope, Type owned)
     {
         Scope = scope;
         Owned = owned ?? throw new ArgumentNullException(nameof(owned));
     }
 
-    public AutofacLifetimeAttribute(Lifetime scope, IEnumerable<object> tags)
+    public LifetimeAttribute(Lifetime scope, IEnumerable<object> tags)
     {
         Scope = scope;
         Tags = tags ?? throw new ArgumentNullException(nameof(tags));
@@ -46,13 +46,13 @@ public sealed class AutofacLifetimeAttribute : Attribute
             throw new ArgumentException("You must pass at least one tag");
     }
 
-    public AutofacLifetimeAttribute(Type owned)
+    public LifetimeAttribute(Type owned)
     {
         Scope = Lifetime.InstancePerOwned;
         Owned = owned ?? throw new ArgumentNullException(nameof(owned));
     }
 
-    public AutofacLifetimeAttribute(IEnumerable<object> tags)
+    public LifetimeAttribute(IEnumerable<object> tags)
     {
         Scope = Lifetime.InstancePerMatchingLifetimeScope;
         Tags = tags ?? throw new ArgumentNullException(nameof(tags));

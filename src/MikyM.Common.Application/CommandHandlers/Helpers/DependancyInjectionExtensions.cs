@@ -45,14 +45,14 @@ public static class DependancyInjectionExtensions
                 .ToList();
 
             var commandSubSet = commandSet
-                .Where(x => x.GetCustomAttribute<AutofacLifetimeAttribute>(false) is not null ||
-                            x.GetCustomAttributes<AutofacInterceptedByAttribute>(false).Count() != 0 && x.IsClass &&
+                .Where(x => x.GetCustomAttribute<LifetimeAttribute>(false) is not null ||
+                            x.GetCustomAttributes<InterceptedByAttribute>(false).Count() != 0 && x.IsClass &&
                             !x.IsAbstract)
                 .ToList();
 
             var commandResultSubSet = commandResultSet
-                .Where(x => x.GetCustomAttribute<AutofacLifetimeAttribute>(false) is not null ||
-                            x.GetCustomAttributes<AutofacInterceptedByAttribute>(false).Count() != 0 && x.IsClass &&
+                .Where(x => x.GetCustomAttribute<LifetimeAttribute>(false) is not null ||
+                            x.GetCustomAttributes<InterceptedByAttribute>(false).Count() != 0 && x.IsClass &&
                             !x.IsAbstract)
                 .ToList();
 
@@ -63,8 +63,8 @@ public static class DependancyInjectionExtensions
 
             foreach (var type in commandSubSet)
             {
-                var lifeAttr = type.GetCustomAttribute<AutofacLifetimeAttribute>(false);
-                var intrAttrs = type.GetCustomAttributes<AutofacInterceptedByAttribute>(false);
+                var lifeAttr = type.GetCustomAttribute<LifetimeAttribute>(false);
+                var intrAttrs = type.GetCustomAttributes<InterceptedByAttribute>(false);
 
                 var registrationBuilder = builder.RegisterTypes(type).AsClosedInterfacesOf(typeof(ICommandHandler<>));
 
@@ -98,7 +98,7 @@ public static class DependancyInjectionExtensions
                 }
 
 
-                var intrAttr = type.GetCustomAttribute<AutofacEnableInterceptionAttribute>();
+                var intrAttr = type.GetCustomAttribute<EnableInterceptionAttribute>();
                 if (intrAttr is null) continue;
 
                 bool interfaceEnabled = false;
@@ -161,8 +161,8 @@ public static class DependancyInjectionExtensions
 
             foreach (var type in commandResultSubSet)
             {
-                var lifeAttr = type.GetCustomAttribute<AutofacLifetimeAttribute>(false);
-                var intrAttrs = type.GetCustomAttributes<AutofacInterceptedByAttribute>(false);
+                var lifeAttr = type.GetCustomAttribute<LifetimeAttribute>(false);
+                var intrAttrs = type.GetCustomAttributes<InterceptedByAttribute>(false);
 
                 var registrationBuilder = builder.RegisterTypes(type).AsClosedInterfacesOf(typeof(ICommandHandler<,>));
 
@@ -195,7 +195,7 @@ public static class DependancyInjectionExtensions
                         throw new ArgumentOutOfRangeException();
                 }
 
-                var intrAttr = type.GetCustomAttribute<AutofacEnableInterceptionAttribute>();
+                var intrAttr = type.GetCustomAttribute<EnableInterceptionAttribute>();
                 if (intrAttr is null) continue;
 
                 bool interfaceEnabled = false;

@@ -36,9 +36,9 @@ using MikyM.Discord.Interfaces;
 namespace Lisbeth.Bot.Application.Discord.Services;
 
 [UsedImplicitly]
-[AutofacService]
-[AutofacRegisterAs(typeof(IDiscordBanService))]
-[AutofacLifetime(Lifetime.InstancePerLifetimeScope)]
+[Service]
+[RegisterAs(typeof(IDiscordBanService))]
+[Lifetime(Lifetime.InstancePerLifetimeScope)]
 public class DiscordBanService : IDiscordBanService
 {
     private readonly IBanDataService _banDataService;

@@ -31,14 +31,14 @@ namespace MikyM.Autofac.Extensions
             {
                 var set = assembly.GetTypes()
                     .Where(x => x.GetCustomAttributes(false)
-                        .Any(y => y.GetType() == typeof(AutofacServiceAttribute)) && x.IsClass && !x.IsAbstract)
+                        .Any(y => y.GetType() == typeof(ServiceAttribute)) && x.IsClass && !x.IsAbstract)
                     .ToList();
 
                 foreach (var type in set)
                 {
-                    var intrAttrs = type.GetCustomAttributes<AutofacInterceptedByAttribute>(false).ToList();
-                    var scopeAttr = type.GetCustomAttribute<AutofacLifetimeAttribute>();
-                    var asAttrs = type.GetCustomAttributes<AutofacRegisterAsAttribute>().ToList();
+                    var intrAttrs = type.GetCustomAttributes<InterceptedByAttribute>(false).ToList();
+                    var scopeAttr = type.GetCustomAttribute<LifetimeAttribute>();
+                    var asAttrs = type.GetCustomAttributes<RegisterAsAttribute>().ToList();
 
                     var scope = scopeAttr?.Scope ?? Lifetime.InstancePerLifetimeScope;
 
@@ -50,7 +50,7 @@ namespace MikyM.Autofac.Extensions
                         asAttrs.All(x => x.RegisterAsType != type);
                     var shouldAsInterfaces = !asAttrs.Any() || asAttrs.Any(x => x.RegisterAsOption == RegisterAs.ImplementedInterfaces);
 
-                    var intrEnableAttr = type.GetCustomAttribute<AutofacEnableInterceptionAttribute>();
+                    var intrEnableAttr = type.GetCustomAttribute<EnableInterceptionAttribute>();
 
                     IRegistrationBuilder<object, ReflectionActivatorData, DynamicRegistrationStyle>? registrationGenericBuilder = null;
                     IRegistrationBuilder<object, ReflectionActivatorData, SingleRegistrationStyle>? registrationBuilder = null;

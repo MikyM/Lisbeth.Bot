@@ -21,9 +21,9 @@ namespace MikyM.Autofac.Extensions.Attributes;
 /// Marks a class for registration as a service
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
-public sealed class AutofacServiceAttribute : Attribute
+public sealed class ServiceAttribute : Attribute
 {
-    public AutofacServiceAttribute()
+    public ServiceAttribute()
     {
     }
 }

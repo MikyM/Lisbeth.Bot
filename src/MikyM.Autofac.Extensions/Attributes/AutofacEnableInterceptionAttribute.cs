@@ -21,10 +21,10 @@ namespace MikyM.Autofac.Extensions.Attributes;
 /// Defines whether to enable interception for this registration
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
-public sealed class AutofacEnableInterceptionAttribute : Attribute
+public sealed class EnableInterceptionAttribute : Attribute
 {
     public Intercept Intercept { get; private set; }
-    public AutofacEnableInterceptionAttribute(Intercept intercept)
+    public EnableInterceptionAttribute(Intercept intercept)
     {
         Intercept = intercept;
     }

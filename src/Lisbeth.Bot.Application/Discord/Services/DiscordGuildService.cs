@@ -37,9 +37,9 @@ using System.Collections.Generic;
 namespace Lisbeth.Bot.Application.Discord.Services;
 
 [UsedImplicitly]
-[AutofacService]
-[AutofacRegisterAs(typeof(IDiscordGuildService))]
-[AutofacLifetime(Lifetime.InstancePerLifetimeScope)]
+[Service]
+[RegisterAs(typeof(IDiscordGuildService))]
+[Lifetime(Lifetime.InstancePerLifetimeScope)]
 public class DiscordGuildService : IDiscordGuildService
 {
     private readonly IDiscordService _discord;

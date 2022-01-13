@@ -27,9 +27,9 @@ using System.Globalization;
 namespace Lisbeth.Bot.Application.Discord.Services;
 
 [UsedImplicitly]
-[AutofacService]
-[AutofacRegisterAs(typeof(IDiscordReminderService))]
-[AutofacLifetime(Lifetime.InstancePerLifetimeScope)]
+[Service]
+[RegisterAs(typeof(IDiscordReminderService))]
+[Lifetime(Lifetime.InstancePerLifetimeScope)]
 public class DiscordReminderService : IDiscordReminderService
 {
     private readonly IDiscordService _discord;

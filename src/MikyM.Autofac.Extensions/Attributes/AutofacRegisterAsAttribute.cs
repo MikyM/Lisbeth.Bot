@@ -21,18 +21,18 @@ namespace MikyM.Autofac.Extensions.Attributes;
 /// Defines as what should the service be registered
 /// </summary>
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-public sealed class AutofacRegisterAsAttribute : Attribute
+public sealed class RegisterAsAttribute : Attribute
 {
     public Type? RegisterAsType { get; private set; }
 
     public RegisterAs? RegisterAsOption { get; private set; }
 
-    public AutofacRegisterAsAttribute(Type registerAs)
+    public RegisterAsAttribute(Type registerAs)
     {
         RegisterAsType = registerAs ?? throw new ArgumentNullException(nameof(registerAs));
     }
 
-    public AutofacRegisterAsAttribute(RegisterAs registerAs)
+    public RegisterAsAttribute(RegisterAs registerAs)
     {
         RegisterAsOption = registerAs;
     }

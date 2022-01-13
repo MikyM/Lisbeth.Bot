@@ -33,11 +33,11 @@ using System.Globalization;
 namespace Lisbeth.Bot.Application.Discord.Services;
 
 [UsedImplicitly]
-[AutofacService]
-[AutofacRegisterAs(typeof(IDiscordMessageService))]
-[AutofacLifetime(Lifetime.InstancePerLifetimeScope)]
-[AutofacEnableInterception(Intercept.Interface)]
-[AutofacInterceptedBy(typeof(LoggingInterceptor))]
+[Service]
+[RegisterAs(typeof(IDiscordMessageService))]
+[Lifetime(Lifetime.InstancePerLifetimeScope)]
+[EnableInterception(Intercept.Interface)]
+[InterceptedBy(typeof(LoggingInterceptor))]
 public class DiscordMessageService : IDiscordMessageService
 {
     private readonly IDiscordService _discord;

@@ -179,7 +179,7 @@ public static class DependancyInjectionExtensions
         {
             var subSet = assembly.GetTypes()
                 .Where(x => x.GetCustomAttributes(false)
-                    .Any(y => y.GetType() == typeof(AutofacServiceAttribute)) && x.IsClass && !x.IsAbstract)
+                    .Any(y => y.GetType() == typeof(ServiceAttribute)) && x.IsClass && !x.IsAbstract)
                 .ToList();
 
             var dataSubSet = assembly.GetTypes()
@@ -193,10 +193,10 @@ public static class DependancyInjectionExtensions
             // handle data services
             foreach (var dataType in dataSubSet)
             {
-                var scopeOverrideAttr = dataType.GetCustomAttribute<AutofacLifetimeAttribute>();
-                var intrAttrs = dataType.GetCustomAttributes<AutofacInterceptedByAttribute>(false).ToList();
-                var asAttr = dataType.GetCustomAttributes<AutofacRegisterAsAttribute>(false).ToList();
-                var intrEnableAttr = dataType.GetCustomAttribute<AutofacEnableInterceptionAttribute>();
+                var scopeOverrideAttr = dataType.GetCustomAttribute<LifetimeAttribute>();
+                var intrAttrs = dataType.GetCustomAttributes<InterceptedByAttribute>(false).ToList();
+                var asAttr = dataType.GetCustomAttributes<RegisterAsAttribute>(false).ToList();
+                var intrEnableAttr = dataType.GetCustomAttribute<EnableInterceptionAttribute>();
 
                 var scope = scopeOverrideAttr?.Scope ?? config.DataServiceLifetime;
 

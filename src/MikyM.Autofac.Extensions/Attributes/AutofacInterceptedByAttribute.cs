@@ -23,13 +23,13 @@ namespace MikyM.Autofac.Extensions.Attributes;
 /// Defines with what interceptors should the service be intercepted
 /// </summary>
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-public sealed class AutofacInterceptedByAttribute : Attribute
+public sealed class InterceptedByAttribute : Attribute
 {
     public Type Interceptor { get; private set; }
     public bool IsAsync { get; private set; }
 
 
-    public AutofacInterceptedByAttribute(Type interceptor)
+    public InterceptedByAttribute(Type interceptor)
     {
         Interceptor = interceptor ?? throw new ArgumentNullException(nameof(interceptor));
 
