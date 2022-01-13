@@ -30,23 +30,11 @@ namespace MikyM.Autofac.Extensions
             var config = new AttributeRegistrationConfiguration(builder);
             options?.Invoke(config);
 
-            /*
-            var method = typeof(RegistrationExtensions).GetMethods().First(x =>
-                x.Name == "Register" && x.GetGenericArguments().Length == 1 &&
-                x.GetParameters().Length == 2);
-
-            foreach (var (interceptorType, registration) in config.InterceptorDelegates)
-            {
-                var registerMethod = method.MakeGenericMethod(interceptorType);
-                registerMethod.Invoke(null, new[] { builder, registration });
-            }
-            */
-
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
                 var set = assembly.GetTypes()
-                    .Where(x => x.GetCustomAttributes(false)
-                        .Any(y => y.GetType() == typeof(ServiceAttribute)) && x.IsClass && !x.IsAbstract)
+                    .Where(x => x.GetCustomAttributes(false).Any(y => y.GetType() == typeof(ServiceAttribute)) &&
+                                x.IsClass && !x.IsAbstract)
                     .ToList();
 
                 foreach (var type in set)
@@ -68,11 +56,14 @@ namespace MikyM.Autofac.Extensions
                         .Distinct()
                         .ToList();
                     var shouldAsSelf = asAttrs.Any(x => x.RegisterAsOption == RegisterAs.Self) &&
-                        asAttrs.All(x => x.RegisterAsType != type);
-                    var shouldAsInterfaces = !asAttrs.Any() || asAttrs.Any(x => x.RegisterAsOption == RegisterAs.ImplementedInterfaces);
+                                       asAttrs.All(x => x.RegisterAsType != type);
+                    var shouldAsInterfaces = !asAttrs.Any() ||
+                                             asAttrs.Any(x => x.RegisterAsOption == RegisterAs.ImplementedInterfaces);
 
-                    IRegistrationBuilder<object, ReflectionActivatorData, DynamicRegistrationStyle>? registrationGenericBuilder = null;
-                    IRegistrationBuilder<object, ReflectionActivatorData, SingleRegistrationStyle>? registrationBuilder = null;
+                    IRegistrationBuilder<object, ReflectionActivatorData, DynamicRegistrationStyle>?
+                        registrationGenericBuilder = null;
+                    IRegistrationBuilder<object, ReflectionActivatorData, SingleRegistrationStyle>?
+                        registrationBuilder = null;
 
                     if (type.IsGenericType && type.IsGenericTypeDefinition)
                     {
@@ -124,8 +115,7 @@ namespace MikyM.Autofac.Extensions
 
                     foreach (var asType in registerAsTypes)
                     {
-                        if (asType is null)
-                            throw new InvalidOperationException("Type was null during registration");
+                        if (asType is null) throw new InvalidOperationException("Type was null during registration");
 
                         registrationBuilder = registrationBuilder?.As(asType);
                         registrationGenericBuilder = registrationGenericBuilder?.As(asType);
@@ -154,8 +144,8 @@ namespace MikyM.Autofac.Extensions
                                 registrationBuilder?.InstancePerMatchingLifetimeScope(scopeAttr?.Tags.ToArray() ??
                                     Array.Empty<object>());
                             registrationGenericBuilder =
-                                registrationGenericBuilder?.InstancePerMatchingLifetimeScope(scopeAttr?.Tags.ToArray() ??
-                                    Array.Empty<object>());
+                                registrationGenericBuilder?.InstancePerMatchingLifetimeScope(
+                                    scopeAttr?.Tags.ToArray() ?? Array.Empty<object>());
                             break;
                         case Lifetime.InstancePerOwned:
                             if (scopeAttr?.Owned is null) throw new InvalidOperationException("Owned type was null");

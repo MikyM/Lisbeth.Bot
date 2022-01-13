@@ -68,39 +68,50 @@ public static class DependancyInjectionExtensions
         switch (config.BaseGenericDataServiceLifetime)
         {
             case Lifetime.Singleton:
-                registReadOnlyBuilder = builder.RegisterGeneric(typeof(ReadOnlyDataService<,>)).As(typeof(IReadOnlyDataService<,>))
+                registReadOnlyBuilder = builder.RegisterGeneric(typeof(ReadOnlyDataService<,>))
+                    .As(typeof(IReadOnlyDataService<,>))
                     .SingleInstance();
-                registCrudBuilder = builder.RegisterGeneric(typeof(CrudService<,>)).As(typeof(ICrudService<,>))
+                registCrudBuilder = builder.RegisterGeneric(typeof(CrudService<,>))
+                    .As(typeof(ICrudService<,>))
                     .SingleInstance();
                 break;
             case Lifetime.InstancePerRequest:
-                registReadOnlyBuilder = builder.RegisterGeneric(typeof(ReadOnlyDataService<,>)).As(typeof(IReadOnlyDataService<,>))
+                registReadOnlyBuilder = builder.RegisterGeneric(typeof(ReadOnlyDataService<,>))
+                    .As(typeof(IReadOnlyDataService<,>))
                     .InstancePerRequest();
-                registCrudBuilder = builder.RegisterGeneric(typeof(CrudService<,>)).As(typeof(ICrudService<,>))
+                registCrudBuilder = builder.RegisterGeneric(typeof(CrudService<,>))
+                    .As(typeof(ICrudService<,>))
                     .InstancePerRequest();
                 break;
             case Lifetime.InstancePerLifetimeScope:
-                registReadOnlyBuilder = builder.RegisterGeneric(typeof(ReadOnlyDataService<,>)).As(typeof(IReadOnlyDataService<,>))
+                registReadOnlyBuilder = builder.RegisterGeneric(typeof(ReadOnlyDataService<,>))
+                    .As(typeof(IReadOnlyDataService<,>))
                     .InstancePerLifetimeScope();
-                registCrudBuilder = builder.RegisterGeneric(typeof(CrudService<,>)).As(typeof(ICrudService<,>))
+                registCrudBuilder = builder.RegisterGeneric(typeof(CrudService<,>))
+                    .As(typeof(ICrudService<,>))
                     .InstancePerLifetimeScope();
                 break;
             case Lifetime.InstancePerMatchingLifetimeScope:
-                registReadOnlyBuilder = builder.RegisterGeneric(typeof(ReadOnlyDataService<,>)).As(typeof(IReadOnlyDataService<,>))
+                registReadOnlyBuilder = builder.RegisterGeneric(typeof(ReadOnlyDataService<,>))
+                    .As(typeof(IReadOnlyDataService<,>))
                     .InstancePerMatchingLifetimeScope();
-                registCrudBuilder = builder.RegisterGeneric(typeof(CrudService<,>)).As(typeof(ICrudService<,>))
+                registCrudBuilder = builder.RegisterGeneric(typeof(CrudService<,>))
+                    .As(typeof(ICrudService<,>))
                     .InstancePerMatchingLifetimeScope();
                 break;
             case Lifetime.InstancePerDependancy:
-                registReadOnlyBuilder = builder.RegisterGeneric(typeof(ReadOnlyDataService<,>)).As(typeof(IReadOnlyDataService<,>))
+                registReadOnlyBuilder = builder.RegisterGeneric(typeof(ReadOnlyDataService<,>))
+                    .As(typeof(IReadOnlyDataService<,>))
                     .InstancePerDependency();
-                registCrudBuilder = builder.RegisterGeneric(typeof(CrudService<,>)).As(typeof(ICrudService<,>))
+                registCrudBuilder = builder.RegisterGeneric(typeof(CrudService<,>))
+                    .As(typeof(ICrudService<,>))
                     .InstancePerDependency();
                 break;
             case Lifetime.InstancePerOwned:
                 throw new NotSupportedException();
             default:
-                throw new ArgumentOutOfRangeException(nameof(config.BaseGenericDataServiceLifetime), config.BaseGenericDataServiceLifetime, null);
+                throw new ArgumentOutOfRangeException(nameof(config.BaseGenericDataServiceLifetime),
+                    config.BaseGenericDataServiceLifetime, null);
         }
 
         // base data interceptors
@@ -125,11 +136,13 @@ public static class DependancyInjectionExtensions
                         registCrudBuilder = registCrudBuilder.EnableInterfaceInterceptors();
                         crudEnabled = true;
                     }
+
                     if (!readEnabled)
                     {
                         registReadOnlyBuilder = registCrudBuilder.EnableInterfaceInterceptors();
                         readEnabled = true;
                     }
+
                     break;
                 case DataInterceptorConfiguration.Crud:
                     registCrudBuilder = interceptorType.GetInterfaces().Any(x => x == typeof(IAsyncInterceptor))
@@ -153,6 +166,7 @@ public static class DependancyInjectionExtensions
                         registReadOnlyBuilder = registCrudBuilder.EnableInterfaceInterceptors();
                         readEnabled = true;
                     }
+
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -164,13 +178,15 @@ public static class DependancyInjectionExtensions
         foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
         {
             var subSet = assembly.GetTypes()
-                .Where(x => x.GetCustomAttributes(false)
-                    .Any(y => y.GetType() == typeof(ServiceAttribute)) && x.IsClass && !x.IsAbstract)
+                .Where(x => x.GetCustomAttributes(false).Any(y => y.GetType() == typeof(ServiceAttribute)) &&
+                            x.IsClass && !x.IsAbstract)
                 .ToList();
 
             var dataSubSet = assembly.GetTypes()
                 .Where(x => x.GetInterfaces()
-                    .Any(y => y.IsGenericType && y.GetGenericTypeDefinition() == typeof(IDataServiceBase<>)) && x.IsClass && !x.IsAbstract)
+                                .Any(y => y.IsGenericType &&
+                                          y.GetGenericTypeDefinition() == typeof(IDataServiceBase<>)) &&
+                            x.IsClass && !x.IsAbstract)
                 .ToList();
 
             subSet.RemoveAll(x => excluded.Any(y => y == x) || dataSubSet.Any(y => y == x));
@@ -191,11 +207,14 @@ public static class DependancyInjectionExtensions
                     .Distinct()
                     .ToList();
                 var shouldAsSelf = asAttr.Any(x => x.RegisterAsOption == RegisterAs.Self) &&
-                    asAttr.All(x => x.RegisterAsType != dataType);
-                var shouldAsInterfaces = !asAttr.Any() || asAttr.Any(x => x.RegisterAsOption == RegisterAs.ImplementedInterfaces);
+                                   asAttr.All(x => x.RegisterAsType != dataType);
+                var shouldAsInterfaces =
+                    !asAttr.Any() || asAttr.Any(x => x.RegisterAsOption == RegisterAs.ImplementedInterfaces);
 
-                IRegistrationBuilder<object, ReflectionActivatorData, DynamicRegistrationStyle>? registrationGenericBuilder = null;
-                IRegistrationBuilder<object, ReflectionActivatorData, SingleRegistrationStyle>? registrationBuilder = null;
+                IRegistrationBuilder<object, ReflectionActivatorData, DynamicRegistrationStyle>?
+                    registrationGenericBuilder = null;
+                IRegistrationBuilder<object, ReflectionActivatorData, SingleRegistrationStyle>? registrationBuilder =
+                    null;
 
                 if (dataType.IsGenericType && dataType.IsGenericTypeDefinition)
                 {
@@ -247,8 +266,7 @@ public static class DependancyInjectionExtensions
 
                 foreach (var asType in registerAsTypes)
                 {
-                    if (asType is null)
-                        throw new InvalidOperationException("Type was null during registration");
+                    if (asType is null) throw new InvalidOperationException("Type was null during registration");
 
                     registrationBuilder = registrationBuilder?.As(asType);
                     registrationGenericBuilder = registrationGenericBuilder?.As(asType);
@@ -277,14 +295,16 @@ public static class DependancyInjectionExtensions
                             registrationBuilder?.InstancePerMatchingLifetimeScope(scopeOverrideAttr?.Tags.ToArray() ??
                                 Array.Empty<object>());
                         registrationGenericBuilder =
-                            registrationGenericBuilder?.InstancePerMatchingLifetimeScope(scopeOverrideAttr?.Tags.ToArray() ??
-                                Array.Empty<object>());
+                            registrationGenericBuilder?.InstancePerMatchingLifetimeScope(
+                                scopeOverrideAttr?.Tags.ToArray() ?? Array.Empty<object>());
                         break;
                     case Lifetime.InstancePerOwned:
-                        if (scopeOverrideAttr?.Owned is null) throw new InvalidOperationException("Owned type was null");
+                        if (scopeOverrideAttr?.Owned is null)
+                            throw new InvalidOperationException("Owned type was null");
 
                         registrationBuilder = registrationBuilder?.InstancePerOwned(scopeOverrideAttr.Owned);
-                        registrationGenericBuilder = registrationGenericBuilder?.InstancePerOwned(scopeOverrideAttr.Owned);
+                        registrationGenericBuilder =
+                            registrationGenericBuilder?.InstancePerOwned(scopeOverrideAttr.Owned);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
