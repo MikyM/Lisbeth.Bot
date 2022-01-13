@@ -39,6 +39,12 @@ namespace MikyM.Autofac.Extensions
                     var intrAttrs = type.GetCustomAttributes<InterceptedByAttribute>(false).ToList();
                     var scopeAttr = type.GetCustomAttribute<LifetimeAttribute>(false);
                     var asAttrs = type.GetCustomAttributes<RegisterAsAttribute>(false).ToList();
+                    var ctorAttr = type.GetCustomAttribute<FindConstructorsWithAttribute>(false);
+                    var intrEnableAttr = type.GetCustomAttribute<EnableInterceptionAttribute>(false);
+
+                    if (ctorAttr is not null && intrEnableAttr is not null)
+                        throw new InvalidOperationException(
+                            "Using a custom constructor finder will prevent interception from happening");
 
                     var scope = scopeAttr?.Scope ?? Lifetime.InstancePerLifetimeScope;
 
@@ -49,8 +55,6 @@ namespace MikyM.Autofac.Extensions
                     var shouldAsSelf = asAttrs.Any(x => x.RegisterAsOption == RegisterAs.Self) &&
                         asAttrs.All(x => x.RegisterAsType != type);
                     var shouldAsInterfaces = !asAttrs.Any() || asAttrs.Any(x => x.RegisterAsOption == RegisterAs.ImplementedInterfaces);
-
-                    var intrEnableAttr = type.GetCustomAttribute<EnableInterceptionAttribute>(false);
 
                     IRegistrationBuilder<object, ReflectionActivatorData, DynamicRegistrationStyle>? registrationGenericBuilder = null;
                     IRegistrationBuilder<object, ReflectionActivatorData, SingleRegistrationStyle>? registrationBuilder = null;
@@ -158,6 +162,24 @@ namespace MikyM.Autofac.Extensions
                             ? registrationGenericBuilder?.InterceptedBy(
                                 typeof(AsyncInterceptorAdapter<>).MakeGenericType(attr.Interceptor))
                             : registrationGenericBuilder?.InterceptedBy(attr.Interceptor);
+                    }
+
+                    if (ctorAttr is not null)
+                    {
+                        if (ctorAttr.ConstructorFinder is not null)
+                        {
+                            registrationBuilder = registrationBuilder?.FindConstructorsWith(ctorAttr.ConstructorFinder);
+                            registrationGenericBuilder =
+                                registrationGenericBuilder?.FindConstructorsWith(ctorAttr.ConstructorFinder);
+                        }
+
+                        if (ctorAttr.FuncConstructorFinder is not null)
+                        {
+                            registrationBuilder = registrationBuilder?.FindConstructorsWith(ctorAttr.FuncConstructorFinder);
+                            registrationGenericBuilder =
+                                registrationGenericBuilder?.FindConstructorsWith(ctorAttr.FuncConstructorFinder);
+                        }
+
                     }
                 }
             }

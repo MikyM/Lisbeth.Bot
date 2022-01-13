@@ -27,12 +27,10 @@ public static class DependancyInjectionExtensions
     {
         builder.RegisterGeneric(typeof(ReadOnlyRepository<>))
             .As(typeof(IReadOnlyRepository<>))
-            .AsSelf()
             .FindConstructorsWith(new AllConstructorsFinder())
             .InstancePerLifetimeScope();
         builder.RegisterGeneric(typeof(Repository<>))
             .As(typeof(IRepository<>))
-            .AsSelf()
             .FindConstructorsWith(new AllConstructorsFinder())
             .InstancePerLifetimeScope();
         builder.RegisterGeneric(typeof(UnitOfWork<>)).As(typeof(IUnitOfWork<>)).InstancePerLifetimeScope();

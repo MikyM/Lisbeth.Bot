@@ -15,21 +15,24 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using MikyM.Common.Application.CommandHandlers.Commands;
-using MikyM.Common.Application.Results;
+using System.Reflection;
+using Autofac.Core.Activators.Reflection;
 
-namespace MikyM.Common.Application.CommandHandlers;
+namespace MikyM.Autofac.Extensions.Attributes;
 
-public interface ICommandHandler
+[AttributeUsage(AttributeTargets.Class)]
+public class FindConstructorsWithAttribute : Attribute
 {
-}
+    public IConstructorFinder? ConstructorFinder { get; set; }
+    public Func<Type, ConstructorInfo[]>? FuncConstructorFinder { get; set; }
 
-public interface ICommandHandler<in TCommand> : ICommandHandler where TCommand : class, ICommand
-{
-    Task<Result> HandleAsync(TCommand command);
-}
+    public FindConstructorsWithAttribute(IConstructorFinder constructorFinder)
+    {
+        ConstructorFinder = constructorFinder ?? throw new ArgumentNullException(nameof(constructorFinder));
+    }
 
-public interface ICommandHandler<in TCommand, TResult> : ICommandHandler where TCommand : class, ICommand<TResult>
-{
-    Task<Result<TResult>> HandleAsync(TCommand command);
+    public FindConstructorsWithAttribute(Func<Type, ConstructorInfo[]> constructorFinder)
+    {
+        FuncConstructorFinder = constructorFinder ?? throw new ArgumentNullException(nameof(constructorFinder));
+    }
 }
