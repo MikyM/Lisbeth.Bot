@@ -23,6 +23,12 @@ namespace MikyM.Common.Application;
 /// </summary>
 public sealed class ServiceRegistrationConfiguration
 {
+    internal ServiceRegistrationConfiguration(RegistrationConfiguration config)
+    {
+        Config = config;
+    }
+
+    internal RegistrationConfiguration Config { get; set; }
     /// <summary>
     /// Gets or sets the default lifetime for base generic data services
     /// </summary>
@@ -46,7 +52,7 @@ public sealed class ServiceRegistrationConfiguration
     /// <returns>Current instance of the <see cref="ServiceRegistrationConfiguration"/></returns>
     public ServiceRegistrationConfiguration AddDataServiceInterceptor(Type interceptor, DataInterceptorConfiguration configuration = DataInterceptorConfiguration.CrudAndReadOnly)
     {
-        DataInterceptors.TryAdd(interceptor, configuration);
+        DataInterceptors.TryAdd(interceptor ?? throw new ArgumentNullException(nameof(interceptor)), configuration);
         return this;
     }
     /// <summary>

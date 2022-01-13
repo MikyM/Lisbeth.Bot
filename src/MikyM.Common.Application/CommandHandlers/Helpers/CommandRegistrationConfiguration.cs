@@ -23,6 +23,14 @@ namespace MikyM.Common.Application.CommandHandlers.Helpers;
 /// </summary>
 public sealed class CommandRegistrationConfiguration
 {
+
+    internal CommandRegistrationConfiguration(RegistrationConfiguration config)
+    {
+        Config = config;
+    }
+
+    internal RegistrationConfiguration Config { get; set; }
+
     /// <summary>
     /// Gets or sets the default lifetime for base generic data services
     /// </summary>

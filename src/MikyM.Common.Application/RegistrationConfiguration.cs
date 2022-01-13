@@ -44,7 +44,7 @@ public sealed class RegistrationConfiguration
     /// <returns>Current instance of the <see cref="ServiceRegistrationConfiguration"/></returns>
     public RegistrationConfiguration AddInterceptor<T>(Func<IComponentContext, T> factoryMethod) where T : notnull
     {
-        InterceptorDelegates.TryAdd(typeof(T), factoryMethod);
+        InterceptorDelegates.TryAdd(typeof(T), factoryMethod ?? throw new ArgumentNullException(nameof(factoryMethod)));
         return this;
     }
 }

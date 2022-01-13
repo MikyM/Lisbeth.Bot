@@ -16,9 +16,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Autofac;
-using System.Reflection;
 using Autofac.Extras.DynamicProxy;
 using MikyM.Autofac.Extensions.Extensions;
+using System.Reflection;
 
 namespace MikyM.Common.Application.CommandHandlers.Helpers;
 
@@ -29,7 +29,7 @@ public static class DependancyInjectionExtensions
     /// </summary>
     public static RegistrationConfiguration AddCommandHandlers(this RegistrationConfiguration registrationConfiguration, Action<CommandRegistrationConfiguration>? configuration = null)
     {
-        var config = new CommandRegistrationConfiguration();
+        var config = new CommandRegistrationConfiguration(registrationConfiguration);
         configuration?.Invoke(config);
 
         var builder = registrationConfiguration.Builder;
@@ -55,11 +55,6 @@ public static class DependancyInjectionExtensions
                             x.GetCustomAttributes<InterceptedByAttribute>(false).Count() != 0 && x.IsClass &&
                             !x.IsAbstract)
                 .ToList();
-
-            if (commandSet.Any())
-            {
-                var a = 3;
-            }
 
             foreach (var type in commandSubSet)
             {

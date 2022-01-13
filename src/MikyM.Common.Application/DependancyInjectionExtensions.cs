@@ -69,7 +69,7 @@ public static class DependancyInjectionExtensions
 
         builder.RegisterServicesByAttributes();
 
-        var config = new ServiceRegistrationConfiguration();
+        var config = new ServiceRegistrationConfiguration(registrationConfiguration);
         configuration?.Invoke(config);
 
         IRegistrationBuilder<object, ReflectionActivatorData, DynamicRegistrationStyle> registReadOnlyBuilder;
