@@ -62,11 +62,6 @@ public static class DependancyInjectionExtensions
                 .AsImplementedInterfaces()
                 .FindConstructorsWith(ctorFinder)
                 .SingleInstance();
-
-            builder.RegisterAssemblyTypes(assembly)
-                .Where(x => x.GetInterfaces().FirstOrDefault(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(ISpecification<>)) is not null)
-                .AsSelf()
-                .SingleInstance();
         }
         
         builder.RegisterType<IncludeEvaluator>()
