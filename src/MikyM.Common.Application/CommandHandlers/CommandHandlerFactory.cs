@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Concurrent;
 using Autofac;
 using MikyM.Common.Application.CommandHandlers.Commands;
 
@@ -29,7 +30,7 @@ public interface ICommandHandlerFactory
 
 public class CommandHandlerFactory : ICommandHandlerFactory
 {
-    private Dictionary<string, ICommandHandler>? _commandHandlers;
+    private ConcurrentDictionary<string, ICommandHandler>? _commandHandlers;
     private readonly ILifetimeScope _lifetimeScope;
 
     public CommandHandlerFactory(ILifetimeScope lifetimeScope)
@@ -42,7 +43,7 @@ public class CommandHandlerFactory : ICommandHandlerFactory
         if (!typeof(TCommandHandler).IsInterface)
             throw new ArgumentException("Due to Autofac limitations you must use interfaces");
 
-        _commandHandlers ??= new Dictionary<string, ICommandHandler>();
+        _commandHandlers ??= new ConcurrentDictionary<string, ICommandHandler>();
 
         var type = typeof(TCommandHandler);
         string name = type.FullName ?? throw new InvalidOperationException();
@@ -57,12 +58,15 @@ public class CommandHandlerFactory : ICommandHandlerFactory
         if (_commandHandlers.TryAdd(name, _lifetimeScope.Resolve<TCommandHandler>()))
             return (TCommandHandler)_commandHandlers[name];
 
+        if (_commandHandlers.TryGetValue(name, out handler))
+            return (TCommandHandler)handler;
+
         throw new InvalidOperationException($"Couldn't add nor retrieve handler of type {name}");
     }
 
     public ICommandHandler<TCommand> GetHandlerFor<TCommand>() where TCommand : class, ICommand
     {
-        _commandHandlers ??= new Dictionary<string, ICommandHandler>();
+        _commandHandlers ??= new ConcurrentDictionary<string, ICommandHandler>();
 
         var commandType = typeof(TCommand);
         string name = commandType.FullName ?? throw new InvalidOperationException();
@@ -76,12 +80,15 @@ public class CommandHandlerFactory : ICommandHandlerFactory
         if (_commandHandlers.TryAdd(genericName, _lifetimeScope.Resolve<ICommandHandler<TCommand>>()))
             return (ICommandHandler<TCommand>)_commandHandlers[genericName];
 
+        if (_commandHandlers.TryGetValue(name, out handler))
+            return (ICommandHandler<TCommand>)handler;
+
         throw new InvalidOperationException($"Couldn't add nor retrieve handler for type {name}");
     }
 
     public ICommandHandler<TCommand ,TResult> GetHandlerFor<TCommand, TResult>() where TCommand : class, ICommand<TResult>
     {
-        _commandHandlers ??= new Dictionary<string, ICommandHandler>();
+        _commandHandlers ??= new ConcurrentDictionary<string, ICommandHandler>();
 
         var commandType = typeof(TCommand);
         var resultType = typeof(TResult);
@@ -95,6 +102,9 @@ public class CommandHandlerFactory : ICommandHandlerFactory
 
         if (_commandHandlers.TryAdd(genericName, _lifetimeScope.Resolve<ICommandHandler<TCommand, TResult>>()))
             return (ICommandHandler<TCommand, TResult>) _commandHandlers[genericName];
+
+        if (_commandHandlers.TryGetValue(name, out handler))
+            return (ICommandHandler<TCommand, TResult>)handler;
 
         throw new InvalidOperationException($"Couldn't add nor retrieve handler for type {name}");
     }

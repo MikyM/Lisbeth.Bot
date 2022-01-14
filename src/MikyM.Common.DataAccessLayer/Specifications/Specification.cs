@@ -16,14 +16,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using AutoMapper;
+using EFCoreSecondLevelCacheInterceptor;
 using MikyM.Common.DataAccessLayer.Filters;
 using MikyM.Common.DataAccessLayer.Specifications.Builders;
-using MikyM.Common.DataAccessLayer.Specifications.Helpers;
-using System.Collections.Generic;
-using System.Linq.Expressions;
-using EFCoreSecondLevelCacheInterceptor;
 using MikyM.Common.DataAccessLayer.Specifications.Expressions;
 using MikyM.Common.DataAccessLayer.Specifications.Validators;
+using System.Collections.Generic;
+using System.Linq.Expressions;
 
 namespace MikyM.Common.DataAccessLayer.Specifications;
 
@@ -40,8 +39,14 @@ public
     {
     }
 
-    protected Specification(IInMemorySpecificationEvaluator inMemorySpecificationEvaluator, PaginationFilter? paginationFilter = null) : base(
+    protected Specification(IInMemorySpecificationEvaluator inMemorySpecificationEvaluator, PaginationFilter paginationFilter) : base(
         inMemorySpecificationEvaluator, paginationFilter)
+    {
+        Query = new SpecificationBuilder<T, TResult>(this);
+    }
+
+    protected Specification(IInMemorySpecificationEvaluator inMemorySpecificationEvaluator) : base(
+        inMemorySpecificationEvaluator)
     {
         Query = new SpecificationBuilder<T, TResult>(this);
     }

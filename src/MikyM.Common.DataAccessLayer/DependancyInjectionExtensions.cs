@@ -19,6 +19,8 @@ using Autofac;
 using MikyM.Autofac.Extensions;
 using MikyM.Common.DataAccessLayer.Specifications;
 using System.Collections.Generic;
+using MikyM.Autofac.Extensions.Extensions;
+using MikyM.Common.DataAccessLayer.Specifications.Validators;
 
 namespace MikyM.Common.DataAccessLayer;
 
@@ -48,6 +50,23 @@ public static class DependancyInjectionExtensions
                 .AsImplementedInterfaces()
                 .FindConstructorsWith(ctorFinder)
                 .SingleInstance();
+
+            builder.RegisterAssemblyTypes(assembly)
+                .Where(x => x.GetInterface(nameof(IValidator)) is not null)
+                .AsImplementedInterfaces()
+                .FindConstructorsWith(ctorFinder)
+                .SingleInstance();
+
+            builder.RegisterAssemblyTypes(assembly)
+                .Where(x => x.GetInterface(nameof(IInMemoryEvaluator)) is not null)
+                .AsImplementedInterfaces()
+                .FindConstructorsWith(ctorFinder)
+                .SingleInstance();
+
+            builder.RegisterAssemblyTypes(assembly)
+                .Where(x => x.GetInterfaces().FirstOrDefault(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(ISpecification<>)) is not null)
+                .AsClosedInterfacesOf(typeof(ISpecification<>))
+                .SingleInstance();
         }
         
         builder.RegisterType<IncludeEvaluator>()
@@ -65,6 +84,18 @@ public static class DependancyInjectionExtensions
         builder.RegisterType<SpecificationEvaluator>()
             .As<ISpecificationEvaluator>()
             .UsingConstructor(typeof(IEnumerable<IEvaluator>), typeof(IProjectionEvaluator))
+            .FindConstructorsWith(ctorFinder)
+            .SingleInstance();
+
+        builder.RegisterType<SpecificationValidator>()
+            .As<ISpecificationValidator>()
+            .UsingConstructor(typeof(IEnumerable<IValidator>))
+            .FindConstructorsWith(ctorFinder)
+            .SingleInstance();
+
+        builder.RegisterType<InMemorySpecificationEvaluator>()
+            .As<IInMemorySpecificationEvaluator>()
+            .UsingConstructor(typeof(IEnumerable<IInMemoryEvaluator>))
             .FindConstructorsWith(ctorFinder)
             .SingleInstance();
     }

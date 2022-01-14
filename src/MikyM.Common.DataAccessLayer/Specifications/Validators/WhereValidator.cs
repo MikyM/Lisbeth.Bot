@@ -20,7 +20,7 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Validators;
 public class WhereValidator : IValidator
 {
     private WhereValidator() { }
-    public static WhereValidator Instance { get; } = new WhereValidator();
+    public static WhereValidator Instance { get; } = new();
 
     public bool IsValid<T>(T entity, ISpecification<T> specification) where T : class
     {

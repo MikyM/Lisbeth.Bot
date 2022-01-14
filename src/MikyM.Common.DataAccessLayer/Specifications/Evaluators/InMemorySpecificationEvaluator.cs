@@ -23,11 +23,11 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators;
 public class InMemorySpecificationEvaluator : IInMemorySpecificationEvaluator
 {
     // Will use singleton for default configuration. Yet, it can be instantiated if necessary, with default or provided evaluators.
-    public static InMemorySpecificationEvaluator Default { get; } = new InMemorySpecificationEvaluator();
+    public static InMemorySpecificationEvaluator Default { get; } = new();
 
     private readonly List<IInMemoryEvaluator> _evaluators = new();
 
-    public InMemorySpecificationEvaluator()
+    private InMemorySpecificationEvaluator()
     {
         this._evaluators.AddRange(new IInMemoryEvaluator[]
         {
@@ -38,7 +38,7 @@ public class InMemorySpecificationEvaluator : IInMemorySpecificationEvaluator
         });
     }
 
-    public InMemorySpecificationEvaluator(IEnumerable<IInMemoryEvaluator> evaluators)
+    private InMemorySpecificationEvaluator(IEnumerable<IInMemoryEvaluator> evaluators)
     {
         this._evaluators.AddRange(evaluators);
     }

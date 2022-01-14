@@ -22,11 +22,11 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Validators;
 public class SpecificationValidator : ISpecificationValidator
 {
     // Will use singleton for default configuration. Yet, it can be instantiated if necessary, with default or provided validators.
-    public static SpecificationValidator Default { get; } = new SpecificationValidator();
+    public static SpecificationValidator Default { get; } = new();
 
     private readonly List<IValidator> _validators = new();
 
-    public SpecificationValidator()
+    private SpecificationValidator()
     {
         this._validators.AddRange(new IValidator[]
         {
@@ -34,7 +34,7 @@ public class SpecificationValidator : ISpecificationValidator
             SearchValidator.Instance
         });
     }
-    public SpecificationValidator(IEnumerable<IValidator> validators)
+    private SpecificationValidator(IEnumerable<IValidator> validators)
     {
         this._validators.AddRange(validators);
     }

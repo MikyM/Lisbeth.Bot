@@ -41,7 +41,7 @@ public class SpecificationEvaluator : ISpecificationEvaluator
     private SpecificationEvaluator(IEnumerable<IEvaluator> evaluators, IProjectionEvaluator projectionEvaluator)
     {
         _projectionEvaluator = projectionEvaluator;
-        this._evaluators = evaluators.ToList();
+        this._evaluators.AddRange(evaluators);
     }
 
     private SpecificationEvaluator(bool cacheEnabled = false)

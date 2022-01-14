@@ -15,13 +15,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
-using System.Linq.Expressions;
 using AutoMapper;
 using EFCoreSecondLevelCacheInterceptor;
 using MikyM.Common.DataAccessLayer.Filters;
 using MikyM.Common.DataAccessLayer.Specifications.Expressions;
-using MikyM.Common.DataAccessLayer.Specifications.Helpers;
+using System.Collections.Generic;
+using System.Linq.Expressions;
 
 namespace MikyM.Common.DataAccessLayer.Specifications;
 
@@ -57,7 +56,7 @@ public interface ISpecification<T, TResult> : ISpecification<T> where T : class
 ///     Encapsulates query logic for <typeparamref name="T" />.
 /// </summary>
 /// <typeparam name="T">The type being queried against.</typeparam>
-public interface ISpecification<T> where T : class
+public interface ISpecification<T> : ISpecification where T : class
 {
     /// <summary>
     ///     Cache timeout if any.
@@ -165,4 +164,12 @@ public interface ISpecification<T> where T : class
     bool IsSatisfiedBy(T entity);
 
     IEnumerable<T> Evaluate(IEnumerable<T> entities);
+}
+
+/// <summary>
+/// Marker specification interface
+/// </summary>
+public interface ISpecification
+{
+
 }
