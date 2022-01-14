@@ -50,7 +50,7 @@ namespace MikyM.Autofac.Extensions
                         throw new InvalidOperationException(
                             "Using a custom constructor finder will prevent interception from happening");
 
-                    var scope = scopeAttr?.Scope ?? Lifetime.InstancePerLifetimeScope;
+                    var scope = scopeAttr?.Scope ?? config.DefaultLifetime;
 
                     var registerAsTypes = asAttrs.Where(x => x.RegisterAsType is not null)
                         .Select(x => x.RegisterAsType)

@@ -15,9 +15,24 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace MikyM.Common.DataAccessLayer.Specifications.Builders;
+using MikyM.Common.DataAccessLayer.Specifications.Extensions;
 
-public interface ICacheSpecificationBuilder<T> : ISpecificationBuilder<T> where T : class
+namespace MikyM.Common.DataAccessLayer.Specifications.Validators;
+
+public class SearchValidator : IValidator
 {
-    bool IsChainDiscarded { get; set; }
+    private SearchValidator() { }
+    public static SearchValidator Instance { get; } = new SearchValidator();
+
+    public bool IsValid<T>(T entity, ISpecification<T> specification) where T : class
+    {
+        if (specification.SearchCriterias is null) return true;
+
+        foreach (var searchGroup in specification.SearchCriterias.GroupBy(x => x.SearchGroup))
+        {
+            if (searchGroup.Any(c => c.SelectorFunc(entity).Like(c.SearchTerm)) == false) return false;
+        }
+
+        return true;
+    }
 }

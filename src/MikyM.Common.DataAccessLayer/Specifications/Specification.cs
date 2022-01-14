@@ -22,6 +22,8 @@ using MikyM.Common.DataAccessLayer.Specifications.Helpers;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using EFCoreSecondLevelCacheInterceptor;
+using MikyM.Common.DataAccessLayer.Specifications.Expressions;
+using MikyM.Common.DataAccessLayer.Specifications.Validators;
 
 namespace MikyM.Common.DataAccessLayer.Specifications;
 
@@ -46,10 +48,13 @@ public
 
     protected new virtual ISpecificationBuilder<T, TResult> Query { get; }
 
-    public new virtual IEnumerable<T> Evaluate(IEnumerable<T> entities)
+    public new virtual IEnumerable<TResult> Evaluate(IEnumerable<T> entities)
     {
         return Evaluator.Evaluate(entities, this);
     }
+
+    /// <inheritdoc/>
+    public Expression<Func<T, TResult>>? Selector { get; internal set; }
 
     public MapperConfiguration? MapperConfiguration { get; internal set; }
     public IEnumerable<Expression<Func<TResult, object>>>? MembersToExpand { get; internal set; }
@@ -84,22 +89,53 @@ public
 /// <inheritdoc cref="ISpecification{T}" />
 public class Specification<T> : ISpecification<T> where T : class
 {
-    protected Specification() : this(InMemorySpecificationEvaluator.Default)
+    protected Specification(PaginationFilter paginationFilter)
+        : this(InMemorySpecificationEvaluator.Default, SpecificationValidator.Default, paginationFilter)
     {
     }
 
-    public Specification(PaginationFilter paginationFilter ) : this(InMemorySpecificationEvaluator.Default, paginationFilter)
+    protected Specification()
+        : this(InMemorySpecificationEvaluator.Default, SpecificationValidator.Default)
     {
     }
 
-    protected Specification(IInMemorySpecificationEvaluator inMemorySpecificationEvaluator, PaginationFilter? paginationFilter = null)
+    protected Specification(IInMemorySpecificationEvaluator inMemorySpecificationEvaluator)
+        : this(inMemorySpecificationEvaluator, SpecificationValidator.Default)
+    {
+    }
+
+    protected Specification(IInMemorySpecificationEvaluator inMemorySpecificationEvaluator, PaginationFilter paginationFilter)
+        : this(inMemorySpecificationEvaluator, SpecificationValidator.Default, paginationFilter)
+    {
+    }
+
+    protected Specification(ISpecificationValidator specificationValidator, PaginationFilter paginationFilter)
+        : this(InMemorySpecificationEvaluator.Default, specificationValidator, paginationFilter)
+    {
+    }
+
+    protected Specification(ISpecificationValidator specificationValidator)
+        : this(InMemorySpecificationEvaluator.Default, specificationValidator)
+    {
+    }
+
+    protected Specification(IInMemorySpecificationEvaluator inMemorySpecificationEvaluator, ISpecificationValidator specificationValidator)
     {
         this.Evaluator = inMemorySpecificationEvaluator;
+        this.Validator = specificationValidator;
+        this.Query = new SpecificationBuilder<T>(this);
+    }
+
+    protected Specification(IInMemorySpecificationEvaluator inMemorySpecificationEvaluator, ISpecificationValidator specificationValidator, PaginationFilter paginationFilter)
+    {
+        this.Evaluator = inMemorySpecificationEvaluator;
+        this.Validator = specificationValidator;
         this.Query = new SpecificationBuilder<T>(this);
         this.PaginationFilter = paginationFilter;
     }
 
     protected IInMemorySpecificationEvaluator Evaluator { get; }
+    protected ISpecificationValidator Validator { get; }
     protected virtual ISpecificationBuilder<T> Query { get; }
 
     public virtual IEnumerable<T> Evaluate(IEnumerable<T> entities)
@@ -107,13 +143,19 @@ public class Specification<T> : ISpecification<T> where T : class
         return Evaluator.Evaluate(entities, this);
     }
 
+    /// <inheritdoc/>
+    public virtual bool IsSatisfiedBy(T entity)
+    {
+        return Validator.IsValid(entity, this);
+    }
+
     public TimeSpan? CacheTimeout { get; internal set; }
 
     public CacheExpirationMode? CacheExpirationMode { get; internal set; }
 
-    public IEnumerable<Expression<Func<T, bool>>>? WhereExpressions { get; internal set; }
+    public IEnumerable<WhereExpressionInfo<T>>? WhereExpressions { get; internal set; }
 
-    public IEnumerable<(Expression<Func<T, object>> KeySelector, OrderTypeEnum OrderType)>? OrderExpressions
+    public IEnumerable<OrderExpressionInfo<T>>? OrderExpressions
     {
         get;
         internal set;
@@ -125,11 +167,14 @@ public class Specification<T> : ISpecification<T> where T : class
 
     public IEnumerable<string>? IncludeStrings { get; internal set; }
 
-    public IEnumerable<(Expression<Func<T, string>> Selector, string SearchTerm, int SearchGroup)>? SearchCriterias
+    public IEnumerable<SearchExpressionInfo<T>>? SearchCriterias
     {
         get;
         internal set;
     }
+
+    /// <inheritdoc/>
+    public bool IgnoreQueryFilters { get; internal set; } = false;
 
     public int? Take { get; internal set; }
 
@@ -171,6 +216,12 @@ public class Specification<T> : ISpecification<T> where T : class
     public bool IsAsNoTracking { get; internal set; } = true;
     public bool IsAsSplitQuery { get; internal set; }
     public bool IsAsNoTrackingWithIdentityResolution { get; internal set; }
+
+
+    protected ISpecificationBuilder<T> WithIgnoreQueryFilters(bool ignore = true)
+    {
+        return this.Query.IgnoreQueryFilters(ignore);
+    }
 
     protected ISpecificationBuilder<T> WithPostProcessingAction(Func<IEnumerable<T>, IEnumerable<T>> postProcessingAction)
     {

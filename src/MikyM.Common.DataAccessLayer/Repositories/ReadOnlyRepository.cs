@@ -34,7 +34,7 @@ public class ReadOnlyRepository<TEntity> : IReadOnlyRepository<TEntity> where TE
 
     public virtual async ValueTask<TEntity?> GetAsync(params object[] keyValues)
     {
-        return await (this.Context.Set<TEntity>().FindAsync(keyValues));
+        return await this.Context.Set<TEntity>().FindAsync(keyValues);
     }
 
     public virtual async Task<TEntity?> GetSingleBySpecAsync(ISpecification<TEntity> specification)

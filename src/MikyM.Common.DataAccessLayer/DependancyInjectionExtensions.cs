@@ -18,26 +18,54 @@
 using Autofac;
 using MikyM.Autofac.Extensions;
 using MikyM.Common.DataAccessLayer.Specifications;
+using System.Collections.Generic;
 
 namespace MikyM.Common.DataAccessLayer;
 
 public static class DependancyInjectionExtensions
 {
-    public static void AddDataAccessLayer(this ContainerBuilder builder)
+    public static void AddDataAccessLayer(this ContainerBuilder builder, Action<DataAccessOptions>? options = null)
     {
+        var config = new DataAccessOptions(builder);
+        options?.Invoke(config);
+
+        var ctorFinder = new AllConstructorsFinder();
+
         builder.RegisterGeneric(typeof(ReadOnlyRepository<>))
             .As(typeof(IReadOnlyRepository<>))
-            .FindConstructorsWith(new AllConstructorsFinder())
+            .FindConstructorsWith(ctorFinder)
             .InstancePerLifetimeScope();
         builder.RegisterGeneric(typeof(Repository<>))
             .As(typeof(IRepository<>))
-            .FindConstructorsWith(new AllConstructorsFinder())
+            .FindConstructorsWith(ctorFinder)
             .InstancePerLifetimeScope();
         builder.RegisterGeneric(typeof(UnitOfWork<>)).As(typeof(IUnitOfWork<>)).InstancePerLifetimeScope();
 
+        foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+        {
+            builder.RegisterAssemblyTypes(assembly)
+                .Where(x => x.GetInterface(nameof(IEvaluator)) is not null && x != typeof(IncludeEvaluator))
+                .AsImplementedInterfaces()
+                .FindConstructorsWith(ctorFinder)
+                .SingleInstance();
+        }
+        
+        builder.RegisterType<IncludeEvaluator>()
+            .As<IEvaluator>()
+            .UsingConstructor(typeof(bool))
+            .FindConstructorsWith(ctorFinder)
+            .WithParameter(new TypedParameter(typeof(bool), config.EnableIncludeCache))
+            .SingleInstance();
+
+        builder.RegisterType<ProjectionEvaluator>()
+            .As<IProjectionEvaluator>()
+            .FindConstructorsWith(ctorFinder)
+            .SingleInstance();
+
         builder.RegisterType<SpecificationEvaluator>()
             .As<ISpecificationEvaluator>()
-            .UsingConstructor()
+            .UsingConstructor(typeof(IEnumerable<IEvaluator>), typeof(IProjectionEvaluator))
+            .FindConstructorsWith(ctorFinder)
             .SingleInstance();
     }
 }

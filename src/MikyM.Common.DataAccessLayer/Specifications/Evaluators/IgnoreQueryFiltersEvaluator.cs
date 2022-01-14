@@ -15,9 +15,26 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace MikyM.Common.DataAccessLayer.Specifications.Builders;
+namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators;
 
-public interface ICacheSpecificationBuilder<T> : ISpecificationBuilder<T> where T : class
+/// <summary>
+/// This evaluator applies EF Core's IgnoreQueryFilters feature to a given query
+/// See: https://docs.microsoft.com/en-us/ef/core/querying/filters
+/// </summary>
+public class IgnoreQueryFiltersEvaluator : IEvaluator
 {
-    bool IsChainDiscarded { get; set; }
+    private IgnoreQueryFiltersEvaluator() { }
+    public static IgnoreQueryFiltersEvaluator Instance { get; } = new IgnoreQueryFiltersEvaluator();
+
+    public bool IsCriteriaEvaluator { get; } = true;
+
+    public IQueryable<T> GetQuery<T>(IQueryable<T> query, ISpecification<T> specification) where T : class
+    {
+        if (specification.IgnoreQueryFilters)
+        {
+            query = query.IgnoreQueryFilters();
+        }
+
+        return query;
+    }
 }

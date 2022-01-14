@@ -15,9 +15,22 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace MikyM.Common.DataAccessLayer.Specifications.Builders;
+namespace MikyM.Common.DataAccessLayer.Specifications.Validators;
 
-public interface ICacheSpecificationBuilder<T> : ISpecificationBuilder<T> where T : class
+public class WhereValidator : IValidator
 {
-    bool IsChainDiscarded { get; set; }
+    private WhereValidator() { }
+    public static WhereValidator Instance { get; } = new WhereValidator();
+
+    public bool IsValid<T>(T entity, ISpecification<T> specification) where T : class
+    {
+        if (specification.WhereExpressions is null) return true;
+
+        foreach (var info in specification.WhereExpressions)
+        {
+            if (info.FilterFunc(entity) == false) return false;
+        }
+
+        return true;
+    }
 }

@@ -23,9 +23,9 @@ public class ProjectionEvaluator : IProjectionEvaluator
 {
     public static ProjectionEvaluator Instance { get; } = new();
 
-    public ProjectionEvaluator()
+    private ProjectionEvaluator()
     {
-            
+        
     }
 
     public IQueryable<TResult> GetQuery<T, TResult>(IQueryable<T> query, ISpecification<T, TResult> specification) where T : class where TResult : class

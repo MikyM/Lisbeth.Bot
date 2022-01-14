@@ -18,8 +18,6 @@
 using Autofac;
 using EFCoreSecondLevelCacheInterceptor;
 using IdGen;
-using Lisbeth.Bot.Application.Discord.Helpers;
-using Lisbeth.Bot.Application.Discord.Services;
 using Lisbeth.Bot.Application.Services;
 using Lisbeth.Bot.DataAccessLayer;
 using Microsoft.AspNetCore.Http;
@@ -28,7 +26,6 @@ using Microsoft.Extensions.Configuration;
 using MikyM.Common.Application;
 using MikyM.Common.Application.CommandHandlers.Helpers;
 using MikyM.Common.DataAccessLayer;
-using MikyM.Common.Utilities;
 using Module = Autofac.Module;
 
 namespace Lisbeth.Bot.API;
@@ -40,12 +37,15 @@ public class AutofacContainerModule : Module
         base.Load(builder);
         // automapper
 
-        builder.AddDataAccessLayer();
-        builder.AddApplicationLayer(x =>
+        builder.AddDataAccessLayer(options =>
         {
-            x.AddCommandHandlers();
-            x.AddServices();
-            x.AddAsyncExecutor();
+            options.EnableIncludeCache = true;
+        }); 
+        builder.AddApplicationLayer(options =>
+        {
+            options.AddCommandHandlers();
+            options.AddServices();
+            options.AddAsyncExecutor();
         });
         
         // pagination stuff
@@ -53,7 +53,7 @@ public class AutofacContainerModule : Module
         builder.Register(x =>
             {
                 var accessor = x.Resolve<IHttpContextAccessor>();
-                var request = accessor?.HttpContext?.Request;
+                var request = accessor.HttpContext?.Request;
                 var uri = string.Concat(request?.Scheme, "://", request?.Host.ToUriComponent());
                 return new UriService(uri);
             })
@@ -86,9 +86,5 @@ public class AutofacContainerModule : Module
             .AsSelf()
             .SingleInstance();
 
-
-        /*builder.RegisterGeneric(typeof(DiscordEmbedConfiguratorService<>))
-            .As(typeof(IDiscordEmbedConfiguratorService<>))
-            .InstancePerLifetimeScope();*/
     }
 }

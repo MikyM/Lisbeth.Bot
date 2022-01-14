@@ -26,6 +26,7 @@ namespace MikyM.Autofac.Extensions;
 public sealed class AttributeRegistrationConfiguration
 {
     internal ContainerBuilder Builder { get; set; }
+    public Lifetime DefaultLifetime { get; set; } = Lifetime.InstancePerLifetimeScope;
 
     public AttributeRegistrationConfiguration(ContainerBuilder builder)
     {

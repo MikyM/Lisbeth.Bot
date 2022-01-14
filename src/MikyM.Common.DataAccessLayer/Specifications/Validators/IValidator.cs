@@ -15,9 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace MikyM.Common.DataAccessLayer.Specifications.Builders;
+namespace MikyM.Common.DataAccessLayer.Specifications.Validators;
 
-public interface ICacheSpecificationBuilder<T> : ISpecificationBuilder<T> where T : class
+public interface IValidator
 {
-    bool IsChainDiscarded { get; set; }
+    bool IsValid<T>(T entity, ISpecification<T> specification) where T : class;
 }

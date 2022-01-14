@@ -15,28 +15,38 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Generic;
 using MikyM.Common.DataAccessLayer.Specifications.Extensions;
 
 namespace MikyM.Common.DataAccessLayer.Specifications.Evaluators;
 
-public class SearchEvaluator : IEvaluator
+public class SearchEvaluator : IEvaluator, IInMemoryEvaluator
 {
-    private SearchEvaluator()
-    {
-    }
-
-    public static SearchEvaluator Instance { get; } = new();
+    private SearchEvaluator() { }
+    public static SearchEvaluator Instance { get; } = new SearchEvaluator();
 
     public bool IsCriteriaEvaluator { get; } = true;
 
+
     public IQueryable<T> GetQuery<T>(IQueryable<T> query, ISpecification<T> specification) where T : class
     {
-        if (!specification.SearchCriterias.AnyNullable()) return query;
+        if (specification.SearchCriterias is null) return query;
 
         foreach (var searchCriteria in specification.SearchCriterias.GroupBy(x => x.SearchGroup))
         {
-            var criterias = searchCriteria.Select(x => (x.Selector, x.SearchTerm));
-            query = query.Search(criterias);
+            query = query.Search(searchCriteria);
+        }
+
+        return query;
+    }
+
+    public IEnumerable<T> Evaluate<T>(IEnumerable<T> query, ISpecification<T> specification) where T : class
+    {
+        if (specification.SearchCriterias is null) return query;
+
+        foreach (var searchGroup in specification.SearchCriterias.GroupBy(x => x.SearchGroup))
+        {
+            query = query.Where(x => searchGroup.Any(c => c.SelectorFunc(x).Like(c.SearchTerm)));
         }
 
         return query;

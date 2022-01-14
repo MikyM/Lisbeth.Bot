@@ -22,7 +22,7 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Extensions;
 
 public static class DbSetExtensions
 {
-    public static async Task<List<TSource>> ToListAsync<TSource>(this DbSet<TSource> source,
+    /*public static async Task<List<TSource>> ToListAsync<TSource>(this DbSet<TSource> source,
         ISpecification<TSource> specification, CancellationToken cancellationToken = default)
         where TSource : class
     {
@@ -51,5 +51,5 @@ public static class DbSetExtensions
     {
         evaluator ??= SpecificationEvaluator.Default;
         return evaluator.GetQuery(source, specification);
-    }
+    }*/
 }

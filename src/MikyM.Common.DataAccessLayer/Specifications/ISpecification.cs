@@ -20,6 +20,7 @@ using System.Linq.Expressions;
 using AutoMapper;
 using EFCoreSecondLevelCacheInterceptor;
 using MikyM.Common.DataAccessLayer.Filters;
+using MikyM.Common.DataAccessLayer.Specifications.Expressions;
 using MikyM.Common.DataAccessLayer.Specifications.Helpers;
 
 namespace MikyM.Common.DataAccessLayer.Specifications;
@@ -43,6 +44,13 @@ public interface ISpecification<T, TResult> : ISpecification<T> where T : class
     ///     <see cref="ISpecification{T, TResult}" />.
     /// </summary>
     new Func<IEnumerable<TResult>, IEnumerable<TResult>>? PostProcessingAction { get; }
+
+    new IEnumerable<TResult> Evaluate(IEnumerable<T> entities);
+
+    /// <summary>
+    /// The transform function to apply to the <typeparamref name="T"/> element.
+    /// </summary>
+    Expression<Func<T, TResult>>? Selector { get; }
 }
 
 /// <summary>
@@ -67,9 +75,9 @@ public interface ISpecification<T> where T : class
     PaginationFilter? PaginationFilter { get; }
 
     /// <summary>
-    ///     The collection of predicates to filter on.
+    /// The collection of filters.
     /// </summary>
-    IEnumerable<Expression<Func<T, bool>>>? WhereExpressions { get; }
+    IEnumerable<WhereExpressionInfo<T>>? WhereExpressions { get; }
 
     /// <summary>
     ///     The collection of predicates to group by.
@@ -77,16 +85,14 @@ public interface ISpecification<T> where T : class
     Expression<Func<T, object>>? GroupByExpression { get; }
 
     /// <summary>
-    ///     The collections of functions used to determine the sorting (and subsequent sorting),
-    ///     to apply to the result of the query encapsulated by the <see cref="ISpecification{T}" />.
-    ///     <para>KeySelector, a function to extract a key from an element.</para>
-    ///     <para>OrderType, whether to (subsequently) sort ascending or descending</para>
+    /// The collections of functions used to determine the sorting (and subsequent sorting),
+    /// to apply to the result of the query encapsulated by the <see cref="ISpecification{T}"/>.
     /// </summary>
-    IEnumerable<(Expression<Func<T, object>> KeySelector, OrderTypeEnum OrderType)>? OrderExpressions { get; }
+    IEnumerable<OrderExpressionInfo<T>>? OrderExpressions { get; }
 
     /// <summary>
-    ///     The collection of <see cref="IncludeExpressionInfo" />s describing each include expression.
-    ///     This information is utilized to build Include/ThenInclude functions in the query.
+    /// The collection of <see cref="IncludeExpressionInfo"/>s describing each include expression.
+    /// This information is utilized to build Include/ThenInclude functions in the query.
     /// </summary>
     IEnumerable<IncludeExpressionInfo>? IncludeExpressions { get; }
 
@@ -96,14 +102,9 @@ public interface ISpecification<T> where T : class
     IEnumerable<string>? IncludeStrings { get; }
 
     /// <summary>
-    ///     The collection of 'SQL LIKE' operations, constructed by;
-    ///     <list type="bullet">
-    ///         <item>Selector, the property to apply the SQL LIKE against.</item>
-    ///         <item>SearchTerm, the value to use for the SQL LIKE.</item>
-    ///         <item>SearchGroup, the index used to group sets of Selectors and SearchTerms together.</item>
-    ///     </list>
+    /// The collection of 'SQL LIKE' operations.
     /// </summary>
-    IEnumerable<(Expression<Func<T, string>> Selector, string SearchTerm, int SearchGroup)>? SearchCriterias { get; }
+    IEnumerable<SearchExpressionInfo<T>>? SearchCriterias { get; }
 
     /// <summary>
     ///     The number of elements to return.
@@ -147,6 +148,21 @@ public interface ISpecification<T> where T : class
     ///     Returns whether or not the change tracker with track the result of this query identity resolution.
     /// </summary>
     bool IsAsNoTrackingWithIdentityResolution { get; }
+
+    /// <summary>
+    /// Returns whether or not the query should ignore the defined global query filters 
+    /// </summary>
+    /// <remarks>
+    /// for more info: https://docs.microsoft.com/en-us/ef/core/querying/filters
+    /// </remarks>
+    bool IgnoreQueryFilters { get; }
+
+    /// <summary>
+    /// It returns whether the given entity satisfies the conditions of the specification.
+    /// </summary>
+    /// <param name="entity">The entity to be validated</param>
+    /// <returns></returns>
+    bool IsSatisfiedBy(T entity);
 
     IEnumerable<T> Evaluate(IEnumerable<T> entities);
 }

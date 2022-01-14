@@ -19,10 +19,12 @@ namespace MikyM.Common.DataAccessLayer.Specifications.Builders;
 
 public class OrderedSpecificationBuilder<T> : IOrderedSpecificationBuilder<T> where T : class
 {
-    public OrderedSpecificationBuilder(Specification<T> specification)
-    {
-        Specification = specification;
-    }
-
     public Specification<T> Specification { get; }
+    public bool IsChainDiscarded { get; set; }
+
+    public OrderedSpecificationBuilder(Specification<T> specification, bool isChainDiscarded = false)
+    {
+        this.Specification = specification;
+        this.IsChainDiscarded = isChainDiscarded;
+    }
 }

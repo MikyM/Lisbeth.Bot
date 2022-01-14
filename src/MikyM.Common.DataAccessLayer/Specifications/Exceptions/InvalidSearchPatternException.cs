@@ -15,9 +15,19 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace MikyM.Common.DataAccessLayer.Specifications.Builders;
+namespace MikyM.Common.DataAccessLayer.Specifications.Exceptions;
 
-public interface ICacheSpecificationBuilder<T> : ISpecificationBuilder<T> where T : class
+public class InvalidSearchPatternException : Exception
 {
-    bool IsChainDiscarded { get; set; }
+    private const string message = "Invalid search pattern: ";
+
+    public InvalidSearchPatternException(string searchPattern)
+        : base($"{message}{searchPattern}")
+    {
+    }
+
+    public InvalidSearchPatternException(string searchPattern, Exception innerException)
+        : base($"{message}{searchPattern}", innerException)
+    {
+    }
 }

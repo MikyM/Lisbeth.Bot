@@ -15,41 +15,59 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using MikyM.Common.DataAccessLayer.Specifications.Expressions;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using MikyM.Common.DataAccessLayer.Specifications.Helpers;
 
 namespace MikyM.Common.DataAccessLayer.Specifications.Builders;
 
 public static class IncludableBuilderExtensions
 {
-    public static IIncludableSpecificationBuilder<TEntity, TProperty> ThenInclude<TEntity, TPreviousProperty,
-        TProperty>(
+    public static IIncludableSpecificationBuilder<TEntity, TProperty> ThenInclude<TEntity, TPreviousProperty, TProperty>(
         this IIncludableSpecificationBuilder<TEntity, TPreviousProperty> previousBuilder,
         Expression<Func<TPreviousProperty, TProperty>> thenIncludeExpression)
         where TEntity : class
+        => ThenInclude(previousBuilder, thenIncludeExpression, true);
+
+    public static IIncludableSpecificationBuilder<TEntity, TProperty> ThenInclude<TEntity, TPreviousProperty, TProperty>(
+        this IIncludableSpecificationBuilder<TEntity, TPreviousProperty> previousBuilder,
+        Expression<Func<TPreviousProperty, TProperty>> thenIncludeExpression,
+        bool condition)
+        where TEntity : class
     {
-        var info = new IncludeExpressionInfo(thenIncludeExpression, typeof(TEntity), typeof(TProperty),
-            typeof(TPreviousProperty));
+        if (condition && !previousBuilder.IsChainDiscarded)
+        {
+            var info = new IncludeExpressionInfo(thenIncludeExpression, typeof(TEntity), typeof(TProperty), typeof(TPreviousProperty));
 
-        previousBuilder.Specification.IncludeExpressions ??= new List<IncludeExpressionInfo>();
-        ((List<IncludeExpressionInfo>) previousBuilder.Specification.IncludeExpressions).Add(info);
+            ((List<IncludeExpressionInfo>)previousBuilder.Specification.IncludeExpressions)?.Add(info);
+        }
 
-        return new IncludableSpecificationBuilder<TEntity, TProperty>(previousBuilder.Specification);
+        var includeBuilder = new IncludableSpecificationBuilder<TEntity, TProperty>(previousBuilder.Specification, !condition || previousBuilder.IsChainDiscarded);
+
+        return includeBuilder;
     }
 
-    public static IIncludableSpecificationBuilder<TEntity, TProperty> ThenInclude<TEntity, TPreviousProperty,
-        TProperty>(
+    public static IIncludableSpecificationBuilder<TEntity, TProperty> ThenInclude<TEntity, TPreviousProperty, TProperty>(
         this IIncludableSpecificationBuilder<TEntity, IEnumerable<TPreviousProperty>> previousBuilder,
         Expression<Func<TPreviousProperty, TProperty>> thenIncludeExpression)
         where TEntity : class
+        => ThenInclude(previousBuilder, thenIncludeExpression, true);
+
+    public static IIncludableSpecificationBuilder<TEntity, TProperty> ThenInclude<TEntity, TPreviousProperty, TProperty>(
+        this IIncludableSpecificationBuilder<TEntity, IEnumerable<TPreviousProperty>> previousBuilder,
+        Expression<Func<TPreviousProperty, TProperty>> thenIncludeExpression,
+        bool condition)
+        where TEntity : class
     {
-        var info = new IncludeExpressionInfo(thenIncludeExpression, typeof(TEntity), typeof(TProperty),
-            typeof(TPreviousProperty));
+        if (condition && !previousBuilder.IsChainDiscarded)
+        {
+            var info = new IncludeExpressionInfo(thenIncludeExpression, typeof(TEntity), typeof(TProperty), typeof(IEnumerable<TPreviousProperty>));
 
-        previousBuilder.Specification.IncludeExpressions ??= new List<IncludeExpressionInfo>();
-        ((List<IncludeExpressionInfo>) previousBuilder.Specification.IncludeExpressions).Add(info);
+            ((List<IncludeExpressionInfo>)previousBuilder.Specification.IncludeExpressions)?.Add(info);
+        }
 
-        return new IncludableSpecificationBuilder<TEntity, TProperty>(previousBuilder.Specification);
+        var includeBuilder = new IncludableSpecificationBuilder<TEntity, TProperty>(previousBuilder.Specification, !condition || previousBuilder.IsChainDiscarded);
+
+        return includeBuilder;
     }
 }

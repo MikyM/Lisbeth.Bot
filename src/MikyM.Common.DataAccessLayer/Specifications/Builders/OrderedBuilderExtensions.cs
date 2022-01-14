@@ -15,9 +15,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using MikyM.Common.DataAccessLayer.Specifications.Expressions;
+using MikyM.Common.DataAccessLayer.Specifications.Helpers;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using MikyM.Common.DataAccessLayer.Specifications.Helpers;
 
 namespace MikyM.Common.DataAccessLayer.Specifications.Builders;
 
@@ -25,26 +26,44 @@ public static class OrderedBuilderExtensions
 {
     public static IOrderedSpecificationBuilder<T> ThenBy<T>(
         this IOrderedSpecificationBuilder<T> orderedBuilder,
-        Expression<Func<T, object?>> orderExpression) where T : class
+        Expression<Func<T, object?>> orderExpression) where T : class => ThenBy(orderedBuilder, orderExpression, true);
+
+    public static IOrderedSpecificationBuilder<T> ThenBy<T>(
+        this IOrderedSpecificationBuilder<T> orderedBuilder,
+        Expression<Func<T, object?>> orderExpression,
+        bool condition) where T : class
     {
-        orderedBuilder.Specification.OrderExpressions ??=
-            new List<(Expression<Func<T, object>> KeySelector, OrderTypeEnum OrderType)>();
-        ((List<(Expression<Func<T, object?>> OrderExpression, OrderTypeEnum OrderType)>) orderedBuilder
-                .Specification.OrderExpressions)
-            .Add((orderExpression, OrderTypeEnum.ThenBy));
+        if (condition && !orderedBuilder.IsChainDiscarded)
+        {
+            orderedBuilder.Specification.OrderExpressions ??= new List<OrderExpressionInfo<T>>();
+            ((List<OrderExpressionInfo<T>>)orderedBuilder.Specification.OrderExpressions).Add(new OrderExpressionInfo<T>(orderExpression, OrderTypeEnum.ThenBy));
+        }
+        else
+        {
+            orderedBuilder.IsChainDiscarded = true;
+        }
 
         return orderedBuilder;
     }
 
     public static IOrderedSpecificationBuilder<T> ThenByDescending<T>(
         this IOrderedSpecificationBuilder<T> orderedBuilder,
-        Expression<Func<T, object?>> orderExpression) where T : class
+        Expression<Func<T, object?>> orderExpression) where T : class => ThenByDescending(orderedBuilder, orderExpression, true);
+
+    public static IOrderedSpecificationBuilder<T> ThenByDescending<T>(
+        this IOrderedSpecificationBuilder<T> orderedBuilder,
+        Expression<Func<T, object?>> orderExpression,
+        bool condition) where T : class
     {
-        orderedBuilder.Specification.OrderExpressions ??=
-            new List<(Expression<Func<T, object>> KeySelector, OrderTypeEnum OrderType)>();
-        ((List<(Expression<Func<T, object?>> OrderExpression, OrderTypeEnum OrderType)>) orderedBuilder
-                .Specification.OrderExpressions)
-            .Add((orderExpression, OrderTypeEnum.ThenByDescending));
+        if (condition && !orderedBuilder.IsChainDiscarded)
+        {
+            orderedBuilder.Specification.OrderExpressions ??= new List<OrderExpressionInfo<T>>();
+            ((List<OrderExpressionInfo<T>>)orderedBuilder.Specification.OrderExpressions).Add(new OrderExpressionInfo<T>(orderExpression, OrderTypeEnum.ThenByDescending));
+        }
+        else
+        {
+            orderedBuilder.IsChainDiscarded = true;
+        }
 
         return orderedBuilder;
     }
