@@ -19,6 +19,7 @@ using Autofac;
 using MikyM.Autofac.Extensions;
 using MikyM.Common.DataAccessLayer.Specifications;
 using System.Collections.Generic;
+using System.Diagnostics;
 using MikyM.Autofac.Extensions.Extensions;
 using MikyM.Common.DataAccessLayer.Specifications.Validators;
 
@@ -50,20 +51,8 @@ public static class DependancyInjectionExtensions
                 .AsImplementedInterfaces()
                 .FindConstructorsWith(ctorFinder)
                 .SingleInstance();
-
-            builder.RegisterAssemblyTypes(assembly)
-                .Where(x => x.GetInterface(nameof(IValidator)) is not null)
-                .AsImplementedInterfaces()
-                .FindConstructorsWith(ctorFinder)
-                .SingleInstance();
-
-            builder.RegisterAssemblyTypes(assembly)
-                .Where(x => x.GetInterface(nameof(IInMemoryEvaluator)) is not null)
-                .AsImplementedInterfaces()
-                .FindConstructorsWith(ctorFinder)
-                .SingleInstance();
         }
-        
+
         builder.RegisterType<IncludeEvaluator>()
             .As<IEvaluator>()
             .UsingConstructor(typeof(bool))

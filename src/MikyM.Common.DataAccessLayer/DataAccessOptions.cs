@@ -17,6 +17,7 @@
 
 using Autofac;
 using MikyM.Autofac.Extensions;
+using MikyM.Common.DataAccessLayer.Specifications.Validators;
 
 namespace MikyM.Common.DataAccessLayer;
 
@@ -50,6 +51,51 @@ public class DataAccessOptions
             .As<IEvaluator>()
             .FindConstructorsWith(new AllConstructorsFinder())
             .SingleInstance();
+
+        return this;
+    }
+
+    public DataAccessOptions AddInMemoryEvaluators()
+    {
+        foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+        {
+            _builder.RegisterAssemblyTypes(assembly)
+                .Where(x => x.GetInterface(nameof(IInMemoryEvaluator)) is not null)
+                .AsImplementedInterfaces()
+                .FindConstructorsWith(new AllConstructorsFinder())
+                .SingleInstance();
+        }
+
+        return this;
+    }
+
+    public DataAccessOptions AddValidators()
+    {
+        foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+        {
+            _builder.RegisterAssemblyTypes(assembly)
+                .Where(x => x.GetInterface(nameof(IValidator)) is not null)
+                .AsImplementedInterfaces()
+                .FindConstructorsWith(new AllConstructorsFinder())
+                .SingleInstance();
+        }
+
+        return this;
+    }
+
+    public DataAccessOptions AddEvaluators()
+    {
+        foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+        {
+            if (assembly == typeof(IncludeEvaluator).Assembly)
+                continue;
+
+            _builder.RegisterAssemblyTypes(assembly)
+                .Where(x => x.GetInterface(nameof(IEvaluator)) is not null)
+                .AsImplementedInterfaces()
+                .FindConstructorsWith(new AllConstructorsFinder())
+                .SingleInstance();
+        }
 
         return this;
     }

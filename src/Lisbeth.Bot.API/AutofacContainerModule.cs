@@ -40,7 +40,11 @@ public class AutofacContainerModule : Module
         builder.AddDataAccessLayer(options =>
         {
             options.EnableIncludeCache = true;
+            options.AddInMemoryEvaluators();
+            options.AddEvaluators();
+            options.AddValidators();
         }); 
+
         builder.AddApplicationLayer(options =>
         {
             options.AddCommandHandlers();
@@ -65,10 +69,8 @@ public class AutofacContainerModule : Module
         builder.Register(x =>
             {
                 var optionsBuilder = new DbContextOptionsBuilder<LisbethBotDbContext>();
-                //optionsBuilder.UseInMemoryDatabase("testdb");
                 optionsBuilder.AddInterceptors(x.Resolve<SecondLevelCacheInterceptor>());
                 //optionsBuilder.EnableSensitiveDataLogging();
-                //optionsBuilder.UseLoggerFactory(x.Resolve<ILoggerFactory>());
                 optionsBuilder.UseNpgsql(x.Resolve<IConfiguration>().GetConnectionString("MainDb"));
                 return new LisbethBotDbContext(optionsBuilder.Options);
             })
