@@ -64,10 +64,11 @@ public class ChannelMessageFormat : SnowflakeDiscordEntity
                     else if (FormatParts.Any(x => parts[part.index + 1].Contains(x))) 
                         return false;
 
-                if (part.text.Contains(formatPart) && !part.text.StartsWith(formatPart))
-                    return false;
+                if (part.text.Contains(formatPart) && !part.text.StartsWith(formatPart)) return false;
 
-                if (part.text.Contains(formatPart) && part.text.Length < 10)
+                if (part.text.Contains(formatPart) && part.text.Replace(formatPart, "")
+                        .Split(" ", StringSplitOptions.RemoveEmptyEntries)
+                        .Length < 2)
                     return false;
             }
         }

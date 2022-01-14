@@ -20,6 +20,7 @@ using Autofac.Builder;
 using Autofac.Extras.DynamicProxy;
 using MikyM.Autofac.Extensions.Attributes;
 using System.Reflection;
+using Autofac.Core.Activators.Reflection;
 
 namespace MikyM.Autofac.Extensions
 {
@@ -169,10 +170,17 @@ namespace MikyM.Autofac.Extensions
                             : registrationGenericBuilder?.InterceptedBy(attr.Interceptor);
                     }
 
-                    /*if (ctorAttr is not null)
+                    if (ctorAttr is not null)
                     {
-                        registrationBuilder = registrationBuilder.FindConstructorsWith()
-                    }*/
+                        var instance = Activator.CreateInstance(ctorAttr.ConstructorFinder);
+
+                        if (instance is null)
+                            throw new InvalidOperationException(
+                                $"Couldn't create an instance of a custom ctor finder of type {ctorAttr.ConstructorFinder.Name}, only finders with parameterless ctors are supported");
+
+                        registrationBuilder = registrationBuilder?.FindConstructorsWith((IConstructorFinder)instance);
+                        registrationGenericBuilder = registrationGenericBuilder?.FindConstructorsWith((IConstructorFinder)instance);
+                    }
                 }
             }
 
