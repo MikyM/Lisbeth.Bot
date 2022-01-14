@@ -65,7 +65,7 @@ public static class DependancyInjectionExtensions
 
             builder.RegisterAssemblyTypes(assembly)
                 .Where(x => x.GetInterfaces().FirstOrDefault(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(ISpecification<>)) is not null)
-                .AsClosedInterfacesOf(typeof(ISpecification<>))
+                .AsSelf()
                 .SingleInstance();
         }
         

@@ -32,8 +32,8 @@ public class SpecificationFactory : ISpecificationFactory
 
     public TSpecification GetSpecification<TSpecification>() where TSpecification : ISpecification
     {
-        if (!typeof(TSpecification).IsInterface)
-            throw new ArgumentException("Due to Autofac limitations you must use interfaces");
+        if (!typeof(TSpecification).IsClass)
+            throw new ArgumentException("You can only resolve class types");
 
         _specifications ??= new ConcurrentDictionary<string, ISpecification>();
 
