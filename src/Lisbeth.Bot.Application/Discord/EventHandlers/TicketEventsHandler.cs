@@ -35,7 +35,20 @@ namespace Lisbeth.Bot.Application.Discord.EventHandlers;
 [UsedImplicitly]
 public class TicketEventsHandler : BaseEventHandler, IDiscordMiscEventsSubscriber, IDiscordChannelEventsSubscriber
 {
-    public TicketEventsHandler(IAsyncExecutor asyncExecutor) : base(asyncExecutor){}
+    private readonly ITicketDataService _ticketDataService;
+    private readonly ICommandHandlerFactory _commandHandlerFactory;
+    private readonly IDiscordChatExportService _chatExportService;
+    private readonly ITicketQueueService _ticketQueueService;
+
+    public TicketEventsHandler(ITicketDataService ticketDataService, IAsyncExecutor asyncExecutor,
+        ICommandHandlerFactory commandHandlerFactory, IDiscordChatExportService chatExportService,
+        ITicketQueueService ticketQueueService) : base(asyncExecutor)
+    {
+        _ticketDataService = ticketDataService;
+        _commandHandlerFactory = commandHandlerFactory;
+        _chatExportService = chatExportService;
+        _ticketQueueService = ticketQueueService;
+    }
 
 
     public Task DiscordOnChannelCreated(DiscordClient sender, ChannelCreateEventArgs args)
@@ -48,11 +61,9 @@ public class TicketEventsHandler : BaseEventHandler, IDiscordMiscEventsSubscribe
         return Task.CompletedTask;
     }
 
-    public Task DiscordOnChannelDeleted(DiscordClient sender, ChannelDeleteEventArgs args)
+    public async Task DiscordOnChannelDeleted(DiscordClient sender, ChannelDeleteEventArgs args)
     {
-        _ = AsyncExecutor.ExecuteAsync<ITicketDataService>(async x =>
-            await x.CheckForDeletedTicketChannelAsync(args.Channel.Id, args.Guild.Id, sender.CurrentUser.Id));
-        return Task.CompletedTask;
+        await _ticketDataService.CheckForDeletedTicketChannelAsync(args.Channel.Id, args.Guild.Id, sender.CurrentUser.Id);
     }
 
     public Task DiscordOnDmChannelDeleted(DiscordClient sender, DmChannelDeleteEventArgs args)
@@ -74,14 +85,13 @@ public class TicketEventsHandler : BaseEventHandler, IDiscordMiscEventsSubscribe
                 await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
                     new DiscordInteractionResponseBuilder().AsEphemeral(true));
                 var handleCloseButtonReq = new CloseTicketCommand(args.Interaction);
-                _ = AsyncExecutor.ExecuteAsync<ICommandHandler<CloseTicketCommand>>(x =>
-                    x.HandleAsync(handleCloseButtonReq));
+                await _commandHandlerFactory.GetHandler<ICommandHandler<CloseTicketCommand>>().HandleAsync(handleCloseButtonReq);
                 break;
             case nameof(TicketButton.TicketOpen):
                 await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
                     new DiscordInteractionResponseBuilder().AsEphemeral(true));
                 var openReq = new TicketOpenReqDto { GuildId = args.Guild.Id, RequestedOnBehalfOfId = args.User.Id };
-                _ = AsyncExecutor.ExecuteAsync<ITicketQueueService>(x => x.EnqueueAsync(openReq, args.Interaction));
+                await _ticketQueueService.EnqueueAsync(openReq, args.Interaction);
                 break;
             case nameof(TicketSelect.TicketCloseMessageSelect):
                 await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
@@ -93,31 +103,26 @@ public class TicketEventsHandler : BaseEventHandler, IDiscordMiscEventsSubscribe
                             GuildId = args.Guild.Id, ChannelId = args.Channel.Id,
                             RequestedOnBehalfOfId = args.User.Id
                         };
-                        _ = AsyncExecutor.ExecuteAsync<ICommandHandler<ReopenTicketCommand, DiscordMessageBuilder>>(async x =>
-                            await x.HandleAsync(new ReopenTicketCommand(req, args.Interaction)));
+                        await _commandHandlerFactory.GetHandler<ICommandHandler<ReopenTicketCommand, DiscordMessageBuilder>>().HandleAsync(new ReopenTicketCommand(req, args.Interaction));
                         break;
                     case nameof(TicketSelectValue.TicketTranscriptValue):
-                        _ = AsyncExecutor.ExecuteAsync<IDiscordChatExportService>(async x =>
-                            await x.ExportToHtmlAsync(args.Interaction));
+                        await _chatExportService.ExportToHtmlAsync(args.Interaction);
                         break;
                     case nameof(TicketSelectValue.TicketDeleteValue):
-                        _ = AsyncExecutor.ExecuteAsync<ICommandHandler<DeleteTicketCommand>>(async x =>
-                            await x.HandleAsync(new DeleteTicketCommand(args.Interaction)));
+                        await _commandHandlerFactory.GetHandler<ICommandHandler<DeleteTicketCommand>>().HandleAsync(new DeleteTicketCommand(args.Interaction));
                         break;
                 }
                 break;
             case nameof(TicketButton.TicketCloseConfirm):
                 await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
                 var closeReq = new TicketCloseReqDto(null, args.Guild.Id, args.Channel.Id, args.User.Id);
-                _ = AsyncExecutor.ExecuteAsync<ICommandHandler<ConfirmCloseTicketCommand>>(async x =>
-                    await x.HandleAsync(new ConfirmCloseTicketCommand(closeReq, args.Interaction)));
+                await _commandHandlerFactory.GetHandler<ICommandHandler<ConfirmCloseTicketCommand>>().HandleAsync(new ConfirmCloseTicketCommand(closeReq, args.Interaction));
                 break;
             case nameof(TicketButton.TicketCloseReject):
                 await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
                     new DiscordInteractionResponseBuilder().AsEphemeral(true));
                 var rejectReq = new RejectCloseTicketCommand(args.Interaction, args.Message);
-                _ = AsyncExecutor.ExecuteAsync<ICommandHandler<RejectCloseTicketCommand>> (x =>
-                    x.HandleAsync(rejectReq));
+                await _commandHandlerFactory.GetHandler<ICommandHandler<RejectCloseTicketCommand>>().HandleAsync(rejectReq);
                 break;
         }
     }

@@ -21,17 +21,22 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using System;
-using System.Linq;
-using System.Reflection;
 using DSharpPlus;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using MikyM.Common.Utilities;
 using MikyM.Discord.Interfaces;
 using MikyM.Discord.Util;
 using OpenTracing;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
+using Autofac;
+using MikyM.Discord.Events;
 
 namespace MikyM.Discord.Services;
 
@@ -41,33 +46,94 @@ namespace MikyM.Discord.Services;
 [UsedImplicitly]
 public class DiscordService : IDiscordService
 {
-    protected readonly IOptions<DiscordConfiguration> DiscordOptions;
-    protected readonly ILoggerFactory LogFactory;
+    private readonly IOptions<DiscordConfiguration> _discordOptions;
+    private readonly ILoggerFactory _logFactory;
+    private readonly ILogger<DiscordService> _logger;
+    private readonly ILifetimeScope _rootScope;
+    private readonly ITracer _tracer;
+    private readonly IAsyncExecutor _asyncExecutor;
 
-    protected readonly ILogger<DiscordService> Logger;
+    private readonly IEnumerable<Type> _miscSubscribers;
+    private readonly IEnumerable<Type> _voiceSubscribers;
+    private readonly IEnumerable<Type> _presenceSubscribers;
+    private readonly IEnumerable<Type> _reactionSubscribers;
+    private readonly IEnumerable<Type> _messageSubscribers;
+    private readonly IEnumerable<Type> _inviteSubscribers;
+    private readonly IEnumerable<Type> _roleSubscribers;
+    private readonly IEnumerable<Type> _memberSubscribers;
+    private readonly IEnumerable<Type> _banSubscribers;
+    private readonly IEnumerable<Type> _guildSubscribers;
+    private readonly IEnumerable<Type> _channelSubscribers;
+    private readonly IEnumerable<Type> _websocketSubscribers;
 
-    protected readonly IServiceProvider ServiceProvider;
-
-    protected readonly ITracer Tracer;
-
-    public DiscordService(IServiceProvider serviceProvider, ILoggerFactory logFactory,
-        ILogger<DiscordService> logger, ITracer tracer, IOptions<DiscordConfiguration> discordOptions)
+    public DiscordService(ILoggerFactory logFactory, ILogger<DiscordService> logger,
+        ITracer tracer, IOptions<DiscordConfiguration> discordOptions, IAsyncExecutor asyncExecutor, ILifetimeScope rootScope)
     {
-        ServiceProvider = serviceProvider;
-        Logger = logger;
-        Tracer = tracer;
-        DiscordOptions = discordOptions;
-        LogFactory = logFactory;
+        _logger = logger;
+        _tracer = tracer;
+        _discordOptions = discordOptions;
+        _asyncExecutor = asyncExecutor;
+        _rootScope = rootScope;
+        _logFactory = logFactory;
+
+        _miscSubscribers = _rootScope.ComponentRegistry.Registrations
+            .Where(r => typeof(IDiscordMiscEventsSubscriber).IsAssignableFrom(r.Activator.LimitType))
+            .Select(r => r.Activator.LimitType)
+            .Distinct();
+        _voiceSubscribers = _rootScope.ComponentRegistry.Registrations
+            .Where(r => typeof(IDiscordVoiceEventsSubscriber).IsAssignableFrom(r.Activator.LimitType))
+            .Select(r => r.Activator.LimitType)
+            .Distinct();
+        _presenceSubscribers = _rootScope.ComponentRegistry.Registrations
+            .Where(r => typeof(IDiscordPresenceUserEventsSubscriber).IsAssignableFrom(r.Activator.LimitType))
+            .Select(r => r.Activator.LimitType)
+            .Distinct();
+        _reactionSubscribers = _rootScope.ComponentRegistry.Registrations
+            .Where(r => typeof(IDiscordMessageReactionEventsSubscriber).IsAssignableFrom(r.Activator.LimitType))
+            .Select(r => r.Activator.LimitType)
+            .Distinct();
+        _messageSubscribers = _rootScope.ComponentRegistry.Registrations
+            .Where(r => typeof(IDiscordMessageEventsSubscriber).IsAssignableFrom(r.Activator.LimitType))
+            .Select(r => r.Activator.LimitType)
+            .Distinct();
+        _inviteSubscribers = _rootScope.ComponentRegistry.Registrations
+            .Where(r => typeof(IDiscordInviteEventsSubscriber).IsAssignableFrom(r.Activator.LimitType))
+            .Select(r => r.Activator.LimitType)
+            .Distinct();
+        _roleSubscribers = _rootScope.ComponentRegistry.Registrations
+            .Where(r => typeof(IDiscordGuildRoleEventsSubscriber).IsAssignableFrom(r.Activator.LimitType))
+            .Select(r => r.Activator.LimitType)
+            .Distinct();
+        _memberSubscribers = _rootScope.ComponentRegistry.Registrations
+            .Where(r => typeof(IDiscordGuildMemberEventsSubscriber).IsAssignableFrom(r.Activator.LimitType))
+            .Select(r => r.Activator.LimitType)
+            .Distinct();
+        _banSubscribers = _rootScope.ComponentRegistry.Registrations
+            .Where(r => typeof(IDiscordGuildBanEventsSubscriber).IsAssignableFrom(r.Activator.LimitType))
+            .Select(r => r.Activator.LimitType)
+            .Distinct();
+        _guildSubscribers = _rootScope.ComponentRegistry.Registrations
+            .Where(r => typeof(IDiscordGuildEventsSubscriber).IsAssignableFrom(r.Activator.LimitType))
+            .Select(r => r.Activator.LimitType)
+            .Distinct();
+        _channelSubscribers = _rootScope.ComponentRegistry.Registrations
+            .Where(r => typeof(IDiscordChannelEventsSubscriber).IsAssignableFrom(r.Activator.LimitType))
+            .Select(r => r.Activator.LimitType)
+            .Distinct();
+        _websocketSubscribers = _rootScope.ComponentRegistry.Registrations
+            .Where(r => typeof(IDiscordWebSocketEventsSubscriber).IsAssignableFrom(r.Activator.LimitType))
+            .Select(r => r.Activator.LimitType)
+            .Distinct();
     }
 
     public DiscordClient Client { get; private set; } = null!;
 
     internal void Initialize()
     {
-        if (DiscordOptions.Value  is null)
+        if (_discordOptions.Value  is null)
             throw new InvalidOperationException($"{nameof(DiscordConfiguration)} option is required");
 
-        using var serviceScope = ServiceProvider.CreateScope();
+        using var serviceScope = _rootScope.BeginLifetimeScope();
 
         #region Subscriber services
 
@@ -100,7 +166,7 @@ public class DiscordService : IDiscordService
         //
         var property = typeof(DiscordConfiguration).GetProperty("Intents");
         property = property?.DeclaringType?.GetProperty("Intents");
-        var intents = (DiscordIntents) (property?.GetValue(DiscordOptions.Value,
+        var intents = (DiscordIntents) (property?.GetValue(_discordOptions.Value,
             BindingFlags.NonPublic | BindingFlags.Instance, null, null, null) ?? throw new InvalidOperationException());
 
         //
@@ -120,12 +186,12 @@ public class DiscordService : IDiscordService
 
         #endregion
 
-        var configuration = new DiscordConfiguration(DiscordOptions.Value)
+        var configuration = new DiscordConfiguration(_discordOptions.Value)
         {
             //
             // Overwrite with DI configured logging factory
             //
-            LoggerFactory = LogFactory,
+            LoggerFactory = _logFactory,
             //
             // Use merged intents
             //
@@ -137,433 +203,703 @@ public class DiscordService : IDiscordService
         //
         // Load options that should load in before Connect call
         //
-        ServiceProvider.GetServices<IDiscordExtensionConfiguration>();
+        _rootScope.Resolve<IEnumerable<IDiscordExtensionConfiguration>>();
 
         #region WebSocket
 
-        Client.SocketErrored += async (sender, args) =>
+        Client.SocketErrored += (sender, args) =>
         {
-            using var workScope = Tracer
+            using var workScope = _tracer
                 .BuildSpan(nameof(Client.SocketErrored))
                 .IgnoreActiveSpan()
                 .StartActive(true);
 
-            using var scope = ServiceProvider.CreateScope();
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_websocketSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordWebSocketEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnSocketErrored(sender, args);
+                    }
+                });
+            });
 
-            foreach (var eventSubscriber in scope.GetDiscordWebSocketEventSubscribers())
-                await eventSubscriber.DiscordOnSocketErrored(sender, args);
+            return Task.CompletedTask;
         };
 
-        Client.SocketOpened += async (sender, args) =>
+        Client.SocketOpened += (sender, args) =>
         {
-            using var workScope = Tracer
+            using var workScope = _tracer
                 .BuildSpan(nameof(Client.SocketOpened))
                 .IgnoreActiveSpan()
                 .StartActive(true);
 
-            using var scope = ServiceProvider.CreateScope();
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_websocketSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordWebSocketEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnSocketOpened(sender, args);
+                    }
+                });
+            });
 
-            foreach (var eventSubscriber in scope.GetDiscordWebSocketEventSubscribers())
-                await eventSubscriber.DiscordOnSocketOpened(sender, args);
+            return Task.CompletedTask;
         };
 
-        Client.SocketClosed += async (sender, args) =>
+        Client.SocketClosed += (sender, args) =>
         {
-            using var workScope = Tracer
+            using var workScope = _tracer
                 .BuildSpan(nameof(Client.SocketClosed))
                 .IgnoreActiveSpan()
                 .StartActive(true);
 
-            using var scope = ServiceProvider.CreateScope();
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_websocketSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordWebSocketEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnSocketClosed(sender, args);
+                    }
+                });
+            });
 
-            foreach (var eventSubscriber in scope.GetDiscordWebSocketEventSubscribers())
-                await eventSubscriber.DiscordOnSocketClosed(sender, args);
+            return Task.CompletedTask;
         };
 
-        Client.Ready += async (sender, args) =>
+        Client.Ready += (sender, args) =>
         {
-            using var workScope = Tracer.BuildSpan(nameof(Client.Ready)).IgnoreActiveSpan().StartActive(true);
+            using var workScope = _tracer.BuildSpan(nameof(Client.Ready)).IgnoreActiveSpan().StartActive(true);
 
-            using var scope = ServiceProvider.CreateScope();
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_websocketSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordWebSocketEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnReady(sender, args);
+                    }
+                });
+            });
 
-            foreach (var eventSubscriber in scope.GetDiscordWebSocketEventSubscribers())
-                await eventSubscriber.DiscordOnReady(sender, args);
+            return Task.CompletedTask;
         };
 
-        Client.Resumed += async (sender, args) =>
+        Client.Resumed += (sender, args) =>
         {
-            using var workScope = Tracer.BuildSpan(nameof(Client.Resumed)).IgnoreActiveSpan().StartActive(true);
+            using var workScope = _tracer.BuildSpan(nameof(Client.Resumed)).IgnoreActiveSpan().StartActive(true);
 
-            using var scope = ServiceProvider.CreateScope();
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_websocketSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordWebSocketEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnResumed(sender, args);
+                    }
+                });
+            });
 
-            foreach (var eventSubscriber in scope.GetDiscordWebSocketEventSubscribers())
-                await eventSubscriber.DiscordOnResumed(sender, args);
+            return Task.CompletedTask;
         };
 
-        Client.Heartbeated += async (sender, args) =>
+        Client.Heartbeated += (sender, args) =>
         {
-            using var workScope = Tracer.BuildSpan(nameof(Client.Heartbeated)).IgnoreActiveSpan().StartActive(true);
+            using var workScope = _tracer.BuildSpan(nameof(Client.Heartbeated)).IgnoreActiveSpan().StartActive(true);
 
-            using var scope = ServiceProvider.CreateScope();
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_websocketSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordWebSocketEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnHeartbeated(sender, args);
+                    }
+                });
+            });
 
-            foreach (var eventSubscriber in scope.GetDiscordWebSocketEventSubscribers())
-                await eventSubscriber.DiscordOnHeartbeated(sender, args);
+            return Task.CompletedTask;
         };
 
-        Client.Zombied += async (sender, args) =>
+        Client.Zombied += (sender, args) =>
         {
-            using var workScope = Tracer.BuildSpan(nameof(Client.Zombied)).IgnoreActiveSpan().StartActive(true);
+            using var workScope = _tracer.BuildSpan(nameof(Client.Zombied)).IgnoreActiveSpan().StartActive(true);
 
-            using var scope = ServiceProvider.CreateScope();
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_websocketSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordWebSocketEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnZombied(sender, args);
+                    }
+                });
+            });
 
-            foreach (var eventSubscriber in scope.GetDiscordWebSocketEventSubscribers())
-                await eventSubscriber.DiscordOnZombied(sender, args);
+            return Task.CompletedTask;
         };
 
         #endregion
 
         #region Channel
 
-        Client.ChannelCreated += async (sender, args) =>
+        Client.ChannelCreated += (sender, args) =>
         {
-            using var workScope = Tracer.BuildSpan(nameof(Client.ChannelCreated))
+            using var workScope = _tracer.BuildSpan(nameof(Client.ChannelCreated))
                 .IgnoreActiveSpan()
                 .StartActive(true);
             workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
             workScope.Span.SetTag("Channel.Id", args.Channel.Id.ToString());
 
-            using var scope = ServiceProvider.CreateScope();
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_channelSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordChannelEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnChannelCreated(sender, args);
+                    }
+                });
+            });
 
-            foreach (var eventSubscriber in scope.GetDiscordChannelEventsSubscribers())
-                await eventSubscriber.DiscordOnChannelCreated(sender, args);
+            return Task.CompletedTask;
         };
 
-        Client.ChannelUpdated += async (sender, args) =>
+        Client.ChannelUpdated += (sender, args) =>
         {
-            using var workScope = Tracer.BuildSpan(nameof(Client.ChannelUpdated))
+            using var workScope = _tracer.BuildSpan(nameof(Client.ChannelUpdated))
                 .IgnoreActiveSpan()
                 .StartActive(true);
             workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
             workScope.Span.SetTag("ChannelBefore.Id", args.ChannelBefore.Id.ToString());
             workScope.Span.SetTag("ChannelAfter.Id", args.ChannelAfter.Id.ToString());
 
-            using var scope = ServiceProvider.CreateScope();
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_channelSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordChannelEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnChannelUpdated(sender, args);
+                    }
+                });
+            });
 
-            foreach (var eventSubscriber in scope.GetDiscordChannelEventsSubscribers())
-                await eventSubscriber.DiscordOnChannelUpdated(sender, args);
+            return Task.CompletedTask;
         };
 
-        Client.ChannelDeleted += async (sender, args) =>
+        Client.ChannelDeleted += (sender, args) =>
         {
-            using var workScope = Tracer.BuildSpan(nameof(Client.ChannelDeleted))
+            using var workScope = _tracer.BuildSpan(nameof(Client.ChannelDeleted))
                 .IgnoreActiveSpan()
                 .StartActive(true);
             workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
             workScope.Span.SetTag("Channel.Id", args.Channel.Id.ToString());
 
-            using var scope = ServiceProvider.CreateScope();
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_channelSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordChannelEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnChannelDeleted(sender, args);
+                    }
+                });
+            });
 
-            foreach (var eventSubscriber in scope.GetDiscordChannelEventsSubscribers())
-                await eventSubscriber.DiscordOnChannelDeleted(sender, args);
+            return Task.CompletedTask;
         };
 
-        Client.DmChannelDeleted += async (sender, args) =>
+        Client.DmChannelDeleted += (sender, args) =>
         {
-            using var workScope = Tracer.BuildSpan(nameof(Client.DmChannelDeleted))
+            using var workScope = _tracer.BuildSpan(nameof(Client.DmChannelDeleted))
                 .IgnoreActiveSpan()
                 .StartActive(true);
             workScope.Span.SetTag("Channel.Id", args.Channel.Id.ToString());
 
-            using var scope = ServiceProvider.CreateScope();
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_channelSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordChannelEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnDmChannelDeleted(sender, args);
+                    }
+                });
+            });
 
-            foreach (var eventSubscriber in scope.GetDiscordChannelEventsSubscribers())
-                await eventSubscriber.DiscordOnDmChannelDeleted(sender, args);
+            return Task.CompletedTask;
         };
 
-        Client.ChannelPinsUpdated += async (sender, args) =>
+        Client.ChannelPinsUpdated += (sender, args) =>
         {
-            using var workScope = Tracer.BuildSpan(nameof(Client.ChannelPinsUpdated))
+            using var workScope = _tracer.BuildSpan(nameof(Client.ChannelPinsUpdated))
                 .IgnoreActiveSpan()
                 .StartActive(true);
             workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
             workScope.Span.SetTag("Channel.Id", args.Channel.Id.ToString());
 
-            using var scope = ServiceProvider.CreateScope();
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_channelSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordChannelEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnChannelPinsUpdated(sender, args);
+                    }
+                });
+            });
 
-            foreach (var eventSubscriber in scope.GetDiscordChannelEventsSubscribers())
-                await eventSubscriber.DiscordOnChannelPinsUpdated(sender, args);
+            return Task.CompletedTask;
         };
 
         #endregion
 
         #region Guild
 
-        Client.GuildCreated += async (sender, args) =>
+        Client.GuildCreated += (sender, args) =>
         {
-            using var workScope = Tracer
+            using var workScope = _tracer
                 .BuildSpan(nameof(Client.GuildCreated))
                 .IgnoreActiveSpan()
                 .StartActive(true);
             workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
 
-            using var scope = ServiceProvider.CreateScope();
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_guildSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordGuildEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnGuildCreated(sender, args);
+                    }
+                });
+            });
 
-            foreach (var eventSubscriber in scope.GetDiscordGuildEventsSubscribers())
-                await eventSubscriber.DiscordOnGuildCreated(sender, args);
+            return Task.CompletedTask;
         };
 
-        Client.GuildAvailable += async (sender, args) =>
+        Client.GuildAvailable += (sender, args) =>
         {
-            using var workScope = Tracer.BuildSpan(nameof(Client.GuildAvailable))
+            using var workScope = _tracer.BuildSpan(nameof(Client.GuildAvailable))
                 .IgnoreActiveSpan()
                 .StartActive(true);
             workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
 
-            using var scope = ServiceProvider.CreateScope();
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_guildSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordGuildEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnGuildAvailable(sender, args);
+                    }
+                });
+            });
 
-            foreach (var eventSubscriber in scope.GetDiscordGuildEventsSubscribers())
-                await eventSubscriber.DiscordOnGuildAvailable(sender, args);
+            return Task.CompletedTask;
         };
 
-        Client.GuildUpdated += async (sender, args) =>
+        Client.GuildUpdated += (sender, args) =>
         {
-            using var workScope = Tracer
+            using var workScope = _tracer
                 .BuildSpan(nameof(Client.GuildUpdated))
                 .IgnoreActiveSpan()
                 .StartActive(true);
 
             workScope.Span.SetTag("Guild.Id", args.GuildBefore.Id.ToString());
 
-            using var scope = ServiceProvider.CreateScope();
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_guildSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordGuildEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnGuildUpdated(sender, args);
+                    }
+                });
+            });
 
-            foreach (var eventSubscriber in scope.GetDiscordGuildEventsSubscribers())
-                await eventSubscriber.DiscordOnGuildUpdated(sender, args);
+            return Task.CompletedTask;
         };
 
-        Client.GuildDeleted += async (sender, args) =>
+        Client.GuildDeleted += (sender, args) =>
         {
-            using var workScope = Tracer
+            using var workScope = _tracer
                 .BuildSpan(nameof(Client.GuildDeleted))
                 .IgnoreActiveSpan()
                 .StartActive(true);
             workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
 
-            using var scope = ServiceProvider.CreateScope();
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_guildSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordGuildEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnGuildDeleted(sender, args);
+                    }
+                });
+            });
 
-            foreach (var eventSubscriber in scope.GetDiscordGuildEventsSubscribers())
-                await eventSubscriber.DiscordOnGuildDeleted(sender, args);
+            return Task.CompletedTask;
         };
 
-        Client.GuildUnavailable += async (sender, args) =>
+        Client.GuildUnavailable += (sender, args) =>
         {
-            using var workScope = Tracer.BuildSpan(nameof(Client.GuildUnavailable))
+            using var workScope = _tracer.BuildSpan(nameof(Client.GuildUnavailable))
                 .IgnoreActiveSpan()
                 .StartActive(true);
             workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
 
-            using var scope = ServiceProvider.CreateScope();
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_guildSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordGuildEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnGuildUnavailable(sender, args);
+                    }
+                });
+            });
 
-            foreach (var eventSubscriber in scope.GetDiscordGuildEventsSubscribers())
-                await eventSubscriber.DiscordOnGuildUnavailable(sender, args);
+            return Task.CompletedTask;
         };
 
-        Client.GuildDownloadCompleted += async (sender, args) =>
+        Client.GuildDownloadCompleted += (sender, args) =>
         {
-            using var workScope = Tracer.BuildSpan(nameof(Client.GuildDownloadCompleted))
+            using var workScope = _tracer.BuildSpan(nameof(Client.GuildDownloadCompleted))
                 .IgnoreActiveSpan()
                 .StartActive(true);
 
-            using var scope = ServiceProvider.CreateScope();
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_guildSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordGuildEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnGuildDownloadCompleted(sender, args);
+                    }
+                });
+            });
 
-            foreach (var eventSubscriber in scope.GetDiscordGuildEventsSubscribers())
-                await eventSubscriber.DiscordOnGuildDownloadCompleted(sender, args);
+            return Task.CompletedTask;
         };
 
-        Client.GuildEmojisUpdated += async (sender, args) =>
+        Client.GuildEmojisUpdated += (sender, args) =>
         {
-            using var workScope = Tracer.BuildSpan(nameof(Client.GuildEmojisUpdated))
-                .IgnoreActiveSpan()
-                .StartActive(true);
-            workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
-
-            using var scope = ServiceProvider.CreateScope();
-
-            foreach (var eventSubscriber in scope.GetDiscordGuildEventsSubscribers())
-                await eventSubscriber.DiscordOnGuildEmojisUpdated(sender, args);
-        };
-
-        Client.GuildStickersUpdated += async (sender, args) =>
-        {
-            using var workScope = Tracer.BuildSpan(nameof(Client.GuildStickersUpdated))
-                .IgnoreActiveSpan()
-                .StartActive(true);
-            workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
-
-            using var scope = ServiceProvider.CreateScope();
-
-            foreach (var eventSubscriber in scope.GetDiscordGuildEventsSubscribers())
-                await eventSubscriber.DiscordOnGuildStickersUpdated(sender, args);
-        };
-
-        Client.GuildIntegrationsUpdated += async (sender, args) =>
-        {
-            using var workScope = Tracer.BuildSpan(nameof(Client.GuildIntegrationsUpdated))
+            using var workScope = _tracer.BuildSpan(nameof(Client.GuildEmojisUpdated))
                 .IgnoreActiveSpan()
                 .StartActive(true);
             workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
 
-            using var scope = ServiceProvider.CreateScope();
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_guildSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordGuildEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnGuildEmojisUpdated(sender, args);
+                    }
+                });
+            });
 
-            foreach (var eventSubscriber in scope.GetDiscordGuildEventsSubscribers())
-                await eventSubscriber.DiscordOnGuildIntegrationsUpdated(sender, args);
+            return Task.CompletedTask;
+        };
+
+        Client.GuildStickersUpdated += (sender, args) =>
+        {
+            using var workScope = _tracer.BuildSpan(nameof(Client.GuildStickersUpdated))
+                .IgnoreActiveSpan()
+                .StartActive(true);
+            workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
+
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_guildSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordGuildEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnGuildStickersUpdated(sender, args);
+                    }
+                });
+            });
+
+            return Task.CompletedTask;
+        };
+
+        Client.GuildIntegrationsUpdated += (sender, args) =>
+        {
+            using var workScope = _tracer.BuildSpan(nameof(Client.GuildIntegrationsUpdated))
+                .IgnoreActiveSpan()
+                .StartActive(true);
+            workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
+
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_guildSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordGuildEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnGuildIntegrationsUpdated(sender, args);
+                    }
+                });
+            });
+
+            return Task.CompletedTask;
         };
 
         #endregion
 
         #region Guild Ban
 
-        Client.GuildBanAdded += async (sender, args) =>
+        Client.GuildBanAdded += (sender, args) =>
         {
-            using var workScope = Tracer
+            using var workScope = _tracer
                 .BuildSpan(nameof(Client.GuildBanAdded))
                 .IgnoreActiveSpan()
                 .StartActive(true);
             workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
             workScope.Span.SetTag("Member.Id", args.Member.Id.ToString());
 
-            using var scope = ServiceProvider.CreateScope();
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_banSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordGuildBanEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnGuildBanAdded(sender, args);
+                    }
+                });
+            });
 
-            foreach (var eventSubscriber in scope.GetDiscordGuildBanEventsSubscribers())
-                await eventSubscriber.DiscordOnGuildBanAdded(sender, args);
+            return Task.CompletedTask;
         };
 
-        Client.GuildBanRemoved += async (sender, args) =>
+        Client.GuildBanRemoved += (sender, args) =>
         {
-            using var workScope = Tracer.BuildSpan(nameof(Client.GuildBanRemoved))
+            using var workScope = _tracer.BuildSpan(nameof(Client.GuildBanRemoved))
                 .IgnoreActiveSpan()
                 .StartActive(true);
             workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
             workScope.Span.SetTag("Member.Id", args.Member.Id.ToString());
 
-            using var scope = ServiceProvider.CreateScope();
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_banSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordGuildBanEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnGuildBanRemoved(sender, args);
+                    }
+                });
+            });
 
-            foreach (var eventSubscriber in scope.GetDiscordGuildBanEventsSubscribers())
-                await eventSubscriber.DiscordOnGuildBanRemoved(sender, args);
+            return Task.CompletedTask;
         };
 
         #endregion
 
         #region Guild Member
 
-        Client.GuildMemberAdded += async (sender, args) =>
+        Client.GuildMemberAdded += (sender, args) =>
         {
-            using var workScope = Tracer.BuildSpan(nameof(Client.GuildMemberAdded))
+            using var workScope = _tracer.BuildSpan(nameof(Client.GuildMemberAdded))
                 .IgnoreActiveSpan()
                 .StartActive(true);
             workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
             workScope.Span.SetTag("Member.Id", args.Member.Id.ToString());
 
-            using var scope = ServiceProvider.CreateScope();
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_memberSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordGuildMemberEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnGuildMemberAdded(sender, args);
+                    }
+                });
+            });
 
-            foreach (var eventSubscriber in scope.GetDiscordGuildMemberEventsSubscribers())
-                await eventSubscriber.DiscordOnGuildMemberAdded(sender, args);
+            return Task.CompletedTask;
         };
 
-        Client.GuildMemberRemoved += async (sender, args) =>
+        Client.GuildMemberRemoved += (sender, args) =>
         {
-            using var workScope = Tracer.BuildSpan(nameof(Client.GuildMemberRemoved))
+            using var workScope = _tracer.BuildSpan(nameof(Client.GuildMemberRemoved))
                 .IgnoreActiveSpan()
                 .StartActive(true);
             workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
             workScope.Span.SetTag("Member.Id", args.Member.Id.ToString());
 
-            using var scope = ServiceProvider.CreateScope();
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_memberSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordGuildMemberEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnGuildMemberRemoved(sender, args);
+                    }
+                });
+            });
 
-            foreach (var eventSubscriber in scope.GetDiscordGuildMemberEventsSubscribers())
-                await eventSubscriber.DiscordOnGuildMemberRemoved(sender, args);
+            return Task.CompletedTask;
         };
 
-        Client.GuildMemberUpdated += async (sender, args) =>
+        Client.GuildMemberUpdated += (sender, args) =>
         {
-            using var workScope = Tracer.BuildSpan(nameof(Client.GuildMemberUpdated))
+            using var workScope = _tracer.BuildSpan(nameof(Client.GuildMemberUpdated))
                 .IgnoreActiveSpan()
                 .StartActive(true);
             workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
             workScope.Span.SetTag("Member.Id", args.Member.Id.ToString());
 
-            using var scope = ServiceProvider.CreateScope();
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_memberSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordGuildMemberEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnGuildMemberUpdated(sender, args);
+                    }
+                });
+            });
 
-            foreach (var eventSubscriber in scope.GetDiscordGuildMemberEventsSubscribers())
-                await eventSubscriber.DiscordOnGuildMemberUpdated(sender, args);
+            return Task.CompletedTask;
         };
 
-        Client.GuildMembersChunked += async (sender, args) =>
+        Client.GuildMembersChunked += (sender, args) =>
         {
-            using var workScope = Tracer.BuildSpan(nameof(Client.GuildMembersChunked))
+            using var workScope = _tracer.BuildSpan(nameof(Client.GuildMembersChunked))
                 .IgnoreActiveSpan()
                 .StartActive(true);
             workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
 
-            using var scope = ServiceProvider.CreateScope();
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_memberSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordGuildMemberEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnGuildMembersChunked(sender, args);
+                    }
+                });
+            });
 
-            foreach (var eventSubscriber in scope.GetDiscordGuildMemberEventsSubscribers())
-                await eventSubscriber.DiscordOnGuildMembersChunked(sender, args);
+            return Task.CompletedTask;
         };
 
         #endregion
 
         #region Guild Role
 
-        Client.GuildRoleCreated += async (sender, args) =>
+        Client.GuildRoleCreated += (sender, args) =>
         {
-            using var workScope = Tracer.BuildSpan(nameof(Client.GuildRoleCreated))
+            using var workScope = _tracer.BuildSpan(nameof(Client.GuildRoleCreated))
                 .IgnoreActiveSpan()
                 .StartActive(true);
             workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
             workScope.Span.SetTag("Role.Id", args.Role.Id.ToString());
 
-            using var scope = ServiceProvider.CreateScope();
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_roleSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordGuildRoleEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnGuildRoleCreated(sender, args);
+                    }
+                });
+            });
 
-            foreach (var eventSubscriber in scope.GetDiscordGuildRoleEventsSubscribers())
-                await eventSubscriber.DiscordOnGuildRoleCreated(sender, args);
+            return Task.CompletedTask;
         };
 
-        Client.GuildRoleUpdated += async (sender, args) =>
+        Client.GuildRoleUpdated += (sender, args) =>
         {
-            using var workScope = Tracer.BuildSpan(nameof(Client.GuildRoleUpdated))
+            using var workScope = _tracer.BuildSpan(nameof(Client.GuildRoleUpdated))
                 .IgnoreActiveSpan()
                 .StartActive(true);
             workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
             workScope.Span.SetTag("RoleBefore.Id", args.RoleBefore.Id.ToString());
             workScope.Span.SetTag("RoleAfter.Id", args.RoleAfter.Id.ToString());
 
-            using var scope = ServiceProvider.CreateScope();
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_roleSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordGuildRoleEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnGuildRoleUpdated(sender, args);
+                    }
+                });
+            });
 
-            foreach (var eventSubscriber in scope.GetDiscordGuildRoleEventsSubscribers())
-                await eventSubscriber.DiscordOnGuildRoleUpdated(sender, args);
+            return Task.CompletedTask;
         };
 
-        Client.GuildRoleDeleted += async (sender, args) =>
+        Client.GuildRoleDeleted += (sender, args) =>
         {
-            using var workScope = Tracer.BuildSpan(nameof(Client.GuildRoleDeleted))
+            using var workScope = _tracer.BuildSpan(nameof(Client.GuildRoleDeleted))
                 .IgnoreActiveSpan()
                 .StartActive(true);
             workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
             workScope.Span.SetTag("Role.Id", args.Role.Id.ToString());
 
-            using var scope = ServiceProvider.CreateScope();
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_roleSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordGuildRoleEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnGuildRoleDeleted(sender, args);
+                    }
+                });
+            });
 
-            foreach (var eventSubscriber in scope.GetDiscordGuildRoleEventsSubscribers())
-                await eventSubscriber.DiscordOnGuildRoleDeleted(sender, args);
+            return Task.CompletedTask;
         };
 
         #endregion
 
         #region Invite
 
-        Client.InviteCreated += async (sender, args) =>
+        Client.InviteCreated += (sender, args) =>
         {
-            using var workScope = Tracer
+            using var workScope = _tracer
                 .BuildSpan(nameof(Client.InviteCreated))
                 .IgnoreActiveSpan()
                 .StartActive(true);
@@ -571,15 +907,24 @@ public class DiscordService : IDiscordService
             workScope.Span.SetTag("Channel.Id", args.Channel.Id.ToString());
             workScope.Span.SetTag("Invite.Code", args.Invite.Code.ToString());
 
-            using var scope = ServiceProvider.CreateScope();
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_inviteSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordInviteEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnInviteCreated(sender, args);
+                    }
+                });
+            });
 
-            foreach (var eventSubscriber in scope.GetDiscordInviteEventsSubscribers())
-                await eventSubscriber.DiscordOnInviteCreated(sender, args);
+            return Task.CompletedTask;
         };
 
-        Client.InviteDeleted += async (sender, args) =>
+        Client.InviteDeleted += (sender, args) =>
         {
-            using var workScope = Tracer
+            using var workScope = _tracer
                 .BuildSpan(nameof(Client.InviteDeleted))
                 .IgnoreActiveSpan()
                 .StartActive(true);
@@ -587,19 +932,28 @@ public class DiscordService : IDiscordService
             workScope.Span.SetTag("Channel.Id", args.Channel.Id.ToString());
             workScope.Span.SetTag("Invite.Code", args.Invite.Code.ToString());
 
-            using var scope = ServiceProvider.CreateScope();
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_inviteSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordInviteEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnInviteDeleted(sender, args);
+                    }
+                });
+            });
 
-            foreach (var eventSubscriber in scope.GetDiscordInviteEventsSubscribers())
-                await eventSubscriber.DiscordOnInviteDeleted(sender, args);
+            return Task.CompletedTask;
         };
 
         #endregion
 
         #region message
 
-        Client.MessageCreated += async (sender, args) =>
+        Client.MessageCreated += (sender, args) =>
         {
-            using var workScope = Tracer.BuildSpan(nameof(Client.MessageCreated))
+            using var workScope = _tracer.BuildSpan(nameof(Client.MessageCreated))
                 .IgnoreActiveSpan()
                 .StartActive(true);
             if (args.Guild is not null) workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
@@ -607,29 +961,47 @@ public class DiscordService : IDiscordService
             workScope.Span.SetTag("Author.Id", args.Author.Id.ToString());
             workScope.Span.SetTag("message.Id", args.Message.Id.ToString());
 
-            using var scope = ServiceProvider.CreateScope();
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_messageSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordMessageEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnMessageCreated(sender, args);
+                    }
+                });
+            });
 
-            foreach (var eventSubscriber in scope.GetDiscordMessageEventsSubscribers())
-                await eventSubscriber.DiscordOnMessageCreated(sender, args);
+            return Task.CompletedTask;
         };
 
-        Client.MessageAcknowledged += async (sender, args) =>
+        Client.MessageAcknowledged += (sender, args) =>
         {
-            using var workScope = Tracer.BuildSpan(nameof(Client.MessageAcknowledged))
+            using var workScope = _tracer.BuildSpan(nameof(Client.MessageAcknowledged))
                 .IgnoreActiveSpan()
                 .StartActive(true);
             workScope.Span.SetTag("Channel.Id", args.Channel.Id.ToString());
             workScope.Span.SetTag("message.Id", args.Message.Id.ToString());
 
-            using var scope = ServiceProvider.CreateScope();
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_messageSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordMessageEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnMessageAcknowledged(sender, args);
+                    }
+                });
+            });
 
-            foreach (var eventSubscriber in scope.GetDiscordMessageEventsSubscribers())
-                await eventSubscriber.DiscordOnMessageAcknowledged(sender, args);
+            return Task.CompletedTask;
         };
 
-        Client.MessageUpdated += async (sender, args) =>
+        Client.MessageUpdated += (sender, args) =>
         {
-            using var workScope = Tracer.BuildSpan(nameof(Client.MessageUpdated))
+            using var workScope = _tracer.BuildSpan(nameof(Client.MessageUpdated))
                 .IgnoreActiveSpan()
                 .StartActive(true);
             if (args.Guild is not null) workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
@@ -637,48 +1009,75 @@ public class DiscordService : IDiscordService
             if (args.Author is not null) workScope.Span.SetTag("Author.Id", args.Author.Id.ToString());
             workScope.Span.SetTag("message.Id", args.Message.Id.ToString());
 
-            using var scope = ServiceProvider.CreateScope();
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_messageSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordMessageEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnMessageUpdated(sender, args);
+                    }
+                });
+            });
 
-            foreach (var eventSubscriber in scope.GetDiscordMessageEventsSubscribers())
-                await eventSubscriber.DiscordOnMessageUpdated(sender, args);
+            return Task.CompletedTask;
         };
 
-        Client.MessageDeleted += async (sender, args) =>
+        Client.MessageDeleted += (sender, args) =>
         {
-            using var workScope = Tracer.BuildSpan(nameof(Client.MessageDeleted))
+            using var workScope = _tracer.BuildSpan(nameof(Client.MessageDeleted))
                 .IgnoreActiveSpan()
                 .StartActive(true);
             if (args.Guild is not null) workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
             workScope.Span.SetTag("Channel.Id", args.Channel.Id.ToString());
             workScope.Span.SetTag("message.Id", args.Message.Id.ToString());
 
-            using var scope = ServiceProvider.CreateScope();
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_messageSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordMessageEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnMessageDeleted(sender, args);
+                    }
+                });
+            });
 
-            foreach (var eventSubscriber in scope.GetDiscordMessageEventsSubscribers())
-                await eventSubscriber.DiscordOnMessageDeleted(sender, args);
+            return Task.CompletedTask;
         };
 
-        Client.MessagesBulkDeleted += async (sender, args) =>
+        Client.MessagesBulkDeleted += (sender, args) =>
         {
-            using var workScope = Tracer.BuildSpan(nameof(Client.MessagesBulkDeleted))
+            using var workScope = _tracer.BuildSpan(nameof(Client.MessagesBulkDeleted))
                 .IgnoreActiveSpan()
                 .StartActive(true);
             if (args.Guild is not null) workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
             workScope.Span.SetTag("Channel.Id", args.Channel.Id.ToString());
 
-            using var scope = ServiceProvider.CreateScope();
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_messageSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordMessageEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnMessagesBulkDeleted(sender, args);
+                    }
+                });
+            });
 
-            foreach (var eventSubscriber in scope.GetDiscordMessageEventsSubscribers())
-                await eventSubscriber.DiscordOnMessagesBulkDeleted(sender, args);
+            return Task.CompletedTask;
         };
 
         #endregion
 
         #region message Reaction
 
-        Client.MessageReactionAdded += async (sender, args) =>
+        Client.MessageReactionAdded += (sender, args) =>
         {
-            using var workScope = Tracer.BuildSpan(nameof(Client.MessageReactionAdded))
+            using var workScope = _tracer.BuildSpan(nameof(Client.MessageReactionAdded))
                 .IgnoreActiveSpan()
                 .StartActive(true);
             workScope.Span.SetTag("Guild.Id", args.Guild.Id);
@@ -686,15 +1085,24 @@ public class DiscordService : IDiscordService
             workScope.Span.SetTag("User.Id", args.User.Id);
             workScope.Span.SetTag("message.Id", args.Message.Id);
 
-            using var scope = ServiceProvider.CreateScope();
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_reactionSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordMessageReactionEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnMessageReactionAdded(sender, args);
+                    }
+                });
+            });
 
-            foreach (var eventSubscriber in scope.GetDiscordMessageReactionAddedEventsSubscribers())
-                await eventSubscriber.DiscordOnMessageReactionAdded(sender, args);
+            return Task.CompletedTask;
         };
 
-        Client.MessageReactionRemoved += async (sender, args) =>
+        Client.MessageReactionRemoved += (sender, args) =>
         {
-            using var workScope = Tracer.BuildSpan(nameof(Client.MessageReactionRemoved))
+            using var workScope = _tracer.BuildSpan(nameof(Client.MessageReactionRemoved))
                 .IgnoreActiveSpan()
                 .StartActive(true);
             workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
@@ -702,30 +1110,48 @@ public class DiscordService : IDiscordService
             workScope.Span.SetTag("User.Id", args.User.Id.ToString());
             workScope.Span.SetTag("message.Id", args.Message.Id.ToString());
 
-            using var scope = ServiceProvider.CreateScope();
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_reactionSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordMessageReactionEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnMessageReactionRemoved(sender, args);
+                    }
+                });
+            });
 
-            foreach (var eventSubscriber in scope.GetDiscordMessageReactionAddedEventsSubscribers())
-                await eventSubscriber.DiscordOnMessageReactionRemoved(sender, args);
+            return Task.CompletedTask;
         };
 
-        Client.MessageReactionsCleared += async (sender, args) =>
+        Client.MessageReactionsCleared += (sender, args) =>
         {
-            using var workScope = Tracer.BuildSpan(nameof(Client.MessageReactionsCleared))
+            using var workScope = _tracer.BuildSpan(nameof(Client.MessageReactionsCleared))
                 .IgnoreActiveSpan()
                 .StartActive(true);
             workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
             workScope.Span.SetTag("Channel.Id", args.Channel.Id.ToString());
             workScope.Span.SetTag("message.Id", args.Message.Id.ToString());
 
-            using var scope = ServiceProvider.CreateScope();
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_reactionSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordMessageReactionEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnMessageReactionsCleared(sender, args);
+                    }
+                });
+            });
 
-            foreach (var eventSubscriber in scope.GetDiscordMessageReactionAddedEventsSubscribers())
-                await eventSubscriber.DiscordOnMessageReactionsCleared(sender, args);
+            return Task.CompletedTask;
         };
 
-        Client.MessageReactionRemovedEmoji += async (sender, args) =>
+        Client.MessageReactionRemovedEmoji += (sender, args) =>
         {
-            using var workScope = Tracer.BuildSpan(nameof(Client.MessageReactionRemovedEmoji))
+            using var workScope = _tracer.BuildSpan(nameof(Client.MessageReactionRemovedEmoji))
                 .IgnoreActiveSpan()
                 .StartActive(true);
             workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
@@ -733,117 +1159,189 @@ public class DiscordService : IDiscordService
             workScope.Span.SetTag("message.Id", args.Message.Id.ToString());
             workScope.Span.SetTag("Emoji.Id", args.Emoji.Id.ToString());
 
-            using var scope = ServiceProvider.CreateScope();
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_reactionSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordMessageReactionEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnMessageReactionRemovedEmoji(sender, args);
+                    }
+                });
+            });
 
-            foreach (var eventSubscriber in scope.GetDiscordMessageReactionAddedEventsSubscribers())
-                await eventSubscriber.DiscordOnMessageReactionRemovedEmoji(sender, args);
+            return Task.CompletedTask;
         };
 
         #endregion
 
         #region Presence/User Update
 
-        Client.PresenceUpdated += async (sender, args) =>
+        Client.PresenceUpdated += (sender, args) =>
         {
-            using var workScope = Tracer.BuildSpan(nameof(Client.PresenceUpdated))
+            using var workScope = _tracer.BuildSpan(nameof(Client.PresenceUpdated))
                 .IgnoreActiveSpan()
                 .StartActive(true);
             workScope.Span.SetTag("User.Id", args.User?.Id.ToString());
 
-            using var scope = ServiceProvider.CreateScope();
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_presenceSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordPresenceUserEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnPresenceUpdated(sender, args);
+                    }
+                });
+            });
 
-            foreach (var eventSubscriber in scope.GetDiscordPresenceUserEventsSubscribers())
-                await eventSubscriber.DiscordOnPresenceUpdated(sender, args);
+            return Task.CompletedTask;
         };
 
-        Client.UserSettingsUpdated += async (sender, args) =>
+        Client.UserSettingsUpdated += (sender, args) =>
         {
-            using var workScope = Tracer.BuildSpan(nameof(Client.UserSettingsUpdated))
+            using var workScope = _tracer.BuildSpan(nameof(Client.UserSettingsUpdated))
                 .IgnoreActiveSpan()
                 .StartActive(true);
             workScope.Span.SetTag("User.Id", args.User?.Id.ToString());
 
-            using var scope = ServiceProvider.CreateScope();
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_presenceSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordPresenceUserEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnUserSettingsUpdated(sender, args);
+                    }
+                });
+            });
 
-            foreach (var eventSubscriber in scope.GetDiscordPresenceUserEventsSubscribers())
-                await eventSubscriber.DiscordOnUserSettingsUpdated(sender, args);
+            return Task.CompletedTask;
         };
 
-        Client.UserUpdated += async (sender, args) =>
+        Client.UserUpdated += (sender, args) =>
         {
-            using var workScope = Tracer.BuildSpan(nameof(Client.UserUpdated)).IgnoreActiveSpan().StartActive(true);
+            using var workScope = _tracer.BuildSpan(nameof(Client.UserUpdated)).IgnoreActiveSpan().StartActive(true);
             workScope.Span.SetTag("UserBefore.Id", args.UserBefore?.Id.ToString());
             workScope.Span.SetTag("UserBefore.Id", args.UserBefore?.Id.ToString());
 
-            using var scope = ServiceProvider.CreateScope();
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_presenceSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordPresenceUserEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnUserUpdated(sender, args);
+                    }
+                });
+            });
 
-            foreach (var eventSubscriber in scope.GetDiscordPresenceUserEventsSubscribers())
-                await eventSubscriber.DiscordOnUserUpdated(sender, args);
+            return Task.CompletedTask;
         };
 
         #endregion
 
         #region Voice
 
-        Client.VoiceStateUpdated += async (sender, args) =>
+        Client.VoiceStateUpdated += (sender, args) =>
         {
-            using var workScope = Tracer.BuildSpan(nameof(Client.VoiceStateUpdated))
+            using var workScope = _tracer.BuildSpan(nameof(Client.VoiceStateUpdated))
                 .IgnoreActiveSpan()
                 .StartActive(true);
             workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
             if (args.Channel is not null) workScope.Span.SetTag("Channel.Id", args.Channel.Id.ToString());
             workScope.Span.SetTag("User.Id", args.User.Id.ToString());
 
-            using var scope = ServiceProvider.CreateScope();
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_voiceSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordVoiceEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnVoiceStateUpdated(sender, args);
+                    }
+                });
+            });
 
-            foreach (var eventSubscriber in scope.GetDiscordVoiceEventsSubscribers())
-                await eventSubscriber.DiscordOnVoiceStateUpdated(sender, args);
+            return Task.CompletedTask;
         };
 
-        Client.VoiceServerUpdated += async (sender, args) =>
+        Client.VoiceServerUpdated += (sender, args) =>
         {
-            using var workScope = Tracer.BuildSpan(nameof(Client.VoiceServerUpdated))
+            using var workScope = _tracer.BuildSpan(nameof(Client.VoiceServerUpdated))
                 .IgnoreActiveSpan()
                 .StartActive(true);
             workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
 
-            using var scope = ServiceProvider.CreateScope();
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_voiceSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordVoiceEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnVoiceServerUpdated(sender, args);
+                    }
+                });
+            });
 
-            foreach (var eventSubscriber in scope.GetDiscordVoiceEventsSubscribers())
-                await eventSubscriber.DiscordOnVoiceServerUpdated(sender, args);
+            return Task.CompletedTask;
         };
 
         #endregion
 
         #region Misc
 
-        Client.ComponentInteractionCreated += async (sender, args) =>
+        Client.ComponentInteractionCreated += (sender, args) =>
         {
-            using var workScope = Tracer.BuildSpan(nameof(Client.ComponentInteractionCreated))
+            using var workScope = _tracer.BuildSpan(nameof(Client.ComponentInteractionCreated))
                 .IgnoreActiveSpan()
                 .StartActive(true);
             workScope.Span.SetTag("Guild.Id", args.Guild.Id.ToString());
             workScope.Span.SetTag("Channel.Id", args.Channel.Id.ToString());
             workScope.Span.SetTag("User.Id", args.User.Id.ToString());
 
-            using var scope = ServiceProvider.CreateScope();
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_miscSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordMiscEventsSubscriber) scope.Resolve(sub);
+                        await handler.DiscordOnComponentInteractionCreated(sender, args);
+                    }
+                });
+            });
 
-            foreach (var eventSubscriber in scope.GetDiscordMiscEventsSubscribers())
-                await eventSubscriber.DiscordOnComponentInteractionCreated(sender, args);
+            return Task.CompletedTask;
         };
 
-        Client.ClientErrored += async (sender, args) =>
+        Client.ClientErrored += (sender, args) =>
         {
-            using var workScope = Tracer
+            using var workScope = _tracer
                 .BuildSpan(nameof(Client.ClientErrored))
                 .IgnoreActiveSpan()
                 .StartActive(true);
-            workScope.Span.SetTag("EventName", args.EventName.ToString());
+            workScope.Span.SetTag("ClientErrored", args.EventName.ToString());
 
-            using var scope = ServiceProvider.CreateScope();
+            _asyncExecutor.ExecuteAsync(async () =>
+            {
+                await Parallel.ForEachAsync(_miscSubscribers, async (sub, _) =>
+                {
+                    using var scope = _rootScope.BeginLifetimeScope();
+                    {
+                        var handler = (IDiscordMiscEventsSubscriber)scope.Resolve(sub);
+                        await handler.DiscordOnClientErrored(sender, args);
+                    }
+                });
+            });
 
-            foreach (var eventSubscriber in scope.GetDiscordMiscEventsSubscribers())
-                await eventSubscriber.DiscordOnClientErrored(sender, args);
+            return Task.CompletedTask;
         };
 
         #endregion

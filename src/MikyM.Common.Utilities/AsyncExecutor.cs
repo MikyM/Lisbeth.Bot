@@ -28,6 +28,8 @@ namespace MikyM.Common.Utilities;
 public interface IAsyncExecutor
 {
     public Task ExecuteAsync<T>(Func<T, Task> func);
+    public Task ExecuteAsync<T>(Func<Task<T>> func);
+    public Task ExecuteAsync(Func<Task> func);
 }
 
 public class AsyncExecutor : IAsyncExecutor
@@ -44,11 +46,29 @@ public class AsyncExecutor : IAsyncExecutor
         return Task.Run(async () =>
             {
                 using var scope = _lifetimeScope.BeginLifetimeScope();
-                var service = scope.Resolve<T>();
-                await func(service);
+                {
+                    var service = scope.Resolve<T>();
+                    await func(service);
+                }
             })
             .ContinueWith(
                 x => _lifetimeScope.Resolve<ILogger<T>>().LogError(x.Exception, x.Exception?.ToFormattedString()),
+                TaskContinuationOptions.OnlyOnFaulted);
+    }
+
+    public Task ExecuteAsync<T>(Func<Task<T>> func)
+    {
+        return Task.Run(async () => { await func.Invoke(); })
+            .ContinueWith(
+                x => _lifetimeScope.Resolve<ILogger<T>>().LogError(x.Exception, x.Exception?.ToFormattedString()),
+                TaskContinuationOptions.OnlyOnFaulted);
+    }
+
+    public Task ExecuteAsync(Func<Task> func)
+    {
+        return Task.Run(async () => { await func.Invoke(); })
+            .ContinueWith(
+                x => _lifetimeScope.Resolve<ILoggerFactory>().CreateLogger(func.Target?.GetType().Name ?? "Logger").LogError(x.Exception, x.Exception?.ToFormattedString()),
                 TaskContinuationOptions.OnlyOnFaulted);
     }
 }

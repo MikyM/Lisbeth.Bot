@@ -39,6 +39,7 @@ public static partial class DiscordServiceCollectionExtensions
 
     public static IServiceCollection AddDiscordWebSocketEventSubscriber(this IServiceCollection services, Type t)
     {
+        services.AddScoped(t);
         return services.AddScoped(typeof(IDiscordWebSocketEventsSubscriber), t);
     }
 
@@ -51,6 +52,7 @@ public static partial class DiscordServiceCollectionExtensions
 
     public static IServiceCollection AddDiscordChannelEventsSubscriber(this IServiceCollection services, Type t)
     {
+        services.AddScoped(t);
         return services.AddScoped(typeof(IDiscordChannelEventsSubscriber), t);
     }
 
@@ -63,6 +65,7 @@ public static partial class DiscordServiceCollectionExtensions
 
     public static IServiceCollection AddDiscordGuildEventsSubscriber(this IServiceCollection services, Type t)
     {
+        services.AddScoped(t);
         return services.AddScoped(typeof(IDiscordGuildEventsSubscriber), t);
     }
 
@@ -75,6 +78,7 @@ public static partial class DiscordServiceCollectionExtensions
 
     public static IServiceCollection AddDiscordGuildBanEventsSubscriber(this IServiceCollection services, Type t)
     {
+        services.AddScoped(t);
         return services.AddScoped(typeof(IDiscordGuildBanEventsSubscriber), t);
     }
 
@@ -87,6 +91,7 @@ public static partial class DiscordServiceCollectionExtensions
 
     public static IServiceCollection AddDiscordGuildMemberEventsSubscriber(this IServiceCollection services, Type t)
     {
+        services.AddScoped(t);
         return services.AddScoped(typeof(IDiscordGuildMemberEventsSubscriber), t);
     }
 
@@ -99,6 +104,7 @@ public static partial class DiscordServiceCollectionExtensions
 
     public static IServiceCollection AddDiscordGuildRoleEventsSubscriber(this IServiceCollection services, Type t)
     {
+        services.AddScoped(t);
         return services.AddScoped(typeof(IDiscordGuildRoleEventsSubscriber), t);
     }
 
@@ -111,6 +117,7 @@ public static partial class DiscordServiceCollectionExtensions
 
     public static IServiceCollection AddDiscordInviteEventsSubscriber(this IServiceCollection services, Type t)
     {
+        services.AddScoped(t);
         return services.AddScoped(typeof(IDiscordInviteEventsSubscriber), t);
     }
 
@@ -123,6 +130,7 @@ public static partial class DiscordServiceCollectionExtensions
 
     public static IServiceCollection AddDiscordMessageEventsSubscriber(this IServiceCollection services, Type t)
     {
+        services.AddScoped(t);
         return services.AddScoped(typeof(IDiscordMessageEventsSubscriber), t);
     }
 
@@ -137,6 +145,7 @@ public static partial class DiscordServiceCollectionExtensions
     public static IServiceCollection AddDiscordMessageReactionAddedEventsSubscriber(
         this IServiceCollection services, Type t)
     {
+        services.AddScoped(t);
         return services.AddScoped(typeof(IDiscordMessageReactionEventsSubscriber), t);
     }
 
@@ -150,6 +159,7 @@ public static partial class DiscordServiceCollectionExtensions
     public static IServiceCollection AddDiscordPresenceUserEventsSubscriber(this IServiceCollection services,
         Type t)
     {
+        services.AddScoped(t);
         return services.AddScoped(typeof(IDiscordPresenceUserEventsSubscriber), t);
     }
 
@@ -162,6 +172,7 @@ public static partial class DiscordServiceCollectionExtensions
 
     public static IServiceCollection AddDiscordVoiceEventsSubscriber(this IServiceCollection services, Type t)
     {
+        services.AddScoped(t);
         return services.AddScoped(typeof(IDiscordVoiceEventsSubscriber), t);
     }
 
@@ -174,6 +185,7 @@ public static partial class DiscordServiceCollectionExtensions
 
     public static IServiceCollection AddDiscordMiscEventsSubscriber(this IServiceCollection services, Type t)
     {
+        services.AddScoped(t);
         return services.AddScoped(typeof(IDiscordMiscEventsSubscriber), t);
     }
 }

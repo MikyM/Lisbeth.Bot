@@ -21,132 +21,108 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+using Autofac;
+using MikyM.Discord.Events;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Extensions.DependencyInjection;
-using MikyM.Discord.Events;
 
 namespace MikyM.Discord.Util;
 
-internal static class ServiceScopeExtensions
+internal static class LifetimeScopeExtensions
 {
     public static IList<IDiscordWebSocketEventsSubscriber> GetDiscordWebSocketEventSubscribers(
-        this IServiceScope scope
+        this ILifetimeScope scope
     )
     {
-        return scope.ServiceProvider
-            .GetServices(typeof(IDiscordWebSocketEventsSubscriber))
-            .Cast<IDiscordWebSocketEventsSubscriber>()
+        return scope.Resolve<IEnumerable<IDiscordWebSocketEventsSubscriber>>()
             .ToList();
     }
 
     public static IList<IDiscordChannelEventsSubscriber> GetDiscordChannelEventsSubscribers(
-        this IServiceScope scope
+        this ILifetimeScope scope
     )
     {
-        return scope.ServiceProvider
-            .GetServices(typeof(IDiscordChannelEventsSubscriber))
-            .Cast<IDiscordChannelEventsSubscriber>()
+        return scope.Resolve<IEnumerable< IDiscordChannelEventsSubscriber>>()
             .ToList();
     }
 
     public static IList<IDiscordGuildEventsSubscriber> GetDiscordGuildEventsSubscribers(
-        this IServiceScope scope
+        this ILifetimeScope scope
     )
     {
-        return scope.ServiceProvider
-            .GetServices(typeof(IDiscordGuildEventsSubscriber))
-            .Cast<IDiscordGuildEventsSubscriber>()
+        return scope.Resolve<IEnumerable<IDiscordGuildEventsSubscriber>>()
             .ToList();
     }
 
     public static IList<IDiscordGuildBanEventsSubscriber> GetDiscordGuildBanEventsSubscribers(
-        this IServiceScope scope
+        this ILifetimeScope scope
     )
     {
-        return scope.ServiceProvider
-            .GetServices(typeof(IDiscordGuildBanEventsSubscriber))
-            .Cast<IDiscordGuildBanEventsSubscriber>()
+        return scope.Resolve<IEnumerable<IDiscordGuildBanEventsSubscriber>>()
             .ToList();
     }
 
     public static IList<IDiscordGuildMemberEventsSubscriber> GetDiscordGuildMemberEventsSubscribers(
-        this IServiceScope scope
+        this ILifetimeScope scope
     )
     {
-        return scope.ServiceProvider
-            .GetServices(typeof(IDiscordGuildMemberEventsSubscriber))
-            .Cast<IDiscordGuildMemberEventsSubscriber>()
+        return scope.Resolve<IEnumerable<IDiscordGuildMemberEventsSubscriber>>()
             .ToList();
     }
 
     public static IList<IDiscordGuildRoleEventsSubscriber> GetDiscordGuildRoleEventsSubscribers(
-        this IServiceScope scope
+        this ILifetimeScope scope
     )
     {
-        return scope.ServiceProvider
-            .GetServices(typeof(IDiscordGuildRoleEventsSubscriber))
-            .Cast<IDiscordGuildRoleEventsSubscriber>()
+        return scope.Resolve<IEnumerable<IDiscordGuildRoleEventsSubscriber>>()
             .ToList();
     }
 
     public static IList<IDiscordInviteEventsSubscriber> GetDiscordInviteEventsSubscribers(
-        this IServiceScope scope
+        this ILifetimeScope scope
     )
     {
-        return scope.ServiceProvider
-            .GetServices(typeof(IDiscordInviteEventsSubscriber))
-            .Cast<IDiscordInviteEventsSubscriber>()
+        return scope.Resolve<IEnumerable<IDiscordInviteEventsSubscriber>>()
             .ToList();
     }
 
     public static IList<IDiscordMessageEventsSubscriber> GetDiscordMessageEventsSubscribers(
-        this IServiceScope scope
+        this ILifetimeScope scope
     )
     {
-        return scope.ServiceProvider
-            .GetServices(typeof(IDiscordMessageEventsSubscriber))
-            .Cast<IDiscordMessageEventsSubscriber>()
+        return scope.Resolve<IEnumerable<IDiscordMessageEventsSubscriber>>()
             .ToList();
     }
 
     public static IList<IDiscordMessageReactionEventsSubscriber> GetDiscordMessageReactionAddedEventsSubscribers(
-        this IServiceScope scope
+        this ILifetimeScope scope
     )
     {
-        return scope.ServiceProvider
-            .GetServices(typeof(IDiscordMessageReactionEventsSubscriber))
-            .Cast<IDiscordMessageReactionEventsSubscriber>()
+        return scope.Resolve<IEnumerable<IDiscordMessageReactionEventsSubscriber>>()
             .ToList();
     }
 
     public static IList<IDiscordPresenceUserEventsSubscriber> GetDiscordPresenceUserEventsSubscribers(
-        this IServiceScope scope
+        this ILifetimeScope scope
     )
     {
-        return scope.ServiceProvider
-            .GetServices(typeof(IDiscordPresenceUserEventsSubscriber))
-            .Cast<IDiscordPresenceUserEventsSubscriber>()
+        return scope.Resolve<IEnumerable<IDiscordPresenceUserEventsSubscriber>>()
             .ToList();
     }
 
     public static IList<IDiscordVoiceEventsSubscriber> GetDiscordVoiceEventsSubscribers(
-        this IServiceScope scope
+        this ILifetimeScope scope
     )
     {
-        return scope.ServiceProvider
-            .GetServices(typeof(IDiscordVoiceEventsSubscriber))
-            .Cast<IDiscordVoiceEventsSubscriber>()
+        return scope.Resolve<IEnumerable<IDiscordVoiceEventsSubscriber>>()
             .ToList();
     }
 
     public static IList<IDiscordMiscEventsSubscriber> GetDiscordMiscEventsSubscribers(
-        this IServiceScope scope
+        this ILifetimeScope scope
     )
     {
-        return scope.ServiceProvider
-            .GetServices(typeof(IDiscordMiscEventsSubscriber))
-            .Cast<IDiscordMiscEventsSubscriber>()
+        return scope.Resolve<IEnumerable<IDiscordMiscEventsSubscriber>>()
             .ToList();
     }
 }
