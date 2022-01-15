@@ -33,6 +33,9 @@ using MikyM.Discord.Extensions.BaseExtensions;
 namespace Lisbeth.Bot.Application.Discord.ChatExport;
 
 [UsedImplicitly]
+[Service]
+[RegisterAs(typeof(IDiscordChatExportService))]
+[Lifetime(Lifetime.InstancePerLifetimeScope)]
 public class DiscordChatExportService : IDiscordChatExportService
 {
     private readonly IDiscordService _discord;
