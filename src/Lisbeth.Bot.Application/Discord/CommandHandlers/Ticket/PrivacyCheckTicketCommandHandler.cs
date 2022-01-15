@@ -18,18 +18,14 @@
 using DSharpPlus;
 using Lisbeth.Bot.Application.Discord.Commands.Ticket;
 using MikyM.Common.Application.CommandHandlers;
-using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 
 [UsedImplicitly]
 public class PrivacyCheckTicketCommandHandler : ICommandHandler<PrivacyCheckTicketCommand, bool>
 {
-    private readonly IDiscordService _discord;
-
-    public PrivacyCheckTicketCommandHandler(IDiscordService discord)
+    public PrivacyCheckTicketCommandHandler()
     {
-        _discord = discord;
     }
 
     public async Task<Result<bool>> HandleAsync(PrivacyCheckTicketCommand command)

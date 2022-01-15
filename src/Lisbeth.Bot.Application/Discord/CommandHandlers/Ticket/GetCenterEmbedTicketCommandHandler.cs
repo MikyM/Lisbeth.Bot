@@ -39,7 +39,7 @@ public class GetCenterEmbedTicketCommandHandler : ICommandHandler<GetTicketCente
 
     public async Task<Result<DiscordMessageBuilder>> HandleAsync(GetTicketCenterEmbedCommand command)
     {
-        var res = await _guildDataService.GetSingleBySpecAsync<Guild>(
+        var res = await _guildDataService.GetSingleBySpecAsync(
             new ActiveGuildByDiscordIdWithTicketingSpecifications(command.InteractionContext.Guild.Id));
 
         if (!res.IsDefined(out var guild)) return Result<DiscordMessageBuilder>.FromError(res);

@@ -61,7 +61,7 @@ public class DataAccessOptions
         {
             _builder.RegisterAssemblyTypes(assembly)
                 .Where(x => x.GetInterface(nameof(IInMemoryEvaluator)) is not null)
-                .AsImplementedInterfaces()
+                .As<IInMemoryEvaluator>()
                 .FindConstructorsWith(new AllConstructorsFinder())
                 .SingleInstance();
         }
@@ -75,7 +75,7 @@ public class DataAccessOptions
         {
             _builder.RegisterAssemblyTypes(assembly)
                 .Where(x => x.GetInterface(nameof(IValidator)) is not null)
-                .AsImplementedInterfaces()
+                .As<IValidator>()
                 .FindConstructorsWith(new AllConstructorsFinder())
                 .SingleInstance();
         }
@@ -92,7 +92,7 @@ public class DataAccessOptions
 
             _builder.RegisterAssemblyTypes(assembly)
                 .Where(x => x.GetInterface(nameof(IEvaluator)) is not null)
-                .AsImplementedInterfaces()
+                .As<IEvaluator>()
                 .FindConstructorsWith(new AllConstructorsFinder())
                 .SingleInstance();
         }

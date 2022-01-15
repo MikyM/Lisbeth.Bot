@@ -57,14 +57,13 @@ public class SpecificationEvaluator : ISpecificationEvaluator
     }
 
     public virtual IQueryable<TResult> GetQuery<T, TResult>(IQueryable<T> query,
-        ISpecification<T, TResult> specification, bool useSelector = false) where T : class where TResult : class
+        ISpecification<T, TResult> specification) where T : class where TResult : class
     {
         if (specification is null) throw new ArgumentNullException(nameof(specification), "Specification is required");
-        if (useSelector && specification.Selector is null) throw new SelectorNotFoundException();
 
         query = GetQuery(query, (ISpecification<T>)specification);
 
-        return useSelector
+        return specification.Selector is not null
             ? query.Select(specification.Selector ?? throw new InvalidOperationException())
             : _projectionEvaluator.GetQuery(query, specification);
     }

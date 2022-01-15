@@ -31,19 +31,19 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 [UsedImplicitly]
 public class OpenTicketCommandHandler : ICommandHandler<OpenTicketCommand>
 {
-    private readonly IDiscordService _discord;
+    private readonly IDiscordGuildRequestDataProvider _requestDataProvider;
     private readonly IGuildDataService _guildDataService;
     private readonly ITicketDataService _ticketDataService;
     private readonly ILogger<OpenTicketCommandHandler> _logger;
     private readonly ICommandHandler<GetTicketWelcomeEmbedCommand, DiscordMessageBuilder> _welcomeEmbedCommandHandler;
 
     public OpenTicketCommandHandler(IGuildDataService guildDataService, ITicketDataService ticketDataService,
-        IDiscordService discord, ILogger<OpenTicketCommandHandler> logger,
+        IDiscordGuildRequestDataProvider requestDataProvider, ILogger<OpenTicketCommandHandler> logger,
         ICommandHandler<GetTicketWelcomeEmbedCommand, DiscordMessageBuilder> welcomeEmbedCommandHandler)
     {
         _guildDataService = guildDataService;
         _ticketDataService = ticketDataService;
-        _discord = discord;
+        _requestDataProvider = requestDataProvider;
         _logger = logger;
         _welcomeEmbedCommandHandler = welcomeEmbedCommandHandler;
     }
@@ -53,9 +53,13 @@ public class OpenTicketCommandHandler : ICommandHandler<OpenTicketCommand>
         if (command is null) throw new ArgumentNullException(nameof(command));
 
         // data req
-        DiscordGuild guild = command.Interaction?.Guild ?? await _discord.Client.GetGuildAsync(command.Dto.GuildId);
-        DiscordMember owner = command.Interaction?.User as DiscordMember ??
-                              await guild.GetMemberAsync(command.Dto.RequestedOnBehalfOfId);
+        var initRes = await _requestDataProvider.InitializeAsync(command.Dto, command.Interaction);
+        if (!initRes.IsSuccess)
+            return initRes;
+
+        DiscordGuild guild = _requestDataProvider.DiscordGuild;
+        DiscordMember owner = _requestDataProvider.RequestingMember;
+
 
         if (owner.Guild.Id != guild.Id) return new DiscordNotAuthorizedError(nameof(owner));
 
@@ -105,17 +109,10 @@ public class OpenTicketCommandHandler : ICommandHandler<OpenTicketCommand>
 
         string topic = $"Support ticket opened by user {owner.GetFullUsername()} at {DateTime.UtcNow}";
 
-        DiscordChannel openedCat;
-        try
-        {
-            openedCat = await _discord.Client.GetChannelAsync(guildCfg.TicketingConfig.OpenedCategoryId);
-        }
-        catch (Exception)
-        {
+        var openedCatRes = await _requestDataProvider.GetChannelAsync(guildCfg.TicketingConfig.OpenedCategoryId);
+        if (!openedCatRes.IsDefined(out var openedCat))
             return new DiscordNotFoundError(
-                $"Closed category channel with Id {guildCfg.TicketingConfig.OpenedCategoryId} doesn't exist");
-        }
-
+                $"Opened category channel with Id {guildCfg.TicketingConfig.OpenedCategoryId} doesn't exist");
         try
         {
             DiscordChannel newTicketChannel = await guild.CreateChannelAsync(

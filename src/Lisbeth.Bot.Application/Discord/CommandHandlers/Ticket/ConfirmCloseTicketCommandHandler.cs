@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.ChatExport;
@@ -30,6 +29,7 @@ using Microsoft.Extensions.Logging;
 using MikyM.Common.Application.CommandHandlers;
 using MikyM.Common.Utilities;
 using MikyM.Discord.Extensions.BaseExtensions;
+using System.Collections.Generic;
 using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
@@ -37,21 +37,23 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 [UsedImplicitly]
 public class ConfirmCloseTicketCommandHandler : ICommandHandler<ConfirmCloseTicketCommand>
 {
-    private readonly IDiscordService _discord;
+    private readonly IDiscordGuildRequestDataProvider _requestDataProvider;
     private readonly IGuildDataService _guildDataService;
     private readonly ITicketDataService _ticketDataService;
     private readonly ILogger<ConfirmCloseTicketCommandHandler> _logger;
     private readonly IAsyncExecutor _asyncExecutor;
+    private readonly IDiscordService _discord;
 
-    public ConfirmCloseTicketCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
+    public ConfirmCloseTicketCommandHandler(IDiscordGuildRequestDataProvider guildDataProvider, IGuildDataService guildDataService,
         ITicketDataService ticketDataService, ILogger<ConfirmCloseTicketCommandHandler> logger,
-        IAsyncExecutor asyncExecutor)
+        IAsyncExecutor asyncExecutor, IDiscordService discord)
     {
-        _discord = discord;
+        _requestDataProvider = guildDataProvider;
         _guildDataService = guildDataService;
         _ticketDataService = ticketDataService;
         _logger = logger;
         _asyncExecutor = asyncExecutor;
+        _discord = discord;
     }
 
     public async Task<Result> HandleAsync(ConfirmCloseTicketCommand command)
@@ -59,7 +61,7 @@ public class ConfirmCloseTicketCommandHandler : ICommandHandler<ConfirmCloseTick
         if (command is null) throw new ArgumentNullException(nameof(command));
 
         var guildRes =
-            await _guildDataService.GetSingleBySpecAsync<Guild>(
+            await _guildDataService.GetSingleBySpecAsync(
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(command.Dto.GuildId));
 
         if (!guildRes.IsDefined(out var guildCfg)) return Result.FromError(guildRes);
@@ -77,9 +79,16 @@ public class ConfirmCloseTicketCommandHandler : ICommandHandler<ConfirmCloseTick
                 $"Ticket with Id: {ticket.GuildSpecificId}, TargetUserId: {ticket.UserId}, GuildId: {ticket.GuildId}, ChannelId: {ticket.ChannelId} is already closed.");
 
         // data req
-        DiscordGuild guild = command.Interaction?.Guild ?? await _discord.Client.GetGuildAsync(command.Dto.GuildId);
-        DiscordMember requestingMember = command.Interaction?.User as DiscordMember ?? await guild.GetMemberAsync(command.Dto.RequestedOnBehalfOfId);
-        DiscordChannel target = command.Interaction?.Channel ?? guild.GetChannel(ticket.ChannelId);
+        var initRes = await _requestDataProvider.InitializeAsync(command.Dto, command.Interaction);
+        if (!initRes.IsSuccess)
+            return initRes;
+
+        DiscordGuild guild = _requestDataProvider.DiscordGuild;
+        DiscordMember requestingMember = _requestDataProvider.RequestingMember;
+
+        var channelRes = await _requestDataProvider.GetChannelAsync(ticket.ChannelId);
+        if (!channelRes.IsDefined(out var target))
+            return Result.FromError(channelRes);
 
         if (ticket.UserId != requestingMember.Id &&
             !requestingMember.Permissions.HasPermission(Permissions.BanMembers))
@@ -175,16 +184,11 @@ public class ConfirmCloseTicketCommandHandler : ICommandHandler<ConfirmCloseTick
         await target.ModifyAsync(x =>
             x.Name = $"{guildCfg.TicketingConfig.ClosedNamePrefix}-{ticket.GuildSpecificId:D4}");
 
-        DiscordChannel closedCat;
-        try
-        {
-            closedCat = await _discord.Client.GetChannelAsync(guildCfg.TicketingConfig.ClosedCategoryId);
-        }
-        catch (Exception ex)
-        {
-            throw new DiscordNotFoundException(
-                $"Closed category channel with Id {guildCfg.TicketingConfig.ClosedCategoryId} doesn't exist", ex);
-        }
+
+        var closedCatRes = await _requestDataProvider.GetChannelAsync(guildCfg.TicketingConfig.ClosedCategoryId);
+        if (!closedCatRes.IsDefined(out var closedCat))
+            return new DiscordNotFoundError(
+                $"Closed category channel with Id {guildCfg.TicketingConfig.ClosedCategoryId} doesn't exist");
 
         await target.ModifyAsync(x => x.Parent = closedCat);
 

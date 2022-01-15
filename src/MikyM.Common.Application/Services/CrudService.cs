@@ -43,7 +43,7 @@ public class CrudService<TEntity, TContext> : ReadOnlyDataService<TEntity, TCont
             UnitOfWork.GetRepository<IRepository<TEntity>>().Add(entity);
         }
 
-        if (shouldSave) return 0;
+        if (!shouldSave) return 0;
         await CommitAsync(userId);
         return Result<long>.FromSuccess(entity.Id);
     }
@@ -66,7 +66,7 @@ public class CrudService<TEntity, TContext> : ReadOnlyDataService<TEntity, TCont
             UnitOfWork.GetRepository<IRepository<TEntity>>().AddRange(entities);
         }
 
-        if (shouldSave) return new List<long>();
+        if (!shouldSave) return new List<long>();
         await CommitAsync(userId);
         return Result<IEnumerable<long>>.FromSuccess(entities.Select(e => e.Id).ToList());
     }
@@ -120,7 +120,7 @@ public class CrudService<TEntity, TContext> : ReadOnlyDataService<TEntity, TCont
                 break;
         }
 
-        if (shouldSave) await CommitAsync(userId);
+        if (!shouldSave) await CommitAsync(userId);
 
         return Result.FromSuccess();
     }
@@ -129,7 +129,7 @@ public class CrudService<TEntity, TContext> : ReadOnlyDataService<TEntity, TCont
     {
         UnitOfWork.GetRepository<IRepository<TEntity>>().Delete(id);
 
-        if (shouldSave) await CommitAsync(userId);
+        if (!shouldSave) await CommitAsync(userId);
 
         return Result.FromSuccess();
     }
@@ -140,7 +140,7 @@ public class CrudService<TEntity, TContext> : ReadOnlyDataService<TEntity, TCont
 
         UnitOfWork.GetRepository<IRepository<TEntity>>().DeleteRange(ids);
 
-        if (shouldSave) await CommitAsync(userId);
+        if (!shouldSave) await CommitAsync(userId);
 
         return Result.FromSuccess();
     }
@@ -161,7 +161,7 @@ public class CrudService<TEntity, TContext> : ReadOnlyDataService<TEntity, TCont
                 break;
         }
 
-        if (shouldSave) await CommitAsync(userId);
+        if (!shouldSave) await CommitAsync(userId);
 
         return Result.FromSuccess();
     }
@@ -171,7 +171,7 @@ public class CrudService<TEntity, TContext> : ReadOnlyDataService<TEntity, TCont
         await UnitOfWork.GetRepository<IRepository<TEntity>>()
             .DisableAsync(id);
 
-        if (shouldSave) await CommitAsync(userId);
+        if (!shouldSave) await CommitAsync(userId);
 
         return Result.FromSuccess();
     }
@@ -190,7 +190,7 @@ public class CrudService<TEntity, TContext> : ReadOnlyDataService<TEntity, TCont
                 break;
         }
 
-        if (shouldSave) await CommitAsync(userId);
+        if (!shouldSave) await CommitAsync(userId);
 
         return Result.FromSuccess();
     }
@@ -202,7 +202,7 @@ public class CrudService<TEntity, TContext> : ReadOnlyDataService<TEntity, TCont
         await UnitOfWork.GetRepository<IRepository<TEntity>>()
             .DisableRangeAsync(ids);
 
-        if (shouldSave) await CommitAsync(userId);
+        if (!shouldSave) await CommitAsync(userId);
 
         return Result.FromSuccess();
     }
@@ -223,7 +223,7 @@ public class CrudService<TEntity, TContext> : ReadOnlyDataService<TEntity, TCont
                 break;
         }
 
-        if (shouldSave) await CommitAsync(userId);
+        if (!shouldSave) await CommitAsync(userId);
 
         return Result.FromSuccess();
     }

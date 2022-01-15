@@ -23,22 +23,21 @@ using Lisbeth.Bot.DataAccessLayer.Specifications.Ticket;
 using Microsoft.Extensions.Logging;
 using MikyM.Common.Application.CommandHandlers;
 using MikyM.Discord.Extensions.BaseExtensions;
-using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 
 [UsedImplicitly]
 public class ReopenTicketCommandHandler : ICommandHandler<ReopenTicketCommand, DiscordMessageBuilder>
 {
-    private readonly IDiscordService _discord;
+    private readonly IDiscordGuildRequestDataProvider _requestDataProvider;
     private readonly IGuildDataService _guildDataService;
     private readonly ITicketDataService _ticketDataService;
     private readonly ILogger<ConfirmCloseTicketCommandHandler> _logger;
 
-    public ReopenTicketCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
+    public ReopenTicketCommandHandler(IDiscordGuildRequestDataProvider requestDataProvider, IGuildDataService guildDataService,
         ITicketDataService ticketDataService, ILogger<ConfirmCloseTicketCommandHandler> logger)
     {
-        _discord = discord;
+        _requestDataProvider = requestDataProvider;
         _guildDataService = guildDataService;
         _ticketDataService = ticketDataService;
         _logger = logger;
@@ -49,7 +48,7 @@ public class ReopenTicketCommandHandler : ICommandHandler<ReopenTicketCommand, D
         if (command is null) throw new ArgumentNullException(nameof(command));
 
         var guildRes =
-            await _guildDataService.GetSingleBySpecAsync<Guild>(
+            await _guildDataService.GetSingleBySpecAsync(
                 new ActiveGuildByDiscordIdWithTicketingSpecifications(command.Dto.GuildId));
 
         if (!guildRes.IsDefined(out var guildCfg)) return Result<DiscordMessageBuilder>.FromError(guildRes);
@@ -67,10 +66,16 @@ public class ReopenTicketCommandHandler : ICommandHandler<ReopenTicketCommand, D
                 $"Ticket with Id: {ticket.GuildSpecificId}, TargetUserId: {ticket.UserId}, GuildId: {ticket.GuildId}, ChannelId: {ticket.ChannelId} is not closed.");
 
         // data req
-        DiscordGuild guild = command.Interaction?.Guild ?? await _discord.Client.GetGuildAsync(command.Dto.GuildId);
-        DiscordMember requestingMember = command.Interaction?.User as DiscordMember ?? await guild.GetMemberAsync(command.Dto.RequestedOnBehalfOfId);
-        DiscordChannel target = command.Interaction?.Channel ?? guild.GetChannel(ticket.ChannelId);
+        var initRes = await _requestDataProvider.InitializeAsync(command.Dto, command.Interaction);
+        if (!initRes.IsSuccess)
+            return Result<DiscordMessageBuilder>.FromError(initRes);
 
+        DiscordGuild guild = _requestDataProvider.DiscordGuild;
+        DiscordMember requestingMember = _requestDataProvider.RequestingMember;
+
+        var channelRes = await _requestDataProvider.GetChannelAsync(ticket.ChannelId);
+        if (!channelRes.IsDefined(out var target))
+            return Result<DiscordMessageBuilder>.FromError(channelRes);
 
         if (!requestingMember.IsModerator())
             return new DiscordNotAuthorizedError("Requesting member doesn't have moderator rights.");
@@ -113,16 +118,10 @@ public class ReopenTicketCommandHandler : ICommandHandler<ReopenTicketCommand, D
         await target.ModifyAsync(x =>
             x.Name = $"{guildCfg.TicketingConfig.OpenedNamePrefix}-{ticket.GuildSpecificId:D4}");
 
-        DiscordChannel openedCat;
-        try
-        {
-            openedCat = await _discord.Client.GetChannelAsync(guildCfg.TicketingConfig.OpenedCategoryId);
-        }
-        catch (Exception)
-        {
+        var openedCatRes = await _requestDataProvider.GetChannelAsync(guildCfg.TicketingConfig.OpenedCategoryId);
+        if (!openedCatRes.IsDefined(out var openedCat))
             return new DiscordNotFoundError(
-                $"Closed category channel with Id {guildCfg.TicketingConfig.OpenedCategoryId} doesn't exist");
-        }
+                $"Opened category channel with Id {guildCfg.TicketingConfig.OpenedCategoryId} doesn't exist");
 
         await target.ModifyAsync(x => x.Parent = openedCat);
 

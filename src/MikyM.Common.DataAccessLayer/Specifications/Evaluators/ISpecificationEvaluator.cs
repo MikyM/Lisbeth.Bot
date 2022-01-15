@@ -31,8 +31,7 @@ public interface ISpecificationEvaluator
     /// <param name="inputQuery">The sequence of <typeparamref name="T" /></param>
     /// <param name="specification">The encapsulated query logic.</param>
     /// <returns>A filtered sequence of <typeparamref name="TResult" /></returns>
-    IQueryable<TResult> GetQuery<T, TResult>(IQueryable<T> inputQuery, ISpecification<T, TResult> specification,
-        bool useSelector = false) where T : class where TResult : class;
+    IQueryable<TResult> GetQuery<T, TResult>(IQueryable<T> inputQuery, ISpecification<T, TResult> specification) where T : class where TResult : class;
 
     /// <summary>
     ///     Applies the logic encapsulated by <paramref name="specification" /> to given <paramref name="inputQuery" />.

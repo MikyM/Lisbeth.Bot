@@ -48,7 +48,7 @@ public static class DependancyInjectionExtensions
         {
             builder.RegisterAssemblyTypes(assembly)
                 .Where(x => x.GetInterface(nameof(IEvaluator)) is not null && x != typeof(IncludeEvaluator))
-                .AsImplementedInterfaces()
+                .As<IEvaluator>()
                 .FindConstructorsWith(ctorFinder)
                 .SingleInstance();
         }
