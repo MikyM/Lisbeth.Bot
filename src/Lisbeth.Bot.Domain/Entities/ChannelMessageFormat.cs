@@ -65,11 +65,6 @@ public class ChannelMessageFormat : SnowflakeDiscordEntity
                         return false;
 
                 if (part.text.Contains(formatPart) && !part.text.StartsWith(formatPart)) return false;
-
-                if (part.text.Contains(formatPart) && part.text.Replace(formatPart, "")
-                        .Split(" ", StringSplitOptions.RemoveEmptyEntries)
-                        .Length < 2)
-                    return false;
             }
         }
 
