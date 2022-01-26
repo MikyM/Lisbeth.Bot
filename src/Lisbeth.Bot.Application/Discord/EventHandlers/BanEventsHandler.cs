@@ -26,21 +26,19 @@ namespace Lisbeth.Bot.Application.Discord.EventHandlers;
 [UsedImplicitly]
 public class BanEventsHandler : BaseEventHandler, IDiscordGuildBanEventsSubscriber
 {
-    public BanEventsHandler(IAsyncExecutor asyncExecutor) : base(asyncExecutor)
+    private readonly IBanCheckService _banCheckService;
+    public BanEventsHandler(IBanCheckService banCheckService, IAsyncExecutor asyncExecutor) : base(asyncExecutor)
     {
+        _banCheckService = banCheckService;
     }
 
-    public Task DiscordOnGuildBanAdded(DiscordClient sender, GuildBanAddEventArgs args)
+    public async Task DiscordOnGuildBanAdded(DiscordClient sender, GuildBanAddEventArgs args)
     {
-        _ = AsyncExecutor.ExecuteAsync<IBanCheckService>(x =>
-            x.CheckForNonBotBanAsync(args.Member.Id, args.Guild.Id, sender.CurrentUser.Id));
-        return Task.CompletedTask;
+        await _banCheckService.CheckForNonBotBanAsync(args.Member.Id, args.Guild.Id, sender.CurrentUser.Id);
     }
 
-    public Task DiscordOnGuildBanRemoved(DiscordClient sender, GuildBanRemoveEventArgs args)
+    public async Task DiscordOnGuildBanRemoved(DiscordClient sender, GuildBanRemoveEventArgs args)
     {
-        _ = AsyncExecutor.ExecuteAsync<IBanCheckService>(x =>
-            x.CheckForNonBotUnbanAsync(args.Member.Id, args.Guild.Id, sender.CurrentUser.Id));
-        return Task.CompletedTask;
+        await _banCheckService.CheckForNonBotUnbanAsync(args.Member.Id, args.Guild.Id, sender.CurrentUser.Id);
     }
 }

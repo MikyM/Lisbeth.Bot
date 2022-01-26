@@ -34,7 +34,7 @@ public class SlashCommandEventsHandler : IDiscordSlashCommandsEventsSubscriber
         _logger = logger;
     }
 
-    public Task SlashCommandsOnContextMenuErrored(SlashCommandsExtension sender, ContextMenuErrorEventArgs args)
+    public async Task SlashCommandsOnContextMenuErrored(SlashCommandsExtension sender, ContextMenuErrorEventArgs args)
     {
         _logger.LogError(args.Exception, args.Exception.GetFullMessage());
         var noEntryEmoji = DiscordEmoji.FromName(sender.Client, ":x:");
@@ -43,8 +43,7 @@ public class SlashCommandEventsHandler : IDiscordSlashCommandsEventsSubscriber
         embed.WithAuthor($"{noEntryEmoji} Context menu errored");
         embed.AddField("Type", args.Exception.GetType().ToString());
         embed.AddField("Message", args.Exception.GetFullMessage());
-        args.Context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
-        return Task.CompletedTask;
+        await args.Context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
     }
 
     public Task SlashCommandsOnContextMenuExecuted(SlashCommandsExtension sender, ContextMenuExecutedEventArgs args)
@@ -52,7 +51,7 @@ public class SlashCommandEventsHandler : IDiscordSlashCommandsEventsSubscriber
         return Task.CompletedTask;
     }
 
-    public Task SlashCommandsOnSlashCommandErrored(SlashCommandsExtension sender, SlashCommandErrorEventArgs args)
+    public async Task SlashCommandsOnSlashCommandErrored(SlashCommandsExtension sender, SlashCommandErrorEventArgs args)
     {
         _logger.LogError(args.Exception, args.Exception.GetFullMessage());
         var noEntryEmoji = DiscordEmoji.FromName(sender.Client, ":x:");
@@ -61,8 +60,7 @@ public class SlashCommandEventsHandler : IDiscordSlashCommandsEventsSubscriber
         embed.WithAuthor($"{noEntryEmoji} Command errored");
         embed.AddField("Type", args.Exception.GetType().ToString());
         embed.AddField("Message", args.Exception.GetFullMessage());
-        args.Context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
-        return Task.CompletedTask;
+        await args.Context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
     }
 
     public Task SlashCommandsOnSlashCommandExecuted(SlashCommandsExtension sender,

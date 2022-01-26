@@ -19,6 +19,13 @@ using DSharpPlus.SlashCommands;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 
+public enum PhishingActionType
+{
+    [ChoiceName("mute")] Mute,
+    [ChoiceName("kick")] Kick,
+    [ChoiceName("ban")] Ban,
+    [ChoiceName("disable")] Disable
+}
 public enum BanActionType
 {
     [ChoiceName("ban")] Ban,

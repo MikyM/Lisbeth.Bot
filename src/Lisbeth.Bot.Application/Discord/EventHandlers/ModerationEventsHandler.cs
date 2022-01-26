@@ -26,20 +26,24 @@ namespace Lisbeth.Bot.Application.Discord.EventHandlers;
 [UsedImplicitly]
 public class ModerationEventsHandler : BaseEventHandler, IDiscordMessageEventsSubscriber, IDiscordGuildMemberEventsSubscriber
 {
-    public ModerationEventsHandler(IAsyncExecutor asyncExecutor) : base(asyncExecutor)
+    private readonly IDiscordMemberService _discordMemberService;
+    private readonly IDiscordMessageService _discordMessageService;
+
+    public ModerationEventsHandler(IAsyncExecutor asyncExecutor, IDiscordMemberService discordMemberService,
+        IDiscordMessageService discordMessageService) : base(asyncExecutor)
     {
+        _discordMemberService = discordMemberService;
+        _discordMessageService = discordMessageService;
     }
 
-    public Task DiscordOnGuildMemberAdded(DiscordClient sender, GuildMemberAddEventArgs args)
+    public async Task DiscordOnGuildMemberAdded(DiscordClient sender, GuildMemberAddEventArgs args)
     {
-        _ = AsyncExecutor.ExecuteAsync<IDiscordMemberService>(async x => await x.SendWelcomeMessageAsync(args));
-        return Task.CompletedTask;
+        await _discordMemberService.SendWelcomeMessageAsync(args);
     }
 
-    public Task DiscordOnGuildMemberRemoved(DiscordClient sender, GuildMemberRemoveEventArgs args)
+    public async Task DiscordOnGuildMemberRemoved(DiscordClient sender, GuildMemberRemoveEventArgs args)
     {
-        _ = AsyncExecutor.ExecuteAsync<IDiscordMemberService>(async x => await x.LogMemberRemovedEventAsync(args));
-        return Task.CompletedTask;
+        await _discordMemberService.LogMemberRemovedEventAsync(args);
     }
 
     public Task DiscordOnGuildMemberUpdated(DiscordClient sender, GuildMemberUpdateEventArgs args)
@@ -62,24 +66,18 @@ public class ModerationEventsHandler : BaseEventHandler, IDiscordMessageEventsSu
         return Task.CompletedTask;
     }
 
-    public Task DiscordOnMessageUpdated(DiscordClient sender, MessageUpdateEventArgs args)
+    public async Task DiscordOnMessageUpdated(DiscordClient sender, MessageUpdateEventArgs args)
     {
-        _ = AsyncExecutor.ExecuteAsync<IDiscordMessageService>(
-            async x => await x.LogMessageUpdatedEventAsync(args));
-        return Task.CompletedTask;
+        await _discordMessageService.LogMessageUpdatedEventAsync(args);
     }
 
-    public Task DiscordOnMessageDeleted(DiscordClient sender, MessageDeleteEventArgs args)
+    public async Task DiscordOnMessageDeleted(DiscordClient sender, MessageDeleteEventArgs args)
     {
-        _ = AsyncExecutor.ExecuteAsync<IDiscordMessageService>(
-            async x => await x.LogMessageDeletedEventAsync(args));
-        return Task.CompletedTask;
+        await _discordMessageService.LogMessageDeletedEventAsync(args);
     }
 
-    public Task DiscordOnMessagesBulkDeleted(DiscordClient sender, MessageBulkDeleteEventArgs args)
+    public async Task DiscordOnMessagesBulkDeleted(DiscordClient sender, MessageBulkDeleteEventArgs args)
     {
-        _ = AsyncExecutor.ExecuteAsync<IDiscordMessageService>(async x =>
-            await x.LogMessageBulkDeletedEventAsync(args));
-        return Task.CompletedTask;
+        await _discordMessageService.LogMessageBulkDeletedEventAsync(args);
     }
 }

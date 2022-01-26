@@ -29,16 +29,17 @@ namespace Lisbeth.Bot.Application.Discord.EventHandlers;
 [UsedImplicitly]
 public class MuteEventHandlers : BaseEventHandler, IDiscordGuildMemberEventsSubscriber
 {
-    public MuteEventHandlers(IAsyncExecutor asyncExecutor) : base(asyncExecutor)
+    private readonly ICommandHandlerFactory _commandHandlerFactory;
+
+    public MuteEventHandlers(ICommandHandlerFactory commandHandlerFactory, IAsyncExecutor asyncExecutor) : base(asyncExecutor)
     {
+        _commandHandlerFactory = commandHandlerFactory;
     }
 
-    public Task DiscordOnGuildMemberAdded(DiscordClient sender, GuildMemberAddEventArgs args)
+    public async Task DiscordOnGuildMemberAdded(DiscordClient sender, GuildMemberAddEventArgs args)
     {
-        _ = AsyncExecutor.ExecuteAsync<ICommandHandler<CheckMuteStateForNewUserCommand>>(x =>
-            x.HandleAsync(new CheckMuteStateForNewUserCommand(args.Member)));
-
-        return Task.CompletedTask;
+        await _commandHandlerFactory.GetHandler<ICommandHandler<CheckMuteStateForNewUserCommand>>()
+            .HandleAsync(new CheckMuteStateForNewUserCommand(args.Member));
     }
 
     public Task DiscordOnGuildMemberRemoved(DiscordClient sender, GuildMemberRemoveEventArgs args)
@@ -46,20 +47,18 @@ public class MuteEventHandlers : BaseEventHandler, IDiscordGuildMemberEventsSubs
         return Task.CompletedTask;
     }
 
-    public Task DiscordOnGuildMemberUpdated(DiscordClient sender, GuildMemberUpdateEventArgs args)
+    public async Task DiscordOnGuildMemberUpdated(DiscordClient sender, GuildMemberUpdateEventArgs args)
     {
-        _ = AsyncExecutor.ExecuteAsync<ICommandHandler<CheckNonBotMuteActionCommand>>(x =>
-            x.HandleAsync(new CheckNonBotMuteActionCommand(args.Member, args.RolesBefore, args.RolesAfter)));
+        await _commandHandlerFactory.GetHandler<ICommandHandler<CheckNonBotMuteActionCommand>>()
+            .HandleAsync(new CheckNonBotMuteActionCommand(args.Member, args.RolesBefore, args.RolesAfter));
 
         if (!args.CommunicationDisabledUntilAfter.HasValue && !args.CommunicationDisabledUntilBefore.HasValue ||
             args.CommunicationDisabledUntilAfter.HasValue && args.CommunicationDisabledUntilBefore.HasValue)
-            return Task.CompletedTask;
+            return;
 
-        _ = AsyncExecutor.ExecuteAsync<ICommandHandler<LogTimeoutCommand>>(x =>
-            x.HandleAsync(new LogTimeoutCommand(args.Member, args.CommunicationDisabledUntilBefore,
-                args.CommunicationDisabledUntilAfter)));
-
-        return Task.CompletedTask;
+        await _commandHandlerFactory.GetHandler<ICommandHandler<LogTimeoutCommand>>()
+            .HandleAsync(new LogTimeoutCommand(args.Member, args.CommunicationDisabledUntilBefore,
+                args.CommunicationDisabledUntilAfter));
     }
 
     public Task DiscordOnGuildMembersChunked(DiscordClient sender, GuildMembersChunkEventArgs args)

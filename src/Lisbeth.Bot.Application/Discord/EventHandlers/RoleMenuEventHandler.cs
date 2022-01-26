@@ -29,7 +29,12 @@ namespace Lisbeth.Bot.Application.Discord.EventHandlers;
 [UsedImplicitly]
 public class RoleMenuEventHandler : BaseEventHandler, IDiscordMiscEventsSubscriber
 {
-    public RoleMenuEventHandler(IAsyncExecutor asyncExecutor) : base(asyncExecutor){}
+    private readonly ICommandHandlerFactory _commandHandlerFactory;
+
+    public RoleMenuEventHandler(IAsyncExecutor asyncExecutor, ICommandHandlerFactory commandHandlerFactory) : base(asyncExecutor)
+    {
+        _commandHandlerFactory = commandHandlerFactory;
+    }
 
     public async Task DiscordOnComponentInteractionCreated(DiscordClient sender,
         ComponentInteractionCreateEventArgs args)
@@ -45,15 +50,15 @@ public class RoleMenuEventHandler : BaseEventHandler, IDiscordMiscEventsSubscrib
         if (args.Id.StartsWith("role_menu_button"))
         {
             await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
-            _ = AsyncExecutor.ExecuteAsync<ICommandHandler<RoleMenuButtonPressedCommand>>(async x =>
-                await x.HandleAsync(new RoleMenuButtonPressedCommand(args)));
+            await _commandHandlerFactory.GetHandler<ICommandHandler<RoleMenuButtonPressedCommand>>()
+                .HandleAsync(new RoleMenuButtonPressedCommand(args));
         }
 
         if (args.Id.StartsWith("role_menu_") && !args.Id.Contains("button"))
         {
             await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
-            _ = AsyncExecutor.ExecuteAsync<ICommandHandler<RoleMenuOptionSelectedCommand>>(async x =>
-                await x.HandleAsync(new RoleMenuOptionSelectedCommand(args)));
+            await _commandHandlerFactory.GetHandler<ICommandHandler<RoleMenuOptionSelectedCommand>>()
+                .HandleAsync(new RoleMenuOptionSelectedCommand(args));
         }
     }
 

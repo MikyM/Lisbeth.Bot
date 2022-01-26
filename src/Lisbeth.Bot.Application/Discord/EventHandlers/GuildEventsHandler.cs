@@ -29,17 +29,19 @@ namespace Lisbeth.Bot.Application.Discord.EventHandlers;
 public class GuildEventsHandler : BaseEventHandler, IDiscordGuildEventsSubscriber
 {
     private readonly ITicketQueueService _ticketQueueService;
+    private readonly IDiscordGuildService _discordGuildService;
 
-    public GuildEventsHandler(IAsyncExecutor asyncExecutor, ITicketQueueService ticketQueueService) : base(asyncExecutor)
+    public GuildEventsHandler(IAsyncExecutor asyncExecutor, ITicketQueueService ticketQueueService,
+        IDiscordGuildService discordGuildService) : base(asyncExecutor)
     {
         _ticketQueueService = ticketQueueService;
+        _discordGuildService = discordGuildService;
     }
 
-    public Task DiscordOnGuildCreated(DiscordClient sender, GuildCreateEventArgs args)
+    public async Task DiscordOnGuildCreated(DiscordClient sender, GuildCreateEventArgs args)
     {
-        _ = AsyncExecutor.ExecuteAsync<IDiscordGuildService>(async x => await x.HandleGuildCreateAsync(args));
+        await _discordGuildService.HandleGuildCreateAsync(args);
         _ticketQueueService.AddGuildQueue(args.Guild.Id);
-        return Task.CompletedTask;
     }
 
     public Task DiscordOnGuildAvailable(DiscordClient sender, GuildCreateEventArgs args)
@@ -52,11 +54,10 @@ public class GuildEventsHandler : BaseEventHandler, IDiscordGuildEventsSubscribe
         return Task.CompletedTask;
     }
 
-    public Task DiscordOnGuildDeleted(DiscordClient sender, GuildDeleteEventArgs args)
+    public async Task DiscordOnGuildDeleted(DiscordClient sender, GuildDeleteEventArgs args)
     {
-        _ = AsyncExecutor.ExecuteAsync<IDiscordGuildService>(async x => await x.HandleGuildDeleteAsync(args));
+        await _discordGuildService.HandleGuildDeleteAsync(args);
         _ticketQueueService.RemoveGuildQueue(args.Guild.Id);
-        return Task.CompletedTask;
     }
 
     public Task DiscordOnGuildUnavailable(DiscordClient sender, GuildDeleteEventArgs args)
@@ -64,14 +65,10 @@ public class GuildEventsHandler : BaseEventHandler, IDiscordGuildEventsSubscribe
         return Task.CompletedTask;
     }
 
-    public Task DiscordOnGuildDownloadCompleted(DiscordClient sender, GuildDownloadCompletedEventArgs args)
+    public async Task DiscordOnGuildDownloadCompleted(DiscordClient sender, GuildDownloadCompletedEventArgs args)
     {
-        _ = AsyncExecutor.ExecuteAsync<IDiscordGuildService>(async x =>
-            await x.PrepareSlashPermissionsAsync(args.Guilds.Values));
-        _ = AsyncExecutor.ExecuteAsync<IDiscordGuildService>(async x =>
-            await x.PrepareBot(args.Guilds.Keys));
-
-        return Task.CompletedTask;
+        await _discordGuildService.PrepareSlashPermissionsAsync(args.Guilds.Values);
+        await _discordGuildService.PrepareBot(args.Guilds.Keys);
     }
 
     public Task DiscordOnGuildEmojisUpdated(DiscordClient sender, GuildEmojisUpdateEventArgs args)

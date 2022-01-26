@@ -33,6 +33,7 @@ using MikyM.Discord.Enums;
 using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.Interfaces;
 using System.Collections.Generic;
+using Lisbeth.Bot.Domain.DTOs.Request.Guild;
 
 namespace Lisbeth.Bot.Application.Discord.Services;
 
@@ -317,6 +318,19 @@ public class DiscordGuildService : IDiscordGuildService
 
         foreach (var key in guildIds)
             _ticketQueueService.AddGuildQueue(key);
+
+        return Result.FromSuccess();
+    }
+
+    public async Task<Result> SetPhishingDetectionAsync(SetPhishingReqDto req)
+    {
+        var res =  await _guildDataService.GetSingleBySpecAsync(new ActiveGuildByIdSpec(req.GuildId));
+        if (!res.IsDefined(out var cfg))
+            return Result.FromError(res);
+
+        _guildDataService.BeginUpdate(cfg);
+        cfg.PhishingDetection = req.PhishingDetection;
+        await _guildDataService.CommitAsync(req.RequestedOnBehalfOfId.ToString());
 
         return Result.FromSuccess();
     }

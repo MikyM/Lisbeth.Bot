@@ -1,5 +1,6 @@
 ﻿// This file is part of Lisbeth.Bot project
 //
+// Copyright (C) 2021 VTPDevelopment - @VelvetThePanda
 // Copyright (C) 2021 Krzysztof Kupisz - MikyM
 // 
 // This program is free software: you can redistribute it and/or modify
@@ -17,36 +18,25 @@
 
 using DSharpPlus;
 using DSharpPlus.EventArgs;
-using Lisbeth.Bot.Application.Discord.Commands.ChannelMessageFormat;
 using Lisbeth.Bot.Application.Discord.EventHandlers.Base;
-using Lisbeth.Bot.Domain.DTOs.Request.ChannelMessageFormat;
-using MikyM.Common.Application.CommandHandlers;
 using MikyM.Common.Utilities;
 using MikyM.Discord.Events;
-using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.EventHandlers;
 
 [UsedImplicitly]
-public class ChannelMessageFormatEventHandler : BaseEventHandler, IDiscordMessageEventsSubscriber
+public class PhishingEventHandler : BaseEventHandler, IDiscordMessageEventsSubscriber
 {
-    private readonly IDiscordService _discord;
-    private readonly ICommandHandler<VerifyMessageFormatCommand, VerifyMessageFormatResDto> _commandHandler;
+    private readonly IDiscordPhishingDetectionService _phishingDetection;
 
-    public ChannelMessageFormatEventHandler(IAsyncExecutor asyncExecutor, IDiscordService discord, ICommandHandler<VerifyMessageFormatCommand, VerifyMessageFormatResDto> commandHandler) : base(asyncExecutor)
+    public PhishingEventHandler(IDiscordPhishingDetectionService phishingDetection, IAsyncExecutor asyncExecutor) : base(asyncExecutor)
     {
-        _discord = discord;
-        _commandHandler = commandHandler;
+        _phishingDetection = phishingDetection;
     }
 
     public async Task DiscordOnMessageCreated(DiscordClient sender, MessageCreateEventArgs args)
     {
-        if (args.Channel is null || args.Guild is null)
-            return;
-
-        await _commandHandler.HandleAsync(new VerifyMessageFormatCommand(
-                new VerifyMessageFormatReqDto(args.Channel.Id, args.Message.Id, args.Guild.Id,
-                    _discord.Client.CurrentUser.Id), args));
+        await _phishingDetection.DetectPhishingAsync(args.Message);
     }
 
     public Task DiscordOnMessageAcknowledged(DiscordClient sender, MessageAcknowledgeEventArgs args)
@@ -54,9 +44,9 @@ public class ChannelMessageFormatEventHandler : BaseEventHandler, IDiscordMessag
         return Task.CompletedTask;
     }
 
-    public Task DiscordOnMessageUpdated(DiscordClient sender, MessageUpdateEventArgs args)
+    public async Task DiscordOnMessageUpdated(DiscordClient sender, MessageUpdateEventArgs args)
     {
-        return Task.CompletedTask;
+        await _phishingDetection.DetectPhishingAsync(args.Message);
     }
 
     public Task DiscordOnMessageDeleted(DiscordClient sender, MessageDeleteEventArgs args)

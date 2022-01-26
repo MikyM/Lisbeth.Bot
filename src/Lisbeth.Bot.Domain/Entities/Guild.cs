@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using Lisbeth.Bot.Domain.Enums;
 
 // ReSharper disable CollectionNeverUpdated.Local
 // ReSharper disable InconsistentNaming
@@ -57,6 +58,7 @@ public sealed class Guild : SnowflakeEntity
     public TicketingConfig? TicketingConfig { get; private set; }
     public ModerationConfig? ModerationConfig { get; private set; }
     public string EmbedHexColor { get; set; } = "#26296e";
+    public PhishingDetection PhishingDetection { get; set; } = PhishingDetection.Disabled;
     public IEnumerable<Mute>? Mutes => mutes?.AsEnumerable();
     public IEnumerable<Ban>? Bans => bans?.AsEnumerable();
     public IEnumerable<Prune>? Prunes => prunes?.AsEnumerable();

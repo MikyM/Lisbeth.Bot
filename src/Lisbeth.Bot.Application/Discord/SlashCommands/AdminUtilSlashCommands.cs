@@ -28,6 +28,7 @@ using Lisbeth.Bot.Application.Validation.ModerationConfig;
 using Lisbeth.Bot.Application.Validation.ReminderConfig;
 using Lisbeth.Bot.Application.Validation.TicketingConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.ChannelMessageFormat;
+using Lisbeth.Bot.Domain.DTOs.Request.Guild;
 using Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.ReminderConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
@@ -102,6 +103,35 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
             default:
                 throw new ArgumentOutOfRangeException(nameof(action), action, null);
         }
+    }
+
+    [UsedImplicitly]
+    [SlashRequireUserPermissions(Permissions.Administrator)]
+    [SlashCommand("phishing-detection", "Allows configuring phishing detection", false)]
+    public async Task SetPhishingCommand(InteractionContext ctx,
+        [Option("phishing-handle", "How to handle detected phishing")]
+        PhishingActionType action)
+    {
+        await ctx.DeferAsync(true);
+
+        var res = action switch
+        {
+            PhishingActionType.Mute => await _discordGuildService.SetPhishingDetectionAsync(
+                new SetPhishingReqDto(PhishingDetection.Mute, ctx.Guild.Id, ctx.User.Id)),
+            PhishingActionType.Kick => await _discordGuildService.SetPhishingDetectionAsync(
+                new SetPhishingReqDto(PhishingDetection.Kick, ctx.Guild.Id, ctx.User.Id)),
+            PhishingActionType.Ban => await _discordGuildService.SetPhishingDetectionAsync(
+                new SetPhishingReqDto(PhishingDetection.Ban, ctx.Guild.Id, ctx.User.Id)),
+            PhishingActionType.Disable => await _discordGuildService.SetPhishingDetectionAsync(
+                new SetPhishingReqDto(PhishingDetection.Disabled, ctx.Guild.Id, ctx.User.Id)),
+            _ => throw new ArgumentOutOfRangeException(nameof(action), action, null)
+        };
+
+        if (res.IsSuccess)
+            await ctx.EditResponseAsync(
+                new DiscordWebhookBuilder().AddEmbed(base.GetSuccessfulActionEmbed(ctx.Client)));
+        else
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(res, ctx.Client)));
     }
 
     [UsedImplicitly]

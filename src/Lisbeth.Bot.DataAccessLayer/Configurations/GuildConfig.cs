@@ -15,7 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using Lisbeth.Bot.Domain.Enums;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Lisbeth.Bot.DataAccessLayer.Configurations;
 
@@ -37,6 +39,8 @@ internal class GuildConfig : IEntityTypeConfiguration<Guild>
         builder.Property(x => x.EmbedHexColor).HasColumnName("embed_hex_color").HasColumnType("varchar(40)")
             .HasMaxLength(40).IsRequired();
         builder.Property(x => x.ReminderChannelId).HasColumnName("reminder_channel_id").HasColumnType("bigint");
+        builder.Property(x => x.PhishingDetection).HasColumnName("phishing_detection").HasColumnType("varchar(40)").HasMaxLength(40)
+            .HasConversion<EnumToStringConverter<PhishingDetection>>().IsRequired();
 
         builder.Metadata.FindNavigation(nameof(Guild.Tags))?.SetPropertyAccessMode(PropertyAccessMode.Field);
         builder.Metadata.FindNavigation(nameof(Guild.Bans))?.SetPropertyAccessMode(PropertyAccessMode.Field);

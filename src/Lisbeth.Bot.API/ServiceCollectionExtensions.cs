@@ -118,6 +118,7 @@ public static class ServiceCollectionExtensions
         services.AddDiscordMiscEventsSubscriber<RoleMenuEventHandler>();
         services.AddDiscordGuildMemberEventsSubscriber<MuteEventHandlers>();
         services.AddDiscordMessageEventsSubscriber<ChannelMessageFormatEventHandler>();
+        services.AddDiscordMessageEventsSubscriber<PhishingEventHandler>();
 
         #endregion
     }

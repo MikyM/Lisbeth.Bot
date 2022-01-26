@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.SlashCommands;
+using Lisbeth.Bot.Domain.DTOs.Request.Guild;
 using Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.ReminderConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
@@ -52,4 +53,5 @@ public interface IDiscordGuildService
     Task<Result> PrepareSlashPermissionsAsync(IEnumerable<DiscordGuild> guilds);
     Task<Result> PrepareSlashPermissionsAsync(DiscordGuild guild);
     Task<Result> PrepareBot(IEnumerable<ulong> guildIds);
+    Task<Result> SetPhishingDetectionAsync(SetPhishingReqDto req);
 }
