@@ -16,23 +16,20 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using DSharpPlus;
-using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using Lisbeth.Bot.Application.Discord.EventHandlers.Base;
 using Lisbeth.Bot.Application.Discord.Helpers;
-using MikyM.Common.Utilities;
 using MikyM.Discord.Events;
 
 namespace Lisbeth.Bot.Application.Discord.EventHandlers;
 
 [UsedImplicitly]
-public class GuildEventsHandler : BaseEventHandler, IDiscordGuildEventsSubscriber
+public class GuildEventsHandler : IDiscordGuildEventsSubscriber
 {
     private readonly ITicketQueueService _ticketQueueService;
     private readonly IDiscordGuildService _discordGuildService;
 
-    public GuildEventsHandler(IAsyncExecutor asyncExecutor, ITicketQueueService ticketQueueService,
-        IDiscordGuildService discordGuildService) : base(asyncExecutor)
+    public GuildEventsHandler(ITicketQueueService ticketQueueService,
+        IDiscordGuildService discordGuildService)
     {
         _ticketQueueService = ticketQueueService;
         _discordGuildService = discordGuildService;

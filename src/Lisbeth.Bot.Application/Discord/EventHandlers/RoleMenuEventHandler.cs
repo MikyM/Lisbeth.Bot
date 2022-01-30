@@ -18,20 +18,18 @@
 using DSharpPlus;
 using DSharpPlus.EventArgs;
 using Lisbeth.Bot.Application.Discord.Commands.RoleMenu;
-using Lisbeth.Bot.Application.Discord.EventHandlers.Base;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Buttons;
 using MikyM.Common.Application.CommandHandlers;
-using MikyM.Common.Utilities;
 using MikyM.Discord.Events;
 
 namespace Lisbeth.Bot.Application.Discord.EventHandlers;
 
 [UsedImplicitly]
-public class RoleMenuEventHandler : BaseEventHandler, IDiscordMiscEventsSubscriber
+public class RoleMenuEventHandler : IDiscordMiscEventsSubscriber
 {
     private readonly ICommandHandlerFactory _commandHandlerFactory;
 
-    public RoleMenuEventHandler(IAsyncExecutor asyncExecutor, ICommandHandlerFactory commandHandlerFactory) : base(asyncExecutor)
+    public RoleMenuEventHandler(ICommandHandlerFactory commandHandlerFactory)
     {
         _commandHandlerFactory = commandHandlerFactory;
     }

@@ -6,9 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MikyM.Common.Domain\MikyM.Common.Domain.csproj" />
-    <ProjectReference Include="..\MikyM.Common.Utilities\MikyM.Common.Utilities.csproj" />
-    <ProjectReference Include="..\MikyM.Discord\MikyM.Discord.csproj" />
+    <PackageReference Include="MikyM.Common.DDDArchitecture" Version="1.0.0" />
+    <PackageReference Include="MikyM.Discord" Version="1.0.0" />
   </ItemGroup>
 
 </Project>

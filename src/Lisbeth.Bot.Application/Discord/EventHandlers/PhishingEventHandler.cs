@@ -18,18 +18,16 @@
 
 using DSharpPlus;
 using DSharpPlus.EventArgs;
-using Lisbeth.Bot.Application.Discord.EventHandlers.Base;
-using MikyM.Common.Utilities;
 using MikyM.Discord.Events;
 
 namespace Lisbeth.Bot.Application.Discord.EventHandlers;
 
 [UsedImplicitly]
-public class PhishingEventHandler : BaseEventHandler, IDiscordMessageEventsSubscriber
+public class PhishingEventHandler : IDiscordMessageEventsSubscriber
 {
     private readonly IDiscordPhishingDetectionService _phishingDetection;
 
-    public PhishingEventHandler(IDiscordPhishingDetectionService phishingDetection, IAsyncExecutor asyncExecutor) : base(asyncExecutor)
+    public PhishingEventHandler(IDiscordPhishingDetectionService phishingDetection)
     {
         _phishingDetection = phishingDetection;
     }

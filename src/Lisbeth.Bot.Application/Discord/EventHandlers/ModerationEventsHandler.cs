@@ -17,20 +17,18 @@
 
 using DSharpPlus;
 using DSharpPlus.EventArgs;
-using Lisbeth.Bot.Application.Discord.EventHandlers.Base;
-using MikyM.Common.Utilities;
 using MikyM.Discord.Events;
 
 namespace Lisbeth.Bot.Application.Discord.EventHandlers;
 
 [UsedImplicitly]
-public class ModerationEventsHandler : BaseEventHandler, IDiscordMessageEventsSubscriber, IDiscordGuildMemberEventsSubscriber
+public class ModerationEventsHandler : IDiscordMessageEventsSubscriber, IDiscordGuildMemberEventsSubscriber
 {
     private readonly IDiscordMemberService _discordMemberService;
     private readonly IDiscordMessageService _discordMessageService;
 
-    public ModerationEventsHandler(IAsyncExecutor asyncExecutor, IDiscordMemberService discordMemberService,
-        IDiscordMessageService discordMessageService) : base(asyncExecutor)
+    public ModerationEventsHandler(IDiscordMemberService discordMemberService,
+        IDiscordMessageService discordMessageService)
     {
         _discordMemberService = discordMemberService;
         _discordMessageService = discordMessageService;

@@ -17,17 +17,15 @@
 
 using DSharpPlus;
 using DSharpPlus.EventArgs;
-using Lisbeth.Bot.Application.Discord.EventHandlers.Base;
-using MikyM.Common.Utilities;
 using MikyM.Discord.Events;
 
 namespace Lisbeth.Bot.Application.Discord.EventHandlers;
 
 [UsedImplicitly]
-public class BanEventsHandler : BaseEventHandler, IDiscordGuildBanEventsSubscriber
+public class BanEventsHandler : IDiscordGuildBanEventsSubscriber
 {
     private readonly IBanCheckService _banCheckService;
-    public BanEventsHandler(IBanCheckService banCheckService, IAsyncExecutor asyncExecutor) : base(asyncExecutor)
+    public BanEventsHandler(IBanCheckService banCheckService)
     {
         _banCheckService = banCheckService;
     }

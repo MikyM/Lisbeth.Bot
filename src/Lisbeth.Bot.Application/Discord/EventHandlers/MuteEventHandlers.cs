@@ -19,19 +19,17 @@ using DSharpPlus;
 using DSharpPlus.EventArgs;
 using Lisbeth.Bot.Application.Discord.Commands.Mute;
 using Lisbeth.Bot.Application.Discord.Commands.Timeout;
-using Lisbeth.Bot.Application.Discord.EventHandlers.Base;
 using MikyM.Common.Application.CommandHandlers;
-using MikyM.Common.Utilities;
 using MikyM.Discord.Events;
 
 namespace Lisbeth.Bot.Application.Discord.EventHandlers;
 
 [UsedImplicitly]
-public class MuteEventHandlers : BaseEventHandler, IDiscordGuildMemberEventsSubscriber
+public class MuteEventHandlers : IDiscordGuildMemberEventsSubscriber
 {
     private readonly ICommandHandlerFactory _commandHandlerFactory;
 
-    public MuteEventHandlers(ICommandHandlerFactory commandHandlerFactory, IAsyncExecutor asyncExecutor) : base(asyncExecutor)
+    public MuteEventHandlers(ICommandHandlerFactory commandHandlerFactory)
     {
         _commandHandlerFactory = commandHandlerFactory;
     }

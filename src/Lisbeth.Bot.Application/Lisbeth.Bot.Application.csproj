@@ -31,14 +31,13 @@
     <PackageReference Include="Microsoft.CodeAnalysis.Scripting" Version="4.0.1" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
     <PackageReference Include="Microsoft.Toolkit.HighPerformance" Version="7.1.2" />
+    <PackageReference Include="MikyM.Common.DDDArchitecture" Version="1.0.0" />
     <PackageReference Include="NCrontab.Signed" Version="3.3.2" />
     <PackageReference Include="VimeoDotNet" Version="2.1.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Lisbeth.Bot.DataAccessLayer\Lisbeth.Bot.DataAccessLayer.csproj" />
-    <ProjectReference Include="..\MikyM.Common.Application\MikyM.Common.Application.csproj" />
-    <ProjectReference Include="..\MikyM.Common.Utilities\MikyM.Common.Utilities.csproj" />
   </ItemGroup>
 
   <ItemGroup>

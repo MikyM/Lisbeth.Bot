@@ -20,29 +20,27 @@ using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using Lisbeth.Bot.Application.Discord.ChatExport;
 using Lisbeth.Bot.Application.Discord.Commands.Ticket;
-using Lisbeth.Bot.Application.Discord.EventHandlers.Base;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Buttons;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Selects;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.SelectValues;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 using MikyM.Common.Application.CommandHandlers;
-using MikyM.Common.Utilities;
 using MikyM.Discord.Events;
 
 namespace Lisbeth.Bot.Application.Discord.EventHandlers;
 
 [UsedImplicitly]
-public class TicketEventsHandler : BaseEventHandler, IDiscordMiscEventsSubscriber, IDiscordChannelEventsSubscriber
+public class TicketEventsHandler : IDiscordMiscEventsSubscriber, IDiscordChannelEventsSubscriber
 {
     private readonly ITicketDataService _ticketDataService;
     private readonly ICommandHandlerFactory _commandHandlerFactory;
     private readonly IDiscordChatExportService _chatExportService;
     private readonly ITicketQueueService _ticketQueueService;
 
-    public TicketEventsHandler(ITicketDataService ticketDataService, IAsyncExecutor asyncExecutor,
+    public TicketEventsHandler(ITicketDataService ticketDataService,
         ICommandHandlerFactory commandHandlerFactory, IDiscordChatExportService chatExportService,
-        ITicketQueueService ticketQueueService) : base(asyncExecutor)
+        ITicketQueueService ticketQueueService)
     {
         _ticketDataService = ticketDataService;
         _commandHandlerFactory = commandHandlerFactory;

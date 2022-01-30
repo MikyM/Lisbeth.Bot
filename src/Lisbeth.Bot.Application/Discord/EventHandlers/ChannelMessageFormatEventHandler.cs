@@ -18,22 +18,20 @@
 using DSharpPlus;
 using DSharpPlus.EventArgs;
 using Lisbeth.Bot.Application.Discord.Commands.ChannelMessageFormat;
-using Lisbeth.Bot.Application.Discord.EventHandlers.Base;
 using Lisbeth.Bot.Domain.DTOs.Request.ChannelMessageFormat;
 using MikyM.Common.Application.CommandHandlers;
-using MikyM.Common.Utilities;
 using MikyM.Discord.Events;
 using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.EventHandlers;
 
 [UsedImplicitly]
-public class ChannelMessageFormatEventHandler : BaseEventHandler, IDiscordMessageEventsSubscriber
+public class ChannelMessageFormatEventHandler : IDiscordMessageEventsSubscriber
 {
     private readonly IDiscordService _discord;
     private readonly ICommandHandler<VerifyMessageFormatCommand, VerifyMessageFormatResDto> _commandHandler;
 
-    public ChannelMessageFormatEventHandler(IAsyncExecutor asyncExecutor, IDiscordService discord, ICommandHandler<VerifyMessageFormatCommand, VerifyMessageFormatResDto> commandHandler) : base(asyncExecutor)
+    public ChannelMessageFormatEventHandler(IDiscordService discord, ICommandHandler<VerifyMessageFormatCommand, VerifyMessageFormatResDto> commandHandler)
     {
         _discord = discord;
         _commandHandler = commandHandler;

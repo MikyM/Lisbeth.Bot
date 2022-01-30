@@ -16,13 +16,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Autofac;
-using EFCoreSecondLevelCacheInterceptor;
 using IdGen;
 using Lisbeth.Bot.Application.Services;
-using Lisbeth.Bot.DataAccessLayer;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using MikyM.Common.Application;
 using MikyM.Common.Application.CommandHandlers.Helpers;
 using MikyM.Common.DataAccessLayer;
