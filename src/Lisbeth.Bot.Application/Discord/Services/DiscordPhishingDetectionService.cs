@@ -75,7 +75,7 @@ public sealed class DiscordPhishingDetectionService : IDiscordPhishingDetectionS
         if (message.Channel?.Guild is null) return Result.FromSuccess(); // DM channels are exmepted.
 
         var res = await _guildDataService.GetSingleBySpecAsync(new ActiveGuildByIdSpec(message.Channel.Guild.Id));
-        if (!res.IsDefined(out var config))
+        if (!res.IsDefined(out var config) || config.IsDisabled)
             return Result.FromSuccess();
 
         if (config.PhishingDetection == PhishingDetection.Disabled) return Result.FromSuccess(); // Phishing detection is disabled.
@@ -112,7 +112,7 @@ public sealed class DiscordPhishingDetectionService : IDiscordPhishingDetectionS
         await message.Channel.DeleteMessageAsync(message);
 
         var res = await _guildDataService.GetSingleBySpecAsync(new ActiveGuildByIdSpec(message.Channel.Guild.Id));
-        if (!res.IsDefined(out var config)) return Result.FromSuccess();
+        if (!res.IsDefined(out var config) || config.IsDisabled) return Result.FromSuccess();
 
         var self = _discord.Client.CurrentUser.Id;
 

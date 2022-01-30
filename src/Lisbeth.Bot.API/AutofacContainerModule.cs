@@ -65,18 +65,6 @@ public class AutofacContainerModule : Module
             .SingleInstance();
 
 
-        // Register Entity Framework
-        builder.Register(x =>
-            {
-                var optionsBuilder = new DbContextOptionsBuilder<LisbethBotDbContext>();
-                optionsBuilder.AddInterceptors(x.Resolve<SecondLevelCacheInterceptor>());
-                //optionsBuilder.EnableSensitiveDataLogging();
-                optionsBuilder.UseNpgsql(x.Resolve<IConfiguration>().GetConnectionString("MainDb"));
-                return new LisbethBotDbContext(optionsBuilder.Options);
-            })
-            .AsSelf()
-            .InstancePerLifetimeScope();
-
         builder.Register(_ =>
             {
                 var epoch = new DateTime(2021, 1, 1, 0, 0, 0, DateTimeKind.Utc);

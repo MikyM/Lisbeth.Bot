@@ -56,7 +56,7 @@ public static class RecurringJobHelper
         JobIds.Add("ticketClose");
     }
 
-    public static async Task ScheduleAllDefinedAfterDelayAsync()
+    public static async void ScheduleAllDefinedAfterDelayAsync()
     {
         await Task.Delay(10000);
         ScheduleAutomaticUnban();

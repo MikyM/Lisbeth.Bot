@@ -41,6 +41,10 @@ using OpenTracing.Mock;
 using System.Security.Claims;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity.EventHandling;
+using Lisbeth.Bot.Application.Services;
+using Lisbeth.Bot.DataAccessLayer;
+using Lisbeth.Bot.Domain;
+using Microsoft.EntityFrameworkCore;
 
 namespace Lisbeth.Bot.API;
 
@@ -193,7 +197,10 @@ public static class ServiceCollectionExtensions
     {
         services.AddEFSecondLevelCache(options =>
         {
-            options.UseEasyCachingCoreProvider("InMemoryCache").DisableLogging(true).UseCacheKeyPrefix("EF_");
+            options.UseEasyCachingCoreProvider("InMemoryCache").UseCacheKeyPrefix("EF_");
+#if !DEBUG
+            options.DisableLogging(true);
+#endif
             options.CacheQueriesContainingTypes(CacheExpirationMode.Sliding, TimeSpan.FromMinutes(30), typeof(Guild),
                 typeof(ChannelMessageFormat), typeof(TicketingConfig), typeof(ModerationConfig));
         });
@@ -202,7 +209,11 @@ public static class ServiceCollectionExtensions
             options.UseInMemory(config =>
             {
                 config.DBConfig = new InMemoryCachingOptions { SizeLimit = 1000 };
+#if DEBUG
+                config.EnableLogging = true;
+#else
                 config.EnableLogging = false;
+#endif
             }, "InMemoryCache");
         });
     }
@@ -240,12 +251,6 @@ public static class ServiceCollectionExtensions
         });
     }
 
-    public static void ConfigureBotSettings(this IServiceCollection services, IConfiguration configuration)
-    {
-        var sp = services.BuildServiceProvider();
-        //services.AddOptions<BotSettings>().BindConfiguration(sp.GetRequiredService<IWebHostEnvironment>().IsDevelopment() ? "BotSettings:Dev" : "BotSettings:Prod", options => options.BindNonPublicProperties = true);
-    }
-
     public static void ConfigureHealthChecks(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddHealthChecks()
@@ -270,5 +275,29 @@ public static class ServiceCollectionExtensions
             options.AutomaticValidationEnabled = false;
             options.ImplicitlyValidateChildProperties = true;
         });
+    }
+
+    public static void ConfigureLisbethDbContext(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddDbContextPool<LisbethBotDbContext>((provider, options) =>
+        {
+            options.AddInterceptors(provider.GetRequiredService<SecondLevelCacheInterceptor>());
+            options.UseNpgsql(configuration.GetConnectionString("MainDb"));
+#if DEBUG
+            options.EnableSensitiveDataLogging();
+#endif
+        });
+    }
+
+    public static void ConfigurePhishingGateway(this IServiceCollection services)
+    {
+        services.AddSingleton<PhishingGatewayService>();
+        services.AddHostedService(x => x.GetRequiredService<PhishingGatewayService>());
+    }
+
+    public static void ConfigureBotOptions(this IServiceCollection services)
+    {
+        services.AddOptions<BotOptions>()
+            .BindConfiguration("BotOptions", options => options.BindNonPublicProperties = true);
     }
 }

@@ -35,8 +35,6 @@ using Serilog.Events;
 using System.Globalization;
 using System.Net.Http;
 using System.Threading;
-using Lisbeth.Bot.Application.Services;
-using Lisbeth.Bot.Domain;
 
 namespace Lisbeth.Bot.API;
 
@@ -74,6 +72,7 @@ public class Program
                 options.Conventions.Add(new RouteTokenTransformerConvention(new SlugifyParameterTransformer())));
             builder.Services.ConfigureSwagger();
             builder.Services.AddHttpClient();
+            builder.Services.ConfigureLisbethDbContext(builder.Configuration);
             builder.Services.ConfigureDiscord(builder.Configuration);
             builder.Services.ConfigureHangfire(builder.Configuration);
             builder.Services.ConfigureApiKey(builder.Configuration);
@@ -83,10 +82,8 @@ public class Program
             builder.Services.ConfigureHealthChecks(builder.Configuration);
             builder.Services.ConfigureFluentValidation();
             builder.Services.AddEnrichedDiscordEmbedBuilders();
-            builder.Services.AddSingleton<PhishingGatewayService>();
-            builder.Services.AddHostedService(x => x.GetRequiredService<PhishingGatewayService>());
-            builder.Services.AddOptions<BotOptions>()
-                .BindConfiguration("BotOptions", options => options.BindNonPublicProperties = true);
+            builder.Services.ConfigurePhishingGateway();
+            builder.Services.ConfigureBotOptions();
 
             // Configure Autofac
             builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
@@ -138,7 +135,7 @@ public class Program
             });
 
             // Schedule recurring jobs
-            await RecurringJobHelper.ScheduleAllDefinedAfterDelayAsync();
+            RecurringJobHelper.ScheduleAllDefinedAfterDelayAsync();
 
             await app.RunAsync(_cts.Token);
             await Task.Delay(TimeSpan.FromSeconds(15));
