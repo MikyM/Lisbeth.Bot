@@ -155,8 +155,7 @@ public class DiscordMessageService : IDiscordMessageService
             {
                 messagesToDelete.Clear();
 
-                if (cycles == 0)
-                    messagesToDelete.Add(lastMessage);
+                messagesToDelete.Add(lastMessage);
 
                 messagesToDelete.AddRange(await channel.GetMessagesBeforeAsync(lastMessage.Id));
                 await Task.Delay(300);
@@ -169,7 +168,10 @@ public class DiscordMessageService : IDiscordMessageService
                     shouldStop = true;
                 }
 
-                lastMessage = messagesToDelete.Last();
+                lastMessage = messagesToDelete.Last(); // save last message
+
+                messagesToDelete.RemoveAll(x => x.Id == lastMessage.Id); // dont delete message so we can grab messages before it and we dont need to re-fetch
+
                 await Task.Delay(600);
 
                 // keep interaction message
