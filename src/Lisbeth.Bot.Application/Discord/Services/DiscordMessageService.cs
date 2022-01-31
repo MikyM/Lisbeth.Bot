@@ -189,6 +189,7 @@ public class DiscordMessageService : IDiscordMessageService
                 count += messagesToDelete.Count;
                 cycles++;
                 req.Messages.AddRange(_mapper.Map<List<MessageLog>>(messagesToDelete));
+                await Task.Delay(1000);
             }
         }
         else if (req.TargetAuthorId.HasValue)
