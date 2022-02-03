@@ -61,7 +61,7 @@ public sealed class PhishingGatewayService : IHostedService
         try
         {
             await _ws.ConnectAsync(new(WebSocketUrl), CancellationToken.None);
-            _logger.LogInformation("Phishing gateway is up and running.");
+            _logger.LogInformation("Phishing gateway is up and running");
         }
         catch (WebSocketException)
         {
@@ -69,14 +69,12 @@ public sealed class PhishingGatewayService : IHostedService
             return;
         }
 
-        _logger.LogInformation("Opened websocket to phishing API.");
-
         _ = Task.Run(ReceiveLoopAsync);
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Cancellation requested. Stopping service.");
+        _logger.LogInformation("Cancellation requested. Stopping service");
 
         _cts.Cancel();
     }
@@ -136,6 +134,8 @@ public sealed class PhishingGatewayService : IHostedService
         }
         finally
         {
+            _logger.LogInformation("Closing websocket");
+            
             await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Ready to shut down.",
                 CancellationToken.None);
         }
