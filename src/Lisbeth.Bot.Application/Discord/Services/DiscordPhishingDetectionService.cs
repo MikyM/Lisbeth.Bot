@@ -94,8 +94,6 @@ public sealed class DiscordPhishingDetectionService : IDiscordPhishingDetectionS
 
             var link = match.Groups["link"].Value;
             
-            if (message.Author.IsBotOwner(_discord.Client)) _logger.LogInformation(link);
-            
             if (!_phishGateway.IsBlacklisted(link)) continue;
 
             _logger.LogInformation("Detected phishing link.");
