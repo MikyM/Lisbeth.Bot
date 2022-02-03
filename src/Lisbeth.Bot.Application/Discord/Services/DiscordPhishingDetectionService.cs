@@ -25,6 +25,7 @@ using Lisbeth.Bot.Domain.DTOs.Request.Ban;
 using Lisbeth.Bot.Domain.DTOs.Request.Mute;
 using Microsoft.Extensions.Logging;
 using MikyM.Common.Application.CommandHandlers;
+using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.Services;
@@ -71,13 +72,14 @@ public sealed class DiscordPhishingDetectionService : IDiscordPhishingDetectionS
         if (message.Author is null) return Result.FromSuccess(); // In case it's an edit and it's not in cache.
 
         if (message.Author.IsBot) return Result.FromSuccess(); // Sus.
-
+        
+        if (message.Author.IsBotOwner(_discord.Client)) _logger.LogInformation("Channel/guild null check");
         if (message.Channel?.Guild is null) return Result.FromSuccess(); // DM channels are exmepted.
-
+        if (message.Author.IsBotOwner(_discord.Client)) _logger.LogInformation("Active guild check");
         var res = await _guildDataService.GetSingleBySpecAsync(new ActiveGuildByIdSpec(message.Channel.Guild.Id));
         if (!res.IsDefined(out var config) || config.IsDisabled)
             return Result.FromSuccess();
-
+        if (message.Author.IsBotOwner(_discord.Client)) _logger.LogInformation("Settings check");
         if (config.PhishingDetection == PhishingDetection.Disabled) return Result.FromSuccess(); // Phishing detection is disabled.
 
         // As to why I don't use Regex.Match() instead:
@@ -92,7 +94,9 @@ public sealed class DiscordPhishingDetectionService : IDiscordPhishingDetectionS
             if (match is null || !match.Success) continue;
 
             var link = match.Groups["link"].Value;
-
+            
+            if (message.Author.IsBotOwner(_discord.Client)) _logger.LogInformation(link);
+            
             if (!_phishGateway.IsBlacklisted(link)) continue;
 
             _logger.LogInformation("Detected phishing link.");
@@ -108,7 +112,7 @@ public sealed class DiscordPhishingDetectionService : IDiscordPhishingDetectionS
     /// <param name="message">Message to handle.</param>
     private async Task<Result> HandleDetectedPhishingAsync(DiscordMessage message)
     {
-
+        if (message.Author.IsBotOwner(_discord.Client)) _logger.LogInformation("Yeet attempt");
         await message.Channel.DeleteMessageAsync(message);
 
         var res = await _guildDataService.GetSingleBySpecAsync(new ActiveGuildByIdSpec(message.Channel.Guild.Id));
