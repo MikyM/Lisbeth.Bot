@@ -110,7 +110,7 @@ public sealed class PhishingGatewayService : IHostedService
                 if (result.MessageType is WebSocketMessageType.Close)
                 {
                     if (await RestartWebsocketAsync()) continue;
-                    
+
                     return;
                 }
 
@@ -130,24 +130,15 @@ public sealed class PhishingGatewayService : IHostedService
         }
         catch (Exception e)
         {
-            _logger.LogWarning(e, "Websocket threw an exception. API - Unavailable. Attempting to reconnect in 5 minutes");
+            _logger.LogWarning(e, "Websocket threw an exception. API - Unavailable");
+        }
+        finally
+        {
+            _logger.LogInformation("Closing websocket");
             
             await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Ready to shut down.",
                 CancellationToken.None);
-
-            await Task.Delay(TimeSpan.FromMinutes(5));
-            
-            _ = await RestartWebsocketAsync();
-
-            _ = Task.Run(ReceiveLoopAsync);
-            
-            return;
         }
-        
-        _logger.LogInformation("Closing websocket");
-            
-        await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Ready to shut down.",
-            CancellationToken.None);
     }
 
     private async Task<bool> RestartWebsocketAsync()
@@ -163,20 +154,8 @@ public sealed class PhishingGatewayService : IHostedService
         }
         catch
         {
-            if (!_cts.Token.IsCancellationRequested)
-            {
-                _logger.LogWarning("Could not connect to phishing. API - Unavailable. Retrying in 5 minutes");
-
-                await Task.Delay(TimeSpan.FromMinutes(5));
-
-                return await RestartWebsocketAsync();
-            }
-            else
-            {
-                _logger.LogWarning("Could not connect to phishing. API - Unavailable");
-
-                return false;
-            }
+            _logger.LogWarning("Could not connect to phishing. API - Unavailable");
+            return false;
         }
     }
 
