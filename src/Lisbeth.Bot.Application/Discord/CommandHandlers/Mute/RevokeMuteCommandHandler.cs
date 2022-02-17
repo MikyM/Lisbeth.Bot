@@ -17,6 +17,7 @@
 
 using DSharpPlus;
 using DSharpPlus.Entities;
+using DSharpPlus.Exceptions;
 using Lisbeth.Bot.Application.Discord.Commands.Mute;
 using Lisbeth.Bot.Application.Discord.EmbedBuilders;
 using Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response.Infractions;
@@ -62,9 +63,19 @@ public class RevokeMuteCommandHandler : ICommandHandler<RevokeMuteCommand, Disco
                              command.MenuCtx?.Guild ?? await _discord.Client.GetGuildAsync(command.Dto.GuildId);
         DiscordMember requestingUser = command.Ctx?.User as DiscordMember ?? command.MenuCtx?.User as DiscordMember ??
             await guild.GetMemberAsync(command.Dto.RequestedOnBehalfOfId);
-        DiscordMember target = command.Ctx?.ResolvedUserMentions[0] as DiscordMember ?? command.MenuCtx?.TargetMember ??
-            command.MenuCtx?.TargetMessage.Author as DiscordMember ??
-            await guild.GetMemberAsync(command.Dto.TargetUserId);
+
+        DiscordMember? target;
+        try
+        {
+            target = command.Ctx?.ResolvedUserMentions[0] as DiscordMember ?? command.MenuCtx?.TargetMember ??
+                command.MenuCtx?.TargetMessage.Author as DiscordMember ??
+                await guild.GetMemberAsync(command.Dto.TargetUserId);
+        }
+        catch
+        {
+            target = null;
+        }
+
 
         if (!requestingUser.IsModerator())
             return new DiscordNotAuthorizedError();
@@ -82,11 +93,13 @@ public class RevokeMuteCommandHandler : ICommandHandler<RevokeMuteCommand, Disco
         if (!guild.IsRoleHierarchyValid(mutedRole)) return new DiscordError("Bots role is below muted role in the role hierarchy.");
         if (!guild.HasSelfPermissions(Permissions.ManageRoles)) return new DiscordError("Bot doesn't have manage roles permission.");
 
-        bool isMuted = target.Roles.Any(r => r.Id == guildEntity.ModerationConfig.MuteRoleId);
+        bool isMuted = false;
+        if (target is not null)
+            isMuted = target.Roles.Any(r => r.Id == guildEntity.ModerationConfig.MuteRoleId);
 
         await _guildLogger.LogToDiscordAsync(guild, command.Dto, DiscordModeration.Unmute, requestingUser, target, guildEntity.EmbedHexColor);
 
-        if (isMuted)
+        if (isMuted && target is not null)
         {
             var muteRes = await target.UnmuteAsync(guildEntity.ModerationConfig.MuteRoleId);
             if (!muteRes.IsSuccess) return new DiscordError("Failed to unmute");
