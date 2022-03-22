@@ -20,11 +20,13 @@ using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Tag;
 using Lisbeth.Bot.Domain.DTOs.Request.Tag;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
+using MikyM.Common.Utilities.Results;
+using MikyM.Common.Utilities.Results.Errors;
 
 namespace Lisbeth.Bot.Application.Services.Database;
 
 [UsedImplicitly]
-public class TagDataService : CrudService<Tag, LisbethBotDbContext>, ITagDataService
+public class TagDataService : CrudDataService<Tag, LisbethBotDbContext>, ITagDataService
 {
     public TagDataService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
     {

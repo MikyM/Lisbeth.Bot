@@ -18,6 +18,7 @@
 
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Domain.DTOs.Request.Base;
+using MikyM.Common.Utilities.Results;
 using MikyM.Discord.EmbedBuilders.Enums;
 
 namespace Lisbeth.Bot.Application.Discord.Services.Interfaces;

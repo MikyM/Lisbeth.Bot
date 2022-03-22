@@ -17,10 +17,11 @@
 
 using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.Domain.DTOs.Request.Tag;
+using MikyM.Common.Utilities.Results;
 
 namespace Lisbeth.Bot.Application.Services.Database.Interfaces;
 
-public interface ITagDataService : ICrudService<Tag, LisbethBotDbContext>
+public interface ITagDataService : ICrudDataService<Tag, LisbethBotDbContext>
 {
     Task<Result> AddAsync(TagAddReqDto req, bool shouldSave = false);
     Task<Result> UpdateTagTextAsync(TagEditReqDto req, bool shouldSave = false);

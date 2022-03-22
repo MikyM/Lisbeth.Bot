@@ -24,6 +24,7 @@ using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.Interfaces;
 using System.Globalization;
 using AutoMapper;
+using MikyM.Common.Utilities.Results;
 
 namespace Lisbeth.Bot.Application.Discord.Helpers;
 

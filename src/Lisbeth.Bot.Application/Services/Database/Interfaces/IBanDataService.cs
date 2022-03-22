@@ -17,10 +17,11 @@
 
 using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.Domain.DTOs.Request.Ban;
+using MikyM.Common.Utilities.Results;
 
 namespace Lisbeth.Bot.Application.Services.Database.Interfaces;
 
-public interface IBanDataService : ICrudService<Ban, LisbethBotDbContext>
+public interface IBanDataService : ICrudDataService<Ban, LisbethBotDbContext>
 {
     Task<Result<(long Id, Ban? FoundEntity)>> AddOrExtendAsync(BanApplyReqDto req, bool shouldSave = false);
     Task<Result<Ban>> DisableAsync(BanRevokeReqDto entry, bool shouldSave = false);

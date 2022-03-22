@@ -19,6 +19,7 @@ using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Domain.DTOs.Request.Prune;
+using MikyM.Common.Utilities.Results;
 
 namespace Lisbeth.Bot.Application.Discord.Services.Interfaces;
 

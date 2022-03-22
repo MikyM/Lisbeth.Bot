@@ -17,6 +17,8 @@
 
 using DSharpPlus;
 using DSharpPlus.Entities;
+using MikyM.Common.Utilities.Results;
+using MikyM.Common.Utilities.Results.Errors;
 
 namespace Lisbeth.Bot.Application.Discord.Extensions;
 

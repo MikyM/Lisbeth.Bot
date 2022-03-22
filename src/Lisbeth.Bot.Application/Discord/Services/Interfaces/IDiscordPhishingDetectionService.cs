@@ -17,6 +17,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using DSharpPlus.Entities;
+using MikyM.Common.Utilities.Results;
 
 namespace Lisbeth.Bot.Application.Discord.Services.Interfaces;
 

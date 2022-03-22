@@ -22,16 +22,14 @@
 
   <ItemGroup>
     <PackageReference Include="CronExpressionDescriptor" Version="2.16.0" />
-    <PackageReference Include="FluentValidation.AspNetCore" Version="10.3.6" />
+    <PackageReference Include="FluentValidation.AspNetCore" Version="10.4.0" />
     <PackageReference Include="Hangfire.Core" Version="1.7.28" />
     <PackageReference Include="Imgur.API" Version="5.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
     <PackageReference Include="Microsoft.CodeAnalysis" Version="4.0.1" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.0.1" />
     <PackageReference Include="Microsoft.CodeAnalysis.Scripting" Version="4.0.1" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
     <PackageReference Include="Microsoft.Toolkit.HighPerformance" Version="7.1.2" />
-    <PackageReference Include="MikyM.Common.DDDArchitecture" Version="1.0.0" />
     <PackageReference Include="NCrontab.Signed" Version="3.3.2" />
     <PackageReference Include="VimeoDotNet" Version="2.1.1" />
   </ItemGroup>

@@ -24,20 +24,22 @@ using Lisbeth.Bot.Domain.DTOs.Request.ReminderConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.RoleMenu;
 using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
+using MikyM.Common.Utilities.Results;
+using MikyM.Common.Utilities.Results.Errors;
 
 namespace Lisbeth.Bot.Application.Services.Database;
 
 [UsedImplicitly]
-public class GuildDataService : CrudService<Guild, LisbethBotDbContext>, IGuildDataService
+public class GuildDataService : CrudDataService<Guild, LisbethBotDbContext>, IGuildDataService
 {
-    private readonly ICrudService<ModerationConfig, LisbethBotDbContext> _moderationService;
-    private readonly ICrudService<RoleMenu, LisbethBotDbContext> _roleMenuService;
-    private readonly ICrudService<TicketingConfig, LisbethBotDbContext> _ticketingService;
+    private readonly ICrudDataService<ModerationConfig, LisbethBotDbContext> _moderationService;
+    private readonly ICrudDataService<RoleMenu, LisbethBotDbContext> _roleMenuService;
+    private readonly ICrudDataService<TicketingConfig, LisbethBotDbContext> _ticketingService;
 
     public GuildDataService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof,
-        ICrudService<ModerationConfig, LisbethBotDbContext> moderationService,
-        ICrudService<TicketingConfig, LisbethBotDbContext> ticketingService,
-        ICrudService<RoleMenu, LisbethBotDbContext> roleMenuService) : base(mapper, uof)
+        ICrudDataService<ModerationConfig, LisbethBotDbContext> moderationService,
+        ICrudDataService<TicketingConfig, LisbethBotDbContext> ticketingService,
+        ICrudDataService<RoleMenu, LisbethBotDbContext> roleMenuService) : base(mapper, uof)
     {
         _moderationService = moderationService;
         _ticketingService = ticketingService;

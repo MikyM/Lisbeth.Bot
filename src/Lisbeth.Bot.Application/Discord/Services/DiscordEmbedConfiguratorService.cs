@@ -20,6 +20,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
+using MikyM.Common.Utilities.Results;
+using MikyM.Common.Utilities.Results.Errors;
 
 namespace Lisbeth.Bot.Application.Discord.Services;
 
@@ -32,10 +34,10 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
     private readonly IEmbedConfigDataService _embedConfigDataService;
     private readonly IDiscordEmbedProvider _embedProvider;
     private readonly IMapper _mapper;
-    private readonly ICrudService<T, LisbethBotDbContext> _service;
+    private readonly ICrudDataService<T, LisbethBotDbContext> _service;
     private readonly IGuildDataService _guildDataService;
 
-    public DiscordEmbedConfiguratorService(ICrudService<T, LisbethBotDbContext> service, IMapper mapper,
+    public DiscordEmbedConfiguratorService(ICrudDataService<T, LisbethBotDbContext> service, IMapper mapper,
         IDiscordEmbedProvider embedProvider, IEmbedConfigDataService embedConfigDataService, IGuildDataService guildDataService)
     {
         _service = service;

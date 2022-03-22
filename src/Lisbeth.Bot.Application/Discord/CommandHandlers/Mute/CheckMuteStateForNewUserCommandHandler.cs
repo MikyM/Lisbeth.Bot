@@ -19,6 +19,7 @@ using Lisbeth.Bot.Application.Discord.Commands.Mute;
 using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Mute;
 using MikyM.Common.Application.CommandHandlers;
+using MikyM.Common.Utilities.Results;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Mute;
 

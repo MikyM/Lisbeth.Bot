@@ -22,7 +22,7 @@ using MikyM.Common.DataAccessLayer.UnitOfWork;
 namespace Lisbeth.Bot.Application.Services.Database;
 
 [UsedImplicitly]
-public class PruneDataService : CrudService<Prune, LisbethBotDbContext>, IPruneDataService
+public class PruneDataService : CrudDataService<Prune, LisbethBotDbContext>, IPruneDataService
 {
     public PruneDataService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
     {

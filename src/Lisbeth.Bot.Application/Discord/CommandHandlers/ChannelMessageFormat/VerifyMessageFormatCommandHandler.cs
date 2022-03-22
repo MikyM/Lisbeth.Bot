@@ -29,6 +29,8 @@ using Lisbeth.Bot.Domain.DTOs;
 using Lisbeth.Bot.Domain.DTOs.Request.DirectMessage;
 using Microsoft.Extensions.Logging;
 using MikyM.Common.Application.CommandHandlers;
+using MikyM.Common.Utilities.Results;
+using MikyM.Common.Utilities.Results.Errors.Bases;
 using MikyM.Discord.Enums;
 using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.Interfaces;

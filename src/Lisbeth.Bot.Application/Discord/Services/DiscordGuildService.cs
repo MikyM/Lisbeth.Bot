@@ -34,6 +34,8 @@ using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.Interfaces;
 using System.Collections.Generic;
 using Lisbeth.Bot.Domain.DTOs.Request.Guild;
+using MikyM.Common.Utilities.Results;
+using MikyM.Common.Utilities.Results.Errors;
 
 namespace Lisbeth.Bot.Application.Discord.Services;
 

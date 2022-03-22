@@ -24,6 +24,8 @@ using Microsoft.Extensions.Logging;
 using MikyM.Common.Application.CommandHandlers;
 using MikyM.Discord.Enums;
 using System.Collections.Generic;
+using MikyM.Common.Utilities.Results;
+using MikyM.Common.Utilities.Results.Errors;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 

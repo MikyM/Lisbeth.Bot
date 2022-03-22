@@ -28,6 +28,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Lisbeth.Bot.Domain;
 using Microsoft.Extensions.Options;
+using MikyM.Common.Utilities.Results;
+using MikyM.Common.Utilities.Results.Errors;
 using MikyM.Discord.Extensions.BaseExtensions;
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport;

@@ -37,13 +37,13 @@ public class RoleMenuEventHandler : IDiscordMiscEventsSubscriber
     public async Task DiscordOnComponentInteractionCreated(DiscordClient sender,
         ComponentInteractionCreateEventArgs args)
     {
-        /*switch (args.Id)
+        switch (args.Id)
         {
             case nameof(RoleMenuButton.RoleMenuFinalize):
             case nameof(RoleMenuButton.RoleMenuAddOption):
                 await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
                 break;
-        }*/
+        }
 
         if (args.Id.StartsWith("role_menu_button"))
         {

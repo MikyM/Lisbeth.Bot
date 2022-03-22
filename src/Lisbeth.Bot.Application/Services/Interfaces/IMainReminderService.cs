@@ -16,6 +16,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Lisbeth.Bot.Domain.DTOs.Request.Reminder;
+using MikyM.Common.Utilities.Results;
 
 namespace Lisbeth.Bot.Application.Services.Interfaces;
 

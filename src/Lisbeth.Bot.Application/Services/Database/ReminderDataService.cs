@@ -20,12 +20,14 @@ using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Reminder;
 using Lisbeth.Bot.Domain.DTOs.Request.Reminder;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
+using MikyM.Common.Utilities.Results;
+using MikyM.Common.Utilities.Results.Errors.Bases;
 using NCrontab;
 
 namespace Lisbeth.Bot.Application.Services.Database;
 
 [UsedImplicitly]
-public class ReminderDataService : CrudService<Reminder, LisbethBotDbContext>, IReminderDataService
+public class ReminderDataService : CrudDataService<Reminder, LisbethBotDbContext>, IReminderDataService
 {
     public ReminderDataService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
     {

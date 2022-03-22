@@ -201,8 +201,8 @@ public static class ServiceCollectionExtensions
 #if !DEBUG
             options.DisableLogging(true);
 #endif
-            options.CacheQueriesContainingTypes(CacheExpirationMode.Sliding, TimeSpan.FromMinutes(30), typeof(Guild),
-                typeof(ChannelMessageFormat), typeof(TicketingConfig), typeof(ModerationConfig));
+            options.CacheQueriesContainingTypes(CacheExpirationMode.Sliding, TimeSpan.FromMinutes(30), typeof(Guild)/*,
+                typeof(ChannelMessageFormat), typeof(TicketingConfig), typeof(ModerationConfig)*/);
         });
         services.AddEasyCaching(options =>
         {

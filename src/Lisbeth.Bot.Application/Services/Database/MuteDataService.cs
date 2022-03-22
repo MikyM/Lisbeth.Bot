@@ -20,11 +20,13 @@ using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Mute;
 using Lisbeth.Bot.Domain.DTOs.Request.Mute;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
+using MikyM.Common.Utilities.Results;
+using MikyM.Common.Utilities.Results.Errors;
 
 namespace Lisbeth.Bot.Application.Services.Database;
 
 [UsedImplicitly]
-public class MuteDataService : CrudService<Mute, LisbethBotDbContext>, IMuteDataService
+public class MuteDataService : CrudDataService<Mute, LisbethBotDbContext>, IMuteDataService
 {
     public MuteDataService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
     {

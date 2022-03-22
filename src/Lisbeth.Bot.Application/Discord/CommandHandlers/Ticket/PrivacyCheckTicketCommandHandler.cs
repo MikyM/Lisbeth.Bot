@@ -18,6 +18,8 @@
 using DSharpPlus;
 using Lisbeth.Bot.Application.Discord.Commands.Ticket;
 using MikyM.Common.Application.CommandHandlers;
+using MikyM.Common.Utilities.Results;
+using MikyM.Common.Utilities.Results.Errors;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 
