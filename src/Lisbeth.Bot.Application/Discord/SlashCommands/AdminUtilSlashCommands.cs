@@ -22,6 +22,7 @@ using DSharpPlus.SlashCommands.Attributes;
 using FluentValidation;
 using Lisbeth.Bot.Application.Discord.Commands.ChannelMessageFormat;
 using Lisbeth.Bot.Application.Discord.Commands.Ticket;
+using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
 using Lisbeth.Bot.Application.Validation.ChannelMessageFormat;
 using Lisbeth.Bot.Application.Validation.ModerationConfig;
@@ -293,6 +294,45 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
                 new DiscordWebhookBuilder().AddEmbed(GetUnsuccessfulResultEmbed(res, ctx.Client)));
         else
             await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
+    }
+
+    [UsedImplicitly]
+    [SlashRequireUserPermissions(Permissions.Administrator)]
+    [SlashCommand("assign-role", "Command that allows bulk role assignment", false)]
+    public async Task AssignRoleCommand(InteractionContext ctx,
+        [Option("role-to-assign", "Role to assign")]
+        DiscordRole roleToAssign,
+        [Option("role-or-user", "User or a role to assign the new role to")]
+        SnowflakeObject targetRoleOrUser)
+    {
+        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
+            new DiscordInteractionResponseBuilder().AsEphemeral(true));
+
+        if (roleToAssign is null || targetRoleOrUser is null)
+            throw new ArgumentException("Provide all arguments");
+
+        if (targetRoleOrUser is DiscordRole targetRole)
+        {
+            var users = await ctx.Guild.GetAllMembersAsync();
+            var targets = users.Where(x => x.HasRole(targetRole.Id, out _));
+
+            foreach (var target in targets)
+            {
+                await Task.Delay(500);
+                
+                if (target.HasRole(roleToAssign.Id, out _))
+                    continue;
+
+                await target.GrantRoleAsync(roleToAssign);
+            }
+        }
+        else if (targetRoleOrUser is DiscordMember member)
+        {
+            if (member.HasRole(roleToAssign.Id, out _))
+                return;
+
+            await member.GrantRoleAsync(roleToAssign);
+        }
     }
 
     [UsedImplicitly]
