@@ -328,11 +328,11 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
         }
         else if (targetRoleOrUser is DiscordMember member)
         {
-            if (member.HasRole(roleToAssign.Id, out _))
-                return;
-
-            await member.GrantRoleAsync(roleToAssign);
+            if (!member.HasRole(roleToAssign.Id, out _))
+                await member.GrantRoleAsync(roleToAssign);
         }
+        
+        await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(GetSuccessfulActionEmbed(ctx.Client)));
     }
 
     [UsedImplicitly]
