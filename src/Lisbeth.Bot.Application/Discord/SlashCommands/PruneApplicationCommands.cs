@@ -40,7 +40,7 @@ public partial class PruneApplicationCommands : ExtendedApplicationCommandModule
 
     [UsedImplicitly]
     [SlashRequireUserPermissions(Permissions.ManageMessages)]
-    [SlashCommand("prune", "A command that allows pruning messages", false)]
+    [SlashCommand("prune", "Command that allows pruning messages", false)]
     public async Task PruneCommand(InteractionContext ctx,
         [Option("count", "Number of messages to prune")]
         long count,

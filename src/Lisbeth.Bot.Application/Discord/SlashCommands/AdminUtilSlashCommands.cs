@@ -61,7 +61,7 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
 
     [UsedImplicitly]
     [SlashRequireUserPermissions(Permissions.Administrator)]
-    [SlashCommand("ticket-center", "A command that allows working with a ticket center message", false)]
+    [SlashCommand("ticket-center", "Command that allows working with a ticket center message", false)]
     public async Task TicketCenterCommand(InteractionContext ctx, [Option("action", "Action to perform")] TicketCenterActionType action, [Option("channel", "Channel to send the message to")] DiscordChannel? channel = null)
     {
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
@@ -138,7 +138,7 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
 
     [UsedImplicitly]
     [SlashRequireUserPermissions(Permissions.Administrator)]
-    [SlashCommand("message-format", "A command that allows working with channel message formats", false)]
+    [SlashCommand("message-format", "Command that allows working with channel message formats", false)]
     public async Task ChannelMessageFormatCommand(InteractionContext ctx,
         [Option("action", "Action to perform")] ChannelMessageFormatActionType action,
         [Option("channel", "Channel to configure format for")] DiscordChannel channel,
@@ -281,7 +281,7 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
 
     [UsedImplicitly]
     [SlashRequireUserPermissions(Permissions.Administrator)]
-    [SlashCommand("ticket-welcome-config", "A command that allows configuring ticket welcome message", false)]
+    [SlashCommand("ticket-welcome-config", "Command that allows configuring ticket welcome message", false)]
     public async Task TicketCenterCommand(InteractionContext ctx)
     {
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
@@ -338,7 +338,7 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
 
     [UsedImplicitly]
     [SlashRequireUserPermissions(Permissions.Administrator)]
-    [SlashCommand("module", "A command that allows configuring modules", false)]
+    [SlashCommand("module", "Command that allows configuring modules", false)]
     public async Task TicketConfigCommand(InteractionContext ctx,
         [Option("action", "Action to perform")]
         ModuleActionType action,

@@ -45,7 +45,7 @@ public class TicketSlashCommands : ExtendedApplicationCommandModule
 
     [UsedImplicitly]
     [SlashRequireUserPermissions(Permissions.BanMembers)]
-    [SlashCommand("ticket", "A command that allows managing tickets", false)]
+    [SlashCommand("ticket", "Command that allows managing tickets", false)]
     public async Task TicketHandlerCommand(InteractionContext ctx,
         [Option("action", "Type of action to perform")]
         TicketActionType action,

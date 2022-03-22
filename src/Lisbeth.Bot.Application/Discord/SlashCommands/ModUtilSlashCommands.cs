@@ -22,7 +22,7 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
 
     }
     [SlashRequireUserPermissions(Permissions.BanMembers)]
-    [SlashCommand("identity", "A command that allows checking information about a member.", false)]
+    [SlashCommand("identity", "Command that allows checking information about a member.", false)]
     [UsedImplicitly]
     public async Task IdentityCommand(InteractionContext ctx,
         [Option("user", "User to identify")] DiscordUser user)

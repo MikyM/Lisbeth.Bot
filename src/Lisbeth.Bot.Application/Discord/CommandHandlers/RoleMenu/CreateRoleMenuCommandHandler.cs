@@ -116,7 +116,8 @@ public class CreateRoleMenuCommandHandler : ICommandHandler<CreateRoleMenuComman
 
         while (true)
         {
-            if (loopCount > 25) new DiscordMessageBuilder().AddEmbed(resultEmbed);
+            if (loopCount > 25) 
+                return new DiscordMessageBuilder().AddEmbed(resultEmbed);
 
             var result = await AddNewOptionAsync(command.Ctx, intr, resultEmbed, roleMenu);
 

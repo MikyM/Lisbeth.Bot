@@ -40,7 +40,7 @@ public class BanApplicationCommands : ExtendedApplicationCommandModule
 
     [UsedImplicitly]
     [SlashRequireUserPermissions(Permissions.BanMembers)]
-    [SlashCommand("ban", "A command that allows banning, unbanning and getting info about bans", false)]
+    [SlashCommand("ban", "Command that allows banning, unbanning and getting info about bans", false)]
     public async Task BanCommand(InteractionContext ctx,
         [Option("action", "Action type")] BanActionType actionType,
         [Option("user", "User to ban")] DiscordUser? user = null, [Option("id", "User Id to ban")] string id = "",

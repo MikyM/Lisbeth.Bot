@@ -52,7 +52,7 @@ public partial class MuteApplicationCommands : ExtendedApplicationCommandModule
     }
 
     [SlashRequireUserPermissions(Permissions.BanMembers)]
-    [SlashCommand("mute", "A command that allows muting, unmuting and getting info about mutes", false)]
+    [SlashCommand("mute", "Command that allows muting, unmuting and getting info about mutes", false)]
     [UsedImplicitly]
     public async Task MuteCommand(InteractionContext ctx,
         [Option("action", "Action type")] MuteActionType actionType,

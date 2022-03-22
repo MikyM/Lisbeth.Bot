@@ -46,7 +46,7 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
 
     [SlashCooldown(20, 120, CooldownBucketType.Guild)]
     [UsedImplicitly]
-    [SlashCommand("tag", "A command that allows working with tags")]
+    [SlashCommand("tag", "Command that allows working with tags")]
     public async Task TagCommand(InteractionContext ctx,
         [Option("action", "Type of action to perform")]
         TagActionType action,

@@ -86,11 +86,11 @@ public static class ServiceCollectionExtensions
         services.AddDiscordInteractivity(options =>
         {
             options.PaginationBehaviour = PaginationBehaviour.Ignore;
-            options.ResponseBehavior = InteractionResponseBehavior.Respond;
+            //options.ResponseBehavior = InteractionResponseBehavior.Respond;
             options.ButtonBehavior = ButtonPaginationBehavior.Disable;
             options.AckPaginationButtons = true;
             options.Timeout = TimeSpan.FromSeconds(10);
-            options.ResponseMessage = "Sorry, but this wasn't a valid option, or does not belong to you!";
+            //options.ResponseMessage = "Oh noes! Something went wrong!";
 
             options.PaginationButtons = new PaginationButtons()
             {

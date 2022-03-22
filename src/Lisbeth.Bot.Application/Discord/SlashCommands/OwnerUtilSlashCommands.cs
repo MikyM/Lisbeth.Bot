@@ -61,7 +61,7 @@ public class OwnerUtilSlashCommands : ExtendedApplicationCommandModule
 
     [UsedImplicitly]
     [SlashRequireOwner]
-    [SlashCommand("re-register-commands", "A command that allows re-registering bot slashies", false)]
+    [SlashCommand("re-register-commands", "Command that allows re-registering bot slashies", false)]
     public async Task RegisterSlashiesCommand(InteractionContext ctx)
     {
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
@@ -102,7 +102,7 @@ public class OwnerUtilSlashCommands : ExtendedApplicationCommandModule
 
     [UsedImplicitly]
     [SlashRequireOwner]
-    [SlashCommand("sql", "A command that runs sql query.", false)]
+    [SlashCommand("sql", "Command that runs sql query.", false)]
     public async Task SqlCommand(InteractionContext ctx,
         [Option("query", "Sql query to be executed.")] string query,
         [Option("ephemeral", "Whether response should be eph")] string shouldEph = "true")
