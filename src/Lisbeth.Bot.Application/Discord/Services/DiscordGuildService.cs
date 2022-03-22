@@ -349,6 +349,7 @@ public class DiscordGuildService : IDiscordGuildService
                 var manageMessagesRoles = new List<DiscordRole>();
                 var userManageRoles = new List<DiscordRole>();
                 var ownerPerms = new List<DiscordApplicationCommandPermission>();
+                var serverOwnerPerms = new List<DiscordApplicationCommandPermission>();
 
                 foreach (var role in guild.Roles.Values)
                 {
@@ -369,7 +370,16 @@ public class DiscordGuildService : IDiscordGuildService
                 {
                     botOwner = null;
                 }
-
+                DiscordMember? serverOwner = guild.Owner;
+                try
+                {
+                    serverOwner ??= await guild.GetMemberAsync(guild.OwnerId);
+                }
+                catch
+                {
+                    serverOwner = null;
+                }
+                
                 if (botOwner is not null) ownerPerms.Add(new DiscordApplicationCommandPermission(botOwner, true));
                 var admPerms = adminRoles
                     .Select(adminRole => new DiscordApplicationCommandPermission(adminRole, true))
@@ -380,6 +390,12 @@ public class DiscordGuildService : IDiscordGuildService
                 var userPerms = userManageRoles
                     .Select(userRole => new DiscordApplicationCommandPermission(userRole, true))
                     .ToList();
+                if (serverOwner is not null)
+                {
+                    admPerms.Add(new DiscordApplicationCommandPermission(serverOwner, true));
+                    messagePerms.Add(new DiscordApplicationCommandPermission(serverOwner, true));
+                    userPerms.Add(new DiscordApplicationCommandPermission(serverOwner, true));
+                }
 
                 var cmds = _options.Value.GlobalRegister ? await _discord.Client.GetGlobalApplicationCommandsAsync() : await guild.GetApplicationCommandsAsync();
                 cmds = cmds.Where(x => x.ApplicationId == _discord.Client.CurrentApplication.Id).ToList();
