@@ -32,6 +32,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net.Http;
 using System.Text;
+using DSharpPlus.Interactivity.Extensions;
 using Lisbeth.Bot.Application.Discord.Exceptions;
 using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
 using Lisbeth.Bot.Domain;
@@ -174,26 +175,34 @@ public class OwnerUtilSlashCommands : ExtendedApplicationCommandModule
     [UsedImplicitly]
     [SlashRequireOwner]
     [SlashCommand("eval", "Evaluate a piece of C# code.", false)]
-    public async Task EvalCommand(InteractionContext ctx, [Option("code", "Code to evaluate.")] string code,
+    public async Task EvalCommand(InteractionContext ctx,
         [Option("ephemeral", "Whether response should be eph")]
         string shouldEph = "true")
     {
-        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
-            new DiscordInteractionResponseBuilder().AsEphemeral(bool.Parse(shouldEph)));
-
         if (!ctx.User.IsBotOwner(ctx.Client))
             throw new DiscordNotAuthorizedException();
 
-        var cs1 = code.IndexOf("```", StringComparison.Ordinal) + 3;
-        var cs2 = code.LastIndexOf("```", StringComparison.Ordinal);
+        var isEph = bool.Parse(shouldEph);
+        var resBldr = new DiscordInteractionResponseBuilder();
+        resBldr.WithCustomId("lisbeth_code_evaluation");
+        resBldr.WithTitle("C# Code Evaluation");
+        var input = new TextInputComponent("C# code to evaluate", "lisbeth_code_evaluation_input", "Your code", null, true, TextInputStyle.Paragraph);
+        resBldr.AddComponents(input);
+        resBldr.AsEphemeral(isEph);
+        await ctx.CreateResponseAsync(InteractionResponseType.Modal, resBldr.AsEphemeral(isEph));
 
-        if (cs1 == -1 || cs2 == -1)
-            throw new ArgumentException("You need to wrap the code into a code block.", nameof(code));
-
-        code = code[cs1..cs2];
-
+        var intr = ctx.Client.GetInteractivity();
+        var modalRes = await intr.WaitForModalAsync("lisbeth_code_evaluation", ctx.User, TimeSpan.FromMinutes(5));
+        if (modalRes.TimedOut)
+            throw new Exception("Timed out");
+        var interaction = modalRes.Result.Interaction;
         var embed = new DiscordEmbedBuilder { Title = "Evaluating...", Color = new DiscordColor(_options.Value.EmbedHexColor) };
-        await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
+        await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+            new DiscordInteractionResponseBuilder().AddEmbed(embed).AsEphemeral(isEph));
+        
+        var code = modalRes.Result.Values["lisbeth_code_evaluation_input"];
+        
+        _ = await interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
 
         var globals = new EvaluationEnvironment(ctx);
         var sopts = ScriptOptions.Default
@@ -232,7 +241,7 @@ public class OwnerUtilSlashCommands : ExtendedApplicationCommandModule
                 embed.AddField("Some errors ommitted",
                     string.Concat((csc.Length - 3).ToString("#,##0"), " more errors not displayed"));
 
-            await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
+            _ = await interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
             return;
         }
 
@@ -261,7 +270,7 @@ public class OwnerUtilSlashCommands : ExtendedApplicationCommandModule
                         "ms with `", rex.GetType(), ": ", rex.Message, "`."),
                 Color = new DiscordColor(0xD091B2)
             };
-            await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
+            await interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
             return;
         }
 
@@ -275,7 +284,8 @@ public class OwnerUtilSlashCommands : ExtendedApplicationCommandModule
 
         if (css?.ReturnValue is not null) embed.AddField("Return type", css.ReturnValue.GetType().ToString(), true);
 
-        await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
+        
+        _ = await interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
     }
 }
 
