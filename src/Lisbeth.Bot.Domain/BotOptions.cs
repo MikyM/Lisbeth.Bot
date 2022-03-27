@@ -34,32 +34,11 @@ public class BotOptions
     public string ChatExportJs { get; private set; } = string.Empty;
 
     public void SetShorteners(string[] shorteners)
-    {
-        Shorteners ??= Array.Empty<string>();
-        
-        if (Shorteners.Any())
-            return;
-
-        Shorteners = shorteners;
-    }
+        => Shorteners = shorteners;
     
     public void SetChatExportCss(string css)
-    {
-        ChatExportCss ??= string.Empty;
-        
-        if (ChatExportCss.Any())
-            return;
-
-        ChatExportCss = css;
-    }
+        => ChatExportCss = css;
     
     public void SetChatExportJs(string js)
-    {
-        ChatExportCss ??= string.Empty;
-        
-        if (ChatExportJs.Any())
-            return;
-
-        ChatExportJs = js;
-    }
+        => ChatExportJs = js;
 }
