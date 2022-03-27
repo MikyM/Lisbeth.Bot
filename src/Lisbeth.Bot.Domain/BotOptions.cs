@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Linq;
 
 namespace Lisbeth.Bot.Domain;
@@ -27,9 +28,9 @@ public class BotOptions
     public string? EmbedHexColor { get; private set; }
     public ulong TestGuildId { get; private set; }
     public bool GlobalRegister { get; private set; }
-    public string[] Shorteners { get; private set; }
-    public string ChatExportCss { get; private set; }
-    public string ChatExportJs { get; private set; }
+    public string[] Shorteners { get; private set; } = Array.Empty<string>();
+    public string ChatExportCss { get; private set; } = string.Empty;
+    public string ChatExportJs { get; private set; } = string.Empty;
 
     public void SetShorteners(string[] shorteners)
     {

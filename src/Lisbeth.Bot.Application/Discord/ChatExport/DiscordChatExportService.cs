@@ -143,6 +143,8 @@ public class DiscordChatExportService : IDiscordChatExportService
             if (guild is null) throw new ArgumentNullException(nameof(guild));
             if (target is null) throw new ArgumentNullException(nameof(target));
             if (requestingMember is null) throw new ArgumentNullException(nameof(requestingMember));
+            if (!_options.Value.ChatExportCss.Any() || !_options.Value.ChatExportJs.Any())
+                throw new ArgumentException("CSS or JS file was not loaded");
 
             var resGuild =
                 await _guildDataService.GetSingleBySpecAsync(new ActiveGuildByDiscordIdWithTicketingSpecifications(guild.Id));
