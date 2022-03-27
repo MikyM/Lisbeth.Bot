@@ -17,18 +17,21 @@
 //  
 //  Original license can be found in ./licenses directory.
 //  This file has been edited after obtaining it's copy.
+
+using System.Net.Http;
 using System.Text.RegularExpressions;
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.Mute;
 using Lisbeth.Bot.Application.Services;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
+using Lisbeth.Bot.Domain;
 using Lisbeth.Bot.Domain.DTOs.Request.Ban;
 using Lisbeth.Bot.Domain.DTOs.Request.Mute;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using MikyM.Common.Application.CommandHandlers;
 using MikyM.Common.Utilities.Results;
 using MikyM.Common.Utilities.Results.Errors.Bases;
-using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.Services;
@@ -54,9 +57,13 @@ public sealed class DiscordPhishingDetectionService : IDiscordPhishingDetectionS
     private readonly IDiscordService _discord;
     private readonly IDiscordBanService _banService;
     private readonly ICommandHandlerFactory _commandHandlerFactory;
+    private readonly IOptions<BotOptions> _options;
+    private readonly HttpClient _httpClient;
 
-    public DiscordPhishingDetectionService(PhishingGatewayService phishGateway, ILogger<DiscordPhishingDetectionService> logger,
-        IGuildDataService guildDataService, IDiscordService discord, IDiscordBanService banService, ICommandHandlerFactory commandHandlerFactory)
+    public DiscordPhishingDetectionService(PhishingGatewayService phishGateway,
+        ILogger<DiscordPhishingDetectionService> logger,
+        IGuildDataService guildDataService, IDiscordService discord, IDiscordBanService banService,
+        ICommandHandlerFactory commandHandlerFactory, IOptions<BotOptions> options, IHttpClientFactory httpClientFactory)
     {
         _phishGateway = phishGateway;
         _logger = logger;
@@ -64,6 +71,8 @@ public sealed class DiscordPhishingDetectionService : IDiscordPhishingDetectionS
         _discord = discord;
         _banService = banService;
         _commandHandlerFactory = commandHandlerFactory;
+        _options = options;
+        _httpClient = httpClientFactory.CreateClient();
     }
 
     /// <summary>
@@ -75,14 +84,15 @@ public sealed class DiscordPhishingDetectionService : IDiscordPhishingDetectionS
         if (message.Author is null) return Result.FromSuccess(); // In case it's an edit and it's not in cache.
 
         if (message.Author.IsBot) return Result.FromSuccess(); // Sus.
-        
+
         if (message.Channel?.Guild is null) return Result.FromSuccess(); // DM channels are exmepted.
 
         var res = await _guildDataService.GetSingleBySpecAsync(new ActiveGuildByIdSpec(message.Channel.Guild.Id));
         if (!res.IsDefined(out var config) || config.IsDisabled)
             return Result.FromSuccess();
-        
-        if (config.PhishingDetection == PhishingDetection.Disabled) return Result.FromSuccess(); // Phishing detection is disabled.
+
+        if (config.PhishingDetection is PhishingDetection.Disabled)
+            return Result.FromSuccess(); // Phishing detection is disabled.
 
         // As to why I don't use Regex.Match() instead:
         // Regex.Match casts its return value to a non-nullable Match.
@@ -96,11 +106,32 @@ public sealed class DiscordPhishingDetectionService : IDiscordPhishingDetectionS
             if (match is null || !match.Success) continue;
 
             var link = match.Groups["link"].Value;
-            
-            if (!_phishGateway.IsBlacklisted(link)) continue;
 
-            _logger.LogInformation("Detected phishing link.");
-            return await HandleDetectedPhishingAsync(message);
+            if (_phishGateway.IsBlacklisted(link))
+            {
+                _logger.LogInformation("Detected phishing link.");
+                return await HandleDetectedPhishingAsync(message);
+            }
+
+            if (_options.Value.Shorteners.Contains(link)) // follow shortened link
+            {
+                using var request = new HttpRequestMessage(HttpMethod.Get, link);
+                using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseContentRead);
+                
+                if (response.IsSuccessStatusCode)
+                {
+                    var location = response.Headers.Location;
+                    if (location is not null)
+                    {
+                        var shortLink = location.ToString();
+                        if (_phishGateway.IsBlacklisted(shortLink))
+                        {
+                            _logger.LogInformation("Detected phishing link that was shortened.");
+                            return await HandleDetectedPhishingAsync(message);
+                        }
+                    }
+                }
+            }
         }
 
         return Result.FromSuccess();

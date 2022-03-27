@@ -199,7 +199,7 @@ public class OwnerUtilSlashCommands : ExtendedApplicationCommandModule
         var embed = new DiscordEmbedBuilder { Title = "Evaluating...", Color = new DiscordColor(_options.Value.EmbedHexColor) };
         await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
             new DiscordInteractionResponseBuilder().AddEmbed(embed).AsEphemeral(isEph));
-        
+
         var code = modalRes.Result.Values["lisbeth_code_evaluation_input"];
         
         _ = await interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));

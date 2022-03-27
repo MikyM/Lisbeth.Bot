@@ -215,41 +215,12 @@ public class DiscordChatExportService : IDiscordChatExportService
 
             foreach (var msg in messages.Where(msg => !users.Contains(msg.Author) && msg.Author is not null)) { users.Add(msg.Author); }
 
-            string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Discord", "ChatExport",
-                "ChatExport.css");
-            string css;
-            if (File.Exists(path))
-            {
-                using StreamReader streamReader = new(path, Encoding.UTF8);
-                css = await streamReader.ReadToEndAsync();
-                css = css.Trim().Replace("\r", string.Empty);
-                css = css.Trim().Replace("\n", string.Empty);
-            }
-            else
-            {
-                throw new IOException($"CSS file was not found at {path}");
-            }
-
-            path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Discord", "ChatExport", "ChatExport.js");
-            string js;
-            if (File.Exists(path))
-            {
-                using StreamReader streamReader = new(path, Encoding.UTF8);
-                js = await streamReader.ReadToEndAsync();
-                js = js.Trim().Replace("\r", string.Empty);
-                js = js.Trim().Replace("\n", string.Empty);
-            }
-            else
-            {
-                throw new IOException($"JS file was not found at {path}");
-            }
-
             var htmlChatBuilder = new HtmlChatBuilder();
             htmlChatBuilder.WithChannel(target)
                 .WithUsers(users)
                 .WithMessages(messages)
-                .WithCss(css)
-                .WithJs(js)
+                .WithCss(_options.Value.ChatExportCss)
+                .WithJs(_options.Value.ChatExportJs)
                 .WithOptions(_options.Value)
                 .WithGuild(guild);
             string html = await htmlChatBuilder.BuildAsync();

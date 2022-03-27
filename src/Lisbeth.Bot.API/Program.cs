@@ -33,8 +33,12 @@ using MikyM.Discord.EmbedBuilders;
 using Serilog;
 using Serilog.Events;
 using System.Globalization;
+using System.IO;
 using System.Net.Http;
+using System.Text;
 using System.Threading;
+using Lisbeth.Bot.Domain;
+using Microsoft.Extensions.Options;
 
 namespace Lisbeth.Bot.API;
 
@@ -54,7 +58,43 @@ public class Program
                 .WriteTo.Console()
                 .CreateBootstrapLogger();
 
-            Log.Information("Starting web host");
+            Log.Information("Loading configuration");
+            
+            // Read shorteners
+            string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resource", "Shorteners.txt");
+            string[] shorteners;
+            if (File.Exists(path))
+            {
+                shorteners = (await File.ReadAllTextAsync(path)).Split("\r\n", StringSplitOptions.RemoveEmptyEntries);
+            }
+            else
+            {
+                throw new IOException($"Shorteners file was not found at {path}");
+            }
+            // Read chat export files
+            path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resource", "ChatExport.css");
+            string chatExportCss;
+            if (File.Exists(path))
+            {
+                chatExportCss = (await File.ReadAllTextAsync(path)).Trim().Replace("\r", string.Empty)
+                    .Replace("\n", string.Empty);
+            }
+            else
+            {
+                throw new IOException($"CSS file was not found at {path}");
+            }
+
+            path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resource", "ChatExport.js");
+            string chatExportJs;
+            if (File.Exists(path))
+            {
+                chatExportJs = (await File.ReadAllTextAsync(path)).Trim().Replace("\r", string.Empty)
+                    .Replace("\n", string.Empty);
+            }
+            else
+            {
+                throw new IOException($"JS file was not found at {path}");
+            }
 
             var builder = WebApplication.CreateBuilder(args);
 
@@ -67,6 +107,8 @@ public class Program
                 builder.Environment.IsDevelopment() ? "appsettings.Development.json" : "appsettings.json", false, true);
             builder.Configuration.AddEnvironmentVariables();
 
+            Log.Information("Starting web host");
+            
             // Configure some services with base Microsoft DI
             builder.Services.AddControllers(options =>
                 options.Conventions.Add(new RouteTokenTransformerConvention(new SlugifyParameterTransformer())));
@@ -84,7 +126,7 @@ public class Program
             builder.Services.AddEnrichedDiscordEmbedBuilders();
             builder.Services.ConfigurePhishingGateway();
             builder.Services.ConfigureBotOptions();
-
+            
             // Configure Autofac
             builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
             builder.Host.ConfigureContainer<ContainerBuilder>(cb =>
@@ -99,6 +141,12 @@ public class Program
             builder.WebHost.UseSentry();
 
             var app = builder.Build();
+            
+            // Set shorteners and chat export files
+            var options = app.Services.GetAutofacRoot().Resolve<IOptions<BotOptions>>().Value;
+            options.SetShorteners(shorteners);
+            options.SetChatExportCss(chatExportCss);
+            options.SetChatExportJs(chatExportJs);
 
             // Configure IdGen factory
             IdGeneratorFactory.SetFactory(() => app.Services.GetAutofacRoot().Resolve<IdGenerator>());

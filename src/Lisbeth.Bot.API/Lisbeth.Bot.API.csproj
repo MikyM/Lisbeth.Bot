@@ -38,4 +38,17 @@
   <ItemGroup>
     <ProjectReference Include="..\Lisbeth.Bot.Application\Lisbeth.Bot.Application.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Resource\ChatExport.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resource\ChatExport.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <None Remove="Resource\shorteners.txt" />
+    <Content Include="Resource\Shorteners.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 </Project>
