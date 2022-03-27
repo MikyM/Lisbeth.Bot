@@ -17,6 +17,7 @@
 
 using System;
 using System.Linq;
+// ReSharper disable ConstantNullCoalescingCondition
 
 namespace Lisbeth.Bot.Domain;
 
@@ -34,6 +35,8 @@ public class BotOptions
 
     public void SetShorteners(string[] shorteners)
     {
+        Shorteners ??= Array.Empty<string>();
+        
         if (Shorteners.Any())
             return;
 
@@ -42,6 +45,8 @@ public class BotOptions
     
     public void SetChatExportCss(string css)
     {
+        ChatExportCss ??= string.Empty;
+        
         if (ChatExportCss.Any())
             return;
 
@@ -50,6 +55,8 @@ public class BotOptions
     
     public void SetChatExportJs(string js)
     {
+        ChatExportCss ??= string.Empty;
+        
         if (ChatExportJs.Any())
             return;
 
