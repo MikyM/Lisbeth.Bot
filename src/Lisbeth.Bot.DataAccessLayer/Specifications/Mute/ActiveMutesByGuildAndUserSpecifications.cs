@@ -26,10 +26,10 @@ public class ActiveMutesByGuildAndUserSpecifications : Specification<Domain.Enti
     public ActiveMutesByGuildAndUserSpecifications(ulong guildId, ulong userId)
     {
         Where(x => !x.IsDisabled);
-        Where(x => !x.Guild.IsDisabled);
-        Where(x => x.Guild.GuildId == guildId);
+        Where(x => !x.Guild!.IsDisabled);
+        Where(x => x.Guild!.GuildId == guildId);
         Where(x => x.AppliedUntil > DateTime.UtcNow);
         Where(x => x.UserId == userId);
-        Include(x => x.Guild).ThenInclude(x => x.ModerationConfig);
+        Include(x => x.Guild).ThenInclude(x => x!.ModerationConfig);
     }
 }

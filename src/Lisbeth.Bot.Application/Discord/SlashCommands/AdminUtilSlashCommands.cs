@@ -65,7 +65,7 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
     public async Task TicketCenterCommand(InteractionContext ctx, [Option("action", "Action to perform")] TicketCenterActionType action, [Option("channel", "Channel to send the message to")] DiscordChannel? channel = null)
     {
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
-            new DiscordInteractionResponseBuilder().AsEphemeral(true));
+            new DiscordInteractionResponseBuilder().AsEphemeral());
 
         switch (action)
         {
@@ -73,34 +73,34 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
                 var builderGet = await _discordTicketService.HandleAsync(new GetTicketCenterEmbedCommand(ctx));
                 await ctx.Channel.SendMessageAsync(builderGet.Entity);
                 await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
-                    .AddEmbed(base.GetSuccessfulActionEmbed(ctx.Client, "Message sent successfully"))
-                    .AsEphemeral(true));
+                    .AddEmbed(GetSuccessfulActionEmbed(ctx.Client, "Message sent successfully"))
+                    .AsEphemeral());
                 return;
             case TicketCenterActionType.ConfigureEmbed:
                 var partial = await _embedConfiguratorService.ConfigureAsync(ctx, x => x.CenterEmbedConfig,
                     x => x.CenterEmbedConfigId);
                 if (!partial.IsDefined(out var embed))
                     await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
-                        .AddEmbed(base.GetUnsuccessfulResultEmbed(partial, ctx.Client))
-                        .AsEphemeral(true));
+                        .AddEmbed(GetUnsuccessfulResultEmbed(partial, ctx.Client))
+                        .AsEphemeral());
                 else
                     await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
                         .AddEmbed(embed)
-                        .AsEphemeral(true));
+                        .AsEphemeral());
                 return;
             case TicketCenterActionType.Send:
                 if (channel is null)
                 {
                     await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
-                        .AsEphemeral(true)
+                        .AsEphemeral()
                         .AddEmbed(GetSuccessfulActionEmbed(ctx.Client, "You have to provide a channel")));
                     return;
                 }
                 var builderSend = await _discordTicketService.HandleAsync(new GetTicketCenterEmbedCommand(ctx));
                 await channel.SendMessageAsync(builderSend.Entity);
                 await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
-                    .AddEmbed(base.GetSuccessfulActionEmbed(ctx.Client, "Message sent successfully"))
-                    .AsEphemeral(true));
+                    .AddEmbed(GetSuccessfulActionEmbed(ctx.Client, "Message sent successfully"))
+                    .AsEphemeral());
                 return;
             default:
                 throw new ArgumentOutOfRangeException(nameof(action), action, null);
@@ -131,9 +131,9 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
 
         if (res.IsSuccess)
             await ctx.EditResponseAsync(
-                new DiscordWebhookBuilder().AddEmbed(base.GetSuccessfulActionEmbed(ctx.Client)));
+                new DiscordWebhookBuilder().AddEmbed(GetSuccessfulActionEmbed(ctx.Client)));
         else
-            await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(res, ctx.Client)));
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(GetUnsuccessfulResultEmbed(res, ctx.Client)));
     }
 
     [UsedImplicitly]
@@ -165,7 +165,7 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
                     await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(getEmbed));
                 else
                     await ctx.EditResponseAsync(
-                        new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(getRes, ctx.Client)));
+                        new DiscordWebhookBuilder().AddEmbed(GetUnsuccessfulResultEmbed(getRes, ctx.Client)));
                 return;
             case ChannelMessageFormatActionType.Create:
                 var createReq = new CreateChannelMessageFormatReqDto
@@ -187,7 +187,7 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
                     await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(createEmbed));
                 else
                     await ctx.EditResponseAsync(
-                        new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(createRes, ctx.Client)));
+                        new DiscordWebhookBuilder().AddEmbed(GetUnsuccessfulResultEmbed(createRes, ctx.Client)));
                 return;
             case ChannelMessageFormatActionType.Edit:
                 var editReq = new EditChannelMessageFormatReqDto
@@ -209,7 +209,7 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
                     await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(editEmbed));
                 else
                     await ctx.EditResponseAsync(
-                        new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(editRes, ctx.Client)));
+                        new DiscordWebhookBuilder().AddEmbed(GetUnsuccessfulResultEmbed(editRes, ctx.Client)));
                 return;
             case ChannelMessageFormatActionType.Disable:
                 var disableReq = new DisableChannelMessageFormatReqDto
@@ -231,7 +231,7 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
                     await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(disableEmbed));
                 else
                     await ctx.EditResponseAsync(
-                        new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(disableRes, ctx.Client)));
+                        new DiscordWebhookBuilder().AddEmbed(GetUnsuccessfulResultEmbed(disableRes, ctx.Client)));
                 return;
             case ChannelMessageFormatActionType.Verify:
 
@@ -250,7 +250,7 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
                     await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(verifyResDto.Embed));
                 else
                     await ctx.EditResponseAsync(
-                        new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(verifyRes, ctx.Client)));
+                        new DiscordWebhookBuilder().AddEmbed(GetUnsuccessfulResultEmbed(verifyRes, ctx.Client)));
                 return;
             case ChannelMessageFormatActionType.Enable:
                 var enableReq = new DisableChannelMessageFormatReqDto
@@ -272,7 +272,7 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
                     await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(enableEmbed));
                 else
                     await ctx.EditResponseAsync(
-                        new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(enableRes, ctx.Client)));
+                        new DiscordWebhookBuilder().AddEmbed(GetUnsuccessfulResultEmbed(enableRes, ctx.Client)));
                 return;
             default:
                 throw new ArgumentOutOfRangeException(nameof(action), action, null);
@@ -285,7 +285,7 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
     public async Task TicketCenterCommand(InteractionContext ctx)
     {
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
-            new DiscordInteractionResponseBuilder().AsEphemeral(true));
+            new DiscordInteractionResponseBuilder().AsEphemeral());
 
         var res = await _embedConfiguratorService.ConfigureAsync(ctx, x => x.WelcomeEmbedConfig,
             x => x.WelcomeEmbedConfigId);
@@ -307,7 +307,7 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
         SnowflakeObject targetRoleOrUser)
     {
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
-            new DiscordInteractionResponseBuilder().AsEphemeral(true));
+            new DiscordInteractionResponseBuilder().AsEphemeral());
 
         if (roleToAssign is null || targetRoleOrUser is null)
             throw new ArgumentException("Provide all arguments");
@@ -352,7 +352,7 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
         DiscordChannel? reminderChannel = null)
     {
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
-            new DiscordInteractionResponseBuilder().AsEphemeral(true));
+            new DiscordInteractionResponseBuilder().AsEphemeral());
 
         Result<DiscordEmbed>? result = null;
 

@@ -41,6 +41,6 @@ public class ReminderResDto
     public string? Name { get; set; }
     public DateTime NextOccurrence { get; set; }
     public List<string>? Mentions { get; set; }
-    public string Text { get; set; }
+    public string? Text { get; set; }
     public bool IsRecurring { get; set; }
 }

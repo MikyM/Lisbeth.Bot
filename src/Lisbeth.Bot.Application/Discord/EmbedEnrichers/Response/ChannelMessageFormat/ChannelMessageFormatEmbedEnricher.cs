@@ -15,12 +15,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Globalization;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Application.Discord.SlashCommands;
 using MikyM.Discord.EmbedBuilders.Enrichers;
 using MikyM.Discord.EmbedBuilders.Wrappers;
 using MikyM.Discord.Enums;
-using System.Globalization;
 
 namespace Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response.ChannelMessageFormat;
 
@@ -38,12 +38,12 @@ public class ChannelMessageFormatEmbedEnricher : EmbedEnricherBase<Domain.Entiti
 
     public override void Enrich(IDiscordEmbedBuilderWrapper embedBuilder)
     {
-        string action = this.SecondaryEnricher switch
+        string action = SecondaryEnricher switch
         {
             ChannelMessageFormatActionType.Create => "created",
             ChannelMessageFormatActionType.Get => "retrieved",
             ChannelMessageFormatActionType.Edit => "edited",
-            ChannelMessageFormatActionType.Disable => this.PrimaryEnricher.IsDisabled ? "disabled" : "enabled",
+            ChannelMessageFormatActionType.Disable => PrimaryEnricher.IsDisabled ? "disabled" : "enabled",
             ChannelMessageFormatActionType.Verify => "verified",
             _ => throw new ArgumentOutOfRangeException()
         };
@@ -52,20 +52,20 @@ public class ChannelMessageFormatEmbedEnricher : EmbedEnricherBase<Domain.Entiti
             .WithDescription($"Channel message format {action} successfully");
 
         embedBuilder.AddField("Channel",
-            ExtendedFormatter.Mention(this.PrimaryEnricher.ChannelId, DiscordEntity.Channel), true);
+            ExtendedFormatter.Mention(PrimaryEnricher.ChannelId, DiscordEntity.Channel), true);
 
         embedBuilder.AddField("Created by",
-            ExtendedFormatter.Mention(this.PrimaryEnricher.CreatorId, DiscordEntity.User), true);
+            ExtendedFormatter.Mention(PrimaryEnricher.CreatorId, DiscordEntity.User), true);
 
         embedBuilder.AddField("Created on",
-            this.PrimaryEnricher.CreatedAt.HasValue
-                ? this.PrimaryEnricher.CreatedAt.Value.ToString(CultureInfo.CurrentCulture)
+            PrimaryEnricher.CreatedAt.HasValue
+                ? PrimaryEnricher.CreatedAt.Value.ToString(CultureInfo.CurrentCulture)
                 : "unknown", true);
 
         embedBuilder.AddField("Format",
-            this.PrimaryEnricher.MessageFormat ?? "Unknown");
+            PrimaryEnricher.MessageFormat ?? "Unknown");
 
-        if (this.SecondaryEnricher is not ChannelMessageFormatActionType.Verify || _resDto is null) return;
+        if (SecondaryEnricher is not ChannelMessageFormatActionType.Verify || _resDto is null) return;
 
         embedBuilder.AddField("Verification result", _resDto.IsCompliant ? "Compliant" : "Not compliant", true);
 

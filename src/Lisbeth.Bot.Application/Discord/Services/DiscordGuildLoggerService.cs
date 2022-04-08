@@ -91,12 +91,12 @@ public class DiscordGuildLoggerService : IDiscordGuildLoggerService
     {
         if (_discord.Client.Guilds.TryGetValue(discordGuildId, out var guild)) return new DiscordNotFoundError(DiscordEntity.Guild);
 
-        return await this.LogToDiscordAsync(guild ?? throw new InvalidOperationException("Guild was null."), req, moderation, moderator, target, hexColor, caseId);
+        return await LogToDiscordAsync(guild ?? throw new InvalidOperationException("Guild was null."), req, moderation, moderator, target, hexColor, caseId);
     }
 
     public async Task<Result> LogToDiscordAsync<TRequest>(Guild guild, TRequest req, DiscordModeration moderation, DiscordUser? moderator = null, SnowflakeObject? target = null, string hexColor = "#26296e", long? caseId = null) where TRequest : class, IBaseModAuthReq
     {
-        return await this.LogToDiscordAsync(guild.GuildId, req, moderation, moderator, target, hexColor, caseId);
+        return await LogToDiscordAsync(guild.GuildId, req, moderation, moderator, target, hexColor, caseId);
     }
 
     public async Task<Result> LogToDiscordAsync<TRequest>(long guildId, TRequest req, DiscordModeration moderation, DiscordUser? moderator = null, SnowflakeObject? target = null, string hexColor = "#26296e", long? caseId = null) where TRequest : class, IBaseModAuthReq
@@ -106,21 +106,12 @@ public class DiscordGuildLoggerService : IDiscordGuildLoggerService
 
         if (!guildRes.IsDefined()) return new NotFoundError();
 
-        return await this.LogToDiscordAsync(guildRes.Entity.GuildId, req, moderation, moderator, target, hexColor, caseId);
+        return await LogToDiscordAsync(guildRes.Entity.GuildId, req, moderation, moderator, target, hexColor, caseId);
     }
 
-    public async Task<Result> LogToDiscordAsync<TEvent>(DiscordGuild discordGuild, TEvent discordEvent, DiscordLog log, string hexColor = "#26296e") where TEvent : DiscordEventArgs
+    public Task<Result> LogToDiscordAsync<TEvent>(DiscordGuild discordGuild, TEvent discordEvent, DiscordLog log, string hexColor = "#26296e") where TEvent : DiscordEventArgs
     {
-        IEmbedEnricher? enricher = null;
-
-        var embed = _embedBuilder
-            .WithEmbedColor(new DiscordColor(hexColor))
-            .AsEnriched<LogDiscordEmbedBuilder>()
-            .WithType(log)
-            .EnrichFrom(enricher)
-            .Build();
-
-        return await _logSender.SendAsync(discordGuild, log, embed);
+        throw new NotImplementedException();
     }
 
 
@@ -128,12 +119,12 @@ public class DiscordGuildLoggerService : IDiscordGuildLoggerService
     {
         if (_discord.Client.Guilds.TryGetValue(discordGuildId, out var guild)) return new DiscordNotFoundError(DiscordEntity.Guild);
 
-        return await this.LogToDiscordAsync(guild ?? throw new InvalidOperationException("Guild was null."), discordEvent, log, hexColor);
+        return await LogToDiscordAsync(guild ?? throw new InvalidOperationException("Guild was null."), discordEvent, log, hexColor);
     }
 
     public async Task<Result> LogToDiscordAsync<TEvent>(Guild guild, TEvent discordEvent, DiscordLog log, string hexColor = "#26296e") where TEvent : DiscordEventArgs
     {
-        return await this.LogToDiscordAsync(guild.GuildId, discordEvent, log, hexColor);
+        return await LogToDiscordAsync(guild.GuildId, discordEvent, log, hexColor);
     }
 
     public async Task<Result> LogToDiscordAsync<TEvent>(long guildId, TEvent discordEvent, DiscordLog log, string hexColor = "#26296e") where TEvent : DiscordEventArgs
@@ -143,6 +134,6 @@ public class DiscordGuildLoggerService : IDiscordGuildLoggerService
 
         if (!guildRes.IsDefined()) return new NotFoundError();
 
-        return await this.LogToDiscordAsync(guildRes.Entity.GuildId, discordEvent, log, hexColor);
+        return await LogToDiscordAsync(guildRes.Entity.GuildId, discordEvent, log, hexColor);
     }
 }

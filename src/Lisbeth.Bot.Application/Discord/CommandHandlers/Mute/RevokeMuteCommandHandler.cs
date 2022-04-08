@@ -17,7 +17,6 @@
 
 using DSharpPlus;
 using DSharpPlus.Entities;
-using DSharpPlus.Exceptions;
 using Lisbeth.Bot.Application.Discord.Commands.Mute;
 using Lisbeth.Bot.Application.Discord.EmbedBuilders;
 using Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response.Infractions;

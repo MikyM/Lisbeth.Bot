@@ -22,7 +22,6 @@ using Microsoft.AspNetCore.Http;
 using MikyM.Common.Application;
 using MikyM.Common.Application.CommandHandlers.Helpers;
 using MikyM.Common.DataAccessLayer;
-using Module = Autofac.Module;
 
 namespace Lisbeth.Bot.API;
 

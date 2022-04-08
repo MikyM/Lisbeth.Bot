@@ -15,11 +15,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Generic;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.ChatExport;
 using Lisbeth.Bot.Application.Discord.Commands.Ticket;
-using Lisbeth.Bot.Application.Discord.Exceptions;
 using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Selects;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.SelectValues;
@@ -28,10 +28,9 @@ using Lisbeth.Bot.DataAccessLayer.Specifications.Ticket;
 using Microsoft.Extensions.Logging;
 using MikyM.Common.Application.CommandHandlers;
 using MikyM.Common.Utilities;
-using MikyM.Discord.Extensions.BaseExtensions;
-using System.Collections.Generic;
 using MikyM.Common.Utilities.Results;
 using MikyM.Common.Utilities.Results.Errors;
+using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
@@ -74,7 +73,7 @@ public class ConfirmCloseTicketCommandHandler : ICommandHandler<ConfirmCloseTick
         var res = await _ticketDataService.GetSingleBySpecAsync(
             new TicketByChannelIdOrGuildAndOwnerIdSpec(command.Dto.ChannelId, command.Dto.GuildId, command.Dto.OwnerId));
 
-        if (!res.IsDefined(out var ticket)) return new NotFoundError($"Ticket with given params doesn't exist.");
+        if (!res.IsDefined(out var ticket)) return new NotFoundError("Ticket with given params doesn't exist.");
 
         if (ticket.IsDisabled)
             return new DisabledEntityError(

@@ -27,15 +27,15 @@ public class MessageFormatComplianceEmbedEnricher : EmbedEnricherBase<ChannelMes
 
     public override void Enrich(IDiscordEmbedBuilderWrapper embedBuilder)
     {
-        embedBuilder.WithAuthor($"Channel message format warning | {this.SecondaryEnricher.Author.GetFullUsername()}",
-            null, this.SecondaryEnricher.Author.AvatarUrl);
+        embedBuilder.WithAuthor($"Channel message format warning | {SecondaryEnricher.Author.GetFullUsername()}",
+            null, SecondaryEnricher.Author.AvatarUrl);
 
         embedBuilder.WithDescription(
-            $"Your message in {this.SecondaryEnricher.Channel.Mention} channel was deleted, because it was not compliant with the message format defined for this channel.");
+            $"Your message in {SecondaryEnricher.Channel.Mention} channel was deleted, because it was not compliant with the message format defined for this channel.");
 
-        embedBuilder.AddField("Channel", this.SecondaryEnricher.Channel.Mention);
-        embedBuilder.AddField("Required format", this.PrimaryEnricher.MessageFormat ?? "Unknown");
-        embedBuilder.AddField("Your message", this.SecondaryEnricher.Content);
+        embedBuilder.AddField("Channel", SecondaryEnricher.Channel.Mention);
+        embedBuilder.AddField("Required format", PrimaryEnricher.MessageFormat ?? "Unknown");
+        embedBuilder.AddField("Your message", SecondaryEnricher.Content);
 
         embedBuilder.WithFooter(
             $"Guild: {SecondaryEnricher.Channel.Guild.Name} | Channel Id: {SecondaryEnricher.Channel.Id} | Message Id: {SecondaryEnricher.Id}");

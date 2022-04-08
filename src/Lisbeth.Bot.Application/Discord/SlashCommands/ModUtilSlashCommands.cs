@@ -29,9 +29,9 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
     {
         if (user is null) throw new ArgumentNullException(nameof(user));
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
-            new DiscordInteractionResponseBuilder().AsEphemeral(true));
+            new DiscordInteractionResponseBuilder().AsEphemeral());
 
-        var res = await this._guildDataService!.GetSingleBySpecAsync<Guild>(
+        var res = await _guildDataService!.GetSingleBySpecAsync<Guild>(
             new ActiveGuildByDiscordIdWithTicketingSpecifications(ctx.Guild.Id));
 
         if (!res.IsDefined()) throw new ArgumentException("Guild not found in database");
@@ -48,6 +48,6 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
         embed.WithFooter($"Member Id: {member.Id}");
 
         await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(embed.Build())
-            .AsEphemeral(true));
+            .AsEphemeral());
     }
 }

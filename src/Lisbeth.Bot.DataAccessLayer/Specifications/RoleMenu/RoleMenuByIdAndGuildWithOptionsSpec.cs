@@ -24,7 +24,7 @@ public class RoleMenuByIdAndGuildWithOptionsSpec : Specification<Domain.Entities
     public RoleMenuByIdAndGuildWithOptionsSpec(long id, ulong guildId)
     {
         Where(x => x.Id == id);
-        Where(x => x.Guild.GuildId == guildId);
+        Where(x => x.Guild!.GuildId == guildId);
         Include(x => x.RoleMenuOptions);
         Include(x => x.EmbedConfig);
         Include(x => x.Guild);

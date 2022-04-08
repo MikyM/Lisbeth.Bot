@@ -74,12 +74,14 @@ public sealed class PhishingGatewayService : IHostedService
         _ = Task.Run(ReceiveLoopAsync);
     }
 
+#pragma warning disable CS1998
     public async Task StopAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Cancellation requested. Stopping service");
 
         _cts.Cancel();
     }
+#pragma warning restore CS1998
 
     public bool IsBlacklisted(string link) => _domains.Contains(link);
 

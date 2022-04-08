@@ -16,7 +16,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Lisbeth.Bot.Application.Discord.Helpers;
-using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.DTOs.Request.Prune;
 using MikyM.Discord.EmbedBuilders.Wrappers;
 using MikyM.Discord.Enums;
@@ -31,29 +30,29 @@ public class PruneModAddReqLogEnricher : EmbedEnricher<PruneReqDto>
 
     public override void Enrich(IDiscordEmbedBuilderWrapper embedBuilder)
     {
-        var (name, pastTense) = base.GetUnderlyingNameAndPastTense();
+        var (name, pastTense) = GetUnderlyingNameAndPastTense();
 
         embedBuilder.AddField("Moderator",
-            ExtendedFormatter.Mention(this.PrimaryEnricher.RequestedOnBehalfOfId, DiscordEntity.Member), true);
+            ExtendedFormatter.Mention(PrimaryEnricher.RequestedOnBehalfOfId, DiscordEntity.Member), true);
 
         embedBuilder.AddField("Channel",
-            ExtendedFormatter.Mention(this.PrimaryEnricher.ChannelId, DiscordEntity.Channel), true);
+            ExtendedFormatter.Mention(PrimaryEnricher.ChannelId, DiscordEntity.Channel), true);
 
-        if (this.PrimaryEnricher.Count.HasValue)
+        if (PrimaryEnricher.Count.HasValue)
             embedBuilder.AddField("Message count",
-                this.PrimaryEnricher.Count.Value.ToString(), true);
+                PrimaryEnricher.Count.Value.ToString(), true);
 
-        if (this.PrimaryEnricher.TargetAuthorId.HasValue)
+        if (PrimaryEnricher.TargetAuthorId.HasValue)
             embedBuilder.AddField("Target author",
-                ExtendedFormatter.Mention(this.PrimaryEnricher.TargetAuthorId.Value, DiscordEntity.Member), true);
+                ExtendedFormatter.Mention(PrimaryEnricher.TargetAuthorId.Value, DiscordEntity.Member), true);
 
-        if (this.PrimaryEnricher.MessageId.HasValue)
+        if (PrimaryEnricher.MessageId.HasValue)
             embedBuilder.AddField("Target message Id",
-                this.PrimaryEnricher.MessageId.Value.ToString(), true);
+                PrimaryEnricher.MessageId.Value.ToString(), true);
 
-        if (this.PrimaryEnricher.IsTargetedMessageDelete.HasValue)
+        if (PrimaryEnricher.IsTargetedMessageDelete.HasValue)
             embedBuilder.AddField("Is targeted message delete",
-            this.PrimaryEnricher.IsTargetedMessageDelete.Value.ToString(), true);
+            PrimaryEnricher.IsTargetedMessageDelete.Value.ToString(), true);
 
         embedBuilder.WithFooter();
     }

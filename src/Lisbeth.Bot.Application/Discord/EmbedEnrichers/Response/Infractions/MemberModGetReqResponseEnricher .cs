@@ -31,28 +31,28 @@ public class MemberModGetReqResponseEnricher : EmbedEnricher<IModEntity>
 
     public override void Enrich(IDiscordEmbedBuilderWrapper embedBuilder)
     {
-        var (name, pastTense) = base.GetUnderlyingNameAndPastTense();
+        var (name, pastTense) = GetUnderlyingNameAndPastTense();
 
-        embedBuilder.AddField("User", ExtendedFormatter.Mention(this.PrimaryEnricher.UserId, DiscordEntity.User), true);
-        embedBuilder.AddField("Moderator", ExtendedFormatter.Mention(this.PrimaryEnricher.AppliedById, DiscordEntity.User),
+        embedBuilder.AddField("User", ExtendedFormatter.Mention(PrimaryEnricher.UserId, DiscordEntity.User), true);
+        embedBuilder.AddField("Moderator", ExtendedFormatter.Mention(PrimaryEnricher.AppliedById, DiscordEntity.User),
             true);
 
-        TimeSpan duration = this.PrimaryEnricher.AppliedUntil.Subtract(DateTime.UtcNow);
-        string lengthString = this.PrimaryEnricher.AppliedUntil == DateTime.MaxValue
+        TimeSpan duration = PrimaryEnricher.AppliedUntil.Subtract(DateTime.UtcNow);
+        string lengthString = PrimaryEnricher.AppliedUntil == DateTime.MaxValue
             ? "Permanent"
             : $"{duration.Days} days, {duration.Hours} hrs, {duration.Minutes} mins";
 
-        embedBuilder.AddField($"{pastTense} on", this.PrimaryEnricher.CreatedAt?.ToString() ?? "Error");
+        embedBuilder.AddField($"{pastTense} on", PrimaryEnricher.CreatedAt?.ToString() ?? "Error");
         embedBuilder.AddField("Length", lengthString, true);
-        embedBuilder.AddField($"{pastTense} until", this.PrimaryEnricher.AppliedUntil.ToString(CultureInfo.CurrentCulture),
+        embedBuilder.AddField($"{pastTense} until", PrimaryEnricher.AppliedUntil.ToString(CultureInfo.CurrentCulture),
             true);
 
-        if (this.PrimaryEnricher.LiftedOn is not null)
+        if (PrimaryEnricher.LiftedOn is not null)
         {
-            embedBuilder.AddField("Lifted on", this.PrimaryEnricher.LiftedOn.Value.ToString(CultureInfo.CurrentCulture));
-            embedBuilder.AddField("Lifted by", ExtendedFormatter.Mention(this.PrimaryEnricher.LiftedById, DiscordEntity.User));
+            embedBuilder.AddField("Lifted on", PrimaryEnricher.LiftedOn.Value.ToString(CultureInfo.CurrentCulture));
+            embedBuilder.AddField("Lifted by", ExtendedFormatter.Mention(PrimaryEnricher.LiftedById, DiscordEntity.User));
         }
 
-        if (!string.IsNullOrWhiteSpace(this.PrimaryEnricher.Reason)) embedBuilder.AddField("Reason", this.PrimaryEnricher.Reason);
+        if (!string.IsNullOrWhiteSpace(PrimaryEnricher.Reason)) embedBuilder.AddField("Reason", PrimaryEnricher.Reason);
     }
 }

@@ -15,6 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Generic;
+using System.Globalization;
+using System.Text.RegularExpressions;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
@@ -24,11 +27,8 @@ using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
 using Lisbeth.Bot.Application.Validation.Reminder;
 using Lisbeth.Bot.Domain.DTOs.Request.Reminder;
 using MikyM.Common.Application.CommandHandlers;
-using NCrontab;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Text.RegularExpressions;
 using MikyM.Common.Utilities.Results;
+using NCrontab;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 
@@ -71,7 +71,7 @@ public class ReminderSlashCommands : ExtendedApplicationCommandModule
         DiscordChannel? channel = null)
     {
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
-            new DiscordInteractionResponseBuilder().AsEphemeral(true));
+            new DiscordInteractionResponseBuilder().AsEphemeral());
         Result<DiscordEmbed> result;
 
         /*
@@ -153,7 +153,7 @@ public class ReminderSlashCommands : ExtendedApplicationCommandModule
                         switch (reminderType)
                         {
                             case ReminderType.Single:
-                                var res = await this._reminderEmbedConfiguratorService.ConfigureAsync(ctx,
+                                var res = await _reminderEmbedConfiguratorService.ConfigureAsync(ctx,
                                     x => x.EmbedConfig, x => x.EmbedConfigId, name);
                                 if (res.IsDefined())
                                     await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(res.Entity));
@@ -163,7 +163,7 @@ public class ReminderSlashCommands : ExtendedApplicationCommandModule
                                             GetUnsuccessfulResultEmbed(res, ctx.Client)));
                                 return;
                             case ReminderType.Recurring:
-                                var resRec = await this._reminderEmbedConfiguratorService.ConfigureAsync(ctx,
+                                var resRec = await _reminderEmbedConfiguratorService.ConfigureAsync(ctx,
                                     x => x.EmbedConfig, x => x.EmbedConfigId, name);
                                 if (resRec.IsDefined())
                                     await ctx.EditResponseAsync(
@@ -194,8 +194,8 @@ public class ReminderSlashCommands : ExtendedApplicationCommandModule
             await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(result.Entity));
         else
             await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder()
-                .AddEmbed(base.GetUnsuccessfulResultEmbed(result, ctx.Client))
-                .AsEphemeral(true));
+                .AddEmbed(GetUnsuccessfulResultEmbed(result, ctx.Client))
+                .AsEphemeral());
     }
 
     [UsedImplicitly]
@@ -205,7 +205,7 @@ public class ReminderSlashCommands : ExtendedApplicationCommandModule
         string cron)
     {
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
-            new DiscordInteractionResponseBuilder().AsEphemeral(true));
+            new DiscordInteractionResponseBuilder().AsEphemeral());
 
         var schedule = CrontabSchedule.TryParse(cron);
         var scheduleOpt = CrontabSchedule.TryParse(cron, new CrontabSchedule.ParseOptions { IncludingSeconds = true });

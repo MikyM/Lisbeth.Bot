@@ -15,11 +15,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Lisbeth.Bot.Domain.Entities.Base;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using Lisbeth.Bot.Domain.Entities.Base;
 using Lisbeth.Bot.Domain.Enums;
 
 // ReSharper disable CollectionNeverUpdated.Local
@@ -156,14 +156,14 @@ public sealed class Guild : SnowflakeEntity
 
     [MemberNotNullWhen(true, nameof(TicketingConfig))]
     public bool IsTicketingModuleEnabled
-        => this.TicketingConfig is not null;
+        => TicketingConfig is not null;
 
     [MemberNotNullWhen(true, nameof(ModerationConfig))]
     public bool IsModerationModuleEnabled
-        => this.ModerationConfig is not null;
+        => ModerationConfig is not null;
 
 
     [MemberNotNullWhen(true, nameof(ModerationConfig))]
     public bool IsReminderModuleEnabled
-        => this.ReminderChannelId is not null;
+        => ReminderChannelId is not null;
 }

@@ -26,10 +26,6 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 [UsedImplicitly]
 public class PrivacyCheckTicketCommandHandler : ICommandHandler<PrivacyCheckTicketCommand, bool>
 {
-    public PrivacyCheckTicketCommandHandler()
-    {
-    }
-
     public async Task<Result<bool>> HandleAsync(PrivacyCheckTicketCommand command)
     {
         if (command is null) throw new ArgumentNullException(nameof(command));

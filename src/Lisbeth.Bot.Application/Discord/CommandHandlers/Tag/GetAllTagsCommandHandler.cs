@@ -15,18 +15,18 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Generic;
+using System.Globalization;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using Lisbeth.Bot.Application.Discord.Commands.Tag;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using MikyM.Common.Application.CommandHandlers;
-using MikyM.Discord.Enums;
-using MikyM.Discord.Interfaces;
-using System.Collections.Generic;
-using System.Globalization;
 using MikyM.Common.Utilities.Results;
 using MikyM.Common.Utilities.Results.Errors;
+using MikyM.Discord.Enums;
+using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Tag;
 

@@ -16,7 +16,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Lisbeth.Bot.Application.Discord.Helpers;
-using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.DTOs.Request.Prune;
 using MikyM.Discord.EmbedBuilders.Wrappers;
 using MikyM.Discord.Enums;
@@ -33,13 +32,13 @@ public class PruneReqResponseEnricher : EmbedEnricher<PruneReqDto>
     public override void Enrich(IDiscordEmbedBuilderWrapper embedBuilder)
     {
         embedBuilder.AddField("Moderator",
-            ExtendedFormatter.Mention(this.PrimaryEnricher.RequestedOnBehalfOfId, DiscordEntity.User), true);
+            ExtendedFormatter.Mention(PrimaryEnricher.RequestedOnBehalfOfId, DiscordEntity.User), true);
         embedBuilder.AddField("Number of deleted messages", _count.ToString(), true);
         embedBuilder.AddField("Channel",
-            ExtendedFormatter.Mention(this.PrimaryEnricher.ChannelId, DiscordEntity.Channel), true);
+            ExtendedFormatter.Mention(PrimaryEnricher.ChannelId, DiscordEntity.Channel), true);
 
-        if (this.PrimaryEnricher.TargetAuthorId is not null)
+        if (PrimaryEnricher.TargetAuthorId is not null)
             embedBuilder.AddField("Target author",
-                ExtendedFormatter.Mention(this.PrimaryEnricher.TargetAuthorId.Value, DiscordEntity.User), true);
+                ExtendedFormatter.Mention(PrimaryEnricher.TargetAuthorId.Value, DiscordEntity.User), true);
     }
 }

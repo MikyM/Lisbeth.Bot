@@ -50,7 +50,7 @@ public class ReminderDataService : CrudDataService<Reminder, LisbethBotDbContext
     {
         var result =
             await base.GetSingleBySpecAsync(
-                new ActiveReminderByNameOrIdAndGuildSpec(req.Name, req.GuildId, req.ReminderId));
+                new ActiveReminderByNameOrIdAndGuildSpec(req.Name ?? string.Empty, req.GuildId, req.ReminderId));
         if (!result.IsDefined(out var reminder)) return Result.FromError(result);
 
         if (reminder.IsRecurring && string.IsNullOrWhiteSpace(req.CronExpression))

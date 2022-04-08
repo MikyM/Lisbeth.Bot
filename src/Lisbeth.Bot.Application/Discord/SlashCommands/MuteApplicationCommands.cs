@@ -62,7 +62,7 @@ public partial class MuteApplicationCommands : ExtendedApplicationCommandModule
         [Option("reason", "Reason for mute")] string reason = "No reason provided")
     {
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
-            new DiscordInteractionResponseBuilder().AsEphemeral(true));
+            new DiscordInteractionResponseBuilder().AsEphemeral());
 
         Result<DiscordEmbed> result;
 
@@ -101,10 +101,10 @@ public partial class MuteApplicationCommands : ExtendedApplicationCommandModule
         if (result.IsDefined())
             await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
                 .AddEmbed(result.Entity)
-                .AsEphemeral(true));
+                .AsEphemeral());
         else
             await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
                 .AddEmbed(GetUnsuccessfulResultEmbed(result, ctx.Client))
-                .AsEphemeral(true));
+                .AsEphemeral());
     }
 }

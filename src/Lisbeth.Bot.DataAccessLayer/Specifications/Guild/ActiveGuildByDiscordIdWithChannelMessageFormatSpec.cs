@@ -25,7 +25,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Specifications.Guild
         {
             Where(x => !x.IsDisabled);
             Where(x => x.GuildId == discordGuildId);
-            Include(x => x.ChannelMessageFormats.Where(y => y.ChannelId == channelId));
+            Include(x => x.ChannelMessageFormats!.Where(y => y.ChannelId == channelId));
         }
     }
 }

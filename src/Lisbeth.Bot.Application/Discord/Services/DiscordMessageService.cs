@@ -15,22 +15,23 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Generic;
+using System.Globalization;
 using AutoMapper;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using DSharpPlus.Exceptions;
 using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Application.Discord.EmbedBuilders;
 using Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response.Prune;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.Domain.DTOs.Request.Prune;
 using Microsoft.Extensions.Logging;
+using MikyM.Common.Utilities.Results;
+using MikyM.Common.Utilities.Results.Errors;
 using MikyM.Discord.EmbedBuilders.Enums;
 using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.Interfaces;
-using System.Collections.Generic;
-using System.Globalization;
-using MikyM.Common.Utilities.Results;
-using MikyM.Common.Utilities.Results.Errors;
 
 namespace Lisbeth.Bot.Application.Discord.Services;
 
@@ -121,7 +122,7 @@ public class DiscordMessageService : IDiscordMessageService
             {
                 targetMessage = await channel.GetMessageAsync(req.MessageId.Value);
             }
-            catch (DSharpPlus.Exceptions.NotFoundException)
+            catch (NotFoundException)
             {
                 return new DiscordNotFoundError("Message with given Id was not found");
             }
@@ -143,7 +144,7 @@ public class DiscordMessageService : IDiscordMessageService
             {
                 targetMessage = await channel.GetMessageAsync(req.MessageId.Value);
             }
-            catch (DSharpPlus.Exceptions.NotFoundException)
+            catch (NotFoundException)
             {
                 return new DiscordNotFoundError("Message with given Id was not found");
             }
@@ -185,7 +186,7 @@ public class DiscordMessageService : IDiscordMessageService
                 {
                     await channel.DeleteMessagesAsync(messagesToDelete);
                 }
-                catch (DSharpPlus.Exceptions.BadRequestException)
+                catch (BadRequestException)
                 {
                     return new InvalidOperationError("Can't batch delete messages older than 14 days");
                 }

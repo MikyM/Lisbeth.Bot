@@ -31,51 +31,51 @@ public class MemberModAddReqResponseEnricher : EmbedEnricher<IApplyInfractionReq
     public IModEntity? Previous { get; }
 
     public bool IsOverlapping =>
-        this.Previous is not null && this.Previous.AppliedUntil > this.PrimaryEnricher.AppliedUntil && !this.Previous.IsDisabled;
+        Previous is not null && Previous.AppliedUntil > PrimaryEnricher.AppliedUntil && !Previous.IsDisabled;
 
     public MemberModAddReqResponseEnricher(IApplyInfractionReq request, DiscordUser target, IModEntity? previous = null) :
         base(request)
     {
-        this.Target = target;
-        this.Previous = previous;
+        Target = target;
+        Previous = previous;
     }
 
     public override void Enrich(IDiscordEmbedBuilderWrapper embedBuilder)
     {
-        var (name, pastTense) = base.GetUnderlyingNameAndPastTense();
+        var (name, pastTense) = GetUnderlyingNameAndPastTense();
         /*embedBuilder.WithAuthor(
             $" {(this.Previous is not null && !this.IsOverlapping ? "Extend " : "")}{name} {(this.Previous is not null && this.IsOverlapping ? "failed " : "")}| {this.Target.GetFullDisplayName()}",
             null, this.Target.AvatarUrl);*/
 
-        if (this.Previous is not null)
+        if (Previous is not null)
         {
-            if (this.IsOverlapping)
+            if (IsOverlapping)
             {
                 embedBuilder.WithDescription(
-                    $"This user has already been {pastTense.ToLower()} until {this.Previous.AppliedUntil} by {ExtendedFormatter.Mention(this.PrimaryEnricher.RequestedOnBehalfOfId, DiscordEntity.User)}");
+                    $"This user has already been {pastTense.ToLower()} until {Previous.AppliedUntil} by {ExtendedFormatter.Mention(PrimaryEnricher.RequestedOnBehalfOfId, DiscordEntity.User)}");
                 return;
             }
 
-            embedBuilder.AddField($"Previous {name.ToLower()} until", this.Previous.AppliedUntil.ToString(CultureInfo.CurrentCulture), true);
+            embedBuilder.AddField($"Previous {name.ToLower()} until", Previous.AppliedUntil.ToString(CultureInfo.CurrentCulture), true);
             embedBuilder.AddField("Previous moderator",
-                $"{ExtendedFormatter.Mention(this.Previous.AppliedById, DiscordEntity.User)}", true);
-            if (!string.IsNullOrWhiteSpace(this.Previous.Reason))
-                embedBuilder.AddField("Previous reason", this.Previous.Reason, true);
+                $"{ExtendedFormatter.Mention(Previous.AppliedById, DiscordEntity.User)}", true);
+            if (!string.IsNullOrWhiteSpace(Previous.Reason))
+                embedBuilder.AddField("Previous reason", Previous.Reason, true);
         }
 
         embedBuilder.WithDescription($"Successfully {pastTense.ToLower()}");
-        embedBuilder.AddField("User mention", this.Target.Mention, true);
+        embedBuilder.AddField("User mention", Target.Mention, true);
         embedBuilder.AddField("Moderator",
-            ExtendedFormatter.Mention(this.PrimaryEnricher.RequestedOnBehalfOfId, DiscordEntity.Member), true);
+            ExtendedFormatter.Mention(PrimaryEnricher.RequestedOnBehalfOfId, DiscordEntity.Member), true);
 
-        TimeSpan duration = this.PrimaryEnricher.AppliedUntil.Subtract(DateTime.UtcNow);
-        string lengthString = this.PrimaryEnricher.AppliedUntil == DateTime.MaxValue
+        TimeSpan duration = PrimaryEnricher.AppliedUntil.Subtract(DateTime.UtcNow);
+        string lengthString = PrimaryEnricher.AppliedUntil == DateTime.MaxValue
             ? "Permanent"
             : $"{duration.Days} days, {duration.Hours} hrs, {duration.Minutes} mins";
 
         embedBuilder.AddField("Length", lengthString, true);
-        embedBuilder.AddField($"{pastTense} until", this.PrimaryEnricher.AppliedUntil.ToString(CultureInfo.CurrentCulture),
+        embedBuilder.AddField($"{pastTense} until", PrimaryEnricher.AppliedUntil.ToString(CultureInfo.CurrentCulture),
             true);
-        if (!string.IsNullOrWhiteSpace(this.PrimaryEnricher.Reason)) embedBuilder.AddField("Reason", this.PrimaryEnricher.Reason);
+        if (!string.IsNullOrWhiteSpace(PrimaryEnricher.Reason)) embedBuilder.AddField("Reason", PrimaryEnricher.Reason);
     }
 }

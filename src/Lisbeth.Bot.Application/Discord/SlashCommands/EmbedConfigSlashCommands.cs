@@ -44,7 +44,7 @@ public class EmbedConfigSlashCommands : ApplicationCommandModule
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
         var result =
-            await this._embedConfigService!.ConfigureAsync(ctx, x => x.EmbedConfig, x => x.EmbedConfigId,
+            await _embedConfigService!.ConfigureAsync(ctx, x => x.EmbedConfig, x => x.EmbedConfigId,
                 parsedId.ToString());
 
         await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(result.Entity));

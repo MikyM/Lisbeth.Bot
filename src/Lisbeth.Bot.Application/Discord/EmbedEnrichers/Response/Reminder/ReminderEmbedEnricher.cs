@@ -29,7 +29,7 @@ public class ReminderEmbedEnricher : EmbedEnricherBase<ReminderResDto, ReminderA
 
     public override void Enrich(IDiscordEmbedBuilderWrapper embedBuilder)
     {
-        string action = this.SecondaryEnricher switch
+        string action = SecondaryEnricher switch
         {
             ReminderActionType.Set => "set",
             ReminderActionType.Reschedule => "rescheduled",
@@ -41,17 +41,17 @@ public class ReminderEmbedEnricher : EmbedEnricherBase<ReminderResDto, ReminderA
         embedBuilder.WithAuthor("Lisbeth reminder service")
             .WithDescription($"Reminder {action} successfully");
 
-        if (this.PrimaryEnricher.IsRecurring)
-            embedBuilder.AddField("Name", this.PrimaryEnricher.Name ?? "Unknown");
+        if (PrimaryEnricher.IsRecurring)
+            embedBuilder.AddField("Name", PrimaryEnricher.Name ?? "Unknown");
 
-        if (this.SecondaryEnricher is not ReminderActionType.Disable)
+        if (SecondaryEnricher is not ReminderActionType.Disable)
         {
             embedBuilder.AddField("Next occurrence",
-                    this.PrimaryEnricher.NextOccurrence.ToUniversalTime().ToString("dd/MM/yyyy hh:mm tt").ToUpper() +
+                    PrimaryEnricher.NextOccurrence.ToUniversalTime().ToString("dd/MM/yyyy hh:mm tt").ToUpper() +
                     " UTC", true)
                 .AddField("Mentions",
-                    string.Join(", ", this.PrimaryEnricher.Mentions ?? throw new InvalidOperationException()), true)
-                .AddField("Text", this.PrimaryEnricher.Text);
+                    string.Join(", ", PrimaryEnricher.Mentions ?? throw new InvalidOperationException()), true)
+                .AddField("Text", PrimaryEnricher.Text ?? string.Empty);
         }
     }
 }

@@ -27,6 +27,6 @@ public class ActiveGuildByDiscordIdWithModerationSpec : Specification<Domain.Ent
     {
         Where(x => !x.IsDisabled);
         Where(x => x.GuildId == discordGuildId);
-        Include(x => x.ModerationConfig).ThenInclude(x => x.MemberWelcomeEmbedConfig);
+        Include(x => x.ModerationConfig).ThenInclude(x => x!.MemberWelcomeEmbedConfig);
     }
 }

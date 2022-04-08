@@ -15,18 +15,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Generic;
 using DSharpPlus;
 using DSharpPlus.Entities;
+using Lisbeth.Bot.Application.Discord.Commands.Ticket;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Microsoft.Extensions.Logging;
 using MikyM.Common.Application.CommandHandlers;
 using MikyM.Common.Utilities.Extensions;
-using MikyM.Discord.Extensions.BaseExtensions;
-using MikyM.Discord.Interfaces;
-using System.Collections.Generic;
-using Lisbeth.Bot.Application.Discord.Commands.Ticket;
 using MikyM.Common.Utilities.Results;
 using MikyM.Common.Utilities.Results.Errors;
+using MikyM.Discord.Extensions.BaseExtensions;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 
@@ -84,7 +83,7 @@ public class OpenTicketCommandHandler : ICommandHandler<OpenTicketCommand>
             if (command.Interaction is not null)
                 await command.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
                     .AddEmbed(failEmbed.Build())
-                    .AsEphemeral(true));
+                    .AsEphemeral());
             return new InvalidOperationError("Member already has an opened ticket in this guild.");
         }
         
@@ -131,7 +130,7 @@ public class OpenTicketCommandHandler : ICommandHandler<OpenTicketCommand>
                 succEmbed.WithDescription($"Ticket created successfully! Channel: {newTicketChannel.Mention}");
                 await command.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
                     .AddEmbed(succEmbed.Build())
-                    .AsEphemeral(true));
+                    .AsEphemeral());
             }
 
             _ticketDataService.BeginUpdate(ticket);

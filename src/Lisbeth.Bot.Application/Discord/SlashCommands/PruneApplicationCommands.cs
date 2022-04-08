@@ -20,7 +20,6 @@ using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
 using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
-using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.DTOs.Request.Prune;
 using MikyM.Common.Utilities.Results;
 
@@ -51,7 +50,7 @@ public partial class PruneApplicationCommands : ExtendedApplicationCommandModule
         [Option("reason", "Reason for ban")] string reason = "No reason provided")
     {
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
-            new DiscordInteractionResponseBuilder().AsEphemeral(true));
+            new DiscordInteractionResponseBuilder().AsEphemeral());
 
         if (count > 99) count = 99;
 
@@ -63,12 +62,12 @@ public partial class PruneApplicationCommands : ExtendedApplicationCommandModule
                 {
                     case 0:
                         var reqNoUsNoMsgId = new PruneReqDto(ctx.Guild.Id, ctx.Channel.Id, ctx.Member.Id, (int)count);
-                        result = await this._discordMessageService.PruneAsync(ctx, reqNoUsNoMsgId);
+                        result = await _discordMessageService.PruneAsync(ctx, reqNoUsNoMsgId);
                         break;
                     default:
                         var reqNoUsWithMsgId =
                             new PruneReqDto(ctx.Guild.Id, ctx.Channel.Id, ctx.Member.Id, null, (ulong)id);
-                        result = await this._discordMessageService.PruneAsync(ctx, reqNoUsWithMsgId);
+                        result = await _discordMessageService.PruneAsync(ctx, reqNoUsWithMsgId);
                         break;
                 }
 
@@ -79,7 +78,7 @@ public partial class PruneApplicationCommands : ExtendedApplicationCommandModule
                     case 0:
                         var reqWithUsNoMsgId = new PruneReqDto(ctx.Guild.Id, ctx.Channel.Id, ctx.Member.Id, null, null,
                             user.Id);
-                        result = await this._discordMessageService.PruneAsync(ctx, reqWithUsNoMsgId);
+                        result = await _discordMessageService.PruneAsync(ctx, reqWithUsNoMsgId);
                         break;
                     default:
                         throw new ArgumentException(nameof(id));
@@ -89,10 +88,10 @@ public partial class PruneApplicationCommands : ExtendedApplicationCommandModule
 
 
         if (!result.Value.IsDefined(out var embed))
-            await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(result, ctx.Client))
-                .AsEphemeral(true));
+            await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(GetUnsuccessfulResultEmbed(result, ctx.Client))
+                .AsEphemeral());
         else
             await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(embed)
-                .AsEphemeral(true));
+                .AsEphemeral());
     }
 }

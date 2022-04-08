@@ -109,7 +109,7 @@ public class MainReminderService : IMainReminderService
                     "Cron expressions with more than 12 occurrences per hour (more frequent than every 5 minutes) are not allowed");
 
             var count = await _reminderDataDataService.LongCountAsync(
-                new ActiveRecurringRemindersPerGuildByNameSpec(req.GuildId, req.Name));
+                new ActiveRecurringRemindersPerGuildByNameSpec(req.GuildId, req.Name ?? string.Empty));
             if (count.Entity != 0)
                 return new DiscordArgumentError(nameof(recGuild.Entity),
                     $"This guild already has a recurring reminder with name: {req.Name}");
@@ -140,7 +140,7 @@ public class MainReminderService : IMainReminderService
         if (req.SetFor.HasValue || !string.IsNullOrWhiteSpace(req.TimeSpanExpression)) // handle single reminder
         {
             var result = await _reminderDataDataService.GetSingleBySpecAsync(
-                new ActiveReminderByNameOrIdAndGuildSpec(req.Name, req.GuildId, req.ReminderId));
+                new ActiveReminderByNameOrIdAndGuildSpec(req.Name ?? string.Empty, req.GuildId, req.ReminderId));
             if (!result.IsDefined(out var reminder)) return Result<ReminderResDto>.FromError(result);
 
             if (req.RequestedOnBehalfOfId != reminder.CreatorId)
@@ -163,7 +163,7 @@ public class MainReminderService : IMainReminderService
             if (!res) return new HangfireError("Hangfire failed to delete the job");
 
             string hangfireId = _backgroundJobClient.Schedule(
-                (IDiscordSendReminderService x) => x.SendReminderAsync((long)result.Entity.Id, ReminderType.Single), setFor.ToUniversalTime(),
+                (IDiscordSendReminderService x) => x.SendReminderAsync(result.Entity.Id, ReminderType.Single), setFor.ToUniversalTime(),
                 "reminder");
 
             req.NewHangfireId = long.Parse(hangfireId);
@@ -181,7 +181,7 @@ public class MainReminderService : IMainReminderService
                 "Cron expressions with more than 12 occurrences per hour (more frequent than every 5 minutes) are not allowed");
 
         var partial = await _reminderDataDataService.GetSingleBySpecAsync(
-            new ActiveRecurringReminderByNameOrIdAndGuildSpec(req.Name, req.GuildId, req.ReminderId));
+            new ActiveRecurringReminderByNameOrIdAndGuildSpec(req.Name ?? string.Empty, req.GuildId, req.ReminderId));
         if (!partial.IsDefined(out var recurringReminder)) return Result<ReminderResDto>.FromError(partial);
 
         if (req.RequestedOnBehalfOfId != recurringReminder.CreatorId)
@@ -207,7 +207,7 @@ public class MainReminderService : IMainReminderService
         {
             case ReminderType.Single:
                 var singleResult = await _reminderDataDataService.GetSingleBySpecAsync(
-                    new ActiveReminderByNameOrIdAndGuildSpec(req.Name, (ulong?)req.GuildId, (long?)req.ReminderId));
+                    new ActiveReminderByNameOrIdAndGuildSpec(req.Name ?? string.Empty, req.GuildId, req.ReminderId));
                 if (!singleResult.IsDefined(out var reminder)) return Result<ReminderResDto>.FromError(singleResult);
 
                 if (req.RequestedOnBehalfOfId != reminder.CreatorId)
@@ -219,11 +219,11 @@ public class MainReminderService : IMainReminderService
 
                 await _reminderDataDataService.DisableAsync(req, true);
 
-                return new ReminderResDto((long)singleResult.Entity.Id, (string?)singleResult.Entity.Name, DateTime.MinValue,
+                return new ReminderResDto(singleResult.Entity.Id, (string?)singleResult.Entity.Name, DateTime.MinValue,
                     singleResult.Entity.Mentions, singleResult.Entity.Text ?? "Text not set");
             case ReminderType.Recurring:
                 var recurringResult = await _reminderDataDataService.GetSingleBySpecAsync(
-                    new ActiveRecurringReminderByNameOrIdAndGuildSpec(req.Name, req.GuildId, req.ReminderId));
+                    new ActiveRecurringReminderByNameOrIdAndGuildSpec(req.Name ?? string.Empty, req.GuildId, req.ReminderId));
                 if (!recurringResult.IsDefined(out var recurringReminder)) return Result<ReminderResDto>.FromError(recurringResult);
 
                 if (req.RequestedOnBehalfOfId != recurringReminder.CreatorId)

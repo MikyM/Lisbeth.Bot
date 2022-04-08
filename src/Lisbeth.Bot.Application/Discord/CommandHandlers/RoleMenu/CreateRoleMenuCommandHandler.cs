@@ -75,7 +75,7 @@ public class CreateRoleMenuCommandHandler : ICommandHandler<CreateRoleMenuComman
         if (!guildResult.IsDefined()) return Result<DiscordMessageBuilder>.FromError(guildResult);
 
         var count = await _roleMenuDataService.LongCountAsync(
-            new RoleMenuByNameAndGuildWithOptionsSpec(command.Dto.Name, command.Dto.GuildId));
+            new RoleMenuByNameAndGuildWithOptionsSpec(command.Dto.Name ?? string.Empty, command.Dto.GuildId));
 
         if (!count.IsDefined(out var countRes) || countRes >= 1)
             return new SameEntityNamePerGuildError("Role menu", command.Dto.Name ?? "null");
@@ -108,7 +108,7 @@ public class CreateRoleMenuCommandHandler : ICommandHandler<CreateRoleMenuComman
             CreatorId = requestingUser.Id,
             GuildId = guild.Id,
             LastEditById = requestingUser.Id,
-            Name = command.Dto.Name,
+            Name = command.Dto.Name ?? string.Empty,
             Text = command.Dto.Text
         };
         roleMenu.CustomSelectComponentId = $"role_menu_{guild.Id}_{roleMenu.Id}";

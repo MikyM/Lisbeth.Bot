@@ -57,14 +57,14 @@ public class AddSnowflakePermissionTagCommandHandler : ICommandHandler<AddSnowfl
         if (!guildRes.IsDefined()) return Result.FromError(guildRes);
 
         var tagRes =
-            await _tagDataService.GetSingleBySpecAsync(new ActiveTagByGuildAndNameSpec(command.Dto.Name,
+            await _tagDataService.GetSingleBySpecAsync(new ActiveTagByGuildAndNameSpec(command.Dto.Name ?? string.Empty,
                 command.Dto.GuildId));
 
         if (!tagRes.IsDefined(out var  tag)) return Result.FromError(tagRes);
 
         if (tag.IsDisabled)
             return new DisabledEntityError(
-                $"Found tag is disabled.");
+                "Found tag is disabled.");
 
         // data req
         DiscordGuild guild = command.Ctx?.Guild ?? await _discord.Client.GetGuildAsync(command.Dto.GuildId);

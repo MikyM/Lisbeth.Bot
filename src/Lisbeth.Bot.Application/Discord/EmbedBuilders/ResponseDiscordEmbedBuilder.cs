@@ -31,11 +31,11 @@ public sealed class ResponseDiscordEmbedBuilder<TType> : EnrichedDiscordEmbedBui
     public ResponseDiscordEmbedBuilder(EnhancedDiscordEmbedBuilder enhanced) : base(enhanced) { }
 
     public ResponseDiscordEmbedBuilder(TType type)
-        => this.ResponseType = type;
+        => ResponseType = type;
 
     public IResponseDiscordEmbedBuilder<TType> WithType(TType action)
     {
-        this.ResponseType = action;
+        ResponseType = action;
         return this;
     }
 
@@ -44,16 +44,16 @@ public sealed class ResponseDiscordEmbedBuilder<TType> : EnrichedDiscordEmbedBui
 
     protected override void Evaluate()
     {
-        if (this.ResponseType is not null or 0) // if not default
-            base.WithAction(this.ResponseType);
-        base.WithActionType(DiscordBotAction.Response);
+        if (ResponseType is not null or 0) // if not default
+            WithAction(ResponseType);
+        WithActionType(DiscordBotAction.Response);
 
         base.Evaluate();
     }
 
     public override IResponseDiscordEmbedBuilder<TType> EnrichFrom<TEnricher>(TEnricher enricher)
     {
-        enricher.Enrich(this.Current);
+        enricher.Enrich(Current);
         return this;
     }
 }

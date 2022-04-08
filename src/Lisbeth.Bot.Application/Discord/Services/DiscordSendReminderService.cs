@@ -15,17 +15,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Generic;
 using DSharpPlus.Entities;
 using Hangfire;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.DataAccessLayer.Specifications.RecurringReminder;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Reminder;
-using MikyM.Discord.Enums;
-using MikyM.Discord.Interfaces;
-using System.Collections.Generic;
 using MikyM.Common.Utilities.Results;
 using MikyM.Common.Utilities.Results.Errors;
 using MikyM.Common.Utilities.Results.Errors.Bases;
+using MikyM.Discord.Enums;
+using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.Services;
 
@@ -63,7 +63,7 @@ public class DiscordSendReminderService : IDiscordSendReminderService
         switch (type)
         {
             case ReminderType.Single:
-                var rem = await _reminderDataDataService.GetSingleBySpecAsync(new ActiveReminderByIdWithEmbedSpec((long)reminderId));
+                var rem = await _reminderDataDataService.GetSingleBySpecAsync(new ActiveReminderByIdWithEmbedSpec(reminderId));
                 if (!rem.IsDefined() || rem.Entity.Guild?.ReminderChannelId is null)
                     return Result.FromError(new NotFoundError());
                 guild = rem.Entity.Guild;

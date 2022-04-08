@@ -15,13 +15,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Diagnostics.CodeAnalysis;
 using DSharpPlus.Entities;
+using DSharpPlus.Exceptions;
 using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Domain.DTOs.Request.Base;
+using MikyM.Common.Utilities.Results;
 using MikyM.Discord.Enums;
 using MikyM.Discord.Interfaces;
-using System.Diagnostics.CodeAnalysis;
-using MikyM.Common.Utilities.Results;
 
 namespace Lisbeth.Bot.Application.Discord.Services;
 
@@ -105,7 +106,7 @@ public class DiscordGuildRequestDataProvider : IDiscordGuildRequestDataProvider
         DiscordMember? member;
         try
         {
-            member = await this.DiscordGuild.GetMemberAsync(userId);
+            member = await DiscordGuild.GetMemberAsync(userId);
 
             if (member is null)
                 return new DiscordNotFoundError(DiscordEntity.Member);
@@ -126,8 +127,8 @@ public class DiscordGuildRequestDataProvider : IDiscordGuildRequestDataProvider
         DiscordMember? member;
         try
         {
-            member = this.InteractionContext?.ResolvedUserMentions?.ElementAtOrDefault(0) as DiscordMember ??
-                     await this.DiscordGuild.GetMemberAsync(userId);
+            member = InteractionContext?.ResolvedUserMentions?.ElementAtOrDefault(0) as DiscordMember ??
+                     await DiscordGuild.GetMemberAsync(userId);
 
             if (member is null)
                 return new DiscordNotFoundError(DiscordEntity.Member);
@@ -140,7 +141,7 @@ public class DiscordGuildRequestDataProvider : IDiscordGuildRequestDataProvider
         return member;
     }
 
-    public async Task<Result<DiscordRole>> GetRoleAsync(ulong roleId)
+    public Task<Result<DiscordRole>> GetRoleAsync(ulong roleId)
     {
         if (!IsInitialized)
             throw new InvalidOperationException();
@@ -148,20 +149,20 @@ public class DiscordGuildRequestDataProvider : IDiscordGuildRequestDataProvider
         DiscordRole? role;
         try
         {
-            role = this.DiscordGuild.GetRole(roleId);
+            role = DiscordGuild.GetRole(roleId);
 
             if (role is null)
-                return new DiscordNotFoundError(DiscordEntity.Role);
+                return Task.FromResult<Result<DiscordRole>>(new DiscordNotFoundError(DiscordEntity.Role));
         }
         catch (Exception ex)
         {
-            return GetErrorFromDiscordException(ex, DiscordEntity.Role);
+            return Task.FromResult<Result<DiscordRole>>(GetErrorFromDiscordException(ex, DiscordEntity.Role));
         }
 
-        return role;
+        return Task.FromResult<Result<DiscordRole>>(role);
     }
 
-    public async Task<Result<DiscordRole>> GetFirstResolvedRoleOrAsync(ulong roleId)
+    public Task<Result<DiscordRole>> GetFirstResolvedRoleOrAsync(ulong roleId)
     {
         if (!IsInitialized)
             throw new InvalidOperationException();
@@ -169,21 +170,21 @@ public class DiscordGuildRequestDataProvider : IDiscordGuildRequestDataProvider
         DiscordRole? role;
         try
         {
-            role = this.InteractionContext?.ResolvedRoleMentions?.ElementAtOrDefault(0) ??
-                   this.DiscordGuild.GetRole(roleId);
+            role = InteractionContext?.ResolvedRoleMentions?.ElementAtOrDefault(0) ??
+                   DiscordGuild.GetRole(roleId);
 
             if (role is null)
-                return new DiscordNotFoundError(DiscordEntity.Role);
+                return Task.FromResult<Result<DiscordRole>>(new DiscordNotFoundError(DiscordEntity.Role));
         }
         catch (Exception ex)
         {
-            return GetErrorFromDiscordException(ex, DiscordEntity.Role);
+            return Task.FromResult<Result<DiscordRole>>(GetErrorFromDiscordException(ex, DiscordEntity.Role));
         }
 
-        return role;
+        return Task.FromResult<Result<DiscordRole>>(role);
     }
 
-    public async Task<Result<DiscordChannel>> GetChannelAsync(ulong channelId)
+    public Task<Result<DiscordChannel>> GetChannelAsync(ulong channelId)
     {
         if (!IsInitialized)
             throw new InvalidOperationException();
@@ -191,20 +192,20 @@ public class DiscordGuildRequestDataProvider : IDiscordGuildRequestDataProvider
         DiscordChannel? channel;
         try
         {
-            channel = this.DiscordGuild.GetChannel(channelId);
+            channel = DiscordGuild.GetChannel(channelId);
 
             if (channel is null)
-                return new DiscordNotFoundError(DiscordEntity.Role);
+                return Task.FromResult<Result<DiscordChannel>>(new DiscordNotFoundError(DiscordEntity.Role));
         }
         catch (Exception ex)
         {
-            return GetErrorFromDiscordException(ex, DiscordEntity.Role);
+            return Task.FromResult<Result<DiscordChannel>>(GetErrorFromDiscordException(ex, DiscordEntity.Role));
         }
 
-        return channel;
+        return Task.FromResult<Result<DiscordChannel>>(channel);
     }
 
-    public async Task<Result<DiscordChannel>> GetFirstResolvedChannelOrAsync(ulong channelId)
+    public Task<Result<DiscordChannel>> GetFirstResolvedChannelOrAsync(ulong channelId)
     {
         if (!IsInitialized)
             throw new InvalidOperationException();
@@ -212,18 +213,18 @@ public class DiscordGuildRequestDataProvider : IDiscordGuildRequestDataProvider
         DiscordChannel? channel;
         try
         {
-            channel = this.InteractionContext?.ResolvedChannelMentions?.ElementAtOrDefault(0) ??
-                      this.DiscordGuild.GetChannel(channelId);
+            channel = InteractionContext?.ResolvedChannelMentions?.ElementAtOrDefault(0) ??
+                      DiscordGuild.GetChannel(channelId);
 
             if (channel is null)
-                return new DiscordNotFoundError(DiscordEntity.Channel);
+                return Task.FromResult<Result<DiscordChannel>>(new DiscordNotFoundError(DiscordEntity.Channel));
         }
         catch (Exception ex)
         {
-            return GetErrorFromDiscordException(ex, DiscordEntity.Channel);
+            return Task.FromResult<Result<DiscordChannel>>(GetErrorFromDiscordException(ex, DiscordEntity.Channel));
         }
 
-        return channel;
+        return Task.FromResult<Result<DiscordChannel>>(channel);
     }
 
     public async Task<Result<(SnowflakeObject Snowflake, DiscordEntity Type)>> GetFirstResolvedSnowflakeOrAsync(ulong id, DiscordEntity? type = null)
@@ -235,19 +236,19 @@ public class DiscordGuildRequestDataProvider : IDiscordGuildRequestDataProvider
         DiscordEntity resultType = DiscordEntity.Guild;
         try
         {
-            snowflake = this.InteractionContext?.ResolvedChannelMentions?.ElementAtOrDefault(0);
+            snowflake = InteractionContext?.ResolvedChannelMentions?.ElementAtOrDefault(0);
             if (snowflake is not null)
             {
                 return (snowflake, DiscordEntity.Channel);
             }
 
-            snowflake = this.InteractionContext?.ResolvedRoleMentions?.ElementAtOrDefault(0);
+            snowflake = InteractionContext?.ResolvedRoleMentions?.ElementAtOrDefault(0);
             if (snowflake is not null)
             {
                 return (snowflake, DiscordEntity.Role);
             }
 
-            snowflake = this.InteractionContext?.ResolvedUserMentions?.ElementAtOrDefault(0) as DiscordMember;
+            snowflake = InteractionContext?.ResolvedUserMentions?.ElementAtOrDefault(0) as DiscordMember;
             if (snowflake is not null)
             {
                 return (snowflake, DiscordEntity.Member);
@@ -304,13 +305,13 @@ public class DiscordGuildRequestDataProvider : IDiscordGuildRequestDataProvider
         DiscordEntity resultType = DiscordEntity.Guild;
         try
         {
-            snowflake = this.InteractionContext?.ResolvedRoleMentions?.ElementAtOrDefault(0);
+            snowflake = InteractionContext?.ResolvedRoleMentions?.ElementAtOrDefault(0);
             if (snowflake is not null)
             {
                 return (snowflake, DiscordEntity.Role);
             }
 
-            snowflake = this.InteractionContext?.ResolvedUserMentions?.ElementAtOrDefault(0) as DiscordMember;
+            snowflake = InteractionContext?.ResolvedUserMentions?.ElementAtOrDefault(0) as DiscordMember;
             if (snowflake is not null)
             {
                 return (snowflake, DiscordEntity.Member);
@@ -347,26 +348,26 @@ public class DiscordGuildRequestDataProvider : IDiscordGuildRequestDataProvider
         return (snowflake, resultType);
     }
 
-    public async Task<Result<DiscordMember>> GetOwnerAsync()
+    public Task<Result<DiscordMember>> GetOwnerAsync()
     {
         if (!IsInitialized)
             throw new InvalidOperationException();
 
-        return this.DiscordGuild.Owner;
+        return Task.FromResult<Result<DiscordMember>>(DiscordGuild.Owner);
     }
 
     private static ResultError GetErrorFromDiscordException(Exception ex, DiscordEntity? entity = null)
     {
         switch (ex)
         {
-            case DSharpPlus.Exceptions.NotFoundException:
+            case NotFoundException:
                 return entity.HasValue ? new DiscordNotFoundError(entity.Value) : new DiscordNotFoundError();
-            case DSharpPlus.Exceptions.UnauthorizedException:
+            case UnauthorizedException:
                 return new DiscordNotAuthorizedError();
-            case DSharpPlus.Exceptions.BadRequestException:
-            case DSharpPlus.Exceptions.RateLimitException:
-            case DSharpPlus.Exceptions.RequestSizeException:
-            case DSharpPlus.Exceptions.ServerErrorException:
+            case BadRequestException:
+            case RateLimitException:
+            case RequestSizeException:
+            case ServerErrorException:
                 return new DiscordError();
             default:
                 return new DiscordError();

@@ -23,7 +23,6 @@ using FluentValidation;
 using Lisbeth.Bot.Application.Discord.Commands.Mute;
 using Lisbeth.Bot.Application.Validation.Mute;
 using Lisbeth.Bot.Application.Validation.Prune;
-using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.DTOs.Request.Mute;
 using Lisbeth.Bot.Domain.DTOs.Request.Prune;
 
@@ -52,11 +51,11 @@ public partial class MuteApplicationCommands
         if (result.IsDefined())
             await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
                 .AddEmbed(result.Entity)
-                .AsEphemeral(true));
+                .AsEphemeral());
         else
             await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
                 .AddEmbed(GetUnsuccessfulResultEmbed(result, ctx.Client))
-                .AsEphemeral(true));
+                .AsEphemeral());
     }
 
     [UsedImplicitly]
@@ -75,11 +74,11 @@ public partial class MuteApplicationCommands
         if (result.IsDefined())
             await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
                 .AddEmbed(result.Entity)
-                .AsEphemeral(true));
+                .AsEphemeral());
         else
             await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
                 .AddEmbed(GetUnsuccessfulResultEmbed(result, ctx.Client))
-                .AsEphemeral(true));
+                .AsEphemeral());
     }
 
     [UsedImplicitly]
@@ -98,11 +97,11 @@ public partial class MuteApplicationCommands
         if (result.IsDefined())
             await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
                 .AddEmbed(result.Entity)
-                .AsEphemeral(true));
+                .AsEphemeral());
         else
             await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
                 .AddEmbed(GetUnsuccessfulResultEmbed(result, ctx.Client))
-                .AsEphemeral(true));
+                .AsEphemeral());
     }
 
     #endregion
@@ -126,11 +125,11 @@ public partial class MuteApplicationCommands
         if (result.IsDefined())
             await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
                 .AddEmbed(result.Entity)
-                .AsEphemeral(true));
+                .AsEphemeral());
         else
             await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
                 .AddEmbed(GetUnsuccessfulResultEmbed(result, ctx.Client))
-                .AsEphemeral(true));
+                .AsEphemeral());
     }
 
     [UsedImplicitly]
@@ -156,11 +155,11 @@ public partial class MuteApplicationCommands
         if (result.IsDefined() && pruneResult.IsDefined())
             await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
                 .AddEmbed(result.Entity)
-                .AsEphemeral(true));
+                .AsEphemeral());
         else
             await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
                 .AddEmbed(GetUnsuccessfulResultEmbed(result, ctx.Client))
-                .AsEphemeral(true));
+                .AsEphemeral());
     }
 
     #endregion

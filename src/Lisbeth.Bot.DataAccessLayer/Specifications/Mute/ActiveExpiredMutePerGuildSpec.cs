@@ -27,6 +27,6 @@ public class ActiveExpiredMutePerGuildSpec : Specification<Domain.Entities.Mute>
         Where(x => x.GuildId == guildId);
         Where(x => x.UserId == targetUserId);
         Where(x => x.AppliedUntil <= DateTime.UtcNow);
-        Where(x => !x.Guild.IsDisabled);
+        Where(x => !x.Guild!.IsDisabled);
     }
 }

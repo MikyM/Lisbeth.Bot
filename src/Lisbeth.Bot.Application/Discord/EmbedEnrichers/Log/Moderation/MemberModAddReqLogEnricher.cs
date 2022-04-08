@@ -31,23 +31,23 @@ public class MemberModAddReqLogEnricher : EmbedEnricher<IApplyInfractionReq>
 
     public override void Enrich(IDiscordEmbedBuilderWrapper embedBuilder)
     {
-        var (name, pastTense) = base.GetUnderlyingNameAndPastTense();
+        var (name, pastTense) = GetUnderlyingNameAndPastTense();
 
         embedBuilder.AddField("Moderator",
-            ExtendedFormatter.Mention(this.PrimaryEnricher.RequestedOnBehalfOfId, DiscordEntity.Member), true);
+            ExtendedFormatter.Mention(PrimaryEnricher.RequestedOnBehalfOfId, DiscordEntity.Member), true);
 
-        embedBuilder.AddField("Target", ExtendedFormatter.Mention(this.PrimaryEnricher.TargetUserId, DiscordEntity.Member),
+        embedBuilder.AddField("Target", ExtendedFormatter.Mention(PrimaryEnricher.TargetUserId, DiscordEntity.Member),
             true);
 
-        TimeSpan duration = this.PrimaryEnricher.AppliedUntil.Subtract(DateTime.UtcNow);
-        string lengthString = this.PrimaryEnricher.AppliedUntil == DateTime.MaxValue
+        TimeSpan duration = PrimaryEnricher.AppliedUntil.Subtract(DateTime.UtcNow);
+        string lengthString = PrimaryEnricher.AppliedUntil == DateTime.MaxValue
             ? "Permanent"
             : $"{duration.Days} days, {duration.Hours} hrs, {duration.Minutes} mins";
 
         embedBuilder.AddField("Length", lengthString, true);
-        embedBuilder.AddField($"{pastTense} until", this.PrimaryEnricher.AppliedUntil.ToString(CultureInfo.CurrentCulture),
+        embedBuilder.AddField($"{pastTense} until", PrimaryEnricher.AppliedUntil.ToString(CultureInfo.CurrentCulture),
             true);
 
-        if (!string.IsNullOrWhiteSpace(this.PrimaryEnricher.Reason)) embedBuilder.AddField("Reason", this.PrimaryEnricher.Reason);
+        if (!string.IsNullOrWhiteSpace(PrimaryEnricher.Reason)) embedBuilder.AddField("Reason", PrimaryEnricher.Reason);
     }
 }

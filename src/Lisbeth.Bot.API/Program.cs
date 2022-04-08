@@ -15,6 +15,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Globalization;
+using System.IO;
+using System.Net.Http;
+using System.Threading;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Hangfire;
@@ -22,23 +26,18 @@ using IdGen;
 using Lisbeth.Bot.API.ExceptionMiddleware;
 using Lisbeth.Bot.API.Helpers;
 using Lisbeth.Bot.Application.Discord.ChatExport;
+using Lisbeth.Bot.Domain;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using MikyM.Common.Domain;
 using MikyM.Discord.EmbedBuilders;
 using Serilog;
 using Serilog.Events;
-using System.Globalization;
-using System.IO;
-using System.Net.Http;
-using System.Text;
-using System.Threading;
-using Lisbeth.Bot.Domain;
-using Microsoft.Extensions.Options;
 
 namespace Lisbeth.Bot.API;
 

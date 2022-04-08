@@ -1,4 +1,8 @@
-﻿using AutoMapper;
+﻿using System.Collections.Generic;
+using System.Globalization;
+using System.Linq.Expressions;
+using System.Text.RegularExpressions;
+using AutoMapper;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
@@ -14,14 +18,10 @@ using Lisbeth.Bot.DataAccessLayer.Specifications.EmbedConfig;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.Domain.Entities.Base;
 using MikyM.Common.Utilities.ExpressionHelpers;
-using MikyM.Discord.EmbedBuilders;
-using MikyM.Discord.Extensions.BaseExtensions;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq.Expressions;
-using System.Text.RegularExpressions;
 using MikyM.Common.Utilities.Results;
 using MikyM.Common.Utilities.Results.Errors;
+using MikyM.Discord.EmbedBuilders;
+using MikyM.Discord.Extensions.BaseExtensions;
 
 namespace Lisbeth.Bot.Application.Discord.Services;
 
@@ -132,7 +132,7 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
 
         if (waitResult.TimedOut)
         {
-            await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(GetTimedOutEmbed(idOrName, true)));
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(GetTimedOutEmbed(idOrName ?? string.Empty, true)));
             return Result<DiscordEmbed>.FromError(new DiscordTimedOutError());
         }
 

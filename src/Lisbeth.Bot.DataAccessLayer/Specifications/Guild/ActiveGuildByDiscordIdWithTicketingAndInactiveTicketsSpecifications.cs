@@ -28,6 +28,6 @@ public class
         Where(x => !x.IsDisabled);
         Where(x => x.GuildId == discordGuildId);
         Include(x => x.TicketingConfig);
-        Include(x => x.Tickets.Where(y => y.IsDisabled));
+        Include(x => x.Tickets!.Where(y => y.IsDisabled));
     }
 }

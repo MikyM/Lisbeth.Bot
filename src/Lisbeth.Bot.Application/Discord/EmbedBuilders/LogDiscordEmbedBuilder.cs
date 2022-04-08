@@ -34,35 +34,35 @@ public sealed class LogDiscordEmbedBuilder : EnrichedDiscordEmbedBuilder, ILogDi
     public LogDiscordEmbedBuilder(EnhancedDiscordEmbedBuilder enhanced) : base(enhanced) { }
 
     public LogDiscordEmbedBuilder(DiscordLog log)
-        => this.Log = log;
+        => Log = log;
 
     public static implicit operator DiscordEmbed(LogDiscordEmbedBuilder builder)
         => builder.Build();
 
     public ILogDiscordEmbedBuilder WithType(DiscordLog log)
     {
-        this.Log = log;
+        Log = log;
         return this;
     }
 
     public ILogDiscordEmbedBuilder WithModerationType(DiscordModeration moderation)
     {
-        this.Moderation = moderation;
+        Moderation = moderation;
         return this;
     }
 
     protected override void Evaluate()
     {
-        if (this.Moderation is not null or 0) // if not null or default
-            base.WithAction(this.Moderation.Value);
-        base.WithActionType(DiscordBotAction.Log);
+        if (Moderation is not null or 0) // if not null or default
+            WithAction(Moderation.Value);
+        WithActionType(DiscordBotAction.Log);
 
         base.Evaluate();
     }
 
     public override ILogDiscordEmbedBuilder EnrichFrom<TEnricher>(TEnricher enricher)
     {
-        enricher.Enrich(base.Current);
+        enricher.Enrich(Current);
         return this;
     }
 }

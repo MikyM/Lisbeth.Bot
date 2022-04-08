@@ -90,12 +90,12 @@ public class GuildDataService : CrudDataService<Guild, LisbethBotDbContext>, IGu
         if (guild.IsReminderModuleEnabled)
             return new InvalidOperationError("Reminder module is already enabled");
 
-        this.BeginUpdate(guild);
+        BeginUpdate(guild);
         guild.ReminderChannelId = req.ChannelId;
 
-        if (shouldSave) await this.CommitAsync();
+        if (shouldSave) await CommitAsync();
 
-        return await this.EnableConfigAsync(req.GuildId, GuildModule.Reminders, shouldSave);
+        return await EnableConfigAsync(req.GuildId, GuildModule.Reminders, shouldSave);
     }
 
     public async Task<Result<Guild>> AddConfigAsync(ModerationConfigReqDto req, bool shouldSave = false)
@@ -146,7 +146,7 @@ public class GuildDataService : CrudDataService<Guild, LisbethBotDbContext>, IGu
                 if (!guild.IsReminderModuleEnabled)
                     return new DisabledEntityError(nameof(guild.ReminderChannelId));
 
-                this.BeginUpdate(guild);
+                BeginUpdate(guild);
                 guild.ReminderChannelId = null;
                 if (shouldSave) await base.CommitAsync();
                 break;

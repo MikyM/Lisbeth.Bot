@@ -18,7 +18,6 @@
 using AutoMapper;
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Domain.DTOs;
-using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.DTOs.Request.Ban;
 using Lisbeth.Bot.Domain.DTOs.Request.ChannelMessageFormat;
 using Lisbeth.Bot.Domain.DTOs.Request.Guild;
@@ -125,7 +124,7 @@ public class AutoMapperProfile : Profile
             .ForMember(dest => dest.ImageUrl, source => source.MapFrom(x => x.Image.Url))
             .ForMember(dest => dest.Fields,
                 source => source.MapFrom(x =>
-                    x.Fields.Select(y => new DiscordFieldDto() { Text = y.Value, Title = y.Name })))
+                    x.Fields.Select(y => new DiscordFieldDto { Text = y.Value, Title = y.Name })))
             .ForMember(dest => dest.Title, source => source.MapFrom(x => x.Title))
             .ForMember(dest => dest.Timestamp, source => source.PreCondition(x => x.Timestamp.HasValue))
             .ForMember(dest => dest.Timestamp, source => source.MapFrom(x => x.Timestamp!.Value.DateTime))

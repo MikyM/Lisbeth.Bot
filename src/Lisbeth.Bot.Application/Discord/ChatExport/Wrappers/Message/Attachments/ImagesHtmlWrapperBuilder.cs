@@ -16,7 +16,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using CronExpressionDescriptor;
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.ChatExport.Models;
 using Lisbeth.Bot.Domain;

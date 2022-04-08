@@ -19,7 +19,6 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
-using Lisbeth.Bot.Domain.DTOs.Request;
 using Lisbeth.Bot.Domain.DTOs.Request.Prune;
 
 // ReSharper disable once CheckNamespace
@@ -35,18 +34,18 @@ public partial class PruneApplicationCommands
     [ContextMenu(ApplicationCommandType.UserContextMenu, "Prune last 10 messages", false)]
     public async Task PruneLastTenUserMenu(ContextMenuContext ctx)
     {
-        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
+        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
 
         var req = new PruneReqDto(ctx.Guild.Id, ctx.Channel.Id, ctx.Member.Id, 10);
 
         var result = await _discordMessageService.PruneAsync(ctx, req);
 
         if (!result.IsDefined(out var embed))
-            await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(result, ctx.Client))
-                .AsEphemeral(true));
+            await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(GetUnsuccessfulResultEmbed(result, ctx.Client))
+                .AsEphemeral());
         else
             await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(embed)
-                .AsEphemeral(true));
+                .AsEphemeral());
     }
 
     #endregion
@@ -58,18 +57,18 @@ public partial class PruneApplicationCommands
     [ContextMenu(ApplicationCommandType.MessageContextMenu, "Prune last 10", false)]
     public async Task PruneLastTenFromThisMessageMenu(ContextMenuContext ctx)
     {
-        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
+        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
 
         var req = new PruneReqDto(ctx.Guild.Id, ctx.Channel.Id, ctx.Member.Id, 10);
 
         var result = await _discordMessageService.PruneAsync(ctx, req);
 
         if (!result.IsDefined(out var embed))
-            await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(result, ctx.Client))
-                .AsEphemeral(true));
+            await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(GetUnsuccessfulResultEmbed(result, ctx.Client))
+                .AsEphemeral());
         else
             await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(embed)
-                .AsEphemeral(true));
+                .AsEphemeral());
     }
 
     [UsedImplicitly]
@@ -77,18 +76,18 @@ public partial class PruneApplicationCommands
     [ContextMenu(ApplicationCommandType.MessageContextMenu, "Prune until this", false)]
     public async Task PruneUntilThisMessageMenu(ContextMenuContext ctx)
     {
-        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
+        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
 
         var req = new PruneReqDto(ctx.Guild.Id, ctx.Channel.Id, ctx.Member.Id, null, ctx.TargetMessage.Id);
 
         var result = await _discordMessageService.PruneAsync(ctx, req);
 
         if (!result.IsDefined(out var embed))
-            await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(result, ctx.Client))
-                .AsEphemeral(true));
+            await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(GetUnsuccessfulResultEmbed(result, ctx.Client))
+                .AsEphemeral());
         else
             await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(embed)
-                .AsEphemeral(true));
+                .AsEphemeral());
     }
 
     [UsedImplicitly]
@@ -96,18 +95,18 @@ public partial class PruneApplicationCommands
     [ContextMenu(ApplicationCommandType.MessageContextMenu, "Prune by author", false)]
     public async Task PruneUntilThisByThisAuthorMessageMenu(ContextMenuContext ctx)
     {
-        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
+        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
 
         var req = new PruneReqDto(ctx.Guild.Id, ctx.Channel.Id, ctx.Member.Id, null, null, ctx.TargetMessage.Author.Id);
 
         var result = await _discordMessageService.PruneAsync(ctx, req);
 
         if (!result.IsDefined(out var embed))
-            await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(result, ctx.Client))
-                .AsEphemeral(true));
+            await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(GetUnsuccessfulResultEmbed(result, ctx.Client))
+                .AsEphemeral());
         else
             await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(embed)
-                .AsEphemeral(true));
+                .AsEphemeral());
     }
 
     #endregion

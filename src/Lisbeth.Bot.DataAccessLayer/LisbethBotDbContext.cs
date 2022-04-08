@@ -25,19 +25,19 @@ public sealed class LisbethBotDbContext : AuditableDbContext
     {
     }
 
-    public DbSet<Guild> Guilds { get; set; }
-    public DbSet<Mute> Mutes { get; set; }
-    public DbSet<Ticket> Tickets { get; set; }
-    public DbSet<Ban> Bans { get; set; }
-    public DbSet<ServerBooster> ServerBoosters { get; set; }
-    public DbSet<Prune> Prunes { get; set; }
-    public DbSet<TicketingConfig> TicketingConfigs { get; set; }
-    public DbSet<ModerationConfig> ModerationConfigs { get; set; }
-    public DbSet<Tag> Tags { get; set; }
-    public DbSet<Reminder> Reminders { get; set; }
-    public DbSet<RoleMenu> RoleMenus { get; set; }
-    public DbSet<EmbedConfig> EmbedConfigs { get; set; }
-    public DbSet<ChannelMessageFormat> ChannelMessageFormats { get; set; }
+    public DbSet<Guild> Guilds { get; set; } = null!;
+    public DbSet<Mute> Mutes { get; set; } = null!;
+    public DbSet<Ticket> Tickets { get; set; } = null!;
+    public DbSet<Ban> Bans { get; set; } = null!;
+    public DbSet<ServerBooster> ServerBoosters { get; set; } = null!;
+    public DbSet<Prune> Prunes { get; set; } = null!;
+    public DbSet<TicketingConfig> TicketingConfigs { get; set; } = null!;
+    public DbSet<ModerationConfig> ModerationConfigs { get; set; } = null!;
+    public DbSet<Tag> Tags { get; set; } = null!;
+    public DbSet<Reminder> Reminders { get; set; } = null!;
+    public DbSet<RoleMenu> RoleMenus { get; set; } = null!;
+    public DbSet<EmbedConfig> EmbedConfigs { get; set; } = null!;
+    public DbSet<ChannelMessageFormat> ChannelMessageFormats { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

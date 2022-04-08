@@ -40,6 +40,6 @@ public class ServerBoosterConfig : IEntityTypeConfiguration<ServerBooster>
             .IsRequired();
 
         builder.Metadata.FindNavigation(nameof(ServerBooster.GuildServerBoosters))
-            .SetPropertyAccessMode(PropertyAccessMode.Field);
+            ?.SetPropertyAccessMode(PropertyAccessMode.Field);
     }
 }

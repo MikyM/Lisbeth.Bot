@@ -1,10 +1,9 @@
-using Imgur.API;
-using Imgur.API.Authentication;
-using Imgur.API.Endpoints;
-using Imgur.API.Models;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
+using Imgur.API.Authentication;
+using Imgur.API.Endpoints;
+using Imgur.API.Models;
 using Lisbeth.Bot.Application.Discord.ChatExport.Wrappers;
 using Lisbeth.Bot.Domain;
 

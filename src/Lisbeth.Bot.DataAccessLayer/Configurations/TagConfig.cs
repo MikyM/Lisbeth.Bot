@@ -15,10 +15,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Lisbeth.Bot.DataAccessLayer.Configurations;
 
@@ -50,7 +50,7 @@ public class TagConfig : IEntityTypeConfiguration<Tag>
                 x => JsonSerializer.Serialize(x,
                     new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull }),
                 x => JsonSerializer.Deserialize<List<ulong>>(x,
-                    new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull }));
+                    new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull }) ?? new List<ulong>());
         builder.Property(x => x.AllowedUserIds)
             .HasColumnName("allowed_user_ids")
             .HasColumnType("text")
@@ -58,7 +58,7 @@ public class TagConfig : IEntityTypeConfiguration<Tag>
                 x => JsonSerializer.Serialize(x,
                     new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull }),
                 x => JsonSerializer.Deserialize<List<ulong>>(x,
-                    new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull }));
+                    new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull }) ?? new List<ulong>());
 
         builder.HasOne(x => x.EmbedConfig)
             .WithOne(x => x.Tag)

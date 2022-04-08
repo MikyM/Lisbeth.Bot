@@ -25,7 +25,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Specifications.Ban
         {
             Where(x => x.UserId == targetUserId);
             Where(x => x.GuildId == guildId);
-            Where(x => !x.Guild.IsDisabled);
+            Where(x => !x.Guild!.IsDisabled);
             Where(x => !x.IsDisabled);
         }
     }

@@ -21,7 +21,6 @@ using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
 using FluentValidation;
-using Lisbeth.Bot.Application.Discord.CommandHandlers.Tag;
 using Lisbeth.Bot.Application.Discord.Commands.Tag;
 using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
 using Lisbeth.Bot.Application.Validation.Tag;
@@ -78,8 +77,8 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
                         .AddEmbeds(getBuilder.Embeds));
                 else
                     await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder()
-                        .AddEmbed(base.GetUnsuccessfulResultEmbed(getRes, ctx.Client))
-                        .AsEphemeral(true));
+                        .AddEmbed(GetUnsuccessfulResultEmbed(getRes, ctx.Client))
+                        .AsEphemeral());
                 break;
             case TagActionType.Create:
                 var addReq = new TagAddReqDto
@@ -95,10 +94,10 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
 
                 if (createRes.IsSuccess)
                     await ctx.EditResponseAsync(
-                        new DiscordWebhookBuilder().AddEmbed(base.GetSuccessfulActionEmbed(ctx.Client)));
+                        new DiscordWebhookBuilder().AddEmbed(GetSuccessfulActionEmbed(ctx.Client)));
                 else
                     await ctx.EditResponseAsync(
-                        new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(createRes, ctx.Client)));
+                        new DiscordWebhookBuilder().AddEmbed(GetUnsuccessfulResultEmbed(createRes, ctx.Client)));
                 break;
             case TagActionType.Edit:
                 var editReq = new TagEditReqDto
@@ -114,10 +113,10 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
 
                 if (editRes.IsSuccess)
                     await ctx.EditResponseAsync(
-                        new DiscordWebhookBuilder().AddEmbed(base.GetSuccessfulActionEmbed(ctx.Client)));
+                        new DiscordWebhookBuilder().AddEmbed(GetSuccessfulActionEmbed(ctx.Client)));
                 else
                     await ctx.EditResponseAsync(
-                        new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(editRes, ctx.Client)));
+                        new DiscordWebhookBuilder().AddEmbed(GetUnsuccessfulResultEmbed(editRes, ctx.Client)));
                 break;
             case TagActionType.Disable:
                 var removeReq = new TagDisableReqDto
@@ -133,10 +132,10 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
 
                 if (disableRes.IsSuccess)
                     await ctx.EditResponseAsync(
-                        new DiscordWebhookBuilder().AddEmbed(base.GetSuccessfulActionEmbed(ctx.Client)));
+                        new DiscordWebhookBuilder().AddEmbed(GetSuccessfulActionEmbed(ctx.Client)));
                 else
                     await ctx.EditResponseAsync(
-                        new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(disableRes, ctx.Client)));
+                        new DiscordWebhookBuilder().AddEmbed(GetUnsuccessfulResultEmbed(disableRes, ctx.Client)));
                 break;
             case TagActionType.ConfigureEmbed:
                 var configRes =
@@ -147,7 +146,7 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
                     await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
                 else
                     await ctx.EditResponseAsync(
-                        new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(configRes, ctx.Client)));
+                        new DiscordWebhookBuilder().AddEmbed(GetUnsuccessfulResultEmbed(configRes, ctx.Client)));
                 break;
             case TagActionType.Send:
                 var sendReq = new TagSendReqDto
@@ -166,10 +165,10 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
 
                 if (sendRes.IsSuccess)
                     await ctx.EditResponseAsync(
-                        new DiscordWebhookBuilder().AddEmbed(base.GetSuccessfulActionEmbed(ctx.Client)));
+                        new DiscordWebhookBuilder().AddEmbed(GetSuccessfulActionEmbed(ctx.Client)));
                 else
                     await ctx.EditResponseAsync(
-                        new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(sendRes, ctx.Client)));
+                        new DiscordWebhookBuilder().AddEmbed(GetUnsuccessfulResultEmbed(sendRes, ctx.Client)));
                 break;
             case TagActionType.AddPermissionFor:
                 var addPermReq = new TagAddSnowflakePermissionReqDto
@@ -188,10 +187,10 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
 
                 if (addPermRes.IsSuccess)
                     await ctx.EditResponseAsync(
-                        new DiscordWebhookBuilder().AddEmbed(base.GetSuccessfulActionEmbed(ctx.Client)));
+                        new DiscordWebhookBuilder().AddEmbed(GetSuccessfulActionEmbed(ctx.Client)));
                 else
                     await ctx.EditResponseAsync(
-                        new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(addPermRes, ctx.Client)));
+                        new DiscordWebhookBuilder().AddEmbed(GetUnsuccessfulResultEmbed(addPermRes, ctx.Client)));
                 break;
             case TagActionType.RevokePermissionFor:
                 var revokePermReq = new TagRevokeSnowflakePermissionReqDto
@@ -211,14 +210,14 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
 
                 if (revokePermRes.IsSuccess)
                     await ctx.EditResponseAsync(
-                        new DiscordWebhookBuilder().AddEmbed(base.GetSuccessfulActionEmbed(ctx.Client)));
+                        new DiscordWebhookBuilder().AddEmbed(GetSuccessfulActionEmbed(ctx.Client)));
                 else
                     await ctx.EditResponseAsync(
                         new DiscordWebhookBuilder().AddEmbed(
-                            base.GetUnsuccessfulResultEmbed(revokePermRes, ctx.Client)));
+                            GetUnsuccessfulResultEmbed(revokePermRes, ctx.Client)));
                 break;
             case TagActionType.List:
-                var getAllReq = new TagGetAllReqDto() { GuildId = ctx.Guild.Id, RequestedOnBehalfOfId = ctx.User.Id };
+                var getAllReq = new TagGetAllReqDto { GuildId = ctx.Guild.Id, RequestedOnBehalfOfId = ctx.User.Id };
 
                 var getAllValidator = new TagGetAllReqValidator(ctx.Client);
                 await getAllValidator.ValidateAndThrowAsync(getAllReq);
@@ -235,7 +234,7 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
                 }
                 else
                     await ctx.EditResponseAsync(
-                        new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(getAllRes, ctx.Client)));
+                        new DiscordWebhookBuilder().AddEmbed(GetUnsuccessfulResultEmbed(getAllRes, ctx.Client)));
 
                 break;
             default:

@@ -22,7 +22,7 @@ using MikyM.Common.DataAccessLayer.Specifications;
 namespace Lisbeth.Bot.DataAccessLayer.Specifications.EmbedConfig;
 
 public class ActiveSnowflakeWithGivenEmbedSpec<T, TEmbedProperty> : Specification<T> where T : SnowflakeDiscordEntity
-    where TEmbedProperty : Domain.Entities.EmbedConfig
+    where TEmbedProperty : Domain.Entities.EmbedConfig?
 {
     public ActiveSnowflakeWithGivenEmbedSpec(Expression<Func<T, TEmbedProperty?>> embedToInclude, ulong guildId)
     {

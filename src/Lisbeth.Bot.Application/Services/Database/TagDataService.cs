@@ -34,7 +34,7 @@ public class TagDataService : CrudDataService<Tag, LisbethBotDbContext>, ITagDat
 
     public async Task<Result> AddAsync(TagAddReqDto req, bool shouldSave = false)
     {
-        var res = await base.LongCountAsync(new ActiveTagByGuildAndNameSpec(req.Name, req.GuildId));
+        var res = await base.LongCountAsync(new ActiveTagByGuildAndNameSpec(req.Name ?? string.Empty, req.GuildId));
         if (res.Entity != 0)
             return new DiscordArgumentError(nameof(req.Name), $"Guild already has a tag named {req.Name}");
 

@@ -15,10 +15,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Security.Claims;
 using AspNetCore.Authentication.ApiKey;
 using AspNetCoreRateLimit;
 using DSharpPlus;
+using DSharpPlus.Entities;
 using DSharpPlus.Interactivity.Enums;
+using DSharpPlus.Interactivity.EventHandling;
 using EasyCaching.InMemory;
 using EFCoreSecondLevelCacheInterceptor;
 using FluentValidation.AspNetCore;
@@ -28,8 +31,12 @@ using Lisbeth.Bot.API.HealthChecks;
 using Lisbeth.Bot.Application.Discord.ApplicationCommands;
 using Lisbeth.Bot.Application.Discord.EventHandlers;
 using Lisbeth.Bot.Application.Discord.SlashCommands;
+using Lisbeth.Bot.Application.Services;
+using Lisbeth.Bot.DataAccessLayer;
+using Lisbeth.Bot.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
@@ -38,13 +45,6 @@ using MikyM.Discord.Extensions.Interactivity;
 using MikyM.Discord.Extensions.SlashCommands;
 using OpenTracing;
 using OpenTracing.Mock;
-using System.Security.Claims;
-using DSharpPlus.Entities;
-using DSharpPlus.Interactivity.EventHandling;
-using Lisbeth.Bot.Application.Services;
-using Lisbeth.Bot.DataAccessLayer;
-using Lisbeth.Bot.Domain;
-using Microsoft.EntityFrameworkCore;
 
 namespace Lisbeth.Bot.API;
 
@@ -92,7 +92,7 @@ public static class ServiceCollectionExtensions
             options.Timeout = TimeSpan.FromSeconds(10);
             //options.ResponseMessage = "Oh noes! Something went wrong!";
 
-            options.PaginationButtons = new PaginationButtons()
+            options.PaginationButtons = new PaginationButtons
             {
                 Stop = new DiscordButtonComponent(ButtonStyle.Danger, "stop", null, false,
                     new DiscordComponentEmoji(862259725785497620)),

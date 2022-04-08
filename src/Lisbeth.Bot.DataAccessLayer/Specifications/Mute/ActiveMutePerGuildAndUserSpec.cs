@@ -26,6 +26,6 @@ public class ActiveMutePerGuildAndUserSpec : Specification<Domain.Entities.Mute>
         Where(x => !x.IsDisabled);
         Where(x => x.GuildId == guildId);
         Where(x => x.UserId == targetUserId);
-        Where(x => !x.Guild.IsDisabled);
+        Where(x => !x.Guild!.IsDisabled);
     }
 }

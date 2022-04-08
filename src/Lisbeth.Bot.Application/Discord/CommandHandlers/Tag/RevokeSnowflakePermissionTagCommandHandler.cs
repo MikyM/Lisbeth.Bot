@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus;
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.Tag;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
@@ -49,8 +48,6 @@ public class RevokeSnowflakePermissionTagCommandHandler : ICommandHandler<Revoke
 
     public async Task<Result> HandleAsync(RevokeSnowflakePermissionTagCommand command)
     {
-        if (command is null) throw new ArgumentNullException(nameof(command));
-
         var guildRes =
             await _guildDataService.GetSingleBySpecAsync(
                 new ActiveGuildByIdSpec(command.Dto.GuildId));
@@ -58,14 +55,14 @@ public class RevokeSnowflakePermissionTagCommandHandler : ICommandHandler<Revoke
         if (!guildRes.IsDefined()) return Result.FromError(guildRes);
 
         var tagRes =
-            await _tagDataService.GetSingleBySpecAsync(new ActiveTagByGuildAndNameSpec(command.Dto.Name,
+            await _tagDataService.GetSingleBySpecAsync(new ActiveTagByGuildAndNameSpec(command.Dto.Name ?? string.Empty,
                 command.Dto.GuildId));
 
         if (!tagRes.IsDefined(out var tag)) return Result.FromError(tagRes);
 
         if (tag.IsDisabled)
             return new DisabledEntityError(
-                $"Found tag is disabled.");
+                "Found tag is disabled.");
 
         // data req
         DiscordGuild guild = command.Ctx?.Guild ?? await _discord.Client.GetGuildAsync(command.Dto.GuildId);

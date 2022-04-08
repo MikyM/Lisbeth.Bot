@@ -16,27 +16,26 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Autofac;
-using DSharpPlus;
-using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
-using Lisbeth.Bot.Application.Discord.ChatExport;
-using Lisbeth.Bot.DataAccessLayer;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Scripting;
-using Microsoft.CodeAnalysis.Scripting;
-using Microsoft.EntityFrameworkCore;
-using MikyM.Common.Domain.Entities;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net.Http;
 using System.Text;
+using DSharpPlus;
+using DSharpPlus.Entities;
 using DSharpPlus.Interactivity.Extensions;
+using DSharpPlus.SlashCommands;
+using DSharpPlus.SlashCommands.Attributes;
+using Lisbeth.Bot.Application.Discord.ChatExport;
 using Lisbeth.Bot.Application.Discord.Exceptions;
 using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
+using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.Domain;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Scripting;
+using Microsoft.CodeAnalysis.Scripting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using MikyM.Common.Domain.Entities;
 using MikyM.Discord.Extensions.BaseExtensions;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands;
@@ -66,7 +65,7 @@ public class OwnerUtilSlashCommands : ExtendedApplicationCommandModule
     public async Task RegisterSlashiesCommand(InteractionContext ctx)
     {
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
-            new DiscordInteractionResponseBuilder().AsEphemeral(true));
+            new DiscordInteractionResponseBuilder().AsEphemeral());
 
         var res = await _discordGuildService.PrepareSlashPermissionsAsync(ctx.Client.Guilds.Values);
 
@@ -89,7 +88,7 @@ public class OwnerUtilSlashCommands : ExtendedApplicationCommandModule
         if (!ctx.User.IsBotOwner(ctx.Client))
             throw new DiscordNotAuthorizedException();
 
-        var res = await this._dataService!.GetAllAsync<AuditLog>();
+        var res = await _dataService!.GetAllAsync<AuditLog>();
 
         if (!res.IsDefined()) throw new InvalidOperationException();
 
@@ -117,8 +116,8 @@ public class OwnerUtilSlashCommands : ExtendedApplicationCommandModule
         var dat = new List<Dictionary<string, string?>>();
         int i;
 
-        using var cmd = this._ctx!.Database.GetDbConnection().CreateCommand();
-        await this._ctx.Database.OpenConnectionAsync();
+        using var cmd = _ctx!.Database.GetDbConnection().CreateCommand();
+        await _ctx.Database.OpenConnectionAsync();
 
         cmd.CommandText = query;
         using var rdr = await cmd.ExecuteReaderAsync();

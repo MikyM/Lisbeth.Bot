@@ -15,15 +15,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Generic;
 using Autofac;
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.Ticket;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Microsoft.Extensions.Logging;
 using MikyM.Common.Application.CommandHandlers;
-using MikyM.Discord.Interfaces;
-using System.Collections.Generic;
 using MikyM.Common.Utilities.Results;
+using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 

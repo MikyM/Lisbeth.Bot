@@ -25,16 +25,16 @@ namespace Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response.Infractions;
 
 public class MemberModDisableReqResponseEnricher : EmbedEnricher<IRevokeInfractionReq>
 {
-    public DiscordUser Target { get; }
+    public DiscordUser? Target { get; }
 
-    public MemberModDisableReqResponseEnricher(IRevokeInfractionReq request, DiscordUser target) : base(request) =>
-        this.Target = target;
+    public MemberModDisableReqResponseEnricher(IRevokeInfractionReq request, DiscordUser? target) : base(request) =>
+        Target = target;
 
     public override void Enrich(IDiscordEmbedBuilderWrapper embedBuilder)
     {
-        embedBuilder.WithDescription($"Successfully {this.GetModerationTypeAndPastTense().PastTense.ToLower()}");
-        embedBuilder.AddField("User mention", this.Target.Mention, true);
+        embedBuilder.WithDescription($"Successfully {GetModerationTypeAndPastTense().PastTense.ToLower()}");
+        embedBuilder.AddField("User mention", Target?.Mention ?? "Unknown", true);
         embedBuilder.AddField("Moderator",
-            ExtendedFormatter.Mention(this.PrimaryEnricher.RequestedOnBehalfOfId, DiscordEntity.Member), true);
+            ExtendedFormatter.Mention(PrimaryEnricher.RequestedOnBehalfOfId, DiscordEntity.Member), true);
     }
 }

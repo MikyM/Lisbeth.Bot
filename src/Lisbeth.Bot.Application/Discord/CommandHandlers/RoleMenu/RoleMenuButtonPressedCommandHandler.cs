@@ -50,7 +50,7 @@ public class RoleMenuButtonPressedCommandHandler : ICommandHandler<RoleMenuButto
         if (!res.IsDefined(out var roleMenu)) return Result.FromError(new NotFoundError());
 
         var memberRoles = ((DiscordMember)command.Interaction.User).Roles;
-        var builder = new DiscordFollowupMessageBuilder().AsEphemeral(true);
+        var builder = new DiscordFollowupMessageBuilder().AsEphemeral();
         var embed = new DiscordEmbedBuilder().WithColor(new DiscordColor(roleMenu.Guild?.EmbedHexColor));
         embed.WithAuthor("Lisbeth Role Menu");
         embed.WithDescription("Please select roles you'd like to get or deselect them to drop them!");

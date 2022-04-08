@@ -15,12 +15,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Generic;
 using AutoMapper;
 using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Ticket;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 using MikyM.Common.DataAccessLayer.UnitOfWork;
-using System.Collections.Generic;
 using MikyM.Common.Utilities.Results;
 using MikyM.Common.Utilities.Results.Errors;
 
@@ -53,7 +53,7 @@ public class TicketDataService : CrudDataService<Ticket, LisbethBotDbContext>, I
         if (req is null) throw new ArgumentNullException(nameof(req));
 
         var res = await base.GetSingleBySpecAsync<Ticket>(new TicketBaseGetSpecifications(null, req.OwnerId,
-            req.GuildId, req.ChannelId, null));
+            req.GuildId, req.ChannelId));
 
         if (!res.IsDefined()) return Result<Ticket>.FromError(res);
 

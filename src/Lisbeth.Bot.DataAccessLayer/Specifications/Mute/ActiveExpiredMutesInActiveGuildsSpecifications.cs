@@ -25,8 +25,8 @@ public class ActiveExpiredMutesInActiveGuildsSpecifications : Specification<Doma
     public ActiveExpiredMutesInActiveGuildsSpecifications()
     {
         Where(x => !x.IsDisabled);
-        Where(x => !x.Guild.IsDisabled);
+        Where(x => !x.Guild!.IsDisabled);
         Where(x => x.AppliedUntil.ToUniversalTime() <= DateTime.UtcNow);
-        OrderBy(x => x.Guild.Id);
+        OrderBy(x => x.Guild!.Id);
     }
 }

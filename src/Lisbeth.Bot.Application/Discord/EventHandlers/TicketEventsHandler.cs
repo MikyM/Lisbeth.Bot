@@ -81,13 +81,13 @@ public class TicketEventsHandler : IDiscordMiscEventsSubscriber, IDiscordChannel
         {
             case nameof(TicketButton.TicketClose):
                 await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
-                    new DiscordInteractionResponseBuilder().AsEphemeral(true));
+                    new DiscordInteractionResponseBuilder().AsEphemeral());
                 var handleCloseButtonReq = new CloseTicketCommand(args.Interaction);
                 await _commandHandlerFactory.GetHandler<ICommandHandler<CloseTicketCommand>>().HandleAsync(handleCloseButtonReq);
                 break;
             case nameof(TicketButton.TicketOpen):
                 await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
-                    new DiscordInteractionResponseBuilder().AsEphemeral(true));
+                    new DiscordInteractionResponseBuilder().AsEphemeral());
                 var openReq = new TicketOpenReqDto { GuildId = args.Guild.Id, RequestedOnBehalfOfId = args.User.Id };
                 await _ticketQueueService.EnqueueAsync(openReq, args.Interaction);
                 break;
@@ -118,7 +118,7 @@ public class TicketEventsHandler : IDiscordMiscEventsSubscriber, IDiscordChannel
                 break;
             case nameof(TicketButton.TicketCloseReject):
                 await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
-                    new DiscordInteractionResponseBuilder().AsEphemeral(true));
+                    new DiscordInteractionResponseBuilder().AsEphemeral());
                 var rejectReq = new RejectCloseTicketCommand(args.Interaction, args.Message);
                 await _commandHandlerFactory.GetHandler<ICommandHandler<RejectCloseTicketCommand>>().HandleAsync(rejectReq);
                 break;

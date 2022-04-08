@@ -72,6 +72,6 @@ public class RoleMenuConfig : IEntityTypeConfiguration<RoleMenu>
             .HasPrincipalKey(x => x.Id);
 
         builder.Metadata.FindNavigation(nameof(RoleMenu.RoleMenuOptions))
-            .SetPropertyAccessMode(PropertyAccessMode.Field);
+            ?.SetPropertyAccessMode(PropertyAccessMode.Field);
     }
 }

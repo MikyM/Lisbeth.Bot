@@ -48,6 +48,6 @@ public class PruneConfig : IEntityTypeConfiguration<Prune>
                 x => JsonSerializer.Serialize(x,
                     new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull }),
                 x => JsonSerializer.Deserialize<List<MessageLog>>(x,
-                    new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull }));
+                    new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull }) ?? new List<MessageLog>());
     }
 }

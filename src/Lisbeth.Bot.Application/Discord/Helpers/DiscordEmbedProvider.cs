@@ -15,16 +15,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Globalization;
+using AutoMapper;
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Domain.DTOs;
 using Lisbeth.Bot.Domain.DTOs.Request.Base;
 using Lisbeth.Bot.Domain.Entities.Base;
+using MikyM.Common.Utilities.Results;
 using MikyM.Discord.Enums;
 using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.Interfaces;
-using System.Globalization;
-using AutoMapper;
-using MikyM.Common.Utilities.Results;
 
 namespace Lisbeth.Bot.Application.Discord.Helpers;
 
@@ -106,18 +106,18 @@ public class DiscordEmbedProvider : IDiscordEmbedProvider
     }
 
     public DiscordEmbedBuilder GetEmbedFromConfig(EmbedConfigDto config)
-        => this.GetEmbedFromConfig(_mapper.Map<EmbedConfig>(config));
+        => GetEmbedFromConfig(_mapper.Map<EmbedConfig>(config));
 
     public DiscordEmbedBuilder GetUnsuccessfulActionEmbed(IResult result)
     {
-        return this.GetUnsuccessfulActionEmbed(result.Error ??
+        return GetUnsuccessfulActionEmbed(result.Error ??
                                           throw new InvalidOperationException(
                                               "Given result does not contain an error"));
     }
 
     public DiscordEmbedBuilder GetUnsuccessfulActionEmbed(IResultError error)
     {
-        return this.GetUnsuccessfulActionEmbed(error.Message);
+        return GetUnsuccessfulActionEmbed(error.Message);
     }
 
     public DiscordEmbedBuilder GetUnsuccessfulActionEmbed(string error)
@@ -133,7 +133,7 @@ public class DiscordEmbedProvider : IDiscordEmbedProvider
         var embed = new DiscordEmbedBuilder();
         embed.WithTitle("Action timed out");
         embed.WithDescription(
-            $"Your interaction timed out, please try again!");
+            "Your interaction timed out, please try again!");
         embed.WithFooter("");
         embed.WithColor(new DiscordColor("#26296e"));
 
@@ -145,7 +145,7 @@ public class DiscordEmbedProvider : IDiscordEmbedProvider
         var embed = new DiscordEmbedBuilder();
         embed.WithTitle("Action succeeded");
         embed.WithDescription(
-            $"Your interaction timed out, please try again!");
+            "Your interaction timed out, please try again!");
         embed.WithFooter("");
         embed.WithColor(new DiscordColor("#26296e"));
 

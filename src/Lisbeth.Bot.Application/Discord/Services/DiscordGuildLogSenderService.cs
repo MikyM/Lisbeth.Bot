@@ -42,7 +42,7 @@ public class DiscordGuildLogSenderService : IDiscordGuildLogSenderService
 
     public async Task<Result> SendAsync(Guild guild, DiscordLog type, DiscordEmbed embed)
     {
-        return await this.SendAsync(guild.GuildId, type, embed);
+        return await SendAsync(guild.GuildId, type, embed);
     }
 
     public async Task<Result> SendAsync(long guildId, DiscordLog type, DiscordEmbed embed)
@@ -52,7 +52,7 @@ public class DiscordGuildLogSenderService : IDiscordGuildLogSenderService
 
         if (!guildRes.IsDefined()) return new NotFoundError();
 
-        return await this.SendAsync(guildRes.Entity.GuildId, type, embed);
+        return await SendAsync(guildRes.Entity.GuildId, type, embed);
     }
 
     public async Task<Result> SendAsync(DiscordGuild discordGuild, DiscordLog type, DiscordEmbed embed)
@@ -82,7 +82,7 @@ public class DiscordGuildLogSenderService : IDiscordGuildLogSenderService
         }
         catch (Exception)
         {
-            return new DiscordError($"Couldn't find the proper log channel.");
+            return new DiscordError("Couldn't find the proper log channel.");
         }
 
         if (target is null) return new DiscordNotFoundError();
@@ -93,7 +93,7 @@ public class DiscordGuildLogSenderService : IDiscordGuildLogSenderService
         }
         catch (Exception)
         {
-            return new DiscordError($"Couldn't send the log to the proper log channel.");
+            return new DiscordError("Couldn't send the log to the proper log channel.");
         }
 
         return Result.FromSuccess();
@@ -103,6 +103,6 @@ public class DiscordGuildLogSenderService : IDiscordGuildLogSenderService
     {
         if (_discordService.Client.Guilds.TryGetValue(discordGuildId, out var guild)) return new DiscordNotFoundError(DiscordEntity.Guild);
 
-        return await this.SendAsync(guild ?? throw new InvalidOperationException("Guild was null."), type, embed);
+        return await SendAsync(guild ?? throw new InvalidOperationException("Guild was null."), type, embed);
     }
 }

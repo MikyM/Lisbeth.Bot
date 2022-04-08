@@ -65,7 +65,7 @@ public class CreateTagCommandHandler : ICommandHandler<CreateTagCommand>
         if (!requestingUser.IsModerator())
             return new DiscordNotAuthorizedError();
 
-        var check = await _tagDataService.LongCountAsync(new ActiveTagByGuildAndNameSpec(command.Dto.Name, command.Dto.GuildId));
+        var check = await _tagDataService.LongCountAsync(new ActiveTagByGuildAndNameSpec(command.Dto.Name ?? string.Empty, command.Dto.GuildId));
 
         if (check.IsDefined(out var count) && count > 0) return new SameEntityNamePerGuildError("Tag", command.Dto.Name!);
 

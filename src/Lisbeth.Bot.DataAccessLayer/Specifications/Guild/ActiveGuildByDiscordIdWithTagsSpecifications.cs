@@ -27,6 +27,6 @@ public class ActiveGuildByDiscordIdWithTagsSpecifications : Specification<Domain
     {
         Where(x => !x.IsDisabled);
         Where(x => x.GuildId == discordGuildId);
-        Include(x => x.Tags).ThenInclude(x => x.EmbedConfig);
+        Include(x => x.Tags).ThenInclude(x => x!.EmbedConfig);
     }
 }

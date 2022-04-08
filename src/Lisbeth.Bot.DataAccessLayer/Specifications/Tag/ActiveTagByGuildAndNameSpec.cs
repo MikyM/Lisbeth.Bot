@@ -26,7 +26,7 @@ public class ActiveTagByGuildAndNameSpec : Specification<Domain.Entities.Tag>
         Where(x => x.Name.ToLower() == name.ToLower());
         Where(x => x.GuildId == guildId);
         Where(x => !x.IsDisabled);
-        Where(x => !x.Guild.IsDisabled);
+        Where(x => !x.Guild!.IsDisabled);
         Include(x => x.EmbedConfig);
     }
 }

@@ -55,7 +55,7 @@ public class TicketSlashCommands : ExtendedApplicationCommandModule
         if (target is null) throw new ArgumentNullException(nameof(target));
 
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
-            new DiscordInteractionResponseBuilder().AsEphemeral(true));
+            new DiscordInteractionResponseBuilder().AsEphemeral());
 
         Result<DiscordEmbed> result;
         switch (action)
@@ -64,14 +64,14 @@ public class TicketSlashCommands : ExtendedApplicationCommandModule
                 var addReq = new TicketAddReqDto(null,  ctx.Guild.Id, ctx.Channel.Id, ctx.User.Id, target.Id);
                 var addReqValidator = new TicketAddReqValidator(ctx.Client);
                 await addReqValidator.ValidateAndThrowAsync(addReq);
-                result = await this._addSnowflakeTicketCommandHandler.HandleAsync(new AddSnowflakeToTicketCommand(addReq, ctx));
+                result = await _addSnowflakeTicketCommandHandler.HandleAsync(new AddSnowflakeToTicketCommand(addReq, ctx));
                 break;
             case TicketActionType.Remove:
                 var removeReq = new TicketRemoveReqDto(null, ctx.Guild.Id, ctx.Channel.Id, ctx.User.Id,
                     target.Id);
                 var removeReqValidator = new TicketRemoveReqValidator(ctx.Client);
                 await removeReqValidator.ValidateAndThrowAsync(removeReq);
-                result = await this._removeSnowflakeCommandHandler.HandleAsync(new RemoveSnowflakeFromTicketCommand(removeReq, ctx));
+                result = await _removeSnowflakeCommandHandler.HandleAsync(new RemoveSnowflakeFromTicketCommand(removeReq, ctx));
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(action), action, null);
@@ -80,10 +80,10 @@ public class TicketSlashCommands : ExtendedApplicationCommandModule
         if (result.IsDefined())
             await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
                 .AddEmbed(result.Entity)
-                .AsEphemeral(true));
+                .AsEphemeral());
         else
             await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
                 .AddEmbed(GetUnsuccessfulResultEmbed(result, ctx.Client))
-                .AsEphemeral(true));
+                .AsEphemeral());
     }
 }

@@ -15,14 +15,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Concurrent;
 using Autofac;
 using DSharpPlus.Entities;
+using Lisbeth.Bot.Application.Discord.Commands.Ticket;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 using Microsoft.Extensions.Logging;
-using MikyM.Common.Utilities;
-using System.Collections.Concurrent;
-using Lisbeth.Bot.Application.Discord.Commands.Ticket;
 using MikyM.Common.Application.CommandHandlers;
+using MikyM.Common.Utilities;
 
 namespace Lisbeth.Bot.Application.Discord.Helpers;
 
@@ -63,11 +63,11 @@ public class TicketQueueService : ITicketQueueService
     }
 
     public bool AddGuildQueue(ulong guildId) 
-        => this._guildQueues.TryAdd(guildId, new ConcurrentTaskQueue());
+        => _guildQueues.TryAdd(guildId, new ConcurrentTaskQueue());
 
 
     public bool RemoveGuildQueue(ulong guildId)
-        => this._guildQueues.TryRemove(guildId, out _);
+        => _guildQueues.TryRemove(guildId, out _);
 
     public async Task EnqueueAsync(TicketOpenReqDto req)
     {

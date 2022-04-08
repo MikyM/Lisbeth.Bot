@@ -17,11 +17,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Globalization;
+using System.Text.RegularExpressions;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using MikyM.Discord.Enums;
-using System.Globalization;
-using System.Text.RegularExpressions;
 
 namespace Lisbeth.Bot.Application.Discord.Helpers;
 

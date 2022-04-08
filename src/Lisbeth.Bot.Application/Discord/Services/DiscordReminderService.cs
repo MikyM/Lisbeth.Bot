@@ -15,15 +15,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Generic;
+using System.Globalization;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.Domain.DTOs.Request.Reminder;
+using MikyM.Common.Utilities.Results;
 using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.Interfaces;
-using System.Collections.Generic;
-using System.Globalization;
-using MikyM.Common.Utilities.Results;
 
 namespace Lisbeth.Bot.Application.Discord.Services;
 
@@ -139,7 +139,7 @@ public class DiscordReminderService : IDiscordReminderService
         if (requestingMember is null) throw new ArgumentNullException(nameof(requestingMember));
         if (req is null) throw new ArgumentNullException(nameof(req));
 
-        if (req.Type is Domain.Enums.ReminderType.Recurring && !requestingMember.IsModerator())
+        if (req.Type is ReminderType.Recurring && !requestingMember.IsModerator())
             return Result<DiscordEmbed>.FromError(new DiscordNotAuthorizedError());
 
         var result = await _guildDataService.GetSingleBySpecAsync<Guild>(new ActiveGuildByIdSpec(req.GuildId));

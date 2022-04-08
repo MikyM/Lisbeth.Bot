@@ -84,7 +84,7 @@ public class RoleMenuSlashCommands : ExtendedApplicationCommandModule
                         .WithContent(builder.Content));
                 else
                     await ctx.EditResponseAsync(
-                        new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(getRes, ctx.Client)));
+                        new DiscordWebhookBuilder().AddEmbed(GetUnsuccessfulResultEmbed(getRes, ctx.Client)));
 
                 break;
             case RoleMenuActionType.Create:
@@ -109,7 +109,7 @@ public class RoleMenuSlashCommands : ExtendedApplicationCommandModule
                         .WithContent(createBuilder.Content));
                 else
                     await ctx.EditResponseAsync(
-                        new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(createRes, ctx.Client)));
+                        new DiscordWebhookBuilder().AddEmbed(GetUnsuccessfulResultEmbed(createRes, ctx.Client)));
                 break;
             case RoleMenuActionType.Edit:
                 if (string.IsNullOrWhiteSpace(name))
@@ -145,13 +145,13 @@ public class RoleMenuSlashCommands : ExtendedApplicationCommandModule
                 //partial = await _discordRoleMenuService.DisableAsync(ctx, removeReq);
                 break;
             case RoleMenuActionType.ConfigureEmbed:
-                var configRes = await this._discordEmbedConfiguratorService.ConfigureAsync(ctx, x => x.EmbedConfig,
+                var configRes = await _discordEmbedConfiguratorService.ConfigureAsync(ctx, x => x.EmbedConfig,
                     x => x.EmbedConfigId, name);
                 if (configRes.IsDefined(out var configEmbed))
                     await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(configEmbed));
                 else
                     await ctx.EditResponseAsync(
-                        new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(configRes, ctx.Client)));
+                        new DiscordWebhookBuilder().AddEmbed(GetUnsuccessfulResultEmbed(configRes, ctx.Client)));
                 break;
             case RoleMenuActionType.Send:
                 if (string.IsNullOrWhiteSpace(name))
@@ -171,10 +171,10 @@ public class RoleMenuSlashCommands : ExtendedApplicationCommandModule
 
                 var sendRes = await _sendRoleMenuHandler.HandleAsync(new SendRoleMenuCommand(sendReq, ctx));
                 if (sendRes.IsSuccess)
-                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(base.GetSuccessfulActionEmbed(ctx.Client)));
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(GetSuccessfulActionEmbed(ctx.Client)));
                 else
                     await ctx.EditResponseAsync(
-                        new DiscordWebhookBuilder().AddEmbed(base.GetUnsuccessfulResultEmbed(sendRes, ctx.Client)));
+                        new DiscordWebhookBuilder().AddEmbed(GetUnsuccessfulResultEmbed(sendRes, ctx.Client)));
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(action), action, null);

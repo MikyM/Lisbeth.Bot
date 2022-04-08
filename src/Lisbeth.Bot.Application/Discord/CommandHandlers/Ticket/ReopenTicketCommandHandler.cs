@@ -61,7 +61,7 @@ public class ReopenTicketCommandHandler : ICommandHandler<ReopenTicketCommand, D
         var res = await _ticketDataService.GetSingleBySpecAsync(
             new TicketByChannelIdOrGuildAndOwnerIdSpec(command.Dto.ChannelId, command.Dto.GuildId, command.Dto.OwnerId));
 
-        if (!res.IsDefined(out var ticket)) return new NotFoundError($"Ticket with given params doesn't exist.");
+        if (!res.IsDefined(out var ticket)) return new NotFoundError("Ticket with given params doesn't exist.");
 
         if (!ticket.IsDisabled)
             return new DisabledEntityError(

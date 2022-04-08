@@ -67,7 +67,7 @@ public class LogTimeoutCommandHandler : ICommandHandler<LogTimeoutCommand>
         {
             if (!command.CommunicationDisabledUntilAfter.HasValue) return Result.FromSuccess();
             var applyDto =
-                new MuteApplyReqDto()
+                new MuteApplyReqDto
                 {
                     GuildId = command.Member.Guild.Id,
                     RequestedOnBehalfOfId = requestingUser.Id,
