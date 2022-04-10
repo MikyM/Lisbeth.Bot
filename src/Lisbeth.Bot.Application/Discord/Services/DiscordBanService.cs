@@ -304,7 +304,7 @@ public class DiscordBanService : IDiscordBanService
         if (!partial.IsDefined(out var idEntityPair)) return Result<DiscordEmbed>.FromError(partial);
 
         return _embedBuilder
-            .WithType(DiscordModeration.Mute)
+            .WithType(DiscordModeration.Ban)
             .EnrichFrom(new MemberModAddReqResponseEnricher(req, target, idEntityPair.FoundEntity))
             .WithCase(idEntityPair.Id)
             .WithEmbedColor(new DiscordColor(guildEntity.EmbedHexColor))
@@ -363,7 +363,7 @@ public class DiscordBanService : IDiscordBanService
         if (!res.IsDefined(out var foundBan)) return Result<DiscordEmbed>.FromError(res);
 
         return _embedBuilder
-            .WithType(DiscordModeration.Mute)
+            .WithType(DiscordModeration.Ban)
             .EnrichFrom(new MemberModDisableReqResponseEnricher(req, target))
             .WithCase(foundBan.Id)
             .WithEmbedColor(new DiscordColor(guildEntity.EmbedHexColor))
@@ -410,7 +410,7 @@ public class DiscordBanService : IDiscordBanService
             .WithAuthorSnowflakeInfo(target)
             .WithFooterSnowflakeInfo(target)
             .AsEnriched<ResponseDiscordEmbedBuilder<DiscordModeration>>()
-            .WithType(DiscordModeration.Mute)
+            .WithType(DiscordModeration.Ban)
             .EnrichFrom(new MemberModGetReqResponseEnricher(foundBan))
             .Build();
     }
