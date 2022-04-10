@@ -104,7 +104,7 @@ public class DiscordBanService : IDiscordBanService
 
         DiscordUser target;
 
-        if (ctx.ResolvedUserMentions is not null)
+        if (ctx.ResolvedUserMentions is not null && ctx.ResolvedUserMentions.Count > 0)
             target = ctx.ResolvedUserMentions[0];
         else
             try

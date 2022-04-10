@@ -37,7 +37,7 @@ public class BanReqValidator : AbstractValidator<BanApplyReqDto>
         RuleFor(x => x.GuildId).NotEmpty();
         RuleFor(x => x.TargetUserId)
             .NotEmpty()
-            .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<BanApplyReqDto>(discord)));
+            .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<BanApplyReqDto>(discord, true)));
         RuleFor(x => x.RequestedOnBehalfOfId)
             .NotEmpty()
             .DependentRules(x => x.SetAsyncValidator(new DiscordUserIdValidator<BanApplyReqDto>(discord)));
