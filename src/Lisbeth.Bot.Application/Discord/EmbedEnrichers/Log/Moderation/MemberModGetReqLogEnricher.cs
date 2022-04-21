@@ -42,10 +42,13 @@ public class MemberModGetReqLogEnricher : EmbedEnricher<IGetInfractionReq>
             var value = argumentValue?.ToString();
 
             if (value is not null)
-                embedBuilder.AddField(argumentName.SplitByCapitalAndConcat(),
+                embedBuilder.AddField(
+                    argumentName == "TargetUserId" ? "Target user mention" : argumentName.SplitByCapitalAndConcat(),
                     argumentName == "TargetUserId"
                         ? ExtendedFormatter.Mention(ulong.Parse(value), DiscordEntity.User)
                         : value);
         }
+        
+        embedBuilder.AddField($"Target User Id", $"[{PrimaryEnricher.TargetUserId}](https://discordapp.com/users/{PrimaryEnricher.TargetUserId})");
     }
 }

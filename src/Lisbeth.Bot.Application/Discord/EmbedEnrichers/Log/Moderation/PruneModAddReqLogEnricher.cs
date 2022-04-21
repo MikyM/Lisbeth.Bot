@@ -32,27 +32,37 @@ public class PruneModAddReqLogEnricher : EmbedEnricher<PruneReqDto>
     {
         var (name, pastTense) = GetUnderlyingNameAndPastTense();
 
-        embedBuilder.AddField("Moderator",
+        embedBuilder.AddField("Moderator mention",
             ExtendedFormatter.Mention(PrimaryEnricher.RequestedOnBehalfOfId, DiscordEntity.Member), true);
+        embedBuilder.AddInvisibleField();
+        embedBuilder.AddField($"Moderator ID and profile",
+            $"[{PrimaryEnricher.RequestedOnBehalfOfId}](https://discordapp.com/users/{PrimaryEnricher.RequestedOnBehalfOfId})", true);
 
-        embedBuilder.AddField("Channel",
+        embedBuilder.AddField("Channel mention",
             ExtendedFormatter.Mention(PrimaryEnricher.ChannelId, DiscordEntity.Channel), true);
-
-        if (PrimaryEnricher.Count.HasValue)
-            embedBuilder.AddField("Message count",
-                PrimaryEnricher.Count.Value.ToString(), true);
+        embedBuilder.AddInvisibleField();
+        embedBuilder.AddField("Channel ID", PrimaryEnricher.ChannelId.ToString(), true);
 
         if (PrimaryEnricher.TargetAuthorId.HasValue)
-            embedBuilder.AddField("Target author",
+        {
+            embedBuilder.AddField("Target author mention",
                 ExtendedFormatter.Mention(PrimaryEnricher.TargetAuthorId.Value, DiscordEntity.Member), true);
+            embedBuilder.AddInvisibleField();
+            embedBuilder.AddField($"Target author ID and profile",
+                $"[{PrimaryEnricher.TargetAuthorId.Value}](https://discordapp.com/users/{PrimaryEnricher.TargetAuthorId.Value})", true);
+        }
 
         if (PrimaryEnricher.MessageId.HasValue)
-            embedBuilder.AddField("Target message Id",
-                PrimaryEnricher.MessageId.Value.ToString(), true);
+            embedBuilder.AddField("Target message ID and link",
+                $"[{PrimaryEnricher.MessageId.Value.ToString()}](https://discordapp.com/channels/{PrimaryEnricher.GuildId}/{PrimaryEnricher.ChannelId}/{PrimaryEnricher.MessageId})");
+        
+        if (PrimaryEnricher.Count.HasValue)
+            embedBuilder.AddField("Message count",
+                PrimaryEnricher.Count.Value.ToString());
 
         if (PrimaryEnricher.IsTargetedMessageDelete.HasValue)
             embedBuilder.AddField("Is targeted message delete",
-            PrimaryEnricher.IsTargetedMessageDelete.Value.ToString(), true);
+            PrimaryEnricher.IsTargetedMessageDelete.Value.ToString());
 
         embedBuilder.WithFooter();
     }

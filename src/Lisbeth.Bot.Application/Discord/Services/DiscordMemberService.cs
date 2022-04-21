@@ -86,10 +86,11 @@ public class DiscordMemberService : IDiscordMemberService
         embed.WithTitle("Member has left the guild");
         embed.AddField("Member's identity", $"{args.Member.GetFullUsername()}", true);
         embed.AddField("Member's mention", $"{args.Member.Mention}", true);
+        embed.AddField("Member's ID and profile", $"[{args.Member.Id}](https://discordapp.com/users/{args.Member.Id})", true);
         embed.AddField("Joined guild", $"{args.Member.JoinedAt.ToString(CultureInfo.CurrentCulture)}");
         embed.AddField("Account created", $"{args.Member.CreationTimestamp.ToString(CultureInfo.CurrentCulture)}");
         embed.WithColor(new DiscordColor(res.Entity.EmbedHexColor));
-        embed.WithFooter($"Member ID: {args.Member.Id}");
+        embed.WithFooter($"Member's User ID: {args.Member.Id}");
 
         if (reasonLeft != "No reason found") embed.AddField("Reason for leaving", reasonLeft);
 

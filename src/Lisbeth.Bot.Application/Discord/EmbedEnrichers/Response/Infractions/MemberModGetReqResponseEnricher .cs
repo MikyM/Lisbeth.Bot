@@ -33,9 +33,14 @@ public class MemberModGetReqResponseEnricher : EmbedEnricher<IModEntity>
     {
         var (name, pastTense) = GetUnderlyingNameAndPastTense();
 
-        embedBuilder.AddField("User", ExtendedFormatter.Mention(PrimaryEnricher.UserId, DiscordEntity.User), true);
-        embedBuilder.AddField("Moderator", ExtendedFormatter.Mention(PrimaryEnricher.AppliedById, DiscordEntity.User),
+        embedBuilder.AddField("User mention", ExtendedFormatter.Mention(PrimaryEnricher.UserId, DiscordEntity.User), true);
+        embedBuilder.AddInvisibleField();
+        embedBuilder.AddField("User ID and profile", $"[{PrimaryEnricher.UserId}](https://discordapp.com/users/{PrimaryEnricher.UserId})", true);
+        
+        embedBuilder.AddField("Moderator mention", ExtendedFormatter.Mention(PrimaryEnricher.AppliedById, DiscordEntity.User),
             true);
+        embedBuilder.AddInvisibleField();
+        embedBuilder.AddField("Moderator ID and profile", $"[{PrimaryEnricher.AppliedById}](https://discordapp.com/users/{PrimaryEnricher.AppliedById})", true);
 
         TimeSpan duration = PrimaryEnricher.AppliedUntil.Subtract(DateTime.UtcNow);
         string lengthString = PrimaryEnricher.AppliedUntil == DateTime.MaxValue
@@ -49,8 +54,9 @@ public class MemberModGetReqResponseEnricher : EmbedEnricher<IModEntity>
 
         if (PrimaryEnricher.LiftedOn is not null)
         {
-            embedBuilder.AddField("Lifted on", PrimaryEnricher.LiftedOn.Value.ToString(CultureInfo.CurrentCulture));
-            embedBuilder.AddField("Lifted by", ExtendedFormatter.Mention(PrimaryEnricher.LiftedById, DiscordEntity.User));
+            embedBuilder.AddField("Lifted on", PrimaryEnricher.LiftedOn.Value.ToString(CultureInfo.CurrentCulture), true);
+            embedBuilder.AddField("Lifted by", ExtendedFormatter.Mention(PrimaryEnricher.LiftedById, DiscordEntity.User), true);
+            embedBuilder.AddField("Lifted by ID and profile", $"[{PrimaryEnricher.LiftedById}](https://discordapp.com/users/{PrimaryEnricher.LiftedById})", true);
         }
 
         if (!string.IsNullOrWhiteSpace(PrimaryEnricher.Reason)) embedBuilder.AddField("Reason", PrimaryEnricher.Reason);

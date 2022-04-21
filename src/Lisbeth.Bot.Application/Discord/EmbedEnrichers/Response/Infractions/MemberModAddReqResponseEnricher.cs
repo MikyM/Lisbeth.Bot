@@ -43,9 +43,6 @@ public class MemberModAddReqResponseEnricher : EmbedEnricher<IApplyInfractionReq
     public override void Enrich(IDiscordEmbedBuilderWrapper embedBuilder)
     {
         var (name, pastTense) = GetUnderlyingNameAndPastTense();
-        /*embedBuilder.WithAuthor(
-            $" {(this.Previous is not null && !this.IsOverlapping ? "Extend " : "")}{name} {(this.Previous is not null && this.IsOverlapping ? "failed " : "")}| {this.Target.GetFullDisplayName()}",
-            null, this.Target.AvatarUrl);*/
 
         if (Previous is not null)
         {
@@ -61,12 +58,19 @@ public class MemberModAddReqResponseEnricher : EmbedEnricher<IApplyInfractionReq
                 $"{ExtendedFormatter.Mention(Previous.AppliedById, DiscordEntity.User)}", true);
             if (!string.IsNullOrWhiteSpace(Previous.Reason))
                 embedBuilder.AddField("Previous reason", Previous.Reason, true);
+            else
+                embedBuilder.AddInvisibleField();
         }
 
         embedBuilder.WithDescription($"Successfully {pastTense.ToLower()}");
-        embedBuilder.AddField("User mention", Target.Mention, true);
-        embedBuilder.AddField("Moderator",
+        embedBuilder.AddField("Target user mention", Target.Mention, true);
+        embedBuilder.AddInvisibleField();
+        embedBuilder.AddField("Target user ID and profile", $"[{Target.Id}](https://discordapp.com/users/{Target.Id})", true);
+        
+        embedBuilder.AddField("Moderator mention",
             ExtendedFormatter.Mention(PrimaryEnricher.RequestedOnBehalfOfId, DiscordEntity.Member), true);
+        embedBuilder.AddInvisibleField();
+        embedBuilder.AddField("Moderator user ID and profile", $"[{PrimaryEnricher.RequestedOnBehalfOfId}](https://discordapp.com/users/{PrimaryEnricher.RequestedOnBehalfOfId})", true);
 
         TimeSpan duration = PrimaryEnricher.AppliedUntil.Subtract(DateTime.UtcNow);
         string lengthString = PrimaryEnricher.AppliedUntil == DateTime.MaxValue

@@ -46,7 +46,7 @@ public class AutofacContainerModule : Module
             options.AddServices();
             options.AddAsyncExecutor();
         });
-        
+
         // pagination stuff
         builder.RegisterType<HttpContextAccessor>().As<IHttpContextAccessor>().SingleInstance();
         builder.Register(x =>
@@ -70,6 +70,5 @@ public class AutofacContainerModule : Module
             })
             .AsSelf()
             .SingleInstance();
-
     }
 }

@@ -24,6 +24,7 @@ using DSharpPlus.Exceptions;
 using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Application.Discord.EmbedBuilders;
 using Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response.Prune;
+using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.Domain.DTOs.Request.Prune;
 using Microsoft.Extensions.Logging;
@@ -260,9 +261,15 @@ public class DiscordMessageService : IDiscordMessageService
         var embed = new DiscordEmbedBuilder();
         embed.WithTitle("Message has been edited");
         embed.WithThumbnail(args.Author.AvatarUrl);
-        embed.AddField("Author", $"{args.Author.GetFullUsername()}", true);
-        embed.AddField("Author mention", $"{args.Message.Author.Mention}", true);
-        embed.AddField("Channel", $"{args.Channel.Mention}", true);
+        
+        embed.AddField("Author's identity", $"{args.Author.GetFullUsername()}", true);
+        embed.AddField("Author's mention", $"{args.Message.Author.Mention}", true);
+        embed.AddField("Author's ID and profile", $"[{args.Message.Author.Id}](https://discordapp.com/users/{args.Message.Author.Id})", true);
+        
+        embed.AddField("Channel's mention", $"{args.Channel.Mention}", true);
+        embed.AddField("Channel's ID", $"{args.Channel.Id}", true);
+        embed.AddField("Message's ID and link", $"[{args.Message.Id}](https://discordapp.com/channels/{args.Guild.Id}/{args.Channel.Id}/{args.Message.Id})", true);
+        
         embed.AddField("Date sent", $"{args.Message.Timestamp.ToString(CultureInfo.CurrentCulture)}");
         embed.AddField("Old content", oldContent);
         embed.AddField("Old attachments", oldAttachmentsString);
@@ -332,9 +339,15 @@ public class DiscordMessageService : IDiscordMessageService
         var embed = new DiscordEmbedBuilder();
 
         embed.WithThumbnail(args.Message.Author.AvatarUrl);
-        embed.AddField("Author", $"{args.Message.Author.GetFullUsername()}", true);
-        embed.AddField("Author mention", $"{args.Message.Author.Mention}", true);
-        embed.AddField("Channel", $"{args.Channel.Mention}", true);
+        
+        embed.AddField("Author's identity", $"{args.Message.Author.GetFullUsername()}", true);
+        embed.AddField("Author's mention", $"{args.Message.Author.Mention}", true);
+        embed.AddField("Author's ID and profile", $"[{args.Message.Author.Id}](https://discordapp.com/users/{args.Message.Author.Id})", true);
+        
+        embed.AddField("Channel's mention", $"{args.Channel.Mention}", true);
+        embed.AddField("Channel's ID", $"{args.Channel.Id}", true);
+        embed.AddField("Message's ID and link", $"[{args.Message.Id}](https://discordapp.com/channels/{args.Guild.Id}/{args.Channel.Id}/{args.Message.Id})", true);
+
         if (filteredBans.Count() != 0)
         {
             embed.WithTitle("Message has been deleted due to ban prune");
@@ -406,9 +419,14 @@ public class DiscordMessageService : IDiscordMessageService
             if (content == "") content = "No content";
 
             embed.WithThumbnail(msg.Author.AvatarUrl);
-            embed.AddField("Author", $"{msg.Author.Username}#{msg.Author.Discriminator}", true);
-            embed.AddField("Author mention", $"{msg.Author.Mention}", true);
-            embed.AddField("Channel", $"{args.Channel.Mention}", true);
+            
+            embed.AddField("Author's identity", $"{msg.Author.GetFullUsername()}", true);
+            embed.AddField("Author's mention", $"{msg.Author.Mention}", true);
+            embed.AddField("Author's ID and profile", $"[{msg.Author.Id}](https://discordapp.com/users/{msg.Author.Id})", true);
+            
+            embed.AddField("Channel's mention", $"{args.Channel.Mention}", true);
+            embed.AddField("Channel's ID", $"{args.Channel.Id}", true);
+            embed.AddField("Message's ID and link", $"[{msg.Id}](https://discordapp.com/channels/{args.Guild.Id}/{args.Channel.Id}/{msg.Id})", true);
 
             if (filtered.Count != 0)
             {

@@ -33,8 +33,14 @@ public class MemberModDisableReqResponseEnricher : EmbedEnricher<IRevokeInfracti
     public override void Enrich(IDiscordEmbedBuilderWrapper embedBuilder)
     {
         embedBuilder.WithDescription($"Successfully {GetModerationTypeAndPastTense().PastTense.ToLower()}");
-        embedBuilder.AddField("User mention", Target?.Mention ?? "Unknown", true);
+        
+        embedBuilder.AddField("Target user mention", Target?.Mention ?? "Unknown", true);
+        embedBuilder.AddInvisibleField();
+        embedBuilder.AddField("Target user ID and profile", $"{(Target?.Mention is not null ? $"[{Target.Id}](https://discordapp.com/users/{Target.Id})" : "Unknown")}", true);
+        
         embedBuilder.AddField("Moderator",
             ExtendedFormatter.Mention(PrimaryEnricher.RequestedOnBehalfOfId, DiscordEntity.Member), true);
+        embedBuilder.AddInvisibleField();
+        embedBuilder.AddField("Moderator user ID and profile", $"[{PrimaryEnricher.RequestedOnBehalfOfId}](https://discordapp.com/users/{PrimaryEnricher.RequestedOnBehalfOfId})", true);
     }
 }

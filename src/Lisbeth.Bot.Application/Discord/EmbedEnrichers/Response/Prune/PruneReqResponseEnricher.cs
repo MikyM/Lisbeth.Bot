@@ -37,8 +37,14 @@ public class PruneReqResponseEnricher : EmbedEnricher<PruneReqDto>
         embedBuilder.AddField("Channel",
             ExtendedFormatter.Mention(PrimaryEnricher.ChannelId, DiscordEntity.Channel), true);
 
-        if (PrimaryEnricher.TargetAuthorId is not null)
-            embedBuilder.AddField("Target author",
-                ExtendedFormatter.Mention(PrimaryEnricher.TargetAuthorId.Value, DiscordEntity.User), true);
+        if (PrimaryEnricher.TargetAuthorId is null)
+            return;
+
+        embedBuilder.AddField("Target author mention",
+            ExtendedFormatter.Mention(PrimaryEnricher.TargetAuthorId.Value, DiscordEntity.User), true);
+        embedBuilder.AddInvisibleField();
+        embedBuilder.AddField("Target author ID and profile",
+            $"[{PrimaryEnricher.TargetAuthorId.Value}](https://discordapp.com/users/{PrimaryEnricher.TargetAuthorId.Value})",
+            true);
     }
 }

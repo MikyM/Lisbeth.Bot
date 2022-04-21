@@ -33,11 +33,18 @@ public class MemberModAddReqLogEnricher : EmbedEnricher<IApplyInfractionReq>
     {
         var (name, pastTense) = GetUnderlyingNameAndPastTense();
 
-        embedBuilder.AddField("Moderator",
+        embedBuilder.AddField("Moderator mention",
             ExtendedFormatter.Mention(PrimaryEnricher.RequestedOnBehalfOfId, DiscordEntity.Member), true);
+        embedBuilder.AddInvisibleField();
+        embedBuilder.AddField($"Moderator ID and profile",
+            $"[{PrimaryEnricher.RequestedOnBehalfOfId}](https://discordapp.com/users/{PrimaryEnricher.RequestedOnBehalfOfId})", true);
 
-        embedBuilder.AddField("Target", ExtendedFormatter.Mention(PrimaryEnricher.TargetUserId, DiscordEntity.Member),
+        embedBuilder.AddField("Target user mention",
+            ExtendedFormatter.Mention(PrimaryEnricher.TargetUserId, DiscordEntity.Member),
             true);
+        embedBuilder.AddInvisibleField();
+        embedBuilder.AddField($"Target user ID and profile",
+            $"[{PrimaryEnricher.TargetUserId}](https://discordapp.com/users/{PrimaryEnricher.TargetUserId})", true);
 
         TimeSpan duration = PrimaryEnricher.AppliedUntil.Subtract(DateTime.UtcNow);
         string lengthString = PrimaryEnricher.AppliedUntil == DateTime.MaxValue
@@ -48,6 +55,9 @@ public class MemberModAddReqLogEnricher : EmbedEnricher<IApplyInfractionReq>
         embedBuilder.AddField($"{pastTense} until", PrimaryEnricher.AppliedUntil.ToString(CultureInfo.CurrentCulture),
             true);
 
-        if (!string.IsNullOrWhiteSpace(PrimaryEnricher.Reason)) embedBuilder.AddField("Reason", PrimaryEnricher.Reason);
+        if (!string.IsNullOrWhiteSpace(PrimaryEnricher.Reason)) 
+            embedBuilder.AddField("Reason", PrimaryEnricher.Reason);
+        else
+            embedBuilder.AddInvisibleField();
     }
 }

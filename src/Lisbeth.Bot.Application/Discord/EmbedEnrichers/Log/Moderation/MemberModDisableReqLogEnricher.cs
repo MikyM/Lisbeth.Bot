@@ -30,10 +30,16 @@ public class MemberModDisableReqLogEnricher : EmbedEnricher<IRevokeInfractionReq
 
     public override void Enrich(IDiscordEmbedBuilderWrapper embedBuilder)
     {
-        embedBuilder.AddField("Moderator",
+        embedBuilder.AddField("Moderator  mention",
             ExtendedFormatter.Mention(PrimaryEnricher.RequestedOnBehalfOfId, DiscordEntity.User), true);
+        embedBuilder.AddInvisibleField();
+        embedBuilder.AddField($"Moderator ID and profile",
+            $"[{PrimaryEnricher.RequestedOnBehalfOfId}](https://discordapp.com/users/{PrimaryEnricher.RequestedOnBehalfOfId})", true);
 
-        embedBuilder.AddField("Target",
+        embedBuilder.AddField("Target user mention",
             ExtendedFormatter.Mention(PrimaryEnricher.TargetUserId, DiscordEntity.User), true);
+        embedBuilder.AddInvisibleField();
+        embedBuilder.AddField($"Target user ID and profile",
+            $"[{PrimaryEnricher.TargetUserId}](https://discordapp.com/users/{PrimaryEnricher.TargetUserId})", true);
     }
 }
