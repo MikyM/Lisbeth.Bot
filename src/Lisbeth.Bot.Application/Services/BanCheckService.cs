@@ -39,7 +39,7 @@ public class BanCheckService : IBanCheckService
 
         var banRes = await _banDataService.GetSingleBySpecAsync(new NonBotBanSpec(targetId, guildId));
 
-        if (banRes.IsDefined(out var ban) && !ban.IsDisabled && ban.CreatedAt < DateTime.UtcNow.Subtract(TimeSpan.FromSeconds(30)))
+        if (banRes.IsDefined(out var ban) && !ban.IsDisabled)
             return;
 
         await _banDataService.AddOrExtendAsync(new BanApplyReqDto(targetId, guildId, requestedOnBehalfOfId,
