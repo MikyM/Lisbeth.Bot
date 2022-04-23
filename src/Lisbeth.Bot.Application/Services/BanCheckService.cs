@@ -1,6 +1,6 @@
 ﻿// This file is part of Lisbeth.Bot project
 //
-// Copyright (C) 2021 Krzysztof Kupisz - MikyM
+// Copyright (C) 2021-2022 Krzysztof Kupisz - MikyM
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -35,12 +35,12 @@ public class BanCheckService : IBanCheckService
 
     public async Task CheckForNonBotBanAsync(ulong targetId, ulong guildId, ulong requestedOnBehalfOfId)
     {
-        await Task.Delay(1000);
+        await Task.Delay(1500);
 
-        var ban = await _banDataService.GetSingleBySpecAsync(
-            new BanBaseGetSpecifications(null, targetId, guildId));
+        var banRes = await _banDataService.GetSingleBySpecAsync(new NonBotBanSpec(targetId, guildId));
 
-        if (!ban.IsDefined()) return;
+        if (banRes.IsDefined(out var ban) && !ban.IsDisabled && ban.CreatedAt < DateTime.UtcNow.Subtract(TimeSpan.FromSeconds(30)))
+            return;
 
         await _banDataService.AddOrExtendAsync(new BanApplyReqDto(targetId, guildId, requestedOnBehalfOfId,
             DateTime.MaxValue));
@@ -48,12 +48,12 @@ public class BanCheckService : IBanCheckService
 
     public async Task CheckForNonBotUnbanAsync(ulong targetId, ulong guildId, ulong requestedOnBehalfOfId)
     {
-        await Task.Delay(1000);
+        await Task.Delay(1500);
 
-        var ban = await _banDataService.GetSingleBySpecAsync(
-            new BanBaseGetSpecifications(null, targetId, guildId));
+        var banRes = await _banDataService.GetSingleBySpecAsync(new NonBotBanSpec(targetId, guildId));
 
-        if (!ban.IsDefined()) return;
+        if (banRes.IsDefined(out var ban) && ban.IsDisabled)
+            return;
 
         await _banDataService.DisableAsync(new BanRevokeReqDto(targetId, guildId, requestedOnBehalfOfId));
     }

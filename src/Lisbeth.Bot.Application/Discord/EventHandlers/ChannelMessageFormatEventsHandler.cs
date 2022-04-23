@@ -1,6 +1,6 @@
 ﻿// This file is part of Lisbeth.Bot project
 //
-// Copyright (C) 2021 Krzysztof Kupisz - MikyM
+// Copyright (C) 2021-2022 Krzysztof Kupisz - MikyM
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -26,12 +26,12 @@ using MikyM.Discord.Interfaces;
 namespace Lisbeth.Bot.Application.Discord.EventHandlers;
 
 [UsedImplicitly]
-public class ChannelMessageFormatEventHandler : IDiscordMessageEventsSubscriber
+public class ChannelMessageFormatEventsHandler : IDiscordMessageEventsSubscriber
 {
     private readonly IDiscordService _discord;
     private readonly ICommandHandler<VerifyMessageFormatCommand, VerifyMessageFormatResDto> _commandHandler;
 
-    public ChannelMessageFormatEventHandler(IDiscordService discord, ICommandHandler<VerifyMessageFormatCommand, VerifyMessageFormatResDto> commandHandler)
+    public ChannelMessageFormatEventsHandler(IDiscordService discord, ICommandHandler<VerifyMessageFormatCommand, VerifyMessageFormatResDto> commandHandler)
     {
         _discord = discord;
         _commandHandler = commandHandler;

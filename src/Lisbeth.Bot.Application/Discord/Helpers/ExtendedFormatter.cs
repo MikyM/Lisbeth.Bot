@@ -1,6 +1,6 @@
 ﻿// This file is part of Lisbeth.Bot project
 //
-// Copyright (C) 2021 Krzysztof Kupisz - MikyM
+// Copyright (C) 2021-2022 Krzysztof Kupisz - MikyM
 // Copyright (c) 2015 Mike Santiago
 // Copyright (c) 2016-2021 DSharpPlus Contributors
 // 

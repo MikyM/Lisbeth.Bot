@@ -1,6 +1,6 @@
 ﻿// This file is part of Lisbeth.Bot project
 //
-// Copyright (C) 2021 Krzysztof Kupisz - MikyM
+// Copyright (C) 2021-2022 Krzysztof Kupisz - MikyM
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -25,11 +25,11 @@ using MikyM.Discord.Events;
 namespace Lisbeth.Bot.Application.Discord.EventHandlers;
 
 [UsedImplicitly]
-public class MuteEventHandlers : IDiscordGuildMemberEventsSubscriber
+public class MuteEventsHandlers : IDiscordGuildMemberEventsSubscriber
 {
     private readonly ICommandHandlerFactory _commandHandlerFactory;
 
-    public MuteEventHandlers(ICommandHandlerFactory commandHandlerFactory)
+    public MuteEventsHandlers(ICommandHandlerFactory commandHandlerFactory)
     {
         _commandHandlerFactory = commandHandlerFactory;
     }

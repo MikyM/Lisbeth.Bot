@@ -1,7 +1,7 @@
 ﻿// This file is part of Lisbeth.Bot project
 //
 // Copyright (C) 2018-2021 Emzi0767
-// Copyright (C) 2021 Krzysztof Kupisz - MikyM
+// Copyright (C) 2021-2022 Krzysztof Kupisz - MikyM
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by

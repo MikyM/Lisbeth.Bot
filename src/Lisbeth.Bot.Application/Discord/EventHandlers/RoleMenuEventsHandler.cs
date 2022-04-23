@@ -1,6 +1,6 @@
 ﻿// This file is part of Lisbeth.Bot project
 //
-// Copyright (C) 2021 Krzysztof Kupisz - MikyM
+// Copyright (C) 2021-2022 Krzysztof Kupisz - MikyM
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -17,27 +17,46 @@
 
 using DSharpPlus;
 using DSharpPlus.EventArgs;
+using Lisbeth.Bot.Application.Discord.Commands.RoleMenu;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Buttons;
-using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Selects;
+using MikyM.Common.Application.CommandHandlers;
 using MikyM.Discord.Events;
 
 namespace Lisbeth.Bot.Application.Discord.EventHandlers;
 
 [UsedImplicitly]
-public class EmbedConfigEventHandler : IDiscordMiscEventsSubscriber
+public class RoleMenuEventsHandler : IDiscordMiscEventsSubscriber
 {
+    private readonly ICommandHandlerFactory _commandHandlerFactory;
+
+    public RoleMenuEventsHandler(ICommandHandlerFactory commandHandlerFactory)
+    {
+        _commandHandlerFactory = commandHandlerFactory;
+    }
+
     public async Task DiscordOnComponentInteractionCreated(DiscordClient sender,
         ComponentInteractionCreateEventArgs args)
     {
         switch (args.Id)
         {
-            case nameof(EmbedConfigSelect.EmbedConfigMainSelect):
-            case nameof(EmbedConfigButton.EmbedConfigConfirm):
-            case nameof(EmbedConfigButton.EmbedConfigAbort):
-            case nameof(EmbedConfigButton.EmbedConfigFinal):
-            case nameof(EmbedConfigButton.EmbedConfigContinue):
+            case nameof(RoleMenuButton.RoleMenuFinalize):
+            case nameof(RoleMenuButton.RoleMenuAddOption):
                 await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
                 break;
+        }
+
+        if (args.Id.StartsWith("role_menu_button"))
+        {
+            await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+            await _commandHandlerFactory.GetHandler<ICommandHandler<RoleMenuButtonPressedCommand>>()
+                .HandleAsync(new RoleMenuButtonPressedCommand(args));
+        }
+
+        if (args.Id.StartsWith("role_menu_") && !args.Id.Contains("button"))
+        {
+            await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+            await _commandHandlerFactory.GetHandler<ICommandHandler<RoleMenuOptionSelectedCommand>>()
+                .HandleAsync(new RoleMenuOptionSelectedCommand(args));
         }
     }
 

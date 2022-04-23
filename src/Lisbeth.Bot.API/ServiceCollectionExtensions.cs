@@ -1,6 +1,6 @@
 ﻿// This file is part of Lisbeth.Bot project
 //
-// Copyright (C) 2021 Krzysztof Kupisz - MikyM
+// Copyright (C) 2021-2022 Krzysztof Kupisz - MikyM
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -117,12 +117,13 @@ public static class ServiceCollectionExtensions
         services.AddDiscordMessageEventsSubscriber<ModerationEventsHandler>();
         services.AddDiscordMiscEventsSubscriber<TicketEventsHandler>();
         services.AddDiscordChannelEventsSubscriber<TicketEventsHandler>();
-        services.AddDiscordMiscEventsSubscriber<EmbedConfigEventHandler>();
+        services.AddDiscordMiscEventsSubscriber<EmbedConfigEventsHandler>();
         services.AddDiscordGuildEventsSubscriber<GuildEventsHandler>();
-        services.AddDiscordMiscEventsSubscriber<RoleMenuEventHandler>();
-        services.AddDiscordGuildMemberEventsSubscriber<MuteEventHandlers>();
-        services.AddDiscordMessageEventsSubscriber<ChannelMessageFormatEventHandler>();
-        services.AddDiscordMessageEventsSubscriber<PhishingEventHandler>();
+        services.AddDiscordMiscEventsSubscriber<RoleMenuEventsHandler>();
+        services.AddDiscordGuildMemberEventsSubscriber<MuteEventsHandlers>();
+        services.AddDiscordMessageEventsSubscriber<ChannelMessageFormatEventsHandler>();
+        services.AddDiscordMessageEventsSubscriber<PhishingEventsHandler>();
+        services.AddDiscordGuildBanEventsSubscriber<BanEventsHandler>();
 
         #endregion
     }

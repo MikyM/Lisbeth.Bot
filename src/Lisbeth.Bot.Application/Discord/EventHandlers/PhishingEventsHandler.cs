@@ -1,7 +1,7 @@
 ﻿// This file is part of Lisbeth.Bot project
 //
 // Copyright (C) 2021 VTPDevelopment - @VelvetThePanda
-// Copyright (C) 2021 Krzysztof Kupisz - MikyM
+// Copyright (C) 2021-2022 Krzysztof Kupisz - MikyM
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -23,11 +23,11 @@ using MikyM.Discord.Events;
 namespace Lisbeth.Bot.Application.Discord.EventHandlers;
 
 [UsedImplicitly]
-public class PhishingEventHandler : IDiscordMessageEventsSubscriber
+public class PhishingEventsHandler : IDiscordMessageEventsSubscriber
 {
     private readonly IDiscordPhishingDetectionService _phishingDetection;
 
-    public PhishingEventHandler(IDiscordPhishingDetectionService phishingDetection)
+    public PhishingEventsHandler(IDiscordPhishingDetectionService phishingDetection)
     {
         _phishingDetection = phishingDetection;
     }
