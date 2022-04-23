@@ -52,7 +52,7 @@ public class BanCheckService : IBanCheckService
 
         var banRes = await _banDataService.GetSingleBySpecAsync(new NonBotBanSpec(targetId, guildId));
 
-        if (banRes.IsDefined(out var ban) && ban.IsDisabled)
+        if (!banRes.IsDefined(out var ban) || ban.IsDisabled)
             return;
 
         await _banDataService.DisableAsync(new BanRevokeReqDto(targetId, guildId, requestedOnBehalfOfId));
