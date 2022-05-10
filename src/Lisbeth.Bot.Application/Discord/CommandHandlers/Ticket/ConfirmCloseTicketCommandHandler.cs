@@ -26,7 +26,7 @@ using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.SelectValues;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Ticket;
 using Microsoft.Extensions.Logging;
-using MikyM.Common.Application.CommandHandlers;
+using MikyM.CommandHandlers;
 using MikyM.Common.Utilities;
 using MikyM.Common.Utilities.Results;
 using MikyM.Common.Utilities.Results.Errors;

@@ -38,7 +38,6 @@ public class GuildEventsHandler : IDiscordGuildEventsSubscriber
     public async Task DiscordOnGuildCreated(DiscordClient sender, GuildCreateEventArgs args)
     {
         await _discordGuildService.HandleGuildCreateAsync(args);
-        _ticketQueueService.AddGuildQueue(args.Guild.Id);
     }
 
     public Task DiscordOnGuildAvailable(DiscordClient sender, GuildCreateEventArgs args)
@@ -65,7 +64,7 @@ public class GuildEventsHandler : IDiscordGuildEventsSubscriber
     public async Task DiscordOnGuildDownloadCompleted(DiscordClient sender, GuildDownloadCompletedEventArgs args)
     {
         await _discordGuildService.PrepareSlashPermissionsAsync(args.Guilds.Values);
-        await _discordGuildService.PrepareBot(args.Guilds.Keys);
+        await _discordGuildService.PrepareBotAsync(args.Guilds.Keys);
     }
 
     public Task DiscordOnGuildEmojisUpdated(DiscordClient sender, GuildEmojisUpdateEventArgs args)

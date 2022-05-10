@@ -53,6 +53,6 @@ public interface IDiscordGuildService
     Task<Result<int>> CreateOverwritesForMutedRoleAsync(InteractionContext ctx, CreateMuteOverwritesReqDto req);
     Task<Result> PrepareSlashPermissionsAsync(IEnumerable<DiscordGuild> guilds);
     Task<Result> PrepareSlashPermissionsAsync(DiscordGuild guild);
-    Task<Result> PrepareBot(IEnumerable<ulong> guildIds);
+    Task<Result> PrepareBotAsync(IEnumerable<ulong> guildIds);
     Task<Result> SetPhishingDetectionAsync(SetPhishingReqDto req);
 }

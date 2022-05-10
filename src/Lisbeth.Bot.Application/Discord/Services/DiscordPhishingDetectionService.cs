@@ -1,7 +1,7 @@
 ﻿//  This file is part of Lisbeth.Bot project
 //
 //  Copyright (C) 2021 VTPDevelopment - @VelvetThePanda
-//  Copyright (C) 2021 Krzysztof Kupisz - MikyM
+//  Copyright (C) 2021-2022 Krzysztof Kupisz - MikyM
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -29,9 +29,8 @@ using Lisbeth.Bot.Domain.DTOs.Request.Ban;
 using Lisbeth.Bot.Domain.DTOs.Request.Mute;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using MikyM.Common.Application.CommandHandlers;
+using MikyM.CommandHandlers;
 using MikyM.Common.Utilities.Results;
-using MikyM.Common.Utilities.Results.Errors.Bases;
 using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.Services;
@@ -45,7 +44,8 @@ namespace Lisbeth.Bot.Application.Discord.Services;
 [UsedImplicitly]
 public sealed class DiscordPhishingDetectionService : IDiscordPhishingDetectionService
 {
-    private const string Phishing = "Message contained a phishing link.";
+    private const string PhishingReason = "Message contained a phishing link.";
+    private const string PhishingSuspiciousReason = "Message contained suspicious content and needs verification:\n\n";
 
     private static readonly Regex LinkRegex =
         new(
@@ -57,13 +57,13 @@ public sealed class DiscordPhishingDetectionService : IDiscordPhishingDetectionS
     private readonly IDiscordService _discord;
     private readonly IDiscordBanService _banService;
     private readonly ICommandHandlerFactory _commandHandlerFactory;
-    private readonly IOptions<BotOptions> _options;
+    private readonly IOptions<BotConfiguration> _options;
     private readonly HttpClient _httpClient;
 
     public DiscordPhishingDetectionService(PhishingGatewayService phishGateway,
         ILogger<DiscordPhishingDetectionService> logger,
         IGuildDataService guildDataService, IDiscordService discord, IDiscordBanService banService,
-        ICommandHandlerFactory commandHandlerFactory, IOptions<BotOptions> options, IHttpClientFactory httpClientFactory)
+        ICommandHandlerFactory commandHandlerFactory, IOptions<BotConfiguration> options, IHttpClientFactory httpClientFactory)
     {
         _phishGateway = phishGateway;
         _logger = logger;
@@ -109,7 +109,7 @@ public sealed class DiscordPhishingDetectionService : IDiscordPhishingDetectionS
 
             if (_phishGateway.IsBlacklisted(link))
             {
-                _logger.LogInformation("Detected phishing link.");
+                _logger.LogInformation("Detected phishing link");
                 return await HandleDetectedPhishingAsync(message);
             }
 
@@ -126,11 +126,20 @@ public sealed class DiscordPhishingDetectionService : IDiscordPhishingDetectionS
                         var shortLink = location.ToString();
                         if (_phishGateway.IsBlacklisted(shortLink))
                         {
-                            _logger.LogInformation("Detected phishing link that was shortened.");
+                            _logger.LogInformation("Detected phishing link that was shortened");
                             return await HandleDetectedPhishingAsync(message);
                         }
                     }
                 }
+            }
+
+            if ((message.Content.Contains("pls") || message.Content.Contains("please") || message.Content.Contains("plz")) 
+                && message.Content.Contains("first game") 
+                && message.Content.Contains("test") 
+                && (message.Content.Contains("pw") || message.Content.Contains("pass") || message.Content.Contains("password")))
+            {
+                _logger.LogInformation("Detected suspicious first game message");
+                return await HandleDetectedPhishingAsync(message, true);
             }
         }
 
@@ -141,31 +150,43 @@ public sealed class DiscordPhishingDetectionService : IDiscordPhishingDetectionS
     ///     Handles a detected phishing link.
     /// </summary>
     /// <param name="message">Message to handle.</param>
-    private async Task<Result> HandleDetectedPhishingAsync(DiscordMessage message)
+    /// <param name="isOnlySuspicious">Whether the content of the message isn't a 100% hit</param>
+    private async Task<Result> HandleDetectedPhishingAsync(DiscordMessage message, bool isOnlySuspicious = false)
     {
-        await message.Channel.DeleteMessageAsync(message);
-
         var res = await _guildDataService.GetSingleBySpecAsync(new ActiveGuildByIdSpec(message.Channel.Guild.Id));
         if (!res.IsDefined(out var config) || config.IsDisabled) return Result.FromSuccess();
+        if (config.PhishingDetection is PhishingDetection.Disabled)
+            return Result.FromSuccess(); // Phishing detection is disabled.
+        
+        await message.Channel.DeleteMessageAsync(message);
 
         var self = _discord.Client.CurrentUser.Id;
+        
+        if (isOnlySuspicious)
+        {
+            var mr = await _commandHandlerFactory
+                .GetHandler<ICommandHandler<ApplyMuteCommand, DiscordEmbed>>()
+                .HandleAsync(new ApplyMuteCommand(new MuteApplyReqDto(message.Author.Id, message.Channel.Guild.Id,
+                    self,
+                    DateTime.UtcNow.AddDays(7), $"{PhishingSuspiciousReason}{message.Content}")));
+            return mr.IsSuccess ? Result.FromSuccess() : Result.FromError(mr);
+        }
 
         switch (config.PhishingDetection)
         {
             case PhishingDetection.Disabled:
-                _logger.LogError("Wrong enum chosen for phis detection");
-                return new ArgumentError(nameof(config.PhishingDetection), "Wrong enum chosen for phis detection");
+                return Result.FromSuccess();
             case PhishingDetection.Mute:
                 var mr = await _commandHandlerFactory
                     .GetHandler<ICommandHandler<ApplyMuteCommand, DiscordEmbed>>()
                     .HandleAsync(new ApplyMuteCommand(new MuteApplyReqDto(message.Author.Id, message.Channel.Guild.Id,
                         self,
-                        DateTime.UtcNow.AddDays(7), Phishing)));
+                        DateTime.UtcNow.AddDays(7), PhishingReason)));
                 return mr.IsSuccess ? Result.FromSuccess() : Result.FromError(mr);
             case PhishingDetection.Kick:
                 try
                 {
-                    await ((DiscordMember)message.Author).RemoveAsync(Phishing);
+                    await ((DiscordMember)message.Author).RemoveAsync(PhishingReason);
                 }
                 catch
                 {
@@ -174,7 +195,7 @@ public sealed class DiscordPhishingDetectionService : IDiscordPhishingDetectionS
                 return Result.FromSuccess();
             case PhishingDetection.Ban:
                 var br = await _banService.BanAsync(new BanApplyReqDto(message.Author.Id,
-                    message.Channel.Guild.Id, self, DateTime.MaxValue, Phishing));
+                    message.Channel.Guild.Id, self, DateTime.MaxValue, PhishingReason));
                 return br.IsSuccess ? Result.FromSuccess() : Result.FromError(br);
             default:
                 throw new ArgumentOutOfRangeException();

@@ -7,14 +7,14 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Models;
 
 public class HtmlMessage : IAsyncHtmlBuilder
 {
-    public HtmlMessage(DiscordMessage message, BotOptions options)
+    public HtmlMessage(DiscordMessage message, BotConfiguration configuration)
     {
         Msg ??= message ?? throw new ArgumentNullException(nameof(message));
-        BotOptions ??= options ?? throw new ArgumentNullException(nameof(options));
+        BotConfiguration ??= configuration ?? throw new ArgumentNullException(nameof(configuration));
     }
 
     public DiscordMessage Msg { get; }
-    public BotOptions BotOptions { get; private set; }
+    public BotConfiguration BotConfiguration { get; private set; }
 
     public async Task<string> BuildAsync()
     {
@@ -32,7 +32,7 @@ public class HtmlMessage : IAsyncHtmlBuilder
 
         if (Msg.Attachments.Count != 0)
         {
-            AttachmentsHtmlWrapperBuilder attachmentsBuilder = new (Msg.Attachments, BotOptions);
+            AttachmentsHtmlWrapperBuilder attachmentsBuilder = new (Msg.Attachments, BotConfiguration);
             attachmentsHtml = await attachmentsBuilder.BuildAsync();
         }
 
@@ -45,9 +45,9 @@ public class HtmlMessage : IAsyncHtmlBuilder
         return $"<div class=\"message\">{messageTop}{messageBot}{attachmentsHtml}{reactionsHtml}</div><hr>";
     }
 
-    public HtmlMessage WithOptions(BotOptions options)
+    public HtmlMessage WithOptions(BotConfiguration configuration)
     {
-        BotOptions = options ?? throw new ArgumentNullException(nameof(options));
+        BotConfiguration = configuration ?? throw new ArgumentNullException(nameof(configuration));
 
         return this;
     }

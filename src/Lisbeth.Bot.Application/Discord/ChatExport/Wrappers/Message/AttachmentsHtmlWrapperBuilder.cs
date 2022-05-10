@@ -25,14 +25,14 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Wrappers.Message;
 
 public class AttachmentsHtmlWrapperBuilder : IAsyncHtmlBuilder
 {
-    public AttachmentsHtmlWrapperBuilder(IReadOnlyList<DiscordAttachment> attachments, BotOptions options)
+    public AttachmentsHtmlWrapperBuilder(IReadOnlyList<DiscordAttachment> attachments, BotConfiguration configuration)
     {
         Attachments ??= attachments ?? throw new ArgumentNullException(nameof(attachments));
-        BotOptions ??= options ?? throw new ArgumentNullException(nameof(options));
+        BotConfiguration ??= configuration ?? throw new ArgumentNullException(nameof(configuration));
     }
 
     public IReadOnlyList<DiscordAttachment> Attachments { get; private set; }
-    public BotOptions BotOptions { get; private set; }
+    public BotConfiguration BotConfiguration { get; private set; }
 
     public async Task<string> BuildAsync()
     {
@@ -46,13 +46,13 @@ public class AttachmentsHtmlWrapperBuilder : IAsyncHtmlBuilder
 
         if (imageAttachments.Count != 0)
         {
-            ImagesHtmlWrapperBuilder imagesBuilder = new(imageAttachments, BotOptions);
+            ImagesHtmlWrapperBuilder imagesBuilder = new(imageAttachments, BotConfiguration);
             imagesHtml = await imagesBuilder.BuildAsync();
         }
 
         if (videoAttachments.Count == 0) return $"<div class=\"attachments\">{imagesHtml}{videosHtml}</div>";
 
-        VideosHtmlWrapperBuilder videosBuilder = new(videoAttachments, BotOptions);
+        VideosHtmlWrapperBuilder videosBuilder = new(videoAttachments, BotConfiguration);
         videosHtml = await videosBuilder.BuildAsync();
 
         return $"<div class=\"attachments\">{imagesHtml}{videosHtml}</div>";
@@ -65,9 +65,9 @@ public class AttachmentsHtmlWrapperBuilder : IAsyncHtmlBuilder
         return this;
     }
 
-    public AttachmentsHtmlWrapperBuilder WithOptions(BotOptions options)
+    public AttachmentsHtmlWrapperBuilder WithOptions(BotConfiguration configuration)
     {
-        BotOptions = options ?? throw new ArgumentNullException(nameof(options));
+        BotConfiguration = configuration ?? throw new ArgumentNullException(nameof(configuration));
 
         return this;
     }

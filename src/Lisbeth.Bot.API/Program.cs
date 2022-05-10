@@ -34,6 +34,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using MikyM.Common.DataAccessLayer;
 using MikyM.Common.Domain;
 using MikyM.Discord.EmbedBuilders;
 using Serilog;
@@ -140,18 +141,18 @@ public class Program
             builder.WebHost.UseSentry();
 
             var app = builder.Build();
-            
+
             // Set shorteners and chat export files
-            var options = app.Services.GetAutofacRoot().Resolve<IOptions<BotOptions>>().Value;
+            var options = app.Services.GetAutofacRoot().Resolve<IOptions<BotConfiguration>>().Value;
             options.SetShorteners(shorteners);
             options.SetChatExportCss(chatExportCss);
             options.SetChatExportJs(chatExportJs);
 
             // Configure IdGen factory
-            IdGeneratorFactory.SetFactory(() => app.Services.GetAutofacRoot().Resolve<IdGenerator>());
+            app.Services.ConfigureIdGeneratorFactory();
             ChatExportHttpClientFactory.SetFactory(() =>
                 app.Services.GetAutofacRoot().Resolve<IHttpClientFactory>().CreateClient());
-
+            
             GlobalConfiguration.Configuration.UseAutofacActivator(app.Services.GetAutofacRoot());
 
             // Configure the HTTP request pipeline.

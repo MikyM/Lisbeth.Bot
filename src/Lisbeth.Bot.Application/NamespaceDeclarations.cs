@@ -1,5 +1,5 @@
-﻿global using MikyM.Common.Application.Services;
-global using MikyM.Common.Application.Interfaces;
+﻿global using MikyM.Common.ApplicationLayer.Services;
+global using MikyM.Common.ApplicationLayer.Interfaces;
 
 global using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 global using Lisbeth.Bot.Application.Extensions;

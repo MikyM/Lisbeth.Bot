@@ -22,7 +22,7 @@ using Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response.Infractions;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Mute;
 using Microsoft.Extensions.Logging;
-using MikyM.Common.Application.CommandHandlers;
+using MikyM.CommandHandlers;
 using MikyM.Common.Utilities.Results;
 using MikyM.Common.Utilities.Results.Errors;
 using MikyM.Discord.EmbedBuilders.Enums;

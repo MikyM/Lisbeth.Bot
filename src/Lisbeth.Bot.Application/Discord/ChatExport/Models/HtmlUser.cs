@@ -7,14 +7,14 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Models;
 
 public class HtmlUser : IAsyncHtmlBuilder
 {
-    public HtmlUser(DiscordUser user, BotOptions options)
+    public HtmlUser(DiscordUser user, BotConfiguration configuration)
     {
         User ??= user ?? throw new ArgumentNullException(nameof(user));
-        BotOptions ??= options ?? throw new ArgumentNullException(nameof(options));
+        BotConfiguration ??= configuration ?? throw new ArgumentNullException(nameof(configuration));
     }
 
     public DiscordUser User { get; }
-    public BotOptions BotOptions { get; }
+    public BotConfiguration BotConfiguration { get; }
 
     public Task<string> BuildAsync()
     {
@@ -23,7 +23,7 @@ public class HtmlUser : IAsyncHtmlBuilder
 
     public async Task<string> BuildAvatar()
     {
-        var avatar = new HtmlImage(User.AvatarUrl, BotOptions);
+        var avatar = new HtmlImage(User.AvatarUrl, BotConfiguration);
         var url = await avatar.GetImgurLinkAsync();
 
         return $"<img class=\"avatar\" src={url}/>";

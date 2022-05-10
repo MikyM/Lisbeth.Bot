@@ -298,7 +298,7 @@ public static class ServiceCollectionExtensions
 
     public static void ConfigureBotOptions(this IServiceCollection services)
     {
-        services.AddOptions<BotOptions>()
+        services.AddOptions<BotConfiguration>()
             .BindConfiguration("BotOptions", options => options.BindNonPublicProperties = true);
     }
 }

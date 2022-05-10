@@ -21,7 +21,7 @@ using System;
 
 namespace Lisbeth.Bot.Domain;
 
-public class BotOptions
+public class BotConfiguration
 {
     public string? VimeoApiKey { get; private set; }
     public string? ImgurApiKey { get; private set; }

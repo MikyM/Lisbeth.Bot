@@ -1,7 +1,7 @@
 ﻿//  This file is part of Lisbeth.Bot project
 //
 //  Copyright (C) 2021 VTPDevelopment - @VelvetThePanda
-//  Copyright (C) 2021 Krzysztof Kupisz - MikyM
+//  Copyright (C) 2021-2022 Krzysztof Kupisz - MikyM
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.

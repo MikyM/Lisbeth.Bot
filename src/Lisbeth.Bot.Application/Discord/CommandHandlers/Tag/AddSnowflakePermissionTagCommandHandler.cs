@@ -20,7 +20,7 @@ using Lisbeth.Bot.Application.Discord.Commands.Tag;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Tag;
 using Microsoft.Extensions.Logging;
-using MikyM.Common.Application.CommandHandlers;
+using MikyM.CommandHandlers;
 using MikyM.Common.Utilities.Results;
 using MikyM.Common.Utilities.Results.Errors;
 using MikyM.Discord.Extensions.BaseExtensions;

@@ -44,10 +44,10 @@ public class DiscordChatExportService : IDiscordChatExportService
     private readonly IGuildDataService _guildDataService;
     private readonly ILogger<DiscordChatExportService> _logger;
     private readonly ITicketDataService _ticketDataService;
-    private readonly IOptions<BotOptions> _options;
+    private readonly IOptions<BotConfiguration> _options;
 
     public DiscordChatExportService(IDiscordService discord, IGuildDataService guildDataService,
-        ITicketDataService ticketDataService, ILogger<DiscordChatExportService> logger, IOptions<BotOptions> options)
+        ITicketDataService ticketDataService, ILogger<DiscordChatExportService> logger, IOptions<BotConfiguration> options)
     {
         _discord = discord;
         _guildDataService = guildDataService;

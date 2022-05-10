@@ -24,14 +24,14 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Wrappers;
 
 public class MessagesHtmlWrapperBuilder : IAsyncHtmlBuilder
 {
-    public MessagesHtmlWrapperBuilder(List<DiscordMessage> messages, BotOptions options)
+    public MessagesHtmlWrapperBuilder(List<DiscordMessage> messages, BotConfiguration configuration)
     {
         Messages ??= messages ?? throw new ArgumentNullException(nameof(messages));
-        BotOptions ??= options ?? throw new ArgumentNullException(nameof(options));
+        BotConfiguration ??= configuration ?? throw new ArgumentNullException(nameof(configuration));
     }
 
     public List<DiscordMessage> Messages { get; }
-    public BotOptions BotOptions { get; private set; }
+    public BotConfiguration BotConfiguration { get; private set; }
 
     public async Task<string> BuildAsync()
     {
@@ -40,16 +40,16 @@ public class MessagesHtmlWrapperBuilder : IAsyncHtmlBuilder
         foreach (var msg in Messages)
         {
             if (msg.Author.IsBot) continue;
-            HtmlMessage message = new (msg, BotOptions);
+            HtmlMessage message = new (msg, BotConfiguration);
             messagesHtml += await message.BuildAsync();
         }
 
         return $"<div id=\"messages-wrapper\">{messagesHtml}</div>";
     }
 
-    public MessagesHtmlWrapperBuilder WithOptions(BotOptions options)
+    public MessagesHtmlWrapperBuilder WithOptions(BotConfiguration configuration)
     {
-        BotOptions = options ?? throw new ArgumentNullException(nameof(options));
+        BotConfiguration = configuration ?? throw new ArgumentNullException(nameof(configuration));
 
         return this;
     }

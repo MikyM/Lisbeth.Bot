@@ -51,11 +51,11 @@ public class DiscordGuildService : IDiscordGuildService
     private readonly IGuildDataService _guildDataService;
     private readonly ILogger<DiscordGuildService> _logger;
     private readonly ITicketQueueService _ticketQueueService;
-    private readonly IOptions<BotOptions> _options;
+    private readonly IOptions<BotConfiguration> _options;
 
     public DiscordGuildService(IEmbedConfigDataService embedConfigDataService, IDiscordEmbedProvider embedProvider,
         IGuildDataService guildDataService, IDiscordService discord, ILogger<DiscordGuildService> logger,
-        ITicketQueueService ticketQueueService, IOptions<BotOptions> options)
+        ITicketQueueService ticketQueueService, IOptions<BotConfiguration> options)
     {
         _embedConfigDataService = embedConfigDataService;
         _embedProvider = embedProvider;
@@ -314,13 +314,9 @@ public class DiscordGuildService : IDiscordGuildService
         return await PrepareSlashPermissionsAsync(new[] { guild });
     }
 
-    public async Task<Result> PrepareBot(IEnumerable<ulong> guildIds)
+    public async Task<Result> PrepareBotAsync(IEnumerable<ulong> guildIds)
     {
         await _discord.Client.UpdateStatusAsync(new DiscordActivity("you closely.", ActivityType.Watching));
-
-        foreach (var key in guildIds)
-            _ticketQueueService.AddGuildQueue(key);
-
         return Result.FromSuccess();
     }
 

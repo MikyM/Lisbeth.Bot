@@ -19,7 +19,7 @@ using DSharpPlus;
 using DSharpPlus.EventArgs;
 using Lisbeth.Bot.Application.Discord.Commands.Mute;
 using Lisbeth.Bot.Application.Discord.Commands.Timeout;
-using MikyM.Common.Application.CommandHandlers;
+using MikyM.CommandHandlers;
 using MikyM.Discord.Events;
 
 namespace Lisbeth.Bot.Application.Discord.EventHandlers;

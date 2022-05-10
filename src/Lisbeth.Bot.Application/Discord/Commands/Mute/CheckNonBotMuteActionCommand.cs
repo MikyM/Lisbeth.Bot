@@ -17,7 +17,7 @@
 
 using System.Collections.Generic;
 using DSharpPlus.Entities;
-using MikyM.Common.Application.CommandHandlers.Commands;
+using MikyM.CommandHandlers.Commands;
 
 namespace Lisbeth.Bot.Application.Discord.Commands.Mute;
 

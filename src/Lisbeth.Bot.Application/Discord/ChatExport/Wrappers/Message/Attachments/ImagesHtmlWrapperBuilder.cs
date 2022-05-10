@@ -24,14 +24,14 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Wrappers.Message.Attachment
 
 public class ImagesHtmlWrapperBuilder : IAsyncHtmlBuilder
 {
-    public ImagesHtmlWrapperBuilder(IReadOnlyList<DiscordAttachment> images, BotOptions options)
+    public ImagesHtmlWrapperBuilder(IReadOnlyList<DiscordAttachment> images, BotConfiguration configuration)
     {
         Images ??= images ?? throw new ArgumentNullException(nameof(images));
-        BotOptions ??= options ?? throw new ArgumentNullException(nameof(options));
+        BotConfiguration ??= configuration ?? throw new ArgumentNullException(nameof(configuration));
     }
 
     public IReadOnlyList<DiscordAttachment> Images { get; private set; }
-    public BotOptions BotOptions { get; private set; }
+    public BotConfiguration BotConfiguration { get; private set; }
 
     public async Task<string> BuildAsync()
     {
@@ -39,7 +39,7 @@ public class ImagesHtmlWrapperBuilder : IAsyncHtmlBuilder
         string imagesHtml = "";
         foreach (var attachment in Images)
         {
-            HtmlImage image = new (attachment.Url,BotOptions);
+            HtmlImage image = new (attachment.Url,BotConfiguration);
             imagesHtml += await image.BuildAsync();
         }
 
@@ -53,9 +53,9 @@ public class ImagesHtmlWrapperBuilder : IAsyncHtmlBuilder
         return this;
     }
 
-    public ImagesHtmlWrapperBuilder WithOptions(BotOptions options)
+    public ImagesHtmlWrapperBuilder WithOptions(BotConfiguration configuration)
     {
-        BotOptions = options ?? throw new ArgumentNullException();
+        BotConfiguration = configuration ?? throw new ArgumentNullException();
 
         return this;
     }

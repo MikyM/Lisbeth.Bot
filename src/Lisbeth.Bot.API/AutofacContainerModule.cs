@@ -19,8 +19,7 @@ using Autofac;
 using IdGen;
 using Lisbeth.Bot.Application.Services;
 using Microsoft.AspNetCore.Http;
-using MikyM.Common.Application;
-using MikyM.Common.Application.CommandHandlers.Helpers;
+using MikyM.Common.ApplicationLayer;
 using MikyM.Common.DataAccessLayer;
 
 namespace Lisbeth.Bot.API;
@@ -38,37 +37,23 @@ public class AutofacContainerModule : Module
             options.AddInMemoryEvaluators();
             options.AddEvaluators();
             options.AddValidators();
+            options.AddSnowflakeIdGenerator(generatorOptions =>
+            {
+                generatorOptions.GeneratorId = 1;
+                generatorOptions.IdStructure = new IdStructure(45, 2, 16);
+                generatorOptions.DefaultTimeSource =
+                    new DefaultTimeSource(new DateTime(2021, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+                generatorOptions.SequenceOverflowStrategy = SequenceOverflowStrategy.SpinWait;
+            });
         }); 
 
         builder.AddApplicationLayer(options =>
         {
+            options.AddAttributeDefinedServices();
             options.AddCommandHandlers();
-            options.AddServices();
+            options.AddDataServices();
             options.AddAsyncExecutor();
+            options.AddResponsePaginator();
         });
-
-        // pagination stuff
-        builder.RegisterType<HttpContextAccessor>().As<IHttpContextAccessor>().SingleInstance();
-        builder.Register(x =>
-            {
-                var accessor = x.Resolve<IHttpContextAccessor>();
-                var request = accessor.HttpContext?.Request;
-                var uri = string.Concat(request?.Scheme, "://", request?.Host.ToUriComponent());
-                return new UriService(uri);
-            })
-            .As<IUriService>()
-            .SingleInstance();
-
-
-        builder.Register(_ =>
-            {
-                var epoch = new DateTime(2021, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-                var structure = new IdStructure(45, 2, 16);
-                var options = new IdGeneratorOptions(structure, new DefaultTimeSource(epoch),
-                    SequenceOverflowStrategy.SpinWait);
-                return new IdGenerator(0, options);
-            })
-            .AsSelf()
-            .SingleInstance();
     }
 }

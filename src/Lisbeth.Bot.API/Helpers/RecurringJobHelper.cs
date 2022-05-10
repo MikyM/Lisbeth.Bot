@@ -19,7 +19,7 @@ using System.Collections.Generic;
 using Hangfire;
 using Lisbeth.Bot.Application.Discord.Commands.Mute;
 using Lisbeth.Bot.Application.Discord.Commands.Ticket;
-using MikyM.Common.Application.CommandHandlers;
+using MikyM.CommandHandlers;
 using Serilog;
 
 namespace Lisbeth.Bot.API.Helpers;

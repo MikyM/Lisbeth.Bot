@@ -30,7 +30,7 @@ public class HtmlChatBuilder : IAsyncHtmlBuilder
     }
 
     public HtmlChatBuilder(List<DiscordUser>? users, List<DiscordMessage>? messages, DiscordChannel? channel,
-        string? js, string? css, BotOptions? options, DiscordGuild? guild)
+        string? js, string? css, BotConfiguration? options, DiscordGuild? guild)
     {
         Users = users ?? throw new ArgumentNullException(nameof(users));
         Messages = messages ?? throw new ArgumentNullException(nameof(messages));
@@ -46,7 +46,7 @@ public class HtmlChatBuilder : IAsyncHtmlBuilder
     public DiscordChannel? Channel { get; private set; }
     public string? Js { get; private set; }
     public string? Css { get; private set; }
-    public BotOptions? Options { get; private set; }
+    public BotConfiguration? Options { get; private set; }
     public DiscordGuild? Guild { get; private set; }
 
     public async Task<string> BuildAsync()
@@ -122,9 +122,9 @@ public class HtmlChatBuilder : IAsyncHtmlBuilder
         return this;
     }
 
-    public HtmlChatBuilder WithOptions(BotOptions options)
+    public HtmlChatBuilder WithOptions(BotConfiguration configuration)
     {
-        Options ??= options ?? throw new ArgumentNullException(nameof(options));
+        Options ??= configuration ?? throw new ArgumentNullException(nameof(configuration));
 
         return this;
     }

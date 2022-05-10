@@ -24,14 +24,14 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Wrappers;
 
 public class MembersHtmlWrapperBuilder : IAsyncHtmlBuilder
 {
-    public MembersHtmlWrapperBuilder(List<DiscordUser> users, BotOptions options)
+    public MembersHtmlWrapperBuilder(List<DiscordUser> users, BotConfiguration configuration)
     {
         Users ??= users ?? throw new ArgumentNullException(nameof(users));
-        BotOptions ??= options ?? throw new ArgumentNullException(nameof(options));
+        BotConfiguration ??= configuration ?? throw new ArgumentNullException(nameof(configuration));
     }
 
     public List<DiscordUser> Users { get; private set; }
-    public BotOptions BotOptions { get; }
+    public BotConfiguration BotConfiguration { get; }
 
     public async Task<string> BuildAsync()
     {
@@ -40,7 +40,7 @@ public class MembersHtmlWrapperBuilder : IAsyncHtmlBuilder
         string usersHtml = "";
         foreach (var user in Users)
         {
-            HtmlUser userModel = new (user, BotOptions);
+            HtmlUser userModel = new (user, BotConfiguration);
             usersHtml += $"<div class=\"user\">{await userModel.BuildAvatar()} {await userModel.BuildAsync()}</div>";
         }
 

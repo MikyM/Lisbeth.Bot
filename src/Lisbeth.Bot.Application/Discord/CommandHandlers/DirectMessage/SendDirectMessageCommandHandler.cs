@@ -19,7 +19,7 @@ using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.DirectMessage;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
-using MikyM.Common.Application.CommandHandlers;
+using MikyM.CommandHandlers;
 using MikyM.Common.Utilities.Results;
 using MikyM.Discord.Enums;
 using MikyM.Discord.Extensions.BaseExtensions;

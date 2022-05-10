@@ -23,7 +23,7 @@ using Lisbeth.Bot.Application.Discord.Exceptions;
 using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.DataAccessLayer.Specifications.RoleMenu;
 using Microsoft.Extensions.Logging;
-using MikyM.Common.Application.CommandHandlers;
+using MikyM.CommandHandlers;
 using MikyM.Common.Utilities.Extensions;
 using MikyM.Common.Utilities.Results;
 using MikyM.Common.Utilities.Results.Errors;

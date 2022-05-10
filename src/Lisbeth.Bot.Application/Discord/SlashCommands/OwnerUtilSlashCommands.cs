@@ -35,6 +35,7 @@ using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using MikyM.Common.ApplicationLayer.Interfaces;
 using MikyM.Common.Domain.Entities;
 using MikyM.Discord.Extensions.BaseExtensions;
 
@@ -48,10 +49,10 @@ public class OwnerUtilSlashCommands : ExtendedApplicationCommandModule
     private readonly LisbethBotDbContext _ctx;
     private readonly IReadOnlyDataService<AuditLog, LisbethBotDbContext> _dataService;
     private readonly IDiscordGuildService _discordGuildService;
-    private readonly IOptions<BotOptions> _options;
+    private readonly IOptions<BotConfiguration> _options;
 
     public OwnerUtilSlashCommands(LisbethBotDbContext ctx, IReadOnlyDataService<AuditLog, LisbethBotDbContext> dataService,
-        IDiscordGuildService discordGuildService, IOptions<BotOptions> options)
+        IDiscordGuildService discordGuildService, IOptions<BotConfiguration> options)
     {
         _ctx = ctx;
         _dataService = dataService;

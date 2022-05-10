@@ -22,7 +22,7 @@ using DSharpPlus.Interactivity;
 using Lisbeth.Bot.Application.Discord.Commands.Tag;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
-using MikyM.Common.Application.CommandHandlers;
+using MikyM.CommandHandlers;
 using MikyM.Common.Utilities.Results;
 using MikyM.Common.Utilities.Results.Errors;
 using MikyM.Discord.Enums;

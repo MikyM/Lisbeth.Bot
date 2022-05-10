@@ -25,14 +25,14 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Wrappers.Message.Attachment
 public class VideosHtmlWrapperBuilder : IAsyncHtmlBuilder
 {
 
-    public VideosHtmlWrapperBuilder(IReadOnlyList<DiscordAttachment> videos, BotOptions options)
+    public VideosHtmlWrapperBuilder(IReadOnlyList<DiscordAttachment> videos, BotConfiguration configuration)
     {
         Videos ??= videos ?? throw new ArgumentNullException(nameof(videos));
-        Options ??= options ?? throw new ArgumentNullException(nameof(options));
+        Configuration ??= configuration ?? throw new ArgumentNullException(nameof(configuration));
     }
 
     public IReadOnlyList<DiscordAttachment> Videos { get; private set; }
-    public BotOptions Options { get; private set; }
+    public BotConfiguration Configuration { get; private set; }
 
     public async Task<string> BuildAsync()
     {
@@ -40,7 +40,7 @@ public class VideosHtmlWrapperBuilder : IAsyncHtmlBuilder
         string videosHtml = "";
         foreach (var attachment in Videos)
         {
-            HtmlVideo video = new(attachment.Url, Options);
+            HtmlVideo video = new(attachment.Url, Configuration);
             videosHtml += await video.BuildAsync();
         }
 

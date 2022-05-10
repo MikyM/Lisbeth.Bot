@@ -17,7 +17,7 @@
 
 using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Domain.DTOs.Request.RoleMenu;
-using MikyM.Common.Application.CommandHandlers.Commands;
+using MikyM.CommandHandlers.Commands;
 
 namespace Lisbeth.Bot.Application.Discord.Commands.RoleMenu;
 

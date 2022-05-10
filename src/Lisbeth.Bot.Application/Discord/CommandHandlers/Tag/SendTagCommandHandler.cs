@@ -19,7 +19,7 @@ using AutoMapper;
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.Tag;
 using Lisbeth.Bot.Domain.DTOs.Request.Tag;
-using MikyM.Common.Application.CommandHandlers;
+using MikyM.CommandHandlers;
 using MikyM.Common.Utilities.Results;
 using MikyM.Discord.Enums;
 using MikyM.Discord.Extensions.BaseExtensions;

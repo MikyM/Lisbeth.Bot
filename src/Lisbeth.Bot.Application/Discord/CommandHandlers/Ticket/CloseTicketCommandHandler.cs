@@ -21,7 +21,7 @@ using Lisbeth.Bot.Application.Discord.Commands.Ticket;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Buttons;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Microsoft.Extensions.Logging;
-using MikyM.Common.Application.CommandHandlers;
+using MikyM.CommandHandlers;
 using MikyM.Common.Utilities.Results;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;

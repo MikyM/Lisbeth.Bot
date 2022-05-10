@@ -26,7 +26,7 @@ using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Buttons;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.DataAccessLayer.Specifications.RoleMenu;
 using Microsoft.Extensions.Logging;
-using MikyM.Common.Application.CommandHandlers;
+using MikyM.CommandHandlers;
 using MikyM.Common.DataAccessLayer;
 using MikyM.Common.Utilities.Results;
 using MikyM.Common.Utilities.Results.Errors;

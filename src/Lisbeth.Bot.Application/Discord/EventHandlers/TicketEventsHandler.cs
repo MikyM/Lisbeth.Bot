@@ -25,7 +25,7 @@ using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Buttons;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Selects;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.SelectValues;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
-using MikyM.Common.Application.CommandHandlers;
+using MikyM.CommandHandlers;
 using MikyM.Discord.Events;
 
 namespace Lisbeth.Bot.Application.Discord.EventHandlers;

@@ -17,11 +17,11 @@
 
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
-using MikyM.Common.Application.CommandHandlers.Commands;
+using MikyM.CommandHandlers.Commands;
 
 namespace Lisbeth.Bot.Application.Discord.Commands.Ticket;
 
-public class OpenTicketCommand : ICommand
+public class OpenTicketCommand : CommandBase
 {
     public OpenTicketCommand(TicketOpenReqDto dto, DiscordInteraction? interaction = null)
     {

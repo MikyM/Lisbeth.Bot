@@ -24,7 +24,7 @@ using Lisbeth.Bot.Application.Discord.Commands.Ticket;
 using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
 using Lisbeth.Bot.Application.Validation.Ticket;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
-using MikyM.Common.Application.CommandHandlers;
+using MikyM.CommandHandlers;
 using MikyM.Common.Utilities.Results;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands;

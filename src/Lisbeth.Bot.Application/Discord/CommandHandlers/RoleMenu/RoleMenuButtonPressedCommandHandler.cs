@@ -19,7 +19,7 @@ using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.RoleMenu;
 using Lisbeth.Bot.Application.Discord.Exceptions;
 using Lisbeth.Bot.DataAccessLayer.Specifications.RoleMenu;
-using MikyM.Common.Application.CommandHandlers;
+using MikyM.CommandHandlers;
 using MikyM.Common.Utilities.Results;
 using MikyM.Common.Utilities.Results.Errors;
 

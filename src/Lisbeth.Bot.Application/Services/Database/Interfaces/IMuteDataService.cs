@@ -17,6 +17,7 @@
 
 using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.Domain.DTOs.Request.Mute;
+using MikyM.Common.ApplicationLayer.Interfaces;
 using MikyM.Common.Utilities.Results;
 
 namespace Lisbeth.Bot.Application.Services.Database.Interfaces;

@@ -21,7 +21,7 @@ using Lisbeth.Bot.Application.Discord.EmbedBuilders;
 using Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response.ChannelMessageFormat;
 using Lisbeth.Bot.Application.Discord.SlashCommands;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
-using MikyM.Common.Application.CommandHandlers;
+using MikyM.CommandHandlers;
 using MikyM.Common.Utilities.Results;
 using MikyM.Common.Utilities.Results.Errors.Bases;
 using MikyM.Discord.Enums;

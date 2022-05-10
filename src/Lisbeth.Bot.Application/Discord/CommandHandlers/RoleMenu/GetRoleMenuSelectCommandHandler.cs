@@ -18,7 +18,7 @@
 using System.Collections.Generic;
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.RoleMenu;
-using MikyM.Common.Application.CommandHandlers;
+using MikyM.CommandHandlers;
 using MikyM.Common.Utilities.Results;
 using MikyM.Discord.Interfaces;
 

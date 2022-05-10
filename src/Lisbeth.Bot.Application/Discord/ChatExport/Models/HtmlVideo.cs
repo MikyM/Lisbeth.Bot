@@ -10,21 +10,21 @@ namespace Lisbeth.Bot.Application.Discord.ChatExport.Models;
 
 public class HtmlVideo : IAsyncHtmlBuilder
 {
-    public HtmlVideo(string discordLink, BotOptions options)
+    public HtmlVideo(string discordLink, BotConfiguration configuration)
     {
         DiscordLink ??= discordLink ?? throw new ArgumentNullException(nameof(discordLink));
-        BotOptions ??= options ?? throw new ArgumentNullException(nameof(options));
+        BotConfiguration ??= configuration ?? throw new ArgumentNullException(nameof(configuration));
     }
 
     private string DiscordLink { get; }
     public static List<string> SupportedTypes { get; } = new() { "mp4", "mov", "wmv", "avi", "flv" };
-    public BotOptions BotOptions { get; }
+    public BotConfiguration BotConfiguration { get; }
 
     public async Task<string> GetVimeoLinkAsync()
     {
         if (SupportedTypes.All(x => x != DiscordLink.Split('.').Last())) return "";
 
-        var client = new VimeoClient(BotOptions.VimeoApiKey);
+        var client = new VimeoClient(BotConfiguration.VimeoApiKey);
         IUploadRequest request;
 
         using (HttpClient httpClient = ChatExportHttpClientFactory.Build())

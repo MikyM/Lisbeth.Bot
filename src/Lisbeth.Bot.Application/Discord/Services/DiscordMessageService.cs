@@ -24,7 +24,6 @@ using DSharpPlus.Exceptions;
 using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Application.Discord.EmbedBuilders;
 using Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response.Prune;
-using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.Domain.DTOs.Request.Prune;
 using Microsoft.Extensions.Logging;

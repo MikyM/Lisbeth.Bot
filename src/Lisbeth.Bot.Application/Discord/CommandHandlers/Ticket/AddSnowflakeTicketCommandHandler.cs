@@ -22,7 +22,7 @@ using Lisbeth.Bot.Application.Discord.Commands.Ticket;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Ticket;
 using Microsoft.Extensions.Logging;
-using MikyM.Common.Application.CommandHandlers;
+using MikyM.CommandHandlers;
 using MikyM.Common.Utilities.Results;
 using MikyM.Common.Utilities.Results.Errors;
 using MikyM.Discord.Enums;

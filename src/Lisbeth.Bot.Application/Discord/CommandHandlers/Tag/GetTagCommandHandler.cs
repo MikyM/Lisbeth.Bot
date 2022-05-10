@@ -21,7 +21,7 @@ using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Tag;
-using MikyM.Common.Application.CommandHandlers;
+using MikyM.CommandHandlers;
 using MikyM.Common.Utilities.Results;
 using MikyM.Common.Utilities.Results.Errors;
 using MikyM.Discord.Enums;

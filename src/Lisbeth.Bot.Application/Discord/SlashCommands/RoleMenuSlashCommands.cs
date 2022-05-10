@@ -23,7 +23,7 @@ using Lisbeth.Bot.Application.Discord.Commands.RoleMenu;
 using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
 using Lisbeth.Bot.Application.Validation.RoleMenu;
 using Lisbeth.Bot.Domain.DTOs.Request.RoleMenu;
-using MikyM.Common.Application.CommandHandlers;
+using MikyM.CommandHandlers;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 
