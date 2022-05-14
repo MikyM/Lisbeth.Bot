@@ -20,6 +20,7 @@ using Lisbeth.Bot.DataAccessLayer.Specifications.RecurringReminder;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Reminder;
 using Lisbeth.Bot.Domain.DTOs.Request.Reminder;
 using MikyM.Common.Utilities.Results;
+using MikyM.Common.Utilities.Results.Errors.Bases;
 using NCrontab;
 
 namespace Lisbeth.Bot.Application.Services;
@@ -69,9 +70,10 @@ public class MainReminderService : IMainReminderService
             DateTime setFor;
             if (!string.IsNullOrWhiteSpace(req.TimeSpanExpression))
             {
-                var isValid = req.TimeSpanExpression.TryParseToDurationAndNextOccurrence(out var occurrence, out _);
-                if (!isValid) return new DiscordArgumentError(nameof(req.TimeSpanExpression));
-                setFor = occurrence;
+                if (!req.TimeSpanExpression.TryParseToDurationAndNextOccurrence(out var occurrence, out _)) 
+                    return new ArgumentError(nameof(req.TimeSpanExpression), "Timespan expression couldn't be parsed.");
+                setFor = occurrence.Value;
+                req.SetFor = occurrence;
             }
             else
             {
@@ -84,53 +86,52 @@ public class MainReminderService : IMainReminderService
                 req.Name = $"{req.GuildId}_{req.RequestedOnBehalfOfId}_{DateTime.UtcNow.ToString("s")}";
 
             var partial = await _reminderDataDataService.AddAsync(req, true);
-            string hangfireId = _backgroundJobClient.Schedule(
-                (IDiscordSendReminderService x) => x.SendReminderAsync(partial.Entity, ReminderType.Single), setFor.ToUniversalTime(),
+            string hangfireId = _backgroundJobClient.Schedule<IDiscordSendReminderService>(
+                x => x.SendReminderAsync(partial.Entity, ReminderType.Single), setFor.ToUniversalTime(),
                 "reminder");
             await _reminderDataDataService.SetHangfireIdAsync(partial.Entity, hangfireId, true);
 
             return new ReminderResDto(partial.Entity, req.Name, setFor, req.Mentions, req.Text ?? "Text not set");
         }
 
-        if (string.IsNullOrWhiteSpace(req.CronExpression)) throw new InvalidOperationException();
-        {
-            var parsed = CrontabSchedule.TryParse(req.CronExpression);
-            var parsedWithSeconds = CrontabSchedule.TryParse(req.CronExpression,
-                new CrontabSchedule.ParseOptions { IncludingSeconds = true });
-            if (parsed is null && parsedWithSeconds is null)
-                return Result<ReminderResDto>.FromError(new DiscordArgumentError(nameof(recGuild.Entity),
-                    "Invalid cron expression"));
-            if (parsed is not null &&
-                parsed.GetNextOccurrences(DateTime.UtcNow, DateTime.UtcNow.AddHours(1)).Count() > 12 ||
-                parsedWithSeconds is not null && parsedWithSeconds
-                    .GetNextOccurrences(DateTime.UtcNow, DateTime.UtcNow.AddHours(1))
-                    .Count() > 12)
-                return new DiscordArgumentError(nameof(recGuild.Entity),
-                    "Cron expressions with more than 12 occurrences per hour (more frequent than every 5 minutes) are not allowed");
+        if (string.IsNullOrWhiteSpace(req.CronExpression)) 
+            throw new InvalidOperationException();
 
-            var count = await _reminderDataDataService.LongCountAsync(
-                new ActiveRecurringRemindersPerGuildByNameSpec(req.GuildId, req.Name ?? string.Empty));
-            if (count.Entity != 0)
-                return new DiscordArgumentError(nameof(recGuild.Entity),
-                    $"This guild already has a recurring reminder with name: {req.Name}");
+        var parsed = CrontabSchedule.TryParse(req.CronExpression);
+        var parsedWithSeconds = CrontabSchedule.TryParse(req.CronExpression,
+            new CrontabSchedule.ParseOptions { IncludingSeconds = true });
+        if (parsed is null && parsedWithSeconds is null)
+            return Result<ReminderResDto>.FromError(new DiscordArgumentError(nameof(recGuild.Entity),
+                "Invalid cron expression"));
+        if (parsed is not null &&
+            parsed.GetNextOccurrences(DateTime.UtcNow, DateTime.UtcNow.AddHours(1)).Count() > 12 ||
+            parsedWithSeconds is not null && parsedWithSeconds
+                .GetNextOccurrences(DateTime.UtcNow, DateTime.UtcNow.AddHours(1))
+                .Count() > 12)
+            return new DiscordArgumentError(nameof(recGuild.Entity),
+                "Cron expressions with more than 12 occurrences per hour (more frequent than every 5 minutes) are not allowed");
 
-            string jobName = $"{req.GuildId}_{req.Name}";
+        var count = await _reminderDataDataService.LongCountAsync(
+            new ActiveRecurringRemindersPerGuildByNameSpec(req.GuildId, req.Name ?? string.Empty));
+        if (count.Entity != 0)
+            return new DiscordArgumentError(nameof(recGuild.Entity),
+                $"This guild already has a recurring reminder with name: {req.Name}");
 
-            req.SetFor = null;
-            req.TimeSpanExpression = null; // clean these just in case
+        string jobName = $"{req.GuildId}_{req.Name}";
 
-            var partial = await _reminderDataDataService.AddAsync(req, true);
-            RecurringJob.AddOrUpdate<IDiscordSendReminderService>(jobName,
-                x => x.SendReminderAsync(partial.Entity, ReminderType.Recurring), req.CronExpression,
-                TimeZoneInfo.Utc, "reminder");
-            await _reminderDataDataService.SetHangfireIdAsync(partial.Entity, jobName, true);
+        req.SetFor = null;
+        req.TimeSpanExpression = null; // clean these just in case
 
-            return new ReminderResDto(partial.Entity, req.Name,
-                parsed?.GetNextOccurrence(DateTime.UtcNow).ToUniversalTime() ??
-                parsedWithSeconds?.GetNextOccurrence(DateTime.UtcNow).ToUniversalTime() ??
-                throw new InvalidOperationException(), req.Mentions, req.Text ?? "Text not set", true);
-        }
+        var partialRec = await _reminderDataDataService.AddAsync(req, true);
+        RecurringJob.AddOrUpdate<IDiscordSendReminderService>(jobName,
+            x => x.SendReminderAsync(partialRec.Entity, ReminderType.Recurring), req.CronExpression,
+            TimeZoneInfo.Utc, "reminder");
+        await _reminderDataDataService.SetHangfireIdAsync(partialRec.Entity, jobName, true);
 
+        return new ReminderResDto(partialRec.Entity, req.Name,
+            parsed?.GetNextOccurrence(DateTime.UtcNow).ToUniversalTime() ??
+            parsedWithSeconds?.GetNextOccurrence(DateTime.UtcNow).ToUniversalTime() ??
+            throw new InvalidOperationException(), req.Mentions, req.Text ?? "Text not set", true);
     }
 
     public async Task<Result<ReminderResDto>> RescheduleReminderAsync(RescheduleReminderReqDto req)
@@ -149,9 +150,9 @@ public class MainReminderService : IMainReminderService
             DateTime setFor;
             if (!string.IsNullOrWhiteSpace(req.TimeSpanExpression))
             {
-                var isValid = req.TimeSpanExpression.TryParseToDurationAndNextOccurrence(out var occurrence, out _);
-                if (!isValid) throw new ArgumentException(nameof(req.TimeSpanExpression));
-                setFor = occurrence;
+                if (!req.TimeSpanExpression.TryParseToDurationAndNextOccurrence(out var occurrence, out _)) 
+                    return new ArgumentError(nameof(req.TimeSpanExpression), "Timespan expression couldn't be parsed.");
+                setFor = occurrence.Value;
             }
             else
             {

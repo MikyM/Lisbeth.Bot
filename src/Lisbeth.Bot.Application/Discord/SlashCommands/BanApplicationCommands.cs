@@ -59,13 +59,10 @@ public class BanApplicationCommands : ExtendedApplicationCommandModule
         switch (actionType)
         {
             case BanActionType.Ban:
-
-                bool isValid = length.TryParseToDurationAndNextOccurrence(out var occurrence, out _);
-
-                if (!isValid)
+                if (!length.TryParseToDurationAndNextOccurrence(out var occurrence, out _))
                     throw new ArgumentException($"Parameter {nameof(length)} can't be parsed to a known duration.");
 
-                var banReq = new BanApplyReqDto(validId, ctx.Guild.Id, ctx.User.Id, occurrence, reason);
+                var banReq = new BanApplyReqDto(validId, ctx.Guild.Id, ctx.User.Id, occurrence.Value, reason);
                 var banReqValidator = new BanReqValidator(ctx.Client);
                 await banReqValidator.ValidateAndThrowAsync(banReq);
 

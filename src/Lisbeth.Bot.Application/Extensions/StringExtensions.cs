@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Lisbeth.Bot.Application.Extensions;
 
 public static class StringExtensions
@@ -23,11 +25,16 @@ public static class StringExtensions
     {
         return input.All(c => c is >= '0' and <= '9');
     }
-
-    public static bool TryParseToDurationAndNextOccurrence(this string input, out DateTime occurrence,
-        out TimeSpan duration)
+    
+    public static bool TryParseToDurationAndNextOccurrence(this string input, [NotNullWhen(true)] out DateTime? occurrence,
+        [NotNullWhen(true)] out TimeSpan? duration)
     {
-        if (input is null) throw new ArgumentNullException(nameof(input));
+        if (string.IsNullOrWhiteSpace(input))
+        {
+            occurrence = null;
+            duration = null;
+            return false;
+        }
 
         TimeSpan tmsp = new ();
         DateTime result;
@@ -104,14 +111,7 @@ public static class StringExtensions
                     break;
 
                 case 'm':
-                    if (parsedInput > 12)
-                    {
-                        occurrence = DateTime.MinValue;
-                        duration = TimeSpan.MinValue;
-                        return false;
-                    }
-
-                    tmsp = TimeSpan.FromDays(parsedInput * 31);
+                    tmsp = TimeSpan.FromMinutes(parsedInput);
                     break;
 
                 case 'y':

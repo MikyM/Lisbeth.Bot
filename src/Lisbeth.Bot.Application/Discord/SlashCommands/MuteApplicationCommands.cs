@@ -69,12 +69,11 @@ public partial class MuteApplicationCommands : ExtendedApplicationCommandModule
         switch (actionType)
         {
             case MuteActionType.Mute:
-                bool isValid = length.TryParseToDurationAndNextOccurrence(out var occurrence, out _);
-                if (!isValid)
+                if (!length.TryParseToDurationAndNextOccurrence(out var occurrence, out _))
                     throw new ArgumentException($"Parameter {nameof(length)} can't be parsed to a known duration.");
                 if (length is "") throw new ArgumentException($"Parameter {nameof(length)} can't be empty.");
 
-                var muteReq = new MuteApplyReqDto(user.Id, ctx.Guild.Id, ctx.User.Id, occurrence, reason);
+                var muteReq = new MuteApplyReqDto(user.Id, ctx.Guild.Id, ctx.User.Id, occurrence.Value, reason);
                 var muteReqValidator = new MuteReqValidator(ctx.Client);
                 await muteReqValidator.ValidateAndThrowAsync(muteReq);
 
