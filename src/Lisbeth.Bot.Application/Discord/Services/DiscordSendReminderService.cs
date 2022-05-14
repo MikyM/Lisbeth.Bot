@@ -37,12 +37,12 @@ public class DiscordSendReminderService : IDiscordSendReminderService
 {
     private readonly IDiscordService _discord;
     private readonly IDiscordEmbedProvider _embedProvider;
-    private readonly IReminderDataService _reminderDataDataService;
+    private readonly IReminderDataService _reminderDataService;
 
-    public DiscordSendReminderService(IReminderDataService reminderDataDataService, IDiscordService discord,
+    public DiscordSendReminderService(IReminderDataService reminderDataService, IDiscordService discord,
         IDiscordEmbedProvider embedProvider)
     {
-        _reminderDataDataService = reminderDataDataService;
+        _reminderDataService = reminderDataService;
         _discord = discord;
         _embedProvider = embedProvider;
     }
@@ -64,7 +64,7 @@ public class DiscordSendReminderService : IDiscordSendReminderService
         switch (type)
         {
             case ReminderType.Single:
-                var rem = await _reminderDataDataService.GetSingleBySpecAsync(new ActiveReminderByIdWithEmbedSpec(reminderId));
+                var rem = await _reminderDataService.GetSingleBySpecAsync(new ActiveReminderByIdWithEmbedSpec(reminderId));
                 if (!rem.IsDefined(out reminder) || reminder.Guild?.ReminderChannelId is null)
                     return Result.FromError(new NotFoundError());
                 guild = reminder.Guild;
@@ -75,7 +75,7 @@ public class DiscordSendReminderService : IDiscordSendReminderService
                 guildId = reminder.GuildId;
                 break;
             case ReminderType.Recurring:
-                var recRem = await _reminderDataDataService.GetSingleBySpecAsync(
+                var recRem = await _reminderDataService.GetSingleBySpecAsync(
                     new ActiveRecurringReminderByIdWithEmbedSpec(reminderId));
                 if (!recRem.IsDefined(out reminder) || reminder.Guild?.ReminderChannelId is null)
                     return Result.FromError(new NotFoundError());
@@ -123,7 +123,7 @@ public class DiscordSendReminderService : IDiscordSendReminderService
             await channel.SendMessageAsync(string.Join(' ', mentions ?? throw new InvalidOperationException()) + "\n\n" + text);
 
         if (type is ReminderType.Single)
-            await _reminderDataDataService.DisableAsync(reminder, true);
+            await _reminderDataService.DisableAsync(reminder, true);
 
         return Result.FromSuccess();
     }
