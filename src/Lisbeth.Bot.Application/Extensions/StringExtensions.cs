@@ -56,8 +56,8 @@ public static class StringExtensions
 
             if (!char.IsDigit(input.First()))
             {
-                occurrence = DateTime.MinValue;
-                duration = TimeSpan.MinValue;
+                occurrence = null;
+                duration = null;
                 return false;
             }
 
@@ -66,8 +66,8 @@ public static class StringExtensions
                 inputType = char.ToLower(c);
                 if (inputType is not ('m' or 'd' or 'w' or 'y' or 'h'))
                 {
-                    occurrence = DateTime.MinValue;
-                    duration = TimeSpan.MinValue;
+                    occurrence = null;
+                    duration = null;
                     return false;
                 }
 
@@ -80,8 +80,8 @@ public static class StringExtensions
                 case 'h':
                     if (parsedInput > 8784)
                     {
-                        occurrence = DateTime.MinValue;
-                        duration = TimeSpan.MinValue;
+                        occurrence = null;
+                        duration = null;
                         return false;
                     }
 
@@ -91,8 +91,8 @@ public static class StringExtensions
                 case 'd':
                     if (parsedInput > 366)
                     {
-                        occurrence = DateTime.MinValue;
-                        duration = TimeSpan.MinValue;
+                        occurrence = null;
+                        duration = null;
                         return false;
                     }
 
@@ -102,8 +102,8 @@ public static class StringExtensions
                 case 'w':
                     if (parsedInput > 53)
                     {
-                        occurrence = DateTime.MinValue;
-                        duration = TimeSpan.MinValue;
+                        occurrence = null;
+                        duration = null;
                         return false;
                     }
 
@@ -117,8 +117,8 @@ public static class StringExtensions
                 case 'y':
                     if (parsedInput > 1)
                     {
-                        occurrence = DateTime.MinValue;
-                        duration = TimeSpan.MinValue;
+                        occurrence = null;
+                        duration = null;
                         return false;
                     }
 
