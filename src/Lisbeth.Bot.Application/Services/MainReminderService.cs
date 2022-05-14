@@ -164,8 +164,8 @@ public class MainReminderService : IMainReminderService
 
             if (!res) return new HangfireError("Hangfire failed to delete the job");
 
-            string hangfireId = _backgroundJobClient.Schedule(
-                (IDiscordSendReminderService x) => x.SendReminderAsync(reminder.Id, ReminderType.Single), setFor.ToUniversalTime(),
+            string hangfireId = _backgroundJobClient.Schedule<IDiscordSendReminderService>(
+                 x => x.SendReminderAsync(reminder.Id, ReminderType.Single), setFor.ToUniversalTime(),
                 "reminder");
 
             req.NewHangfireId = long.Parse(hangfireId);
