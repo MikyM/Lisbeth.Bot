@@ -153,24 +153,25 @@ public class MainReminderService : IMainReminderService
                 if (!req.TimeSpanExpression.TryParseToDurationAndNextOccurrence(out var occurrence, out _)) 
                     return new ArgumentError(nameof(req.TimeSpanExpression), "Timespan expression couldn't be parsed.");
                 setFor = occurrence.Value;
+                req.SetFor = occurrence;
             }
             else
             {
                 setFor = req.SetFor ?? throw new InvalidOperationException();
             }
 
-            bool res = BackgroundJob.Delete(result.Entity.HangfireId);
+            bool res = BackgroundJob.Delete(reminder.HangfireId);
 
             if (!res) return new HangfireError("Hangfire failed to delete the job");
 
             string hangfireId = _backgroundJobClient.Schedule(
-                (IDiscordSendReminderService x) => x.SendReminderAsync(result.Entity.Id, ReminderType.Single), setFor.ToUniversalTime(),
+                (IDiscordSendReminderService x) => x.SendReminderAsync(reminder.Id, ReminderType.Single), setFor.ToUniversalTime(),
                 "reminder");
 
             req.NewHangfireId = long.Parse(hangfireId);
             await _reminderDataDataService.RescheduleAsync(req, true);
 
-            return new ReminderResDto(result.Entity.Id, result.Entity.Name, setFor, result.Entity.Mentions, result.Entity.Text ?? "Text not set");
+            return new ReminderResDto(reminder.Id, reminder.Name, setFor, reminder.Mentions, reminder.Text ?? "Text not set");
         }
 
         if (string.IsNullOrWhiteSpace(req.CronExpression)) throw new InvalidOperationException();
@@ -188,16 +189,16 @@ public class MainReminderService : IMainReminderService
         if (req.RequestedOnBehalfOfId != recurringReminder.CreatorId)
             return new DiscordNotAuthorizedError("Only the creator of a reminder can make changes to it.");
 
-        string jobName = $"{partial.Entity.GuildId}_{partial.Entity.Name}";
+        string jobName = $"{recurringReminder.GuildId}_{recurringReminder.Name}";
 
         RecurringJob.AddOrUpdate<IDiscordSendReminderService>(jobName,
-            x => x.SendReminderAsync(partial.Entity.Id, ReminderType.Recurring), req.CronExpression,
+            x => x.SendReminderAsync(recurringReminder.Id, ReminderType.Recurring), req.CronExpression,
             TimeZoneInfo.Utc, "reminder");
 
         await _reminderDataDataService.RescheduleAsync(req, true);
 
-        return new ReminderResDto(partial.Entity.Id, partial.Entity.Name, parsed.GetNextOccurrence(DateTime.UtcNow),
-            partial.Entity.Mentions, partial.Entity.Text ?? "Text not set", true);
+        return new ReminderResDto(recurringReminder.Id, recurringReminder.Name, parsed.GetNextOccurrence(DateTime.UtcNow),
+            recurringReminder.Mentions, recurringReminder.Text ?? "Text not set", true);
     }
 
     public async Task<Result<ReminderResDto>> DisableReminderAsync(DisableReminderReqDto req)
@@ -214,14 +215,14 @@ public class MainReminderService : IMainReminderService
                 if (req.RequestedOnBehalfOfId != reminder.CreatorId)
                     return new DiscordNotAuthorizedError("Only the creator of a reminder can make changes to it.");
 
-                bool res = BackgroundJob.Delete(singleResult.Entity.HangfireId);
+                bool res = BackgroundJob.Delete(reminder.HangfireId);
 
                 if (!res) throw new Exception("Hangfire failed to delete a scheduled job");
 
-                await _reminderDataDataService.DisableAsync(req, true);
+                await _reminderDataDataService.DisableAsync(reminder, true);
 
-                return new ReminderResDto(singleResult.Entity.Id, (string?)singleResult.Entity.Name, DateTime.MinValue,
-                    singleResult.Entity.Mentions, singleResult.Entity.Text ?? "Text not set");
+                return new ReminderResDto(reminder.Id, (string?)reminder.Name, DateTime.MinValue,
+                    reminder.Mentions, reminder.Text ?? "Text not set");
             case ReminderType.Recurring:
                 var recurringResult = await _reminderDataDataService.GetSingleBySpecAsync(
                     new ActiveRecurringReminderByNameOrIdAndGuildSpec(req.Name ?? string.Empty, req.GuildId, req.ReminderId));
@@ -230,12 +231,12 @@ public class MainReminderService : IMainReminderService
                 if (req.RequestedOnBehalfOfId != recurringReminder.CreatorId)
                     return new DiscordNotAuthorizedError("Only the creator of a reminder can make changes to it.");
 
-                RecurringJob.RemoveIfExists(recurringResult.Entity.HangfireId);
+                RecurringJob.RemoveIfExists(recurringReminder.HangfireId);
 
-                await _reminderDataDataService.DisableAsync(req, true);
+                await _reminderDataDataService.DisableAsync(recurringReminder, true);
 
-                return new ReminderResDto(recurringResult.Entity.Id, recurringResult.Entity.Name, DateTime.MinValue,
-                    recurringResult.Entity.Mentions, recurringResult.Entity.Text ?? "Text not set", true);
+                return new ReminderResDto(recurringReminder.Id, recurringReminder.Name, DateTime.MinValue,
+                    recurringReminder.Mentions, recurringReminder.Text ?? "Text not set", true);
             default:
                 throw new ArgumentOutOfRangeException(nameof(req.Type));
         }
