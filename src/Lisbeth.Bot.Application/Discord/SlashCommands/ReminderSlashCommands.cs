@@ -65,7 +65,7 @@ public class ReminderSlashCommands : ExtendedApplicationCommandModule
         string time = "",
         [Option("mentions", "Role, channel or user mentions - defaults to creator mention")]
         string mentions = "",
-        [Option("name", "Reminder's name")]
+        [Option("name-or-id", "Reminder's name or id")]
         string name = "",
         [Option("channel", "Channel to send the message to")]
         DiscordChannel? channel = null)
@@ -73,16 +73,11 @@ public class ReminderSlashCommands : ExtendedApplicationCommandModule
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
             new DiscordInteractionResponseBuilder().AsEphemeral());
         Result<DiscordEmbed> result;
-
-        /*
-        bool isValidDateTime = DateTime.TryParseExact(time, "d/M/yyyy hh:mm tt", DateTimeFormatInfo.InvariantInfo,
-            DateTimeStyles.None, out DateTime parsedDateTime);*/
+        
         bool isValidDateTime = DateTime.TryParse(time, DateTimeFormatInfo.InvariantInfo,
             DateTimeStyles.None, out DateTime parsedDateTime);
         bool isValidTime = DateTime.TryParse(time, DateTimeFormatInfo.InvariantInfo,
             DateTimeStyles.None, out DateTime parsedTime);
-        /*if (!isValidTime) isValidTime = DateTime.TryParse(time, DateTimeFormatInfo.InvariantInfo,
-            DateTimeStyles.None, out parsedTime);*/
         bool isValidStringRep = !string.IsNullOrWhiteSpace(time) && text.TryParseToDurationAndNextOccurrence(out _, out _);
         bool isValidCron = true;
         string exMessage = "";
@@ -178,7 +173,7 @@ public class ReminderSlashCommands : ExtendedApplicationCommandModule
                         }
                     case ReminderActionType.Disable:
                         var disableReq = new DisableReminderReqDto(reminderType, name, ctx.Guild.Id, ctx.Member.Id,
-                            name.IsDigitsOnly() ? long.Parse(name) : null);
+                            long.TryParse(name, out var subId) ? subId : null);
                         var disableReqValidator = new DisableReminderReqValidator(ctx.Client);
                         await disableReqValidator.ValidateAndThrowAsync(disableReq);
                         result = await _disableHandler.HandleAsync(new DisableReminderCommand(disableReq, ctx));

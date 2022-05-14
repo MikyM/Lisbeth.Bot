@@ -31,7 +31,6 @@ public class DisableReminderReqValidator : AbstractValidator<DisableReminderReqD
 
     public DisableReminderReqValidator(DiscordClient discord)
     {
-        RuleFor(x => x.Type).NotEmpty();
         RuleFor(x => x.RequestedOnBehalfOfId).NotEmpty().DependentRules(x =>
             x.SetAsyncValidator(new DiscordUserIdValidator<DisableReminderReqDto>(discord)));
         RuleFor(x => x.GuildId).NotEmpty().DependentRules(x =>

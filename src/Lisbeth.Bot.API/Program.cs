@@ -163,8 +163,8 @@ public class Program
 
             app.UseHangfireDashboard("/hangfire",
                 app.Environment.IsDevelopment()
-                    ? new DashboardOptions { AppPath = "kek", Authorization = new[] { new HangfireAlwaysAuthFilter() } }
-                    : new DashboardOptions { AppPath = "kek", Authorization = new[] { new HangfireAuthFilter() } });
+                    ? new DashboardOptions { AppPath = null, Authorization = new[] { new HangfireAlwaysAuthFilter() } }
+                    : new DashboardOptions { AppPath = null, Authorization = new[] { new HangfireAuthFilter() } });
             app.UseMiddleware<CustomExceptionMiddleware>();
             app.UseHttpsRedirection();
             app.UseRouting();
