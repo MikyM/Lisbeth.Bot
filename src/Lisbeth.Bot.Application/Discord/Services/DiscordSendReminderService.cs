@@ -51,15 +51,9 @@ public class DiscordSendReminderService : IDiscordSendReminderService
     [PreserveOriginalQueue]
     public async Task<Result> SendReminderAsync(long reminderId, ReminderType type)
     {
-        Guild guild;
-        EmbedConfig? embedConfig;
-        string? text;
-        List<string>? mentions;
-        DiscordChannel channel;
-        ulong? channelId;
-        DiscordGuild discordGuild;
-        ulong guildId;
         Reminder? reminder;
+        DiscordGuild discordGuild;
+        DiscordChannel channel;
 
         switch (type)
         {
@@ -67,24 +61,12 @@ public class DiscordSendReminderService : IDiscordSendReminderService
                 var rem = await _reminderDataService.GetSingleBySpecAsync(new ActiveReminderByIdWithEmbedSpec(reminderId));
                 if (!rem.IsDefined(out reminder) || reminder.Guild?.ReminderChannelId is null)
                     return Result.FromError(new NotFoundError());
-                guild = reminder.Guild;
-                embedConfig = reminder.EmbedConfig;
-                text = reminder.Text;
-                mentions = reminder.Mentions;
-                channelId = reminder.ChannelId;
-                guildId = reminder.GuildId;
                 break;
             case ReminderType.Recurring:
                 var recRem = await _reminderDataService.GetSingleBySpecAsync(
                     new ActiveRecurringReminderByIdWithEmbedSpec(reminderId));
                 if (!recRem.IsDefined(out reminder) || reminder.Guild?.ReminderChannelId is null)
                     return Result.FromError(new NotFoundError());
-                guild = reminder.Guild;
-                embedConfig = reminder.EmbedConfig;
-                text = reminder.Text;
-                mentions = reminder.Mentions;
-                channelId = reminder.ChannelId;
-                guildId = reminder.GuildId;
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(type), type, null);
@@ -92,7 +74,7 @@ public class DiscordSendReminderService : IDiscordSendReminderService
 
         try
         {
-            discordGuild = _discord.Client.Guilds[guildId];
+            discordGuild = _discord.Client.Guilds[reminder.GuildId];
         }
         catch (Exception)
         {
@@ -101,12 +83,12 @@ public class DiscordSendReminderService : IDiscordSendReminderService
 
         try
         {
-            if (channelId.HasValue)
-                channel = discordGuild.GetChannel(channelId.Value);
-            else if (!guild.ReminderChannelId.HasValue)
-                return new ArgumentError(nameof(guild.ReminderChannelId),"Guild doesn't have a set reminder channel");
+            if (reminder.ChannelId.HasValue)
+                channel = discordGuild.GetChannel(reminder.ChannelId.Value);
+            else if (!reminder.Guild.ReminderChannelId.HasValue)
+                return new ArgumentError(nameof(reminder.Guild.ReminderChannelId),"Guild doesn't have a set reminder channel");
             else 
-                channel = discordGuild.GetChannel(guild.ReminderChannelId.Value);
+                channel = discordGuild.GetChannel(reminder.Guild.ReminderChannelId.Value);
 
             if (channel is null)
                 return Result.FromError(new DiscordNotFoundError(DiscordEntity.Channel));
@@ -116,11 +98,11 @@ public class DiscordSendReminderService : IDiscordSendReminderService
             return Result.FromError(new DiscordNotFoundError(DiscordEntity.Channel));
         }
 
-        if (embedConfig is not null)
-            await channel.SendMessageAsync(string.Join(' ', mentions ?? throw new InvalidOperationException()),
-                _embedProvider.GetEmbedFromConfig(embedConfig).Build());
+        if (reminder.EmbedConfig is not null)
+            await channel.SendMessageAsync(string.Join(' ', reminder.Mentions ?? throw new InvalidOperationException()),
+                _embedProvider.GetEmbedFromConfig(reminder.EmbedConfig).Build());
         else
-            await channel.SendMessageAsync(string.Join(' ', mentions ?? throw new InvalidOperationException()) + "\n\n" + text);
+            await channel.SendMessageAsync(string.Join(' ', reminder.Mentions ?? throw new InvalidOperationException()) + "\n\n" + text);
 
         if (type is ReminderType.Single)
             await _reminderDataService.DisableAsync(reminder, true);
