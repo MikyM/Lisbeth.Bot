@@ -17,10 +17,10 @@
 
 using Autofac;
 using IdGen;
-using Lisbeth.Bot.Application.Services;
-using Microsoft.AspNetCore.Http;
 using MikyM.Common.ApplicationLayer;
 using MikyM.Common.DataAccessLayer;
+using MikyM.Common.EfCore.ApplicationLayer;
+using MikyM.Common.EfCore.DataAccessLayer;
 
 namespace Lisbeth.Bot.API;
 
@@ -33,10 +33,13 @@ public class AutofacContainerModule : Module
 
         builder.AddDataAccessLayer(options =>
         {
-            options.EnableIncludeCache = true;
-            options.AddInMemoryEvaluators();
-            options.AddEvaluators();
-            options.AddValidators();
+            options.AddEfCoreDataAccessLayer(efCoreOptions =>
+            {
+                efCoreOptions.EnableIncludeCache = true;
+                efCoreOptions.AddInMemoryEvaluators();
+                efCoreOptions.AddEvaluators();
+                efCoreOptions.AddValidators();
+            });
             options.AddSnowflakeIdGenerator(generatorOptions =>
             {
                 generatorOptions.GeneratorId = 1;
@@ -51,9 +54,8 @@ public class AutofacContainerModule : Module
         {
             options.AddAttributeDefinedServices();
             options.AddCommandHandlers();
-            options.AddDataServices();
+            options.AddEfCoreDataServices();
             options.AddAsyncExecutor();
-            options.AddResponsePaginator();
         });
     }
 }

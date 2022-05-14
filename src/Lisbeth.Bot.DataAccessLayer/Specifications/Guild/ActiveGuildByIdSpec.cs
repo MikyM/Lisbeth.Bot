@@ -16,7 +16,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-using MikyM.Common.DataAccessLayer.Specifications;
+using MikyM.Common.EfCore.DataAccessLayer.Specifications;
 
 namespace Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 

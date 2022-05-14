@@ -16,8 +16,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-using MikyM.Common.DataAccessLayer.Specifications;
-using MikyM.Common.DataAccessLayer.Specifications.Builders;
+using MikyM.Common.EfCore.DataAccessLayer.Specifications;
+using MikyM.Common.EfCore.DataAccessLayer.Specifications.Builders;
 
 namespace Lisbeth.Bot.DataAccessLayer.Specifications.Mute;
 

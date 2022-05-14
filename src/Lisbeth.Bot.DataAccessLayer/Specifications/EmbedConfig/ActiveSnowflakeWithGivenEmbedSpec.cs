@@ -17,7 +17,7 @@
 
 using System.Linq.Expressions;
 using Lisbeth.Bot.Domain.Entities.Base;
-using MikyM.Common.DataAccessLayer.Specifications;
+using MikyM.Common.EfCore.DataAccessLayer.Specifications;
 
 namespace Lisbeth.Bot.DataAccessLayer.Specifications.EmbedConfig;
 

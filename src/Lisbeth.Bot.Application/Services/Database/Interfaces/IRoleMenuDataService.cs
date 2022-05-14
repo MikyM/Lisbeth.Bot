@@ -16,7 +16,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Lisbeth.Bot.DataAccessLayer;
-using MikyM.Common.ApplicationLayer.Interfaces;
+using MikyM.Common.EfCore.ApplicationLayer.Interfaces;
 
 namespace Lisbeth.Bot.Application.Services.Database.Interfaces;
 

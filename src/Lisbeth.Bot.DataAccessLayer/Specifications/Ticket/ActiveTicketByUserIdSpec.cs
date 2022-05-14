@@ -1,4 +1,4 @@
-﻿using MikyM.Common.DataAccessLayer.Specifications;
+﻿using MikyM.Common.EfCore.DataAccessLayer.Specifications;
 
 namespace Lisbeth.Bot.DataAccessLayer.Specifications.Ticket;
 

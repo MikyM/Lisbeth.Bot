@@ -35,8 +35,8 @@ using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using MikyM.Common.ApplicationLayer.Interfaces;
 using MikyM.Common.Domain.Entities;
+using MikyM.Common.EfCore.ApplicationLayer.Interfaces;
 using MikyM.Discord.Extensions.BaseExtensions;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands;

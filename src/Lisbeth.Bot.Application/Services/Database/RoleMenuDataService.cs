@@ -17,8 +17,7 @@
 
 using AutoMapper;
 using Lisbeth.Bot.DataAccessLayer;
-using MikyM.Common.ApplicationLayer.Services;
-using MikyM.Common.DataAccessLayer.UnitOfWork;
+using MikyM.Common.EfCore.DataAccessLayer.UnitOfWork;
 
 namespace Lisbeth.Bot.Application.Services.Database;
 

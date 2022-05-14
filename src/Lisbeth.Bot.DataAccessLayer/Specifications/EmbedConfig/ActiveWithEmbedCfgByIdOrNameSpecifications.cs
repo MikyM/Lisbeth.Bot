@@ -16,7 +16,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Lisbeth.Bot.Domain.Entities.Base;
-using MikyM.Common.DataAccessLayer.Specifications;
+using MikyM.Common.EfCore.DataAccessLayer.Specifications;
 
 namespace Lisbeth.Bot.DataAccessLayer.Specifications.EmbedConfig;
 

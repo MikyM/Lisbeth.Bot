@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MikyM.Common.DDDArchitecture" Version="1.2.0" />
+    <PackageReference Include="MikyM.Common.DDDArchitecture" Version="2.0.2" />
     <PackageReference Include="MikyM.Discord" Version="1.0.7" />
   </ItemGroup>
 
