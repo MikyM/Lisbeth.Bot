@@ -78,7 +78,7 @@ public class ReminderSlashCommands : ExtendedApplicationCommandModule
             DateTimeStyles.None, out DateTime parsedDateTime);
         bool isValidTime = DateTime.TryParse(time, DateTimeFormatInfo.InvariantInfo,
             DateTimeStyles.None, out DateTime parsedTime);
-        bool isValidStringRep = !string.IsNullOrWhiteSpace(time) && text.TryParseToDurationAndNextOccurrence(out _, out _);
+        bool isValidStringRep = !string.IsNullOrWhiteSpace(time) && time.TryParseToDurationAndNextOccurrence(out _, out _);
         bool isValidCron = true;
         string exMessage = "";
 
