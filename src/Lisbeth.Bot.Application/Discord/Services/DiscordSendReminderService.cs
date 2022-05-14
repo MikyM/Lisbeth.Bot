@@ -102,7 +102,7 @@ public class DiscordSendReminderService : IDiscordSendReminderService
             await channel.SendMessageAsync(string.Join(' ', reminder.Mentions ?? throw new InvalidOperationException()),
                 _embedProvider.GetEmbedFromConfig(reminder.EmbedConfig).Build());
         else
-            await channel.SendMessageAsync(string.Join(' ', reminder.Mentions ?? throw new InvalidOperationException()) + "\n\n" + text);
+            await channel.SendMessageAsync(string.Join(' ', reminder.Mentions ?? throw new InvalidOperationException()) + "\n\n" + reminder.Text);
 
         if (type is ReminderType.Single)
             await _reminderDataService.DisableAsync(reminder, true);
