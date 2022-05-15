@@ -32,7 +32,8 @@ public class SetReminderReqValidator : AbstractValidator<SetReminderReqDto>
 
     public SetReminderReqValidator(DiscordClient discord)
     {
-        CascadeMode = CascadeMode.Stop;
+        ClassLevelCascadeMode = CascadeMode.Stop;
+        RuleLevelCascadeMode = CascadeMode.Stop;
 
         RuleFor(x => x.RequestedOnBehalfOfId)
             .NotEmpty()

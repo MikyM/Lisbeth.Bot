@@ -32,7 +32,8 @@ public class MuteDisableReqValidator : AbstractValidator<MuteRevokeReqDto>
 
     public MuteDisableReqValidator(DiscordClient discord)
     {
-        CascadeMode = CascadeMode.Stop;
+        ClassLevelCascadeMode = CascadeMode.Stop;
+        RuleLevelCascadeMode = CascadeMode.Stop;
 
         RuleFor(x => x.GuildId)
             .NotEmpty()

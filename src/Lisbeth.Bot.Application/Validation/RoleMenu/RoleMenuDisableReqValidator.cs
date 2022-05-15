@@ -31,7 +31,8 @@ public class RoleMenuDisableReqValidator : AbstractValidator<RoleMenuDisableReqD
 
     public RoleMenuDisableReqValidator(DiscordClient discord)
     {
-        CascadeMode = CascadeMode.Stop;
+        ClassLevelCascadeMode = CascadeMode.Stop;
+        RuleLevelCascadeMode = CascadeMode.Stop;
 
         RuleFor(x => x.Id).NotEmpty().When(x => x.Name is not null && !x.GuildId.HasValue);
         RuleFor(x => x.Name).NotEmpty().When(x => !x.Id.HasValue);

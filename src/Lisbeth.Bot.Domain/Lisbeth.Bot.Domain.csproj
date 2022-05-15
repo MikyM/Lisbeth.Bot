@@ -7,7 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="MikyM.Common.DDDArchitecture" Version="2.0.2" />
-    <PackageReference Include="MikyM.Discord" Version="1.0.7" />
+    <PackageReference Include="MikyM.Discord" Version="1.0.8" />
   </ItemGroup>
 
 </Project>

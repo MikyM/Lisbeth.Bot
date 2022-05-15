@@ -31,7 +31,8 @@ public class RoleMenuGetReqValidator : AbstractValidator<RoleMenuGetReqDto>
 
     public RoleMenuGetReqValidator(DiscordClient discord)
     {
-        CascadeMode = CascadeMode.Stop;
+        ClassLevelCascadeMode = CascadeMode.Stop;
+        RuleLevelCascadeMode = CascadeMode.Stop;
 
         RuleFor(x => x.Name).NotEmpty();
         RuleFor(x => x.GuildId)

@@ -13,7 +13,7 @@
 
   <ItemGroup>
     <PackageReference Include="CronExpressionDescriptor" Version="2.16.0" />
-    <PackageReference Include="FluentValidation.AspNetCore" Version="10.4.0" />
+    <PackageReference Include="FluentValidation.AspNetCore" Version="11.0.1" />
     <PackageReference Include="Hangfire.Core" Version="1.7.28" />
     <PackageReference Include="Imgur.API" Version="5.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />

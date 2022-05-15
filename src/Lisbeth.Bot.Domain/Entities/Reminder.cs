@@ -30,6 +30,7 @@ public class Reminder : EmbedConfigEntity
     public ulong? ChannelId { get; set; }
     public List<string>? Mentions { get; set; }
     public bool IsGuildReminder { get; set; }
+    public bool ShouldAddCreationInfo { get; set; }
 
     public bool IsRecurring => !SetFor.HasValue && CronExpression is null
         ? throw new InvalidOperationException("Unable to determine reminder type, both values are null")

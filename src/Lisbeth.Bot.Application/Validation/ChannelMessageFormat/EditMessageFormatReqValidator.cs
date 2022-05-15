@@ -31,7 +31,8 @@ public class EditMessageFormatReqValidator : AbstractValidator<EditChannelMessag
 
     public EditMessageFormatReqValidator(DiscordClient discord)
     {
-        CascadeMode = CascadeMode.Stop;
+        ClassLevelCascadeMode = CascadeMode.Stop;
+        RuleLevelCascadeMode = CascadeMode.Stop;
 
         RuleFor(x => x.GuildId)
             .NotEmpty()

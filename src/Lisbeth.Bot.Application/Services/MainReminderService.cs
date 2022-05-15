@@ -83,7 +83,7 @@ public class MainReminderService : IMainReminderService
             req.CronExpression = null; // clean cron expression just in case, single takes precedence
 
             if (string.IsNullOrWhiteSpace(req.Name))
-                req.Name = $"{req.GuildId}_{req.RequestedOnBehalfOfId}_{DateTime.UtcNow.ToString("s")}";
+                req.Name = $"{req.GuildId}_{req.RequestedOnBehalfOfId}_{Guid.NewGuid().ToString()}";
 
             var partial = await _reminderDataDataService.AddAsync(req, true);
             string hangfireId = _backgroundJobClient.Schedule<IDiscordSendReminderService>(

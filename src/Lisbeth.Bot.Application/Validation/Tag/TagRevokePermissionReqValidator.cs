@@ -31,7 +31,8 @@ public class TagRevokePermissionReqValidator : AbstractValidator<TagRevokeSnowfl
 
     public TagRevokePermissionReqValidator(DiscordClient discord)
     {
-        CascadeMode = CascadeMode.Stop;
+        ClassLevelCascadeMode = CascadeMode.Stop;
+        RuleLevelCascadeMode = CascadeMode.Stop;
 
         RuleFor(x => x.Name).NotEmpty();
         RuleFor(x => x.GuildId).NotEmpty().DependentRules(x =>

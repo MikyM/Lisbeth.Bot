@@ -28,7 +28,7 @@ public class SetReminderReqDto : BaseAuthWithGuildReqDto
     }
 
     public SetReminderReqDto(string name, string? cronExpression, DateTime? setFor, string? timeSpanExpression,
-        string text, List<string> mentions, ulong guildId, ulong requestedOnBehalfOfId, ulong? channelId = null) : base(guildId,
+        string text, List<string> mentions, ulong guildId, ulong requestedOnBehalfOfId, ulong? channelId = null, bool shouldAddCreationInfo = false) : base(guildId,
         requestedOnBehalfOfId)
     {
         Name = name;
@@ -38,6 +38,7 @@ public class SetReminderReqDto : BaseAuthWithGuildReqDto
         Text = text;
         Mentions = mentions;
         ChannelId = channelId;
+        ShouldAddCreationInfo = shouldAddCreationInfo;
     }
 
     public string? Name { get; set; }
@@ -46,5 +47,6 @@ public class SetReminderReqDto : BaseAuthWithGuildReqDto
     public string? TimeSpanExpression { get; set; }
     public string? Text { get; set; }
     public ulong? ChannelId { get; set; }
+    public bool ShouldAddCreationInfo { get; set; }
     public List<string>? Mentions { get; set; }
 }

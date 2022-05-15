@@ -63,7 +63,6 @@ public class GuildEventsHandler : IDiscordGuildEventsSubscriber
 
     public async Task DiscordOnGuildDownloadCompleted(DiscordClient sender, GuildDownloadCompletedEventArgs args)
     {
-        await _discordGuildService.PrepareSlashPermissionsAsync(args.Guilds.Values);
         await _discordGuildService.PrepareBotAsync(args.Guilds.Keys);
     }
 

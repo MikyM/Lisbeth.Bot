@@ -50,19 +50,17 @@ public class DiscordGuildService : IDiscordGuildService
     private readonly IDiscordEmbedProvider _embedProvider;
     private readonly IGuildDataService _guildDataService;
     private readonly ILogger<DiscordGuildService> _logger;
-    private readonly ITicketQueueService _ticketQueueService;
     private readonly IOptions<BotConfiguration> _options;
 
     public DiscordGuildService(IEmbedConfigDataService embedConfigDataService, IDiscordEmbedProvider embedProvider,
         IGuildDataService guildDataService, IDiscordService discord, ILogger<DiscordGuildService> logger,
-        ITicketQueueService ticketQueueService, IOptions<BotConfiguration> options)
+        IOptions<BotConfiguration> options)
     {
         _embedConfigDataService = embedConfigDataService;
         _embedProvider = embedProvider;
         _guildDataService = guildDataService;
         _discord = discord;
         _logger = logger;
-        _ticketQueueService = ticketQueueService;
         _options = options;
     }
 
@@ -89,8 +87,6 @@ public class DiscordGuildService : IDiscordGuildService
             if (embedResult.IsDefined())
                 await args.Guild.Owner.SendMessageAsync(_embedProvider.GetEmbedFromConfig(embedResult.Entity).Build());
         }
-        _ = await PrepareSlashPermissionsAsync(args.Guild);
-
         _logger.LogInformation($"Add process for guild with Id: {args.Guild.Id} finished");
         return Result.FromSuccess();
     }

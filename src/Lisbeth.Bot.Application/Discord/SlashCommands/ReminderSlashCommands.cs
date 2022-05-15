@@ -68,7 +68,9 @@ public class ReminderSlashCommands : ExtendedApplicationCommandModule
         [Option("name-or-id", "Reminder's name or id")]
         string name = "",
         [Option("channel", "Channel to send the message to")]
-        DiscordChannel? channel = null)
+        DiscordChannel? channel = null,
+        [Option("add-additional-info", "Whether to append additional info to reminder messages")]
+        bool shouldAddCreationInfo = false)
     {
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
             new DiscordInteractionResponseBuilder().AsEphemeral());
@@ -127,11 +129,12 @@ public class ReminderSlashCommands : ExtendedApplicationCommandModule
                 switch (actionType)
                 {
                     case ReminderActionType.Set:
-                        if (reminderType is ReminderType.Single && name is "") name = $"{ctx.Guild.Id}_{ctx.User.Id}_{DateTime.UtcNow.ToString("s")}";
+                        if (reminderType is ReminderType.Single && string.IsNullOrWhiteSpace(name)) 
+                            name = $"{ctx.Guild.Id}_{ctx.User.Id}_{Guid.NewGuid().ToString()}";
 
                         var setReq = new SetReminderReqDto(name, isValidCron && !isValidDateTime && !isValidTime ? time : null,
                             isValidDateTime ? parsedDateTime : isValidTime ? DateTime.UtcNow.Date.Add(parsedTime.TimeOfDay) : null, isValidStringRep ? time : null, text,
-                            mentionList, ctx.Guild.Id, ctx.Member.Id, channel?.Id);
+                            mentionList, ctx.Guild.Id, ctx.Member.Id, channel?.Id, shouldAddCreationInfo);
                         var setReqValidator = new SetReminderReqValidator(ctx.Client);
                         await setReqValidator.ValidateAndThrowAsync(setReq);
                         result = await _setNewHandler.HandleAsync(new SetNewReminderCommand(setReq, ctx));

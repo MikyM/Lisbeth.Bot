@@ -36,7 +36,8 @@ public class ReminderConfig : IEntityTypeConfiguration<Reminder>
             .ValueGeneratedOnAdd()
             .IsRequired();
         builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz").IsRequired();
-
+        
+        builder.Property(x => x.ShouldAddCreationInfo).HasColumnName("should_add_creation_info").HasColumnType("boolean").IsRequired();
         builder.Property(x => x.Mentions)
             .HasColumnName("tags")
             .HasColumnType("text")
@@ -45,7 +46,7 @@ public class ReminderConfig : IEntityTypeConfiguration<Reminder>
                     new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull }),
                 x => JsonSerializer.Deserialize<List<string>>(x,
                     new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull }));
-        builder.Property(x => x.GuildId).HasColumnName("guild_id").HasColumnType("bigint");
+        builder.Property(x => x.GuildId).HasColumnName("guild_id").HasColumnType("bigint").IsRequired();
         builder.Property(x => x.CreatorId).HasColumnName("creator_id").HasColumnType("bigint").IsRequired();
         builder.Property(x => x.LastEditById)
             .HasColumnName("lasted_edit_by_id")
@@ -60,12 +61,14 @@ public class ReminderConfig : IEntityTypeConfiguration<Reminder>
             .HasColumnName("is_guild_reminder")
             .HasColumnType("boolean")
             .IsRequired();
-        builder.Property(x => x.HangfireId).HasColumnName("hangfire_id").HasColumnType("varchar(300)").HasMaxLength(300);
+        builder.Property(x => x.HangfireId).HasColumnName("hangfire_id").HasColumnType("varchar(300)").HasMaxLength(300)
+            .IsRequired();
         builder.Property(x => x.ChannelId).HasColumnName("channel_id");
         builder.Property(x => x.Name)
             .HasColumnName("name")
-            .HasColumnType("varchar(100)")
-            .HasMaxLength(100);
+            .HasColumnType("varchar(200)")
+            .HasMaxLength(200)
+            .IsRequired();
 
         builder.HasOne(x => x.EmbedConfig)
             .WithOne(x => x.Reminder)

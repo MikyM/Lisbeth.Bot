@@ -31,7 +31,8 @@ public class ReminderConfigDisableReqValidator : AbstractValidator<ReminderConfi
 
     public ReminderConfigDisableReqValidator(DiscordClient client)
     {
-        CascadeMode = CascadeMode.Stop;
+        ClassLevelCascadeMode = CascadeMode.Stop;
+        RuleLevelCascadeMode = CascadeMode.Stop;
 
         RuleFor(x => x.GuildId)
             .NotEmpty()

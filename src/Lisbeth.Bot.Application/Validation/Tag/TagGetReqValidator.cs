@@ -31,7 +31,8 @@ public class TagGetReqValidator : AbstractValidator<TagGetReqDto>
 
     public TagGetReqValidator(DiscordClient discord)
     {
-        CascadeMode = CascadeMode.Stop;
+        ClassLevelCascadeMode = CascadeMode.Stop;
+        RuleLevelCascadeMode = CascadeMode.Stop;
 
         RuleFor(x => x.Id).NotEmpty().When(x => x.Name is null);
         RuleFor(x => x.Name).NotEmpty().When(x => !x.Id.HasValue);

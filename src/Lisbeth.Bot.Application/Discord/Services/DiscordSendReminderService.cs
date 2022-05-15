@@ -98,11 +98,20 @@ public class DiscordSendReminderService : IDiscordSendReminderService
             return Result.FromError(new DiscordNotFoundError(DiscordEntity.Channel));
         }
 
+        var mentions = reminder.Mentions ?? new List<string> { ExtendedFormatter.Mention(reminder.CreatorId, DiscordEntity.Member) };
+        var prefixText = reminder.ShouldAddCreationInfo
+            ? $"Oi {string.Join(' ', mentions)}, you asked to be reminded about:"
+            : string.Join(' ', mentions);
+        var suffixText = reminder.ShouldAddCreationInfo
+            ? $"This reminder was created at {reminder.CreatedAt?.ToString("dd/MM/yyyy hh:mm tt")} UTC"
+            : string.Empty;
+
         if (reminder.EmbedConfig is not null)
-            await channel.SendMessageAsync(string.Join(' ', reminder.Mentions ?? throw new InvalidOperationException()),
+            await channel.SendMessageAsync(prefixText + $"{(reminder.ShouldAddCreationInfo ? "\n" : string.Empty)}" + suffixText,
                 _embedProvider.GetEmbedFromConfig(reminder.EmbedConfig).Build());
         else
-            await channel.SendMessageAsync(string.Join(' ', reminder.Mentions ?? throw new InvalidOperationException()) + "\n\n" + reminder.Text);
+            await channel.SendMessageAsync(
+                prefixText + "\n\n" + reminder.Text + $"{(reminder.ShouldAddCreationInfo ? "\n\n" : string.Empty)}" + suffixText);
 
         if (type is ReminderType.Single)
             await _reminderDataService.DisableAsync(reminder, true);

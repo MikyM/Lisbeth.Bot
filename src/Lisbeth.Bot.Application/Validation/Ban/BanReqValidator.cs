@@ -32,7 +32,8 @@ public class BanReqValidator : AbstractValidator<BanApplyReqDto>
 
     public BanReqValidator(DiscordClient discord)
     {
-        CascadeMode = CascadeMode.Stop;
+        ClassLevelCascadeMode = CascadeMode.Stop;
+        RuleLevelCascadeMode = CascadeMode.Stop;
 
         RuleFor(x => x.GuildId).NotEmpty();
         RuleFor(x => x.TargetUserId)
