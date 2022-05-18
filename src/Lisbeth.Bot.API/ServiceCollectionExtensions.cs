@@ -81,6 +81,7 @@ public static class ServiceCollectionExtensions
             extension?.RegisterCommands<ReminderSlashCommands>(guildId);
             extension?.RegisterCommands<EmbedConfigSlashCommands>(guildId);
             extension?.RegisterCommands<RoleMenuSlashCommands>(guildId);
+            extension?.RegisterCommands<UtilitySlashCommands>(guildId);
         });
 
         services.AddDiscordInteractivity(options =>
