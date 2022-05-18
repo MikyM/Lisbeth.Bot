@@ -4,6 +4,7 @@ using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Application.Discord.Exceptions;
 using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
+using MikyM.Discord.Extensions.BaseExtensions;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 
@@ -40,6 +41,7 @@ public class UtilitySlashCommands : ExtendedApplicationCommandModule
         embed.WithImageUrl(member.GetGuildAvatarUrl(ImageFormat.Auto));
         embed.AddField("Default avatar URL", member.GetAvatarUrl(ImageFormat.Auto));
         embed.AddField("Guild avatar URL", member.GetGuildAvatarUrl(ImageFormat.Auto));
+        embed.WithTitle($"Avatar response | {member.GetFullUsername()}");
 
         await ctx.EditResponseAsync(
             new DiscordWebhookBuilder().AddEmbed(embed));
