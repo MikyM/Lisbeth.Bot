@@ -190,7 +190,7 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                     foreach (var booster in chunk)
                     {
                         embedBuilderActiveDisc.AddField(ExtendedFormatter.Mention(booster.Id, DiscordEntity.User),
-                            $"Last boost date: {booster.PremiumSince!.Value.UtcDateTime.ToString(CultureInfo.InvariantCulture)}\nBoosting for: {Math.Round(DateTime.UtcNow.Subtract(booster.PremiumSince!.Value.UtcDateTime).TotalDays, 2).ToString(CultureInfo.InvariantCulture)}");
+                            $"Last boost date: {booster.PremiumSince!.Value.ToString(CultureInfo.InvariantCulture)}\nBoosting for: {Math.Round(DateTime.UtcNow.Subtract(booster.PremiumSince!.Value.UtcDateTime).TotalDays, 2).ToString(CultureInfo.InvariantCulture)}");
                     }
 
                     pagesActiveDisc.Add(new Page("", embedBuilderActiveDisc));
