@@ -102,7 +102,7 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                     case true:
                         embed.AddField("Boosting since", date.HasValue ? date.Value.ToString() : "Unknown");
                         embed.AddField("Boosting for", date.HasValue
-                            ? $"{DateTime.UtcNow.Subtract(date.Value.UtcDateTime).TotalDays.ToString(CultureInfo.InvariantCulture)} days"
+                            ? $"{Math.Round(DateTime.UtcNow.Subtract(date.Value.UtcDateTime).TotalDays, 2).ToString(CultureInfo.InvariantCulture)} days"
                             : "Unknown");
                         break;
                 }
@@ -128,7 +128,7 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                     foreach (var booster in chunk)
                     {
                         embedBuilder.AddField(ExtendedFormatter.Mention(booster.UserId, DiscordEntity.User),
-                            $"Is boosting: {!booster.IsDisabled}\nLast boost date: {booster.BoostingSince.ToString(CultureInfo.InvariantCulture)}{(booster.IsDisabled ? string.Empty : $"\nBoosting for: {DateTime.UtcNow.Subtract(booster.BoostingSince.ToUniversalTime()).TotalDays.ToString(CultureInfo.InvariantCulture)}")}");
+                            $"Is boosting: {!booster.IsDisabled}\nLast boost date: {booster.BoostingSince.ToString(CultureInfo.InvariantCulture)}{(booster.IsDisabled ? string.Empty : $"\nBoosting for: {Math.Round(DateTime.UtcNow.Subtract(booster.BoostingSince.ToUniversalTime()).TotalDays, 2).ToString(CultureInfo.InvariantCulture)}")}");
                     }
 
                     pages.Add(new Page("", embedBuilder));
@@ -158,7 +158,7 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                     foreach (var booster in chunk)
                     {
                         embedBuilderActive.AddField(ExtendedFormatter.Mention(booster.UserId, DiscordEntity.User),
-                            $"Last boost date: {booster.BoostingSince.ToString(CultureInfo.InvariantCulture)}\nBoosting for: {DateTime.UtcNow.Subtract(booster.BoostingSince.ToUniversalTime()).TotalDays.ToString(CultureInfo.InvariantCulture)}");
+                            $"Last boost date: {booster.BoostingSince.ToString(CultureInfo.InvariantCulture)}\nBoosting for: {Math.Round(DateTime.UtcNow.Subtract(booster.BoostingSince.ToUniversalTime()).TotalDays, 2).ToString(CultureInfo.InvariantCulture)}");
                     }
 
                     pagesActive.Add(new Page("", embedBuilderActive));
