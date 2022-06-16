@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Lisbeth.Bot.Domain.Entities.Base;
 
 // ReSharper disable CollectionNeverUpdated.Local
@@ -27,9 +28,11 @@ namespace Lisbeth.Bot.Domain.Entities;
 public sealed class ServerBooster : SnowflakeEntity
 {
     private readonly HashSet<GuildServerBooster>? guildServerBoosters;
+    private readonly HashSet<Guild>? guilds;
 
     public ServerBooster()
     {
+        guilds = new HashSet<Guild>();
         guildServerBoosters ??= new HashSet<GuildServerBooster>();
     }
 
@@ -37,5 +40,6 @@ public sealed class ServerBooster : SnowflakeEntity
     public ulong UserId { get; set; }
     public DateTime BoostingSince { get; set; } = DateTime.UtcNow;
     public int BoostCount { get; set; } = 1;
-    public IReadOnlyCollection<GuildServerBooster>? GuildServerBoosters => guildServerBoosters;
+    public IEnumerable<GuildServerBooster>? GuildServerBoosters => guildServerBoosters?.AsEnumerable();
+    public IEnumerable<Guild>? Guilds => guilds?.AsEnumerable();
 }

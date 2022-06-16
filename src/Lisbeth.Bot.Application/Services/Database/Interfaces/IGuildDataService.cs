@@ -38,4 +38,7 @@ public interface IGuildDataService : ICrudDataService<Guild, LisbethBotDbContext
     Task<Result> EditTicketingConfigAsync(TicketingConfigEditReqDto req, bool shouldSave = false);
     Task<Result> EditModerationConfigAsync(ulong guildId, bool shouldSave = false);
     Task<Result> AddRoleMenuAsync(RoleMenuAddReqDto req, bool shouldSave = false);
+    Task<Result> RemoveServerBoosterAsync(ulong guildId, ulong userId, bool shouldSave = false);
+    Task<Result> AddServerBoosterAsync(ulong guildId, ulong userId, DateTime? date = null, bool shouldSave = false);
+    Task<Result<ServerBooster>> GetServerBoosterAsync(ulong guildId, ulong userId);
 }

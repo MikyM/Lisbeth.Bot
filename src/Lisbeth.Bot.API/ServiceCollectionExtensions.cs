@@ -125,6 +125,7 @@ public static class ServiceCollectionExtensions
         services.AddDiscordMessageEventsSubscriber<ChannelMessageFormatEventsHandler>();
         services.AddDiscordMessageEventsSubscriber<PhishingEventsHandler>();
         services.AddDiscordGuildBanEventsSubscriber<BanEventsHandler>();
+        services.AddDiscordGuildMemberEventsSubscriber<ServerBoosterEventsHandler>();
 
         #endregion
     }

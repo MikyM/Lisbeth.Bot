@@ -49,6 +49,8 @@ internal class GuildConfig : IEntityTypeConfiguration<Guild>
         builder.Metadata.FindNavigation(nameof(Guild.RoleMenus))?.SetPropertyAccessMode(PropertyAccessMode.Field);
         builder.Metadata.FindNavigation(nameof(Guild.GuildServerBoosters))?
             .SetPropertyAccessMode(PropertyAccessMode.Field);
+        builder.Metadata.FindNavigation(nameof(Guild.ServerBoosters))?
+            .SetPropertyAccessMode(PropertyAccessMode.Field);
         builder.Metadata.FindNavigation(nameof(Guild.Reminders))?.SetPropertyAccessMode(PropertyAccessMode.Field);
         builder.Metadata.FindNavigation(nameof(Guild.ChannelMessageFormats))?.SetPropertyAccessMode(PropertyAccessMode.Field);
 
@@ -114,5 +116,28 @@ internal class GuildConfig : IEntityTypeConfiguration<Guild>
             .HasForeignKey(x => x.GuildId)
             .HasPrincipalKey(x => x.GuildId)
             .IsRequired(false);
+        
+        builder
+            .HasMany(x => x.ServerBoosters)
+            .WithMany(x => x.Guilds)
+            .UsingEntity<GuildServerBooster>(
+                r => r
+                    .HasOne(x => x.ServerBooster)
+                    .WithMany(x => x.GuildServerBoosters)
+                    .HasForeignKey(x => x.UserId),
+                l => l
+                    .HasOne(x => x.Guild)
+                    .WithMany(x => x.GuildServerBoosters)
+                    .HasForeignKey(x => x.GuildId),
+                j =>
+                {
+                    j.HasKey(x => new { x.GuildId, x.UserId });
+                    j.ToTable("guild_server_booster");
+                    j.Property(x => x.GuildId).HasColumnName("guild_id").HasColumnType("bigint").ValueGeneratedNever()
+                        .IsRequired();
+                    j.Property(x => x.UserId).HasColumnName("user_id").HasColumnType("bigint")
+                        .ValueGeneratedNever()
+                        .IsRequired();
+                });
     }
 }

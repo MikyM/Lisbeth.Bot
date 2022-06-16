@@ -31,6 +31,7 @@ public sealed class Guild : SnowflakeEntity
 {
     private readonly HashSet<Ban>? bans;
     private readonly HashSet<GuildServerBooster>? guildServerBoosters;
+    private HashSet<ServerBooster>? serverBoosters;
     private readonly HashSet<Mute>? mutes;
     private readonly HashSet<Prune>? prunes;
     private readonly HashSet<Reminder>? reminders;
@@ -41,6 +42,7 @@ public sealed class Guild : SnowflakeEntity
 
     public Guild()
     {
+        serverBoosters ??= new HashSet<ServerBooster>();
         bans ??= new HashSet<Ban>();
         guildServerBoosters ??= new HashSet<GuildServerBooster>();
         mutes ??= new HashSet<Mute>();
@@ -63,6 +65,7 @@ public sealed class Guild : SnowflakeEntity
     public IEnumerable<Ban>? Bans => bans?.AsEnumerable();
     public IEnumerable<Prune>? Prunes => prunes?.AsEnumerable();
     public IEnumerable<Ticket>? Tickets => tickets?.AsEnumerable();
+    public IEnumerable<ServerBooster>? ServerBoosters => serverBoosters?.AsEnumerable();
     public IEnumerable<GuildServerBooster>? GuildServerBoosters => guildServerBoosters?.AsEnumerable();
     public IEnumerable<Reminder>? Reminders => reminders?.AsEnumerable();
     public IEnumerable<Tag>? Tags => tags?.AsEnumerable();
@@ -87,10 +90,30 @@ public sealed class Guild : SnowflakeEntity
         bans?.Add(ban);
     }
 
-    public void AddServerBooster(GuildServerBooster guildServerBooster)
+    public void RemoveServerBooster(ulong userId)
     {
-        if (guildServerBooster is null) throw new ArgumentNullException(nameof(guildServerBooster));
-        guildServerBoosters?.Add(guildServerBooster);
+        var booster = serverBoosters?.FirstOrDefault(x => x.UserId == userId && x.GuildId == GuildId);
+
+        if (booster is not null)
+            booster.IsDisabled = true;
+    }
+    
+    public void AddServerBooster(ulong userId, DateTime? date = null)
+    {
+        if (serverBoosters is null)
+            throw new ArgumentNullException();
+        
+        var booster = serverBoosters.FirstOrDefault(x => x.UserId == userId && x.GuildId == GuildId);
+
+        if (booster is not null)
+        {
+            booster.BoostingSince = date ?? DateTime.UtcNow;
+            booster.IsDisabled = false;
+            return;
+        }
+        
+        serverBoosters ??= new HashSet<ServerBooster>();
+        serverBoosters.Add(new ServerBooster { GuildId = GuildId, UserId = userId, BoostingSince = date ?? DateTime.UtcNow } );
     }
 
     public bool AddTag(Tag tag)

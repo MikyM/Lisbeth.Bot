@@ -108,3 +108,11 @@ public enum ModuleActionType
     [ChoiceName("edit")] Edit,
     [ChoiceName("disable")] Disable
 }
+
+public enum BoosterActionType
+{
+    [ChoiceName("check")] Check,
+    [ChoiceName("history")] History,
+    [ChoiceName("active")] Active,
+    [ChoiceName("backtrack")] Backtrack
+}

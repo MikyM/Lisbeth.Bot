@@ -293,12 +293,58 @@ public class GuildDataService : CrudDataService<Guild, LisbethBotDbContext>, IGu
 
     public async Task<Result> AddRoleMenuAsync(RoleMenuAddReqDto req, bool shouldSave = false)
     {
-        var result = await base.GetSingleBySpecAsync<Guild>(
+        var result = await GetSingleBySpecAsync<Guild>(
             new ActiveGuildByIdSpec(req.GuildId));
         if (!result.IsSuccess) return Result.FromError(new NotFoundError());
 
         var partial = await _roleMenuService.AddAsync(req, shouldSave);
 
         return partial.IsSuccess ? Result.FromSuccess() : Result.FromError(partial.Error);
+    }
+
+    public async Task<Result> RemoveServerBoosterAsync(ulong guildId, ulong userId, bool shouldSave = false)
+    {
+        var result = await GetSingleBySpecAsync(
+            new ActiveGuildByDiscordIdWithBoostersSpecifications(guildId));
+        if (!result.IsDefined(out var guild)) 
+            return new NotFoundError();
+
+        _ = BeginUpdate(guild);
+        guild.RemoveServerBooster(userId);
+
+        if (shouldSave)
+            _ = await CommitAsync();
+
+        return Result.FromSuccess();
+    }
+
+    public async Task<Result> AddServerBoosterAsync(ulong guildId, ulong userId, DateTime? date = null, bool shouldSave = false)
+    {
+        var result = await GetSingleBySpecAsync(
+            new ActiveGuildByDiscordIdWithBoostersSpecifications(guildId));
+        if (!result.IsDefined(out var guild)) 
+            return new NotFoundError();
+
+        _ = BeginUpdate(guild);
+        guild.AddServerBooster(userId, date);
+
+        if (shouldSave)
+            _ = await CommitAsync();
+
+        return Result.FromSuccess();
+    }
+
+    public async Task<Result<ServerBooster>> GetServerBoosterAsync(ulong guildId, ulong userId)
+    {
+        var result = await GetSingleBySpecAsync(
+            new ActiveGuildByDiscordIdWithBoostersSpecifications(guildId));
+        if (!result.IsDefined(out var guild)) 
+            return new NotFoundError();
+
+        var booster = guild.ServerBoosters?.FirstOrDefault(x => x.GuildId == guildId && x.UserId == userId);
+        if (booster is null)
+            return new NotFoundError();
+
+        return booster;
     }
 }

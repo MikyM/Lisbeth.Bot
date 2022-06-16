@@ -307,15 +307,15 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                         .HasColumnName("guild_id")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.None);
 
-                    b.Property<long>("ServerBoosterId")
+                    b.Property<long>("UserId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
                         .HasColumnName("user_id")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.None);
 
-                    b.HasKey("GuildId", "ServerBoosterId");
+                    b.HasKey("GuildId", "UserId");
 
-                    b.HasIndex("ServerBoosterId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("guild_server_booster", (string)null);
                 });
@@ -1126,7 +1126,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
 
                     b.HasOne("Lisbeth.Bot.Domain.Entities.ServerBooster", "ServerBooster")
                         .WithMany("GuildServerBoosters")
-                        .HasForeignKey("ServerBoosterId")
+                        .HasForeignKey("UserId")
                         .HasPrincipalKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
