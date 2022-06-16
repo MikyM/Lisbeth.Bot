@@ -162,7 +162,7 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                     {
                         var memberActive = await ctx.Guild.GetMemberAsync(booster.UserId);
                         embedBuilderActive.AddField(memberActive.GetFullUsername(),
-                            $"Last boost date: {booster.BoostingSince.ToString(CultureInfo.InvariantCulture)}\nBoosting for: {Math.Round(DateTime.UtcNow.Subtract(booster.BoostingSince.ToUniversalTime()).TotalDays, 2).ToString(CultureInfo.InvariantCulture)}");
+                            $"Last boost date: {booster.BoostingSince.ToString(CultureInfo.InvariantCulture)}\nBoosting for: {Math.Round(DateTime.UtcNow.Subtract(booster.BoostingSince.ToUniversalTime()).TotalDays, 2).ToString(CultureInfo.InvariantCulture)} days");
                         await Task.Delay(500);
                     }
 
@@ -194,7 +194,7 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                     foreach (var booster in chunk)
                     {
                         embedBuilderActiveDisc.AddField(booster.GetFullUsername(),
-                            $"Last boost date: {booster.PremiumSince!.Value.ToString(CultureInfo.InvariantCulture)}\nBoosting for: {Math.Round(DateTime.UtcNow.Subtract(booster.PremiumSince!.Value.UtcDateTime).TotalDays, 2).ToString(CultureInfo.InvariantCulture)}");
+                            $"Last boost date: {booster.PremiumSince!.Value.ToString(CultureInfo.InvariantCulture)}\nBoosting for: {Math.Round(DateTime.UtcNow.Subtract(booster.PremiumSince!.Value.UtcDateTime).TotalDays, 2).ToString(CultureInfo.InvariantCulture)} days");
                     }
 
                     pagesActiveDisc.Add(new Page("", embedBuilderActiveDisc));
