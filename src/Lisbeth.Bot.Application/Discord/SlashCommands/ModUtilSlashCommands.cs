@@ -128,8 +128,10 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
 
                     foreach (var booster in chunk)
                     {
-                        embedBuilder.AddField(ExtendedFormatter.Mention(booster.UserId, DiscordEntity.User),
+                        var memberHistory = await ctx.Guild.GetMemberAsync(booster.UserId);
+                        embedBuilder.AddField(memberHistory.GetFullUsername(),
                             $"Is boosting: {!booster.IsDisabled}\nLast boost date: {booster.BoostingSince.ToString(CultureInfo.InvariantCulture)}{(booster.IsDisabled ? string.Empty : $"\nBoosting for: {Math.Round(DateTime.UtcNow.Subtract(booster.BoostingSince.ToUniversalTime()).TotalDays, 2).ToString(CultureInfo.InvariantCulture)}")}");
+                        await Task.Delay(500);
                     }
 
                     pages.Add(new Page("", embedBuilder));
@@ -158,8 +160,10 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
 
                     foreach (var booster in chunk)
                     {
-                        embedBuilderActive.AddField(ExtendedFormatter.Mention(booster.UserId, DiscordEntity.User),
+                        var memberActive = await ctx.Guild.GetMemberAsync(booster.UserId);
+                        embedBuilderActive.AddField(memberActive.GetFullUsername(),
                             $"Last boost date: {booster.BoostingSince.ToString(CultureInfo.InvariantCulture)}\nBoosting for: {Math.Round(DateTime.UtcNow.Subtract(booster.BoostingSince.ToUniversalTime()).TotalDays, 2).ToString(CultureInfo.InvariantCulture)}");
+                        await Task.Delay(500);
                     }
 
                     pagesActive.Add(new Page("", embedBuilderActive));
@@ -189,7 +193,7 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
 
                     foreach (var booster in chunk)
                     {
-                        embedBuilderActiveDisc.AddField(ExtendedFormatter.Mention(booster.Id, DiscordEntity.User),
+                        embedBuilderActiveDisc.AddField(booster.GetFullUsername(),
                             $"Last boost date: {booster.PremiumSince!.Value.ToString(CultureInfo.InvariantCulture)}\nBoosting for: {Math.Round(DateTime.UtcNow.Subtract(booster.PremiumSince!.Value.UtcDateTime).TotalDays, 2).ToString(CultureInfo.InvariantCulture)}");
                     }
 
