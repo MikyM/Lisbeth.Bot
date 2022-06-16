@@ -114,5 +114,6 @@ public enum BoosterActionType
     [ChoiceName("check")] Check,
     [ChoiceName("history")] History,
     [ChoiceName("active")] Active,
+    [ChoiceName("active-disc")] ActiveByDiscord,
     [ChoiceName("backtrack")] Backtrack
 }

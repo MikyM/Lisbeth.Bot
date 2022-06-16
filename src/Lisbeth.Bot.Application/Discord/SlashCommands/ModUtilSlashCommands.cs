@@ -169,6 +169,37 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                 await intrActive.SendPaginatedResponseAsync(ctx.Interaction, false, ctx.User, pagesActive, null,
                     null, null, default, true);
                 break;
+            case BoosterActionType.ActiveByDiscord:
+                var intrActiveDisc = ctx.Client.GetInteractivity();
+                var pagesActiveDisc = new List<Page>();
+                var membersActiveDisc = await ctx.Guild.GetAllMembersAsync();
+                var chunkedActiveDisc = membersActiveDisc.Where(x => x.Roles.Any(y => y.Tags.IsPremiumSubscriber))
+                    .OrderBy(x => x.PremiumSince!.Value)
+                    .Chunk(10)
+                    .OrderByDescending(x => x.Length)
+                    .ToList();
+                
+                int pageNumberActiveDisc = 1;
+                
+                foreach (var chunk in chunkedActiveDisc)
+                {
+                    var embedBuilderActiveDisc = new DiscordEmbedBuilder().WithColor(new DiscordColor(guild.EmbedHexColor))
+                        .WithTitle("Boosters")
+                        .WithFooter($"Current page: {pageNumberActiveDisc} | Total pages: {chunkedActiveDisc.Count}");
+
+                    foreach (var booster in chunk)
+                    {
+                        embedBuilderActiveDisc.AddField(ExtendedFormatter.Mention(booster.Id, DiscordEntity.User),
+                            $"Last boost date: {booster.PremiumSince!.Value.UtcDateTime.ToString(CultureInfo.InvariantCulture)}\nBoosting for: {Math.Round(DateTime.UtcNow.Subtract(booster.PremiumSince!.Value.UtcDateTime).TotalDays, 2).ToString(CultureInfo.InvariantCulture)}");
+                    }
+
+                    pagesActiveDisc.Add(new Page("", embedBuilderActiveDisc));
+                    pageNumberActiveDisc++;
+                }
+
+                await intrActiveDisc.SendPaginatedResponseAsync(ctx.Interaction, false, ctx.User, pagesActiveDisc, null,
+                    null, null, default, true);
+                break;
             case BoosterActionType.Backtrack:
                 var members = await ctx.Guild.GetAllMembersAsync();
                 foreach (var memberBacktrack in members)
