@@ -83,7 +83,7 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                 embed.WithTitle("Booster information");
                 embed.WithThumbnail(member.AvatarUrl);
                 embed.WithColor(new DiscordColor(guild.EmbedHexColor));
-                var isBoosting = member.Roles.Any(x => !x.Tags.IsPremiumSubscriber);
+                var isBoosting = member.Roles.Any(x => x.Tags.IsPremiumSubscriber);
                 var discordBoostDate = member.PremiumSince;
                 var dbBooster = (await _guildDataService.GetServerBoosterAsync(ctx.Guild.Id, member.Id)).Entity;
 
@@ -93,7 +93,7 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                         ? null
                         : new DateTimeOffset(dbBooster.BoostingSince, TimeSpan.Zero);
                 
-                embed.AddField("Currently boosting", isBoosting ? "No" : "Yes", true);
+                embed.AddField("Currently boosting", isBoosting ? "Yes" : "No", true);
                 
                 switch (isBoosting)
                 {
@@ -173,7 +173,7 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                 var members = await ctx.Guild.GetAllMembersAsync();
                 foreach (var memberBacktrack in members)
                 {
-                    if (memberBacktrack.Roles.All(x => x.Tags.IsPremiumSubscriber))
+                    if (!memberBacktrack.Roles.Any(x => x.Tags.IsPremiumSubscriber))
                         continue;
                     
                     var dateBacktrack = memberBacktrack.PremiumSince is not null &&
