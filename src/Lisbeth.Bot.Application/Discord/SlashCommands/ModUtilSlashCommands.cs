@@ -82,6 +82,7 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
 
                 embed.WithTitle("Booster information");
                 embed.WithThumbnail(member.AvatarUrl);
+                embed.WithColor(new DiscordColor(guild.EmbedHexColor));
                 var isBoosting = member.Roles.Any(x => !x.Tags.IsPremiumSubscriber);
                 var discordBoostDate = member.PremiumSince;
                 var dbBooster = (await _guildDataService.GetServerBoosterAsync(ctx.Guild.Id, member.Id)).Entity;
@@ -184,8 +185,10 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                 }
 
                 _ = await _guildDataService.CommitAsync();
-                
-                _ = await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(new DiscordEmbedBuilder().WithDescription("Backtracking server boosters has finished successfully!")));
+
+                _ = await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(
+                    new DiscordEmbedBuilder().WithDescription("Backtracking server boosters has finished successfully!")
+                        .WithColor(new DiscordColor(guild.EmbedHexColor))));
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(actionType), actionType, null);
