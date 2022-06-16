@@ -82,7 +82,7 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
 
                 embed.WithTitle("Booster information");
                 embed.WithThumbnail(member.AvatarUrl);
-                var isBoosting = member.Roles.Any(x => x.Tags.IsPremiumSubscriber);
+                var isBoosting = member.Roles.Any(x => !x.Tags.IsPremiumSubscriber);
                 var discordBoostDate = member.PremiumSince;
                 var dbBooster = (await _guildDataService.GetServerBoosterAsync(ctx.Guild.Id, member.Id)).Entity;
 
@@ -172,7 +172,7 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                 var members = await ctx.Guild.GetAllMembersAsync();
                 foreach (var memberBacktrack in members)
                 {
-                    if (!memberBacktrack.Roles.Any(r => r.Tags.IsPremiumSubscriber)) 
+                    if (memberBacktrack.Roles.All(x => x.Tags.IsPremiumSubscriber))
                         continue;
                     
                     var dateBacktrack = memberBacktrack.PremiumSince is not null &&

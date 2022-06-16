@@ -39,7 +39,7 @@ public class ServerBoosterEventsHandler : IDiscordGuildMemberEventsSubscriber
 
     public async Task DiscordOnGuildMemberRemoved(DiscordClient sender, GuildMemberRemoveEventArgs args)
     {
-        var hadBoost = args.Member.Roles.Any(x => x.Tags.IsPremiumSubscriber);
+        var hadBoost = args.Member.Roles.Any(x => !x.Tags.IsPremiumSubscriber);
 
         if (!hadBoost)
             return;
@@ -51,8 +51,8 @@ public class ServerBoosterEventsHandler : IDiscordGuildMemberEventsSubscriber
     public async Task DiscordOnGuildMemberUpdated(DiscordClient sender, GuildMemberUpdateEventArgs args)
     {
 
-        var hasBoostNow = args.RolesAfter.Any(x => x.Tags.IsPremiumSubscriber);
-        var hadBoostBefore = args.RolesBefore.Any(x => x.Tags.IsPremiumSubscriber);
+        var hasBoostNow = args.RolesAfter.Any(x => !x.Tags.IsPremiumSubscriber);
+        var hadBoostBefore = args.RolesBefore.Any(x => !x.Tags.IsPremiumSubscriber);
 
         _ = hadBoostBefore switch
         {
