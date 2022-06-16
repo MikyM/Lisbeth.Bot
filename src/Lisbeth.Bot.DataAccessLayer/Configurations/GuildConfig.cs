@@ -124,11 +124,13 @@ internal class GuildConfig : IEntityTypeConfiguration<Guild>
                 r => r
                     .HasOne(x => x.ServerBooster)
                     .WithMany(x => x.GuildServerBoosters)
-                    .HasForeignKey(x => x.UserId),
-                l => l
+                    .HasForeignKey(x => x.UserId)
+                    .HasPrincipalKey(x => x.UserId),
+            l => l
                     .HasOne(x => x.Guild)
                     .WithMany(x => x.GuildServerBoosters)
-                    .HasForeignKey(x => x.GuildId),
+                    .HasForeignKey(x => x.GuildId)
+                    .HasPrincipalKey(x => x.GuildId),
                 j =>
                 {
                     j.HasKey(x => new { x.GuildId, x.UserId });
