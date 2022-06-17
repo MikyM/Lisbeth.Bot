@@ -117,6 +117,7 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                     .ToList();
 
                 int pageNumber = 1;
+                int entryNumber = 1;
                 
                 foreach (var chunk in chunked)
                 {
@@ -133,8 +134,9 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                                 ? x.UpdatedAt!.Value.Subtract(x.BoostingSince).TotalDays
                                 : DateTime.UtcNow.Subtract(x.BoostingSince).TotalDays);
                         
-                        embedBuilder.AddField(memberHistory.GetFullUsername(),
-                            $"Is currently boosting: {!booster.IsDisabled && check}\nLast boost date: {booster.BoostingSince.ToString("g")} UTC{(booster.IsDisabled ? string.Empty : $"\nBoosting currently for: {Math.Round(DateTime.UtcNow.Subtract(booster.BoostingSince.ToUniversalTime()).TotalDays, 2).ToString(CultureInfo.InvariantCulture)} days")}\nBoosted totally for: {Math.Round(daysBoostedTotally, 2)}");
+                        embedBuilder.AddField($"Entry {entryNumber}",
+                            $"Entry for user: {ExtendedFormatter.Bold(memberHistory.GetFullUsername())}\nIs currently boosting: {!booster.IsDisabled && check}\nLast boost date: {booster.BoostingSince.ToString("g")} UTC{(booster.IsDisabled ? $"\nBoosted until: {booster.UpdatedAt!.Value.ToString("g")} UTC" : $"\nBoosting currently for: {Math.Round(DateTime.UtcNow.Subtract(booster.BoostingSince.ToUniversalTime()).TotalDays, 2).ToString(CultureInfo.InvariantCulture)} days")}\nBoosted totally for: {Math.Round(daysBoostedTotally, 2)}");
+                        entryNumber++;
                         await Task.Delay(500);
                     }
 
