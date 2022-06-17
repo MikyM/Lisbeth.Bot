@@ -111,14 +111,14 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                 var intr = ctx.Client.GetInteractivity();
                 var pages = new List<Page>();
                 var chunked = (guild.ServerBoosters ?? throw new ArgumentNullException())
+                    .DistinctBy(x => new { x.UserId, x.GuildId })
                     .OrderBy(x => x.BoostingSince)
                     .Chunk(10)
                     .OrderByDescending(x => x.Length)
                     .ToList();
 
                 int pageNumber = 1;
-                int entryNumber = 1;
-                
+
                 foreach (var chunk in chunked)
                 {
                     var embedBuilder = new DiscordEmbedBuilder().WithColor(new DiscordColor(guild.EmbedHexColor))
@@ -134,9 +134,9 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                                 ? x.UpdatedAt!.Value.Subtract(x.BoostingSince).TotalDays
                                 : DateTime.UtcNow.Subtract(x.BoostingSince).TotalDays);
                         
-                        embedBuilder.AddField($"Entry {entryNumber}",
-                            $"Entry for user: {ExtendedFormatter.Bold(memberHistory.GetFullUsername())}\nIs currently boosting: {!booster.IsDisabled && check}\nLast boost date: {booster.BoostingSince.ToString("g")} UTC{(booster.IsDisabled ? $"\nBoosted until: {booster.UpdatedAt!.Value.ToString("g")} UTC" : $"\nBoosting currently for: {Math.Round(DateTime.UtcNow.Subtract(booster.BoostingSince.ToUniversalTime()).TotalDays, 2).ToString(CultureInfo.InvariantCulture)} days")}\nBoosted totally for: {Math.Round(daysBoostedTotally, 2)}");
-                        entryNumber++;
+                        embedBuilder.AddField(memberHistory.GetFullUsername(),
+                            $"Is currently boosting: {!booster.IsDisabled && check}\nLast boost date: {booster.BoostingSince.ToString("g")} UTC{(booster.IsDisabled ? $"\nBoosted until: {booster.UpdatedAt!.Value.ToString("g")} UTC" : $"\nBoosting currently for: {Math.Round(DateTime.UtcNow.Subtract(booster.BoostingSince.ToUniversalTime()).TotalDays, 2).ToString(CultureInfo.InvariantCulture)} days")}\nBoosted totally for: {Math.Round(daysBoostedTotally, 2)} days");
+       
                         await Task.Delay(500);
                     }
 
