@@ -111,7 +111,8 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                 var intr = ctx.Client.GetInteractivity();
                 var pages = new List<Page>();
                 var chunked = (guild.ServerBoosters ?? throw new ArgumentNullException())
-                    .DistinctBy(x => new { x.UserId, x.GuildId })
+                    .GroupBy(x => new { x.UserId, x.GuildId })
+                    .Select(x => x.OrderByDescending(y => y.BoostingSince).First())
                     .OrderBy(x => x.BoostingSince)
                     .Chunk(10)
                     .OrderByDescending(x => x.Length)
