@@ -87,11 +87,9 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                 var discordBoostDate = member.PremiumSince;
                 var dbBooster = (await _guildDataService.GetServerBoosterAsync(ctx.Guild.Id, member.Id)).Entity;
 
-                var date = discordBoostDate is not null && discordBoostDate != DateTimeOffset.MinValue
-                    ? discordBoostDate
-                    : dbBooster is null 
-                        ? null
-                        : new DateTimeOffset(dbBooster.BoostingSince, TimeSpan.Zero);
+                DateTime? date = discordBoostDate.HasValue && discordBoostDate != DateTimeOffset.MinValue
+                    ? discordBoostDate.Value.UtcDateTime
+                    : dbBooster?.BoostingSince;
                 
                 embed.AddField("Currently boosting", isBoosting ? "Yes" : "No", true);
                 
@@ -101,9 +99,9 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                         embed.AddField("Boosted previously", dbBooster is not null ? "Yes" : "Unknown", true);
                         break;
                     case true:
-                        embed.AddField("Boosting since", date.HasValue ? date.Value.ToString() : "Unknown");
+                        embed.AddField("Boosting since", date.HasValue ? $"{date.Value.ToString("g")} UTC" : "Unknown");
                         embed.AddField("Boosting for", date.HasValue
-                            ? $"{Math.Round(DateTime.UtcNow.Subtract(date.Value.UtcDateTime).TotalDays, 2).ToString(CultureInfo.InvariantCulture)} days"
+                            ? $"{Math.Round(DateTime.UtcNow.Subtract(date.Value).TotalDays, 2).ToString(CultureInfo.InvariantCulture)} days"
                             : "Unknown");
                         break;
                 }
@@ -130,7 +128,7 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                     {
                         var memberHistory = await ctx.Guild.GetMemberAsync(booster.UserId);
                         embedBuilder.AddField(memberHistory.GetFullUsername(),
-                            $"Is boosting: {!booster.IsDisabled}\nLast boost date: {booster.BoostingSince.ToString(CultureInfo.InvariantCulture)}{(booster.IsDisabled ? string.Empty : $"\nBoosting for: {Math.Round(DateTime.UtcNow.Subtract(booster.BoostingSince.ToUniversalTime()).TotalDays, 2).ToString(CultureInfo.InvariantCulture)}")}");
+                            $"Is currently boosting: {!booster.IsDisabled}\nLast boost date: {booster.BoostingSince.ToString("g")} UTC{(booster.IsDisabled ? string.Empty : $"\nBoosting for: {Math.Round(DateTime.UtcNow.Subtract(booster.BoostingSince.ToUniversalTime()).TotalDays, 2).ToString(CultureInfo.InvariantCulture)} days")}");
                         await Task.Delay(500);
                     }
 
@@ -167,7 +165,7 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                     {
                         var memberActive = await ctx.Guild.GetMemberAsync(booster.UserId);
                         embedBuilderActive.AddField(memberActive.GetFullUsername(),
-                            $"Last boost date: {booster.BoostingSince.ToString(CultureInfo.InvariantCulture)}\nBoosting for: {Math.Round(DateTime.UtcNow.Subtract(booster.BoostingSince.ToUniversalTime()).TotalDays, 2).ToString(CultureInfo.InvariantCulture)} days");
+                            $"Last boost date: {booster.BoostingSince.ToString("g")} UTC\nBoosting for: {Math.Round(DateTime.UtcNow.Subtract(booster.BoostingSince.ToUniversalTime()).TotalDays, 2).ToString(CultureInfo.InvariantCulture)} days");
                         await Task.Delay(500);
                     }
 
@@ -203,7 +201,7 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                     foreach (var booster in chunk)
                     {
                         embedBuilderActiveDisc.AddField(booster.GetFullUsername(),
-                            $"Last boost date: {booster.PremiumSince!.Value.ToString(CultureInfo.InvariantCulture)}\nBoosting for: {Math.Round(DateTime.UtcNow.Subtract(booster.PremiumSince!.Value.UtcDateTime).TotalDays, 2).ToString(CultureInfo.InvariantCulture)} days");
+                            $"Last boost date: {booster.PremiumSince!.Value.UtcDateTime.ToString("g")} UTC\nBoosting for: {Math.Round(DateTime.UtcNow.Subtract(booster.PremiumSince!.Value.UtcDateTime).TotalDays, 2).ToString(CultureInfo.InvariantCulture)} days");
                     }
 
                     pagesActiveDisc.Add(new Page("", embedBuilderActiveDisc));
@@ -219,11 +217,10 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                 break;
             case BoosterActionType.Backtrack:
                 var members = await ctx.Guild.GetAllMembersAsync();
-                foreach (var memberBacktrack in members)
+                var boosters = members.Where(x => x.Roles.Any(y => y.Tags.IsPremiumSubscriber)).ToList();
+                
+                foreach (var memberBacktrack in boosters)
                 {
-                    if (!memberBacktrack.Roles.Any(x => x.Tags.IsPremiumSubscriber))
-                        continue;
-                    
                     var dateBacktrack = memberBacktrack.PremiumSince is not null &&
                                         memberBacktrack.PremiumSince != DateTimeOffset.MinValue
                         ? memberBacktrack.PremiumSince.Value.UtcDateTime
@@ -235,7 +232,7 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                 _ = await _guildDataService.CommitAsync();
 
                 _ = await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(
-                    new DiscordEmbedBuilder().WithDescription("Backtracking server boosters has finished successfully!")
+                    new DiscordEmbedBuilder().WithDescription($"Backtracking server boosters has finished successfully!\nFound boosters: {string.Join(", ", boosters)}")
                         .WithColor(new DiscordColor(guild.EmbedHexColor))));
                 break;
             default:
