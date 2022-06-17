@@ -110,7 +110,7 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
             case BoosterActionType.History:
                 var intr = ctx.Client.GetInteractivity();
                 var pages = new List<Page>();
-                var chunked = (guild.ServerBoosters ?? throw new ArgumentNullException()).Where(x => !x.IsDisabled)
+                var chunked = (guild.ServerBoosters ?? throw new ArgumentNullException())
                     .OrderBy(x => x.BoostingSince)
                     .Chunk(10)
                     .OrderByDescending(x => x.Length)
@@ -127,8 +127,14 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                     foreach (var booster in chunk)
                     {
                         var memberHistory = await ctx.Guild.GetMemberAsync(booster.UserId);
+                        var check = memberHistory.Roles.Any(x => x.Tags.IsPremiumSubscriber);
+                        var daysBoostedTotally = guild.ServerBoosters.Where(x => x.UserId == booster.UserId).Sum(x =>
+                            x.IsDisabled
+                                ? x.UpdatedAt!.Value.Subtract(x.BoostingSince).TotalDays
+                                : DateTime.UtcNow.Subtract(x.BoostingSince).TotalDays);
+                        
                         embedBuilder.AddField(memberHistory.GetFullUsername(),
-                            $"Is currently boosting: {!booster.IsDisabled}\nLast boost date: {booster.BoostingSince.ToString("g")} UTC{(booster.IsDisabled ? string.Empty : $"\nBoosting for: {Math.Round(DateTime.UtcNow.Subtract(booster.BoostingSince.ToUniversalTime()).TotalDays, 2).ToString(CultureInfo.InvariantCulture)} days")}");
+                            $"Is currently boosting: {!booster.IsDisabled && check}\nLast boost date: {booster.BoostingSince.ToString("g")} UTC{(booster.IsDisabled ? string.Empty : $"\nBoosting currently for: {Math.Round(DateTime.UtcNow.Subtract(booster.BoostingSince.ToUniversalTime()).TotalDays, 2).ToString(CultureInfo.InvariantCulture)} days")}\nBoosted totally for: {Math.Round(daysBoostedTotally, 2)}");
                         await Task.Delay(500);
                     }
 
@@ -164,6 +170,8 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                     foreach (var booster in chunk)
                     {
                         var memberActive = await ctx.Guild.GetMemberAsync(booster.UserId);
+                        if (!memberActive.Roles.Any(x => x.Tags.IsPremiumSubscriber))
+                            continue;
                         embedBuilderActive.AddField(memberActive.GetFullUsername(),
                             $"Last boost date: {booster.BoostingSince.ToString("g")} UTC\nBoosting for: {Math.Round(DateTime.UtcNow.Subtract(booster.BoostingSince.ToUniversalTime()).TotalDays, 2).ToString(CultureInfo.InvariantCulture)} days");
                         await Task.Delay(500);
