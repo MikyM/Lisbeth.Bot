@@ -225,8 +225,9 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                                         memberBacktrack.PremiumSince != DateTimeOffset.MinValue
                         ? memberBacktrack.PremiumSince.Value.UtcDateTime
                         : DateTime.UtcNow;
-                    
-                    _ = await _guildDataService.AddServerBoosterAsync(ctx.Guild.Id, memberBacktrack.Id, dateBacktrack);
+
+                    _ = _guildDataService.BeginUpdate(guild);
+                    guild.AddServerBooster(memberBacktrack.Id, dateBacktrack);
                 }
 
                 _ = await _guildDataService.CommitAsync();

@@ -25,6 +25,7 @@ public class ActiveGuildByDiscordIdWithBoostersSpecifications : Specification<Do
 {
     public ActiveGuildByDiscordIdWithBoostersSpecifications(ulong discordGuildId)
     {
+        Where(x => !x.IsDisabled);
         Where(x => x.GuildId == discordGuildId);
         Include(x => x.ServerBoosters);
         Include(x => x.GuildServerBoosters);
