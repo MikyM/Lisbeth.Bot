@@ -116,7 +116,7 @@ internal class GuildConfig : IEntityTypeConfiguration<Guild>
             .HasForeignKey(x => x.GuildId)
             .HasPrincipalKey(x => x.GuildId)
             .IsRequired(false);
-        
+
         builder
             .HasMany(x => x.ServerBoosters)
             .WithMany(x => x.Guilds)
@@ -133,8 +133,13 @@ internal class GuildConfig : IEntityTypeConfiguration<Guild>
                     .HasPrincipalKey(x => x.GuildId),
                 j =>
                 {
-                    j.HasKey(x => new { x.GuildId, x.UserId });
+                    j.HasKey(x => x.Id);
                     j.ToTable("guild_server_booster");
+                    j.Property(x => x.Id).HasColumnName("id").HasColumnType("bigint").ValueGeneratedNever()
+                        .IsRequired();
+                    j.Property(x => x.IsDisabled).HasColumnName("is_disabled").HasColumnType("boolean").IsRequired();
+                    j.Property(x => x.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz").IsRequired();
+                    j.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz").IsRequired();
                     j.Property(x => x.GuildId).HasColumnName("guild_id").HasColumnType("bigint").ValueGeneratedNever()
                         .IsRequired();
                     j.Property(x => x.UserId).HasColumnName("user_id").HasColumnType("bigint")

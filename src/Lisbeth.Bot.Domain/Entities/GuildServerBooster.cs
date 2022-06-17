@@ -1,6 +1,8 @@
-﻿namespace Lisbeth.Bot.Domain.Entities;
+﻿using Lisbeth.Bot.Domain.Entities.Base;
 
-public class GuildServerBooster
+namespace Lisbeth.Bot.Domain.Entities;
+
+public class GuildServerBooster : SnowflakeEntity
 {
     public ulong UserId { get; set; }
     public ulong GuildId { get; set; }

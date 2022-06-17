@@ -92,9 +92,11 @@ public sealed class Guild : SnowflakeEntity
 
     public void RemoveServerBooster(ulong userId)
     {
-        var booster = serverBoosters?.FirstOrDefault(x => x.UserId == userId && x.GuildId == GuildId);
-
-        if (booster is not null)
+        var boosters = serverBoosters?.Where(x => x.UserId == userId && x.GuildId == GuildId && !IsDisabled).ToList();
+        if (boosters is null || !boosters.Any())
+            return;
+        
+        foreach (var booster in boosters)
             booster.IsDisabled = true;
     }
     
@@ -103,14 +105,9 @@ public sealed class Guild : SnowflakeEntity
         if (serverBoosters is null)
             throw new ArgumentNullException();
         
-        var booster = serverBoosters.FirstOrDefault(x => x.UserId == userId && x.GuildId == GuildId);
-
+        var booster = serverBoosters.FirstOrDefault(x => x.UserId == userId && x.GuildId == GuildId && !IsDisabled);
         if (booster is not null)
-        {
-            booster.BoostingSince = date ?? DateTime.UtcNow;
-            booster.IsDisabled = false;
             return;
-        }
         
         serverBoosters ??= new HashSet<ServerBooster>();
         serverBoosters.Add(new ServerBooster { GuildId = GuildId, UserId = userId, BoostingSince = date ?? DateTime.UtcNow } );

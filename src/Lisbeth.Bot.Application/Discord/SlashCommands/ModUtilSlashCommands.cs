@@ -137,9 +137,14 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                     pages.Add(new Page("", embedBuilder));
                     pageNumber++;
                 }
-
-                await intr.SendPaginatedResponseAsync(ctx.Interaction, false, ctx.User, pages, null,
-                    null, null, default, true);
+                
+                
+                if (pages.Any())
+                    await intr.SendPaginatedResponseAsync(ctx.Interaction, false, ctx.User, pages, null,
+                        null, null, default, true);
+                else
+                    await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().AddEmbed(new DiscordEmbedBuilder()
+                        .WithTitle("Booster history").WithDescription("No history entries available.").WithColor(new DiscordColor(guild.EmbedHexColor))));
                 break;
             case BoosterActionType.Active:
                 var intrActive = ctx.Client.GetInteractivity();
@@ -170,8 +175,12 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                     pageNumberActive++;
                 }
 
-                await intrActive.SendPaginatedResponseAsync(ctx.Interaction, false, ctx.User, pagesActive, null,
-                    null, null, default, true);
+                if (pagesActive.Any())
+                    await intrActive.SendPaginatedResponseAsync(ctx.Interaction, false, ctx.User, pagesActive, null,
+                        null, null, default, true);
+                else
+                    _ = await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().AddEmbed(new DiscordEmbedBuilder()
+                        .WithTitle("Boosters").WithDescription("No active boosters found.").WithColor(new DiscordColor(guild.EmbedHexColor))));
                 break;
             case BoosterActionType.ActiveByDiscord:
                 var intrActiveDisc = ctx.Client.GetInteractivity();
@@ -200,9 +209,13 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                     pagesActiveDisc.Add(new Page("", embedBuilderActiveDisc));
                     pageNumberActiveDisc++;
                 }
-
-                await intrActiveDisc.SendPaginatedResponseAsync(ctx.Interaction, false, ctx.User, pagesActiveDisc, null,
-                    null, null, default, true);
+                
+                if (pagesActiveDisc.Any())
+                    await intrActiveDisc.SendPaginatedResponseAsync(ctx.Interaction, false, ctx.User, pagesActiveDisc, null,
+                      null, null, default, true);
+                else
+                    _ = await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().AddEmbed(new DiscordEmbedBuilder()
+                        .WithTitle("Boosters").WithDescription("No active boosters found.").WithColor(new DiscordColor(guild.EmbedHexColor))));
                 break;
             case BoosterActionType.Backtrack:
                 var members = await ctx.Guild.GetAllMembersAsync();
