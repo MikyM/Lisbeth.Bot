@@ -27,7 +27,7 @@ public class ActiveGuildByDiscordIdWithBoostersSpecifications : Specification<Do
     {
         Where(x => !x.IsDisabled);
         Where(x => x.GuildId == discordGuildId);
-        Include(x => x.ServerBoosters);
-        Include(x => x.GuildServerBoosters);
+        Include(x => x.ServerBoosters!.Where(y => y.GuildId == discordGuildId));
+        Include(x => x.GuildServerBoosters!.Where(y => y.GuildId == discordGuildId));
     }
 }

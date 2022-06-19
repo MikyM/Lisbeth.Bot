@@ -110,7 +110,7 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
             case BoosterActionType.History:
                 var intr = ctx.Client.GetInteractivity();
                 var pages = new List<Page>();
-                var chunked = (guild.ServerBoosters ?? throw new ArgumentNullException())
+                var chunked = (guild.ServerBoosters?.Where(x => x.GuildId == ctx.Guild.Id) ?? throw new ArgumentNullException())
                     .GroupBy(x => new { x.UserId, x.GuildId })
                     .Select(x => x.OrderByDescending(y => y.BoostingSince).First())
                     .OrderBy(x => x.BoostingSince)
@@ -130,7 +130,7 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                     {
                         var memberHistory = await ctx.Guild.GetMemberAsync(booster.UserId);
                         var check = memberHistory.Roles.Any(x => x.Tags.IsPremiumSubscriber);
-                        var daysBoostedTotally = guild.ServerBoosters.Where(x => x.UserId == booster.UserId).Sum(x =>
+                        var daysBoostedTotally = guild.ServerBoosters.Where(x => x.UserId == booster.UserId && x.GuildId == ctx.Guild.Id).Sum(x =>
                             x.IsDisabled
                                 ? x.UpdatedAt!.Value.Subtract(x.BoostingSince).TotalDays
                                 : DateTime.UtcNow.Subtract(x.BoostingSince).TotalDays);
