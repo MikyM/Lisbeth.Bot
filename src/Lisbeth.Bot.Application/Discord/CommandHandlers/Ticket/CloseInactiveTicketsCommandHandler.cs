@@ -52,70 +52,68 @@ public class CloseInactiveTicketsCommandHandler : ICommandHandler<CloseInactiveT
         {
             await Parallel.ForEachAsync(_discord.Client.Guilds.Keys, async (guildId, _) =>
             {
-                using (var scope = _scope.BeginLifetimeScope())
-                {
-                    var res = await scope.Resolve<IGuildDataService>().GetSingleBySpecAsync(
+                await using var scope = _scope.BeginLifetimeScope();
+                var res = await scope.Resolve<IGuildDataService>().GetSingleBySpecAsync(
                     new ActiveGuildByDiscordIdWithTicketingAndTicketsSpecifications(guildId));
 
-                    if (!res.IsDefined(out var guildCfg)) return;
+                if (!res.IsDefined(out var guildCfg)) return;
 
-                    if (guildCfg.TicketingConfig?.CloseAfter is null) return;
-                    if (guildCfg.Tickets?.Count() == 0) return;
+                if (guildCfg.TicketingConfig?.CloseAfter is null) return;
+                if (guildCfg.Tickets?.Count() == 0) return;
 
-                    DiscordChannel openedCat;
+                DiscordChannel openedCat;
+                try
+                {
+                    openedCat = await _discord.Client.GetChannelAsync(guildCfg.TicketingConfig.OpenedCategoryId);
+                }
+                catch (Exception)
+                {
+                    _logger.LogInformation(
+                        $"Guild with Id: {guildId} has non-existing opened ticket category set with Id: {guildCfg.TicketingConfig.OpenedCategoryId}.");
+                    return;
+                }
+
+                if (openedCat is null) return;
+
+                foreach (var openedTicketChannel in openedCat.Children)
+                {
+                    if ((guildCfg.Tickets ?? throw new InvalidOperationException()).All(x =>
+                            x.ChannelId != openedTicketChannel.Id)) continue;
+
+                    IReadOnlyList<DiscordMessage> lastMessages;
                     try
                     {
-                        openedCat = await _discord.Client.GetChannelAsync(guildCfg.TicketingConfig.OpenedCategoryId);
+                        lastMessages = await openedTicketChannel.GetMessagesAsync(1);
                     }
-                    catch (Exception)
+                    catch
                     {
-                        _logger.LogInformation(
-                            $"Guild with Id: {guildId} has non-existing opened ticket category set with Id: {guildCfg.TicketingConfig.OpenedCategoryId}.");
-                        return;
+                        continue;
                     }
 
-                    if (openedCat is null) return;
+                    var msg = lastMessages?.FirstOrDefault();
+                    if (msg is null) continue;
 
-                    foreach (var openedTicketChannel in openedCat.Children)
+                    if (msg.Author is DiscordMember member && !member.IsModerator()) continue;
+
+                    var timeDifference = DateTime.UtcNow.Subtract(msg.Timestamp.UtcDateTime);
+
+                    if (timeDifference.TotalHours >= guildCfg.TicketingConfig.CloseAfter.Value.TotalHours)
                     {
-                        if ((guildCfg.Tickets ?? throw new InvalidOperationException()).All(x =>
-                                x.ChannelId != openedTicketChannel.Id)) continue;
+                        var req = new TicketCloseReqDto(null, guildId, openedTicketChannel.Id,
+                            _discord.Client.CurrentUser.Id);
 
-                        IReadOnlyList<DiscordMessage> lastMessages;
-                        try
-                        {
-                            lastMessages = await openedTicketChannel.GetMessagesAsync(1);
-                        }
-                        catch
-                        {
-                            continue;
-                        }
+                        var validator = new TicketCloseReqValidator(_discord);
+                        await validator.ValidateAndThrowAsync(req);
 
-                        var msg = lastMessages?.FirstOrDefault();
-                        if (msg is null) continue;
+                        await scope.Resolve<ICommandHandler<ConfirmCloseTicketCommand>>().HandleAsync(new ConfirmCloseTicketCommand(req));
 
-                        if (msg.Author is DiscordMember member && !member.IsModerator()) continue;
-
-                        var timeDifference = DateTime.UtcNow.Subtract(msg.Timestamp.UtcDateTime);
-
-                        if (timeDifference.TotalHours >= guildCfg.TicketingConfig.CloseAfter.Value.TotalHours)
-                        {
-                            var req = new TicketCloseReqDto(null, guildId, openedTicketChannel.Id,
-                                _discord.Client.CurrentUser.Id);
-
-                            var validator = new TicketCloseReqValidator(_discord);
-                            await validator.ValidateAndThrowAsync(req);
-
-                            await scope.Resolve<ICommandHandler<ConfirmCloseTicketCommand>>().HandleAsync(new ConfirmCloseTicketCommand(req));
-
-                            _logger.LogDebug($"Closing channel Id: {openedTicketChannel.Id} with name: {openedTicketChannel.Name}");
-                        }
-
-                        await Task.Delay(500);
+                        _logger.LogDebug($"Closing channel Id: {openedTicketChannel.Id} with name: {openedTicketChannel.Name}");
                     }
 
                     await Task.Delay(500);
                 }
+
+                await Task.Delay(500);
             });
         }
         catch (Exception ex)

@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using Autofac;
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.Mute;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Mute;
@@ -34,16 +35,16 @@ public class RevokeExpiredMutesCommandHandler : ICommandHandler<RevokeExpiredMut
     private readonly IMuteDataService _muteDataService;
     private readonly ILogger<RevokeExpiredMutesCommandHandler> _logger;
     private readonly IDiscordService _discord;
-    private readonly ICommandHandler<RevokeMuteCommand, DiscordEmbed> _revokeHandler;
+    private readonly ILifetimeScope _lifetimeScope;
 
     public RevokeExpiredMutesCommandHandler(IMuteDataService muteDataService,
         ILogger<RevokeExpiredMutesCommandHandler> logger, IDiscordService discord,
-        ICommandHandler<RevokeMuteCommand, DiscordEmbed> revokeHandler)
+        ILifetimeScope lifetimeScope)
     {
         _muteDataService = muteDataService;
         _logger = logger;
         _discord = discord;
-        _revokeHandler = revokeHandler;
+        _lifetimeScope = lifetimeScope;
     }
 
     public async Task<Result> HandleAsync(RevokeExpiredMutesCommand command)
@@ -57,8 +58,10 @@ public class RevokeExpiredMutesCommandHandler : ICommandHandler<RevokeExpiredMut
 
             await Parallel.ForEachAsync(res.Entity, async (x, _) =>
             {
+                await using var childScope = _lifetimeScope.BeginLifetimeScope();
+                var revokeHandler = childScope.Resolve<ICommandHandler<RevokeMuteCommand, DiscordEmbed>>();
                 var req = new MuteRevokeReqDto(x.UserId, x.GuildId, _discord.Client.CurrentUser.Id);
-                await _revokeHandler.HandleAsync(new RevokeMuteCommand(req));
+                await revokeHandler.HandleAsync(new RevokeMuteCommand(req));
             });
         }
         catch (Exception ex)
