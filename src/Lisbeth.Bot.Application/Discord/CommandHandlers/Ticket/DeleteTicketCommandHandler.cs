@@ -17,6 +17,7 @@
 
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.Ticket;
+using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using MikyM.CommandHandlers;
 using MikyM.Common.Utilities.Results;
 
@@ -25,11 +26,23 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 [UsedImplicitly]
 public class DeleteTicketCommandHandler : ICommandHandler<DeleteTicketCommand>
 {
+    private readonly IGuildDataService _guildDataService;
+
+    public DeleteTicketCommandHandler(IGuildDataService guildDataService)
+    {
+        _guildDataService = guildDataService;
+    }
+
     public async Task<Result> HandleAsync(DeleteTicketCommand command)
     {
+        var guildRes = await _guildDataService.GetSingleBySpecAsync(new ActiveGuildByIdSpec(command.Interaction.Guild.Id));
+
+        if (!guildRes.IsDefined(out var guild))
+            return Result.FromError(guildRes);
+
         await command.Interaction.CreateFollowupMessageAsync(
             new DiscordFollowupMessageBuilder().AddEmbed(
-                new DiscordEmbedBuilder().WithDescription("This ticket will be deleted in 5 seconds")));
+                new DiscordEmbedBuilder().WithColor(new DiscordColor(guild.EmbedHexColor)).WithDescription("This ticket will be deleted in 5 seconds")));
 
         await Task.Delay(5000);
 
