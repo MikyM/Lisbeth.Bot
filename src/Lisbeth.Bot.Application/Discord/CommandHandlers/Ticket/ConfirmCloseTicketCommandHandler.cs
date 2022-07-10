@@ -191,7 +191,17 @@ public class ConfirmCloseTicketCommandHandler : ICommandHandler<ConfirmCloseTick
             return new DiscordNotFoundError(
                 $"Closed category channel with Id {guildCfg.TicketingConfig.ClosedCategoryId} doesn't exist");
 
-        await target.ModifyAsync(x => x.Parent = closedCat);
+        var isClosedCatFull = closedCat.Children.Count == 50;
+
+        try
+        {
+            await target.ModifyAsync(x => x.Parent = isClosedCatFull ? null : closedCat);
+        }
+        catch
+        {
+            // ignore
+        }
+        
 
         command.Dto.ClosedMessageId = closeMsg.Id;
         await _ticketDataService.CloseAsync(command.Dto, ticket);

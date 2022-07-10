@@ -114,11 +114,14 @@ public class OpenTicketCommandHandler : ICommandHandler<OpenTicketCommand>
         if (!openedCatRes.IsDefined(out var openedCat))
             return new DiscordNotFoundError(
                 $"Opened category channel with Id {guildCfg.TicketingConfig.OpenedCategoryId} doesn't exist");
+
+        var isOpenedCatFull = openedCat.Children.Count == 50;
+        
         try
         {
             DiscordChannel newTicketChannel = await guild.CreateChannelAsync(
                 $"{guildCfg.TicketingConfig.OpenedNamePrefix}-{command.Dto.GuildSpecificId:D4}", ChannelType.Text,
-                openedCat, topic, null, null, overwrites);
+                isOpenedCatFull ? null : openedCat, topic, null, null, overwrites);
             DiscordMessage msg =
                 await newTicketChannel.SendMessageAsync(message);
             //Program.cachedMsgs.Add(msg.Id, msg);
