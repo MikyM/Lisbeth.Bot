@@ -87,9 +87,14 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                 var discordBoostDate = member.PremiumSince;
                 var dbBooster = (await _guildDataService.GetServerBoosterAsync(ctx.Guild.Id, member.Id)).Entity;
 
-                DateTime? date = discordBoostDate.HasValue && discordBoostDate != DateTimeOffset.MinValue
+                var date = discordBoostDate.HasValue && discordBoostDate != DateTimeOffset.MinValue
                     ? discordBoostDate.Value.UtcDateTime
                     : dbBooster?.BoostingSince;
+                
+                var daysBoostedTotallyCheck = guild.ServerBoosters?.Where(x => x.UserId == member.Id && x.GuildId == ctx.Guild.Id).Sum(x =>
+                    x.IsDisabled
+                        ? x.UpdatedAt!.Value.Subtract(x.BoostingSince).TotalDays
+                        : DateTime.UtcNow.Subtract(x.BoostingSince).TotalDays);
                 
                 embed.AddField("Currently boosting", isBoosting ? "Yes" : "No", true);
                 
@@ -105,6 +110,10 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                             : "Unknown");
                         break;
                 }
+
+                if (daysBoostedTotallyCheck is not null && dbBooster is not null)
+                    embed.AddField("Boosted totally for", daysBoostedTotallyCheck.ToString());
+                
                 await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(embed.Build()));
                 break;
             case BoosterActionType.History:
