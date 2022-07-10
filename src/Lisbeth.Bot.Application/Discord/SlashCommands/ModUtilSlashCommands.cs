@@ -112,7 +112,7 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                 }
 
                 if (daysBoostedTotallyCheck is not null && dbBooster is not null)
-                    embed.AddField("Boosted totally for", daysBoostedTotallyCheck.ToString());
+                    embed.AddField("Boosted totally for", $"{Math.Round(daysBoostedTotallyCheck.Value, 2).ToString()} days");
                 
                 await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(embed.Build()));
                 break;
