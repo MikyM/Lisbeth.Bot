@@ -128,15 +128,32 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
 
                     foreach (var booster in chunk)
                     {
-                        var memberHistory = await ctx.Guild.GetMemberAsync(booster.UserId);
-                        var check = memberHistory.Roles.Any(x => x.Tags.IsPremiumSubscriber);
+                        DiscordMember? memberHistory = null;
+                        DiscordUser? userHistory = null;
+                        try
+                        {
+                            memberHistory = await ctx.Guild.GetMemberAsync(booster.UserId);
+                        }
+                        catch
+                        {
+                            try
+                            {
+                                userHistory = await ctx.Client.GetUserAsync(booster.UserId);
+                            }
+                            catch
+                            {
+                                // ignore
+                            }
+                        }
+                        
+                        var check = memberHistory?.Roles.Any(x => x.Tags.IsPremiumSubscriber);
                         var daysBoostedTotally = guild.ServerBoosters.Where(x => x.UserId == booster.UserId && x.GuildId == ctx.Guild.Id).Sum(x =>
                             x.IsDisabled
                                 ? x.UpdatedAt!.Value.Subtract(x.BoostingSince).TotalDays
                                 : DateTime.UtcNow.Subtract(x.BoostingSince).TotalDays);
                         
-                        embedBuilder.AddField(memberHistory.GetFullUsername(),
-                            $"Is currently boosting: {!booster.IsDisabled && check}\nLast boost date: {booster.BoostingSince.ToString("g")} UTC{(booster.IsDisabled ? $"\nBoosted until: {booster.UpdatedAt!.Value.ToString("g")} UTC" : $"\nBoosting currently for: {Math.Round(DateTime.UtcNow.Subtract(booster.BoostingSince.ToUniversalTime()).TotalDays, 2).ToString(CultureInfo.InvariantCulture)} days")}\nBoosted totally for: {Math.Round(daysBoostedTotally, 2)} days");
+                        embedBuilder.AddField(memberHistory?.GetFullUsername() ?? userHistory?.GetFullUsername() ?? "User deleted",
+                            $"Is currently boosting: {!booster.IsDisabled && (!check.HasValue || check.Value)}\nLast boost date: {booster.BoostingSince.ToString("g")} UTC{(booster.IsDisabled ? $"\nBoosted until: {booster.UpdatedAt!.Value.ToString("g")} UTC" : $"\nBoosting currently for: {Math.Round(DateTime.UtcNow.Subtract(booster.BoostingSince.ToUniversalTime()).TotalDays, 2).ToString(CultureInfo.InvariantCulture)} days")}\nBoosted totally for: {Math.Round(daysBoostedTotally, 2)} days");
        
                         await Task.Delay(500);
                     }
