@@ -118,12 +118,11 @@ public class AddSnowflakeTicketCommandHandler : ICommandHandler<AddSnowflakeToTi
             case DiscordEntity.Role:
                 targetRole = (DiscordRole)snowflake.Snowflake;
                 await ticketChannel.AddOverwriteAsync(targetRole, Permissions.AccessChannels);
-
-                // give discord half a second and refresh channel
+                
                 await Task.Delay(1000);
 
                 List<ulong> roleIds = new();
-                foreach (var overwrite in ticketChannel.PermissionOverwrites)
+                foreach (var overwrite in ticketChannel.PermissionOverwrites.ToList())
                 {
                     if (overwrite.CheckPermission(Permissions.AccessChannels) != PermissionLevel.Allowed) continue;
 

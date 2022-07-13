@@ -112,8 +112,10 @@ public class RemoveSnowflakeTicketCommandHandler : ICommandHandler<RemoveSnowfla
                 targetRole = (DiscordRole)snowflake.Snowflake;
                 await ticketChannel.AddOverwriteAsync(targetRole, deny: Permissions.AccessChannels);
 
+                await Task.Delay(1000);
+                
                 List<ulong> roleIds = new();
-                foreach (var overwrite in ticketChannel.PermissionOverwrites)
+                foreach (var overwrite in ticketChannel.PermissionOverwrites.ToList())
                 {
                     if (overwrite.CheckPermission(Permissions.AccessChannels) != PermissionLevel.Allowed) continue;
 
