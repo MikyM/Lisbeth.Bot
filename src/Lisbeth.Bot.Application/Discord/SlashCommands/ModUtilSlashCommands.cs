@@ -91,10 +91,10 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                     ? discordBoostDate.Value.UtcDateTime
                     : dbBooster?.BoostingSince;
                 
-                var daysBoostedTotallyCheck = guild.ServerBoosters?.Where(x => x.UserId == member.Id && x.GuildId == ctx.Guild.Id).Sum(x =>
+                var daysBoostedTotallyCheck = guild.GuildServerBoosters?.Where(x => x.UserId == member.Id && x.GuildId == ctx.Guild.Id).Sum(x =>
                     x.IsDisabled
-                        ? x.UpdatedAt!.Value.Subtract(x.BoostingSince).TotalDays
-                        : DateTime.UtcNow.Subtract(x.BoostingSince).TotalDays);
+                        ? x.UpdatedAt!.Value.Subtract(x.CreatedAt!.Value).TotalDays
+                        : DateTime.UtcNow.Subtract(x.CreatedAt!.Value).TotalDays);
                 
                 embed.AddField("Currently boosting", isBoosting ? "Yes" : "No", true);
                 
@@ -119,10 +119,10 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
             case BoosterActionType.History:
                 var intr = ctx.Client.GetInteractivity();
                 var pages = new List<Page>();
-                var chunked = (guild.ServerBoosters?.Where(x => x.GuildId == ctx.Guild.Id) ?? throw new ArgumentNullException())
+                var chunked = (guild.GuildServerBoosters?.Where(x => x.GuildId == ctx.Guild.Id) ?? throw new ArgumentNullException())
                     .GroupBy(x => new { x.UserId, x.GuildId })
-                    .Select(x => x.OrderByDescending(y => y.BoostingSince).First())
-                    .OrderBy(x => x.BoostingSince)
+                    .Select(x => x.OrderByDescending(y => y.CreatedAt).First())
+                    .OrderBy(x => x.CreatedAt)
                     .Chunk(10)
                     .OrderByDescending(x => x.Length)
                     .ToList();
@@ -156,13 +156,13 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                         }
                         
                         var check = memberHistory?.Roles.Any(x => x.Tags.IsPremiumSubscriber);
-                        var daysBoostedTotally = guild.ServerBoosters.Where(x => x.UserId == booster.UserId && x.GuildId == ctx.Guild.Id).Sum(x =>
+                        var daysBoostedTotally = guild.GuildServerBoosters?.Where(x => x.UserId == booster.UserId && x.GuildId == ctx.Guild.Id).Sum(x =>
                             x.IsDisabled
-                                ? x.UpdatedAt!.Value.Subtract(x.BoostingSince).TotalDays
-                                : DateTime.UtcNow.Subtract(x.BoostingSince).TotalDays);
+                                ? x.UpdatedAt!.Value.Subtract(x.CreatedAt!.Value).TotalDays
+                                : DateTime.UtcNow.Subtract(x.CreatedAt!.Value).TotalDays);
                         
                         embedBuilder.AddField(memberHistory?.GetFullUsername() ?? userHistory?.GetFullUsername() ?? "User deleted",
-                            $"Is currently boosting: {!booster.IsDisabled && (!check.HasValue || check.Value)}\nLast boost date: {booster.BoostingSince.ToString("g")} UTC{(booster.IsDisabled ? $"\nBoosted until: {booster.UpdatedAt!.Value.ToString("g")} UTC" : $"\nBoosting currently for: {Math.Round(DateTime.UtcNow.Subtract(booster.BoostingSince.ToUniversalTime()).TotalDays, 2).ToString(CultureInfo.InvariantCulture)} days")}\nBoosted totally for: {Math.Round(daysBoostedTotally, 2)} days");
+                            $"Is currently boosting: {!booster.IsDisabled && (!check.HasValue || check.Value)}\nLast boost date: {booster.CreatedAt!.Value.ToString("g")} UTC{(booster.IsDisabled ? $"\nBoosted until: {booster.UpdatedAt!.Value.ToString("g")} UTC" : $"\nBoosting currently for: {Math.Round(DateTime.UtcNow.Subtract(booster.CreatedAt!.Value.ToUniversalTime()).TotalDays, 2).ToString(CultureInfo.InvariantCulture)} days")}\nBoosted totally for: {Math.Round(daysBoostedTotally ?? 0, 2)} days");
        
                         await Task.Delay(500);
                     }
@@ -182,8 +182,8 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
             case BoosterActionType.Active:
                 var intrActive = ctx.Client.GetInteractivity();
                 var pagesActive = new List<Page>();
-                var chunkedActive = (guild.ServerBoosters?.Where(x => !x.IsDisabled) ?? throw new ArgumentNullException()).Where(x => !x.IsDisabled)
-                    .OrderBy(x => x.BoostingSince)
+                var chunkedActive = (guild.GuildServerBoosters?.Where(x => !x.IsDisabled) ?? throw new ArgumentNullException()).Where(x => !x.IsDisabled)
+                    .OrderBy(x => x.CreatedAt)
                     .Chunk(10)
                     .OrderByDescending(x => x.Length)
                     .ToList();
@@ -202,7 +202,7 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                         if (!memberActive.Roles.Any(x => x.Tags.IsPremiumSubscriber))
                             continue;
                         embedBuilderActive.AddField(memberActive.GetFullUsername(),
-                            $"Last boost date: {booster.BoostingSince.ToString("g")} UTC\nBoosting for: {Math.Round(DateTime.UtcNow.Subtract(booster.BoostingSince.ToUniversalTime()).TotalDays, 2).ToString(CultureInfo.InvariantCulture)} days");
+                            $"Last boost date: {booster.CreatedAt!.Value.ToString("g")} UTC\nBoosting for: {Math.Round(DateTime.UtcNow.Subtract(booster.CreatedAt!.Value.ToUniversalTime()).TotalDays, 2).ToString(CultureInfo.InvariantCulture)} days");
                         await Task.Delay(500);
                     }
 
