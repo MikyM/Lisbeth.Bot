@@ -84,12 +84,11 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                 embed.WithThumbnail(member.AvatarUrl);
                 embed.WithColor(new DiscordColor(guild.EmbedHexColor));
                 var isBoosting = member.Roles.Any(x => x.Tags.IsPremiumSubscriber);
-                var discordBoostDate = member.PremiumSince;
-                var dbBooster = (await _guildDataService.GetServerBoosterAsync(ctx.Guild.Id, member.Id)).Entity;
+                var dbBooster =
+                    (guild.GuildServerBoosters?.Where(x => x.GuildId == ctx.Guild.Id && x.UserId == member.Id))
+                    ?.MaxBy(x => x.CreatedAt!.Value);
 
-                var date = discordBoostDate.HasValue && discordBoostDate != DateTimeOffset.MinValue
-                    ? discordBoostDate.Value.UtcDateTime
-                    : dbBooster?.BoostingSince;
+                var date = dbBooster?.CreatedAt;
                 
                 var daysBoostedTotallyCheck = guild.GuildServerBoosters?.Where(x => x.UserId == member.Id && x.GuildId == ctx.Guild.Id).Sum(x =>
                     x.IsDisabled
@@ -105,7 +104,7 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                         break;
                     case true:
                         embed.AddField("Boosting since", date.HasValue ? $"{date.Value.ToString("g")} UTC" : "Unknown");
-                        embed.AddField("Boosting for", date.HasValue
+                        embed.AddField("Boosting currently for", date.HasValue
                             ? $"{Math.Round(DateTime.UtcNow.Subtract(date.Value).TotalDays, 2).ToString(CultureInfo.InvariantCulture)} days"
                             : "Unknown");
                         break;
@@ -121,8 +120,8 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                 var pages = new List<Page>();
                 var chunked = (guild.GuildServerBoosters?.Where(x => x.GuildId == ctx.Guild.Id) ?? throw new ArgumentNullException())
                     .GroupBy(x => new { x.UserId, x.GuildId })
-                    .Select(x => x.OrderByDescending(y => y.CreatedAt).First())
-                    .OrderBy(x => x.CreatedAt)
+                    .Select(x => x.OrderByDescending(y => y.CreatedAt!.Value).First())
+                    .OrderBy(x => x.CreatedAt!.Value)
                     .Chunk(10)
                     .OrderByDescending(x => x.Length)
                     .ToList();
@@ -183,7 +182,7 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                 var intrActive = ctx.Client.GetInteractivity();
                 var pagesActive = new List<Page>();
                 var chunkedActive = (guild.GuildServerBoosters?.Where(x => !x.IsDisabled) ?? throw new ArgumentNullException()).Where(x => !x.IsDisabled)
-                    .OrderBy(x => x.CreatedAt)
+                    .OrderBy(x => x.CreatedAt!.Value)
                     .Chunk(10)
                     .OrderByDescending(x => x.Length)
                     .ToList();
