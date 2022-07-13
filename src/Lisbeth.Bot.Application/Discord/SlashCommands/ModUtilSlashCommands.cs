@@ -112,7 +112,7 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                 }
 
                 if (daysBoostedTotallyCheck is not null && dbBooster is not null)
-                    embed.AddField("Boosted totally for", $"{Math.Round(daysBoostedTotallyCheck.Value, 2).ToString()} days");
+                    embed.AddField("Boosted totally for", $"{Math.Round(daysBoostedTotallyCheck.Value, 2).ToString(CultureInfo.InvariantCulture)} days");
                 
                 await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(embed.Build()));
                 break;
@@ -198,7 +198,15 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
 
                     foreach (var booster in chunk)
                     {
-                        var memberActive = await ctx.Guild.GetMemberAsync(booster.UserId);
+                        DiscordMember memberActive;
+                        try
+                        {
+                            memberActive = await ctx.Guild.GetMemberAsync(booster.UserId);
+                        }
+                        catch
+                        {
+                            continue;
+                        }
                         if (!memberActive.Roles.Any(x => x.Tags.IsPremiumSubscriber))
                             continue;
                         embedBuilderActive.AddField(memberActive.GetFullUsername(),
