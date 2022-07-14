@@ -112,7 +112,7 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                         embed.AddField("Boosting currently for", date.HasValue
                             ? $"{Math.Round(DateTime.UtcNow.Subtract(date.Value).TotalDays, 2).ToString(CultureInfo.InvariantCulture)} days"
                             : "Unknown");
-                        embed.AddField("Boosting currently according to Discord's data (untrusted)", discordDate.HasValue
+                        embed.AddField("Boosting currently for according to Discord's data (untrusted)", discordDate.HasValue
                             ? $"{Math.Round(DateTime.UtcNow.Subtract(discordDate.Value.ToUniversalTime().DateTime).TotalDays, 2).ToString(CultureInfo.InvariantCulture)} days"
                             : "Unknown");
                         break;
