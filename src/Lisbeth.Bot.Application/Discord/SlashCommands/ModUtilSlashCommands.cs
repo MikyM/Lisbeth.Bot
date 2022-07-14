@@ -107,10 +107,13 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                         embed.AddField("Boosting since", date.HasValue ? $"{date.Value.ToString("g")} UTC" : "Unknown");
                         embed.AddField("Boosting since according to Discord's data (untrusted)",
                             discordDate.HasValue
-                                ? $"{discordDate.Value.ToUniversalTime().Date.ToString("g")} UTC"
+                                ? $"{discordDate.Value.ToUniversalTime().DateTime.ToString("g")} UTC"
                                 : "Unknown");
                         embed.AddField("Boosting currently for", date.HasValue
                             ? $"{Math.Round(DateTime.UtcNow.Subtract(date.Value).TotalDays, 2).ToString(CultureInfo.InvariantCulture)} days"
+                            : "Unknown");
+                        embed.AddField("Boosting currently according to Discord's data (untrusted)", discordDate.HasValue
+                            ? $"{Math.Round(DateTime.UtcNow.Subtract(discordDate.Value.ToUniversalTime().DateTime).TotalDays, 2).ToString(CultureInfo.InvariantCulture)} days"
                             : "Unknown");
                         break;
                 }
