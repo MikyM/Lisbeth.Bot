@@ -89,6 +89,7 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                     ?.MaxBy(x => x.CreatedAt!.Value);
 
                 var date = dbBooster?.CreatedAt;
+                var discordDate = member.PremiumSince;
                 
                 var daysBoostedTotallyCheck = guild.GuildServerBoosters?.Where(x => x.UserId == member.Id && x.GuildId == ctx.Guild.Id).Sum(x =>
                     x.IsDisabled
@@ -104,6 +105,10 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                         break;
                     case true:
                         embed.AddField("Boosting since", date.HasValue ? $"{date.Value.ToString("g")} UTC" : "Unknown");
+                        embed.AddField("Boosting since according to Discord's data (untrusted)",
+                            discordDate.HasValue
+                                ? $"{discordDate.Value.ToUniversalTime().Date.ToString("g")} UTC"
+                                : "Unknown");
                         embed.AddField("Boosting currently for", date.HasValue
                             ? $"{Math.Round(DateTime.UtcNow.Subtract(date.Value).TotalDays, 2).ToString(CultureInfo.InvariantCulture)} days"
                             : "Unknown");
