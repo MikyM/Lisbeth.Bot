@@ -356,7 +356,7 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                 _ = await _guildDataService.CommitAsync();
 
                 _ = await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(
-                    new DiscordEmbedBuilder().WithDescription($"Backtracking server boosters has finished successfully!\nFound boosters: {string.Join(", ", boosters)}")
+                    new DiscordEmbedBuilder().WithDescription("Backtracking server boosters has finished successfully!}")
                         .WithColor(new DiscordColor(guild.EmbedHexColor))));
                 break;
             default:
