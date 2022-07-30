@@ -123,12 +123,11 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                         var rejoined =
                             guild.MemberHistoryEntries.Count(x =>
                                 x.GuildId == ctx.Guild.Id && x.UserId == entry.UserId);
-                        var boosted =
-                            guild.ServerBoosterHistoryEntries?.FirstOrDefault(x =>
-                                x.GuildId == ctx.Guild.Id && x.UserId == entry.UserId) is not null;
+                        
+                        var lastBoostHistory = entry.ServerBoosterHistoryEntries?.MaxBy(x => x.CreatedAt);
                         
                         embedBuilder.AddField(entry.Username,
-                            $"Joined at: {entry.CreatedAt!.Value.ToString("g")} UTC\n{(entry.IsDisabled ? $"Left at: {entry.UpdatedAt!.Value.ToString("g")} UTC" : $"Member currently for: {Math.Round(DateTime.UtcNow.Subtract(entry.CreatedAt!.Value.ToUniversalTime()).TotalDays, 2).ToString(CultureInfo.InvariantCulture)} days")}\nAccount created at: {entry.AccountCreated.ToString("g")} UTC{(rejoined > 1 ? $"\nRejoined {rejoined} times" : "")}{(rejoined > 1 ? $"\nRejoined {rejoined} times" : "")}");
+                            $"Joined at: {entry.CreatedAt!.Value.ToString("g")} UTC\n{(entry.IsDisabled ? $"Left at: {entry.UpdatedAt!.Value.ToString("g")} UTC" : $"Member currently for: {Math.Round(DateTime.UtcNow.Subtract(entry.CreatedAt!.Value.ToUniversalTime()).TotalDays, 2).ToString(CultureInfo.InvariantCulture)} days")}\nAccount created at: {entry.AccountCreated.ToString("g")} UTC{(rejoined > 1 ? $"\nRejoined {rejoined} times" : "")}{(lastBoostHistory is not null ? $"\n{(lastBoostHistory.IsDisabled ? $"Was boosting in the past, since {lastBoostHistory.CreatedAt!.Value.ToUniversalTime()} UTC to {lastBoostHistory.UpdatedAt!.Value.ToUniversalTime()} UTC" : $"Currently boosting since {lastBoostHistory.CreatedAt!.Value.ToUniversalTime()} UTC")}" : "\nNever boosted")}");
        
                         await Task.Delay(500);
                     }
