@@ -65,11 +65,11 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
         _ = ctx.DeferAsync();
 
         var res = await _guildDataService.GetSingleBySpecAsync(
-            new ActiveGuildByDiscordIdWithMembersEntriesSpec(ctx.Guild.Id));
+            new ActiveGuildByDiscordIdWithMembersAndBoostsSpec(ctx.Guild.Id));
 
         if (!res.IsDefined(out var guild)) 
             throw new ArgumentException("Guild not found in database");
-        
+
         switch (actionType)
         {
             case MemberActionType.Check:
@@ -77,11 +77,20 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                 if (member is null)
                     throw new ArgumentNullException(nameof(user), "You must supply a user to use this option.");
 
+                var dbEntry =
+                    (guild.MemberHistoryEntries ?? throw new InvalidOperationException()).Where(x =>
+                        x.GuildId == ctx.Guild.Id && x.UserId == member.Id).MaxBy(x => x.CreatedAt);
+
+                var lastBoost = dbEntry?.ServerBoosterHistoryEntries?.MaxBy(x => x.CreatedAt);
+
                 var embed = new DiscordEmbedBuilder();
                 embed.WithThumbnail(member.AvatarUrl);
                 embed.WithTitle("Member information");
                 embed.AddField("Member's identity", $"{member.GetFullUsername()}", true);
                 embed.AddField("Joined guild", $"{member.JoinedAt.ToString(CultureInfo.CurrentCulture)}");
+                embed.AddField("Boosting info",
+                    $"{(lastBoost is not null ? $"{(lastBoost.IsDisabled ? $"Was boosting in the past, since {lastBoost.CreatedAt!.Value.ToUniversalTime()} UTC to {lastBoost.UpdatedAt!.Value.ToUniversalTime()} UTC" : $"Currently boosting since {lastBoost.CreatedAt!.Value.ToUniversalTime()} UTC")}" : "Never boosted")}");
+
                 embed.AddField("Account created", $"{member.CreationTimestamp.ToString(CultureInfo.CurrentCulture)}");
                 embed.WithColor(new DiscordColor(res.Entity.EmbedHexColor));
                 embed.WithFooter($"Member Id: {member.Id}");
@@ -97,7 +106,7 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                     .Select(x => x.OrderByDescending(y => y.CreatedAt!.Value).First())
                     .OrderBy(x => x.CreatedAt!.Value)
                     .Take(1000)
-                    .Chunk(25)
+                    .Chunk(20)
                     .OrderByDescending(x => x.Length)
                     .ToList();
 
@@ -111,8 +120,15 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
 
                     foreach (var entry in chunk)
                     {
+                        var rejoined =
+                            guild.MemberHistoryEntries.Count(x =>
+                                x.GuildId == ctx.Guild.Id && x.UserId == entry.UserId);
+                        var boosted =
+                            guild.ServerBoosterHistoryEntries?.FirstOrDefault(x =>
+                                x.GuildId == ctx.Guild.Id && x.UserId == entry.UserId) is not null;
+                        
                         embedBuilder.AddField(entry.Username,
-                            $"Joined at: {entry.CreatedAt!.Value.ToString("g")} UTC {(entry.IsDisabled ? $"\nLeft at: {entry.UpdatedAt!.Value.ToString("g")} UTC" : $"Member currently for: {Math.Round(DateTime.UtcNow.Subtract(entry.CreatedAt!.Value.ToUniversalTime()).TotalDays, 2).ToString(CultureInfo.InvariantCulture)} days\nAccount created at: {entry.AccountCreated.ToString("g")} UTC")}");
+                            $"Joined at: {entry.CreatedAt!.Value.ToString("g")} UTC\n{(entry.IsDisabled ? $"Left at: {entry.UpdatedAt!.Value.ToString("g")} UTC" : $"Member currently for: {Math.Round(DateTime.UtcNow.Subtract(entry.CreatedAt!.Value.ToUniversalTime()).TotalDays, 2).ToString(CultureInfo.InvariantCulture)} days")}\nAccount created at: {entry.AccountCreated.ToString("g")} UTC{(rejoined > 1 ? $"\nRejoined {rejoined} times" : "")}{(rejoined > 1 ? $"\nRejoined {rejoined} times" : "")}");
        
                         await Task.Delay(500);
                     }
@@ -229,7 +245,7 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                     .Select(x => x.OrderByDescending(y => y.CreatedAt!.Value).First())
                     .OrderBy(x => x.CreatedAt!.Value)
                     .Take(1000)
-                    .Chunk(25)
+                    .Chunk(20)
                     .OrderByDescending(x => x.Length)
                     .ToList();
 
@@ -272,7 +288,7 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                 var chunkedActive = (guild.ServerBoosterHistoryEntries?.Where(x => !x.IsDisabled) ?? throw new ArgumentNullException()).Where(x => !x.IsDisabled)
                     .OrderBy(x => x.CreatedAt!.Value)
                     .Take(1000)
-                    .Chunk(25)
+                    .Chunk(20)
                     .OrderByDescending(x => x.Length)
                     .ToList();
 
@@ -309,7 +325,7 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                 var chunkedActiveDisc = membersActiveDisc.Where(x => x.Roles.Any(y => y.Tags.IsPremiumSubscriber))
                     .OrderBy(x => x.PremiumSince!.Value)
                     .Take(1000)
-                    .Chunk(25)
+                    .Chunk(20)
                     .OrderByDescending(x => x.Length)
                     .ToList();
                 
@@ -356,7 +372,7 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                 _ = await _guildDataService.CommitAsync();
 
                 _ = await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(
-                    new DiscordEmbedBuilder().WithDescription("Backtracking server boosters has finished successfully!}")
+                    new DiscordEmbedBuilder().WithDescription("Backtracking server boosters has finished successfully!")
                         .WithColor(new DiscordColor(guild.EmbedHexColor))));
                 break;
             default:
