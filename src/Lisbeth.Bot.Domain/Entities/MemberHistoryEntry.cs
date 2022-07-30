@@ -18,6 +18,6 @@ public class MemberHistoryEntry : SnowflakeEntity, IDisableableEntity
         _serverBoosterHistoryEntries?.AsEnumerable();
     
     public bool IsDisabled { get; set; }
-    public string Username { get; set; }
+    public string Username { get; set; } = null!;
     public DateTime AccountCreated { get; set; }
 }

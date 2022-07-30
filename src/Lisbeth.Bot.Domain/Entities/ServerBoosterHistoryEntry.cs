@@ -10,5 +10,5 @@ public class ServerBoosterHistoryEntry : SnowflakeEntity, IDisableableEntity
     public Guild? Guild { get; set; }
     public MemberHistoryEntry? MemberHistoryEntry { get; set; }
     public bool IsDisabled { get; set; }
-    public string Username { get; set; }
+    public string Username { get; set; } = null!;
 }
