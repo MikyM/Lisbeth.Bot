@@ -20,6 +20,6 @@ using MikyM.Common.EfCore.ApplicationLayer.Interfaces;
 
 namespace Lisbeth.Bot.Application.Services.Database.Interfaces;
 
-public interface IRoleMenuDataService : ICrudDataService<RoleMenu, LisbethBotDbContext>
+public interface IRoleMenuDataService : ICrudDataService<RoleMenu, ILisbethBotDbContext>
 {
 }

@@ -31,42 +31,21 @@ using MikyM.Common.Utilities.Results.Errors;
 namespace Lisbeth.Bot.Application.Services.Database;
 
 [UsedImplicitly]
-public class GuildDataService : CrudDataService<Guild, LisbethBotDbContext>, IGuildDataService
+public class GuildDataService : CrudDataService<Guild, ILisbethBotDbContext>, IGuildDataService
 {
-    private readonly ICrudDataService<ModerationConfig, LisbethBotDbContext> _moderationService;
-    private readonly ICrudDataService<RoleMenu, LisbethBotDbContext> _roleMenuService;
-    private readonly ICrudDataService<TicketingConfig, LisbethBotDbContext> _ticketingService;
+    private readonly ICrudDataService<ModerationConfig, ILisbethBotDbContext> _moderationService;
+    private readonly ICrudDataService<RoleMenu, ILisbethBotDbContext> _roleMenuService;
+    private readonly ICrudDataService<TicketingConfig, ILisbethBotDbContext> _ticketingService;
 
-    public GuildDataService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof,
-        ICrudDataService<ModerationConfig, LisbethBotDbContext> moderationService,
-        ICrudDataService<TicketingConfig, LisbethBotDbContext> ticketingService,
-        ICrudDataService<RoleMenu, LisbethBotDbContext> roleMenuService) : base(mapper, uof)
+    public GuildDataService(IMapper mapper, IUnitOfWork<ILisbethBotDbContext> uof,
+        ICrudDataService<ModerationConfig, ILisbethBotDbContext> moderationService,
+        ICrudDataService<TicketingConfig, ILisbethBotDbContext> ticketingService,
+        ICrudDataService<RoleMenu, ILisbethBotDbContext> roleMenuService) : base(mapper, uof)
     {
         _moderationService = moderationService;
         _ticketingService = ticketingService;
         _roleMenuService = roleMenuService;
     }
-
-    /*public async Task<Result<Guild>> AddMessageFormatAsync(CreateChannelMessageFormatReqDto dto, bool shouldSave = false)
-    {
-        var guildRes =
-            await base.GetSingleBySpecAsync(
-                new ActiveGuildByDiscordIdWithChannelMessageFormatsSpec(dto.GuildId));
-
-        if (!guildRes.IsDefined(out var guildCfg))
-            return guildRes;
-
-        var format = guildCfg.ChannelMessageFormats?.FirstOrDefault(x => x.ChannelId == dto.ChannelId);
-        if (format is not null)
-            return new ArgumentError(nameof(dto.ChannelId),
-                $"There already is a{(format.IsDisabled ? " disabled" : "")} message format registered for this channel");
-
-        var mapped = Mapper.Map<ChannelMessageFormat>(dto);
-        guildCfg.AddChannelMessageFormat(mapped);
-
-        base.UnitOfWork.Context.Entry(guildCfg.ChannelMessageFormats).State = EntityState.Modified;
-        await _guildDataService.CommitAsync(requestingUser.Id.ToString());
-    }*/
 
     public async Task<Result<Guild>> AddConfigAsync(TicketingConfigReqDto req, bool shouldSave = false)
     {
@@ -300,51 +279,5 @@ public class GuildDataService : CrudDataService<Guild, LisbethBotDbContext>, IGu
         var partial = await _roleMenuService.AddAsync(req, shouldSave);
 
         return partial.IsSuccess ? Result.FromSuccess() : Result.FromError(partial.Error);
-    }
-
-    public async Task<Result> RemoveServerBoosterAsync(ulong guildId, ulong userId, bool shouldSave = false)
-    {
-        var result = await GetSingleBySpecAsync(
-            new ActiveGuildByDiscordIdWithBoostersSpecifications(guildId));
-        if (!result.IsDefined(out var guild)) 
-            return new NotFoundError();
-
-        _ = BeginUpdate(guild);
-        guild.RemoveServerBooster(userId);
-
-        if (shouldSave)
-            _ = await CommitAsync();
-
-        return Result.FromSuccess();
-    }
-
-    public async Task<Result> AddServerBoosterAsync(ulong guildId, ulong userId, DateTime? date = null, bool shouldSave = false)
-    {
-        var result = await GetSingleBySpecAsync(
-            new ActiveGuildByDiscordIdWithBoostersSpecifications(guildId));
-        if (!result.IsDefined(out var guild)) 
-            return new NotFoundError();
-
-        _ = BeginUpdate(guild);
-        guild.AddServerBooster(userId, date);
-
-        if (shouldSave)
-            _ = await CommitAsync();
-
-        return Result.FromSuccess();
-    }
-
-    public async Task<Result<ServerBooster>> GetServerBoosterAsync(ulong guildId, ulong userId)
-    {
-        var result = await GetSingleBySpecAsync(
-            new ActiveGuildByDiscordIdWithBoostersSpecifications(guildId));
-        if (!result.IsDefined(out var guild)) 
-            return new NotFoundError();
-
-        var booster = guild.ServerBoosters?.FirstOrDefault(x => x.GuildId == guildId && x.UserId == userId);
-        if (booster is null)
-            return new NotFoundError();
-
-        return booster;
     }
 }

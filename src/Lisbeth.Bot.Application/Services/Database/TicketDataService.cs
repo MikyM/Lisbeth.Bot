@@ -27,9 +27,9 @@ using MikyM.Common.Utilities.Results.Errors;
 namespace Lisbeth.Bot.Application.Services.Database;
 
 [UsedImplicitly]
-public class TicketDataService : CrudDataService<Ticket, LisbethBotDbContext>, ITicketDataService
+public class TicketDataService : CrudDataService<Ticket, ILisbethBotDbContext>, ITicketDataService
 {
-    public TicketDataService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
+    public TicketDataService(IMapper mapper, IUnitOfWork<ILisbethBotDbContext> uof) : base(mapper, uof)
     {
     }
 

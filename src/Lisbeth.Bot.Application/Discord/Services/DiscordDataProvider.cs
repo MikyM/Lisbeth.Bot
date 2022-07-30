@@ -28,7 +28,7 @@ namespace Lisbeth.Bot.Application.Discord.Services;
 
 [Service]
 [RegisterAs(typeof(IDiscordGuildRequestDataProvider))]
-[Lifetime(Lifetime.InstancePerDependancy)]
+[Lifetime(Lifetime.InstancePerDependency)]
 [UsedImplicitly]
 public class DiscordGuildRequestDataProvider : IDiscordGuildRequestDataProvider
 {

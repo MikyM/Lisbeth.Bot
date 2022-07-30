@@ -26,9 +26,9 @@ using MikyM.Common.Utilities.Results.Errors;
 namespace Lisbeth.Bot.Application.Services.Database;
 
 [UsedImplicitly]
-public class TagDataService : CrudDataService<Tag, LisbethBotDbContext>, ITagDataService
+public class TagDataService : CrudDataService<Tag, ILisbethBotDbContext>, ITagDataService
 {
-    public TagDataService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
+    public TagDataService(IMapper mapper, IUnitOfWork<ILisbethBotDbContext> uof) : base(mapper, uof)
     {
     }
 

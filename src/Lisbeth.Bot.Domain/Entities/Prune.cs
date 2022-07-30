@@ -16,11 +16,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using Lisbeth.Bot.Domain.Entities.Base;
+using MikyM.Common.DataAccessLayer;
+using MikyM.Common.Domain.Entities;
 
 namespace Lisbeth.Bot.Domain.Entities;
 
-public sealed class Prune : SnowflakeEntity
+public sealed class Prune : SnowflakeEntity, IDisableableEntity
 {
     public ulong UserId { get; set; }
     public ulong ModeratorId { get; set; }
@@ -30,4 +31,5 @@ public sealed class Prune : SnowflakeEntity
 
     public ulong GuildId { get; set; }
     public Guild? Guild { get; set; }
+    public bool IsDisabled { get; set; }
 }

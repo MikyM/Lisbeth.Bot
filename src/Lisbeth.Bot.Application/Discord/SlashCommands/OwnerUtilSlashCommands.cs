@@ -46,35 +46,18 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 [UsedImplicitly]
 public class OwnerUtilSlashCommands : ExtendedApplicationCommandModule
 {
-    private readonly LisbethBotDbContext _ctx;
-    private readonly IReadOnlyDataService<AuditLog, LisbethBotDbContext> _dataService;
+    private readonly ILisbethBotDbContext _ctx;
+    private readonly IReadOnlyDataService<AuditLog, ILisbethBotDbContext> _dataService;
     private readonly IDiscordGuildService _discordGuildService;
     private readonly IOptions<BotConfiguration> _options;
 
-    public OwnerUtilSlashCommands(LisbethBotDbContext ctx, IReadOnlyDataService<AuditLog, LisbethBotDbContext> dataService,
+    public OwnerUtilSlashCommands(ILisbethBotDbContext ctx, IReadOnlyDataService<AuditLog, ILisbethBotDbContext> dataService,
         IDiscordGuildService discordGuildService, IOptions<BotConfiguration> options)
     {
         _ctx = ctx;
         _dataService = dataService;
         _discordGuildService = discordGuildService;
         _options = options;
-    }
-
-    [UsedImplicitly]
-    [SlashRequireOwner]
-    [SlashCommand("re-register-commands", "Command that allows re-registering bot slashies", false)]
-    public async Task RegisterSlashiesCommand(InteractionContext ctx)
-    {
-        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
-            new DiscordInteractionResponseBuilder().AsEphemeral());
-
-        var res = await _discordGuildService.PrepareSlashPermissionsAsync(ctx.Client.Guilds.Values);
-
-        if (!res.IsSuccess)
-            await ctx.EditResponseAsync(
-                new DiscordWebhookBuilder().AddEmbed(GetUnsuccessfulResultEmbed(res, ctx.Client)));
-        else
-            await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(GetSuccessfulActionEmbed(ctx.Client)));
     }
 
     [UsedImplicitly]

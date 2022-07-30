@@ -1,3 +1,4 @@
+using DSharpPlus;
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.ChatExport.Wrappers;
 using Lisbeth.Bot.Domain;
@@ -23,7 +24,7 @@ public class HtmlUser : IAsyncHtmlBuilder
 
     public async Task<string> BuildAvatar()
     {
-        var avatar = new HtmlImage(User.AvatarUrl, BotConfiguration);
+        var avatar = new HtmlImage(User.GetAvatarUrl(ImageFormat.Png), BotConfiguration);
         var url = await avatar.GetImgurLinkAsync();
 
         return $"<img class=\"avatar\" src={url}/>";

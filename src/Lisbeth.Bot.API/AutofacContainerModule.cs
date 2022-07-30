@@ -17,6 +17,7 @@
 
 using Autofac;
 using IdGen;
+using Lisbeth.Bot.DataAccessLayer;
 using MikyM.Common.ApplicationLayer;
 using MikyM.Common.DataAccessLayer;
 using MikyM.Common.EfCore.ApplicationLayer;
@@ -39,6 +40,7 @@ public class AutofacContainerModule : Module
                 efCoreOptions.AddInMemoryEvaluators();
                 efCoreOptions.AddEvaluators();
                 efCoreOptions.AddValidators();
+                efCoreOptions.AddDbContext<ILisbethBotDbContext, LisbethBotDbContext>();
             });
             options.AddSnowflakeIdGenerator(generatorOptions =>
             {

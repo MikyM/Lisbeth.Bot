@@ -1,7 +1,7 @@
 ﻿using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Domain.DTOs.Request.Reminder;
-using MikyM.CommandHandlers.Commands;
+using MikyM.CommandHandlers;
 
 namespace Lisbeth.Bot.Application.Discord.Commands.Reminder;
 

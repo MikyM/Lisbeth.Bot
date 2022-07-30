@@ -26,9 +26,9 @@ using MikyM.Common.Utilities.Results.Errors;
 namespace Lisbeth.Bot.Application.Services.Database;
 
 [UsedImplicitly]
-public class MuteDataService : CrudDataService<Mute, LisbethBotDbContext>, IMuteDataService
+public class MuteDataService : CrudDataService<Mute, ILisbethBotDbContext>, IMuteDataService
 {
-    public MuteDataService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
+    public MuteDataService(IMapper mapper, IUnitOfWork<ILisbethBotDbContext> uof) : base(mapper, uof)
     {
     }
 

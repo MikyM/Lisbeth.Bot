@@ -6,8 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MikyM.Common.DDDArchitecture" Version="2.0.2" />
-    <PackageReference Include="MikyM.Discord" Version="1.0.8" />
+    <PackageReference Include="MikyM.Common.EfCore.ApplicationLayer" Version="1.2.14" />
+    <PackageReference Include="MikyM.Discord" Version="1.0.9" />
   </ItemGroup>
 
 </Project>

@@ -15,11 +15,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using Lisbeth.Bot.Domain.Entities.Base;
+using MikyM.Common.DataAccessLayer;
+using MikyM.Common.Domain.Entities;
 
 namespace Lisbeth.Bot.Domain.Entities;
 
-public class RoleMenuOption : SnowflakeEntity
+public class RoleMenuOption : SnowflakeEntity, IDisableableEntity
 {
     public long RoleMenuId { get; set; }
     public ulong RoleId { get; set; }
@@ -29,4 +30,5 @@ public class RoleMenuOption : SnowflakeEntity
     public string? CustomSelectOptionValueId { get; set; }
 
     public RoleMenu? RoleMenu { get; set; }
+    public bool IsDisabled { get; set; }
 }

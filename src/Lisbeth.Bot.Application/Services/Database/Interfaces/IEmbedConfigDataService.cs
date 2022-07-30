@@ -20,6 +20,6 @@ using MikyM.Common.EfCore.ApplicationLayer.Interfaces;
 
 namespace Lisbeth.Bot.Application.Services.Database.Interfaces;
 
-public interface IEmbedConfigDataService : ICrudDataService<EmbedConfig, LisbethBotDbContext>
+public interface IEmbedConfigDataService : ICrudDataService<EmbedConfig, ILisbethBotDbContext>
 {
 }

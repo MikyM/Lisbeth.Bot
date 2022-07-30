@@ -30,7 +30,6 @@ using Lisbeth.Bot.Domain.DTOs.Request.ReminderConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using MikyM.Common.Utilities.Extensions;
 using MikyM.Common.Utilities.Results;
 using MikyM.Common.Utilities.Results.Errors;
 using MikyM.Discord.Enums;
@@ -303,13 +302,6 @@ public class DiscordGuildService : IDiscordGuildService
             ctx.Guild.Roles[guildResult.Entity.ModerationConfig.MuteRoleId], ctx.Member);
     }
 
-    public async Task<Result> PrepareSlashPermissionsAsync(DiscordGuild guild)
-    {
-        if (guild is null) throw new ArgumentNullException(nameof(guild));
-
-        return await PrepareSlashPermissionsAsync(new[] { guild });
-    }
-
     public async Task<Result> PrepareBotAsync(IEnumerable<ulong> guildIds)
     {
         await _discord.Client.UpdateStatusAsync(new DiscordActivity("you closely.", ActivityType.Watching));
@@ -326,110 +318,6 @@ public class DiscordGuildService : IDiscordGuildService
         cfg.PhishingDetection = req.PhishingDetection;
         await _guildDataService.CommitAsync(req.RequestedOnBehalfOfId.ToString());
 
-        return Result.FromSuccess();
-    }
-
-    public async Task<Result> PrepareSlashPermissionsAsync(IEnumerable<DiscordGuild> guilds)
-    {
-        if (guilds is null) throw new ArgumentNullException(nameof(guilds));
-
-        await Task.Delay(10000);
-
-        foreach (var guild in guilds)
-        {
-            try
-            {
-                var adminRoles = new List<DiscordRole>();
-                var manageMessagesRoles = new List<DiscordRole>();
-                var userManageRoles = new List<DiscordRole>();
-                var ownerPerms = new List<DiscordApplicationCommandPermission>();
-                var serverOwnerPerms = new List<DiscordApplicationCommandPermission>();
-
-                foreach (var role in guild.Roles.Values)
-                {
-                    if (role.Permissions.HasPermission(Permissions.Administrator))
-                        adminRoles.Add(role);
-                    if (role.Permissions.HasPermission(Permissions.BanMembers))
-                        userManageRoles.Add(role);
-                    if (role.Permissions.HasPermission(Permissions.ManageMessages))
-                        manageMessagesRoles.Add(role);
-                }
-
-                DiscordMember? botOwner;
-                try
-                {
-                    botOwner = await guild.GetMemberAsync(_discord.Client.CurrentApplication.Owners.First().Id);
-                }
-                catch
-                {
-                    botOwner = null;
-                }
-                DiscordMember? serverOwner = guild.Owner;
-                try
-                {
-                    serverOwner ??= await guild.GetMemberAsync(guild.OwnerId);
-                }
-                catch
-                {
-                    serverOwner = null;
-                }
-                
-                if (botOwner is not null) ownerPerms.Add(new DiscordApplicationCommandPermission(botOwner, true));
-                var admPerms = adminRoles
-                    .Select(adminRole => new DiscordApplicationCommandPermission(adminRole, true))
-                    .ToList();
-                var messagePerms = manageMessagesRoles
-                    .Select(messageRole => new DiscordApplicationCommandPermission(messageRole, true))
-                    .ToList();
-                var userPerms = userManageRoles
-                    .Select(userRole => new DiscordApplicationCommandPermission(userRole, true))
-                    .ToList();
-                if (serverOwner is not null)
-                {
-                    admPerms.Add(new DiscordApplicationCommandPermission(serverOwner, true));
-                    messagePerms.Add(new DiscordApplicationCommandPermission(serverOwner, true));
-                    userPerms.Add(new DiscordApplicationCommandPermission(serverOwner, true));
-                }
-
-                var cmds = _options.Value.GlobalRegister ? await _discord.Client.GetGlobalApplicationCommandsAsync() : await guild.GetApplicationCommandsAsync();
-                cmds = cmds.Where(x => x.ApplicationId == _discord.Client.CurrentApplication.Id).ToList();
-
-                var modCmds = cmds.Where(x =>
-                        x.Name is "ban" or "identity" ||
-                        x.Name.Contains("mute", StringComparison.InvariantCultureIgnoreCase))
-                    .ToList();
-                var messageCmds = cmds.Where(x =>
-                        x.Name.Contains("prune", StringComparison.InvariantCultureIgnoreCase) &&
-                        !x.Name.Contains("mute", StringComparison.InvariantCultureIgnoreCase))
-                    .ToList();
-                var admCmds = cmds.Where(x => x.Name is "role-menu" or "ticket" || x.Name.Contains("admin-util"))
-                    .ToList();
-                var ownerCmds = cmds.Where(x => x.Name is "owner").ToList();
-
-                var update = modCmds.Select(modCmd => new DiscordGuildApplicationCommandPermissions(modCmd.Id, userPerms))
-                    .ToList();
-                update.AddRange(admCmds.Select(admCmd => new DiscordGuildApplicationCommandPermissions(admCmd.Id, admPerms)));
-                update.AddRange(messageCmds.Select(msgCmd =>
-                    new DiscordGuildApplicationCommandPermissions(msgCmd.Id, messagePerms)));
-
-                if (botOwner is not null)
-                    update.AddRange(ownerCmds.Select(ownerCmd =>
-                        new DiscordGuildApplicationCommandPermissions(ownerCmd.Id, ownerPerms)));
-
-                await guild.BatchEditApplicationCommandPermissionsAsync(update);
-
-                _logger.LogInformation(
-                    $"{guild.Id} found roles: Admin roles: {string.Join(" ", adminRoles.Select(x => x.Id))}, Message roles: {string.Join(" ", manageMessagesRoles.Select(x => x.Id))}, Mod roles: {string.Join(" ", userManageRoles.Select(x => x.Id))}{(botOwner is not null ? $", Owner : {botOwner.Id}" : "")}");
-                _logger.LogInformation($"Overwriting slashies done for {guild.Id}");
-
-                await Task.Delay(2000);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Failed to bulk overwrite slashies for guild: {guild.Id} because: {ex.GetFullMessage()}");
-            }
-        }
-        
         return Result.FromSuccess();
     }
 

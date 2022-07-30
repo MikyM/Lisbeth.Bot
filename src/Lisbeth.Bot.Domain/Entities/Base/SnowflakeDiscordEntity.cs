@@ -1,6 +1,10 @@
-﻿namespace Lisbeth.Bot.Domain.Entities.Base;
+﻿using MikyM.Common.DataAccessLayer;
+using MikyM.Common.Domain.Entities;
 
-public class SnowflakeDiscordEntity : SnowflakeEntity
+namespace Lisbeth.Bot.Domain.Entities.Base;
+
+public class SnowflakeDiscordEntity : SnowflakeEntity, IDisableableEntity
 {
-       public ulong GuildId { get; set; } 
+       public ulong GuildId { get; set; }
+       public bool IsDisabled { get; set; }
 }

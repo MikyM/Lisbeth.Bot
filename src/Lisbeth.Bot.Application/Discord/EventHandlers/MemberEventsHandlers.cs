@@ -17,7 +17,8 @@
 
 using DSharpPlus;
 using DSharpPlus.EventArgs;
-using Lisbeth.Bot.Application.Discord.Commands.ServerBooster;
+using Lisbeth.Bot.Application.Discord.Commands.MemberHistoryEntry;
+using Lisbeth.Bot.Application.Discord.Commands.ServerBoosterHistoryEntry;
 using MikyM.CommandHandlers;
 using MikyM.Common.Utilities.Results;
 using MikyM.Discord.Events;
@@ -25,27 +26,33 @@ using MikyM.Discord.Events;
 namespace Lisbeth.Bot.Application.Discord.EventHandlers;
 
 [UsedImplicitly]
-public class ServerBoosterEventsHandler : IDiscordGuildMemberEventsSubscriber
+public class MemberEventsHandler : IDiscordGuildMemberEventsSubscriber
 {
     private readonly ICommandHandlerFactory _commandHandlerFactory;
 
-    public ServerBoosterEventsHandler(ICommandHandlerFactory commandHandlerFactory)
+    public MemberEventsHandler(ICommandHandlerFactory commandHandlerFactory)
     {
         _commandHandlerFactory = commandHandlerFactory;
     }
 
-    public Task DiscordOnGuildMemberAdded(DiscordClient sender, GuildMemberAddEventArgs args)
-        => Task.CompletedTask;
+    public async Task DiscordOnGuildMemberAdded(DiscordClient sender, GuildMemberAddEventArgs args)
+    {
+        _ = await _commandHandlerFactory.GetHandler<ICommandHandler<AddMemberHistoryEntryCommand>>()
+            .HandleAsync(new AddMemberHistoryEntryCommand(args.Guild, args.Member));
+    }
 
     public async Task DiscordOnGuildMemberRemoved(DiscordClient sender, GuildMemberRemoveEventArgs args)
     {
+        _ = await _commandHandlerFactory.GetHandler<ICommandHandler<DisableMemberHistoryEntryCommand>>()
+            .HandleAsync(new DisableMemberHistoryEntryCommand(args.Guild, args.Member));
+        
         var hadBoost = args.Member.Roles.Any(x => x.Tags.IsPremiumSubscriber);
 
         if (!hadBoost)
             return;
         
-        _ = await _commandHandlerFactory.GetHandler<ICommandHandler<RemoveServerBoosterCommand>>()
-            .HandleAsync(new RemoveServerBoosterCommand(args.Guild, args.Member));
+        _ = await _commandHandlerFactory.GetHandler<ICommandHandler<DisableServerBoosterHistoryEntryCommand>>()
+            .HandleAsync(new DisableServerBoosterHistoryEntryCommand(args.Guild, args.Member));
     }
 
     public async Task DiscordOnGuildMemberUpdated(DiscordClient sender, GuildMemberUpdateEventArgs args)
@@ -57,11 +64,11 @@ public class ServerBoosterEventsHandler : IDiscordGuildMemberEventsSubscriber
         _ = hadBoostBefore switch
         {
             true when !hasBoostNow => await _commandHandlerFactory
-                .GetHandler<ICommandHandler<RemoveServerBoosterCommand>>()
-                .HandleAsync(new RemoveServerBoosterCommand(args.Guild, args.Member)),
+                .GetHandler<ICommandHandler<DisableServerBoosterHistoryEntryCommand>>()
+                .HandleAsync(new DisableServerBoosterHistoryEntryCommand(args.Guild, args.Member)),
             false when hasBoostNow => await _commandHandlerFactory
-                .GetHandler<ICommandHandler<AddServerBoosterCommand>>()
-                .HandleAsync(new AddServerBoosterCommand(args.Guild, args.Member)),
+                .GetHandler<ICommandHandler<AddServerBoosterHistoryEntryCommand>>()
+                .HandleAsync(new AddServerBoosterHistoryEntryCommand(args.Guild, args.Member)),
             _ => Result.FromSuccess()
         };
     }

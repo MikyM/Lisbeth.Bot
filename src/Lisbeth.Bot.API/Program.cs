@@ -112,14 +112,14 @@ public class Program
                 options.Conventions.Add(new RouteTokenTransformerConvention(new SlugifyParameterTransformer())));
             builder.Services.ConfigureSwagger();
             builder.Services.AddHttpClient();
-            builder.Services.ConfigureLisbethDbContext(builder.Configuration);
+            builder.Services.ConfigureLisbethDbContext(builder.Configuration, builder.Environment);
             builder.Services.ConfigureDiscord(builder.Configuration);
-            builder.Services.ConfigureHangfire(builder.Configuration);
+            builder.Services.ConfigureHangfire(builder.Configuration, builder.Environment);
             builder.Services.ConfigureApiKey(builder.Configuration);
             builder.Services.ConfigureRateLimiting(builder.Configuration);
             builder.Services.ConfigureEfCache();
             builder.Services.ConfigureApiVersioning();
-            builder.Services.ConfigureHealthChecks(builder.Configuration);
+            builder.Services.ConfigureHealthChecks(builder.Configuration, builder.Environment);
             builder.Services.ConfigureFluentValidation();
             builder.Services.AddEnrichedDiscordEmbedBuilders();
             builder.Services.ConfigurePhishingGateway();

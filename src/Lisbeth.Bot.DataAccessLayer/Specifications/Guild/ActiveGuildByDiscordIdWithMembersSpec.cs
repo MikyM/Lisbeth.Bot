@@ -15,12 +15,20 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using MikyM.Common.Domain;
-using MikyM.Common.Domain.Entities;
 
-namespace Lisbeth.Bot.Domain.Entities.Base;
+using MikyM.Common.EfCore.DataAccessLayer.Specifications;
 
-public class SnowflakeEntity : AggregateRootEntity
+namespace Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
+
+public class ActiveGuildByDiscordIdWithMembersEntriesSpec : Specification<Domain.Entities.Guild>
 {
-    public override long Id { get; protected set; } = IdGeneratorFactory.Build().CreateId();
+    public ActiveGuildByDiscordIdWithMembersEntriesSpec(ulong discordGuildId, ulong? userId = null)
+    {
+        Where(x => !x.IsDisabled);
+        Where(x => x.GuildId == discordGuildId);
+        if (userId is null)
+            Include(x => x.MemberHistoryEntries);
+        else
+            Include(x => x.MemberHistoryEntries!.Where(y => y.UserId == userId));
+    }
 }

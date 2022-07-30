@@ -23,7 +23,7 @@ using MikyM.Common.Utilities.Results;
 
 namespace Lisbeth.Bot.Application.Services.Database.Interfaces;
 
-public interface ITicketDataService : ICrudDataService<Ticket, LisbethBotDbContext>
+public interface ITicketDataService : ICrudDataService<Ticket, ILisbethBotDbContext>
 {
     Task<Result<Ticket>> CloseAsync(TicketCloseReqDto req, bool shouldSave = false);
     Task<Result<Ticket>> CloseAsync(TicketCloseReqDto req, Ticket ticket);

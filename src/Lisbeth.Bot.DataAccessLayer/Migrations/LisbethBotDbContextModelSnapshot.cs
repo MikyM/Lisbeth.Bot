@@ -17,7 +17,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.5")
+                .HasAnnotation("ProductVersion", "6.0.7")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -300,25 +300,54 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     b.ToTable("guild", (string)null);
                 });
 
-            modelBuilder.Entity("Lisbeth.Bot.Domain.Entities.GuildServerBooster", b =>
+            modelBuilder.Entity("Lisbeth.Bot.Domain.Entities.MemberHistoryEntry", b =>
                 {
+                    b.Property<long>("Id")
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("AccountCreated")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("account_created");
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
                     b.Property<long>("GuildId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
                         .HasColumnName("guild_id")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.None);
 
+                    b.Property<bool>("IsDisabled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_disabled");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .IsRequired()
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("updated_at");
+
                     b.Property<long>("UserId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasColumnName("user_id")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.None);
+                        .HasColumnName("user_id");
 
-                    b.HasKey("GuildId", "UserId");
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("UserId"));
 
-                    b.HasIndex("UserId");
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasColumnName("username");
 
-                    b.ToTable("guild_server_booster", (string)null);
+                    b.HasKey("Id");
+
+                    b.ToTable("member_history_entry", (string)null);
                 });
 
             modelBuilder.Entity("Lisbeth.Bot.Domain.Entities.ModerationConfig", b =>
@@ -722,19 +751,11 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     b.ToTable("role_menu_option", (string)null);
                 });
 
-            modelBuilder.Entity("Lisbeth.Bot.Domain.Entities.ServerBooster", b =>
+            modelBuilder.Entity("Lisbeth.Bot.Domain.Entities.ServerBoosterHistoryEntry", b =>
                 {
                     b.Property<long>("Id")
                         .HasColumnType("bigint")
                         .HasColumnName("id");
-
-                    b.Property<int>("BoostCount")
-                        .HasColumnType("int")
-                        .HasColumnName("boost_count");
-
-                    b.Property<DateTime>("BoostingSince")
-                        .HasColumnType("timestamptz")
-                        .HasColumnName("boosting_since");
 
                     b.Property<DateTime?>("CreatedAt")
                         .IsRequired()
@@ -745,9 +766,8 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     b.Property<long>("GuildId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasColumnName("guild_id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("GuildId"));
+                        .HasColumnName("guild_id")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.None);
 
                     b.Property<bool>("IsDisabled")
                         .HasColumnType("boolean")
@@ -761,13 +781,20 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     b.Property<long>("UserId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasColumnName("user_id");
+                        .HasColumnName("user_id")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.None);
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("UserId"));
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasColumnName("username");
 
                     b.HasKey("Id");
 
-                    b.ToTable("server_booster", (string)null);
+                    b.HasIndex("GuildId", "UserId");
+
+                    b.ToTable("server_booster_history_entry", (string)null);
                 });
 
             modelBuilder.Entity("Lisbeth.Bot.Domain.Entities.Tag", b =>
@@ -1045,10 +1072,6 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                         .HasColumnType("timestamptz")
                         .HasColumnName("created_at");
 
-                    b.Property<bool>("IsDisabled")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_disabled");
-
                     b.Property<string>("NewValues")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
@@ -1121,25 +1144,14 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     b.Navigation("Guild");
                 });
 
-            modelBuilder.Entity("Lisbeth.Bot.Domain.Entities.GuildServerBooster", b =>
+            modelBuilder.Entity("Lisbeth.Bot.Domain.Entities.MemberHistoryEntry", b =>
                 {
                     b.HasOne("Lisbeth.Bot.Domain.Entities.Guild", "Guild")
-                        .WithMany("GuildServerBoosters")
+                        .WithMany("MemberHistoryEntries")
                         .HasForeignKey("GuildId")
-                        .HasPrincipalKey("GuildId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Lisbeth.Bot.Domain.Entities.ServerBooster", "ServerBooster")
-                        .WithMany("GuildServerBoosters")
-                        .HasForeignKey("UserId")
-                        .HasPrincipalKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasPrincipalKey("GuildId");
 
                     b.Navigation("Guild");
-
-                    b.Navigation("ServerBooster");
                 });
 
             modelBuilder.Entity("Lisbeth.Bot.Domain.Entities.ModerationConfig", b =>
@@ -1229,6 +1241,23 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     b.Navigation("RoleMenu");
                 });
 
+            modelBuilder.Entity("Lisbeth.Bot.Domain.Entities.ServerBoosterHistoryEntry", b =>
+                {
+                    b.HasOne("Lisbeth.Bot.Domain.Entities.Guild", "Guild")
+                        .WithMany("ServerBoosterHistoryEntries")
+                        .HasForeignKey("GuildId")
+                        .HasPrincipalKey("GuildId");
+
+                    b.HasOne("Lisbeth.Bot.Domain.Entities.MemberHistoryEntry", "MemberHistoryEntry")
+                        .WithMany("ServerBoosterHistoryEntries")
+                        .HasForeignKey("GuildId", "UserId")
+                        .HasPrincipalKey("GuildId", "UserId");
+
+                    b.Navigation("Guild");
+
+                    b.Navigation("MemberHistoryEntry");
+                });
+
             modelBuilder.Entity("Lisbeth.Bot.Domain.Entities.Tag", b =>
                 {
                     b.HasOne("Lisbeth.Bot.Domain.Entities.EmbedConfig", "EmbedConfig")
@@ -1302,7 +1331,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
 
                     b.Navigation("ChannelMessageFormats");
 
-                    b.Navigation("GuildServerBoosters");
+                    b.Navigation("MemberHistoryEntries");
 
                     b.Navigation("ModerationConfig");
 
@@ -1314,6 +1343,8 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
 
                     b.Navigation("RoleMenus");
 
+                    b.Navigation("ServerBoosterHistoryEntries");
+
                     b.Navigation("Tags");
 
                     b.Navigation("TicketingConfig");
@@ -1321,14 +1352,14 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     b.Navigation("Tickets");
                 });
 
+            modelBuilder.Entity("Lisbeth.Bot.Domain.Entities.MemberHistoryEntry", b =>
+                {
+                    b.Navigation("ServerBoosterHistoryEntries");
+                });
+
             modelBuilder.Entity("Lisbeth.Bot.Domain.Entities.RoleMenu", b =>
                 {
                     b.Navigation("RoleMenuOptions");
-                });
-
-            modelBuilder.Entity("Lisbeth.Bot.Domain.Entities.ServerBooster", b =>
-                {
-                    b.Navigation("GuildServerBoosters");
                 });
 #pragma warning restore 612, 618
         }

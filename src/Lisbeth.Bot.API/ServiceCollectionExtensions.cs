@@ -35,10 +35,12 @@ using Lisbeth.Bot.Application.Services;
 using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.Domain;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using MikyM.Discord;
 using MikyM.Discord.Extensions.Interactivity;
@@ -125,20 +127,22 @@ public static class ServiceCollectionExtensions
         services.AddDiscordMessageEventsSubscriber<ChannelMessageFormatEventsHandler>();
         services.AddDiscordMessageEventsSubscriber<PhishingEventsHandler>();
         services.AddDiscordGuildBanEventsSubscriber<BanEventsHandler>();
-        services.AddDiscordGuildMemberEventsSubscriber<ServerBoosterEventsHandler>();
+        services.AddDiscordGuildMemberEventsSubscriber<MemberEventsHandler>();
 
         #endregion
     }
 
-    public static void ConfigureHangfire(this IServiceCollection services, IConfiguration configuration)
+    public static void ConfigureHangfire(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
         services.AddHangfire(options =>
         {
             options.UseRecommendedSerializerSettings();
-            options.UsePostgreSqlStorage(configuration.GetConnectionString("HangfireDb"),
+            options.UsePostgreSqlStorage(
+                (environment.IsProduction()
+                    ? configuration.GetConnectionString("HangfireDb")
+                    : Environment.GetEnvironmentVariable("DevLisbethHangfireDb")) ??
+                throw new InvalidOperationException("Couldn't retrieve dev db connection string from env var."),
                 new PostgreSqlStorageOptions { QueuePollInterval = TimeSpan.FromSeconds(15) });
-            //options.UseFilter(new QueueFilter());
-            //options.UseFilter(new PreserveOriginalQueueAttribute());
         });
 
         services.AddHangfireServer(options =>
@@ -204,7 +208,7 @@ public static class ServiceCollectionExtensions
 #if !DEBUG
             options.DisableLogging(true);
 #endif
-            options.CacheQueriesContainingTypes(CacheExpirationMode.Sliding, TimeSpan.FromMinutes(30), typeof(Guild)/*,
+            options.CacheQueriesContainingTypes(CacheExpirationMode.Sliding, TimeSpan.FromMinutes(30), TableTypeComparison.ContainsOnly, typeof(Guild)/*,
                 typeof(ChannelMessageFormat), typeof(TicketingConfig), typeof(ModerationConfig)*/);
         });
         services.AddEasyCaching(options =>
@@ -254,13 +258,19 @@ public static class ServiceCollectionExtensions
         });
     }
 
-    public static void ConfigureHealthChecks(this IServiceCollection services, IConfiguration configuration)
+    public static void ConfigureHealthChecks(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
         services.AddHealthChecks()
-            .AddNpgSql(configuration.GetConnectionString("MainDb"),
+            .AddNpgSql((environment.IsProduction()
+                           ? configuration.GetConnectionString("MainDb")
+                           : Environment.GetEnvironmentVariable("DevLisbethMainDb")) ??
+                       throw new InvalidOperationException("Couldn't retrieve dev db connection string from env var."),
                 name: "Base DB")
             .AddNpgSql(
-                configuration.GetConnectionString("HangfireDb"),
+                (environment.IsProduction()
+                    ? configuration.GetConnectionString("HangfireDb")
+                    : Environment.GetEnvironmentVariable("DevLisbethHangfireDb")) ??
+                throw new InvalidOperationException("Couldn't retrieve dev db connection string from env var."),
                 name: "Hangfire DB")
             .AddHangfire(options =>
             {
@@ -276,16 +286,18 @@ public static class ServiceCollectionExtensions
         {
             options.DisableDataAnnotationsValidation = true;
             options.AutomaticValidationEnabled = false;
-            options.ImplicitlyValidateChildProperties = true;
         });
     }
 
-    public static void ConfigureLisbethDbContext(this IServiceCollection services, IConfiguration configuration)
+    public static void ConfigureLisbethDbContext(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
         services.AddDbContextPool<LisbethBotDbContext>((provider, options) =>
         {
             options.AddInterceptors(provider.GetRequiredService<SecondLevelCacheInterceptor>());
-            options.UseNpgsql(configuration.GetConnectionString("MainDb"));
+            options.UseNpgsql((environment.IsProduction()
+                                  ? configuration.GetConnectionString("MainDb")
+                                  : Environment.GetEnvironmentVariable("DevLisbethMainDb")) ??
+                              throw new InvalidOperationException("Couldn't retrieve dev db connection string from env var."));
 #if DEBUG
             options.EnableSensitiveDataLogging();
 #endif

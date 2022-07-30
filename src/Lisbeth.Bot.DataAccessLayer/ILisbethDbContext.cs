@@ -15,19 +15,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using MikyM.Common.EfCore.DataAccessLayer.Context;
 
-using MikyM.Common.EfCore.DataAccessLayer.Specifications;
-using MikyM.Common.EfCore.DataAccessLayer.Specifications.Builders;
+namespace Lisbeth.Bot.DataAccessLayer;
 
-namespace Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
-
-public class ActiveGuildByDiscordIdWithBoostersSpecifications : Specification<Domain.Entities.Guild>
+public interface ILisbethBotDbContext : IEfDbContext
 {
-    public ActiveGuildByDiscordIdWithBoostersSpecifications(ulong discordGuildId)
-    {
-        Where(x => !x.IsDisabled);
-        Where(x => x.GuildId == discordGuildId);
-        Include(x => x.ServerBoosters!.Where(y => y.GuildId == discordGuildId));
-        Include(x => x.GuildServerBoosters!.Where(y => y.GuildId == discordGuildId));
-    }
 }

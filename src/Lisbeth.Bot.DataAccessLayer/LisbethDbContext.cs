@@ -15,11 +15,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using MikyM.Common.EfCore.DataAccessLayer;
+using MikyM.Common.EfCore.DataAccessLayer.Context;
 
 namespace Lisbeth.Bot.DataAccessLayer;
 
-public sealed class LisbethBotDbContext : AuditableDbContext
+public sealed class LisbethBotDbContext : AuditableDbContext, ILisbethBotDbContext
 {
     public LisbethBotDbContext(DbContextOptions<LisbethBotDbContext> options) : base(options)
     {
@@ -29,7 +29,8 @@ public sealed class LisbethBotDbContext : AuditableDbContext
     public DbSet<Mute> Mutes { get; set; } = null!;
     public DbSet<Ticket> Tickets { get; set; } = null!;
     public DbSet<Ban> Bans { get; set; } = null!;
-    public DbSet<ServerBooster> ServerBoosters { get; set; } = null!;
+    public DbSet<ServerBoosterHistoryEntry> ServerBoosterHistoryEntries { get; set; } = null!;
+    public DbSet<MemberHistoryEntry> MemberHistoryEntries { get; set; } = null!;
     public DbSet<Prune> Prunes { get; set; } = null!;
     public DbSet<TicketingConfig> TicketingConfigs { get; set; } = null!;
     public DbSet<ModerationConfig> ModerationConfigs { get; set; } = null!;

@@ -27,9 +27,9 @@ using NCrontab;
 namespace Lisbeth.Bot.Application.Services.Database;
 
 [UsedImplicitly]
-public class ReminderDataService : CrudDataService<Reminder, LisbethBotDbContext>, IReminderDataService
+public class ReminderDataService : CrudDataService<Reminder, ILisbethBotDbContext>, IReminderDataService
 {
-    public ReminderDataService(IMapper mapper, IUnitOfWork<LisbethBotDbContext> uof) : base(mapper, uof)
+    public ReminderDataService(IMapper mapper, IUnitOfWork<ILisbethBotDbContext> uof) : base(mapper, uof)
     {
     }
 

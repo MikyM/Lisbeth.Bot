@@ -17,7 +17,7 @@
 
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Domain.DTOs.Request.DirectMessage;
-using MikyM.CommandHandlers.Commands;
+using MikyM.CommandHandlers;
 
 namespace Lisbeth.Bot.Application.Discord.Commands.DirectMessage;
 

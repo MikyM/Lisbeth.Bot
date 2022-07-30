@@ -22,7 +22,7 @@ using MikyM.Common.Utilities.Results;
 
 namespace Lisbeth.Bot.Application.Services.Database.Interfaces;
 
-public interface ITagDataService : ICrudDataService<Tag, LisbethBotDbContext>
+public interface ITagDataService : ICrudDataService<Tag, ILisbethBotDbContext>
 {
     Task<Result> AddAsync(TagAddReqDto req, bool shouldSave = false);
     Task<Result> UpdateTagTextAsync(TagEditReqDto req, bool shouldSave = false);

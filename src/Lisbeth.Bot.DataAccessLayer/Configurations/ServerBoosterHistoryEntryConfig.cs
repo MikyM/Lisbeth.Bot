@@ -19,11 +19,11 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Lisbeth.Bot.DataAccessLayer.Configurations;
 
-public class ServerBoosterConfig : IEntityTypeConfiguration<ServerBooster>
+public class ServerBoosterHistoryEntryConfig : IEntityTypeConfiguration<ServerBoosterHistoryEntry>
 {
-    public void Configure(EntityTypeBuilder<ServerBooster> builder)
+    public void Configure(EntityTypeBuilder<ServerBoosterHistoryEntry> builder)
     {
-        builder.ToTable("server_booster");
+        builder.ToTable("server_booster_history_entry");
 
         builder.Property(x => x.Id).HasColumnName("id").HasColumnType("bigint").ValueGeneratedNever().IsRequired();
         builder.Property(x => x.IsDisabled).HasColumnName("is_disabled").HasColumnType("boolean").IsRequired();
@@ -35,11 +35,7 @@ public class ServerBoosterConfig : IEntityTypeConfiguration<ServerBooster>
             .IsRequired();
         builder.Property(x => x.UserId).HasColumnName("user_id").HasColumnType("bigint").ValueGeneratedOnAdd()
             .IsRequired();
-        builder.Property(x => x.BoostCount).HasColumnName("boost_count").HasColumnType("int").IsRequired();
-        builder.Property(x => x.BoostingSince).HasColumnName("boosting_since").HasColumnType("timestamptz")
+        builder.Property(x => x.Username).HasColumnName("username").HasColumnType("text").ValueGeneratedOnAdd()
             .IsRequired();
-
-        builder.Metadata.FindNavigation(nameof(ServerBooster.GuildServerBoosters))
-            ?.SetPropertyAccessMode(PropertyAccessMode.Field);
     }
 }

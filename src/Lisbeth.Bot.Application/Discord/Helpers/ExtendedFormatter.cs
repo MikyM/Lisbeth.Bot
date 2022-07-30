@@ -130,10 +130,10 @@ public static  class ExtendedFormatter
     /// </summary>
     /// <param name="text">Text to display the link as.</param>
     /// <param name="url">Url that the link will lead to.</param>
-    /// <param name="alt_text">Alt text to display on hover.</param>
+    /// <param name="altText">Alt text to display on hover.</param>
     /// <returns>Formatted url.</returns>
-    public static string MaskedUrl(string text, Uri url, string alt_text = "")
-        => $"[{text}]({url}{(!string.IsNullOrWhiteSpace(alt_text) ? $" \"{alt_text}\"" : "")})";
+    public static string MaskedUrl(string text, Uri url, string altText = "")
+        => $"[{text}]({url}{(!string.IsNullOrWhiteSpace(altText) ? $" \"{altText}\"" : "")})";
 
     /// <summary>
     /// Escapes all markdown formatting from specified text.

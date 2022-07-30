@@ -17,10 +17,12 @@
 
 using System;
 using Lisbeth.Bot.Domain.Entities.Base;
+using MikyM.Common.DataAccessLayer;
+using MikyM.Common.Domain.Entities;
 
 namespace Lisbeth.Bot.Domain.Entities;
 
-public sealed class Mute : SnowflakeEntity, IModEntity
+public sealed class Mute : SnowflakeEntity, IDisableableEntity, IModEntity
 {
     public ulong GuildId { get; set; }
     public ulong UserId { get; set; }
@@ -37,4 +39,6 @@ public sealed class Mute : SnowflakeEntity, IModEntity
     {
         return (Mute)MemberwiseClone();
     }
+
+    public bool IsDisabled { get; set; }
 }

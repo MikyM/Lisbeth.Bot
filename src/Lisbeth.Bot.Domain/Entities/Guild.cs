@@ -17,42 +17,28 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using Lisbeth.Bot.Domain.Entities.Base;
 using Lisbeth.Bot.Domain.Enums;
-
-// ReSharper disable CollectionNeverUpdated.Local
-// ReSharper disable InconsistentNaming
+using MikyM.Common.DataAccessLayer;
+using MikyM.Common.Domain.Entities;
+#pragma warning disable CS0649
 
 namespace Lisbeth.Bot.Domain.Entities;
 
-public sealed class Guild : SnowflakeEntity
+public sealed class Guild : SnowflakeEntity, IDisableableEntity
 {
-    private readonly HashSet<Ban>? bans;
-    private readonly HashSet<GuildServerBooster>? guildServerBoosters;
-    private HashSet<ServerBooster>? serverBoosters;
-    private readonly HashSet<Mute>? mutes;
-    private readonly HashSet<Prune>? prunes;
-    private readonly HashSet<Reminder>? reminders;
-    private readonly HashSet<RoleMenu>? roleMenus;
-    private readonly HashSet<Tag>? tags;
-    private readonly HashSet<Ticket>? tickets;
-    private readonly HashSet<ChannelMessageFormat>? channelMessageFormats;
-
-    public Guild()
-    {
-        serverBoosters ??= new HashSet<ServerBooster>();
-        bans ??= new HashSet<Ban>();
-        guildServerBoosters ??= new HashSet<GuildServerBooster>();
-        mutes ??= new HashSet<Mute>();
-        prunes ??= new HashSet<Prune>();
-        reminders ??= new HashSet<Reminder>();
-        tickets ??= new HashSet<Ticket>();
-        tags ??= new HashSet<Tag>();
-        roleMenus ??= new HashSet<RoleMenu>();
-        channelMessageFormats ??= new HashSet<ChannelMessageFormat>();
-    }
+    private readonly HashSet<Ban>? _bans;
+    private HashSet<MemberHistoryEntry>? _memberHistoryEntries;
+    private HashSet<ServerBoosterHistoryEntry>? _serverBoosterHistoryEntries;
+    private readonly HashSet<Mute>? _mutes;
+    private readonly HashSet<Prune>? _prunes;
+    private readonly HashSet<Reminder>? _reminders;
+    private readonly HashSet<RoleMenu>? _roleMenus;
+    private readonly HashSet<Tag>? _tags;
+    private readonly HashSet<Ticket>? _tickets;
+    private readonly HashSet<ChannelMessageFormat>? _channelMessageFormats;
 
     public ulong GuildId { get; set; }
     public ulong UserId { get; set; }
@@ -61,62 +47,95 @@ public sealed class Guild : SnowflakeEntity
     public ModerationConfig? ModerationConfig { get; private set; }
     public string EmbedHexColor { get; set; } = "#26296e";
     public PhishingDetection PhishingDetection { get; set; } = PhishingDetection.Disabled;
-    public IEnumerable<Mute>? Mutes => mutes?.AsEnumerable();
-    public IEnumerable<Ban>? Bans => bans?.AsEnumerable();
-    public IEnumerable<Prune>? Prunes => prunes?.AsEnumerable();
-    public IEnumerable<Ticket>? Tickets => tickets?.AsEnumerable();
-    public IEnumerable<ServerBooster>? ServerBoosters => serverBoosters?.AsEnumerable();
-    public IEnumerable<GuildServerBooster>? GuildServerBoosters => guildServerBoosters?.AsEnumerable();
-    public IEnumerable<Reminder>? Reminders => reminders?.AsEnumerable();
-    public IEnumerable<Tag>? Tags => tags?.AsEnumerable();
-    public IEnumerable<RoleMenu>? RoleMenus => roleMenus?.AsEnumerable();
-    public IEnumerable<ChannelMessageFormat>? ChannelMessageFormats => channelMessageFormats?.AsEnumerable();
+    public IEnumerable<Mute>? Mutes => _mutes?.AsEnumerable();
+    public IEnumerable<Ban>? Bans => _bans?.AsEnumerable();
+    public IEnumerable<Prune>? Prunes => _prunes?.AsEnumerable();
+    public IEnumerable<Ticket>? Tickets => _tickets?.AsEnumerable();
+    public IEnumerable<MemberHistoryEntry>? MemberHistoryEntries => _memberHistoryEntries?.AsEnumerable();
+    public IEnumerable<Reminder>? Reminders => _reminders?.AsEnumerable();
+    public IEnumerable<Tag>? Tags => _tags?.AsEnumerable();
+    public IEnumerable<RoleMenu>? RoleMenus => _roleMenus?.AsEnumerable();
+    public IEnumerable<ChannelMessageFormat>? ChannelMessageFormats => _channelMessageFormats?.AsEnumerable();
+    public IEnumerable<ServerBoosterHistoryEntry>? ServerBoosterHistoryEntries => _serverBoosterHistoryEntries?.AsEnumerable();
 
+    public void AddServerBoosterHistoryEntry(ServerBoosterHistoryEntry entry)
+    {
+        _serverBoosterHistoryEntries ??= new HashSet<ServerBoosterHistoryEntry>();
+        _serverBoosterHistoryEntries.Add(entry);
+    }
+    
+    public void AddServerBoosterHistoryEntry(ulong userId, string username, DateTime? dateOverride = null)
+    {
+        var date = dateOverride ?? DateTime.UtcNow;
+        _serverBoosterHistoryEntries ??= new HashSet<ServerBoosterHistoryEntry>();
+        _serverBoosterHistoryEntries.Add(new ServerBoosterHistoryEntry { UserId = userId, GuildId = this.GuildId, CreatedAt = date, Username = username } );
+    }
+
+    public void DisableServerBoosterHistoryEntry(ServerBoosterHistoryEntry entry)
+        => DisableServerBoosterHistoryEntry(entry.UserId);
+    
+    public void DisableServerBoosterHistoryEntry(ulong userId)
+    {
+        if (_serverBoosterHistoryEntries is null)
+            throw new DataException("Data wasn't loaded from the database.");
+
+        var current =
+            _serverBoosterHistoryEntries.Where(x => x.UserId == userId && !x.IsDisabled && x.GuildId == GuildId);
+
+        foreach (var curr in current)
+            curr.IsDisabled = true;
+    }
+    
+    public void AddMemberHistoryEntry(MemberHistoryEntry entry)
+    {
+        _memberHistoryEntries ??= new HashSet<MemberHistoryEntry>();
+        _memberHistoryEntries.Add(entry);
+    }
+    
+    public void AddMemberHistoryEntry(ulong userId, string username, DateTime accountCreated, DateTime? dateOverride = null)
+    {
+        var date = dateOverride ?? DateTime.UtcNow;
+        _memberHistoryEntries ??= new HashSet<MemberHistoryEntry>();
+        _memberHistoryEntries.Add(new MemberHistoryEntry { UserId = userId, GuildId = this.GuildId, CreatedAt = date, Username = username, AccountCreated = accountCreated } );
+    }
+
+    public void DisableMemberHistoryEntry(MemberHistoryEntry entry)
+        => DisableServerBoosterHistoryEntry(entry.UserId);
+    
+    public void DisableMemberHistoryEntry(ulong userId)
+    {
+        if (_memberHistoryEntries is null)
+            throw new DataException("Data wasn't loaded from the database.");
+
+        var current =
+            _memberHistoryEntries.Where(x => x.UserId == userId && !x.IsDisabled && x.GuildId == GuildId);
+
+        foreach (var curr in current)
+            curr.IsDisabled = true;
+    }
+    
     public void AddMute(Mute mute)
     {
         if (mute is null) throw new ArgumentNullException(nameof(mute));
-        mutes?.Add(mute);
+        _mutes?.Add(mute);
     }
 
     public void AddPrune(Prune prune)
     {
         if (prune is null) throw new ArgumentNullException(nameof(prune));
-        prunes?.Add(prune);
+        _prunes?.Add(prune);
     }
 
     public void AddBan(Ban ban)
     {
         if (ban is null) throw new ArgumentNullException(nameof(ban));
-        bans?.Add(ban);
-    }
-
-    public void RemoveServerBooster(ulong userId)
-    {
-        var boosters = serverBoosters?.Where(x => x.UserId == userId && x.GuildId == GuildId && !IsDisabled).ToList();
-        if (boosters is null || !boosters.Any())
-            return;
-        
-        foreach (var booster in boosters)
-            booster.IsDisabled = true;
-    }
-    
-    public void AddServerBooster(ulong userId, DateTime? date = null)
-    {
-        if (serverBoosters is null)
-            throw new ArgumentNullException();
-        
-        var booster = serverBoosters.FirstOrDefault(x => x.UserId == userId && x.GuildId == GuildId && !IsDisabled);
-        if (booster is not null)
-            return;
-        
-        serverBoosters ??= new HashSet<ServerBooster>();
-        serverBoosters.Add(new ServerBooster { GuildId = GuildId, UserId = userId, BoostingSince = date ?? DateTime.UtcNow } );
+        _bans?.Add(ban);
     }
 
     public bool AddTag(Tag tag)
     {
         if (tag is null) throw new ArgumentNullException(nameof(tag));
-        return tags is not null && tags.Add(tag);
+        return _tags is not null && _tags.Add(tag);
     }
 
     public bool RemoveTag(string name)
@@ -135,15 +154,15 @@ public sealed class Guild : SnowflakeEntity
     public bool ReplaceTag(Tag tag)
     {
         if (tag is null) throw new ArgumentNullException(nameof(tag));
-        var res = tags?.RemoveWhere(x => x.Name == tag.Name);
-        return tags is not null && res != 0 && tags.Add(tag);
+        var res = _tags?.RemoveWhere(x => x.Name == tag.Name);
+        return _tags is not null && res != 0 && _tags.Add(tag);
     }
 
     public bool AddChannelMessageFormat(ChannelMessageFormat format)
     {
         if (format is null) throw new ArgumentNullException(nameof(format));
         //format.Guild = this;
-        return channelMessageFormats is not null && channelMessageFormats.Add(format);
+        return _channelMessageFormats is not null && _channelMessageFormats.Add(format);
     }
 
     public bool RemoveChannelMessageFormat(ulong channelId)
@@ -160,8 +179,8 @@ public sealed class Guild : SnowflakeEntity
     public bool ReplaceChannelMessageFormat(ChannelMessageFormat format)
     {
         if (format is null) throw new ArgumentNullException(nameof(format));
-        var res = channelMessageFormats?.RemoveWhere(x => x.ChannelId == format.ChannelId);
-        return channelMessageFormats is not null && res != 0 && channelMessageFormats.Add(format);
+        var res = _channelMessageFormats?.RemoveWhere(x => x.ChannelId == format.ChannelId);
+        return _channelMessageFormats is not null && res != 0 && _channelMessageFormats.Add(format);
     }
 
     public void SetTicketingConfig(TicketingConfig config)
@@ -186,4 +205,6 @@ public sealed class Guild : SnowflakeEntity
     [MemberNotNullWhen(true, nameof(ModerationConfig))]
     public bool IsReminderModuleEnabled
         => ReminderChannelId is not null;
+
+    public bool IsDisabled { get; set; }
 }

@@ -6,10 +6,8 @@ using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
-using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
-using MikyM.Discord.Enums;
 using MikyM.Discord.Extensions.BaseExtensions;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands;
@@ -55,7 +53,107 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
         await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(embed.Build())
             .AsEphemeral());
     }
+
+    [SlashRequireUserPermissions(Permissions.BanMembers)]
+    [SlashCommand("member", "Command that allows checking information about members.", false)]
+    [UsedImplicitly]
+    public async Task MemberCommand(InteractionContext ctx,
+        [Option("action", "Action type")] MemberActionType actionType,
+        [Option("user", "User to check if any")]
+        DiscordUser? user = null)
+    {
+        _ = ctx.DeferAsync();
+
+        var res = await _guildDataService.GetSingleBySpecAsync(
+            new ActiveGuildByDiscordIdWithMembersEntriesSpec(ctx.Guild.Id));
+
+        if (!res.IsDefined(out var guild)) 
+            throw new ArgumentException("Guild not found in database");
+        
+        switch (actionType)
+        {
+            case MemberActionType.Check:
+                var member = (DiscordMember?)user;
+                if (member is null)
+                    throw new ArgumentNullException(nameof(user), "You must supply a user to use this option.");
+
+                var embed = new DiscordEmbedBuilder();
+                embed.WithThumbnail(member.AvatarUrl);
+                embed.WithTitle("Member information");
+                embed.AddField("Member's identity", $"{member.GetFullUsername()}", true);
+                embed.AddField("Joined guild", $"{member.JoinedAt.ToString(CultureInfo.CurrentCulture)}");
+                embed.AddField("Account created", $"{member.CreationTimestamp.ToString(CultureInfo.CurrentCulture)}");
+                embed.WithColor(new DiscordColor(res.Entity.EmbedHexColor));
+                embed.WithFooter($"Member Id: {member.Id}");
+
+                await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(embed.Build())
+                    .AsEphemeral());
+                break;
+            case MemberActionType.History:
+                var intr = ctx.Client.GetInteractivity();
+                var pages = new List<Page>();
+                var chunked = (guild.MemberHistoryEntries?.Where(x => x.GuildId == ctx.Guild.Id) ?? throw new ArgumentNullException())
+                    .GroupBy(x => new { x.UserId, x.GuildId })
+                    .Select(x => x.OrderByDescending(y => y.CreatedAt!.Value).First())
+                    .OrderBy(x => x.CreatedAt!.Value)
+                    .Take(1000)
+                    .Chunk(25)
+                    .OrderByDescending(x => x.Length)
+                    .ToList();
+
+                int pageNumber = 1;
+
+                foreach (var chunk in chunked)
+                {
+                    var embedBuilder = new DiscordEmbedBuilder().WithColor(new DiscordColor(guild.EmbedHexColor))
+                        .WithTitle("Member history")
+                        .WithFooter($"Current page: {pageNumber} | Total pages: {chunked.Count}");
+
+                    foreach (var entry in chunk)
+                    {
+                        embedBuilder.AddField(entry.Username,
+                            $"Joined at: {entry.CreatedAt!.Value.ToString("g")} UTC {(entry.IsDisabled ? $"\nLeft at: {entry.UpdatedAt!.Value.ToString("g")} UTC" : $"Member currently for: {Math.Round(DateTime.UtcNow.Subtract(entry.CreatedAt!.Value.ToUniversalTime()).TotalDays, 2).ToString(CultureInfo.InvariantCulture)} days\nAccount created at: {entry.AccountCreated.ToString("g")} UTC")}");
+       
+                        await Task.Delay(500);
+                    }
+
+                    pages.Add(new Page("", embedBuilder));
+                    pageNumber++;
+                }
+                
+                
+                if (pages.Any())
+                    await intr.SendPaginatedResponseAsync(ctx.Interaction, false, ctx.User, pages, null,
+                        null, null, default, true);
+                else
+                    await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().AddEmbed(new DiscordEmbedBuilder()
+                        .WithTitle("Member history").WithDescription("No history entries available.").WithColor(new DiscordColor(guild.EmbedHexColor))));
+                break;
+            case MemberActionType.Backtrack:
+                var members = await ctx.Guild.GetAllMembersAsync();
+
+                foreach (var memberBacktrack in members)
+                {
+                    var dateBacktrack = memberBacktrack.JoinedAt != DateTimeOffset.MinValue
+                        ? memberBacktrack.JoinedAt.UtcDateTime
+                        : DateTime.UtcNow;
+
+                    _ = _guildDataService.BeginUpdate(guild);
+                    guild.AddMemberHistoryEntry(memberBacktrack.Id, memberBacktrack.GetFullUsername(), memberBacktrack.CreationTimestamp.UtcDateTime, dateBacktrack);
+                }
+
+                _ = await _guildDataService.CommitAsync();
+
+                _ = await ctx.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().AddEmbed(
+                    new DiscordEmbedBuilder().WithDescription("Backtracking members has finished successfully!")
+                        .WithColor(new DiscordColor(guild.EmbedHexColor))));
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(actionType), actionType, null);
+        }
+    }
     
+
     [SlashRequireUserPermissions(Permissions.BanMembers)]
     [SlashCommand("booster", "Command that allows checking information about boosters.", false)]
     [UsedImplicitly]
@@ -66,7 +164,7 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
         _ = ctx.DeferAsync();
 
         var res = await _guildDataService.GetSingleBySpecAsync(
-            new ActiveGuildByDiscordIdWithBoostersSpecifications(ctx.Guild.Id));
+            new ActiveGuildByDiscordIdWithBoostersEntriesSpec(ctx.Guild.Id));
 
         if (!res.IsDefined(out var guild)) 
             throw new ArgumentException("Guild not found in database");
@@ -85,13 +183,13 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                 embed.WithColor(new DiscordColor(guild.EmbedHexColor));
                 var isBoosting = member.Roles.Any(x => x.Tags.IsPremiumSubscriber);
                 var dbBooster =
-                    (guild.GuildServerBoosters?.Where(x => x.GuildId == ctx.Guild.Id && x.UserId == member.Id))
+                    (guild.ServerBoosterHistoryEntries?.Where(x => x.GuildId == ctx.Guild.Id && x.UserId == member.Id))
                     ?.MaxBy(x => x.CreatedAt!.Value);
 
                 var date = dbBooster?.CreatedAt;
                 var discordDate = member.PremiumSince;
                 
-                var daysBoostedTotallyCheck = guild.GuildServerBoosters?.Where(x => x.UserId == member.Id && x.GuildId == ctx.Guild.Id).Sum(x =>
+                var daysBoostedTotallyCheck = guild.ServerBoosterHistoryEntries?.Where(x => x.UserId == member.Id && x.GuildId == ctx.Guild.Id).Sum(x =>
                     x.IsDisabled
                         ? x.UpdatedAt!.Value.Subtract(x.CreatedAt!.Value).TotalDays
                         : DateTime.UtcNow.Subtract(x.CreatedAt!.Value).TotalDays);
@@ -126,11 +224,12 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
             case BoosterActionType.History:
                 var intr = ctx.Client.GetInteractivity();
                 var pages = new List<Page>();
-                var chunked = (guild.GuildServerBoosters?.Where(x => x.GuildId == ctx.Guild.Id) ?? throw new ArgumentNullException())
+                var chunked = (guild.ServerBoosterHistoryEntries?.Where(x => x.GuildId == ctx.Guild.Id) ?? throw new ArgumentNullException())
                     .GroupBy(x => new { x.UserId, x.GuildId })
                     .Select(x => x.OrderByDescending(y => y.CreatedAt!.Value).First())
                     .OrderBy(x => x.CreatedAt!.Value)
-                    .Chunk(10)
+                    .Take(1000)
+                    .Chunk(25)
                     .OrderByDescending(x => x.Length)
                     .ToList();
 
@@ -144,32 +243,13 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
 
                     foreach (var booster in chunk)
                     {
-                        DiscordMember? memberHistory = null;
-                        DiscordUser? userHistory = null;
-                        try
-                        {
-                            memberHistory = await ctx.Guild.GetMemberAsync(booster.UserId);
-                        }
-                        catch
-                        {
-                            try
-                            {
-                                userHistory = await ctx.Client.GetUserAsync(booster.UserId);
-                            }
-                            catch
-                            {
-                                // ignore
-                            }
-                        }
-                        
-                        var check = memberHistory?.Roles.Any(x => x.Tags.IsPremiumSubscriber);
-                        var daysBoostedTotally = guild.GuildServerBoosters?.Where(x => x.UserId == booster.UserId && x.GuildId == ctx.Guild.Id).Sum(x =>
+                        var daysBoostedTotally = guild.ServerBoosterHistoryEntries?.Where(x => x.UserId == booster.UserId && x.GuildId == ctx.Guild.Id).Sum(x =>
                             x.IsDisabled
                                 ? x.UpdatedAt!.Value.Subtract(x.CreatedAt!.Value).TotalDays
                                 : DateTime.UtcNow.Subtract(x.CreatedAt!.Value).TotalDays);
                         
-                        embedBuilder.AddField(memberHistory?.GetFullUsername() ?? userHistory?.GetFullUsername() ?? "User deleted",
-                            $"Is currently boosting: {!booster.IsDisabled && (!check.HasValue || check.Value)}\nLast boost date: {booster.CreatedAt!.Value.ToString("g")} UTC{(booster.IsDisabled ? $"\nBoosted until: {booster.UpdatedAt!.Value.ToString("g")} UTC" : $"\nBoosting currently for: {Math.Round(DateTime.UtcNow.Subtract(booster.CreatedAt!.Value.ToUniversalTime()).TotalDays, 2).ToString(CultureInfo.InvariantCulture)} days")}\nBoosted totally for: {Math.Round(daysBoostedTotally ?? 0, 2)} days");
+                        embedBuilder.AddField(booster.Username,
+                            $"Is currently boosting: {!booster.IsDisabled}\nLast boost date: {booster.CreatedAt!.Value.ToString("g")} UTC{(booster.IsDisabled ? $"\nBoosted until: {booster.UpdatedAt!.Value.ToString("g")} UTC" : $"\nBoosting currently for: {Math.Round(DateTime.UtcNow.Subtract(booster.CreatedAt!.Value.ToUniversalTime()).TotalDays, 2).ToString(CultureInfo.InvariantCulture)} days")}\nBoosted totally for: {Math.Round(daysBoostedTotally ?? 0, 2)} days");
        
                         await Task.Delay(500);
                     }
@@ -189,9 +269,10 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
             case BoosterActionType.Active:
                 var intrActive = ctx.Client.GetInteractivity();
                 var pagesActive = new List<Page>();
-                var chunkedActive = (guild.GuildServerBoosters?.Where(x => !x.IsDisabled) ?? throw new ArgumentNullException()).Where(x => !x.IsDisabled)
+                var chunkedActive = (guild.ServerBoosterHistoryEntries?.Where(x => !x.IsDisabled) ?? throw new ArgumentNullException()).Where(x => !x.IsDisabled)
                     .OrderBy(x => x.CreatedAt!.Value)
-                    .Chunk(10)
+                    .Take(1000)
+                    .Chunk(25)
                     .OrderByDescending(x => x.Length)
                     .ToList();
 
@@ -205,18 +286,7 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
 
                     foreach (var booster in chunk)
                     {
-                        DiscordMember memberActive;
-                        try
-                        {
-                            memberActive = await ctx.Guild.GetMemberAsync(booster.UserId);
-                        }
-                        catch
-                        {
-                            continue;
-                        }
-                        if (!memberActive.Roles.Any(x => x.Tags.IsPremiumSubscriber))
-                            continue;
-                        embedBuilderActive.AddField(memberActive.GetFullUsername(),
+                        embedBuilderActive.AddField(booster.Username,
                             $"Last boost date: {booster.CreatedAt!.Value.ToString("g")} UTC\nBoosting for: {Math.Round(DateTime.UtcNow.Subtract(booster.CreatedAt!.Value.ToUniversalTime()).TotalDays, 2).ToString(CultureInfo.InvariantCulture)} days");
                         await Task.Delay(500);
                     }
@@ -238,7 +308,8 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                 var membersActiveDisc = await ctx.Guild.GetAllMembersAsync();
                 var chunkedActiveDisc = membersActiveDisc.Where(x => x.Roles.Any(y => y.Tags.IsPremiumSubscriber))
                     .OrderBy(x => x.PremiumSince!.Value)
-                    .Chunk(10)
+                    .Take(1000)
+                    .Chunk(25)
                     .OrderByDescending(x => x.Length)
                     .ToList();
                 
@@ -279,7 +350,7 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                         : DateTime.UtcNow;
 
                     _ = _guildDataService.BeginUpdate(guild);
-                    guild.AddServerBooster(memberBacktrack.Id, dateBacktrack);
+                    guild.AddServerBoosterHistoryEntry(memberBacktrack.Id, memberBacktrack.GetFullUsername(), dateBacktrack);
                 }
 
                 _ = await _guildDataService.CommitAsync();

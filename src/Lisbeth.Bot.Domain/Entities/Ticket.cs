@@ -17,11 +17,12 @@
 
 using System;
 using System.Collections.Generic;
-using Lisbeth.Bot.Domain.Entities.Base;
+using MikyM.Common.DataAccessLayer;
+using MikyM.Common.Domain.Entities;
 
 namespace Lisbeth.Bot.Domain.Entities;
 
-public sealed class Ticket : SnowflakeEntity
+public sealed class Ticket : SnowflakeEntity, IDisableableEntity
 {
     public ulong UserId { get; set; }
     public ulong ChannelId { get; set; }
@@ -39,4 +40,5 @@ public sealed class Ticket : SnowflakeEntity
 
     public Guild? Guild { get; set; }
     public ulong GuildId { get; set; }
+    public bool IsDisabled { get; set; }
 }

@@ -23,17 +23,17 @@ namespace Lisbeth.Bot.Domain.Entities;
 
 public class RoleMenu : EmbedConfigEntity
 {
-    private readonly HashSet<RoleMenuOption> roleMenuOptions = new();
+    private readonly HashSet<RoleMenuOption> _roleMenuOptions = new();
     public string? Text { get; set; }
     public string? CustomSelectComponentId { get; set; }
     public string? CustomButtonId { get; set; }
-    public IReadOnlyCollection<RoleMenuOption>? RoleMenuOptions => roleMenuOptions;
+    public IReadOnlyCollection<RoleMenuOption>? RoleMenuOptions => _roleMenuOptions;
 
     public Guild? Guild { get; set; }
 
     public void AddRoleMenuOption(RoleMenuOption roleMenuOption)
     {
         if (roleMenuOption is null) throw new ArgumentNullException(nameof(roleMenuOption));
-        roleMenuOptions.Add(roleMenuOption);
+        _roleMenuOptions.Add(roleMenuOption);
     }
 }

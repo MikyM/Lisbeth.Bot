@@ -22,7 +22,7 @@ using MikyM.Common.Utilities.Results;
 
 namespace Lisbeth.Bot.Application.Services.Database.Interfaces;
 
-public interface IReminderDataService : ICrudDataService<Reminder, LisbethBotDbContext>
+public interface IReminderDataService : ICrudDataService<Reminder, ILisbethBotDbContext>
 {
     Task<Result> SetHangfireIdAsync(long reminderId, string hangfireId, bool shouldSave = false);
     Task<Result> RescheduleAsync(RescheduleReminderReqDto req, bool shouldSave = false);
