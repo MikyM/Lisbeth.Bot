@@ -44,7 +44,7 @@ public class AddServerBoosterHistoryEntryCommandHandler : ICommandHandler<AddSer
         embed.WithFooter($"Member ID: {historyEntryCommand.Member.Id}");
 
         _ = _guildDataService.BeginUpdate(guildCfg);
-        guildCfg.AddServerBoosterHistoryEntry(historyEntryCommand.Member.Id, historyEntryCommand.Member.GetFullUsername(), entry.Id);
+        guildCfg.AddServerBoosterHistoryEntry(historyEntryCommand.Member.Id, historyEntryCommand.Member.GetFullUsername(), entry);
         _ = await _guildDataService.CommitAsync();
 
         try

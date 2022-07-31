@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
 using Lisbeth.Bot.Domain.Enums;
 using MikyM.Common.DataAccessLayer;
@@ -64,11 +65,14 @@ public sealed class Guild : SnowflakeEntity, IDisableableEntity
         _serverBoosterHistoryEntries.Add(entry);
     }
     
-    public void AddServerBoosterHistoryEntry(ulong userId, string username, long memberEntryId, DateTime? dateOverride = null)
+    public void AddServerBoosterHistoryEntry(ulong userId, string username, MemberHistoryEntry memberHistoryEntry, DateTime? dateOverride = null)
     {
+        if (memberHistoryEntry.UserId != userId || memberHistoryEntry.GuildId != GuildId)
+            throw new InvalidOperationException();
+        
         var date = dateOverride ?? DateTime.UtcNow;
         _serverBoosterHistoryEntries ??= new HashSet<ServerBoosterHistoryEntry>();
-        _serverBoosterHistoryEntries.Add(new ServerBoosterHistoryEntry { UserId = userId, GuildId = this.GuildId, CreatedAt = date, Username = username } );
+        _serverBoosterHistoryEntries.Add(new ServerBoosterHistoryEntry { UserId = userId, GuildId = this.GuildId, MemberHistoryEntryId = memberHistoryEntry.Id, CreatedAt = date, Username = username } );
     }
 
     public void DisableServerBoosterHistoryEntry(ServerBoosterHistoryEntry entry)

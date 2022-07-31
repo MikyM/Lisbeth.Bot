@@ -378,7 +378,7 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                         continue;
 
                     _ = _guildDataService.BeginUpdate(guild);
-                    guild.AddServerBoosterHistoryEntry(memberBacktrack.Id, memberBacktrack.GetFullUsername(), memberEntry.Id, dateBacktrack);
+                    guild.AddServerBoosterHistoryEntry(memberBacktrack.Id, memberBacktrack.GetFullUsername(), memberEntry, dateBacktrack);
                 }
 
                 _ = await _guildDataService.CommitAsync();
