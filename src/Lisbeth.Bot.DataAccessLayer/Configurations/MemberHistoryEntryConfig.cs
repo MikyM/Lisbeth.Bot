@@ -41,6 +41,8 @@ public class MemberHistoryEntryConfig : IEntityTypeConfiguration<MemberHistoryEn
             .IsRequired();
         builder.Property(x => x.PunishmentReason).HasColumnName("punishment_reason").HasColumnType("text")
             .ValueGeneratedOnAdd();
+        builder.Property(x => x.PunishmentByUsername).HasColumnName("punishment_by_username").HasColumnType("text")
+            .ValueGeneratedOnAdd();
         builder.Property(x => x.Punishment).HasColumnName("punishment").HasColumnType("text")
             .HasConversion<EnumToStringConverter<AuditLogActionType>>().ValueGeneratedOnAdd();
         builder.Property(x => x.PunishmentById).HasColumnName("punishment_by_id").HasColumnType("bigint")
