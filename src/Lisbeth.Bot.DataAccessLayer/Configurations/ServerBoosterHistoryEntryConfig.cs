@@ -37,5 +37,7 @@ public class ServerBoosterHistoryEntryConfig : IEntityTypeConfiguration<ServerBo
             .IsRequired();
         builder.Property(x => x.Username).HasColumnName("username").HasColumnType("text").ValueGeneratedOnAdd()
             .IsRequired();
+        builder.Property(x => x.MemberHistoryEntryId).HasColumnName("member_history_entry_id").HasColumnType("bigint")
+            .IsRequired();
     }
 }

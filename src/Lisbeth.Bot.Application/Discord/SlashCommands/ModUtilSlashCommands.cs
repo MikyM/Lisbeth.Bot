@@ -8,6 +8,7 @@ using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
 using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
+using MikyM.Common.DataAccessLayer.Exceptions;
 using MikyM.Discord.Extensions.BaseExtensions;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands;
@@ -356,6 +357,12 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
             case BoosterActionType.Backtrack:
                 var members = await ctx.Guild.GetAllMembersAsync();
                 var boosters = members.Where(x => x.Roles.Any(y => y.Tags.IsPremiumSubscriber)).ToList();
+
+                var guildRes =
+                    await _guildDataService.GetSingleBySpecAsync(
+                        new ActiveGuildByDiscordIdWithMembersEntriesSpec(ctx.Guild.Id));
+                if (!guildRes.IsDefined(out var guildWithMembers))
+                    throw new NotFoundException("Guild not found");
                 
                 foreach (var memberBacktrack in boosters)
                 {
@@ -364,8 +371,14 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                         ? memberBacktrack.PremiumSince.Value.UtcDateTime
                         : DateTime.UtcNow;
 
+                    var memberEntry = guildWithMembers.MemberHistoryEntries
+                        ?.Where(x => x.GuildId == ctx.Guild.Id && x.UserId == memberBacktrack.Id && !x.IsDisabled)
+                        .MaxBy(x => x.CreatedAt);
+                    if (memberEntry is null)
+                        continue;
+
                     _ = _guildDataService.BeginUpdate(guild);
-                    guild.AddServerBoosterHistoryEntry(memberBacktrack.Id, memberBacktrack.GetFullUsername(), dateBacktrack);
+                    guild.AddServerBoosterHistoryEntry(memberBacktrack.Id, memberBacktrack.GetFullUsername(), memberEntry.Id, dateBacktrack);
                 }
 
                 _ = await _guildDataService.CommitAsync();

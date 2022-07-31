@@ -39,12 +39,11 @@ public class MemberHistoryEntryConfig : IEntityTypeConfiguration<MemberHistoryEn
             .IsRequired();
         builder.Property(x => x.AccountCreated).HasColumnName("account_created").HasColumnType("timestamptz").ValueGeneratedOnAdd()
             .IsRequired();
-        
+
         builder
             .HasMany(x => x.ServerBoosterHistoryEntries)
             .WithOne(x => x.MemberHistoryEntry)
-            .HasForeignKey(x => new {x.GuildId, x.UserId} )
-            .HasPrincipalKey(x => new {x.GuildId, x.UserId} )
-            .IsRequired(false);
+            .HasForeignKey(x => x.MemberHistoryEntryId)
+            .HasPrincipalKey(x => x.Id);
     }
 }

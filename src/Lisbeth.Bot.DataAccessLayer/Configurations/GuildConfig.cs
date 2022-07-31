@@ -107,28 +107,24 @@ internal class GuildConfig : IEntityTypeConfiguration<Guild>
             .HasMany(x => x.Reminders)
             .WithOne(x => x.Guild)
             .HasForeignKey(x => x.GuildId)
-            .HasPrincipalKey(x => x.GuildId)
-            .IsRequired(false);
+            .HasPrincipalKey(x => x.GuildId);
 
         builder
             .HasMany(x => x.Tags)
             .WithOne(x => x.Guild)
             .HasForeignKey(x => x.GuildId)
-            .HasPrincipalKey(x => x.GuildId)
-            .IsRequired(false);
+            .HasPrincipalKey(x => x.GuildId);
 
         builder
             .HasMany(x => x.ServerBoosterHistoryEntries)
             .WithOne(x => x.Guild)
             .HasForeignKey(x => x.GuildId)
-            .HasPrincipalKey(x => x.GuildId)
-            .IsRequired(false);
-        
+            .HasPrincipalKey(x => x.GuildId);
+
         builder
             .HasMany(x => x.MemberHistoryEntries)
             .WithOne(x => x.Guild)
             .HasForeignKey(x => x.GuildId)
-            .HasPrincipalKey(x => x.GuildId)
-            .IsRequired(false);
+            .HasPrincipalKey(x => x.GuildId);
     }
 }

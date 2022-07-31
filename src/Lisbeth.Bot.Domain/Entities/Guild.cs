@@ -64,7 +64,7 @@ public sealed class Guild : SnowflakeEntity, IDisableableEntity
         _serverBoosterHistoryEntries.Add(entry);
     }
     
-    public void AddServerBoosterHistoryEntry(ulong userId, string username, DateTime? dateOverride = null)
+    public void AddServerBoosterHistoryEntry(ulong userId, string username, long memberEntryId, DateTime? dateOverride = null)
     {
         var date = dateOverride ?? DateTime.UtcNow;
         _serverBoosterHistoryEntries ??= new HashSet<ServerBoosterHistoryEntry>();
