@@ -27,6 +27,9 @@ public class ActiveGuildByDiscordIdWithMembersAndBoostsSpec : Specification<Doma
     {
         Where(x => !x.IsDisabled);
         Where(x => x.GuildId == discordGuildId);
+
+        Include(x => x.ModerationConfig);
+        
         if (userId is null)
             Include(x => x.MemberHistoryEntries).ThenInclude(x => x!.ServerBoosterHistoryEntries);
         else
