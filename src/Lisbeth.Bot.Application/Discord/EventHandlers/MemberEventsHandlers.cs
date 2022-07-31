@@ -46,7 +46,9 @@ public class MemberEventsHandler : IDiscordGuildMemberEventsSubscriber
         var guildRes = await _commandHandlerFactory.GetHandler<ICommandHandler<DisableMemberHistoryEntryCommand, Guild>>()
             .HandleAsync(new DisableMemberHistoryEntryCommand(args.Guild, args.Member));
         
-
+        if (!args.Member.Roles.Any(x => x.Tags.IsPremiumSubscriber))
+            return;
+            
         _ = await _commandHandlerFactory.GetHandler<ICommandHandler<DisableServerBoosterHistoryEntryCommand>>()
             .HandleAsync(new DisableServerBoosterHistoryEntryCommand(args.Guild, args.Member, guildRes.Entity));
     }
