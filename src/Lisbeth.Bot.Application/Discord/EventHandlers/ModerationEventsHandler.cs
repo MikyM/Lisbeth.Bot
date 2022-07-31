@@ -24,45 +24,29 @@ namespace Lisbeth.Bot.Application.Discord.EventHandlers;
 [UsedImplicitly]
 public class ModerationEventsHandler : IDiscordMessageEventsSubscriber, IDiscordGuildMemberEventsSubscriber
 {
-    private readonly IDiscordMemberService _discordMemberService;
     private readonly IDiscordMessageService _discordMessageService;
 
-    public ModerationEventsHandler(IDiscordMemberService discordMemberService,
-        IDiscordMessageService discordMessageService)
+    public ModerationEventsHandler(IDiscordMessageService discordMessageService)
     {
-        _discordMemberService = discordMemberService;
         _discordMessageService = discordMessageService;
     }
 
-    public async Task DiscordOnGuildMemberAdded(DiscordClient sender, GuildMemberAddEventArgs args)
-    {
-        await _discordMemberService.SendWelcomeMessageAsync(args);
-    }
-
-    public async Task DiscordOnGuildMemberRemoved(DiscordClient sender, GuildMemberRemoveEventArgs args)
-    {
-        await _discordMemberService.LogMemberRemovedEventAsync(args);
-    }
+    public Task DiscordOnGuildMemberAdded(DiscordClient sender, GuildMemberAddEventArgs args)
+        => Task.CompletedTask;
+    public Task DiscordOnGuildMemberRemoved(DiscordClient sender, GuildMemberRemoveEventArgs args)
+        => Task.CompletedTask;
 
     public Task DiscordOnGuildMemberUpdated(DiscordClient sender, GuildMemberUpdateEventArgs args)
-    {
-        return Task.CompletedTask;
-    }
+        => Task.CompletedTask;
 
     public Task DiscordOnGuildMembersChunked(DiscordClient sender, GuildMembersChunkEventArgs args)
-    {
-        return Task.CompletedTask;
-    }
+        => Task.CompletedTask;
 
     public Task DiscordOnMessageCreated(DiscordClient sender, MessageCreateEventArgs args)
-    {
-        return Task.CompletedTask;
-    }
+        => Task.CompletedTask;
 
     public Task DiscordOnMessageAcknowledged(DiscordClient sender, MessageAcknowledgeEventArgs args)
-    {
-        return Task.CompletedTask;
-    }
+        => Task.CompletedTask;
 
     public async Task DiscordOnMessageUpdated(DiscordClient sender, MessageUpdateEventArgs args)
     {

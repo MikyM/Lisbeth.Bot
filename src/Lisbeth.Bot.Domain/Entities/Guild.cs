@@ -21,9 +21,12 @@ using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using DSharpPlus.Entities;
 using Lisbeth.Bot.Domain.Enums;
 using MikyM.Common.DataAccessLayer;
 using MikyM.Common.Domain.Entities;
+using MikyM.Discord.Extensions.BaseExtensions;
+
 #pragma warning disable CS0649
 
 namespace Lisbeth.Bot.Domain.Entities;
@@ -80,11 +83,11 @@ public sealed class Guild : SnowflakeEntity, IDisableableEntity
     
     public void DisableServerBoosterHistoryEntry(ulong userId)
     {
-        if (_serverBoosterHistoryEntries is null)
-            throw new DataException("Data wasn't loaded from the database.");
-
+        if (_serverBoosterHistoryEntries is null) 
+            return;
+        
         var current =
-            _serverBoosterHistoryEntries.Where(x => x.UserId == userId && !x.IsDisabled && x.GuildId == GuildId);
+            _serverBoosterHistoryEntries.Where(x => x.UserId == userId && x.GuildId == GuildId);
 
         foreach (var curr in current)
             curr.IsDisabled = true;
@@ -103,19 +106,32 @@ public sealed class Guild : SnowflakeEntity, IDisableableEntity
         _memberHistoryEntries.Add(new MemberHistoryEntry { UserId = userId, GuildId = this.GuildId, CreatedAt = date, Username = username, AccountCreated = accountCreated } );
     }
 
-    public void DisableMemberHistoryEntry(MemberHistoryEntry entry)
-        => DisableServerBoosterHistoryEntry(entry.UserId);
-    
-    public void DisableMemberHistoryEntry(ulong userId)
+    public void DisableMemberHistoryEntry(ulong userId, DiscordAuditLogEntry? discordAuditLogEntry = null)
     {
         if (_memberHistoryEntries is null)
-            throw new DataException("Data wasn't loaded from the database.");
+            return;
 
         var current =
-            _memberHistoryEntries.Where(x => x.UserId == userId && !x.IsDisabled && x.GuildId == GuildId);
+            _memberHistoryEntries.Where(x => x.UserId == userId && x.GuildId == GuildId);
 
-        foreach (var curr in current)
-            curr.IsDisabled = true;
+        foreach (var memberHistoryEntry in current)
+        {
+            memberHistoryEntry.IsDisabled = true;
+
+            if (discordAuditLogEntry is not null)
+            {
+                memberHistoryEntry.PunishmentReason = discordAuditLogEntry.Reason == string.Empty ? null : discordAuditLogEntry.Reason;
+                memberHistoryEntry.Punishment = discordAuditLogEntry.ActionType;
+                memberHistoryEntry.PunishmentById = discordAuditLogEntry.UserResponsible.Id;
+                memberHistoryEntry.PunishmentByUsername = discordAuditLogEntry.UserResponsible.GetFullUsername(); 
+            }
+
+            if (memberHistoryEntry.ServerBoosterHistoryEntries is null) 
+                continue;
+            
+            foreach (var boosterHistoryEntry in memberHistoryEntry.ServerBoosterHistoryEntries)
+                boosterHistoryEntry.IsDisabled = true;
+        }
     }
     
     public void AddMute(Mute mute)

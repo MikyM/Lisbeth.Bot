@@ -31,5 +31,7 @@ public class ActiveGuildByDiscordIdWithMembersAndBoostsSpec : Specification<Doma
             Include(x => x.MemberHistoryEntries).ThenInclude(x => x!.ServerBoosterHistoryEntries);
         else
             Include(x => x.MemberHistoryEntries!.Where(y => y.UserId == userId)).ThenInclude(x => x!.ServerBoosterHistoryEntries!.Where(y => y.UserId == userId));;
+
+        AsSplitQuery();
     }
 }

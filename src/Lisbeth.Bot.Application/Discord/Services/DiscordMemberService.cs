@@ -47,65 +47,6 @@ public class DiscordMemberService : IDiscordMemberService
         _embedProvider = embedProvider;
     }
 
-    public async Task<Result> LogMemberRemovedEventAsync(GuildMemberRemoveEventArgs args)
-    {
-        if (args is null) throw new ArgumentNullException(nameof(args));
-
-        var res = await _guildDataService.GetSingleBySpecAsync(new ActiveGuildByDiscordIdWithModerationSpec(args.Guild.Id));
-
-        if (!res.IsDefined(out var guildCfg) || guildCfg.ModerationConfig is null) return Result.FromSuccess();
-        if (!args.Guild.Channels.TryGetValue(guildCfg.ModerationConfig.MemberEventsLogChannelId,
-                out var logChannel)) return Result.FromSuccess();
-
-        string reasonLeft = "No reason found";
-
-        var auditLogsBans = await args.Guild.GetAuditLogsAsync(1, null, AuditLogActionType.Ban);
-        await Task.Delay(500);
-        var auditLogsKicks = await args.Guild.GetAuditLogsAsync(1, null, AuditLogActionType.Kick);
-        var filtered = auditLogsBans.Concat(auditLogsKicks).Where(m =>
-            m.CreationTimestamp.UtcDateTime > DateTime.UtcNow.Subtract(new TimeSpan(0, 0, 4))).ToList();
-
-        var embed = new DiscordEmbedBuilder();
-
-        if (filtered.Count != 0)
-        {
-            var auditLog = filtered[0];
-            var logType = auditLog.ActionType;
-            var userResponsible = auditLog.UserResponsible.Mention;
-            reasonLeft = logType switch
-            {
-                AuditLogActionType.Ban =>
-                    $"Banned by {userResponsible} {(string.IsNullOrEmpty(auditLog.Reason) ? "" : $"with reason: {auditLog.Reason}")}",
-                AuditLogActionType.Kick =>
-                    $"Kicked by {userResponsible} {(string.IsNullOrEmpty(auditLog.Reason) ? "" : $"with reason: {auditLog.Reason}")}",
-                _ => reasonLeft
-            };
-        }
-
-        embed.WithThumbnail(args.Member.AvatarUrl);
-        embed.WithTitle("Member has left the guild");
-        embed.AddField("Member's identity", $"{args.Member.GetFullUsername()}", true);
-        embed.AddField("Member's mention", $"{args.Member.Mention}", true);
-        embed.AddField("Member's ID and profile", $"[{args.Member.Id}](https://discordapp.com/users/{args.Member.Id})", true);
-        embed.AddField("Joined guild", $"{args.Member.JoinedAt.ToString(CultureInfo.CurrentCulture)}");
-        embed.AddField("Account created", $"{args.Member.CreationTimestamp.ToString(CultureInfo.CurrentCulture)}");
-        embed.WithColor(new DiscordColor(res.Entity.EmbedHexColor));
-        embed.WithFooter($"Member's User ID: {args.Member.Id}");
-
-        if (reasonLeft != "No reason found") embed.AddField("Reason for leaving", reasonLeft);
-
-        try
-        {
-            await _discord.Client.SendMessageAsync(logChannel, embed.Build());
-        }
-        catch (Exception)
-        {
-            // probably should tell idiots to fix channel id in config but idk how so return for now, mebe msg members with admin privs
-        }
-
-        return Result.FromSuccess();
-    }
-
     public async Task<Result> SendWelcomeMessageAsync(GuildMemberAddEventArgs args)
     {
         if (args is null) throw new ArgumentNullException(nameof(args));

@@ -22,7 +22,6 @@ namespace Lisbeth.Bot.Application.Discord.Services.Interfaces;
 
 public interface IDiscordMemberService
 {
-    Task<Result> LogMemberRemovedEventAsync(GuildMemberRemoveEventArgs args);
     Task<Result> SendWelcomeMessageAsync(GuildMemberAddEventArgs args);
     Task<Result> MemberMuteCheckAsync(GuildMemberAddEventArgs args);
 }

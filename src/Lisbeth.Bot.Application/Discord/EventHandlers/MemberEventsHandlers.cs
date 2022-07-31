@@ -43,16 +43,12 @@ public class MemberEventsHandler : IDiscordGuildMemberEventsSubscriber
 
     public async Task DiscordOnGuildMemberRemoved(DiscordClient sender, GuildMemberRemoveEventArgs args)
     {
-        _ = await _commandHandlerFactory.GetHandler<ICommandHandler<DisableMemberHistoryEntryCommand>>()
+        var guildRes = await _commandHandlerFactory.GetHandler<ICommandHandler<DisableMemberHistoryEntryCommand, Guild>>()
             .HandleAsync(new DisableMemberHistoryEntryCommand(args.Guild, args.Member));
         
-        var hadBoost = args.Member.Roles.Any(x => x.Tags.IsPremiumSubscriber);
 
-        if (!hadBoost)
-            return;
-        
         _ = await _commandHandlerFactory.GetHandler<ICommandHandler<DisableServerBoosterHistoryEntryCommand>>()
-            .HandleAsync(new DisableServerBoosterHistoryEntryCommand(args.Guild, args.Member));
+            .HandleAsync(new DisableServerBoosterHistoryEntryCommand(args.Guild, args.Member, guildRes.Entity));
     }
 
     public async Task DiscordOnGuildMemberUpdated(DiscordClient sender, GuildMemberUpdateEventArgs args)

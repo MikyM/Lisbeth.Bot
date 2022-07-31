@@ -15,7 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using DSharpPlus.Entities;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Lisbeth.Bot.DataAccessLayer.Configurations;
 
@@ -37,7 +39,14 @@ public class MemberHistoryEntryConfig : IEntityTypeConfiguration<MemberHistoryEn
             .IsRequired();
         builder.Property(x => x.Username).HasColumnName("username").HasColumnType("text").ValueGeneratedOnAdd()
             .IsRequired();
-        builder.Property(x => x.AccountCreated).HasColumnName("account_created").HasColumnType("timestamptz").ValueGeneratedOnAdd()
+        builder.Property(x => x.PunishmentReason).HasColumnName("punishment_reason").HasColumnType("text")
+            .ValueGeneratedOnAdd();
+        builder.Property(x => x.Punishment).HasColumnName("punishment").HasColumnType("text")
+            .HasConversion<EnumToStringConverter<AuditLogActionType>>().ValueGeneratedOnAdd();
+        builder.Property(x => x.PunishmentById).HasColumnName("punishment_by_id").HasColumnType("bigint")
+            .ValueGeneratedOnAdd();
+        builder.Property(x => x.AccountCreated).HasColumnName("account_created").HasColumnType("timestamptz")
+            .ValueGeneratedOnAdd()
             .IsRequired();
 
         builder

@@ -6,11 +6,13 @@ namespace Lisbeth.Bot.Application.Discord.Commands.ServerBoosterHistoryEntry;
 public class DisableServerBoosterHistoryEntryCommand : CommandBase
 {
     public DiscordMember Member { get; }
-    public DiscordGuild Guild { get; }
+    public DiscordGuild DiscordGuild { get; }
+    public Guild? Guild { get; }
     
-    public DisableServerBoosterHistoryEntryCommand(DiscordGuild guild, DiscordMember member)
+    public DisableServerBoosterHistoryEntryCommand(DiscordGuild discordGuild, DiscordMember member, Guild? guild = null)
     {
-        Guild = guild;
+        DiscordGuild = discordGuild;
         Member = member;
+        Guild = guild;
     }
 }
