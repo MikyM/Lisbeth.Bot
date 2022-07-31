@@ -39,16 +39,12 @@ public class MemberHistoryEntryConfig : IEntityTypeConfiguration<MemberHistoryEn
             .IsRequired();
         builder.Property(x => x.Username).HasColumnName("username").HasColumnType("text").ValueGeneratedOnAdd()
             .IsRequired();
-        builder.Property(x => x.PunishmentReason).HasColumnName("punishment_reason").HasColumnType("text")
-            .ValueGeneratedOnAdd();
-        builder.Property(x => x.PunishmentByUsername).HasColumnName("punishment_by_username").HasColumnType("text")
-            .ValueGeneratedOnAdd();
+        builder.Property(x => x.PunishmentReason).HasColumnName("punishment_reason").HasColumnType("text");
+        builder.Property(x => x.PunishmentByUsername).HasColumnName("punishment_by_username").HasColumnType("text");
         builder.Property(x => x.Punishment).HasColumnName("punishment").HasColumnType("text")
-            .HasConversion<EnumToStringConverter<AuditLogActionType>>().ValueGeneratedOnAdd();
-        builder.Property(x => x.PunishmentById).HasColumnName("punishment_by_id").HasColumnType("bigint")
-            .ValueGeneratedOnAdd();
+            .HasConversion<EnumToStringConverter<AuditLogActionType>>();
+        builder.Property(x => x.PunishmentById).HasColumnName("punishment_by_id").HasColumnType("bigint");
         builder.Property(x => x.AccountCreated).HasColumnName("account_created").HasColumnType("timestamptz")
-            .ValueGeneratedOnAdd()
             .IsRequired();
 
         builder

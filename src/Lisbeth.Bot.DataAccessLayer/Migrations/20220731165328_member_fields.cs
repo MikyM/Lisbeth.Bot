@@ -19,8 +19,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                 name: "punishment_by_id",
                 table: "member_history_entry",
                 type: "bigint",
-                nullable: true)
-                .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                nullable: true);
 
             migrationBuilder.AddColumn<string>(
                 name: "punishment_by_username",
