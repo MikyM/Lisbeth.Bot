@@ -18,6 +18,7 @@
 using DSharpPlus;
 using DSharpPlus.EventArgs;
 using Lisbeth.Bot.Application.Discord.Commands.ChannelMessageFormat;
+using Lisbeth.Bot.Application.Discord.Commands.Modules.Suggestions;
 using Lisbeth.Bot.Domain.DTOs.Request.ChannelMessageFormat;
 using MikyM.CommandHandlers;
 using MikyM.Discord.Events;
@@ -26,15 +27,17 @@ using MikyM.Discord.Interfaces;
 namespace Lisbeth.Bot.Application.Discord.EventHandlers;
 
 [UsedImplicitly]
-public class ChannelMessageFormatEventsHandler : IDiscordMessageEventsSubscriber
+public class MessageEventsHandler : IDiscordMessageEventsSubscriber
 {
     private readonly IDiscordService _discord;
-    private readonly ICommandHandler<VerifyMessageFormatCommand, VerifyMessageFormatResDto> _commandHandler;
+    private readonly ICommandHandler<VerifyMessageFormatCommand, VerifyMessageFormatResDto> _verifyCommandHandler;
+    private readonly ICommandHandler<HandlePossibleSuggestionCommand> _suggestionCommandHandler;
 
-    public ChannelMessageFormatEventsHandler(IDiscordService discord, ICommandHandler<VerifyMessageFormatCommand, VerifyMessageFormatResDto> commandHandler)
+    public MessageEventsHandler(IDiscordService discord, ICommandHandler<VerifyMessageFormatCommand, VerifyMessageFormatResDto> verifyCommandHandler, ICommandHandler<HandlePossibleSuggestionCommand> suggestionCommandHandler)
     {
         _discord = discord;
-        _commandHandler = commandHandler;
+        _verifyCommandHandler = verifyCommandHandler;
+        _suggestionCommandHandler = suggestionCommandHandler;
     }
 
     public async Task DiscordOnMessageCreated(DiscordClient sender, MessageCreateEventArgs args)
@@ -42,9 +45,14 @@ public class ChannelMessageFormatEventsHandler : IDiscordMessageEventsSubscriber
         if (args.Channel is null || args.Guild is null)
             return;
 
-        await _commandHandler.HandleAsync(new VerifyMessageFormatCommand(
+        var result = await _verifyCommandHandler.HandleAsync(new VerifyMessageFormatCommand(
                 new VerifyMessageFormatReqDto(args.Channel.Id, args.Message.Id, args.Guild.Id,
                     _discord.Client.CurrentUser.Id), args));
+
+        if (result.IsDefined(out var verifyResult) && verifyResult.IsDeleted.HasValue && verifyResult.IsDeleted.Value)
+            return;
+        
+        await _suggestionCommandHandler.HandleAsync(new HandlePossibleSuggestionCommand(args));
     }
 
     public Task DiscordOnMessageAcknowledged(DiscordClient sender, MessageAcknowledgeEventArgs args)

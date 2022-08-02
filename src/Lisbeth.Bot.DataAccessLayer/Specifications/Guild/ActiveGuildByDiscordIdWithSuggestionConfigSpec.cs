@@ -20,18 +20,12 @@ using MikyM.Common.EfCore.DataAccessLayer.Specifications;
 
 namespace Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 
-public class ActiveGuildByDiscordIdWithSuggestionsSpec : Specification<Domain.Entities.Guild>
+public class ActiveGuildByDiscordIdWithSuggestionConfigSpec : Specification<Domain.Entities.Guild>
 {
-    public ActiveGuildByDiscordIdWithSuggestionsSpec(ulong discordGuildId, ulong? messageId = null)
+    public ActiveGuildByDiscordIdWithSuggestionConfigSpec(ulong discordGuildId)
     {
         Where(x => !x.IsDisabled);
         Where(x => x.GuildId == discordGuildId);
-
         Include(x => x.SuggestionConfig);
-        
-        if (messageId is null)
-            Include(x => x.Suggestions);
-        else
-            Include(x => x.Suggestions!.Where(y => y.MessageId == messageId));
     }
 }

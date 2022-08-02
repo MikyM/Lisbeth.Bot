@@ -124,8 +124,7 @@ public static class ServiceCollectionExtensions
         services.AddDiscordGuildEventsSubscriber<GuildEventsHandler>();
         services.AddDiscordMiscEventsSubscriber<RoleMenuEventsHandler>();
         services.AddDiscordGuildMemberEventsSubscriber<MuteEventsHandlers>();
-        services.AddDiscordMessageEventsSubscriber<ChannelMessageFormatEventsHandler>();        
-        services.AddDiscordMessageEventsSubscriber<SuggestionEventsHandler>();
+        services.AddDiscordMessageEventsSubscriber<MessageEventsHandler>();
         services.AddDiscordMessageEventsSubscriber<PhishingEventsHandler>();
         services.AddDiscordGuildBanEventsSubscriber<BanEventsHandler>();
         services.AddDiscordGuildMemberEventsSubscriber<MemberEventsHandler>();

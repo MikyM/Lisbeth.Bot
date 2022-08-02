@@ -51,7 +51,7 @@ public class GuildDataService : CrudDataService<Guild, ILisbethBotDbContext>, IG
     public async Task<Result<Guild>> AddConfigAsync(SuggestionConfigReqDto req, bool shouldSave = false)
     {
         var result = await GetSingleBySpecAsync(
-            new ActiveGuildByDiscordIdWithSuggestionsSpec(req.GuildId));
+            new ActiveGuildByDiscordIdWithSuggestionConfigSpec(req.GuildId));
         if (!result.IsDefined()) return Result<Guild>.FromError(new NotFoundError());
         if (result.Entity.SuggestionConfig is not null && result.Entity.SuggestionConfig.IsDisabled)
             return await EnableConfigAsync(req.GuildId, GuildModule.Suggestions, shouldSave);
@@ -150,7 +150,7 @@ public class GuildDataService : CrudDataService<Guild, ILisbethBotDbContext>, IG
                 break;
             case GuildModule.Suggestions:
                 result = await base.GetSingleBySpecAsync(
-                    new ActiveGuildByDiscordIdWithSuggestionsSpec(guildId));
+                    new ActiveGuildByDiscordIdWithSuggestionConfigSpec(guildId));
                 if (!result.IsDefined() || result.Entity.SuggestionConfig is null)
                     return Result.FromError(new NotFoundError());
                 if (result.Entity.IsDisabled)
@@ -204,7 +204,7 @@ public class GuildDataService : CrudDataService<Guild, ILisbethBotDbContext>, IG
                 break;
             case GuildModule.Suggestions:
                 result = await base.GetSingleBySpecAsync(
-                    new ActiveGuildByDiscordIdWithSuggestionsSpec(guildId));
+                    new ActiveGuildByDiscordIdWithSuggestionConfigSpec(guildId));
                 if (!result.IsDefined() || result.Entity.SuggestionConfig is null)
                     return Result<Guild>.FromError(new NotFoundError());
                 if (!result.Entity.IsDisabled)
@@ -266,7 +266,7 @@ public class GuildDataService : CrudDataService<Guild, ILisbethBotDbContext>, IG
     public async Task<Result> RepairModuleConfigAsync(SuggestionConfigRepairReqDto req, bool shouldSave = false)
     {
         var result = await GetSingleBySpecAsync(
-            new ActiveGuildByDiscordIdWithSuggestionsSpec(req.GuildId));
+            new ActiveGuildByDiscordIdWithSuggestionConfigSpec(req.GuildId));
         if (!result.IsDefined() || result.Entity.SuggestionConfig is null)
             return Result.FromError(new NotFoundError());
         if (result.Entity.SuggestionConfig.IsDisabled)

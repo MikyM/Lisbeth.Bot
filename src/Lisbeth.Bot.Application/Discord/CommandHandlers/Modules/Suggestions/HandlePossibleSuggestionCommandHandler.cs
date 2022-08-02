@@ -25,7 +25,7 @@ public class HandlePossibleSuggestionCommandHandler : ICommandHandler<HandlePoss
     {
         var guildRes =
             await _guildDataService.GetSingleBySpecAsync(
-                new ActiveGuildByDiscordIdWithSuggestionsSpec(command.EventData.Guild.Id));
+                new ActiveGuildByDiscordIdWithSuggestionConfigSpec(command.EventData.Guild.Id));
 
         if (!guildRes.IsDefined(out var guild))
             return Result.FromSuccess();
@@ -36,15 +36,18 @@ public class HandlePossibleSuggestionCommandHandler : ICommandHandler<HandlePoss
             return Result.FromSuccess();
 
         _ = _guildDataService.BeginUpdate(guild);
-        var suggestion = guild.AddSuggestion(command.EventData.Message.Content, command.EventData.Author.Id, command.EventData.Author.GetFullUsername());
-        _ = await _guildDataService.CommitAsync();
-        
+        var suggestion = guild.AddSuggestion(command.EventData.Message.Content, command.EventData.Message.Id, command.EventData.Author.Id, command.EventData.Author.GetFullUsername());
+
         if (guild.SuggestionConfig.ShouldCreateThreads)
         {
-            await command.EventData.Message.CreateThreadAsync($"{suggestion.Id}",
+            var thread = await command.EventData.Message.CreateThreadAsync($"{suggestion.Id}",
                 command.EventData.Guild.PremiumTier is PremiumTier.Tier_2 or PremiumTier.Tier_3
                     ? AutoArchiveDuration.ThreeDays : AutoArchiveDuration.Day, $"Suggestion made by {command.EventData.Author.GetFullUsername()}");
+
+            suggestion.ThreadId = thread.Id;
         }
+        
+        _ = await _guildDataService.CommitAsync();
         
         await Task.Delay(1000);
 

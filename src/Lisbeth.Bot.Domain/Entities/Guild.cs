@@ -63,10 +63,10 @@ public sealed class Guild : SnowflakeEntity, IDisableableEntity
     public IEnumerable<ChannelMessageFormat>? ChannelMessageFormats => _channelMessageFormats?.AsEnumerable();
     public IEnumerable<ServerBoosterHistoryEntry>? ServerBoosterHistoryEntries => _serverBoosterHistoryEntries?.AsEnumerable();
 
-    public Suggestion AddSuggestion(string text, ulong userId, string username)
+    public Suggestion AddSuggestion(string text, ulong messageId, ulong userId, string username)
     {
         _suggestions ??= new HashSet<Suggestion>();
-        var suggestion = new Suggestion { UserId = userId, Username = username, Text = text };
+        var suggestion = new Suggestion { UserId = userId, MessageId = messageId, Username = username, Text = text };
         _suggestions.Add(suggestion);
         return suggestion;
     }

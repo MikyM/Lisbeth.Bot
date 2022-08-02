@@ -43,5 +43,9 @@ public class SuggestionConfig : IEntityTypeConfiguration<Suggestion>
             .HasColumnName("text").HasColumnType("text").IsRequired();
         builder.Property(x => x.UserId)
             .HasColumnName("user_id").HasColumnType("bigint").IsRequired();
+        builder.Property(x => x.ThreadId)
+            .HasColumnName("thread_id").HasColumnType("bigint");
+        builder.Property(x => x.MessageId)
+            .HasColumnName("message_id").HasColumnType("bigint");
     }
 }

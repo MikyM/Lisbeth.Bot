@@ -52,7 +52,7 @@ public class SuggestionConfigCommandHandler : ICommandHandler<SuggestionConfigCo
 
         var guildRes =
             await _guildDataService.GetSingleBySpecAsync(
-                new ActiveGuildByDiscordIdWithSuggestionsSpec(command.RequestDto.GuildId));
+                new ActiveGuildByDiscordIdWithSuggestionConfigSpec(command.RequestDto.GuildId));
 
         if (!guildRes.IsDefined(out var guild))
             return Result<DiscordEmbed>.FromError(guildRes);
