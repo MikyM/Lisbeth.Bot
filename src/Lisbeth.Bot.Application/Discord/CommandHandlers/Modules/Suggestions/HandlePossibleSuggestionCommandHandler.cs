@@ -40,7 +40,7 @@ public class HandlePossibleSuggestionCommandHandler : ICommandHandler<HandlePoss
 
         if (guild.SuggestionConfig.ShouldCreateThreads)
         {
-            var thread = await command.EventData.Message.CreateThreadAsync($"{suggestion.Id}",
+            var thread = await command.EventData.Message.CreateThreadAsync($"{command.EventData.Author.Username.Truncate(8)} - {DateTime.UtcNow:yyyy-MM-dd}",
                 command.EventData.Guild.PremiumTier is PremiumTier.Tier_2 or PremiumTier.Tier_3
                     ? AutoArchiveDuration.ThreeDays : AutoArchiveDuration.Day, $"Suggestion made by {command.EventData.Author.GetFullUsername()}");
 

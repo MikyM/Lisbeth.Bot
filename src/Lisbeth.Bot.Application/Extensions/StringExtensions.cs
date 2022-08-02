@@ -16,6 +16,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Diagnostics.CodeAnalysis;
+using System;
 
 namespace Lisbeth.Bot.Application.Extensions;
 
@@ -24,6 +25,13 @@ public static class StringExtensions
     public static bool IsDigitsOnly(this string input)
     {
         return input.All(c => c is >= '0' and <= '9');
+    }
+    
+    public static string? Truncate(this string? value, int maxLength, string truncationSuffix = "…")
+    {
+        return value?.Length > maxLength
+            ? string.Concat(value.AsSpan(0, maxLength), truncationSuffix)
+            : value;
     }
     
     public static bool TryParseToDurationAndNextOccurrence(this string input, [NotNullWhen(true)] out DateTime? occurrence,
