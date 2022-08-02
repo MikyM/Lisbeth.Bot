@@ -15,12 +15,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Lisbeth.Bot.Domain.Enums;
 
-public enum GuildModule
+using MikyM.Common.EfCore.DataAccessLayer.Specifications;
+
+namespace Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
+
+public class ActiveGuildByDiscordIdWithSuggestionsSpec : Specification<Domain.Entities.Guild>
 {
-    Ticketing,
-    Moderation,
-    Reminders,
-    Suggestions
+    public ActiveGuildByDiscordIdWithSuggestionsSpec(ulong discordGuildId)
+    {
+        Where(x => !x.IsDisabled);
+        Where(x => x.GuildId == discordGuildId);
+        Include(x => x.SuggestionConfig);
+    }
 }

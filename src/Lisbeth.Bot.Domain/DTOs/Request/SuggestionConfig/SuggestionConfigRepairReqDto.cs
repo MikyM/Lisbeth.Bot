@@ -15,12 +15,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Lisbeth.Bot.Domain.Enums;
+using Lisbeth.Bot.Domain.DTOs.Request.Base;
 
-public enum GuildModule
+namespace Lisbeth.Bot.Domain.DTOs.Request.SuggestionConfig;
+
+public class SuggestionConfigRepairReqDto : BaseAuthWithGuildReqDto
 {
-    Ticketing,
-    Moderation,
-    Reminders,
-    Suggestions
+    public ulong ChannelId { get; set; }
+    public bool ShouldUseThreads { get; set; }
+    public bool ShouldAddReactionVotes { get; set; }
 }

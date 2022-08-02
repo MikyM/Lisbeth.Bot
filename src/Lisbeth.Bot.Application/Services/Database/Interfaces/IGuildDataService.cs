@@ -19,6 +19,7 @@ using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.ReminderConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.RoleMenu;
+using Lisbeth.Bot.Domain.DTOs.Request.SuggestionConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
 using MikyM.Common.EfCore.ApplicationLayer.Interfaces;
 using MikyM.Common.Utilities.Results;
@@ -28,11 +29,13 @@ namespace Lisbeth.Bot.Application.Services.Database.Interfaces;
 public interface IGuildDataService : ICrudDataService<Guild, ILisbethBotDbContext>
 {
     Task<Result<Guild>> AddConfigAsync(ModerationConfigReqDto req, bool shouldSave = false);
+    Task<Result<Guild>> AddConfigAsync(SuggestionConfigReqDto req, bool shouldSave = false);
     Task<Result<Guild>> AddConfigAsync(TicketingConfigReqDto req, bool shouldSave = false);
     Task<Result<Guild>> AddConfigAsync(ReminderConfigReqDto req, bool shouldSave = false);
     Task<Result> DisableConfigAsync(ulong guildId, GuildModule type, bool shouldSave = false);
     Task<Result<Guild>> EnableConfigAsync(ulong guildId, GuildModule type, bool shouldSave = false);
     Task<Result> RepairModuleConfigAsync(TicketingConfigRepairReqDto req, bool shouldSave = false);
+    Task<Result> RepairModuleConfigAsync(SuggestionConfigRepairReqDto req, bool shouldSave = false);
     Task<Result> RepairModuleConfigAsync(ModerationConfigRepairReqDto req, bool shouldSave = false);
     Task<Result> RepairModuleConfigAsync(ReminderConfigRepairReqDto req, bool shouldSave = false);
     Task<Result> EditTicketingConfigAsync(TicketingConfigEditReqDto req, bool shouldSave = false);

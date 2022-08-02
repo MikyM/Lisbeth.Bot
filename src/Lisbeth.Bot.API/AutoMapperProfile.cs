@@ -26,6 +26,7 @@ using Lisbeth.Bot.Domain.DTOs.Request.Mute;
 using Lisbeth.Bot.Domain.DTOs.Request.Prune;
 using Lisbeth.Bot.Domain.DTOs.Request.Reminder;
 using Lisbeth.Bot.Domain.DTOs.Request.RoleMenu;
+using Lisbeth.Bot.Domain.DTOs.Request.SuggestionConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.Tag;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
@@ -155,6 +156,26 @@ public class AutoMapperProfile : Profile
         CreateMap<TagSendReqDto, TagGetReqDto>();
         CreateMap<RoleMenuSendReqDto, RoleMenuGetReqDto>();
 
+        CreateMap<SuggestionConfigReqDto, SuggestionConfig>()
+            .ForMember(dest => dest.GuildId, source => source.MapFrom(x => x.GuildId))
+            .ForMember(dest => dest.SuggestionChannelId, source => source.MapFrom(x => x.ChannelId))
+            .ForMember(dest => dest.ShouldCreateThreads, source => source.MapFrom(x => x.ShouldUseThreads))
+            .ForMember(dest => dest.ShouldAddVoteReactions, source => source.MapFrom(x => x.ShouldAddReactionVotes))
+            .ForMember(dest => dest.Id, source => source.Ignore())
+            .ForMember(dest => dest.IsDisabled, source => source.Ignore())
+            .ForMember(dest => dest.CreatedAt, source => source.Ignore())
+            .ForMember(dest => dest.UpdatedAt, source => source.Ignore());
+        
+        CreateMap<SuggestionConfigRepairReqDto, SuggestionConfig>()
+            .ForMember(dest => dest.GuildId, source => source.MapFrom(x => x.GuildId))
+            .ForMember(dest => dest.SuggestionChannelId, source => source.MapFrom(x => x.ChannelId))
+            .ForMember(dest => dest.ShouldCreateThreads, source => source.MapFrom(x => x.ShouldUseThreads))
+            .ForMember(dest => dest.ShouldAddVoteReactions, source => source.MapFrom(x => x.ShouldAddReactionVotes))
+            .ForMember(dest => dest.Id, source => source.Ignore())
+            .ForMember(dest => dest.IsDisabled, source => source.Ignore())
+            .ForMember(dest => dest.CreatedAt, source => source.Ignore())
+            .ForMember(dest => dest.UpdatedAt, source => source.Ignore());
+            
         CreateMap<DiscordMessage, MessageLog>()
             .ForMember(dest => dest.Content, source => source.MapFrom(x => x.Content))
             .ForMember(dest => dest.AuthorId, source => source.MapFrom(x => x.Author.Id))

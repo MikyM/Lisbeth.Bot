@@ -1,6 +1,4 @@
-﻿using DSharpPlus.Entities;
-using Lisbeth.Bot.Application.Discord.Commands.MemberHistoryEntry;
-using Lisbeth.Bot.Application.Discord.Commands.ServerBoosterHistoryEntry;
+﻿using Lisbeth.Bot.Application.Discord.Commands.MemberHistoryEntry;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using MikyM.CommandHandlers;
 using MikyM.Common.Utilities.Results;

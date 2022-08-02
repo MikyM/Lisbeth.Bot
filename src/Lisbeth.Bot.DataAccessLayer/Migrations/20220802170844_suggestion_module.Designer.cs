@@ -3,6 +3,7 @@ using System;
 using Lisbeth.Bot.DataAccessLayer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Lisbeth.Bot.DataAccessLayer.Migrations
 {
     [DbContext(typeof(LisbethBotDbContext))]
-    partial class LisbethBotDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220802170844_suggestion_module")]
+    partial class suggestion_module
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -821,54 +823,6 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     b.ToTable("server_booster_history_entry", (string)null);
                 });
 
-            modelBuilder.Entity("Lisbeth.Bot.Domain.Entities.Suggestion", b =>
-                {
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    b.Property<DateTime?>("CreatedAt")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamptz")
-                        .HasColumnName("created_at");
-
-                    b.Property<long>("GuildId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("guild_id")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.None);
-
-                    b.Property<bool>("IsDisabled")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_disabled");
-
-                    b.Property<string>("Text")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("text");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .IsRequired()
-                        .HasColumnType("timestamptz")
-                        .HasColumnName("updated_at");
-
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("user_id");
-
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("username");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GuildId");
-
-                    b.ToTable("suggestion", (string)null);
-                });
-
             modelBuilder.Entity("Lisbeth.Bot.Domain.Entities.SuggestionConfig", b =>
                 {
                     b.Property<long>("Id")
@@ -1384,18 +1338,6 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     b.Navigation("MemberHistoryEntry");
                 });
 
-            modelBuilder.Entity("Lisbeth.Bot.Domain.Entities.Suggestion", b =>
-                {
-                    b.HasOne("Lisbeth.Bot.Domain.Entities.Guild", "Guild")
-                        .WithMany("Suggestions")
-                        .HasForeignKey("GuildId")
-                        .HasPrincipalKey("GuildId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Guild");
-                });
-
             modelBuilder.Entity("Lisbeth.Bot.Domain.Entities.SuggestionConfig", b =>
                 {
                     b.HasOne("Lisbeth.Bot.Domain.Entities.Guild", "Guild")
@@ -1498,8 +1440,6 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     b.Navigation("ServerBoosterHistoryEntries");
 
                     b.Navigation("SuggestionConfig");
-
-                    b.Navigation("Suggestions");
 
                     b.Navigation("Tags");
 

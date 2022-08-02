@@ -47,6 +47,7 @@ internal class GuildConfig : IEntityTypeConfiguration<Guild>
         builder.Metadata.FindNavigation(nameof(Guild.Mutes))?.SetPropertyAccessMode(PropertyAccessMode.Field);
         builder.Metadata.FindNavigation(nameof(Guild.Prunes))?.SetPropertyAccessMode(PropertyAccessMode.Field);
         builder.Metadata.FindNavigation(nameof(Guild.RoleMenus))?.SetPropertyAccessMode(PropertyAccessMode.Field);
+        builder.Metadata.FindNavigation(nameof(Guild.Suggestions))?.SetPropertyAccessMode(PropertyAccessMode.Field);
         builder.Metadata.FindNavigation(nameof(Guild.ServerBoosterHistoryEntries))?
             .SetPropertyAccessMode(PropertyAccessMode.Field);
         builder.Metadata.FindNavigation(nameof(Guild.MemberHistoryEntries))?
@@ -65,6 +66,11 @@ internal class GuildConfig : IEntityTypeConfiguration<Guild>
         builder.HasOne(x => x.TicketingConfig)
             .WithOne(x => x.Guild)
             .HasForeignKey<TicketingConfig>(x => x.GuildId)
+            .HasPrincipalKey<Guild>(x => x.GuildId);
+        
+        builder.HasOne(x => x.SuggestionConfig)
+            .WithOne(x => x.Guild)
+            .HasForeignKey<Domain.Entities.SuggestionConfig>(x => x.GuildId)
             .HasPrincipalKey<Guild>(x => x.GuildId);
 
         builder
@@ -123,6 +129,12 @@ internal class GuildConfig : IEntityTypeConfiguration<Guild>
 
         builder
             .HasMany(x => x.MemberHistoryEntries)
+            .WithOne(x => x.Guild)
+            .HasForeignKey(x => x.GuildId)
+            .HasPrincipalKey(x => x.GuildId);
+        
+        builder
+            .HasMany(x => x.Suggestions)
             .WithOne(x => x.Guild)
             .HasForeignKey(x => x.GuildId)
             .HasPrincipalKey(x => x.GuildId);

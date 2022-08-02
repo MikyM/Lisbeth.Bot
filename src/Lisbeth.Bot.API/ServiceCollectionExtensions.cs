@@ -124,7 +124,8 @@ public static class ServiceCollectionExtensions
         services.AddDiscordGuildEventsSubscriber<GuildEventsHandler>();
         services.AddDiscordMiscEventsSubscriber<RoleMenuEventsHandler>();
         services.AddDiscordGuildMemberEventsSubscriber<MuteEventsHandlers>();
-        services.AddDiscordMessageEventsSubscriber<ChannelMessageFormatEventsHandler>();
+        services.AddDiscordMessageEventsSubscriber<ChannelMessageFormatEventsHandler>();        
+        services.AddDiscordMessageEventsSubscriber<SuggestionEventsHandler>();
         services.AddDiscordMessageEventsSubscriber<PhishingEventsHandler>();
         services.AddDiscordGuildBanEventsSubscriber<BanEventsHandler>();
         services.AddDiscordGuildMemberEventsSubscriber<MemberEventsHandler>();
@@ -208,8 +209,8 @@ public static class ServiceCollectionExtensions
 #if !DEBUG
             options.DisableLogging(true);
 #endif
-            options.CacheQueriesContainingTypes(CacheExpirationMode.Sliding, TimeSpan.FromMinutes(30), TableTypeComparison.ContainsOnly, typeof(Guild)/*,
-                typeof(ChannelMessageFormat), typeof(TicketingConfig), typeof(ModerationConfig)*/);
+            options.CacheQueriesContainingTypes(CacheExpirationMode.Sliding, TimeSpan.FromMinutes(30), TableTypeComparison.Contains, typeof(Guild),
+                typeof(ChannelMessageFormat), typeof(TicketingConfig), typeof(ModerationConfig), typeof(SuggestionConfig));
         });
         services.AddEasyCaching(options =>
         {

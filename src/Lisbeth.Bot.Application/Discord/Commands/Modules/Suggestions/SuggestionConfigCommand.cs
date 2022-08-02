@@ -15,12 +15,18 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Lisbeth.Bot.Domain.Enums;
+using DSharpPlus.Entities;
+using Lisbeth.Bot.Domain.DTOs.Request.SuggestionConfig;
+using MikyM.CommandHandlers;
 
-public enum GuildModule
+namespace Lisbeth.Bot.Application.Discord.Commands.Modules.Suggestions;
+
+public class SuggestionConfigCommand : CommandBase<DiscordEmbed>
 {
-    Ticketing,
-    Moderation,
-    Reminders,
-    Suggestions
+    public SuggestionConfigCommand(SuggestionConfigReqDto requestDto)
+    {
+        RequestDto = requestDto;
+    }
+
+    public SuggestionConfigReqDto RequestDto { get; }
 }

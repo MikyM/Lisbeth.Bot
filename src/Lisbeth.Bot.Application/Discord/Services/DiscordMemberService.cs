@@ -15,14 +15,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System.Globalization;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Mute;
 using MikyM.Common.Utilities.Results;
-using MikyM.Discord.Extensions.BaseExtensions;
 using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.Services;

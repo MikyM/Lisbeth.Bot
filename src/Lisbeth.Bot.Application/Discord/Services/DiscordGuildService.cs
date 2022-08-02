@@ -99,7 +99,6 @@ public class DiscordGuildService : IDiscordGuildService
         return Result.FromSuccess();
     }
 
-
     public async Task<Result<DiscordEmbed>> CreateModuleAsync(TicketingConfigReqDto req)
     {
         if (req is null) throw new ArgumentNullException(nameof(req));

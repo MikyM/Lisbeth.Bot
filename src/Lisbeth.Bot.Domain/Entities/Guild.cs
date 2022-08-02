@@ -17,9 +17,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using System.Linq;
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Domain.Enums;
@@ -42,18 +40,21 @@ public sealed class Guild : SnowflakeEntity, IDisableableEntity
     private readonly HashSet<RoleMenu>? _roleMenus;
     private readonly HashSet<Tag>? _tags;
     private readonly HashSet<Ticket>? _tickets;
+    private HashSet<Suggestion>? _suggestions;
     private readonly HashSet<ChannelMessageFormat>? _channelMessageFormats;
 
     public ulong GuildId { get; set; }
     public ulong UserId { get; set; }
     public ulong? ReminderChannelId { get; set; }
+    public SuggestionConfig? SuggestionConfig { get; set; }
     public TicketingConfig? TicketingConfig { get; private set; }
     public ModerationConfig? ModerationConfig { get; private set; }
     public string EmbedHexColor { get; set; } = "#26296e";
     public PhishingDetection PhishingDetection { get; set; } = PhishingDetection.Disabled;
     public IEnumerable<Mute>? Mutes => _mutes?.AsEnumerable();
     public IEnumerable<Ban>? Bans => _bans?.AsEnumerable();
-    public IEnumerable<Prune>? Prunes => _prunes?.AsEnumerable();
+    public IEnumerable<Prune>? Prunes => _prunes?.AsEnumerable();    
+    public IEnumerable<Suggestion>? Suggestions => _suggestions?.AsEnumerable();
     public IEnumerable<Ticket>? Tickets => _tickets?.AsEnumerable();
     public IEnumerable<MemberHistoryEntry>? MemberHistoryEntries => _memberHistoryEntries?.AsEnumerable();
     public IEnumerable<Reminder>? Reminders => _reminders?.AsEnumerable();
@@ -61,6 +62,14 @@ public sealed class Guild : SnowflakeEntity, IDisableableEntity
     public IEnumerable<RoleMenu>? RoleMenus => _roleMenus?.AsEnumerable();
     public IEnumerable<ChannelMessageFormat>? ChannelMessageFormats => _channelMessageFormats?.AsEnumerable();
     public IEnumerable<ServerBoosterHistoryEntry>? ServerBoosterHistoryEntries => _serverBoosterHistoryEntries?.AsEnumerable();
+
+    public Suggestion AddSuggestion(string text, ulong userId, string username)
+    {
+        _suggestions ??= new HashSet<Suggestion>();
+        var suggestion = new Suggestion { UserId = userId, Username = username, Text = text };
+        _suggestions.Add(suggestion);
+        return suggestion;
+    }
 
     public void AddServerBoosterHistoryEntry(ServerBoosterHistoryEntry entry)
     {
@@ -215,11 +224,15 @@ public sealed class Guild : SnowflakeEntity, IDisableableEntity
 
     [MemberNotNullWhen(true, nameof(TicketingConfig))]
     public bool IsTicketingModuleEnabled
-        => TicketingConfig is not null;
+        => TicketingConfig is not null && TicketingConfig.IsDisabled == false;
 
     [MemberNotNullWhen(true, nameof(ModerationConfig))]
     public bool IsModerationModuleEnabled
-        => ModerationConfig is not null;
+        => ModerationConfig is not null && ModerationConfig.IsDisabled == false;
+    
+    [MemberNotNullWhen(true, nameof(SuggestionConfig))]
+    public bool IsSuggestionModuleEnabled
+        => SuggestionConfig is not null && SuggestionConfig.IsDisabled == false;
 
 
     [MemberNotNullWhen(true, nameof(ModerationConfig))]

@@ -22,6 +22,7 @@ using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.ReminderConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.RoleMenu;
+using Lisbeth.Bot.Domain.DTOs.Request.SuggestionConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
 using MikyM.Common.EfCore.ApplicationLayer.Interfaces;
 using MikyM.Common.EfCore.DataAccessLayer.UnitOfWork;
@@ -45,6 +46,23 @@ public class GuildDataService : CrudDataService<Guild, ILisbethBotDbContext>, IG
         _moderationService = moderationService;
         _ticketingService = ticketingService;
         _roleMenuService = roleMenuService;
+    }
+
+    public async Task<Result<Guild>> AddConfigAsync(SuggestionConfigReqDto req, bool shouldSave = false)
+    {
+        var result = await GetSingleBySpecAsync(
+            new ActiveGuildByDiscordIdWithSuggestionsSpec(req.GuildId));
+        if (!result.IsDefined()) return Result<Guild>.FromError(new NotFoundError());
+        if (result.Entity.SuggestionConfig is not null && result.Entity.SuggestionConfig.IsDisabled)
+            return await EnableConfigAsync(req.GuildId, GuildModule.Suggestions, shouldSave);
+        if (result.Entity.SuggestionConfig is not null && !result.Entity.SuggestionConfig.IsDisabled)
+            return Result<Guild>.FromError(new InvalidOperationError());
+
+        _ = BeginUpdate(result.Entity);
+        result.Entity.SuggestionConfig = Mapper.Map<SuggestionConfig>(req);
+        _ = CommitAsync();
+
+        return result.Entity;
     }
 
     public async Task<Result<Guild>> AddConfigAsync(TicketingConfigReqDto req, bool shouldSave = false)
@@ -130,6 +148,17 @@ public class GuildDataService : CrudDataService<Guild, ILisbethBotDbContext>, IG
                 guild.ReminderChannelId = null;
                 if (shouldSave) await base.CommitAsync();
                 break;
+            case GuildModule.Suggestions:
+                result = await base.GetSingleBySpecAsync(
+                    new ActiveGuildByDiscordIdWithSuggestionsSpec(guildId));
+                if (!result.IsDefined() || result.Entity.SuggestionConfig is null)
+                    return Result.FromError(new NotFoundError());
+                if (result.Entity.IsDisabled)
+                    return Result.FromError(new DisabledEntityError(nameof(result.Entity.ModerationConfig)));
+                _ = BeginUpdate(result.Entity);
+                result.Entity.SuggestionConfig.IsDisabled = true;
+                await CommitAsync();
+                break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(type), type, null);
         }
@@ -172,6 +201,19 @@ public class GuildDataService : CrudDataService<Guild, ILisbethBotDbContext>, IG
                 result = await base.GetSingleBySpecAsync(
                     new ActiveGuildByIdSpec(guildId));
                 // ignored for now
+                break;
+            case GuildModule.Suggestions:
+                result = await base.GetSingleBySpecAsync(
+                    new ActiveGuildByDiscordIdWithSuggestionsSpec(guildId));
+                if (!result.IsDefined() || result.Entity.SuggestionConfig is null)
+                    return Result<Guild>.FromError(new NotFoundError());
+                if (!result.Entity.IsDisabled)
+                    return Result<Guild>.FromError(new DisabledEntityError(nameof(result.Entity.SuggestionConfig)));
+
+                _ = BeginUpdate(result.Entity);
+                result.Entity.SuggestionConfig.IsDisabled = false;
+
+                if (shouldSave) await _moderationService.CommitAsync();
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(type), type, null);
@@ -217,6 +259,25 @@ public class GuildDataService : CrudDataService<Guild, ILisbethBotDbContext>, IG
         if (req.LogChannelId is not null) result.Entity.TicketingConfig.LogChannelId = req.LogChannelId.Value;
 
         if (shouldSave) await _ticketingService.CommitAsync();
+
+        return Result.FromSuccess();
+    }
+
+    public async Task<Result> RepairModuleConfigAsync(SuggestionConfigRepairReqDto req, bool shouldSave = false)
+    {
+        var result = await GetSingleBySpecAsync(
+            new ActiveGuildByDiscordIdWithSuggestionsSpec(req.GuildId));
+        if (!result.IsDefined() || result.Entity.SuggestionConfig is null)
+            return Result.FromError(new NotFoundError());
+        if (result.Entity.SuggestionConfig.IsDisabled)
+            return Result.FromError(new DisabledEntityError(nameof(result.Entity.SuggestionConfig)));
+
+        _ = BeginUpdate(result.Entity);
+        result.Entity.SuggestionConfig.ShouldCreateThreads = req.ShouldUseThreads;
+        result.Entity.SuggestionConfig.ShouldAddVoteReactions = req.ShouldAddReactionVotes;
+        result.Entity.SuggestionConfig.SuggestionChannelId = req.ChannelId;
+
+        if (shouldSave) await CommitAsync();
 
         return Result.FromSuccess();
     }

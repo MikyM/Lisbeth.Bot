@@ -21,17 +21,20 @@ using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
 using FluentValidation;
 using Lisbeth.Bot.Application.Discord.Commands.ChannelMessageFormat;
+using Lisbeth.Bot.Application.Discord.Commands.Modules.Suggestions;
 using Lisbeth.Bot.Application.Discord.Commands.Ticket;
 using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
 using Lisbeth.Bot.Application.Validation.ChannelMessageFormat;
 using Lisbeth.Bot.Application.Validation.ModerationConfig;
 using Lisbeth.Bot.Application.Validation.ReminderConfig;
+using Lisbeth.Bot.Application.Validation.SuggestionConfig;
 using Lisbeth.Bot.Application.Validation.TicketingConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.ChannelMessageFormat;
 using Lisbeth.Bot.Domain.DTOs.Request.Guild;
 using Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.ReminderConfig;
+using Lisbeth.Bot.Domain.DTOs.Request.SuggestionConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
 using MikyM.CommandHandlers;
 using MikyM.Common.Utilities.Results;
@@ -348,8 +351,14 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
         string? cleanAfter = "",
         [Option("close-after", "After how many hours should inactive opened tickets be closed")]
         string? closeAfter = "",
-        [Option("reminder-channel", "Channel to send general reminders to")]
-        DiscordChannel? reminderChannel = null)
+        [Option("reminders-channel", "Channel to send general reminders to")]
+        DiscordChannel? reminderChannel = null,
+        [Option("suggestions-channel", "Channel to treat as suggestion channel")]
+        DiscordChannel? suggestionChannel = null,
+        [Option("should-open-threads", "Whether to open a thread for each suggestion")]
+        bool shouldOpenThreads = false,
+        [Option("should-add-votes", "Whether to add reaction votes to each suggestion")]
+        bool shouldAddVotes = false)
     {
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
             new DiscordInteractionResponseBuilder().AsEphemeral());
@@ -506,7 +515,61 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
                     default:
                         throw new ArgumentOutOfRangeException(nameof(action), action, null);
                 }
-
+                break;
+            case GuildModule.Suggestions:
+                switch (action)
+                {
+                    case ModuleActionType.Enable:
+                        if (suggestionChannel is null)
+                            throw new ArgumentNullException(nameof(suggestionChannel));
+                        var enableSuggestionReq = new SuggestionConfigReqDto
+                        {
+                            GuildId = ctx.Guild.Id,
+                            RequestedOnBehalfOfId = ctx.Member.Id,
+                            ChannelId = suggestionChannel.Id,
+                            ShouldUseThreads = shouldOpenThreads,
+                            ShouldAddReactionVotes = shouldAddVotes
+                        };
+                        var enableSuggestionValidator = new SuggestionConfigReqValidator(ctx.Client);
+                        await enableSuggestionValidator.ValidateAndThrowAsync(enableSuggestionReq);
+                        result = await _commandHandlerFactory
+                            .GetHandler<ICommandHandler<SuggestionConfigCommand, DiscordEmbed>>()
+                            .HandleAsync(new SuggestionConfigCommand(enableSuggestionReq));
+                        break;
+                    case ModuleActionType.Repair:
+                        if (suggestionChannel is null)
+                            throw new ArgumentNullException(nameof(suggestionChannel));
+                        var repairSuggestionReq = new SuggestionConfigRepairReqDto
+                        {
+                            GuildId = ctx.Guild.Id,
+                            RequestedOnBehalfOfId = ctx.Member.Id,
+                            ChannelId = suggestionChannel.Id,
+                            ShouldUseThreads = shouldOpenThreads,
+                            ShouldAddReactionVotes = shouldAddVotes
+                        };
+                        var repairSuggestionValidator = new SuggestionConfigRepairReqValidator(ctx.Client);
+                        await repairSuggestionValidator.ValidateAndThrowAsync(repairSuggestionReq);
+                        result = await _commandHandlerFactory
+                            .GetHandler<ICommandHandler<SuggestionConfigRepairCommand, DiscordEmbed>>()
+                            .HandleAsync(new SuggestionConfigRepairCommand(repairSuggestionReq));
+                        break;
+                    case ModuleActionType.Edit:
+                        break;
+                    case ModuleActionType.Disable:
+                        var disableSuggestionReq = new SuggestionConfigDisableReqDto
+                        {
+                            GuildId = ctx.Guild.Id,
+                            RequestedOnBehalfOfId = ctx.Member.Id
+                        };
+                        var disableSuggestionValidator = new SuggestionConfigDisableReqValidator(ctx.Client);
+                        await disableSuggestionValidator.ValidateAndThrowAsync(disableSuggestionReq);
+                        result = await _commandHandlerFactory
+                            .GetHandler<ICommandHandler<SuggestionConfigDisableCommand, DiscordEmbed>>()
+                            .HandleAsync(new SuggestionConfigDisableCommand(disableSuggestionReq));
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(action), action, null);
+                }
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(type), type, null);
