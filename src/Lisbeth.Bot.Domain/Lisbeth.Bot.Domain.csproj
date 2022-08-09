@@ -6,8 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MikyM.Common.EfCore.ApplicationLayer" Version="1.3.0" />
-    <PackageReference Include="MikyM.Discord" Version="1.0.9" />
+    <PackageReference Include="MikyM.Common.EfCore.ApplicationLayer" Version="1.3.3" />
+    <PackageReference Include="MikyM.Discord" Version="1.0.11" />
   </ItemGroup>
 
 </Project>

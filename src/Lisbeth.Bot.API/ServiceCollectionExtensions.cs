@@ -24,6 +24,7 @@ using DSharpPlus.Interactivity.Enums;
 using DSharpPlus.Interactivity.EventHandling;
 using EasyCaching.InMemory;
 using EFCoreSecondLevelCacheInterceptor;
+using FluentValidation;
 using FluentValidation.AspNetCore;
 using Hangfire;
 using Hangfire.PostgreSql;
@@ -31,6 +32,7 @@ using Lisbeth.Bot.API.HealthChecks;
 using Lisbeth.Bot.Application.Discord.ApplicationCommands;
 using Lisbeth.Bot.Application.Discord.EventHandlers;
 using Lisbeth.Bot.Application.Discord.SlashCommands;
+using Lisbeth.Bot.Application.Discord.Validation;
 using Lisbeth.Bot.Application.Services;
 using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.Domain;
@@ -282,11 +284,8 @@ public static class ServiceCollectionExtensions
 
     public static void ConfigureFluentValidation(this IServiceCollection services)
     {
-        services.AddFluentValidation(options =>
-        {
-            options.DisableDataAnnotationsValidation = true;
-            options.AutomaticValidationEnabled = false;
-        });
+        services.AddFluentValidationAutoValidation();
+        services.AddValidatorsFromAssembly(typeof(DiscordValidator<>).Assembly);
     }
 
     public static void ConfigureLisbethDbContext(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
