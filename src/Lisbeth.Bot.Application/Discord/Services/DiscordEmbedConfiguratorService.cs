@@ -19,7 +19,6 @@ using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.Domain.Entities.Base;
 using MikyM.Common.EfCore.ApplicationLayer.Interfaces;
 using MikyM.Common.Utilities.ExpressionHelpers;
-using MikyM.Common.Utilities.Results;
 using MikyM.Common.Utilities.Results.Errors;
 using MikyM.Discord.EmbedBuilders;
 using MikyM.Discord.Extensions.BaseExtensions;

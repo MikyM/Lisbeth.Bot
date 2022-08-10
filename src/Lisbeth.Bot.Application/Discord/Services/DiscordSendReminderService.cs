@@ -21,11 +21,7 @@ using Hangfire;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.DataAccessLayer.Specifications.RecurringReminder;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Reminder;
-using MikyM.Common.Utilities.Results;
 using MikyM.Common.Utilities.Results.Errors;
-using MikyM.Common.Utilities.Results.Errors.Bases;
-using MikyM.Discord.Enums;
-using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.Services;
 

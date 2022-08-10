@@ -29,9 +29,6 @@ using Lisbeth.Bot.Domain.DTOs.Request.Ban;
 using Lisbeth.Bot.Domain.DTOs.Request.Mute;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using MikyM.CommandHandlers;
-using MikyM.Common.Utilities.Results;
-using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.Services;
 

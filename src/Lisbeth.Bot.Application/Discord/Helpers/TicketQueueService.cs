@@ -21,7 +21,6 @@ using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.Ticket;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 using Microsoft.Extensions.Logging;
-using MikyM.CommandHandlers;
 using MikyM.Common.Utilities;
 
 namespace Lisbeth.Bot.Application.Discord.Helpers;

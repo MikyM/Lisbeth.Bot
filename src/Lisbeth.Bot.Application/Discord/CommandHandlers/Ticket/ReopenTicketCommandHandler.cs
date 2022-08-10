@@ -21,8 +21,6 @@ using Lisbeth.Bot.Application.Discord.Commands.Ticket;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Ticket;
 using Microsoft.Extensions.Logging;
-using MikyM.CommandHandlers;
-using MikyM.Common.Utilities.Results;
 using MikyM.Common.Utilities.Results.Errors;
 using MikyM.Discord.Extensions.BaseExtensions;
 
@@ -34,10 +32,10 @@ public class ReopenTicketCommandHandler : ICommandHandler<ReopenTicketCommand, D
     private readonly IDiscordGuildRequestDataProvider _requestDataProvider;
     private readonly IGuildDataService _guildDataService;
     private readonly ITicketDataService _ticketDataService;
-    private readonly ILogger<ConfirmCloseTicketCommandHandler> _logger;
+    private readonly ILogger<ReopenTicketCommandHandler> _logger;
 
     public ReopenTicketCommandHandler(IDiscordGuildRequestDataProvider requestDataProvider, IGuildDataService guildDataService,
-        ITicketDataService ticketDataService, ILogger<ConfirmCloseTicketCommandHandler> logger)
+        ITicketDataService ticketDataService, ILogger<ReopenTicketCommandHandler> logger)
     {
         _requestDataProvider = requestDataProvider;
         _guildDataService = guildDataService;
@@ -45,7 +43,7 @@ public class ReopenTicketCommandHandler : ICommandHandler<ReopenTicketCommand, D
         _logger = logger;
     }
 
-    public async Task<Result<DiscordMessageBuilder>> HandleAsync(ReopenTicketCommand command)
+    public async Task<Result<DiscordMessageBuilder>> HandleAsync(ReopenTicketCommand command, CancellationToken cancellationToken = default)
     {
         if (command is null) throw new ArgumentNullException(nameof(command));
 

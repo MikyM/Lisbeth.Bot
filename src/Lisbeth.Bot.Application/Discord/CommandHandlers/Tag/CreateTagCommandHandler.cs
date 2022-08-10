@@ -19,11 +19,7 @@ using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.Tag;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Tag;
-using MikyM.CommandHandlers;
-using MikyM.Common.Utilities.Results;
-using MikyM.Discord.Enums;
 using MikyM.Discord.Extensions.BaseExtensions;
-using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Tag;
 
@@ -42,7 +38,7 @@ public class CreateTagCommandHandler : ICommandHandler<CreateTagCommand>
         _tagDataService = tagDataService;
     }
 
-    public async Task<Result> HandleAsync(CreateTagCommand command)
+    public async Task<Result> HandleAsync(CreateTagCommand command, CancellationToken cancellationToken = default)
     {
         if (command is null) throw new ArgumentNullException(nameof(command));
 

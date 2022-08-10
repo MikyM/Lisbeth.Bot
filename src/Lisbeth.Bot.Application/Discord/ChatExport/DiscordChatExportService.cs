@@ -27,10 +27,8 @@ using Lisbeth.Bot.Domain;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using MikyM.Common.Utilities.Results;
 using MikyM.Common.Utilities.Results.Errors;
 using MikyM.Discord.Extensions.BaseExtensions;
-using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport;
 

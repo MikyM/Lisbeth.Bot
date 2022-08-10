@@ -18,15 +18,10 @@
 
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.Reminder;
-using Lisbeth.Bot.Application.Discord.EmbedBuilders;
 using Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response.Reminder;
 using Lisbeth.Bot.Application.Discord.SlashCommands;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
-using MikyM.CommandHandlers;
-using MikyM.Common.Utilities.Results;
-using MikyM.Discord.Enums;
 using MikyM.Discord.Extensions.BaseExtensions;
-using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Reminder;
 
@@ -47,7 +42,7 @@ public class SetNewReminderCommandHandler : ICommandHandler<SetNewReminderComman
         _embedBuilder = embedBuilder;
     }
 
-    public async Task<Result<DiscordEmbed>> HandleAsync(SetNewReminderCommand command)
+    public async Task<Result<DiscordEmbed>> HandleAsync(SetNewReminderCommand command, CancellationToken cancellationToken = default)
     {
         if (command is null) throw new ArgumentNullException(nameof(command));
 

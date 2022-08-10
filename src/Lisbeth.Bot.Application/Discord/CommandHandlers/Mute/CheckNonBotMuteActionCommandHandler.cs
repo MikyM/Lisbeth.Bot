@@ -18,10 +18,7 @@
 using Lisbeth.Bot.Application.Discord.Commands.Mute;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.Domain.DTOs.Request.Mute;
-using MikyM.CommandHandlers;
-using MikyM.Common.Utilities.Results;
 using MikyM.Common.Utilities.Results.Errors;
-using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Mute;
 
@@ -40,7 +37,7 @@ public class CheckNonBotMuteActionCommandHandler : ICommandHandler<CheckNonBotMu
         _discord = discord;
     }
 
-    public async Task<Result> HandleAsync(CheckNonBotMuteActionCommand command)
+    public async Task<Result> HandleAsync(CheckNonBotMuteActionCommand command, CancellationToken cancellationToken = default)
     {
         if (command is null) throw new ArgumentNullException(nameof(command));
 

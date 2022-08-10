@@ -23,7 +23,6 @@
 
 using System.Collections.Concurrent;
 using System.Globalization;
-using System.Threading;
 using DSharpPlus.SlashCommands;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands.Base;

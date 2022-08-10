@@ -18,8 +18,6 @@
 using Lisbeth.Bot.Application.Discord.Commands.Mute;
 using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Mute;
-using MikyM.CommandHandlers;
-using MikyM.Common.Utilities.Results;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Mute;
 
@@ -33,7 +31,7 @@ public class CheckMuteStateForNewUserCommandHandler : ICommandHandler<CheckMuteS
         _muteDataService = muteDataService;
     }
 
-    public async Task<Result> HandleAsync(CheckMuteStateForNewUserCommand command)
+    public async Task<Result> HandleAsync(CheckMuteStateForNewUserCommand command, CancellationToken cancellationToken = default)
     {
         if (command is null) throw new ArgumentNullException(nameof(command));
 

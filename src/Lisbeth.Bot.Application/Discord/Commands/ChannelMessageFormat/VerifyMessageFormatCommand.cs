@@ -18,7 +18,6 @@
 using DSharpPlus.EventArgs;
 using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Domain.DTOs.Request.ChannelMessageFormat;
-using MikyM.CommandHandlers;
 
 namespace Lisbeth.Bot.Application.Discord.Commands.ChannelMessageFormat;
 

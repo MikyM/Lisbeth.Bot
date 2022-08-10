@@ -21,8 +21,6 @@ using Lisbeth.Bot.Application.Discord.Commands.Ticket;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Buttons;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
-using MikyM.CommandHandlers;
-using MikyM.Common.Utilities.Results;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 
@@ -38,7 +36,7 @@ public class GetCenterEmbedTicketCommandHandler : ICommandHandler<GetTicketCente
         _embedProvider = embedProvider;
     }
 
-    public async Task<Result<DiscordMessageBuilder>> HandleAsync(GetTicketCenterEmbedCommand command)
+    public async Task<Result<DiscordMessageBuilder>> HandleAsync(GetTicketCenterEmbedCommand command, CancellationToken cancellationToken = default)
     {
         var res = await _guildDataService.GetSingleBySpecAsync(
             new ActiveGuildByDiscordIdWithTicketingSpecifications(command.InteractionContext.Guild.Id));

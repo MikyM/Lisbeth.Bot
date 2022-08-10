@@ -20,7 +20,6 @@ using DSharpPlus;
 using FluentValidation;
 using Lisbeth.Bot.Application.Validation.ReusablePropertyValidation;
 using Lisbeth.Bot.Domain.DTOs.Request.Guild;
-using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Validation.Guild;
 

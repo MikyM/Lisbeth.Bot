@@ -17,7 +17,6 @@
 
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
-using MikyM.CommandHandlers;
 
 namespace Lisbeth.Bot.Application.Discord.Commands.Ticket;
 

@@ -21,12 +21,8 @@ using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Tag;
-using MikyM.CommandHandlers;
-using MikyM.Common.Utilities.Results;
 using MikyM.Common.Utilities.Results.Errors;
-using MikyM.Discord.Enums;
 using MikyM.Discord.Extensions.BaseExtensions;
-using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Tag;
 
@@ -47,7 +43,7 @@ public class GetTagCommandHandler : ICommandHandler<GetTagCommand, DiscordMessag
         _embedProvider = embedProvider;
     }
 
-    public async Task<Result<DiscordMessageBuilder>> HandleAsync(GetTagCommand command)
+    public async Task<Result<DiscordMessageBuilder>> HandleAsync(GetTagCommand command, CancellationToken cancellationToken = default)
     {
         if (command is null) throw new ArgumentNullException(nameof(command));
 

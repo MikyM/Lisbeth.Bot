@@ -21,9 +21,6 @@ using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.Ticket;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Microsoft.Extensions.Logging;
-using MikyM.CommandHandlers;
-using MikyM.Common.Utilities.Results;
-using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 
@@ -42,7 +39,7 @@ public class CleanClosedTicketsCommandHandler : ICommandHandler<CleanClosedTicke
         _logger = logger;
     }
 
-    public async Task<Result> HandleAsync(CleanClosedTicketsCommand command)
+    public async Task<Result> HandleAsync(CleanClosedTicketsCommand command, CancellationToken cancellationToken = default)
     {
         try
         {

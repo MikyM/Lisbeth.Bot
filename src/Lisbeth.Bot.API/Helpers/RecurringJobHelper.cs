@@ -31,7 +31,7 @@ public static class RecurringJobHelper
     public static void ScheduleAutomaticUnmute()
     {
         RecurringJob.AddOrUpdate<ICommandHandler<RevokeExpiredMutesCommand>>("unmute",
-            x => x.HandleAsync(new RevokeExpiredMutesCommand()), Cron.Minutely, TimeZoneInfo.Utc, "moderation");
+            x => x.HandleAsync(new RevokeExpiredMutesCommand(), default), Cron.Minutely, TimeZoneInfo.Utc, "moderation");
         JobIds.Add("unmute");
     }
 
@@ -45,14 +45,14 @@ public static class RecurringJobHelper
     public static void ScheduleAutomaticTicketClean()
     {
         RecurringJob.AddOrUpdate<ICommandHandler<CloseInactiveTicketsCommand>>("ticket-close-inactive",
-            x => x.HandleAsync(new CloseInactiveTicketsCommand()), Cron.Hourly, TimeZoneInfo.Utc, "ticketing");
+            x => x.HandleAsync(new CloseInactiveTicketsCommand(), default), Cron.Hourly, TimeZoneInfo.Utc, "ticketing");
         JobIds.Add("ticketClean");
     }
 
     public static void ScheduleAutomaticTicketClose()
     {
         RecurringJob.AddOrUpdate<ICommandHandler<CleanClosedTicketsCommand>>("ticket-clean-closed",
-            x => x.HandleAsync(new CleanClosedTicketsCommand()), Cron.Hourly, TimeZoneInfo.Utc, "ticketing");
+            x => x.HandleAsync(new CleanClosedTicketsCommand(), default), Cron.Hourly, TimeZoneInfo.Utc, "ticketing");
         JobIds.Add("ticketClose");
     }
 

@@ -1,5 +1,4 @@
 ﻿using DSharpPlus.Entities;
-using MikyM.CommandHandlers;
 
 namespace Lisbeth.Bot.Application.Discord.Commands.MemberHistoryEntry;
 

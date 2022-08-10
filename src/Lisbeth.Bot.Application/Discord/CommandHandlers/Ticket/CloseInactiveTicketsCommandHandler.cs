@@ -24,10 +24,7 @@ using Lisbeth.Bot.Application.Validation.Ticket;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 using Microsoft.Extensions.Logging;
-using MikyM.CommandHandlers;
-using MikyM.Common.Utilities.Results;
 using MikyM.Discord.Extensions.BaseExtensions;
-using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 
@@ -46,7 +43,7 @@ public class CloseInactiveTicketsCommandHandler : ICommandHandler<CloseInactiveT
         _logger = logger;
     }
 
-    public async Task<Result> HandleAsync(CloseInactiveTicketsCommand command)
+    public async Task<Result> HandleAsync(CloseInactiveTicketsCommand command, CancellationToken cancellationToken = default)
     {
         try
         {

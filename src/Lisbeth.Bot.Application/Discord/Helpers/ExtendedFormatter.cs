@@ -21,7 +21,6 @@ using System.Globalization;
 using System.Text.RegularExpressions;
 using DSharpPlus;
 using DSharpPlus.Entities;
-using MikyM.Discord.Enums;
 
 namespace Lisbeth.Bot.Application.Discord.Helpers;
 

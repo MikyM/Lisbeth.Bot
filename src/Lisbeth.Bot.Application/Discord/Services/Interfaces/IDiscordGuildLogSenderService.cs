@@ -17,7 +17,6 @@
 
 
 using DSharpPlus.Entities;
-using MikyM.Common.Utilities.Results;
 using MikyM.Discord.EmbedBuilders.Enums;
 
 namespace Lisbeth.Bot.Application.Discord.Services.Interfaces;

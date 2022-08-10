@@ -20,7 +20,6 @@ using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Domain.DTOs.Request.Base;
 using MikyM.Discord.EmbedBuilders;
 using MikyM.Discord.EmbedBuilders.Wrappers;
-using MikyM.Discord.Enums;
 
 namespace Lisbeth.Bot.Application.Discord.EmbedEnrichers.Log.Moderation;
 

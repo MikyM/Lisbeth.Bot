@@ -18,9 +18,6 @@
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.Modules.Suggestions;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
-using MikyM.CommandHandlers;
-using MikyM.Common.Utilities.Results;
-using MikyM.Common.Utilities.Results.Errors.Bases;
 using MikyM.Discord.Extensions.BaseExtensions;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Modules.Suggestions;
@@ -37,7 +34,7 @@ public class SuggestionConfigDisableCommandHandler : ICommandHandler<SuggestionC
         _dataProvider = dataProvider;
     }
     
-    public async Task<Result<DiscordEmbed>> HandleAsync(SuggestionConfigDisableCommand command)
+    public async Task<Result<DiscordEmbed>> HandleAsync(SuggestionConfigDisableCommand command, CancellationToken cancellationToken = default)
     {
         await _dataProvider.InitializeAsync(command.RequestDto);
         

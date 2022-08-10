@@ -23,9 +23,7 @@ using Lisbeth.Bot.Application.Discord.Exceptions;
 using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.DataAccessLayer.Specifications.RoleMenu;
 using Microsoft.Extensions.Logging;
-using MikyM.CommandHandlers;
 using MikyM.Common.Utilities.Extensions;
-using MikyM.Common.Utilities.Results;
 using MikyM.Common.Utilities.Results.Errors;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.RoleMenu;
@@ -46,7 +44,7 @@ public class RoleMenuOptionSelectedCommandHandler  : ICommandHandler<RoleMenuOpt
         _getSelectHandler = getSelectHandler;
     }
 
-    public async Task<Result> HandleAsync(RoleMenuOptionSelectedCommand command)
+    public async Task<Result> HandleAsync(RoleMenuOptionSelectedCommand command, CancellationToken cancellationToken = default)
     {
         if (command is null) throw new ArgumentNullException(nameof(command));
 

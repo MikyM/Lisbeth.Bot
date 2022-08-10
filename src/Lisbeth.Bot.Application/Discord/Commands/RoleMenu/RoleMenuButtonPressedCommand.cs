@@ -16,7 +16,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using DSharpPlus.EventArgs;
-using MikyM.CommandHandlers;
 
 namespace Lisbeth.Bot.Application.Discord.Commands.RoleMenu;
 

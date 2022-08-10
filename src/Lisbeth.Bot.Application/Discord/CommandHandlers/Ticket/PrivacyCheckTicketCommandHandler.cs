@@ -17,8 +17,6 @@
 
 using DSharpPlus;
 using Lisbeth.Bot.Application.Discord.Commands.Ticket;
-using MikyM.CommandHandlers;
-using MikyM.Common.Utilities.Results;
 using MikyM.Common.Utilities.Results.Errors;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
@@ -26,7 +24,7 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 [UsedImplicitly]
 public class PrivacyCheckTicketCommandHandler : ICommandHandler<PrivacyCheckTicketCommand, bool>
 {
-    public async Task<Result<bool>> HandleAsync(PrivacyCheckTicketCommand command)
+    public async Task<Result<bool>> HandleAsync(PrivacyCheckTicketCommand command, CancellationToken cancellationToken = default)
     {
         if (command is null) throw new ArgumentNullException(nameof(command));
 

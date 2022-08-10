@@ -18,9 +18,6 @@
 using System.Collections.Generic;
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.RoleMenu;
-using MikyM.CommandHandlers;
-using MikyM.Common.Utilities.Results;
-using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.RoleMenu;
 
@@ -34,7 +31,7 @@ public class GetRoleMenuSelectCommandHandler : ICommandHandler<GetRoleMenuSelect
         _discord = discord;
     }
 
-    public Task<Result<DiscordSelectComponent>> HandleAsync(GetRoleMenuSelectCommand command)
+    public Task<Result<DiscordSelectComponent>> HandleAsync(GetRoleMenuSelectCommand command, CancellationToken cancellationToken = default)
     {
         List<DiscordSelectComponentOption> options = new();
 

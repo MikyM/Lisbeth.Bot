@@ -25,8 +25,6 @@ using Lisbeth.Bot.Application.Discord.SlashCommands;
 using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
 using Lisbeth.Bot.Application.Validation.Mute;
 using Lisbeth.Bot.Domain.DTOs.Request.Mute;
-using MikyM.CommandHandlers;
-using MikyM.Common.Utilities.Results;
 
 // ReSharper disable once CheckNamespace
 namespace Lisbeth.Bot.Application.Discord.ApplicationCommands;

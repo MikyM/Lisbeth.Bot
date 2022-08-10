@@ -21,9 +21,7 @@ using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.Ticket;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Microsoft.Extensions.Logging;
-using MikyM.CommandHandlers;
 using MikyM.Common.Utilities.Extensions;
-using MikyM.Common.Utilities.Results;
 using MikyM.Common.Utilities.Results.Errors;
 using MikyM.Discord.Extensions.BaseExtensions;
 
@@ -49,7 +47,7 @@ public class OpenTicketCommandHandler : ICommandHandler<OpenTicketCommand>
         _welcomeEmbedCommandHandler = welcomeEmbedCommandHandler;
     }
 
-    public async Task<Result> HandleAsync(OpenTicketCommand command)
+    public async Task<Result> HandleAsync(OpenTicketCommand command, CancellationToken cancellationToken = default)
     {
         if (command is null) throw new ArgumentNullException(nameof(command));
 

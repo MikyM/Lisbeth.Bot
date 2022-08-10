@@ -19,7 +19,6 @@ using DSharpPlus;
 using FluentValidation;
 using Lisbeth.Bot.Application.Validation.ReusablePropertyValidation;
 using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
-using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Validation.TicketingConfig;
 

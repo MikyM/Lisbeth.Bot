@@ -19,9 +19,6 @@ using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.Mute;
 using Lisbeth.Bot.Application.Discord.Commands.Timeout;
 using Lisbeth.Bot.Domain.DTOs.Request.Mute;
-using MikyM.CommandHandlers;
-using MikyM.Common.Utilities.Results;
-using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Timeout;
 
@@ -40,7 +37,7 @@ public class LogTimeoutCommandHandler : ICommandHandler<LogTimeoutCommand>
         _discord = discord;
     }
 
-    public async Task<Result> HandleAsync(LogTimeoutCommand command)
+    public async Task<Result> HandleAsync(LogTimeoutCommand command, CancellationToken cancellationToken = default)
     {
         if (command is null) throw new ArgumentNullException(nameof(command));
 

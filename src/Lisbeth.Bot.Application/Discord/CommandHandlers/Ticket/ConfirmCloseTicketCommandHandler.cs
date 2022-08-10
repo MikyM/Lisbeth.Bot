@@ -26,12 +26,9 @@ using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.SelectValues;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Ticket;
 using Microsoft.Extensions.Logging;
-using MikyM.CommandHandlers;
 using MikyM.Common.Utilities;
-using MikyM.Common.Utilities.Results;
 using MikyM.Common.Utilities.Results.Errors;
 using MikyM.Discord.Extensions.BaseExtensions;
-using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 
@@ -57,7 +54,7 @@ public class ConfirmCloseTicketCommandHandler : ICommandHandler<ConfirmCloseTick
         _discord = discord;
     }
 
-    public async Task<Result> HandleAsync(ConfirmCloseTicketCommand command)
+    public async Task<Result> HandleAsync(ConfirmCloseTicketCommand command, CancellationToken cancellationToken = default)
     {
         if (command is null) throw new ArgumentNullException(nameof(command));
 

@@ -20,10 +20,6 @@ using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.RoleMenu;
 using Lisbeth.Bot.Domain.DTOs.Request.RoleMenu;
 using Microsoft.Extensions.Logging;
-using MikyM.CommandHandlers;
-using MikyM.Common.Utilities.Results;
-using MikyM.Discord.Enums;
-using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.RoleMenu;
 
@@ -45,7 +41,7 @@ public class SendRoleMenuCommandHandler : ICommandHandler<SendRoleMenuCommand>
         _mapper = mapper;
     }
 
-    public async Task<Result> HandleAsync(SendRoleMenuCommand command)
+    public async Task<Result> HandleAsync(SendRoleMenuCommand command, CancellationToken cancellationToken = default)
     {
         if (command is null) throw new ArgumentNullException(nameof(command));
 

@@ -1,8 +1,6 @@
 ﻿using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.ServerBoosterHistoryEntry;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
-using MikyM.CommandHandlers;
-using MikyM.Common.Utilities.Results;
 using MikyM.Common.Utilities.Results.Errors;
 using MikyM.Discord.Extensions.BaseExtensions;
 
@@ -18,7 +16,7 @@ public class AddServerBoosterHistoryEntryCommandHandler : ICommandHandler<AddSer
         _guildDataService = guildDataService;
     }
 
-    public async Task<Result> HandleAsync(AddServerBoosterHistoryEntryCommand historyEntryCommand)
+    public async Task<Result> HandleAsync(AddServerBoosterHistoryEntryCommand historyEntryCommand, CancellationToken cancellationToken = default)
     {
         var guildRes =
             await _guildDataService.GetSingleBySpecAsync(

@@ -21,11 +21,8 @@ using Lisbeth.Bot.Application.Discord.Commands.Mute;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Mute;
 using Lisbeth.Bot.Domain.DTOs.Request.Mute;
 using Microsoft.Extensions.Logging;
-using MikyM.CommandHandlers;
 using MikyM.Common.Utilities.Extensions;
-using MikyM.Common.Utilities.Results;
 using MikyM.Common.Utilities.Results.Errors;
-using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Mute;
 
@@ -47,7 +44,7 @@ public class RevokeExpiredMutesCommandHandler : ICommandHandler<RevokeExpiredMut
         _lifetimeScope = lifetimeScope;
     }
 
-    public async Task<Result> HandleAsync(RevokeExpiredMutesCommand command)
+    public async Task<Result> HandleAsync(RevokeExpiredMutesCommand command, CancellationToken cancellationToken = default)
     {
         try
         {

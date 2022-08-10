@@ -18,8 +18,6 @@
 using Lisbeth.Bot.Application.Discord.Commands.Ticket;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Microsoft.Extensions.Logging;
-using MikyM.CommandHandlers;
-using MikyM.Common.Utilities.Results;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 
@@ -27,16 +25,16 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 public class RejectCloseTicketCommandHandler : ICommandHandler<RejectCloseTicketCommand>
 {
     private readonly IGuildDataService _guildDataService;
-    private readonly ILogger<CloseTicketCommandHandler> _logger;
+    private readonly ILogger<RejectCloseTicketCommandHandler> _logger;
 
     public RejectCloseTicketCommandHandler(IGuildDataService guildDataService,
-        ILogger<CloseTicketCommandHandler> logger)
+        ILogger<RejectCloseTicketCommandHandler> logger)
     {
         _guildDataService = guildDataService;
         _logger = logger;
     }
 
-    public async Task<Result> HandleAsync(RejectCloseTicketCommand command)
+    public async Task<Result> HandleAsync(RejectCloseTicketCommand command, CancellationToken cancellationToken = default)
     {
         var guildRes =
             await _guildDataService.GetSingleBySpecAsync(

@@ -1,7 +1,5 @@
 ﻿using Lisbeth.Bot.Application.Discord.Commands.MemberHistoryEntry;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
-using MikyM.CommandHandlers;
-using MikyM.Common.Utilities.Results;
 using MikyM.Discord.Extensions.BaseExtensions;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.MemberHistoryEntry;
@@ -16,7 +14,7 @@ public class AddMemberHistoryEntryCommandHandler : ICommandHandler<AddMemberHist
         _guildDataService = guildDataService;
     }
 
-    public async Task<Result> HandleAsync(AddMemberHistoryEntryCommand historyEntryCommand)
+    public async Task<Result> HandleAsync(AddMemberHistoryEntryCommand historyEntryCommand, CancellationToken cancellationToken = default)
     {
         var guildRes =
             await _guildDataService.GetSingleBySpecAsync(

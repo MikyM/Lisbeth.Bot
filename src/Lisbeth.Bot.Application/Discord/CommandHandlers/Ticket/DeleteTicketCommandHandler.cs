@@ -18,8 +18,6 @@
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.Ticket;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
-using MikyM.CommandHandlers;
-using MikyM.Common.Utilities.Results;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 
@@ -33,7 +31,7 @@ public class DeleteTicketCommandHandler : ICommandHandler<DeleteTicketCommand>
         _guildDataService = guildDataService;
     }
 
-    public async Task<Result> HandleAsync(DeleteTicketCommand command)
+    public async Task<Result> HandleAsync(DeleteTicketCommand command, CancellationToken cancellationToken = default)
     {
         var guildRes = await _guildDataService.GetSingleBySpecAsync(new ActiveGuildByIdSpec(command.Interaction.Guild.Id));
 

@@ -23,7 +23,6 @@ using FluentValidation;
 using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
 using Lisbeth.Bot.Application.Validation.Ban;
 using Lisbeth.Bot.Domain.DTOs.Request.Ban;
-using MikyM.Common.Utilities.Results;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 

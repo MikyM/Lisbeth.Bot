@@ -20,9 +20,7 @@ using DSharpPlus.EventArgs;
 using Lisbeth.Bot.Application.Discord.Commands.ChannelMessageFormat;
 using Lisbeth.Bot.Application.Discord.Commands.Modules.Suggestions;
 using Lisbeth.Bot.Domain.DTOs.Request.ChannelMessageFormat;
-using MikyM.CommandHandlers;
 using MikyM.Discord.Events;
-using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.EventHandlers;
 

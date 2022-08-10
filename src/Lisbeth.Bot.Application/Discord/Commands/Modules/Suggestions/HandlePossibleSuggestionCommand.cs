@@ -1,5 +1,4 @@
 ﻿using DSharpPlus.EventArgs;
-using MikyM.CommandHandlers;
 
 namespace Lisbeth.Bot.Application.Discord.Commands.Modules.Suggestions;
 

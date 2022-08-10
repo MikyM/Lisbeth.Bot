@@ -2,10 +2,7 @@
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.Modules.Suggestions;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
-using MikyM.CommandHandlers;
-using MikyM.Common.Utilities.Results;
 using MikyM.Discord.Extensions.BaseExtensions;
-using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Modules.Suggestions;
 
@@ -21,7 +18,7 @@ public class HandlePossibleSuggestionCommandHandler : ICommandHandler<HandlePoss
         _discord = discord;
     }
 
-    public async Task<Result> HandleAsync(HandlePossibleSuggestionCommand command)
+    public async Task<Result> HandleAsync(HandlePossibleSuggestionCommand command, CancellationToken cancellationToken = default)
     {
         var guildRes =
             await _guildDataService.GetSingleBySpecAsync(

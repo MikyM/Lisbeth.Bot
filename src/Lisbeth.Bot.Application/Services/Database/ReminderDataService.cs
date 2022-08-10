@@ -20,8 +20,6 @@ using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Reminder;
 using Lisbeth.Bot.Domain.DTOs.Request.Reminder;
 using MikyM.Common.EfCore.DataAccessLayer.UnitOfWork;
-using MikyM.Common.Utilities.Results;
-using MikyM.Common.Utilities.Results.Errors.Bases;
 using NCrontab;
 
 namespace Lisbeth.Bot.Application.Services.Database;

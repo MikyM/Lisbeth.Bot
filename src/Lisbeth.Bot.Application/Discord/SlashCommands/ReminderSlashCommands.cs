@@ -26,8 +26,6 @@ using Lisbeth.Bot.Application.Discord.Commands.Reminder;
 using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
 using Lisbeth.Bot.Application.Validation.Reminder;
 using Lisbeth.Bot.Domain.DTOs.Request.Reminder;
-using MikyM.CommandHandlers;
-using MikyM.Common.Utilities.Results;
 using NCrontab;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands;

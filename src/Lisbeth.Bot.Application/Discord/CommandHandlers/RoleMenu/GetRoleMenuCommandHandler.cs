@@ -22,11 +22,7 @@ using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.DataAccessLayer.Specifications.RoleMenu;
 using Microsoft.Extensions.Logging;
-using MikyM.CommandHandlers;
-using MikyM.Common.Utilities.Results;
-using MikyM.Discord.Enums;
 using MikyM.Discord.Extensions.BaseExtensions;
-using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.RoleMenu;
 
@@ -50,7 +46,7 @@ public class GetRoleMenuCommandHandler : ICommandHandler<GetRoleMenuCommand, Dis
         _discordEmbedProvider = discordEmbedProvider;
     }
 
-    public async Task<Result<DiscordMessageBuilder>> HandleAsync(GetRoleMenuCommand command)
+    public async Task<Result<DiscordMessageBuilder>> HandleAsync(GetRoleMenuCommand command, CancellationToken cancellationToken = default)
     {
         if (command is null) throw new ArgumentNullException(nameof(command));
 

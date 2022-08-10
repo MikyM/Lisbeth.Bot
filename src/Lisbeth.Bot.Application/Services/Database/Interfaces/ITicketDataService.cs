@@ -19,7 +19,6 @@ using System.Collections.Generic;
 using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 using MikyM.Common.EfCore.ApplicationLayer.Interfaces;
-using MikyM.Common.Utilities.Results;
 
 namespace Lisbeth.Bot.Application.Services.Database.Interfaces;
 

@@ -18,8 +18,6 @@
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Domain.DTOs.Request.Base;
-using MikyM.Common.Utilities.Results;
-using MikyM.Discord.Enums;
 
 namespace Lisbeth.Bot.Application.Discord.Services.Interfaces;
 

@@ -18,7 +18,6 @@
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using Hangfire;
-using Lisbeth.Bot.Application.Discord.EmbedBuilders;
 using Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response.Infractions;
 using Lisbeth.Bot.Application.Discord.Exceptions;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Ban;
@@ -26,12 +25,9 @@ using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.Domain.DTOs.Request.Ban;
 using Microsoft.Extensions.Logging;
 using MikyM.Common.Utilities.Extensions;
-using MikyM.Common.Utilities.Results;
 using MikyM.Common.Utilities.Results.Errors;
 using MikyM.Discord.EmbedBuilders.Enums;
-using MikyM.Discord.Enums;
 using MikyM.Discord.Extensions.BaseExtensions;
-using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.Services;
 

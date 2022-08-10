@@ -17,18 +17,13 @@
 
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.Mute;
-using Lisbeth.Bot.Application.Discord.EmbedBuilders;
 using Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response.Infractions;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Mute;
 using Microsoft.Extensions.Logging;
-using MikyM.CommandHandlers;
-using MikyM.Common.Utilities.Results;
 using MikyM.Common.Utilities.Results.Errors;
 using MikyM.Discord.EmbedBuilders.Enums;
-using MikyM.Discord.Enums;
 using MikyM.Discord.Extensions.BaseExtensions;
-using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Mute;
 
@@ -54,7 +49,7 @@ public class GetMuteInfoCommandHandler : ICommandHandler<GetMuteInfoCommand, Dis
         _embedBuilder = embedBuilder;
     }
 
-    public async Task<Result<DiscordEmbed>> HandleAsync(GetMuteInfoCommand command)
+    public async Task<Result<DiscordEmbed>> HandleAsync(GetMuteInfoCommand command, CancellationToken cancellationToken = default)
     {
         if (command is null) throw new ArgumentNullException(nameof(command));
 

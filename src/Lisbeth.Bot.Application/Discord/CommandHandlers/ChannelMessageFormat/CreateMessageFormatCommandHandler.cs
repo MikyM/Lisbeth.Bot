@@ -20,17 +20,10 @@ using DSharpPlus.Entities;
 using DSharpPlus.Interactivity.Extensions;
 using FluentValidation;
 using Lisbeth.Bot.Application.Discord.Commands.ChannelMessageFormat;
-using Lisbeth.Bot.Application.Discord.EmbedBuilders;
-using Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response.ChannelMessageFormat;
 using Lisbeth.Bot.Application.Discord.SlashCommands;
 using Lisbeth.Bot.Application.Validation.ChannelMessageFormat;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
-using MikyM.CommandHandlers;
-using MikyM.Common.Utilities.Results;
-using MikyM.Common.Utilities.Results.Errors.Bases;
-using MikyM.Discord.Enums;
 using MikyM.Discord.Extensions.BaseExtensions;
-using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.ChannelMessageFormat;
 
@@ -51,7 +44,7 @@ public class CreateMessageFormatCommandHandler : ICommandHandler<CreateMessageFo
         _mapper = mapper;
     }
 
-    public async Task<Result<DiscordEmbed>> HandleAsync(CreateMessageFormatCommand command)
+    public async Task<Result<DiscordEmbed>> HandleAsync(CreateMessageFormatCommand command, CancellationToken cancellationToken = default)
     {
         if (command is null) throw new ArgumentNullException(nameof(command));
 

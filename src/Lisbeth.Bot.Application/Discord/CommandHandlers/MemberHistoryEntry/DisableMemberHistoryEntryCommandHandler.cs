@@ -2,10 +2,7 @@
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.MemberHistoryEntry;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
-using MikyM.CommandHandlers;
-using MikyM.Common.Utilities.Results;
 using MikyM.Discord.Extensions.BaseExtensions;
-using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.MemberHistoryEntry;
 
@@ -21,7 +18,7 @@ public class DisableMemberHistoryEntryCommandHandler : ICommandHandler<DisableMe
         _discord = discord;
     }
     
-    public async Task<Result<Guild>> HandleAsync(DisableMemberHistoryEntryCommand historyEntryCommand)
+    public async Task<Result<Guild>> HandleAsync(DisableMemberHistoryEntryCommand historyEntryCommand, CancellationToken cancellationToken = default)
     {
         var guildRes =
             await _guildDataService.GetSingleBySpecAsync(

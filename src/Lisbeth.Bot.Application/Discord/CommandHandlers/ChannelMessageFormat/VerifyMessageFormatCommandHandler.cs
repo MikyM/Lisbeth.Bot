@@ -18,22 +18,13 @@
 using AutoMapper;
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.ChannelMessageFormat;
-using Lisbeth.Bot.Application.Discord.Commands.DirectMessage;
-using Lisbeth.Bot.Application.Discord.EmbedBuilders;
-using Lisbeth.Bot.Application.Discord.EmbedEnrichers.DirectMessage;
-using Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response.ChannelMessageFormat;
 using Lisbeth.Bot.Application.Discord.SlashCommands;
 using Lisbeth.Bot.Application.Validation.DirectMessage;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.Domain.DTOs;
 using Lisbeth.Bot.Domain.DTOs.Request.DirectMessage;
 using Microsoft.Extensions.Logging;
-using MikyM.CommandHandlers;
-using MikyM.Common.Utilities.Results;
-using MikyM.Common.Utilities.Results.Errors.Bases;
-using MikyM.Discord.Enums;
 using MikyM.Discord.Extensions.BaseExtensions;
-using MikyM.Discord.Interfaces;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.ChannelMessageFormat;
 
@@ -60,7 +51,7 @@ public class VerifyMessageFormatCommandHandler : ICommandHandler<VerifyMessageFo
         _logger = logger;
     }
 
-    public async Task<Result<VerifyMessageFormatResDto>> HandleAsync(VerifyMessageFormatCommand command)
+    public async Task<Result<VerifyMessageFormatResDto>> HandleAsync(VerifyMessageFormatCommand command, CancellationToken cancellationToken = default)
     {
         if (command is null) throw new ArgumentNullException(nameof(command));
 

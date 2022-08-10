@@ -22,10 +22,7 @@ using Lisbeth.Bot.Application.Discord.Commands.Ticket;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Ticket;
 using Microsoft.Extensions.Logging;
-using MikyM.CommandHandlers;
-using MikyM.Common.Utilities.Results;
 using MikyM.Common.Utilities.Results.Errors;
-using MikyM.Discord.Enums;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 
@@ -49,7 +46,7 @@ public class RemoveSnowflakeTicketCommandHandler : ICommandHandler<RemoveSnowfla
         _privacyCheckHandler = privacyCheckHandler;
     }
 
-    public async Task<Result<DiscordEmbed>> HandleAsync(RemoveSnowflakeFromTicketCommand command)
+    public async Task<Result<DiscordEmbed>> HandleAsync(RemoveSnowflakeFromTicketCommand command, CancellationToken cancellationToken = default)
     {
         if (command is null) throw new ArgumentNullException(nameof(command));
 
