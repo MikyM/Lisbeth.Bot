@@ -43,7 +43,7 @@ public class SlashCommandEventsHandler : IDiscordSlashCommandsEventsSubscriber
         embed.WithAuthor($"{noEntryEmoji} Context menu errored");
         embed.AddField("Type", args.Exception.GetType().ToString());
         embed.AddField("Message", args.Exception.GetFullMessage());
-        await args.Context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
+        await args.Context.FollowUpAsync(new DiscordFollowupMessageBuilder().AddEmbed(embed.Build()));
     }
 
     public Task SlashCommandsOnContextMenuExecuted(SlashCommandsExtension sender, ContextMenuExecutedEventArgs args)
@@ -60,7 +60,7 @@ public class SlashCommandEventsHandler : IDiscordSlashCommandsEventsSubscriber
         embed.WithAuthor($"{noEntryEmoji} Command errored");
         embed.AddField("Type", args.Exception.GetType().ToString());
         embed.AddField("Message", args.Exception.GetFullMessage());
-        await args.Context.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed.Build()));
+        await args.Context.FollowUpAsync(new DiscordFollowupMessageBuilder().AddEmbed(embed.Build()));
     }
 
     public Task SlashCommandsOnSlashCommandExecuted(SlashCommandsExtension sender,
