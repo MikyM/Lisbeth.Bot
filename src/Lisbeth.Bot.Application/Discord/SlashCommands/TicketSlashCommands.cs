@@ -32,14 +32,16 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 public class TicketSlashCommands : ExtendedApplicationCommandModule
 {
     public TicketSlashCommands(ICommandHandler<AddSnowflakeToTicketCommand, DiscordEmbed> addSnowflakeTicketCommandHandler,
-        ICommandHandler<RemoveSnowflakeFromTicketCommand, DiscordEmbed> removeSnowflakeCommandHandler)
+        ICommandHandler<RemoveSnowflakeFromTicketCommand, DiscordEmbed> removeSnowflakeCommandHandler, ICommandHandler<CloseTicketCommand> closeTicketCommandHandler)
     {
         _addSnowflakeTicketCommandHandler = addSnowflakeTicketCommandHandler;
         _removeSnowflakeCommandHandler = removeSnowflakeCommandHandler;
+        _closeTicketCommandHandler = closeTicketCommandHandler;
     }
 
     private readonly ICommandHandler<AddSnowflakeToTicketCommand, DiscordEmbed> _addSnowflakeTicketCommandHandler;
     private readonly ICommandHandler<RemoveSnowflakeFromTicketCommand, DiscordEmbed> _removeSnowflakeCommandHandler;
+    private readonly ICommandHandler<CloseTicketCommand> _closeTicketCommandHandler;
 
     [UsedImplicitly]
     [SlashRequireUserPermissions(Permissions.BanMembers)]
@@ -71,6 +73,12 @@ public class TicketSlashCommands : ExtendedApplicationCommandModule
                 await removeReqValidator.ValidateAndThrowAsync(removeReq);
                 result = await _removeSnowflakeCommandHandler.HandleAsync(new RemoveSnowflakeFromTicketCommand(removeReq, ctx));
                 break;
+            case TicketActionType.Close:
+                var closeReq = new TicketCloseReqDto(null, ctx.Guild.Id, ctx.Channel.Id, ctx.User.Id);
+                var closeReqValidator = new TicketCloseReqValidator(ctx.Client);
+                await closeReqValidator.ValidateAndThrowAsync(closeReq);
+                await _closeTicketCommandHandler.HandleAsync(new CloseTicketCommand(ctx.Interaction));
+                return;
             default:
                 throw new ArgumentOutOfRangeException(nameof(action), action, null);
         }

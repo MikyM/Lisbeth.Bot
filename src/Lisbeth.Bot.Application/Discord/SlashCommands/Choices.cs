@@ -56,6 +56,7 @@ public enum PruneActionType
 
 public enum TicketActionType
 {
+    [ChoiceName("close")] Close,
     [ChoiceName("add")] Add,
     [ChoiceName("remove")] Remove
 }
