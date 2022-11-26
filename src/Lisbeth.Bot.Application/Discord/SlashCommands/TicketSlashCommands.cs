@@ -52,8 +52,6 @@ public class TicketSlashCommands : ExtendedApplicationCommandModule
         [Option("target", "A user or a role to add")]
         SnowflakeObject? target = null)
     {
-        if (target is null) throw new ArgumentNullException(nameof(target));
-
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
             new DiscordInteractionResponseBuilder().AsEphemeral());
 
@@ -61,12 +59,14 @@ public class TicketSlashCommands : ExtendedApplicationCommandModule
         switch (action)
         {
             case TicketActionType.Add:
+                if (target is null) throw new ArgumentNullException(nameof(target));
                 var addReq = new TicketAddReqDto(null,  ctx.Guild.Id, ctx.Channel.Id, ctx.User.Id, target.Id);
                 var addReqValidator = new TicketAddReqValidator(ctx.Client);
                 await addReqValidator.ValidateAndThrowAsync(addReq);
                 result = await _addSnowflakeTicketCommandHandler.HandleAsync(new AddSnowflakeToTicketCommand(addReq, ctx));
                 break;
             case TicketActionType.Remove:
+                if (target is null) throw new ArgumentNullException(nameof(target));
                 var removeReq = new TicketRemoveReqDto(null, ctx.Guild.Id, ctx.Channel.Id, ctx.User.Id,
                     target.Id);
                 var removeReqValidator = new TicketRemoveReqValidator(ctx.Client);
