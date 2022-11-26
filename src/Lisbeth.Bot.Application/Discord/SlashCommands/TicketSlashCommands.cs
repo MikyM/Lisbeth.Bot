@@ -50,7 +50,7 @@ public class TicketSlashCommands : ExtendedApplicationCommandModule
         [Option("action", "Type of action to perform")]
         TicketActionType action,
         [Option("target", "A user or a role to add")]
-        SnowflakeObject target)
+        SnowflakeObject? target = null)
     {
         if (target is null) throw new ArgumentNullException(nameof(target));
 
