@@ -54,16 +54,14 @@ public class CreateTagCommandHandler : ICommandHandler<CreateTagCommand>
 
         var guildCfg =
             await _guildDataService.GetSingleBySpecAsync(
-                new ActiveGuildByDiscordIdWithTagsSpecifications(command.Dto.GuildId));
+                new ActiveGuildByDiscordIdWithTagsSpecifications(command.Dto.GuildId), cancellationToken);
         if (!guildCfg.IsDefined())
             return Result.FromError(guildCfg);
 
-        if (!requestingUser.IsModerator())
-            return new DiscordNotAuthorizedError();
+        var check = await _tagDataService.LongCountAsync(new ActiveTagByGuildAndNameSpec(command.Dto.Name ?? string.Empty, command.Dto.GuildId), cancellationToken);
 
-        var check = await _tagDataService.LongCountAsync(new ActiveTagByGuildAndNameSpec(command.Dto.Name ?? string.Empty, command.Dto.GuildId));
-
-        if (check.IsDefined(out var count) && count > 0) return new SameEntityNamePerGuildError("Tag", command.Dto.Name!);
+        if (check.IsDefined(out var count) && count > 0) 
+            return new SameEntityNamePerGuildError("Tag", command.Dto.Name!);
 
         command.Dto.Name = command.Dto.Name?.ToLower();
         var res = await _tagDataService.AddAsync(command.Dto, true);
