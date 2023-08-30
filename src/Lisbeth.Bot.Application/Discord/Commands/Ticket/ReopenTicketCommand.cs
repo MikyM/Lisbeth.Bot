@@ -15,12 +15,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus.Entities;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 
 namespace Lisbeth.Bot.Application.Discord.Commands.Ticket;
 
-public class ReopenTicketCommand : CommandBase<DiscordMessageBuilder>
+public class ReopenTicketCommand : ICommand<DiscordMessageBuilder>
 {
     public ReopenTicketCommand(TicketReopenReqDto dto, DiscordInteraction? interaction = null)
     {

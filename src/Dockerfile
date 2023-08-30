@@ -1,12 +1,11 @@
-FROM mcr.microsoft.com/dotnet/aspnet:6.0-focal AS base
+FROM mcr.microsoft.com/dotnet/aspnet:7.0-focal AS base
 RUN apt-get update -y
 RUN apt-get install -y tzdata
 WORKDIR /app
-FROM mcr.microsoft.com/dotnet/sdk:6.0-focal AS build
+FROM mcr.microsoft.com/dotnet/sdk:7.0-focal AS build
 WORKDIR /src
 # Copy the main source project files
 COPY . .
-RUN dotnet nuget add source https://nuget.emzi0767.com/api/v3/index.json -n dsharp
 RUN dotnet restore "Lisbeth.Bot.API/Lisbeth.Bot.API.csproj" --no-cache
 COPY . .
 WORKDIR "/src/."

@@ -15,8 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus;
-using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.Ticket;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Buttons;
@@ -25,7 +23,7 @@ using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 
 [UsedImplicitly]
-public class GetCenterEmbedTicketCommandHandler : ICommandHandler<GetTicketCenterEmbedCommand, DiscordMessageBuilder>
+public class GetCenterEmbedTicketCommandHandler : IAsyncCommandHandler<GetTicketCenterEmbedCommand, DiscordMessageBuilder>
 {
     private readonly IGuildDataService _guildDataService;
     private readonly IDiscordEmbedProvider _embedProvider;

@@ -16,11 +16,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using DSharpPlus.Entities;
 
 namespace Lisbeth.Bot.Application.Discord.Commands.RoleMenu;
 
-public class GetRoleMenuSelectCommand : CommandBase<DiscordSelectComponent>
+public class GetRoleMenuSelectCommand : ICommand<DiscordSelectComponent>
 {
     public GetRoleMenuSelectCommand(Domain.Entities.RoleMenu roleMenu, IEnumerable<DiscordRole> memberRoles)
     {

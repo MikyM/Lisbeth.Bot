@@ -33,7 +33,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using MikyM.Common.DataAccessLayer;
 using MikyM.Discord.EmbedBuilders;
 using Serilog;
 using Serilog.Events;
@@ -147,7 +146,6 @@ public class Program
             options.SetChatExportJs(chatExportJs);
 
             // Configure IdGen factory
-            app.Services.ConfigureIdGeneratorFactory();
             ChatExportHttpClientFactory.SetFactory(() =>
                 app.Services.GetAutofacRoot().Resolve<IHttpClientFactory>().CreateClient());
 
@@ -192,7 +190,7 @@ public class Program
         }
         finally
         {
-            Log.CloseAndFlush();
+            await Log.CloseAndFlushAsync();
         }
     }
 }

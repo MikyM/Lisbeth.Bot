@@ -17,12 +17,10 @@
 
 using System;
 using System.Collections.Generic;
-using MikyM.Common.DataAccessLayer;
-using MikyM.Common.Domain.Entities;
 
 namespace Lisbeth.Bot.Domain.Entities;
 
-public sealed class Ticket : SnowflakeEntity, IDisableableEntity
+public sealed class Ticket : LisbethEntity
 {
     public ulong UserId { get; set; }
     public ulong ChannelId { get; set; }

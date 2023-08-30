@@ -16,12 +16,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using MikyM.Common.DataAccessLayer;
-using MikyM.Common.Domain.Entities;
 
 namespace Lisbeth.Bot.Domain.Entities;
 
-public sealed class Prune : SnowflakeEntity, IDisableableEntity
+public sealed class Prune : LisbethEntity
 {
     public ulong UserId { get; set; }
     public ulong ModeratorId { get; set; }

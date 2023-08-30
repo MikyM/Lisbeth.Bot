@@ -16,8 +16,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using DSharpPlus;
-using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.ChatExport;
 using Lisbeth.Bot.Application.Discord.Commands.Ticket;
 using Lisbeth.Bot.Application.Discord.Extensions;
@@ -27,24 +25,23 @@ using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Ticket;
 using Microsoft.Extensions.Logging;
 using MikyM.Common.Utilities;
-using MikyM.Common.Utilities.Results.Errors;
 using MikyM.Discord.Extensions.BaseExtensions;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 
 [UsedImplicitly]
-public class ConfirmCloseTicketCommandHandler : ICommandHandler<ConfirmCloseTicketCommand>
+public class ConfirmCloseTicketCommandHandler : IAsyncCommandHandler<ConfirmCloseTicketCommand>
 {
     private readonly IDiscordGuildRequestDataProvider _requestDataProvider;
     private readonly IGuildDataService _guildDataService;
     private readonly ITicketDataService _ticketDataService;
     private readonly ILogger<ConfirmCloseTicketCommandHandler> _logger;
-    private readonly IAsyncExecutor _asyncExecutor;
+    private readonly IBackgroundExecutor _asyncExecutor;
     private readonly IDiscordService _discord;
 
     public ConfirmCloseTicketCommandHandler(IDiscordGuildRequestDataProvider guildDataProvider, IGuildDataService guildDataService,
         ITicketDataService ticketDataService, ILogger<ConfirmCloseTicketCommandHandler> logger,
-        IAsyncExecutor asyncExecutor, IDiscordService discord)
+        IBackgroundExecutor asyncExecutor, IDiscordService discord)
     {
         _requestDataProvider = guildDataProvider;
         _guildDataService = guildDataService;

@@ -17,7 +17,7 @@
 
 namespace Lisbeth.Bot.Application.Discord.Commands.Ticket;
 
-public class CleanClosedTicketsCommand : CommandBase
+public class CleanClosedTicketsCommand : ICommand
 {
         
 }

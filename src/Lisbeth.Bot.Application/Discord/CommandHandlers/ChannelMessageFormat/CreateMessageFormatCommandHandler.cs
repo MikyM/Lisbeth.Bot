@@ -16,8 +16,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using AutoMapper;
-using DSharpPlus.Entities;
-using DSharpPlus.Interactivity.Extensions;
 using FluentValidation;
 using Lisbeth.Bot.Application.Discord.Commands.ChannelMessageFormat;
 using Lisbeth.Bot.Application.Discord.SlashCommands;
@@ -28,7 +26,7 @@ using MikyM.Discord.Extensions.BaseExtensions;
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.ChannelMessageFormat;
 
 [UsedImplicitly]
-public class CreateMessageFormatCommandHandler : ICommandHandler<CreateMessageFormatCommand, DiscordEmbed>
+public class CreateMessageFormatCommandHandler : IAsyncCommandHandler<CreateMessageFormatCommand, DiscordEmbed>
 {
     private readonly IDiscordService _discord;
     private readonly IGuildDataService _guildDataService;
@@ -84,7 +82,7 @@ public class CreateMessageFormatCommandHandler : ICommandHandler<CreateMessageFo
 
         var format = guildCfg.ChannelMessageFormats?.FirstOrDefault(x => x.ChannelId == command.Dto.ChannelId);
         if (format is not null)
-            return new ArgumentError(nameof(command.Dto.ChannelId),
+            return new ArgumentInvalidError(nameof(command.Dto.ChannelId),
                 $"There already is a{(format.IsDisabled ? " disabled" : "")} message format registered for this channel");
 
         if (command.Ctx is not null)

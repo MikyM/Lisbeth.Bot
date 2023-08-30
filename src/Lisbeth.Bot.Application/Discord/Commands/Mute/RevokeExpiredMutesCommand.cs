@@ -17,6 +17,6 @@
 
 namespace Lisbeth.Bot.Application.Discord.Commands.Mute;
 
-public class RevokeExpiredMutesCommand : CommandBase
+public class RevokeExpiredMutesCommand : ICommand
 {
 }

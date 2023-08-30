@@ -17,8 +17,6 @@
 
 using System.Collections.Generic;
 using System.Globalization;
-using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.Domain.DTOs.Request.Reminder;
 using MikyM.Discord.Extensions.BaseExtensions;
@@ -26,9 +24,7 @@ using MikyM.Discord.Extensions.BaseExtensions;
 namespace Lisbeth.Bot.Application.Discord.Services;
 
 [UsedImplicitly]
-[Service]
-[RegisterAs(typeof(IDiscordReminderService))]
-[Lifetime(Lifetime.InstancePerLifetimeScope)]
+[ServiceImplementation<IDiscordReminderService>(ServiceLifetime.InstancePerLifetimeScope)]
 public class DiscordReminderService : IDiscordReminderService
 {
     private readonly IDiscordService _discord;

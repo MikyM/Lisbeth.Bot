@@ -17,7 +17,6 @@
 
 using System;
 using System.Collections.Generic;
-using Lisbeth.Bot.Domain.Entities.Base;
 
 namespace Lisbeth.Bot.Domain.Entities;
 

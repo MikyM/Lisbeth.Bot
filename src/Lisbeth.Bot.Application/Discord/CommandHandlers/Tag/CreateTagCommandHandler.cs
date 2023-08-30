@@ -15,16 +15,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.Tag;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Tag;
-using MikyM.Discord.Extensions.BaseExtensions;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Tag;
 
 [UsedImplicitly]
-public class CreateTagCommandHandler : ICommandHandler<CreateTagCommand>
+public class CreateTagCommandHandler : IAsyncCommandHandler<CreateTagCommand>
 {
     private readonly IDiscordService _discord;
     private readonly IGuildDataService _guildDataService;

@@ -15,12 +15,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus.Entities;
 using Lisbeth.Bot.Domain.DTOs.Request.DirectMessage;
 
 namespace Lisbeth.Bot.Application.Discord.Commands.DirectMessage;
 
-public class SendDirectMessageCommand : CommandBase
+public class SendDirectMessageCommand : ICommand
 {
     public SendDirectMessageCommand(SendDirectMessageReqDto dto, DiscordMember? requestedOnBehalfOf = null,
         DiscordGuild? guild = null, DiscordMember? recipientUser = null)

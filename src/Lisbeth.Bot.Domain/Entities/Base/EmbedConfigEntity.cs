@@ -17,7 +17,7 @@
 
 namespace Lisbeth.Bot.Domain.Entities.Base;
 
-public class EmbedConfigEntity : SnowflakeDiscordEntity
+public class EmbedConfigEntity : LisbethDiscordEntity
 {
     public long? EmbedConfigId { get; set; }
     public EmbedConfig? EmbedConfig { get; set; }

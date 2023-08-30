@@ -1,13 +1,11 @@
-﻿using DSharpPlus;
-using DSharpPlus.Entities;
-using Lisbeth.Bot.Application.Discord.Commands.Modules.Suggestions;
+﻿using Lisbeth.Bot.Application.Discord.Commands.Modules.Suggestions;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using MikyM.Discord.Extensions.BaseExtensions;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Modules.Suggestions;
 
 [UsedImplicitly]
-public class HandlePossibleSuggestionCommandHandler : ICommandHandler<HandlePossibleSuggestionCommand>
+public class HandlePossibleSuggestionCommandHandler : IAsyncCommandHandler<HandlePossibleSuggestionCommand>
 {
     private readonly IGuildDataService _guildDataService;
     private readonly IDiscordService _discord;

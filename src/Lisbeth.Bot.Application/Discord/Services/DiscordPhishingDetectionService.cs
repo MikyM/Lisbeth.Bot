@@ -20,7 +20,6 @@
 
 using System.Net.Http;
 using System.Text.RegularExpressions;
-using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.Mute;
 using Lisbeth.Bot.Application.Services;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
@@ -35,10 +34,8 @@ namespace Lisbeth.Bot.Application.Discord.Services;
 /// <summary>
 ///     Handles potential phishing links.
 /// </summary>
-[Service]
-[RegisterAs(typeof(IDiscordPhishingDetectionService))]
-[Lifetime(Lifetime.InstancePerLifetimeScope)]
 [UsedImplicitly]
+[ServiceImplementation<IDiscordPhishingDetectionService>(ServiceLifetime.InstancePerLifetimeScope)]
 public sealed class DiscordPhishingDetectionService : IDiscordPhishingDetectionService
 {
     private const string PhishingReason = "Message contained a phishing link.";
@@ -53,14 +50,14 @@ public sealed class DiscordPhishingDetectionService : IDiscordPhishingDetectionS
     private readonly IGuildDataService _guildDataService;
     private readonly IDiscordService _discord;
     private readonly IDiscordBanService _banService;
-    private readonly ICommandHandlerFactory _commandHandlerFactory;
+    private readonly ICommandHandlerResolver _commandHandlerFactory;
     private readonly IOptions<BotConfiguration> _options;
     private readonly HttpClient _httpClient;
 
     public DiscordPhishingDetectionService(PhishingGatewayService phishGateway,
         ILogger<DiscordPhishingDetectionService> logger,
         IGuildDataService guildDataService, IDiscordService discord, IDiscordBanService banService,
-        ICommandHandlerFactory commandHandlerFactory, IOptions<BotConfiguration> options, IHttpClientFactory httpClientFactory)
+        ICommandHandlerResolver commandHandlerFactory, IOptions<BotConfiguration> options, IHttpClientFactory httpClientFactory)
     {
         _phishGateway = phishGateway;
         _logger = logger;
@@ -162,7 +159,7 @@ public sealed class DiscordPhishingDetectionService : IDiscordPhishingDetectionS
         if (isOnlySuspicious)
         {
             var mr = await _commandHandlerFactory
-                .GetHandler<ICommandHandler<ApplyMuteCommand, DiscordEmbed>>()
+                .GetHandler<IAsyncCommandHandler<ApplyMuteCommand, DiscordEmbed>>()
                 .HandleAsync(new ApplyMuteCommand(new MuteApplyReqDto(message.Author.Id, message.Channel.Guild.Id,
                     self,
                     DateTime.UtcNow.AddDays(7), $"{PhishingSuspiciousReason}{message.Content}")));
@@ -175,7 +172,7 @@ public sealed class DiscordPhishingDetectionService : IDiscordPhishingDetectionS
                 return Result.FromSuccess();
             case PhishingDetection.Mute:
                 var mr = await _commandHandlerFactory
-                    .GetHandler<ICommandHandler<ApplyMuteCommand, DiscordEmbed>>()
+                    .GetHandler<IAsyncCommandHandler<ApplyMuteCommand, DiscordEmbed>>()
                     .HandleAsync(new ApplyMuteCommand(new MuteApplyReqDto(message.Author.Id, message.Channel.Guild.Id,
                         self,
                         DateTime.UtcNow.AddDays(7), PhishingReason)));

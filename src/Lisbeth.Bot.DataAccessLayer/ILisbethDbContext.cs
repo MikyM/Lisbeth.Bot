@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using MikyM.Common.EfCore.DataAccessLayer.Context;
+using DataExplorer.EfCore.Abstractions.DataContexts;
 
 namespace Lisbeth.Bot.DataAccessLayer;
 

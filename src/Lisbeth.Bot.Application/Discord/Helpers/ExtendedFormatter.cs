@@ -19,8 +19,6 @@
 
 using System.Globalization;
 using System.Text.RegularExpressions;
-using DSharpPlus;
-using DSharpPlus.Entities;
 
 namespace Lisbeth.Bot.Application.Discord.Helpers;
 

@@ -15,13 +15,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using DataExplorer.EfCore.Abstractions.DataServices;
 using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.ReminderConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.RoleMenu;
 using Lisbeth.Bot.Domain.DTOs.Request.SuggestionConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
-using MikyM.Common.EfCore.ApplicationLayer.Interfaces;
 
 namespace Lisbeth.Bot.Application.Services.Database.Interfaces;
 

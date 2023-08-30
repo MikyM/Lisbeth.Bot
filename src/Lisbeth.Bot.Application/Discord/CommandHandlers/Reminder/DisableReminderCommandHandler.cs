@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.Reminder;
 using Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response.Reminder;
 using Lisbeth.Bot.Application.Discord.SlashCommands;
@@ -25,7 +24,7 @@ using MikyM.Discord.Extensions.BaseExtensions;
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Reminder;
 
 [UsedImplicitly]
-public class DisableReminderCommandHandler : ICommandHandler<DisableReminderCommand, DiscordEmbed>
+public class DisableReminderCommandHandler : IAsyncCommandHandler<DisableReminderCommand, DiscordEmbed>
 {
     private readonly IGuildDataService _guildDataService;
     private readonly IDiscordService _discord;

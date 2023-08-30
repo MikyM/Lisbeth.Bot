@@ -3,11 +3,7 @@ using System.Globalization;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using AutoMapper;
-using DSharpPlus;
-using DSharpPlus.Entities;
-using DSharpPlus.Interactivity;
-using DSharpPlus.Interactivity.Extensions;
-using DSharpPlus.SlashCommands;
+using DataExplorer.EfCore.Abstractions.DataServices;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Buttons;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Selects;
@@ -17,19 +13,15 @@ using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.DataAccessLayer.Specifications.EmbedConfig;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.Domain.Entities.Base;
-using MikyM.Common.EfCore.ApplicationLayer.Interfaces;
 using MikyM.Common.Utilities.ExpressionHelpers;
-using MikyM.Common.Utilities.Results.Errors;
 using MikyM.Discord.EmbedBuilders;
 using MikyM.Discord.Extensions.BaseExtensions;
 
 namespace Lisbeth.Bot.Application.Discord.Services;
 
 [UsedImplicitly]
-[Service]
-[RegisterAs(typeof(IDiscordEmbedConfiguratorService<>))]
-[Lifetime(Lifetime.InstancePerLifetimeScope)]
-public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorService<T> where T : SnowflakeDiscordEntity
+[ServiceImplementation(ServiceLifetime.InstancePerLifetimeScope, typeof(IDiscordEmbedConfiguratorService<>))]
+public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorService<T> where T : LisbethDiscordEntity
 {
     private readonly IEmbedConfigDataService _embedConfigDataService;
     private readonly IDiscordEmbedProvider _embedProvider;
@@ -55,12 +47,12 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
         var guildRes = await _guildDataService.GetSingleBySpecAsync(new ActiveGuildByIdSpec(ctx.Guild.Id));
 
         if (!guildRes.IsDefined(out var guildCfg))
-            return new NotFoundError("Guild not found");
+            return new NotFoundError_("Guild not found");
 
         var entityResult = await _service.GetSingleBySpecAsync<T>(
             new ActiveSnowflakeWithGivenEmbedSpec<T, TEmbedProperty?>(embedToConfigure, ctx.Guild.Id));
 
-        if (!entityResult.IsDefined(out var entity)) return new NotFoundError();
+        if (!entityResult.IsDefined(out var entity)) return new NotFoundError_();
         if (entityResult.Entity.GuildId != ctx.Guild.Id)
             return new DiscordNotAuthorizedError();
         var member = await ctx.Guild.GetMemberAsync(ctx.User.Id);
@@ -301,7 +293,7 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
         }
 
         if (string.IsNullOrWhiteSpace(waitResult.Result.Content.Trim()))
-            return Result<DiscordEmbedBuilder>.FromError(new DiscordArgumentError(nameof(waitResult.Result.Content)));
+            return Result<DiscordEmbedBuilder>.FromError(new DiscordArgumentInvalidError(nameof(waitResult.Result.Content)));
 
         if (waitResult.Result.Content.Trim() == "@remove@")
             switch (action)
@@ -348,10 +340,10 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
                         .Trim();
 
                     if (string.IsNullOrWhiteSpace(authorText))
-                        return Result<DiscordEmbedBuilder>.FromError(new ArgumentNullError(nameof(authorText)));
+                        return Result<DiscordEmbedBuilder>.FromError(new ArgumentNullError_(nameof(authorText)));
                     if (authorText.Length > 256)
                         return Result<DiscordEmbedBuilder>.FromError(
-                            new DiscordArgumentError("Author text has a limit of 256 characters."));
+                            new DiscordArgumentInvalidError("Author text has a limit of 256 characters."));
 
                     currentResult.WithAuthor(authorText, authorUrl == "" ? null : authorUrl,
                         authorImageUrl == "" ? null : authorImageUrl);
@@ -363,10 +355,10 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
                         .Trim();
 
                     if (string.IsNullOrWhiteSpace(footerText))
-                        return Result<DiscordEmbedBuilder>.FromError(new ArgumentNullError(nameof(footerText)));
+                        return Result<DiscordEmbedBuilder>.FromError(new ArgumentNullError_(nameof(footerText)));
                     if (footerText.Length > 2048)
                         return Result<DiscordEmbedBuilder>.FromError(
-                            new DiscordArgumentError("Footer text has a limit of 2048 characters."));
+                            new DiscordArgumentInvalidError("Footer text has a limit of 2048 characters."));
 
                     currentResult.WithFooter(footerText, footerImageUrl == "" ? null : footerImageUrl);
                     break;
@@ -374,7 +366,7 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
                     string newDesc = waitResult.Result.Content;
                     if (newDesc.Length > 2048)
                         return Result<DiscordEmbedBuilder>.FromError(
-                            new DiscordArgumentError("Description text has a limit of 4096 characters."));
+                            new DiscordArgumentInvalidError("Description text has a limit of 4096 characters."));
 
                     currentResult.WithDescription(newDesc);
                     break;
@@ -385,22 +377,22 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
                 case EmbedConfigModuleType.Field:
                     if (currentResult.Fields.Count == 25)
                         return Result<DiscordEmbedBuilder>.FromError(
-                            new DiscordArgumentError("This embed already has maximum number of fields (25)."));
+                            new DiscordArgumentInvalidError("This embed already has maximum number of fields (25)."));
 
                     string fieldTitle = waitResult.Result.Content.GetStringBetween("@title@", "@endTitle@").Trim();
                     string fieldText = waitResult.Result.Content.GetStringBetween("@text@", "@endText@").Trim();
 
                     if (string.IsNullOrWhiteSpace(fieldTitle))
-                        return Result<DiscordEmbedBuilder>.FromError(new ArgumentNullError(nameof(fieldTitle)));
+                        return Result<DiscordEmbedBuilder>.FromError(new ArgumentNullError_(nameof(fieldTitle)));
                     if (string.IsNullOrWhiteSpace(fieldText))
-                        return Result<DiscordEmbedBuilder>.FromError(new ArgumentNullError(nameof(fieldText)));
+                        return Result<DiscordEmbedBuilder>.FromError(new ArgumentNullError_(nameof(fieldText)));
 
                     if (fieldTitle.Length > 256)
                         return Result<DiscordEmbedBuilder>.FromError(
-                            new DiscordArgumentError("Field title has a limit of 256 characters."));
+                            new DiscordArgumentInvalidError("Field title has a limit of 256 characters."));
                     if (fieldText.Length > 256)
                         return Result<DiscordEmbedBuilder>.FromError(
-                            new DiscordArgumentError("Field text has a limit of 1024 characters."));
+                            new DiscordArgumentInvalidError("Field text has a limit of 1024 characters."));
 
                     currentResult.AddField(fieldTitle, fieldText);
                     break;
@@ -410,7 +402,7 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
 
                     if (index == -1)
                         return Result<DiscordEmbedBuilder>.FromError(
-                            new DiscordArgumentError("Field with given title wasn't found"));
+                            new DiscordArgumentInvalidError("Field with given title wasn't found"));
 
                     currentResult.RemoveFieldAt(index);
                     break;
@@ -420,7 +412,7 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
 
                     if (!isValid)
                         return Result<DiscordEmbedBuilder>.FromError(
-                            new DiscordArgumentError("Given HEX color value is not valid"));
+                            new DiscordArgumentInvalidError("Given HEX color value is not valid"));
 
                     currentResult.WithColor(new DiscordColor(colorToSet));
                     break;
@@ -428,7 +420,7 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
                     string titleToSet = waitResult.Result.Content.Trim();
                     if (titleToSet.Length > 256)
                         return Result<DiscordEmbedBuilder>.FromError(
-                            new DiscordArgumentError("Embed title has a limit of 256 characters."));
+                            new DiscordArgumentInvalidError("Embed title has a limit of 256 characters."));
 
                     currentResult.WithTitle(titleToSet);
                     break;
@@ -439,7 +431,7 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
 
                     if (!isValidDateTime)
                         return Result<DiscordEmbedBuilder>.FromError(
-                            new DiscordArgumentError("Given date and time are not valid."));
+                            new DiscordArgumentInvalidError("Given date and time are not valid."));
 
                     currentResult.WithTimestamp(parsedDate);
                     break;
@@ -451,7 +443,7 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
 
                     if (string.IsNullOrWhiteSpace(thumbnailUrl))
                         return Result<DiscordEmbedBuilder>.FromError(
-                            new DiscordArgumentError("Thumbnail URL is required."));
+                            new DiscordArgumentInvalidError("Thumbnail URL is required."));
 
                     bool isHeightValid = false;
                     bool isWidthValid = false;
@@ -470,7 +462,7 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
 
         if (!currentResult.IsValid())
             return Result<DiscordEmbedBuilder>.FromError(
-                new DiscordArgumentError("Total count of characters in an embed can't exceed 6000."));
+                new DiscordArgumentInvalidError("Total count of characters in an embed can't exceed 6000."));
 
         var msg = await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(currentResult.Build())
             .WithContent("Your current result is:")
@@ -533,7 +525,7 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
                 return Result<DiscordEmbedBuilder>.FromError(new DiscordAbortedError());
         }
 
-        return Result<DiscordEmbedBuilder>.FromError(new InvalidOperationError());
+        return Result<DiscordEmbedBuilder>.FromError(new InvalidOperationError_());
     }
 
     private DiscordEmbed GetTimedOutEmbed(string idOrName, bool isFirst = false)

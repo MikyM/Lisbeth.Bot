@@ -15,14 +15,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus;
 using Lisbeth.Bot.Application.Discord.Commands.Ticket;
-using MikyM.Common.Utilities.Results.Errors;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 
 [UsedImplicitly]
-public class PrivacyCheckTicketCommandHandler : ICommandHandler<PrivacyCheckTicketCommand, bool>
+public class PrivacyCheckTicketCommandHandler : IAsyncCommandHandler<PrivacyCheckTicketCommand, bool>
 {
     public async Task<Result<bool>> HandleAsync(PrivacyCheckTicketCommand command, CancellationToken cancellationToken = default)
     {

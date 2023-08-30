@@ -16,12 +16,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using DSharpPlus.EventArgs;
-using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Domain.DTOs.Request.ChannelMessageFormat;
 
 namespace Lisbeth.Bot.Application.Discord.Commands.ChannelMessageFormat;
 
-public class VerifyMessageFormatCommand : CommandBase<VerifyMessageFormatResDto>
+public class VerifyMessageFormatCommand : ICommand<VerifyMessageFormatResDto>
 {
     public MessageCreateEventArgs? EventArgs { get; set; }
     public InteractionContext? Ctx { get; set; }

@@ -19,7 +19,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
-using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.ChatExport.Wrappers;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Ticket;
@@ -27,15 +26,12 @@ using Lisbeth.Bot.Domain;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using MikyM.Common.Utilities.Results.Errors;
 using MikyM.Discord.Extensions.BaseExtensions;
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport;
 
 [UsedImplicitly]
-[Service]
-[RegisterAs(typeof(IDiscordChatExportService))]
-[Lifetime(Lifetime.InstancePerLifetimeScope)]
+[ServiceImplementation<IDiscordChatExportService>(ServiceLifetime.InstancePerLifetimeScope)]
 public class DiscordChatExportService : IDiscordChatExportService
 {
     private readonly IDiscordService _discord;
@@ -245,7 +241,7 @@ public class DiscordChatExportService : IDiscordChatExportService
             MemoryStream ms = new(Encoding.UTF8.GetBytes(html));
             DiscordMessageBuilder messageBuilder = new();
 
-            messageBuilder.WithFile($"transcript-{target.Name}.html", ms);
+            messageBuilder.AddFile($"transcript-{target.Name}.html", ms);
             messageBuilder.WithEmbed(embedBuilder.Build());
 
             await ticketLogChannel.SendMessageAsync(messageBuilder);

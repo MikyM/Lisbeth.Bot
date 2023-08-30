@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus;
 using DSharpPlus.EventArgs;
 using Lisbeth.Bot.Application.Discord.Commands.Mute;
 using Lisbeth.Bot.Application.Discord.Commands.Timeout;
@@ -26,16 +25,16 @@ namespace Lisbeth.Bot.Application.Discord.EventHandlers;
 [UsedImplicitly]
 public class MuteEventsHandlers : IDiscordGuildMemberEventsSubscriber
 {
-    private readonly ICommandHandlerFactory _commandHandlerFactory;
+    private readonly ICommandHandlerResolver _commandHandlerFactory;
 
-    public MuteEventsHandlers(ICommandHandlerFactory commandHandlerFactory)
+    public MuteEventsHandlers(ICommandHandlerResolver commandHandlerFactory)
     {
         _commandHandlerFactory = commandHandlerFactory;
     }
 
     public async Task DiscordOnGuildMemberAdded(DiscordClient sender, GuildMemberAddEventArgs args)
     {
-        await _commandHandlerFactory.GetHandler<ICommandHandler<CheckMuteStateForNewUserCommand>>()
+        await _commandHandlerFactory.GetHandler<IAsyncCommandHandler<CheckMuteStateForNewUserCommand>>()
             .HandleAsync(new CheckMuteStateForNewUserCommand(args.Member));
     }
 
@@ -46,14 +45,14 @@ public class MuteEventsHandlers : IDiscordGuildMemberEventsSubscriber
 
     public async Task DiscordOnGuildMemberUpdated(DiscordClient sender, GuildMemberUpdateEventArgs args)
     {
-        await _commandHandlerFactory.GetHandler<ICommandHandler<CheckNonBotMuteActionCommand>>()
+        await _commandHandlerFactory.GetHandler<IAsyncCommandHandler<CheckNonBotMuteActionCommand>>()
             .HandleAsync(new CheckNonBotMuteActionCommand(args.Member, args.RolesBefore, args.RolesAfter));
 
         if (!args.CommunicationDisabledUntilAfter.HasValue && !args.CommunicationDisabledUntilBefore.HasValue ||
             args.CommunicationDisabledUntilAfter.HasValue && args.CommunicationDisabledUntilBefore.HasValue)
             return;
 
-        await _commandHandlerFactory.GetHandler<ICommandHandler<LogTimeoutCommand>>()
+        await _commandHandlerFactory.GetHandler<IAsyncCommandHandler<LogTimeoutCommand>>()
             .HandleAsync(new LogTimeoutCommand(args.Member, args.CommunicationDisabledUntilBefore,
                 args.CommunicationDisabledUntilAfter));
     }

@@ -17,17 +17,14 @@
 
 using System.Collections.Generic;
 using System.Globalization;
-using DSharpPlus.Entities;
-using DSharpPlus.Interactivity;
 using Lisbeth.Bot.Application.Discord.Commands.Tag;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
-using MikyM.Common.Utilities.Results.Errors;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Tag;
 
 [UsedImplicitly]
-public class GetAllTagsCommandHandler : ICommandHandler<GetAllTagsCommand, List<Page>>
+public class GetAllTagsCommandHandler : IAsyncCommandHandler<GetAllTagsCommand, List<Page>>
 {
     private readonly IDiscordService _discord;
     private readonly IGuildDataService _guildDataService;

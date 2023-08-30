@@ -19,7 +19,7 @@ using System.Collections.Generic;
 using Hangfire;
 using Lisbeth.Bot.Application.Discord.Commands.Mute;
 using Lisbeth.Bot.Application.Discord.Commands.Ticket;
-using MikyM.CommandHandlers;
+using ResultCommander;
 using Serilog;
 
 namespace Lisbeth.Bot.API.Helpers;
@@ -30,7 +30,7 @@ public static class RecurringJobHelper
 
     public static void ScheduleAutomaticUnmute()
     {
-        RecurringJob.AddOrUpdate<ICommandHandler<RevokeExpiredMutesCommand>>("unmute",
+        RecurringJob.AddOrUpdate<IAsyncCommandHandler<RevokeExpiredMutesCommand>>("unmute",
             x => x.HandleAsync(new RevokeExpiredMutesCommand(), default), Cron.Minutely, TimeZoneInfo.Utc, "moderation");
         JobIds.Add("unmute");
     }
@@ -44,14 +44,14 @@ public static class RecurringJobHelper
 
     public static void ScheduleAutomaticTicketClean()
     {
-        RecurringJob.AddOrUpdate<ICommandHandler<CloseInactiveTicketsCommand>>("ticket-close-inactive",
+        RecurringJob.AddOrUpdate<IAsyncCommandHandler<CloseInactiveTicketsCommand>>("ticket-close-inactive",
             x => x.HandleAsync(new CloseInactiveTicketsCommand(), default), Cron.Hourly, TimeZoneInfo.Utc, "ticketing");
         JobIds.Add("ticketClean");
     }
 
     public static void ScheduleAutomaticTicketClose()
     {
-        RecurringJob.AddOrUpdate<ICommandHandler<CleanClosedTicketsCommand>>("ticket-clean-closed",
+        RecurringJob.AddOrUpdate<IAsyncCommandHandler<CleanClosedTicketsCommand>>("ticket-clean-closed",
             x => x.HandleAsync(new CleanClosedTicketsCommand(), default), Cron.Hourly, TimeZoneInfo.Utc, "ticketing");
         JobIds.Add("ticketClose");
     }

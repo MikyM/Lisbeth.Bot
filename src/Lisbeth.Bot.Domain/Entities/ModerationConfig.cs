@@ -15,12 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using MikyM.Common.DataAccessLayer;
-using MikyM.Common.Domain.Entities;
-
 namespace Lisbeth.Bot.Domain.Entities;
 
-public sealed class ModerationConfig : SnowflakeEntity, IDisableableEntity
+public sealed class ModerationConfig : LisbethEntity
 {
     public ulong MemberEventsLogChannelId { get; set; }
     public ulong MessageDeletedEventsLogChannelId { get; set; }

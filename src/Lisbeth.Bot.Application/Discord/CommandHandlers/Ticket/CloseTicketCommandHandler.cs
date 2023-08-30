@@ -15,8 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus;
-using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.Ticket;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Buttons;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
@@ -25,7 +23,7 @@ using Microsoft.Extensions.Logging;
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 
 [UsedImplicitly]
-public class CloseTicketCommandHandler : ICommandHandler<CloseTicketCommand>
+public class CloseTicketCommandHandler : IAsyncCommandHandler<CloseTicketCommand>
 {
     private readonly IGuildDataService _guildDataService;
     private readonly ILogger<CloseTicketCommandHandler> _logger;

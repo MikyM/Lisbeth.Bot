@@ -15,11 +15,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using MikyM.Common.EfCore.DataAccessLayer.Context;
+using DataExplorer.EfCore.DataContexts;
 
 namespace Lisbeth.Bot.DataAccessLayer;
 
-public sealed class LisbethBotDbContext : AuditableDbContext, ILisbethBotDbContext
+public sealed class LisbethBotDbContext : EfDbContext, ILisbethBotDbContext
 {
     public LisbethBotDbContext(DbContextOptions<LisbethBotDbContext> options) : base(options)
     {

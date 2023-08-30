@@ -16,10 +16,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using DSharpPlus;
-using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
@@ -30,15 +27,12 @@ using Lisbeth.Bot.Domain.DTOs.Request.ReminderConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using MikyM.Common.Utilities.Results.Errors;
 using MikyM.Discord.Extensions.BaseExtensions;
 
 namespace Lisbeth.Bot.Application.Discord.Services;
 
 [UsedImplicitly]
-[Service]
-[RegisterAs(typeof(IDiscordGuildService))]
-[Lifetime(Lifetime.InstancePerLifetimeScope)]
+[ServiceImplementation<IDiscordGuildService>(ServiceLifetime.InstancePerLifetimeScope)]
 public class DiscordGuildService : IDiscordGuildService
 {
     private readonly IDiscordService _discord;

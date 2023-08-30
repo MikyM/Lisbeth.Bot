@@ -15,12 +15,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Domain.DTOs.Request.Tag;
 
 namespace Lisbeth.Bot.Application.Discord.Commands.Tag;
 
-public class CreateTagCommand : CommandBase
+public class CreateTagCommand : ICommand
 {
     public InteractionContext? Ctx { get; set; } 
     public TagAddReqDto Dto { get; set; }

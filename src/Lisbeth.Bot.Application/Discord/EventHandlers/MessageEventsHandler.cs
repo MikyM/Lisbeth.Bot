@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus;
 using DSharpPlus.EventArgs;
 using Lisbeth.Bot.Application.Discord.Commands.ChannelMessageFormat;
 using Lisbeth.Bot.Application.Discord.Commands.Modules.Suggestions;
@@ -28,10 +27,10 @@ namespace Lisbeth.Bot.Application.Discord.EventHandlers;
 public class MessageEventsHandler : IDiscordMessageEventsSubscriber
 {
     private readonly IDiscordService _discord;
-    private readonly ICommandHandler<VerifyMessageFormatCommand, VerifyMessageFormatResDto> _verifyCommandHandler;
-    private readonly ICommandHandler<HandlePossibleSuggestionCommand> _suggestionCommandHandler;
+    private readonly IAsyncCommandHandler<VerifyMessageFormatCommand, VerifyMessageFormatResDto> _verifyCommandHandler;
+    private readonly IAsyncCommandHandler<HandlePossibleSuggestionCommand> _suggestionCommandHandler;
 
-    public MessageEventsHandler(IDiscordService discord, ICommandHandler<VerifyMessageFormatCommand, VerifyMessageFormatResDto> verifyCommandHandler, ICommandHandler<HandlePossibleSuggestionCommand> suggestionCommandHandler)
+    public MessageEventsHandler(IDiscordService discord, IAsyncCommandHandler<VerifyMessageFormatCommand, VerifyMessageFormatResDto> verifyCommandHandler, IAsyncCommandHandler<HandlePossibleSuggestionCommand> suggestionCommandHandler)
     {
         _discord = discord;
         _verifyCommandHandler = verifyCommandHandler;

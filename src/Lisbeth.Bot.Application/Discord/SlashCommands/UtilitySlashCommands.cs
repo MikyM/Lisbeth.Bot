@@ -1,7 +1,4 @@
-﻿using DSharpPlus;
-using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using Lisbeth.Bot.Application.Discord.Exceptions;
+﻿using Lisbeth.Bot.Application.Discord.Exceptions;
 using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using MikyM.Discord.Extensions.BaseExtensions;

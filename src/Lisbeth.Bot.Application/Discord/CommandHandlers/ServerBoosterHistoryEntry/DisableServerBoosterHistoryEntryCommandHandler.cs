@@ -1,11 +1,10 @@
-﻿using DSharpPlus.Entities;
-using Lisbeth.Bot.Application.Discord.Commands.ServerBoosterHistoryEntry;
+﻿using Lisbeth.Bot.Application.Discord.Commands.ServerBoosterHistoryEntry;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.ServerBoosterHistoryEntry;
 
 [UsedImplicitly]
-public class DisableServerBoosterHistoryEntryCommandHandler : ICommandHandler<DisableServerBoosterHistoryEntryCommand>
+public class DisableServerBoosterHistoryEntryCommandHandler : IAsyncCommandHandler<DisableServerBoosterHistoryEntryCommand>
 {
     private readonly IGuildDataService _guildDataService;
 

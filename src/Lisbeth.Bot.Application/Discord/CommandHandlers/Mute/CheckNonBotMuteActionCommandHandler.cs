@@ -18,12 +18,11 @@
 using Lisbeth.Bot.Application.Discord.Commands.Mute;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.Domain.DTOs.Request.Mute;
-using MikyM.Common.Utilities.Results.Errors;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Mute;
 
 [UsedImplicitly]
-public class CheckNonBotMuteActionCommandHandler : ICommandHandler<CheckNonBotMuteActionCommand>
+public class CheckNonBotMuteActionCommandHandler : IAsyncCommandHandler<CheckNonBotMuteActionCommand>
 {
     private readonly IMuteDataService _muteDataService;
     private readonly IGuildDataService _guildDataService;

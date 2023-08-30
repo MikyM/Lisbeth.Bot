@@ -16,10 +16,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using AutoMapper;
+using DataExplorer.EfCore.Abstractions;
+using DataExplorer.EfCore.DataServices;
 using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Reminder;
 using Lisbeth.Bot.Domain.DTOs.Request.Reminder;
-using MikyM.Common.EfCore.DataAccessLayer.UnitOfWork;
 using NCrontab;
 
 namespace Lisbeth.Bot.Application.Services.Database;
@@ -27,7 +28,7 @@ namespace Lisbeth.Bot.Application.Services.Database;
 [UsedImplicitly]
 public class ReminderDataService : CrudDataService<Reminder, ILisbethBotDbContext>, IReminderDataService
 {
-    public ReminderDataService(IMapper mapper, IUnitOfWork<ILisbethBotDbContext> uof) : base(mapper, uof)
+    public ReminderDataService(IMapper mapper, IUnitOfWork<ILisbethBotDbContext> uof) : base(uof)
     {
     }
 
@@ -52,10 +53,10 @@ public class ReminderDataService : CrudDataService<Reminder, ILisbethBotDbContex
         if (!result.IsDefined(out var reminder)) return Result.FromError(result);
 
         if (reminder.IsRecurring && string.IsNullOrWhiteSpace(req.CronExpression))
-            return new ArgumentError(nameof(req.CronExpression),
+            return new ArgumentInvalidError(nameof(req.CronExpression),
                 "Reminder is of recurring type but cron expression within the request was empty");
         if (!reminder.IsRecurring && string.IsNullOrWhiteSpace(req.TimeSpanExpression) && !req.SetFor.HasValue)
-            return new ArgumentError(nameof(req.TimeSpanExpression) + " " + nameof(req.SetFor),
+            return new ArgumentInvalidError(nameof(req.TimeSpanExpression) + " " + nameof(req.SetFor),
                 "Reminder is of regular type but timespan expression and set for date within the request were empty");
 
 
@@ -65,7 +66,7 @@ public class ReminderDataService : CrudDataService<Reminder, ILisbethBotDbContex
             var parsedWithSeconds = CrontabSchedule.TryParse(req.CronExpression,
                 new CrontabSchedule.ParseOptions { IncludingSeconds = true });
             if (parsed is null && parsedWithSeconds is null && reminder.IsRecurring)
-                return new ArgumentError(nameof(req.CronExpression), "Invalid cron expression");
+                return new ArgumentInvalidError(nameof(req.CronExpression), "Invalid cron expression");
 
             base.BeginUpdate(reminder);
             reminder.CronExpression = req.CronExpression;
@@ -77,7 +78,7 @@ public class ReminderDataService : CrudDataService<Reminder, ILisbethBotDbContex
                     out var occurrence, out _);
 
             if (!isValidTimeSpanExpression && !req.SetFor.HasValue)
-                return new ArgumentError(nameof(req.TimeSpanExpression),
+                return new ArgumentInvalidError(nameof(req.TimeSpanExpression),
                     "Invalid timespan expression value");
 
             base.BeginUpdate(reminder);

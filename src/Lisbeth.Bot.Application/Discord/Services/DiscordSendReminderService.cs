@@ -16,19 +16,15 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using DSharpPlus.Entities;
 using Hangfire;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.DataAccessLayer.Specifications.RecurringReminder;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Reminder;
-using MikyM.Common.Utilities.Results.Errors;
 
 namespace Lisbeth.Bot.Application.Discord.Services;
 
 [UsedImplicitly]
-[Service]
-[RegisterAs(typeof(IDiscordSendReminderService))]
-[Lifetime(Lifetime.InstancePerLifetimeScope)]
+[ServiceImplementation<IDiscordSendReminderService>(ServiceLifetime.InstancePerLifetimeScope)]
 public class DiscordSendReminderService : IDiscordSendReminderService
 {
     private readonly IDiscordService _discord;
@@ -82,7 +78,7 @@ public class DiscordSendReminderService : IDiscordSendReminderService
             if (reminder.ChannelId.HasValue)
                 channel = discordGuild.GetChannel(reminder.ChannelId.Value);
             else if (!reminder.Guild.ReminderChannelId.HasValue)
-                return new ArgumentError(nameof(reminder.Guild.ReminderChannelId),"Guild doesn't have a set reminder channel");
+                return new ArgumentInvalidError(nameof(reminder.Guild.ReminderChannelId),"Guild doesn't have a set reminder channel");
             else 
                 channel = discordGuild.GetChannel(reminder.Guild.ReminderChannelId.Value);
 

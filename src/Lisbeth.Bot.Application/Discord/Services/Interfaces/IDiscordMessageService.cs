@@ -15,9 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Domain.DTOs.Request.Prune;
 
 namespace Lisbeth.Bot.Application.Discord.Services.Interfaces;

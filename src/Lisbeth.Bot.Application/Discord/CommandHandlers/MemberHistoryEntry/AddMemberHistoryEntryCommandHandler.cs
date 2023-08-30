@@ -5,7 +5,7 @@ using MikyM.Discord.Extensions.BaseExtensions;
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.MemberHistoryEntry;
 
 [UsedImplicitly]
-public class AddMemberHistoryEntryCommandHandler : ICommandHandler<AddMemberHistoryEntryCommand>
+public class AddMemberHistoryEntryCommandHandler : IAsyncCommandHandler<AddMemberHistoryEntryCommand>
 {
     private readonly IGuildDataService _guildDataService;
 

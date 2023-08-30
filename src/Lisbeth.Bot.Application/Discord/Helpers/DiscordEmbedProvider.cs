@@ -17,7 +17,6 @@
 
 using System.Globalization;
 using AutoMapper;
-using DSharpPlus.Entities;
 using Lisbeth.Bot.Domain.DTOs;
 using Lisbeth.Bot.Domain.DTOs.Request.Base;
 using Lisbeth.Bot.Domain.Entities.Base;
@@ -48,9 +47,7 @@ public interface IDiscordEmbedProvider
 }
 
 [UsedImplicitly]
-[Service]
-[RegisterAs(typeof(IDiscordEmbedProvider))]
-[Lifetime(Lifetime.SingleInstance)]
+[ServiceImplementation<IDiscordEmbedProvider>(ServiceLifetime.SingleInstance)]
 public class DiscordEmbedProvider : IDiscordEmbedProvider
 {
     private readonly IDiscordService _discord;

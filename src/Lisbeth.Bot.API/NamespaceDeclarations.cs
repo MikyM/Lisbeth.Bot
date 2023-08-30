@@ -1,7 +1,4 @@
-﻿global using MikyM.Common.EfCore.ApplicationLayer.Services;
-global using MikyM.Common.ApplicationLayer.Interfaces;
-
-global using Lisbeth.Bot.Application.Discord.Services.Interfaces;
+﻿global using Lisbeth.Bot.Application.Discord.Services.Interfaces;
 global using Lisbeth.Bot.Application.Extensions;
 global using Lisbeth.Bot.Application.Hangfire;
 global using Lisbeth.Bot.Application.Results;

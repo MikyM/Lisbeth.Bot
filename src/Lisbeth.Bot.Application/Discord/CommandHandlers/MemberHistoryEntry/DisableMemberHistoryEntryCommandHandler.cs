@@ -1,5 +1,4 @@
 ﻿using System.Globalization;
-using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.MemberHistoryEntry;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using MikyM.Discord.Extensions.BaseExtensions;
@@ -7,7 +6,7 @@ using MikyM.Discord.Extensions.BaseExtensions;
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.MemberHistoryEntry;
 
 [UsedImplicitly]
-public class DisableMemberHistoryEntryCommandHandler : ICommandHandler<DisableMemberHistoryEntryCommand, Guild>
+public class DisableMemberHistoryEntryCommandHandler : IAsyncCommandHandler<DisableMemberHistoryEntryCommand, Guild>
 {
     private readonly IGuildDataService _guildDataService;
     private readonly IDiscordService _discord;

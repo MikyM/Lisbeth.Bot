@@ -15,9 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus;
-using DSharpPlus.Entities;
-
 namespace Lisbeth.Bot.Application.Discord.Validation;
 
 public class DiscordValidator<TDiscordType> : IDiscordValidator<TDiscordType> where TDiscordType : class

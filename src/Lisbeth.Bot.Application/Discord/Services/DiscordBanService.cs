@@ -15,8 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
 using Hangfire;
 using Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response.Infractions;
 using Lisbeth.Bot.Application.Discord.Exceptions;
@@ -25,16 +23,13 @@ using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.Domain.DTOs.Request.Ban;
 using Microsoft.Extensions.Logging;
 using MikyM.Common.Utilities.Extensions;
-using MikyM.Common.Utilities.Results.Errors;
 using MikyM.Discord.EmbedBuilders.Enums;
 using MikyM.Discord.Extensions.BaseExtensions;
 
 namespace Lisbeth.Bot.Application.Discord.Services;
 
 [UsedImplicitly]
-[Service]
-[RegisterAs(typeof(IDiscordBanService))]
-[Lifetime(Lifetime.InstancePerLifetimeScope)]
+[ServiceImplementation<IDiscordBanService>(ServiceLifetime.InstancePerLifetimeScope)]
 public class DiscordBanService : IDiscordBanService
 {
     private readonly IBanDataService _banDataService;

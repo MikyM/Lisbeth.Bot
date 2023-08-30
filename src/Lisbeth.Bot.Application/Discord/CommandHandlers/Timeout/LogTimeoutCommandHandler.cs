@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.Mute;
 using Lisbeth.Bot.Application.Discord.Commands.Timeout;
 using Lisbeth.Bot.Domain.DTOs.Request.Mute;
@@ -23,14 +22,14 @@ using Lisbeth.Bot.Domain.DTOs.Request.Mute;
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Timeout;
 
 [UsedImplicitly]
-public class LogTimeoutCommandHandler : ICommandHandler<LogTimeoutCommand>
+public class LogTimeoutCommandHandler : IAsyncCommandHandler<LogTimeoutCommand>
 {
     private readonly IDiscordService _discord;
-    private readonly ICommandHandler<ApplyMuteCommand, DiscordEmbed> _applyMuteHandler;
-    private readonly ICommandHandler<RevokeMuteCommand, DiscordEmbed> _revokeMuteHandler;
+    private readonly IAsyncCommandHandler<ApplyMuteCommand, DiscordEmbed> _applyMuteHandler;
+    private readonly IAsyncCommandHandler<RevokeMuteCommand, DiscordEmbed> _revokeMuteHandler;
 
-    public LogTimeoutCommandHandler(ICommandHandler<ApplyMuteCommand, DiscordEmbed> applyMuteHandler,
-        ICommandHandler<RevokeMuteCommand, DiscordEmbed> revokeMuteHandler, IDiscordService discord)
+    public LogTimeoutCommandHandler(IAsyncCommandHandler<ApplyMuteCommand, DiscordEmbed> applyMuteHandler,
+        IAsyncCommandHandler<RevokeMuteCommand, DiscordEmbed> revokeMuteHandler, IDiscordService discord)
     {
         _applyMuteHandler = applyMuteHandler;
         _revokeMuteHandler = revokeMuteHandler;

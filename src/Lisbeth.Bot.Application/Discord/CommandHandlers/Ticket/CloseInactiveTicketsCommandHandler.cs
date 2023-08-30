@@ -17,7 +17,6 @@
 
 using System.Collections.Generic;
 using Autofac;
-using DSharpPlus.Entities;
 using FluentValidation;
 using Lisbeth.Bot.Application.Discord.Commands.Ticket;
 using Lisbeth.Bot.Application.Validation.Ticket;
@@ -29,7 +28,7 @@ using MikyM.Discord.Extensions.BaseExtensions;
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 
 [UsedImplicitly]
-public class CloseInactiveTicketsCommandHandler : ICommandHandler<CloseInactiveTicketsCommand>
+public class CloseInactiveTicketsCommandHandler : IAsyncCommandHandler<CloseInactiveTicketsCommand>
 {
     private readonly IDiscordService _discord;
     private readonly ILogger<CloseInactiveTicketsCommandHandler> _logger;
@@ -102,7 +101,7 @@ public class CloseInactiveTicketsCommandHandler : ICommandHandler<CloseInactiveT
                         var validator = new TicketCloseReqValidator(_discord);
                         await validator.ValidateAndThrowAsync(req);
 
-                        await scope.Resolve<ICommandHandler<ConfirmCloseTicketCommand>>().HandleAsync(new ConfirmCloseTicketCommand(req));
+                        await scope.Resolve<IAsyncCommandHandler<ConfirmCloseTicketCommand>>().HandleAsync(new ConfirmCloseTicketCommand(req));
 
                         _logger.LogDebug($"Closing channel Id: {openedTicketChannel.Id} with name: {openedTicketChannel.Name}");
                     }

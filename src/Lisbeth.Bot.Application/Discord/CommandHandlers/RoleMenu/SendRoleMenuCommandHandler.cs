@@ -16,7 +16,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using AutoMapper;
-using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.RoleMenu;
 using Lisbeth.Bot.Domain.DTOs.Request.RoleMenu;
 using Microsoft.Extensions.Logging;
@@ -24,16 +23,16 @@ using Microsoft.Extensions.Logging;
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.RoleMenu;
 
 [UsedImplicitly]
-public class SendRoleMenuCommandHandler : ICommandHandler<SendRoleMenuCommand>
+public class SendRoleMenuCommandHandler : IAsyncCommandHandler<SendRoleMenuCommand>
 {
     private readonly ILogger<SendRoleMenuCommandHandler> _logger;
     private readonly IDiscordService _discord;
-    private readonly ICommandHandler<GetRoleMenuCommand, DiscordMessageBuilder>
+    private readonly IAsyncCommandHandler<GetRoleMenuCommand, DiscordMessageBuilder>
         _getRoleMenuHandler;
     private readonly IMapper _mapper;
 
     public SendRoleMenuCommandHandler(ILogger<SendRoleMenuCommandHandler> logger, IDiscordService discord,
-        ICommandHandler<GetRoleMenuCommand, DiscordMessageBuilder> getRoleMenuHandler, IMapper mapper)
+        IAsyncCommandHandler<GetRoleMenuCommand, DiscordMessageBuilder> getRoleMenuHandler, IMapper mapper)
     {
         _logger = logger;
         _discord = discord;

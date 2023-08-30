@@ -15,13 +15,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using AttributeBasedRegistration.Autofac;
 using Autofac;
+using DataExplorer;
+using DataExplorer.EfCore;
+using DataExplorer.EfCore.Extensions;
 using IdGen;
 using Lisbeth.Bot.DataAccessLayer;
-using MikyM.Common.ApplicationLayer;
-using MikyM.Common.DataAccessLayer;
-using MikyM.Common.EfCore.ApplicationLayer;
-using MikyM.Common.EfCore.DataAccessLayer;
+using MikyM.Common.Utilities;
+using ResultCommander.Autofac;
 
 namespace Lisbeth.Bot.API;
 
@@ -32,32 +34,30 @@ public class AutofacContainerModule : Module
         base.Load(builder);
         // automapper
 
-        builder.AddDataAccessLayer(options =>
+        var serviceAssemblies = new[] { typeof(IBanDataService).Assembly };
+        var entityAssemblies = new[] { typeof(Ban).Assembly };
+        
+        builder.AddAsyncExecutor();
+        builder.AddDataExplorer(opt =>
         {
-            options.AddEfCoreDataAccessLayer(efCoreOptions =>
+            opt.AddSnowflakeIdGeneration(1, () =>
             {
-                efCoreOptions.EnableIncludeCache = true;
-                efCoreOptions.AddInMemoryEvaluators();
-                efCoreOptions.AddEvaluators();
-                efCoreOptions.AddValidators();
-                efCoreOptions.AddDbContext<ILisbethBotDbContext, LisbethBotDbContext>();
-            });
-            options.AddSnowflakeIdGenerator(generatorOptions =>
-            {
-                generatorOptions.GeneratorId = 1;
-                generatorOptions.IdStructure = new IdStructure(45, 2, 16);
-                generatorOptions.DefaultTimeSource =
+                var idStructure = new IdStructure(45, 2, 16);
+                var defaultTimeSource =
                     new DefaultTimeSource(new DateTime(2021, 1, 1, 0, 0, 0, DateTimeKind.Utc));
-                generatorOptions.SequenceOverflowStrategy = SequenceOverflowStrategy.SpinWait;
+                return new IdGeneratorOptions(idStructure, defaultTimeSource, SequenceOverflowStrategy.SpinWait);
             });
-        }); 
 
-        builder.AddApplicationLayer(options =>
-        {
-            options.AddAttributeDefinedServices();
-            options.AddCommandHandlers();
-            options.AddEfCoreDataServices();
-            options.AddAsyncExecutor();
+            opt.AddEfCore(serviceAssemblies, entityAssemblies, efOpt =>
+            {
+                efOpt.EnableIncludeCache = true;
+                efOpt.AddDbContext<ILisbethBotDbContext, LisbethBotDbContext>();
+                efOpt.DateTimeStrategy = DateTimeStrategy.UtcNow;
+            });
         });
+
+        builder.AddAttributeDefinedServices(serviceAssemblies);
+        
+        builder.AddResultCommander(serviceAssemblies);
     }
 }

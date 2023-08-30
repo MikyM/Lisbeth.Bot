@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.ChannelMessageFormat;
 using Lisbeth.Bot.Application.Discord.SlashCommands;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
@@ -24,7 +23,7 @@ using MikyM.Discord.Extensions.BaseExtensions;
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.ChannelMessageFormat;
 
 [UsedImplicitly]
-public class DisableMessageFormatCommandHandler : ICommandHandler<DisableMessageFormatCommand, DiscordEmbed>
+public class DisableMessageFormatCommandHandler : IAsyncCommandHandler<DisableMessageFormatCommand, DiscordEmbed>
 {
     private readonly IDiscordService _discord;
     private readonly IGuildDataService _guildDataService;
@@ -78,10 +77,10 @@ public class DisableMessageFormatCommandHandler : ICommandHandler<DisableMessage
 
         var format = guildCfg.ChannelMessageFormats?.FirstOrDefault(x => x.ChannelId == command.Dto.ChannelId);
         if (format is null)
-            return new ArgumentError(nameof(command.Dto.ChannelId),
+            return new ArgumentInvalidError(nameof(command.Dto.ChannelId),
                 "There's no message format registered for this channel");
         if (format.IsDisabled == command.Dto.IsDisabled)
-            return new ArgumentError(nameof(format.IsDisabled),
+            return new ArgumentInvalidError(nameof(format.IsDisabled),
                 $"Entity is already {(format.IsDisabled ? "disabled" : "enabled")}");
 
         _guildDataService.BeginUpdate(guildCfg);

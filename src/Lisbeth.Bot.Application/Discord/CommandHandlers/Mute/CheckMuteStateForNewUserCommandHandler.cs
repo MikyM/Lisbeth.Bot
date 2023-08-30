@@ -22,7 +22,7 @@ using Lisbeth.Bot.DataAccessLayer.Specifications.Mute;
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Mute;
 
 [UsedImplicitly]
-public class CheckMuteStateForNewUserCommandHandler : ICommandHandler<CheckMuteStateForNewUserCommand>
+public class CheckMuteStateForNewUserCommandHandler : IAsyncCommandHandler<CheckMuteStateForNewUserCommand>
 {
     private readonly IMuteDataService _muteDataService;
 

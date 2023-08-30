@@ -15,8 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus;
-using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.RoleMenu;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
@@ -27,7 +25,7 @@ using MikyM.Discord.Extensions.BaseExtensions;
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.RoleMenu;
 
 [UsedImplicitly]
-public class GetRoleMenuCommandHandler : ICommandHandler<GetRoleMenuCommand, DiscordMessageBuilder>
+public class GetRoleMenuCommandHandler : IAsyncCommandHandler<GetRoleMenuCommand, DiscordMessageBuilder>
 {
     private readonly IGuildDataService _guildDataService;
     private readonly IRoleMenuDataService _roleMenuDataService;

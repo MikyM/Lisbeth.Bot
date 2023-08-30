@@ -15,11 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus.Entities;
-
 namespace Lisbeth.Bot.Application.Discord.Commands.Timeout;
 
-public class LogTimeoutCommand : CommandBase
+public class LogTimeoutCommand : ICommand
 {
     public LogTimeoutCommand(DiscordMember member, DateTimeOffset? communicationDisabledUntilBefore,
         DateTimeOffset? communicationDisabledUntilAfter)

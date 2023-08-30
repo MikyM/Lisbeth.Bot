@@ -18,24 +18,20 @@
 using System.Collections.Generic;
 using System.Globalization;
 using AutoMapper;
-using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Exceptions;
-using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response.Prune;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.Domain.DTOs.Request.Prune;
 using Microsoft.Extensions.Logging;
-using MikyM.Common.Utilities.Results.Errors;
 using MikyM.Discord.EmbedBuilders.Enums;
 using MikyM.Discord.Extensions.BaseExtensions;
+using NotFoundException = DSharpPlus.Exceptions.NotFoundException;
 
 namespace Lisbeth.Bot.Application.Discord.Services;
 
 [UsedImplicitly]
-[Service]
-[RegisterAs(typeof(IDiscordMessageService))]
-[Lifetime(Lifetime.InstancePerLifetimeScope)]
+[ServiceImplementation<IDiscordMessageService>(ServiceLifetime.InstancePerLifetimeScope)]
 public class DiscordMessageService : IDiscordMessageService
 {
     private readonly IDiscordService _discord;

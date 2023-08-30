@@ -16,13 +16,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using DSharpPlus.Interactivity;
-using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Domain.DTOs.Request.Tag;
 
 namespace Lisbeth.Bot.Application.Discord.Commands.Tag;
 
-public class GetAllTagsCommand : CommandBase<List<Page>>
+public class GetAllTagsCommand : ICommand<List<Page>>
 {
     public GetAllTagsCommand(TagGetAllReqDto dto, InteractionContext? ctx = null)
     {

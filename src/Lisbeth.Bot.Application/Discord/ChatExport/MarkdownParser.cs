@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using DSharpPlus.Entities;
 
 namespace Lisbeth.Bot.Application.Discord.ChatExport;
 

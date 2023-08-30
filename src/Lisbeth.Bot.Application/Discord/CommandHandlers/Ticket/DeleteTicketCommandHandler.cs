@@ -15,14 +15,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.Ticket;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 
 [UsedImplicitly]
-public class DeleteTicketCommandHandler : ICommandHandler<DeleteTicketCommand>
+public class DeleteTicketCommandHandler : IAsyncCommandHandler<DeleteTicketCommand>
 {
     private readonly IGuildDataService _guildDataService;
 

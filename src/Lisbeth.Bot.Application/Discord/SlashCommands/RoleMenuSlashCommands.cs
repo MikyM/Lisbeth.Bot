@@ -15,9 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus;
-using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
 using FluentValidation;
 using Lisbeth.Bot.Application.Discord.Commands.RoleMenu;
 using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
@@ -30,14 +27,14 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 [SlashModuleLifespan(SlashModuleLifespan.Scoped)]
 public class RoleMenuSlashCommands : ExtendedApplicationCommandModule
 {
-    private readonly ICommandHandler<SendRoleMenuCommand> _sendRoleMenuHandler;
-    private readonly ICommandHandler<GetRoleMenuCommand, DiscordMessageBuilder> _getRoleMenuHandler;
-    private readonly ICommandHandler<CreateRoleMenuCommand, DiscordMessageBuilder> _createRoleMenuHandler;
+    private readonly IAsyncCommandHandler<SendRoleMenuCommand> _sendRoleMenuHandler;
+    private readonly IAsyncCommandHandler<GetRoleMenuCommand, DiscordMessageBuilder> _getRoleMenuHandler;
+    private readonly IAsyncCommandHandler<CreateRoleMenuCommand, DiscordMessageBuilder> _createRoleMenuHandler;
     private readonly IDiscordEmbedConfiguratorService<RoleMenu> _discordEmbedConfiguratorService;
 
-    public RoleMenuSlashCommands(ICommandHandler<SendRoleMenuCommand> sendRoleMenuHandler,
-        ICommandHandler<GetRoleMenuCommand, DiscordMessageBuilder> getRoleMenuHandler,
-        ICommandHandler<CreateRoleMenuCommand, DiscordMessageBuilder> createRoleMenuHandler,
+    public RoleMenuSlashCommands(IAsyncCommandHandler<SendRoleMenuCommand> sendRoleMenuHandler,
+        IAsyncCommandHandler<GetRoleMenuCommand, DiscordMessageBuilder> getRoleMenuHandler,
+        IAsyncCommandHandler<CreateRoleMenuCommand, DiscordMessageBuilder> createRoleMenuHandler,
         IDiscordEmbedConfiguratorService<RoleMenu> discordEmbedConfiguratorService)
     {
         _sendRoleMenuHandler = sendRoleMenuHandler;

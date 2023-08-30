@@ -16,18 +16,19 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using AutoMapper;
+using DataExplorer.EfCore.Abstractions;
+using DataExplorer.EfCore.DataServices;
 using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Tag;
 using Lisbeth.Bot.Domain.DTOs.Request.Tag;
-using MikyM.Common.EfCore.DataAccessLayer.UnitOfWork;
-using MikyM.Common.Utilities.Results.Errors;
+
 
 namespace Lisbeth.Bot.Application.Services.Database;
 
 [UsedImplicitly]
 public class TagDataService : CrudDataService<Tag, ILisbethBotDbContext>, ITagDataService
 {
-    public TagDataService(IMapper mapper, IUnitOfWork<ILisbethBotDbContext> uof) : base(mapper, uof)
+    public TagDataService(IMapper mapper, IUnitOfWork<ILisbethBotDbContext> uof) : base(uof)
     {
     }
 
@@ -35,7 +36,7 @@ public class TagDataService : CrudDataService<Tag, ILisbethBotDbContext>, ITagDa
     {
         var res = await base.LongCountAsync(new ActiveTagByGuildAndNameSpec(req.Name ?? string.Empty, req.GuildId));
         if (res.Entity != 0)
-            return new DiscordArgumentError(nameof(req.Name), $"Guild already has a tag named {req.Name}");
+            return new DiscordArgumentInvalidError(nameof(req.Name), $"Guild already has a tag named {req.Name}");
 
         await base.AddAsync(req, shouldSave);
         return Result.FromSuccess();
@@ -52,7 +53,7 @@ public class TagDataService : CrudDataService<Tag, ILisbethBotDbContext>, ITagDa
 
         if (!tagRes.IsDefined(out var tag)) return Result.FromError(tagRes);
         if (tag.IsDisabled)
-            return new DiscordArgumentError(nameof(tag),
+            return new DiscordArgumentInvalidError(nameof(tag),
                 "Can't update embed config for a disabled tag, enable the tag first.");
 
         base.BeginUpdate(tag);
@@ -75,7 +76,7 @@ public class TagDataService : CrudDataService<Tag, ILisbethBotDbContext>, ITagDa
 
         if (!tagRes.IsDefined(out var tag)) return Result.FromError(tagRes);
         if (tag.IsDisabled)
-            return new DiscordArgumentError(nameof(tag),
+            return new DiscordArgumentInvalidError(nameof(tag),
                 "Can't update a disabled tag, enable the tag first.");
 
         base.BeginUpdate(tag, true);
@@ -97,7 +98,7 @@ public class TagDataService : CrudDataService<Tag, ILisbethBotDbContext>, ITagDa
 
         if (!tagRes.IsDefined(out var tag)) return Result.FromError(tagRes);
         if (tag.IsDisabled)
-            return new DiscordArgumentError(nameof(tag),
+            return new DiscordArgumentInvalidError(nameof(tag),
                 "Can't update a disabled tag, enable the tag first.");
 
         base.BeginUpdate(tag, true);
@@ -119,7 +120,7 @@ public class TagDataService : CrudDataService<Tag, ILisbethBotDbContext>, ITagDa
 
         if (!tagRes.IsDefined(out var tag)) return Result.FromError(tagRes);
         if (tag.IsDisabled)
-            return new DiscordArgumentError(nameof(tag),
+            return new DiscordArgumentInvalidError(nameof(tag),
                 "Can't update a disabled tag, enable the tag first.");
 
         base.BeginUpdate(tag, true);
@@ -141,7 +142,7 @@ public class TagDataService : CrudDataService<Tag, ILisbethBotDbContext>, ITagDa
 
         if (!tagRes.IsDefined(out var tag)) return Result.FromError(tagRes);
         if (tag.IsDisabled)
-            return new DiscordArgumentError(nameof(tag),
+            return new DiscordArgumentInvalidError(nameof(tag),
                 "Can't update a disabled tag, enable the tag first.");
 
         base.BeginUpdate(tag, true);

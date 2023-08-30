@@ -1,8 +1,6 @@
-﻿using DSharpPlus.Entities;
+﻿namespace Lisbeth.Bot.Application.Discord.Commands.MemberHistoryEntry;
 
-namespace Lisbeth.Bot.Application.Discord.Commands.MemberHistoryEntry;
-
-public class DisableMemberHistoryEntryCommand : CommandBase<Guild>
+public class DisableMemberHistoryEntryCommand : ICommand<Guild>
 {
     public DiscordMember Member { get; }
     public DiscordGuild Guild { get; }

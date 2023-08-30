@@ -16,28 +16,25 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using DSharpPlus;
-using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.Ticket;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Ticket;
 using Microsoft.Extensions.Logging;
-using MikyM.Common.Utilities.Results.Errors;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 
 [UsedImplicitly]
-public class RemoveSnowflakeTicketCommandHandler : ICommandHandler<RemoveSnowflakeFromTicketCommand, DiscordEmbed>
+public class RemoveSnowflakeTicketCommandHandler : IAsyncCommandHandler<RemoveSnowflakeFromTicketCommand, DiscordEmbed>
 {
     private readonly IGuildDataService _guildDataService;
     private readonly ITicketDataService _ticketDataService;
     private readonly ILogger<RemoveSnowflakeTicketCommandHandler> _logger;
     private readonly IDiscordGuildRequestDataProvider _requestDataProvider;
-    private readonly ICommandHandler<PrivacyCheckTicketCommand, bool> _privacyCheckHandler;
+    private readonly IAsyncCommandHandler<PrivacyCheckTicketCommand, bool> _privacyCheckHandler;
 
     public RemoveSnowflakeTicketCommandHandler(IGuildDataService guildDataService,
         ILogger<RemoveSnowflakeTicketCommandHandler> logger, IDiscordGuildRequestDataProvider requestDataProvider,
-        ITicketDataService ticketDataService, ICommandHandler<PrivacyCheckTicketCommand, bool> privacyCheckHandler)
+        ITicketDataService ticketDataService, IAsyncCommandHandler<PrivacyCheckTicketCommand, bool> privacyCheckHandler)
     {
         _guildDataService = guildDataService;
         _logger = logger;

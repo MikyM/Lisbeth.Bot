@@ -16,11 +16,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using DSharpPlus.Entities;
 
 namespace Lisbeth.Bot.Application.Discord.Commands.Mute;
 
-public class CheckNonBotMuteActionCommand : CommandBase
+public class CheckNonBotMuteActionCommand : ICommand
 {
     public CheckNonBotMuteActionCommand(DiscordMember member, IReadOnlyList<DiscordRole> rolesBefore,
         IReadOnlyList<DiscordRole> rolesAfter)

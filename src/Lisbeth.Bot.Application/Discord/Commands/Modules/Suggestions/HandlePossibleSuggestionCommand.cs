@@ -2,7 +2,7 @@
 
 namespace Lisbeth.Bot.Application.Discord.Commands.Modules.Suggestions;
 
-public class HandlePossibleSuggestionCommand : CommandBase
+public class HandlePossibleSuggestionCommand : ICommand
 {
     public HandlePossibleSuggestionCommand(MessageCreateEventArgs eventData)
     {

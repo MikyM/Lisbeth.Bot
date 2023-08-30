@@ -17,11 +17,10 @@
 
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
-using Lisbeth.Bot.Domain.Entities.Base;
 
 namespace Lisbeth.Bot.Domain.Entities;
 
-public sealed class TicketingConfig : SnowflakeDiscordEntity
+public sealed class TicketingConfig : LisbethDiscordEntity
 {
     public ulong LogChannelId { get; set; }
     public long LastTicketId { get; set; }

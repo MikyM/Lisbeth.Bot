@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus;
 using DSharpPlus.EventArgs;
 using Lisbeth.Bot.Application.Discord.Commands.RoleMenu;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Buttons;
@@ -26,9 +25,9 @@ namespace Lisbeth.Bot.Application.Discord.EventHandlers;
 [UsedImplicitly]
 public class RoleMenuEventsHandler : IDiscordMiscEventsSubscriber
 {
-    private readonly ICommandHandlerFactory _commandHandlerFactory;
+    private readonly ICommandHandlerResolver _commandHandlerFactory;
 
-    public RoleMenuEventsHandler(ICommandHandlerFactory commandHandlerFactory)
+    public RoleMenuEventsHandler(ICommandHandlerResolver commandHandlerFactory)
     {
         _commandHandlerFactory = commandHandlerFactory;
     }
@@ -47,14 +46,14 @@ public class RoleMenuEventsHandler : IDiscordMiscEventsSubscriber
         if (args.Id.StartsWith("role_menu_button"))
         {
             await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
-            await _commandHandlerFactory.GetHandler<ICommandHandler<RoleMenuButtonPressedCommand>>()
+            await _commandHandlerFactory.GetHandler<IAsyncCommandHandler<RoleMenuButtonPressedCommand>>()
                 .HandleAsync(new RoleMenuButtonPressedCommand(args));
         }
 
         if (args.Id.StartsWith("role_menu_") && !args.Id.Contains("button"))
         {
             await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
-            await _commandHandlerFactory.GetHandler<ICommandHandler<RoleMenuOptionSelectedCommand>>()
+            await _commandHandlerFactory.GetHandler<IAsyncCommandHandler<RoleMenuOptionSelectedCommand>>()
                 .HandleAsync(new RoleMenuOptionSelectedCommand(args));
         }
     }

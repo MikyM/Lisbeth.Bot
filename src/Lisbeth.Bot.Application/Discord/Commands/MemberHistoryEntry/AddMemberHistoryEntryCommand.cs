@@ -1,8 +1,6 @@
-﻿using DSharpPlus.Entities;
+﻿namespace Lisbeth.Bot.Application.Discord.Commands.MemberHistoryEntry;
 
-namespace Lisbeth.Bot.Application.Discord.Commands.MemberHistoryEntry;
-
-public class AddMemberHistoryEntryCommand : CommandBase
+public class AddMemberHistoryEntryCommand : ICommand
 {
     public DiscordMember Member { get; }
     public DiscordGuild Guild { get; }

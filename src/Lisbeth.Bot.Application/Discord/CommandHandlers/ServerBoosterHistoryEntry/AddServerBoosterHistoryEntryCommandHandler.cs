@@ -1,13 +1,11 @@
-﻿using DSharpPlus.Entities;
-using Lisbeth.Bot.Application.Discord.Commands.ServerBoosterHistoryEntry;
+﻿using Lisbeth.Bot.Application.Discord.Commands.ServerBoosterHistoryEntry;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
-using MikyM.Common.Utilities.Results.Errors;
 using MikyM.Discord.Extensions.BaseExtensions;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.ServerBoosterHistoryEntry;
 
 [UsedImplicitly]
-public class AddServerBoosterHistoryEntryCommandHandler : ICommandHandler<AddServerBoosterHistoryEntryCommand>
+public class AddServerBoosterHistoryEntryCommandHandler : IAsyncCommandHandler<AddServerBoosterHistoryEntryCommand>
 {
     private readonly IGuildDataService _guildDataService;
 

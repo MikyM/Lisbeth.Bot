@@ -16,18 +16,19 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using AutoMapper;
+using DataExplorer.EfCore.Abstractions;
+using DataExplorer.EfCore.DataServices;
 using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Mute;
 using Lisbeth.Bot.Domain.DTOs.Request.Mute;
-using MikyM.Common.EfCore.DataAccessLayer.UnitOfWork;
-using MikyM.Common.Utilities.Results.Errors;
+
 
 namespace Lisbeth.Bot.Application.Services.Database;
 
 [UsedImplicitly]
 public class MuteDataService : CrudDataService<Mute, ILisbethBotDbContext>, IMuteDataService
 {
-    public MuteDataService(IMapper mapper, IUnitOfWork<ILisbethBotDbContext> uof) : base(mapper, uof)
+    public MuteDataService(IMapper mapper, IUnitOfWork<ILisbethBotDbContext> uof) : base(uof)
     {
     }
 

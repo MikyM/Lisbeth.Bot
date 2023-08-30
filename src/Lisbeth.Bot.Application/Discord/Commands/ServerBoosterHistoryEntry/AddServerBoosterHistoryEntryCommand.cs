@@ -1,8 +1,6 @@
-﻿using DSharpPlus.Entities;
+﻿namespace Lisbeth.Bot.Application.Discord.Commands.ServerBoosterHistoryEntry;
 
-namespace Lisbeth.Bot.Application.Discord.Commands.ServerBoosterHistoryEntry;
-
-public class AddServerBoosterHistoryEntryCommand : CommandBase
+public class AddServerBoosterHistoryEntryCommand : ICommand
 {
     public DiscordMember Member { get; }
     public DiscordGuild Guild { get; }

@@ -16,28 +16,25 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using DSharpPlus;
-using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.RoleMenu;
 using Lisbeth.Bot.Application.Discord.Exceptions;
 using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.DataAccessLayer.Specifications.RoleMenu;
 using Microsoft.Extensions.Logging;
 using MikyM.Common.Utilities.Extensions;
-using MikyM.Common.Utilities.Results.Errors;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.RoleMenu;
 
 [UsedImplicitly]
-public class RoleMenuOptionSelectedCommandHandler  : ICommandHandler<RoleMenuOptionSelectedCommand>
+public class RoleMenuOptionSelectedCommandHandler  : IAsyncCommandHandler<RoleMenuOptionSelectedCommand>
 {
     private readonly IRoleMenuDataService _roleMenuDataService;
     private readonly ILogger<RoleMenuOptionSelectedCommandHandler> _logger;
-    private readonly ICommandHandler<GetRoleMenuSelectCommand, DiscordSelectComponent> _getSelectHandler;
+    private readonly IAsyncCommandHandler<GetRoleMenuSelectCommand, DiscordSelectComponent> _getSelectHandler;
 
     public RoleMenuOptionSelectedCommandHandler(IRoleMenuDataService roleMenuDataService,
         ILogger<RoleMenuOptionSelectedCommandHandler> logger,
-        ICommandHandler<GetRoleMenuSelectCommand, DiscordSelectComponent> getSelectHandler)
+        IAsyncCommandHandler<GetRoleMenuSelectCommand, DiscordSelectComponent> getSelectHandler)
     {
         _roleMenuDataService = roleMenuDataService;
         _logger = logger;

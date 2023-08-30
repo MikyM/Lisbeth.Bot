@@ -15,12 +15,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Domain.DTOs.Request.RoleMenu;
 
 namespace Lisbeth.Bot.Application.Discord.Commands.RoleMenu;
 
-public class SendRoleMenuCommand : CommandBase
+public class SendRoleMenuCommand : ICommand
 {
     public SendRoleMenuCommand(RoleMenuSendReqDto dto, InteractionContext? ctx = null)
     {

@@ -15,21 +15,18 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus;
-using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.Mute;
 using Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response.Infractions;
 using Lisbeth.Bot.Application.Discord.Extensions;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Microsoft.Extensions.Logging;
-using MikyM.Common.Utilities.Results.Errors;
 using MikyM.Discord.EmbedBuilders.Enums;
 using MikyM.Discord.Extensions.BaseExtensions;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Mute;
 
 [UsedImplicitly]
-public class ApplyMuteCommandHandler : ICommandHandler<ApplyMuteCommand, DiscordEmbed>
+public class ApplyMuteCommandHandler : IAsyncCommandHandler<ApplyMuteCommand, DiscordEmbed>
 {
     private readonly IDiscordService _discord;
     private readonly IGuildDataService _guildDataService;

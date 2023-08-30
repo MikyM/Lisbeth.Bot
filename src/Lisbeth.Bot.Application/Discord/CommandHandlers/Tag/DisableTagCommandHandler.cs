@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.Tag;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using MikyM.Discord.Extensions.BaseExtensions;
@@ -23,7 +22,7 @@ using MikyM.Discord.Extensions.BaseExtensions;
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Tag;
 
 [UsedImplicitly]
-public class DisableTagCommandHandler : ICommandHandler<DisableTagCommand>
+public class DisableTagCommandHandler : IAsyncCommandHandler<DisableTagCommand>
 {
     private readonly IDiscordService _discord;
     private readonly IGuildDataService _guildDataService;

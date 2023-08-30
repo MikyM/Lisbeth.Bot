@@ -15,9 +15,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus;
-using DSharpPlus.Entities;
 using Emzi0767.Utilities;
+using Fasterflect;
 using FluentValidation;
 using FluentValidation.Validators;
 
@@ -36,8 +35,14 @@ public sealed class DiscordRoleIdValidator<T> : IAsyncPropertyValidator<T, ulong
 
     public async Task<bool> IsValidAsync(ValidationContext<T> context, ulong value, CancellationToken cancellation)
     {
-        var data = context.InstanceToValidate.ToDictionary();
-        if (!data.TryGetValue("GuildId", out _guildId)) return false;
+        try
+        {
+            _guildId = context.InstanceToValidate.GetPropertyValue("GuildId");
+        }
+        catch
+        {
+            return false;
+        }
 
         DiscordGuild guild;
         try

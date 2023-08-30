@@ -1,7 +1,6 @@
-﻿using Lisbeth.Bot.Domain.Entities.Base;
-namespace Lisbeth.Bot.Domain.Entities;
+﻿namespace Lisbeth.Bot.Domain.Entities;
 
-public class SuggestionConfig : SnowflakeDiscordEntity
+public class SuggestionConfig : LisbethDiscordEntity
 {
     public Guild? Guild { get; set; }
     public ulong SuggestionChannelId { get; set; }

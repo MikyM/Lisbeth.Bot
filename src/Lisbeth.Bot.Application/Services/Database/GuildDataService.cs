@@ -16,7 +16,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using AutoMapper;
-using Lisbeth.Bot.Application.Exceptions;
+using DataExplorer.EfCore.Abstractions;
+using DataExplorer.EfCore.Abstractions.DataServices;
+using DataExplorer.EfCore.DataServices;
 using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.Domain.DTOs.Request.ModerationConfig;
@@ -24,9 +26,8 @@ using Lisbeth.Bot.Domain.DTOs.Request.ReminderConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.RoleMenu;
 using Lisbeth.Bot.Domain.DTOs.Request.SuggestionConfig;
 using Lisbeth.Bot.Domain.DTOs.Request.TicketingConfig;
-using MikyM.Common.EfCore.ApplicationLayer.Interfaces;
-using MikyM.Common.EfCore.DataAccessLayer.UnitOfWork;
-using MikyM.Common.Utilities.Results.Errors;
+using NotFoundException = DataExplorer.Exceptions.NotFoundException;
+
 
 namespace Lisbeth.Bot.Application.Services.Database;
 
@@ -40,7 +41,7 @@ public class GuildDataService : CrudDataService<Guild, ILisbethBotDbContext>, IG
     public GuildDataService(IMapper mapper, IUnitOfWork<ILisbethBotDbContext> uof,
         ICrudDataService<ModerationConfig, ILisbethBotDbContext> moderationService,
         ICrudDataService<TicketingConfig, ILisbethBotDbContext> ticketingService,
-        ICrudDataService<RoleMenu, ILisbethBotDbContext> roleMenuService) : base(mapper, uof)
+        ICrudDataService<RoleMenu, ILisbethBotDbContext> roleMenuService) : base(uof)
     {
         _moderationService = moderationService;
         _ticketingService = ticketingService;

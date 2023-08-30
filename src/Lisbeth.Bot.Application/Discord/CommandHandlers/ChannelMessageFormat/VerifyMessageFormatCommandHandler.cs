@@ -16,7 +16,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using AutoMapper;
-using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.ChannelMessageFormat;
 using Lisbeth.Bot.Application.Discord.SlashCommands;
 using Lisbeth.Bot.Application.Validation.DirectMessage;
@@ -29,18 +28,18 @@ using MikyM.Discord.Extensions.BaseExtensions;
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.ChannelMessageFormat;
 
 [UsedImplicitly]
-public class VerifyMessageFormatCommandHandler : ICommandHandler<VerifyMessageFormatCommand, VerifyMessageFormatResDto>
+public class VerifyMessageFormatCommandHandler : IAsyncCommandHandler<VerifyMessageFormatCommand, VerifyMessageFormatResDto>
 {
     private readonly IDiscordService _discord;
     private readonly IGuildDataService _guildDataService;
     private readonly IResponseDiscordEmbedBuilder<RegularUserInteraction> _embedBuilder;
-    private readonly ICommandHandler<SendDirectMessageCommand> _sendHandler;
+    private readonly IAsyncCommandHandler<SendDirectMessageCommand> _sendHandler;
     private readonly IMapper _mapper;
     private readonly ILogger<VerifyMessageFormatCommandHandler> _logger;
 
     public VerifyMessageFormatCommandHandler(IDiscordService discord, IGuildDataService guildDataService,
         IResponseDiscordEmbedBuilder<RegularUserInteraction> embedBuilder,
-        ICommandHandler<SendDirectMessageCommand> sendHandler, IMapper mapper,
+        IAsyncCommandHandler<SendDirectMessageCommand> sendHandler, IMapper mapper,
         ILogger<VerifyMessageFormatCommandHandler> logger)
     {
         _discord = discord;
@@ -99,7 +98,7 @@ public class VerifyMessageFormatCommandHandler : ICommandHandler<VerifyMessageFo
 
         var format = guildCfg.ChannelMessageFormats?.FirstOrDefault(x => x.ChannelId == command.Dto.ChannelId);
         if (format is null)
-            return new ArgumentError(nameof(command.Dto.ChannelId),
+            return new ArgumentInvalidError(nameof(command.Dto.ChannelId),
                 "There's no message format registered for this channel");
         if (format.IsDisabled)
             return new DisabledEntityError("Message format is currently disabled for this channel, enable it first");

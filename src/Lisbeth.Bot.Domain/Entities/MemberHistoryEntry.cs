@@ -2,12 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using DSharpPlus.Entities;
-using MikyM.Common.DataAccessLayer;
-using MikyM.Common.Domain.Entities;
 
 namespace Lisbeth.Bot.Domain.Entities;
 
-public class MemberHistoryEntry : SnowflakeEntity, IDisableableEntity
+public class MemberHistoryEntry : LisbethEntity
 {
     private HashSet<ServerBoosterHistoryEntry>? _serverBoosterHistoryEntries = null;
 

@@ -1,9 +1,6 @@
-﻿using MikyM.Common.DataAccessLayer;
-using MikyM.Common.Domain.Entities;
+﻿namespace Lisbeth.Bot.Domain.Entities;
 
-namespace Lisbeth.Bot.Domain.Entities;
-
-public class ServerBoosterHistoryEntry : SnowflakeEntity, IDisableableEntity
+public class ServerBoosterHistoryEntry : LisbethEntity
 {
     public ulong UserId { get; set; }
     public ulong GuildId { get; set; }

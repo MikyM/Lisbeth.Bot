@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.Modules.Suggestions;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
@@ -24,7 +23,7 @@ using MikyM.Discord.Extensions.BaseExtensions;
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Modules.Suggestions;
 
 [UsedImplicitly]
-public class SuggestionConfigCommandHandler : ICommandHandler<SuggestionConfigCommand, DiscordEmbed>
+public class SuggestionConfigCommandHandler : IAsyncCommandHandler<SuggestionConfigCommand, DiscordEmbed>
 {
     private readonly IGuildDataService _guildDataService;
     private readonly IDiscordGuildRequestDataProvider _dataProvider;
@@ -54,7 +53,7 @@ public class SuggestionConfigCommandHandler : ICommandHandler<SuggestionConfigCo
             return Result<DiscordEmbed>.FromError(guildRes);
 
         if (guild.IsSuggestionModuleEnabled)
-            return new ArgumentError(nameof(guild.SuggestionConfig),"Suggestion module is already enabled, please use the repair action.");
+            return new ArgumentInvalidError(nameof(guild.SuggestionConfig),"Suggestion module is already enabled, please use the repair action.");
 
         var addRes = await _guildDataService.AddConfigAsync(command.RequestDto, true);
 

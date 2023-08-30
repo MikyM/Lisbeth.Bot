@@ -15,11 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus.Entities;
-
 namespace Lisbeth.Bot.Application.Discord.Commands.Ticket;
 
-public class RejectCloseTicketCommand : CommandBase
+public class RejectCloseTicketCommand : ICommand
 {
     public RejectCloseTicketCommand(DiscordInteraction interaction, DiscordMessage message)
     {

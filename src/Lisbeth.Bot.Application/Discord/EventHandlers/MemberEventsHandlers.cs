@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus;
 using DSharpPlus.EventArgs;
 using Lisbeth.Bot.Application.Discord.Commands.MemberHistoryEntry;
 using Lisbeth.Bot.Application.Discord.Commands.ServerBoosterHistoryEntry;
@@ -26,28 +25,28 @@ namespace Lisbeth.Bot.Application.Discord.EventHandlers;
 [UsedImplicitly]
 public class MemberEventsHandler : IDiscordGuildMemberEventsSubscriber
 {
-    private readonly ICommandHandlerFactory _commandHandlerFactory;
+    private readonly ICommandHandlerResolver _commandHandlerFactory;
 
-    public MemberEventsHandler(ICommandHandlerFactory commandHandlerFactory)
+    public MemberEventsHandler(ICommandHandlerResolver commandHandlerFactory)
     {
         _commandHandlerFactory = commandHandlerFactory;
     }
 
     public async Task DiscordOnGuildMemberAdded(DiscordClient sender, GuildMemberAddEventArgs args)
     {
-        _ = await _commandHandlerFactory.GetHandler<ICommandHandler<AddMemberHistoryEntryCommand>>()
+        _ = await _commandHandlerFactory.GetHandler<IAsyncCommandHandler<AddMemberHistoryEntryCommand>>()
             .HandleAsync(new AddMemberHistoryEntryCommand(args.Guild, args.Member));
     }
 
     public async Task DiscordOnGuildMemberRemoved(DiscordClient sender, GuildMemberRemoveEventArgs args)
     {
-        var guildRes = await _commandHandlerFactory.GetHandler<ICommandHandler<DisableMemberHistoryEntryCommand, Guild>>()
+        var guildRes = await _commandHandlerFactory.GetHandler<IAsyncCommandHandler<DisableMemberHistoryEntryCommand, Guild>>()
             .HandleAsync(new DisableMemberHistoryEntryCommand(args.Guild, args.Member));
         
         if (!args.Member.Roles.Any(x => x.Tags.IsPremiumSubscriber))
             return;
             
-        _ = await _commandHandlerFactory.GetHandler<ICommandHandler<DisableServerBoosterHistoryEntryCommand>>()
+        _ = await _commandHandlerFactory.GetHandler<IAsyncCommandHandler<DisableServerBoosterHistoryEntryCommand>>()
             .HandleAsync(new DisableServerBoosterHistoryEntryCommand(args.Guild, args.Member, guildRes.Entity));
     }
 
@@ -60,10 +59,10 @@ public class MemberEventsHandler : IDiscordGuildMemberEventsSubscriber
         _ = hadBoostBefore switch
         {
             true when !hasBoostNow => await _commandHandlerFactory
-                .GetHandler<ICommandHandler<DisableServerBoosterHistoryEntryCommand>>()
+                .GetHandler<IAsyncCommandHandler<DisableServerBoosterHistoryEntryCommand>>()
                 .HandleAsync(new DisableServerBoosterHistoryEntryCommand(args.Guild, args.Member)),
             false when hasBoostNow => await _commandHandlerFactory
-                .GetHandler<ICommandHandler<AddServerBoosterHistoryEntryCommand>>()
+                .GetHandler<IAsyncCommandHandler<AddServerBoosterHistoryEntryCommand>>()
                 .HandleAsync(new AddServerBoosterHistoryEntryCommand(args.Guild, args.Member)),
             _ => Result.FromSuccess()
         };

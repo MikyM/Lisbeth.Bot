@@ -16,7 +16,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using AutoMapper;
-using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.Tag;
 using Lisbeth.Bot.Domain.DTOs.Request.Tag;
 using MikyM.Discord.Extensions.BaseExtensions;
@@ -24,14 +23,14 @@ using MikyM.Discord.Extensions.BaseExtensions;
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Tag;
 
 [UsedImplicitly]
-public class SendTagCommandHandler : ICommandHandler<SendTagCommand>
+public class SendTagCommandHandler : IAsyncCommandHandler<SendTagCommand>
 {
     private readonly IDiscordService _discord;
-    private readonly ICommandHandler<GetTagCommand, DiscordMessageBuilder> _commandHandler;
+    private readonly IAsyncCommandHandler<GetTagCommand, DiscordMessageBuilder> _commandHandler;
     private readonly IMapper _mapper;
 
     public SendTagCommandHandler(IDiscordService discord,
-        ICommandHandler<GetTagCommand, DiscordMessageBuilder> commandHandler, IMapper mapper)
+        IAsyncCommandHandler<GetTagCommand, DiscordMessageBuilder> commandHandler, IMapper mapper)
     {
         _discord = discord;
         _commandHandler = commandHandler;

@@ -16,15 +16,16 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using AutoMapper;
+using DataExplorer.EfCore.Abstractions;
+using DataExplorer.EfCore.DataServices;
 using Lisbeth.Bot.DataAccessLayer;
-using MikyM.Common.EfCore.DataAccessLayer.UnitOfWork;
 
 namespace Lisbeth.Bot.Application.Services.Database;
 
 [UsedImplicitly]
 public class EmbedConfigDataService : CrudDataService<EmbedConfig, ILisbethBotDbContext>, IEmbedConfigDataService
 {
-    public EmbedConfigDataService(IMapper mapper, IUnitOfWork<ILisbethBotDbContext> uof) : base(mapper, uof)
+    public EmbedConfigDataService(IMapper mapper, IUnitOfWork<ILisbethBotDbContext> uof) : base(uof)
     {
     }
 }

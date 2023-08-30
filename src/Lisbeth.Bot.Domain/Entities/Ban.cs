@@ -16,13 +16,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using Lisbeth.Bot.Domain.Entities.Base;
-using MikyM.Common.DataAccessLayer;
-using MikyM.Common.Domain.Entities;
 
 namespace Lisbeth.Bot.Domain.Entities;
 
-public sealed class Ban : SnowflakeEntity, IDisableableEntity, IModEntity
+public sealed class Ban : LisbethEntity, IModEntity
 {
     public ulong GuildId { get; set; }
     public ulong UserId { get; set; }
@@ -38,6 +35,4 @@ public sealed class Ban : SnowflakeEntity, IDisableableEntity, IModEntity
     {
         return (Ban)MemberwiseClone();
     }
-
-    public bool IsDisabled { get; set; }
 }

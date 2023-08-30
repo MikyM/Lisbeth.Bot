@@ -15,25 +15,19 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus;
-using DSharpPlus.Entities;
-using DSharpPlus.Interactivity;
-using DSharpPlus.Interactivity.Extensions;
-using DSharpPlus.SlashCommands;
+using DataExplorer.Extensions;
 using Lisbeth.Bot.Application.Discord.Commands.RoleMenu;
 using Lisbeth.Bot.Application.Discord.Helpers;
 using Lisbeth.Bot.Application.Discord.Helpers.InteractionIdEnums.Buttons;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Lisbeth.Bot.DataAccessLayer.Specifications.RoleMenu;
 using Microsoft.Extensions.Logging;
-using MikyM.Common.DataAccessLayer;
-using MikyM.Common.Utilities.Results.Errors;
 using MikyM.Discord.Extensions.BaseExtensions;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.RoleMenu;
 
 [UsedImplicitly]
-public class CreateRoleMenuCommandHandler : ICommandHandler<CreateRoleMenuCommand, DiscordMessageBuilder>
+public class CreateRoleMenuCommandHandler : IAsyncCommandHandler<CreateRoleMenuCommand, DiscordMessageBuilder>
 {
     private readonly IGuildDataService _guildDataService;
     private readonly IRoleMenuDataService _roleMenuDataService;
@@ -184,7 +178,7 @@ public class CreateRoleMenuCommandHandler : ICommandHandler<CreateRoleMenuComman
 
         if (string.IsNullOrWhiteSpace(waitResult.Result.Content.Trim()))
             return Result<(DiscordEmbedBuilder Embed, Domain.Entities.RoleMenu CurrentMenu)>.FromError(
-                new DiscordArgumentError("Response can't be empty"));
+                new DiscordArgumentInvalidError("Response can't be empty"));
 
         string name = waitResult.Result.Content.GetStringBetween("@name@", "@endName@").Trim();
         string desc = waitResult.Result.Content.GetStringBetween("@desc@", "@endDesc@").Trim();
@@ -196,14 +190,14 @@ public class CreateRoleMenuCommandHandler : ICommandHandler<CreateRoleMenuComman
 
         if (roleMenu.RoleMenuOptions.AnyNullable(x => string.Equals(x.Name, name, StringComparison.InvariantCultureIgnoreCase)))
             return Result<(DiscordEmbedBuilder Embed, Domain.Entities.RoleMenu CurrentMenu)>.FromError(
-                new DiscordArgumentError("This menu already contains an option with same name"));
+                new DiscordArgumentInvalidError("This menu already contains an option with same name"));
 
         RoleMenuOption newOption = new() { Name = name };
         if (!string.IsNullOrWhiteSpace(desc)) newOption.Description = desc;
 
         if (!string.IsNullOrWhiteSpace(emoji) && !DiscordEmoji.TryFromName(ctx.Client, emoji, true, out _) && !DiscordEmoji.TryFromUnicode(ctx.Client, emoji, out _))
             return Result<(DiscordEmbedBuilder Embed, Domain.Entities.RoleMenu CurrentMenu)>.FromError(
-                new DiscordArgumentError("Invalid emoji provided."));
+                new DiscordArgumentInvalidError("Invalid emoji provided."));
 
         DiscordEmoji? parsedUnicodeEmoji = null;
 
@@ -213,7 +207,7 @@ public class CreateRoleMenuCommandHandler : ICommandHandler<CreateRoleMenuComman
         {
             if (parsedUnicodeEmoji is not null && parsedUnicodeEmoji.IsAnimated || parsedNameEmoji is not null && parsedNameEmoji.IsAnimated)
                 return Result<(DiscordEmbedBuilder Embed, Domain.Entities.RoleMenu CurrentMenu)>.FromError(
-                    new DiscordArgumentError("Animated emojis are not supported."));
+                    new DiscordArgumentInvalidError("Animated emojis are not supported."));
 
             newOption.Emoji = emoji;
         }

@@ -1,4 +1,3 @@
-using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.ChatExport.Wrappers;
 using Lisbeth.Bot.Application.Discord.ChatExport.Wrappers.Message;
 using Lisbeth.Bot.Domain;

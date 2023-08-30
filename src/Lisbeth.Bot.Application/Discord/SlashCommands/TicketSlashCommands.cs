@@ -15,9 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus;
-using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
 using FluentValidation;
 using Lisbeth.Bot.Application.Discord.Commands.Ticket;
@@ -31,17 +28,17 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 [UsedImplicitly]
 public class TicketSlashCommands : ExtendedApplicationCommandModule
 {
-    public TicketSlashCommands(ICommandHandler<AddSnowflakeToTicketCommand, DiscordEmbed> addSnowflakeTicketCommandHandler,
-        ICommandHandler<RemoveSnowflakeFromTicketCommand, DiscordEmbed> removeSnowflakeCommandHandler, ICommandHandler<CloseTicketCommand> closeTicketCommandHandler)
+    public TicketSlashCommands(IAsyncCommandHandler<AddSnowflakeToTicketCommand, DiscordEmbed> addSnowflakeTicketCommandHandler,
+        IAsyncCommandHandler<RemoveSnowflakeFromTicketCommand, DiscordEmbed> removeSnowflakeCommandHandler, IAsyncCommandHandler<CloseTicketCommand> closeTicketCommandHandler)
     {
         _addSnowflakeTicketCommandHandler = addSnowflakeTicketCommandHandler;
         _removeSnowflakeCommandHandler = removeSnowflakeCommandHandler;
         _closeTicketCommandHandler = closeTicketCommandHandler;
     }
 
-    private readonly ICommandHandler<AddSnowflakeToTicketCommand, DiscordEmbed> _addSnowflakeTicketCommandHandler;
-    private readonly ICommandHandler<RemoveSnowflakeFromTicketCommand, DiscordEmbed> _removeSnowflakeCommandHandler;
-    private readonly ICommandHandler<CloseTicketCommand> _closeTicketCommandHandler;
+    private readonly IAsyncCommandHandler<AddSnowflakeToTicketCommand, DiscordEmbed> _addSnowflakeTicketCommandHandler;
+    private readonly IAsyncCommandHandler<RemoveSnowflakeFromTicketCommand, DiscordEmbed> _removeSnowflakeCommandHandler;
+    private readonly IAsyncCommandHandler<CloseTicketCommand> _closeTicketCommandHandler;
 
     [UsedImplicitly]
     [SlashRequireUserPermissions(Permissions.BanMembers)]

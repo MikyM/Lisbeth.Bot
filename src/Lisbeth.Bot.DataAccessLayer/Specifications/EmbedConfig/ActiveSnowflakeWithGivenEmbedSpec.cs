@@ -16,12 +16,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Linq.Expressions;
+using DataExplorer.EfCore.Specifications;
 using Lisbeth.Bot.Domain.Entities.Base;
-using MikyM.Common.EfCore.DataAccessLayer.Specifications;
 
 namespace Lisbeth.Bot.DataAccessLayer.Specifications.EmbedConfig;
 
-public class ActiveSnowflakeWithGivenEmbedSpec<T, TEmbedProperty> : Specification<T> where T : SnowflakeDiscordEntity
+public class ActiveSnowflakeWithGivenEmbedSpec<T, TEmbedProperty> : Specification<T> where T : LisbethDiscordEntity
     where TEmbedProperty : Domain.Entities.EmbedConfig?
 {
     public ActiveSnowflakeWithGivenEmbedSpec(Expression<Func<T, TEmbedProperty?>> embedToInclude, ulong guildId)

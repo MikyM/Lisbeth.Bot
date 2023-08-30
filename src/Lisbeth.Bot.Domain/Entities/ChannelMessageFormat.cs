@@ -19,11 +19,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using DSharpPlus;
-using Lisbeth.Bot.Domain.Entities.Base;
 
 namespace Lisbeth.Bot.Domain.Entities;
 
-public class ChannelMessageFormat : SnowflakeDiscordEntity
+public class ChannelMessageFormat : LisbethDiscordEntity
 {
     public ulong ChannelId { get; set; }
     public ulong CreatorId { get; set; }

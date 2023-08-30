@@ -17,18 +17,20 @@
 
 using System.Collections.Generic;
 using AutoMapper;
+using DataExplorer.EfCore.Abstractions;
+using DataExplorer.EfCore.DataServices;
 using Lisbeth.Bot.DataAccessLayer;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Ticket;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
-using MikyM.Common.EfCore.DataAccessLayer.UnitOfWork;
-using MikyM.Common.Utilities.Results.Errors;
+
+
 
 namespace Lisbeth.Bot.Application.Services.Database;
 
 [UsedImplicitly]
 public class TicketDataService : CrudDataService<Ticket, ILisbethBotDbContext>, ITicketDataService
 {
-    public TicketDataService(IMapper mapper, IUnitOfWork<ILisbethBotDbContext> uof) : base(mapper, uof)
+    public TicketDataService(IMapper mapper, IUnitOfWork<ILisbethBotDbContext> uof) : base(uof)
     {
     }
 

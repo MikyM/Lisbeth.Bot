@@ -1,10 +1,8 @@
-﻿using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using Lisbeth.Bot.Domain.DTOs.Request.Reminder;
+﻿using Lisbeth.Bot.Domain.DTOs.Request.Reminder;
 
 namespace Lisbeth.Bot.Application.Discord.Commands.Reminder;
 
-public class SetNewReminderCommand : CommandBase<DiscordEmbed>
+public class SetNewReminderCommand : ICommand<DiscordEmbed>
 {
     public SetNewReminderCommand(SetReminderReqDto dto, InteractionContext? ctx = null)
     {

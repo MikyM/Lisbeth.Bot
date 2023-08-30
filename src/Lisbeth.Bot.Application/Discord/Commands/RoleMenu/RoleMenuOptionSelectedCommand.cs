@@ -19,7 +19,7 @@ using DSharpPlus.EventArgs;
 
 namespace Lisbeth.Bot.Application.Discord.Commands.RoleMenu;
 
-public class RoleMenuOptionSelectedCommand : CommandBase
+public class RoleMenuOptionSelectedCommand : ICommand
 {
     public RoleMenuOptionSelectedCommand(ComponentInteractionCreateEventArgs interaction)
     {

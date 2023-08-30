@@ -17,7 +17,6 @@
 
 using System.Collections.Concurrent;
 using Autofac;
-using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.Ticket;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 using Microsoft.Extensions.Logging;
@@ -32,10 +31,8 @@ public interface ITicketQueueService
     bool RemoveGuildQueue(ulong guildId);
 }
 
-[Service]
-[RegisterAs(typeof(ITicketQueueService))]
-[Lifetime(Lifetime.SingleInstance)]
 [UsedImplicitly]
+[ServiceImplementation<ITicketQueueService>(ServiceLifetime.SingleInstance)]
 public class TicketQueueService : ITicketQueueService
 {
     private readonly ConcurrentDictionary<ulong, Lazy<ConcurrentTaskQueue>> _guildQueues = new();
@@ -54,7 +51,7 @@ public class TicketQueueService : ITicketQueueService
             _ => new Lazy<ConcurrentTaskQueue>(() => new ConcurrentTaskQueue())).Value;
 
         using var scope = _lifetimeScope.BeginLifetimeScope();
-        var handler = scope.Resolve<ICommandHandler<OpenTicketCommand>>();
+        var handler = scope.Resolve<IAsyncCommandHandler<OpenTicketCommand>>();
         await guildsQueue.EnqueueAsync(() => handler.HandleAsync(new OpenTicketCommand(req, interaction)));
     }
 
@@ -67,7 +64,7 @@ public class TicketQueueService : ITicketQueueService
             _ => new Lazy<ConcurrentTaskQueue>(() => new ConcurrentTaskQueue())).Value;
 
         using var scope = _lifetimeScope.BeginLifetimeScope();
-        var handler = scope.Resolve<ICommandHandler<OpenTicketCommand>>();
+        var handler = scope.Resolve<IAsyncCommandHandler<OpenTicketCommand>>();
         await guildsQueue.EnqueueAsync(() => handler.HandleAsync(new OpenTicketCommand(req)));
     }
 }

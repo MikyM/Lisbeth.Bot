@@ -21,15 +21,13 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Domain.Enums;
-using MikyM.Common.DataAccessLayer;
-using MikyM.Common.Domain.Entities;
 using MikyM.Discord.Extensions.BaseExtensions;
 
 #pragma warning disable CS0649
 
 namespace Lisbeth.Bot.Domain.Entities;
 
-public sealed class Guild : SnowflakeEntity, IDisableableEntity
+public sealed class Guild : LisbethEntity
 {
     private readonly HashSet<Ban>? _bans;
     private HashSet<MemberHistoryEntry>? _memberHistoryEntries;

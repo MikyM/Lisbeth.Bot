@@ -17,6 +17,6 @@
 
 namespace Lisbeth.Bot.Application.Discord.Commands.Ticket;
 
-public class CloseInactiveTicketsCommand : CommandBase
+public class CloseInactiveTicketsCommand : ICommand
 {
 }

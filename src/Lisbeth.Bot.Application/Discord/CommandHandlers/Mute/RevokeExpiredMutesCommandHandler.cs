@@ -16,18 +16,16 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Autofac;
-using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.Mute;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Mute;
 using Lisbeth.Bot.Domain.DTOs.Request.Mute;
 using Microsoft.Extensions.Logging;
 using MikyM.Common.Utilities.Extensions;
-using MikyM.Common.Utilities.Results.Errors;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Mute;
 
 [UsedImplicitly]
-public class RevokeExpiredMutesCommandHandler : ICommandHandler<RevokeExpiredMutesCommand>
+public class RevokeExpiredMutesCommandHandler : IAsyncCommandHandler<RevokeExpiredMutesCommand>
 {
     private readonly IMuteDataService _muteDataService;
     private readonly ILogger<RevokeExpiredMutesCommandHandler> _logger;
@@ -56,7 +54,7 @@ public class RevokeExpiredMutesCommandHandler : ICommandHandler<RevokeExpiredMut
             await Parallel.ForEachAsync(res.Entity, async (x, _) =>
             {
                 await using var childScope = _lifetimeScope.BeginLifetimeScope();
-                var revokeHandler = childScope.Resolve<ICommandHandler<RevokeMuteCommand, DiscordEmbed>>();
+                var revokeHandler = childScope.Resolve<IAsyncCommandHandler<RevokeMuteCommand, DiscordEmbed>>();
                 var req = new MuteRevokeReqDto(x.UserId, x.GuildId, _discord.Client.CurrentUser.Id);
                 await revokeHandler.HandleAsync(new RevokeMuteCommand(req));
             });

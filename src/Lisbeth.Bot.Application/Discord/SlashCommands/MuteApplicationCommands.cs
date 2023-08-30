@@ -15,9 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus;
-using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
 using FluentValidation;
 using Lisbeth.Bot.Application.Discord.Commands.Mute;
@@ -34,14 +31,14 @@ namespace Lisbeth.Bot.Application.Discord.ApplicationCommands;
 public partial class MuteApplicationCommands : ExtendedApplicationCommandModule
 {
     private readonly IDiscordMessageService _discordMessageService;
-    private readonly ICommandHandler<ApplyMuteCommand, DiscordEmbed> _applyHandler;
-    private readonly ICommandHandler<RevokeMuteCommand, DiscordEmbed> _revokeHandler;
-    private readonly ICommandHandler<GetMuteInfoCommand, DiscordEmbed> _getHandler;
+    private readonly IAsyncCommandHandler<ApplyMuteCommand, DiscordEmbed> _applyHandler;
+    private readonly IAsyncCommandHandler<RevokeMuteCommand, DiscordEmbed> _revokeHandler;
+    private readonly IAsyncCommandHandler<GetMuteInfoCommand, DiscordEmbed> _getHandler;
 
     public MuteApplicationCommands(IDiscordMessageService discordMessageService,
-        ICommandHandler<ApplyMuteCommand, DiscordEmbed> applyHandler,
-        ICommandHandler<RevokeMuteCommand, DiscordEmbed> revokeHandler,
-        ICommandHandler<GetMuteInfoCommand, DiscordEmbed> getHandler)
+        IAsyncCommandHandler<ApplyMuteCommand, DiscordEmbed> applyHandler,
+        IAsyncCommandHandler<RevokeMuteCommand, DiscordEmbed> revokeHandler,
+        IAsyncCommandHandler<GetMuteInfoCommand, DiscordEmbed> getHandler)
     {
         _discordMessageService = discordMessageService;
         _applyHandler = applyHandler;

@@ -15,22 +15,20 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.RoleMenu;
 using Lisbeth.Bot.Application.Discord.Exceptions;
 using Lisbeth.Bot.DataAccessLayer.Specifications.RoleMenu;
-using MikyM.Common.Utilities.Results.Errors;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.RoleMenu;
 
 [UsedImplicitly]
-public class RoleMenuButtonPressedCommandHandler : ICommandHandler<RoleMenuButtonPressedCommand>
+public class RoleMenuButtonPressedCommandHandler : IAsyncCommandHandler<RoleMenuButtonPressedCommand>
 {
     private readonly IRoleMenuDataService _roleMenuDataService;
-    private readonly ICommandHandler<GetRoleMenuSelectCommand, DiscordSelectComponent> _getSelectHandler;
+    private readonly IAsyncCommandHandler<GetRoleMenuSelectCommand, DiscordSelectComponent> _getSelectHandler;
 
     public RoleMenuButtonPressedCommandHandler(IRoleMenuDataService roleMenuDataService,
-        ICommandHandler<GetRoleMenuSelectCommand, DiscordSelectComponent> getSelectHandler)
+        IAsyncCommandHandler<GetRoleMenuSelectCommand, DiscordSelectComponent> getSelectHandler)
     {
         _roleMenuDataService = roleMenuDataService;
         _getSelectHandler = getSelectHandler;

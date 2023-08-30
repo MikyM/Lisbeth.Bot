@@ -15,21 +15,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using Lisbeth.Bot.Application.Discord.EmbedEnrichers.Log.Moderation;
 using Lisbeth.Bot.Domain.DTOs.Request.Base;
 using Lisbeth.Bot.Domain.DTOs.Request.Prune;
-using MikyM.Common.Utilities.Results.Errors;
 using MikyM.Discord.EmbedBuilders.Enrichers;
 using MikyM.Discord.EmbedBuilders.Enums;
 
 namespace Lisbeth.Bot.Application.Discord.Services;
 
 [UsedImplicitly]
-[Service]
-[RegisterAs(typeof(IDiscordGuildLoggerService))]
-[Lifetime(Lifetime.InstancePerLifetimeScope)]
+[ServiceImplementation<IDiscordGuildLoggerService>(ServiceLifetime.InstancePerLifetimeScope)]
 public class DiscordGuildLoggerService : IDiscordGuildLoggerService
 {
     private readonly IDiscordGuildLogSenderService _logSender;

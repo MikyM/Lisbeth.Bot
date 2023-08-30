@@ -15,13 +15,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
 
 namespace Lisbeth.Bot.Application.Discord.Commands.Ticket;
 
-public class AddSnowflakeToTicketCommand : CommandBase<DiscordEmbed>
+public class AddSnowflakeToTicketCommand : ICommand<DiscordEmbed>
 {
     public AddSnowflakeToTicketCommand(TicketAddReqDto dto, InteractionContext? interactionContext = null)
     {

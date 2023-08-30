@@ -17,12 +17,10 @@
 
 using System;
 using System.Collections.Generic;
-using MikyM.Common.DataAccessLayer;
-using MikyM.Common.Domain.Entities;
 
 namespace Lisbeth.Bot.Domain.Entities;
 
-public class EmbedConfig : SnowflakeEntity, IDisableableEntity
+public class EmbedConfig : LisbethEntity
 {
     public string? Author { get; set; }
     public string? AuthorUrl { get; set; }
@@ -47,5 +45,4 @@ public class EmbedConfig : SnowflakeEntity, IDisableableEntity
     public TicketingConfig? TicketingConfigWithCenterMessage { get; set; }
     public TicketingConfig? TicketingConfigWithWelcomeMessage { get; set; }
     public ModerationConfig? ModerationConfig { get; set; }
-    public bool IsDisabled { get; set; }
 }

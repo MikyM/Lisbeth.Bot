@@ -15,12 +15,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus.Entities;
 using Lisbeth.Bot.Domain.DTOs.Request.SuggestionConfig;
 
 namespace Lisbeth.Bot.Application.Discord.Commands.Modules.Suggestions;
 
-public class SuggestionConfigDisableCommand : CommandBase<DiscordEmbed>
+public class SuggestionConfigDisableCommand : ICommand<DiscordEmbed>
 {
     public SuggestionConfigDisableCommand(SuggestionConfigDisableReqDto requestDto)
     {

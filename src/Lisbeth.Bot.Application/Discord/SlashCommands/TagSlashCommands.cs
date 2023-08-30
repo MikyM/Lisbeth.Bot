@@ -16,10 +16,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using DSharpPlus.Entities;
-using DSharpPlus.Interactivity;
-using DSharpPlus.Interactivity.Extensions;
-using DSharpPlus.SlashCommands;
 using FluentValidation;
 using Lisbeth.Bot.Application.Discord.Commands.Tag;
 using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
@@ -33,14 +29,14 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 public class TagSlashCommands : ExtendedApplicationCommandModule
 {
     public TagSlashCommands(IDiscordEmbedConfiguratorService<Tag> discordEmbedTagConfiguratorService,
-        ICommandHandlerFactory commandHandlerFactory)
+        ICommandHandlerResolver commandHandlerFactory)
     {
         _discordEmbedTagConfiguratorService = discordEmbedTagConfiguratorService;
         _commandHandlerFactory = commandHandlerFactory;
     }
 
     private readonly IDiscordEmbedConfiguratorService<Tag> _discordEmbedTagConfiguratorService;
-    private readonly ICommandHandlerFactory _commandHandlerFactory;
+    private readonly ICommandHandlerResolver _commandHandlerFactory;
 
     [SlashCooldown(20, 120, CooldownBucketType.Guild)]
     [UsedImplicitly]
@@ -68,7 +64,7 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
                 var getValidator = new TagGetReqValidator(ctx.Client);
                 await getValidator.ValidateAndThrowAsync(getReq);
 
-                var getRes = await _commandHandlerFactory.GetHandler<ICommandHandler<GetTagCommand, DiscordMessageBuilder>>()
+                var getRes = await _commandHandlerFactory.GetHandler<IAsyncCommandHandler<GetTagCommand, DiscordMessageBuilder>>()
                     .HandleAsync(new GetTagCommand(getReq, ctx));
 
                 if (getRes.IsDefined(out var getBuilder))
@@ -88,7 +84,7 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
                 var addValidator = new TagAddReqValidator(ctx.Client);
                 await addValidator.ValidateAndThrowAsync(addReq);
 
-                var createRes = await _commandHandlerFactory.GetHandler<ICommandHandler<CreateTagCommand>>()
+                var createRes = await _commandHandlerFactory.GetHandler<IAsyncCommandHandler<CreateTagCommand>>()
                     .HandleAsync(new CreateTagCommand(addReq, ctx));
 
                 if (createRes.IsSuccess)
@@ -107,7 +103,7 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
                 var editValidator = new TagEditReqValidator(ctx.Client);
                 await editValidator.ValidateAndThrowAsync(editReq);
 
-                var editRes = await _commandHandlerFactory.GetHandler<ICommandHandler<EditTagCommand>>()
+                var editRes = await _commandHandlerFactory.GetHandler<IAsyncCommandHandler<EditTagCommand>>()
                     .HandleAsync(new EditTagCommand(editReq, ctx));
 
                 if (editRes.IsSuccess)
@@ -126,7 +122,7 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
                 var disableValidator = new TagDisableReqValidator(ctx.Client);
                 await disableValidator.ValidateAndThrowAsync(removeReq);
 
-                var disableRes = await _commandHandlerFactory.GetHandler<ICommandHandler<DisableTagCommand>>()
+                var disableRes = await _commandHandlerFactory.GetHandler<IAsyncCommandHandler<DisableTagCommand>>()
                     .HandleAsync(new DisableTagCommand(removeReq, ctx));
 
                 if (disableRes.IsSuccess)
@@ -159,7 +155,7 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
                 var sendValidator = new TagSendReqValidator(ctx.Client);
                 await sendValidator.ValidateAndThrowAsync(sendReq);
 
-                var sendRes = await _commandHandlerFactory.GetHandler<ICommandHandler<SendTagCommand>>()
+                var sendRes = await _commandHandlerFactory.GetHandler<IAsyncCommandHandler<SendTagCommand>>()
                     .HandleAsync(new SendTagCommand(sendReq, ctx));
 
                 if (sendRes.IsSuccess)
@@ -181,7 +177,7 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
                 var addPermValidator = new TagAddPermissionReqValidator(ctx.Client);
                 await addPermValidator.ValidateAndThrowAsync(addPermReq);
 
-                var addPermRes = await _commandHandlerFactory.GetHandler<ICommandHandler<AddSnowflakePermissionTagCommand>>()
+                var addPermRes = await _commandHandlerFactory.GetHandler<IAsyncCommandHandler<AddSnowflakePermissionTagCommand>>()
                     .HandleAsync(new AddSnowflakePermissionTagCommand(addPermReq, ctx));
 
                 if (addPermRes.IsSuccess)
@@ -204,7 +200,7 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
                 await revokePermValidator.ValidateAndThrowAsync(revokePermReq);
 
                 var revokePermRes = await _commandHandlerFactory
-                    .GetHandler<ICommandHandler<RevokeSnowflakePermissionTagCommand>>()
+                    .GetHandler<IAsyncCommandHandler<RevokeSnowflakePermissionTagCommand>>()
                     .HandleAsync(new RevokeSnowflakePermissionTagCommand(revokePermReq, ctx));
 
                 if (revokePermRes.IsSuccess)
@@ -222,7 +218,7 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
                 await getAllValidator.ValidateAndThrowAsync(getAllReq);
 
                 var getAllRes = await _commandHandlerFactory
-                    .GetHandler<ICommandHandler<GetAllTagsCommand, List<Page>>>()
+                    .GetHandler<IAsyncCommandHandler<GetAllTagsCommand, List<Page>>>()
                     .HandleAsync(new GetAllTagsCommand(getAllReq, ctx));
 
                 if (getAllRes.IsDefined(out var pages))

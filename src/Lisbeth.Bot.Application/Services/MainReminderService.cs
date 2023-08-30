@@ -24,9 +24,7 @@ using NCrontab;
 namespace Lisbeth.Bot.Application.Services;
 
 [UsedImplicitly]
-[Service]
-[RegisterAs(typeof(IMainReminderService))]
-[Lifetime(Lifetime.InstancePerLifetimeScope)]
+[ServiceImplementation<IMainReminderService>(ServiceLifetime.InstancePerLifetimeScope)]
 public class MainReminderService : IMainReminderService
 {
     private readonly IBackgroundJobClient _backgroundJobClient;
@@ -55,12 +53,12 @@ public class MainReminderService : IMainReminderService
         long remindersPerGuild = recGuild.Entity + reGuild.Entity;
 
         if (recGuild.Entity >= 20)
-            return new DiscordArgumentError(nameof(recGuild.Entity),
+            return new DiscordArgumentInvalidError(nameof(recGuild.Entity),
                 "A guild can have up to 20 active recurring reminders");
         if (remindersPerUser >= 10)
-            return new DiscordArgumentError(nameof(recGuild.Entity), "A user can have up to 10 active reminders");
+            return new DiscordArgumentInvalidError(nameof(recGuild.Entity), "A user can have up to 10 active reminders");
         if (remindersPerGuild >= 200)
-            return new DiscordArgumentError(nameof(recGuild.Entity), "A guild can have up to 200 active reminders");
+            return new DiscordArgumentInvalidError(nameof(recGuild.Entity), "A guild can have up to 200 active reminders");
 
         if (req.SetFor.HasValue ||
             !string.IsNullOrWhiteSpace(req.TimeSpanExpression)) // handle single reminder as first option
@@ -69,7 +67,7 @@ public class MainReminderService : IMainReminderService
             if (!string.IsNullOrWhiteSpace(req.TimeSpanExpression))
             {
                 if (!req.TimeSpanExpression.TryParseToDurationAndNextOccurrence(out var occurrence, out _)) 
-                    return new ArgumentError(nameof(req.TimeSpanExpression), "Timespan expression couldn't be parsed.");
+                    return new ArgumentInvalidError(nameof(req.TimeSpanExpression), "Timespan expression couldn't be parsed.");
                 setFor = occurrence.Value;
                 req.SetFor = occurrence;
             }
@@ -99,20 +97,20 @@ public class MainReminderService : IMainReminderService
         var parsedWithSeconds = CrontabSchedule.TryParse(req.CronExpression,
             new CrontabSchedule.ParseOptions { IncludingSeconds = true });
         if (parsed is null && parsedWithSeconds is null)
-            return Result<ReminderResDto>.FromError(new DiscordArgumentError(nameof(recGuild.Entity),
+            return Result<ReminderResDto>.FromError(new DiscordArgumentInvalidError(nameof(recGuild.Entity),
                 "Invalid cron expression"));
         if (parsed is not null &&
             parsed.GetNextOccurrences(DateTime.UtcNow, DateTime.UtcNow.AddHours(1)).Count() > 12 ||
             parsedWithSeconds is not null && parsedWithSeconds
                 .GetNextOccurrences(DateTime.UtcNow, DateTime.UtcNow.AddHours(1))
                 .Count() > 12)
-            return new DiscordArgumentError(nameof(recGuild.Entity),
+            return new DiscordArgumentInvalidError(nameof(recGuild.Entity),
                 "Cron expressions with more than 12 occurrences per hour (more frequent than every 5 minutes) are not allowed");
 
         var count = await _reminderDataDataService.LongCountAsync(
             new ActiveRecurringRemindersPerGuildByNameSpec(req.GuildId, req.Name ?? string.Empty));
         if (count.Entity != 0)
-            return new DiscordArgumentError(nameof(recGuild.Entity),
+            return new DiscordArgumentInvalidError(nameof(recGuild.Entity),
                 $"This guild already has a recurring reminder with name: {req.Name}");
 
         string jobName = $"{req.GuildId}_{req.Name}";
@@ -149,7 +147,7 @@ public class MainReminderService : IMainReminderService
             if (!string.IsNullOrWhiteSpace(req.TimeSpanExpression))
             {
                 if (!req.TimeSpanExpression.TryParseToDurationAndNextOccurrence(out var occurrence, out _)) 
-                    return new ArgumentError(nameof(req.TimeSpanExpression), "Timespan expression couldn't be parsed.");
+                    return new ArgumentInvalidError(nameof(req.TimeSpanExpression), "Timespan expression couldn't be parsed.");
                 setFor = occurrence.Value;
                 req.SetFor = occurrence;
             }
@@ -175,9 +173,9 @@ public class MainReminderService : IMainReminderService
         if (string.IsNullOrWhiteSpace(req.CronExpression)) throw new InvalidOperationException();
 
         var parsed = CrontabSchedule.TryParse(req.TimeSpanExpression);
-        if (parsed is null) return new DiscordArgumentError(nameof(req.CronExpression), "Invalid cron expression");
+        if (parsed is null) return new DiscordArgumentInvalidError(nameof(req.CronExpression), "Invalid cron expression");
         if (parsed.GetNextOccurrences(DateTime.UtcNow, DateTime.UtcNow.AddHours(1)).Count() > 12)
-            return new DiscordArgumentError(nameof(req.CronExpression),
+            return new DiscordArgumentInvalidError(nameof(req.CronExpression),
                 "Cron expressions with more than 12 occurrences per hour (more frequent than every 5 minutes) are not allowed");
 
         var partial = await _reminderDataDataService.GetSingleBySpecAsync(

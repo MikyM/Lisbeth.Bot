@@ -17,7 +17,6 @@
 
 using System.Collections.Generic;
 using Autofac;
-using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.Ticket;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Microsoft.Extensions.Logging;
@@ -25,7 +24,7 @@ using Microsoft.Extensions.Logging;
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 
 [UsedImplicitly]
-public class CleanClosedTicketsCommandHandler : ICommandHandler<CleanClosedTicketsCommand>
+public class CleanClosedTicketsCommandHandler : IAsyncCommandHandler<CleanClosedTicketsCommand>
 {
     private readonly IDiscordService _discord;
     private readonly ILogger<CleanClosedTicketsCommandHandler> _logger;

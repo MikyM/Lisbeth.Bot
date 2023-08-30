@@ -16,17 +16,14 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Diagnostics.CodeAnalysis;
-using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
-using DSharpPlus.SlashCommands;
 using Lisbeth.Bot.Domain.DTOs.Request.Base;
+using NotFoundException = DSharpPlus.Exceptions.NotFoundException;
 
 namespace Lisbeth.Bot.Application.Discord.Services;
 
-[Service]
-[RegisterAs(typeof(IDiscordGuildRequestDataProvider))]
-[Lifetime(Lifetime.InstancePerDependency)]
 [UsedImplicitly]
+[ServiceImplementation<IDiscordGuildRequestDataProvider>(ServiceLifetime.InstancePerDependency)]
 public class DiscordGuildRequestDataProvider : IDiscordGuildRequestDataProvider
 {
     private DiscordGuild? _discordGuild;

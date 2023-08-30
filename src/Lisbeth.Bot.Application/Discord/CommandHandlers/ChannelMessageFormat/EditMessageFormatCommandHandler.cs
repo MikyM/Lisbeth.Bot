@@ -15,8 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus.Entities;
-using DSharpPlus.Interactivity.Extensions;
 using FluentValidation;
 using Lisbeth.Bot.Application.Discord.Commands.ChannelMessageFormat;
 using Lisbeth.Bot.Application.Discord.SlashCommands;
@@ -27,7 +25,7 @@ using MikyM.Discord.Extensions.BaseExtensions;
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.ChannelMessageFormat;
 
 [UsedImplicitly]
-public class EditMessageFormatCommandHandler : ICommandHandler<EditMessageFormatCommand, DiscordEmbed>
+public class EditMessageFormatCommandHandler : IAsyncCommandHandler<EditMessageFormatCommand, DiscordEmbed>
 {
     private readonly IDiscordService _discord;
     private readonly IGuildDataService _guildDataService;
@@ -81,7 +79,7 @@ public class EditMessageFormatCommandHandler : ICommandHandler<EditMessageFormat
 
         var format = guildCfg.ChannelMessageFormats?.FirstOrDefault(x => x.ChannelId == command.Dto.ChannelId);
         if (format is null)
-            return new ArgumentError(nameof(command.Dto.ChannelId),
+            return new ArgumentInvalidError(nameof(command.Dto.ChannelId),
                 "There's no message format registered for this channel");
         if (format.IsDisabled)
             return new DisabledEntityError("Message format is currently disabled for this channel");

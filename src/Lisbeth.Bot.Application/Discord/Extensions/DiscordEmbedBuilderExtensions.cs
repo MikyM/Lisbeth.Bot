@@ -1,6 +1,4 @@
-﻿using DSharpPlus.Entities;
-
-namespace Lisbeth.Bot.Application.Discord.Extensions;
+﻿namespace Lisbeth.Bot.Application.Discord.Extensions;
 
 public static class DiscordEmbedBuilderExtensions
 {

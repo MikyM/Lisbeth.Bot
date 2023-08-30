@@ -15,12 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using MikyM.Common.DataAccessLayer;
-using MikyM.Common.Domain.Entities;
-
 namespace Lisbeth.Bot.Domain.Entities;
 
-public class RoleMenuOption : SnowflakeEntity, IDisableableEntity
+public class RoleMenuOption : LisbethEntity
 {
     public long RoleMenuId { get; set; }
     public ulong RoleId { get; set; }

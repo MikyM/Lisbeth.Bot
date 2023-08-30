@@ -22,7 +22,7 @@ using Microsoft.Extensions.Logging;
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 
 [UsedImplicitly]
-public class RejectCloseTicketCommandHandler : ICommandHandler<RejectCloseTicketCommand>
+public class RejectCloseTicketCommandHandler : IAsyncCommandHandler<RejectCloseTicketCommand>
 {
     private readonly IGuildDataService _guildDataService;
     private readonly ILogger<RejectCloseTicketCommandHandler> _logger;

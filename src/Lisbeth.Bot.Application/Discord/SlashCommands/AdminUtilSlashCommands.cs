@@ -15,9 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus;
-using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
 using FluentValidation;
 using Lisbeth.Bot.Application.Discord.Commands.ChannelMessageFormat;
@@ -45,14 +42,14 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
 {
     private readonly IDiscordGuildService _discordGuildService;
-    private readonly ICommandHandler<GetTicketCenterEmbedCommand, DiscordMessageBuilder> _discordTicketService;
+    private readonly IAsyncCommandHandler<GetTicketCenterEmbedCommand, DiscordMessageBuilder> _discordTicketService;
     private readonly IDiscordEmbedConfiguratorService<TicketingConfig> _embedConfiguratorService;
-    private readonly ICommandHandlerFactory _commandHandlerFactory;
+    private readonly ICommandHandlerResolver _commandHandlerFactory;
 
     public AdminUtilSlashCommands(IDiscordGuildService discordGuildService,
-        ICommandHandler<GetTicketCenterEmbedCommand, DiscordMessageBuilder> discordTicketService,
+        IAsyncCommandHandler<GetTicketCenterEmbedCommand, DiscordMessageBuilder> discordTicketService,
         IDiscordEmbedConfiguratorService<TicketingConfig> embedConfiguratorService,
-        ICommandHandlerFactory commandHandlerFactory)
+        ICommandHandlerResolver commandHandlerFactory)
     {
         _discordGuildService = discordGuildService;
         _discordTicketService = discordTicketService;
@@ -159,7 +156,7 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
                 await getReqValidator.ValidateAndThrowAsync(getReq);
 
                 var getRes = await _commandHandlerFactory
-                    .GetHandler<ICommandHandler<GetMessageFormatCommand, DiscordEmbed>>()
+                    .GetHandler<IAsyncCommandHandler<GetMessageFormatCommand, DiscordEmbed>>()
                     .HandleAsync(new GetMessageFormatCommand(getReq, ctx));
 
                 if (getRes.IsDefined(out var getEmbed))
@@ -181,7 +178,7 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
                 await createReqValidator.ValidateAndThrowAsync(createReq);
 
                 var createRes = await _commandHandlerFactory
-                    .GetHandler<ICommandHandler<CreateMessageFormatCommand, DiscordEmbed>>()
+                    .GetHandler<IAsyncCommandHandler<CreateMessageFormatCommand, DiscordEmbed>>()
                     .HandleAsync(new CreateMessageFormatCommand(createReq, ctx));
 
                 if (createRes.IsDefined(out var createEmbed))
@@ -203,7 +200,7 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
                 await editReqValidator.ValidateAndThrowAsync(editReq);
 
                 var editRes = await _commandHandlerFactory
-                    .GetHandler<ICommandHandler<EditMessageFormatCommand, DiscordEmbed>>()
+                    .GetHandler<IAsyncCommandHandler<EditMessageFormatCommand, DiscordEmbed>>()
                     .HandleAsync(new EditMessageFormatCommand(editReq, ctx));
 
                 if (editRes.IsDefined(out var editEmbed))
@@ -225,7 +222,7 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
                 await disableReqValidator.ValidateAndThrowAsync(disableReq);
 
                 var disableRes = await _commandHandlerFactory
-                    .GetHandler<ICommandHandler<DisableMessageFormatCommand, DiscordEmbed>>()
+                    .GetHandler<IAsyncCommandHandler<DisableMessageFormatCommand, DiscordEmbed>>()
                     .HandleAsync(new DisableMessageFormatCommand(disableReq, ctx));
 
                 if (disableRes.IsDefined(out var disableEmbed))
@@ -244,7 +241,7 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
                 await verifyReqValidator.ValidateAndThrowAsync(verifyReq);
 
                 var verifyRes = await _commandHandlerFactory
-                    .GetHandler<ICommandHandler<VerifyMessageFormatCommand, VerifyMessageFormatResDto>>()
+                    .GetHandler<IAsyncCommandHandler<VerifyMessageFormatCommand, VerifyMessageFormatResDto>>()
                     .HandleAsync(new VerifyMessageFormatCommand(verifyReq, ctx));
 
                 if (verifyRes.IsDefined(out var verifyResDto) && verifyResDto.Embed is not null)
@@ -266,7 +263,7 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
                 await enableReqValidator.ValidateAndThrowAsync(enableReq);
 
                 var enableRes = await _commandHandlerFactory
-                    .GetHandler<ICommandHandler<DisableMessageFormatCommand, DiscordEmbed>>()
+                    .GetHandler<IAsyncCommandHandler<DisableMessageFormatCommand, DiscordEmbed>>()
                     .HandleAsync(new DisableMessageFormatCommand(enableReq, ctx));
 
                 if (enableRes.IsDefined(out var enableEmbed))
@@ -531,7 +528,7 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
                         var enableSuggestionValidator = new SuggestionConfigReqValidator(ctx.Client);
                         await enableSuggestionValidator.ValidateAndThrowAsync(enableSuggestionReq);
                         result = await _commandHandlerFactory
-                            .GetHandler<ICommandHandler<SuggestionConfigCommand, DiscordEmbed>>()
+                            .GetHandler<IAsyncCommandHandler<SuggestionConfigCommand, DiscordEmbed>>()
                             .HandleAsync(new SuggestionConfigCommand(enableSuggestionReq));
                         break;
                     case ModuleActionType.Repair:
@@ -548,7 +545,7 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
                         var repairSuggestionValidator = new SuggestionConfigRepairReqValidator(ctx.Client);
                         await repairSuggestionValidator.ValidateAndThrowAsync(repairSuggestionReq);
                         result = await _commandHandlerFactory
-                            .GetHandler<ICommandHandler<SuggestionConfigRepairCommand, DiscordEmbed>>()
+                            .GetHandler<IAsyncCommandHandler<SuggestionConfigRepairCommand, DiscordEmbed>>()
                             .HandleAsync(new SuggestionConfigRepairCommand(repairSuggestionReq));
                         break;
                     case ModuleActionType.Edit:
@@ -562,7 +559,7 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
                         var disableSuggestionValidator = new SuggestionConfigDisableReqValidator(ctx.Client);
                         await disableSuggestionValidator.ValidateAndThrowAsync(disableSuggestionReq);
                         result = await _commandHandlerFactory
-                            .GetHandler<ICommandHandler<SuggestionConfigDisableCommand, DiscordEmbed>>()
+                            .GetHandler<IAsyncCommandHandler<SuggestionConfigDisableCommand, DiscordEmbed>>()
                             .HandleAsync(new SuggestionConfigDisableCommand(disableSuggestionReq));
                         break;
                     default:

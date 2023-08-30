@@ -20,14 +20,14 @@ namespace Lisbeth.Bot.Application.Results;
 /// <summary>
 ///     Represents a failure to find something that was searched for from Discord services.
 /// </summary>
-public record DiscordArgumentError : ResultError
+public record DiscordArgumentInvalidError : ResultError
 {
     /// <summary>
     ///     Represents a failure to find something that was searched for from Discord services.
     /// </summary>
     /// <param name="name">Argument name.</param>
     /// <param name="message">Custom message.</param>
-    public DiscordArgumentError(string? message = null, string ? name = null) : base(message ??
+    public DiscordArgumentInvalidError(string? message = null, string ? name = null) : base(message ??
                                                                              $"Given {(name is null ? "argument" : $"{name}")} is not valid.")
     {
     }

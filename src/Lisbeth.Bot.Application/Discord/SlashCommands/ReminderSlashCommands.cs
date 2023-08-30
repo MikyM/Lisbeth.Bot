@@ -18,9 +18,6 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text.RegularExpressions;
-using DSharpPlus;
-using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
 using FluentValidation;
 using Lisbeth.Bot.Application.Discord.Commands.Reminder;
 using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
@@ -34,9 +31,9 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 [SlashModuleLifespan(SlashModuleLifespan.Scoped)]
 public class ReminderSlashCommands : ExtendedApplicationCommandModule
 {
-    public ReminderSlashCommands(ICommandHandler<SetNewReminderCommand, DiscordEmbed> setNewHandler,
-        ICommandHandler<RescheduleReminderCommand, DiscordEmbed> rescheduleHandler,
-        ICommandHandler<DisableReminderCommand, DiscordEmbed> disableHandler,
+    public ReminderSlashCommands(IAsyncCommandHandler<SetNewReminderCommand, DiscordEmbed> setNewHandler,
+        IAsyncCommandHandler<RescheduleReminderCommand, DiscordEmbed> rescheduleHandler,
+        IAsyncCommandHandler<DisableReminderCommand, DiscordEmbed> disableHandler,
         IDiscordEmbedConfiguratorService<Reminder> reminderEmbedConfiguratorService)
     {
         _setNewHandler = setNewHandler;
@@ -45,9 +42,9 @@ public class ReminderSlashCommands : ExtendedApplicationCommandModule
         _reminderEmbedConfiguratorService = reminderEmbedConfiguratorService;
     }
 
-    private readonly ICommandHandler<SetNewReminderCommand, DiscordEmbed> _setNewHandler;
-    private readonly ICommandHandler<RescheduleReminderCommand, DiscordEmbed> _rescheduleHandler;
-    private readonly ICommandHandler<DisableReminderCommand, DiscordEmbed> _disableHandler;
+    private readonly IAsyncCommandHandler<SetNewReminderCommand, DiscordEmbed> _setNewHandler;
+    private readonly IAsyncCommandHandler<RescheduleReminderCommand, DiscordEmbed> _rescheduleHandler;
+    private readonly IAsyncCommandHandler<DisableReminderCommand, DiscordEmbed> _disableHandler;
     private readonly IDiscordEmbedConfiguratorService<Reminder> _reminderEmbedConfiguratorService;
 
     [UsedImplicitly]

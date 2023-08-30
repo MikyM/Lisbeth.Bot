@@ -16,29 +16,26 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using DSharpPlus;
-using DSharpPlus.Entities;
 using Lisbeth.Bot.Application.Discord.Commands.Ticket;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using Microsoft.Extensions.Logging;
 using MikyM.Common.Utilities.Extensions;
-using MikyM.Common.Utilities.Results.Errors;
 using MikyM.Discord.Extensions.BaseExtensions;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 
 [UsedImplicitly]
-public class OpenTicketCommandHandler : ICommandHandler<OpenTicketCommand>
+public class OpenTicketCommandHandler : IAsyncCommandHandler<OpenTicketCommand>
 {
     private readonly IDiscordGuildRequestDataProvider _requestDataProvider;
     private readonly IGuildDataService _guildDataService;
     private readonly ITicketDataService _ticketDataService;
     private readonly ILogger<OpenTicketCommandHandler> _logger;
-    private readonly ICommandHandler<GetTicketWelcomeEmbedCommand, DiscordMessageBuilder> _welcomeEmbedCommandHandler;
+    private readonly IAsyncCommandHandler<GetTicketWelcomeEmbedCommand, DiscordMessageBuilder> _welcomeEmbedCommandHandler;
 
     public OpenTicketCommandHandler(IGuildDataService guildDataService, ITicketDataService ticketDataService,
         IDiscordGuildRequestDataProvider requestDataProvider, ILogger<OpenTicketCommandHandler> logger,
-        ICommandHandler<GetTicketWelcomeEmbedCommand, DiscordMessageBuilder> welcomeEmbedCommandHandler)
+        IAsyncCommandHandler<GetTicketWelcomeEmbedCommand, DiscordMessageBuilder> welcomeEmbedCommandHandler)
     {
         _guildDataService = guildDataService;
         _ticketDataService = ticketDataService;
