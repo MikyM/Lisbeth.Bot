@@ -19,8 +19,6 @@ public class MemberHistoryEntry : LisbethEntity
 
     public IEnumerable<ServerBoosterHistoryEntry>? ServerBoosterHistoryEntries =>
         _serverBoosterHistoryEntries?.AsEnumerable();
-    
-    public bool IsDisabled { get; set; }
     public string Username { get; set; } = null!;
     public DateTime AccountCreated { get; set; }
     

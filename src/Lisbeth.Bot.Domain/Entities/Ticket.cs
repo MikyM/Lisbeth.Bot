@@ -38,5 +38,4 @@ public sealed class Ticket : LisbethEntity
 
     public Guild? Guild { get; set; }
     public ulong GuildId { get; set; }
-    public bool IsDisabled { get; set; }
 }

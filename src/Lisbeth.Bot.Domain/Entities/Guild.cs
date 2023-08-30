@@ -22,6 +22,7 @@ using System.Linq;
 using DSharpPlus.Entities;
 using Lisbeth.Bot.Domain.Enums;
 using MikyM.Discord.Extensions.BaseExtensions;
+// ReSharper disable CollectionNeverUpdated.Local
 
 #pragma warning disable CS0649
 
@@ -236,6 +237,4 @@ public sealed class Guild : LisbethEntity
     [MemberNotNullWhen(true, nameof(ModerationConfig))]
     public bool IsReminderModuleEnabled
         => ReminderChannelId is not null;
-
-    public bool IsDisabled { get; set; }
 }

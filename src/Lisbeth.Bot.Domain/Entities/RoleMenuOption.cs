@@ -27,5 +27,4 @@ public class RoleMenuOption : LisbethEntity
     public string? CustomSelectOptionValueId { get; set; }
 
     public RoleMenu? RoleMenu { get; set; }
-    public bool IsDisabled { get; set; }
 }

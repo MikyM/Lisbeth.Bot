@@ -7,6 +7,5 @@ public class ServerBoosterHistoryEntry : LisbethEntity
     public Guild? Guild { get; set; }
     public MemberHistoryEntry? MemberHistoryEntry { get; set; }
     public long MemberHistoryEntryId { get; set; }
-    public bool IsDisabled { get; set; }
     public string Username { get; set; } = null!;
 }

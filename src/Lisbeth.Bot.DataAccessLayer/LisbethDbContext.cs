@@ -25,21 +25,6 @@ public sealed class LisbethBotDbContext : EfDbContext, ILisbethBotDbContext
     {
     }
 
-    public DbSet<Guild> Guilds { get; set; } = null!;
-    public DbSet<Mute> Mutes { get; set; } = null!;
-    public DbSet<Ticket> Tickets { get; set; } = null!;
-    public DbSet<Ban> Bans { get; set; } = null!;
-    public DbSet<ServerBoosterHistoryEntry> ServerBoosterHistoryEntries { get; set; } = null!;
-    public DbSet<MemberHistoryEntry> MemberHistoryEntries { get; set; } = null!;
-    public DbSet<Prune> Prunes { get; set; } = null!;
-    public DbSet<TicketingConfig> TicketingConfigs { get; set; } = null!;
-    public DbSet<ModerationConfig> ModerationConfigs { get; set; } = null!;
-    public DbSet<Tag> Tags { get; set; } = null!;
-    public DbSet<Reminder> Reminders { get; set; } = null!;
-    public DbSet<RoleMenu> RoleMenus { get; set; } = null!;
-    public DbSet<EmbedConfig> EmbedConfigs { get; set; } = null!;
-    public DbSet<ChannelMessageFormat> ChannelMessageFormats { get; set; } = null!;
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(LisbethBotDbContext).Assembly);

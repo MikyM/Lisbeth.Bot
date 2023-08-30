@@ -29,5 +29,4 @@ public sealed class Prune : LisbethEntity
 
     public ulong GuildId { get; set; }
     public Guild? Guild { get; set; }
-    public bool IsDisabled { get; set; }
 }
