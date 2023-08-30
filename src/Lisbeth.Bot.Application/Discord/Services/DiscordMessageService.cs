@@ -221,7 +221,8 @@ public class DiscordMessageService : IDiscordMessageService
         var res = await _guildDataService.GetSingleBySpecAsync<Guild>(
             new ActiveGuildByDiscordIdWithModerationSpec(args.Guild.Id));
 
-        if (!res.IsDefined()) throw new ArgumentException();
+        if (!res.IsDefined()) 
+            return;
 
         var guild = res.Entity;
 
@@ -292,7 +293,7 @@ public class DiscordMessageService : IDiscordMessageService
         var res = await _guildDataService.GetSingleBySpecAsync<Guild>(
             new ActiveGuildByDiscordIdWithModerationSpec(args.Guild.Id));
 
-        if (!res.IsDefined()) throw new ArgumentException();
+        if (!res.IsDefined()) return;
 
         var guild = res.Entity;
 
@@ -374,7 +375,7 @@ public class DiscordMessageService : IDiscordMessageService
         var res = await _guildDataService.GetSingleBySpecAsync<Guild>(
             new ActiveGuildByDiscordIdWithModerationSpec(args.Guild.Id));
 
-        if (!res.IsDefined()) throw new ArgumentException();
+        if (!res.IsDefined()) return;
 
         var guild = res.Entity;
 
