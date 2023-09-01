@@ -290,7 +290,7 @@ public static class ServiceCollectionExtensions
 
     public static void ConfigureLisbethDbContext(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
-        services.AddDbContextPool<LisbethBotDbContext>((provider, options) =>
+        services.AddDbContextPool<ILisbethBotDbContext, LisbethBotDbContext>((provider, options) =>
         {
             options.AddInterceptors(provider.GetRequiredService<SecondLevelCacheInterceptor>());
             options.UseNpgsql((environment.IsProduction()

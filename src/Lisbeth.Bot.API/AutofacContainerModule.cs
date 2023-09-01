@@ -51,7 +51,6 @@ public class AutofacContainerModule : Module
             opt.AddEfCore(serviceAssemblies, entityAssemblies, efOpt =>
             {
                 efOpt.EnableIncludeCache = true;
-                efOpt.AddDbContext<ILisbethBotDbContext, LisbethBotDbContext>();
                 efOpt.DateTimeStrategy = DateTimeStrategy.UtcNow;
             });
         });

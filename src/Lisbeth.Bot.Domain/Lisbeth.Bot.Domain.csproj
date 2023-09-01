@@ -6,8 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DataExplorer" Version="2.2.8" />
-    <PackageReference Include="DataExplorer.EfCore" Version="2.3.6" />
+    <PackageReference Include="DataExplorer" Version="2.2.11" />
+    <PackageReference Include="DataExplorer.EfCore" Version="2.3.11" />
     <PackageReference Include="MikyM.Discord" Version="1.1.1" />
   </ItemGroup>
 
