@@ -144,7 +144,8 @@ public class ConfirmCloseTicketCommandHandler : IAsyncCommandHandler<ConfirmClos
                         await Task.Delay(150, cancellationToken);
                         if (member is null || member.IsModerator()) continue;
 
-                        await target.AddOverwriteAsync(member, deny: Permissions.AccessChannels);
+                        // allow them to see the closed ticket until it's deleted
+                        //await target.AddOverwriteAsync(member, deny: Permissions.AccessChannels);
                         await Task.Delay(250, cancellationToken);
                     }
                     catch
@@ -160,6 +161,7 @@ public class ConfirmCloseTicketCommandHandler : IAsyncCommandHandler<ConfirmClos
                         var role = guild.GetRole(roleId);
                         if (role is null || role.IsModeratorRole()) continue;
 
+                        // allow them to see the closed ticket until it's deleted
                         //await target.AddOverwriteAsync(role, deny: Permissions.AccessChannels);
                         await Task.Delay(250, cancellationToken);
                     }
