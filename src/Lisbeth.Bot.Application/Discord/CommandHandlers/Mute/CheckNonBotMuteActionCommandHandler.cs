@@ -48,8 +48,8 @@ public class CheckNonBotMuteActionCommandHandler : IAsyncCommandHandler<CheckNon
         if (!result.IsDefined() || result.Entity.ModerationConfig is null)
             return Result.FromError(new NotFoundError());
 
-        bool wasMuted = command.RolesBefore.Any(x => x.Id == result.Entity.ModerationConfig.MuteRoleId);
-        bool isMuted = command.RolesAfter.Any(x => x.Id == result.Entity.ModerationConfig.MuteRoleId);
+        var wasMuted = command.RolesBefore.Any(x => x.Id == result.Entity.ModerationConfig.MuteRoleId);
+        var isMuted = command.RolesAfter.Any(x => x.Id == result.Entity.ModerationConfig.MuteRoleId);
 
         switch (wasMuted)
         {

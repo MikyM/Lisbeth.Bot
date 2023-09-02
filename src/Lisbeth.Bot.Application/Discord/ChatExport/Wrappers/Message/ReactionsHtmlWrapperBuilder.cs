@@ -36,7 +36,7 @@ public class ReactionsHtmlWrapperBuilder : IAsyncHtmlBuilder
     public Task<string> BuildAsync()
     {
         //Dictionary<DiscordReaction, int> reactions = Reactions.GroupBy(x => x).ToDictionary(x => x.Key, x => x.Count());
-        string html = "";
+        var html = "";
 
         foreach (var item in Reactions)
         {

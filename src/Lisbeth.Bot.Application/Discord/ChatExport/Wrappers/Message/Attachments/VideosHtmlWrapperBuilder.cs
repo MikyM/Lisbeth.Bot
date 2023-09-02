@@ -36,7 +36,7 @@ public class VideosHtmlWrapperBuilder : IAsyncHtmlBuilder
     public async Task<string> BuildAsync()
     {
         if (Videos.Count == 0) return "";
-        string videosHtml = "";
+        var videosHtml = "";
         foreach (var attachment in Videos)
         {
             HtmlVideo video = new(attachment.Url, Configuration);

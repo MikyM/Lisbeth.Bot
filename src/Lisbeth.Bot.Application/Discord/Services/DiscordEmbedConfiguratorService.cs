@@ -65,7 +65,7 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
                 .SplitByCapitalAndConcat();
 
         var intr = ctx.Client.GetInteractivity();
-        int loopCount = 0;
+        var loopCount = 0;
 
         var mainMenu = new DiscordEmbedBuilder();
         mainMenu.WithAuthor($"Embed configurator menu for Id: {idOrName}");
@@ -128,7 +128,7 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
             return Result<DiscordEmbed>.FromError(new DiscordTimedOutError());
         }
 
-        string choice = waitResult.Result.Values[0];
+        var choice = waitResult.Result.Values[0];
 
         while (true)
         {
@@ -333,9 +333,9 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
             switch (action)
             {
                 case EmbedConfigModuleType.Author:
-                    string authorText = waitResult.Result.Content.GetStringBetween("@name@", "@endName@").Trim();
-                    string authorUrl = waitResult.Result.Content.GetStringBetween("@url@", "@endUrl@").Trim();
-                    string authorImageUrl = waitResult.Result.Content
+                    var authorText = waitResult.Result.Content.GetStringBetween("@name@", "@endName@").Trim();
+                    var authorUrl = waitResult.Result.Content.GetStringBetween("@url@", "@endUrl@").Trim();
+                    var authorImageUrl = waitResult.Result.Content
                         .GetStringBetween("@imageUrl@", "@endImageUrl@")
                         .Trim();
 
@@ -349,8 +349,8 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
                         authorImageUrl == "" ? null : authorImageUrl);
                     break;
                 case EmbedConfigModuleType.Footer:
-                    string footerText = waitResult.Result.Content.GetStringBetween("@text@", "@endText@").Trim();
-                    string footerImageUrl = waitResult.Result.Content
+                    var footerText = waitResult.Result.Content.GetStringBetween("@text@", "@endText@").Trim();
+                    var footerImageUrl = waitResult.Result.Content
                         .GetStringBetween("@imageUrl@", "@endImageUrl@")
                         .Trim();
 
@@ -363,7 +363,7 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
                     currentResult.WithFooter(footerText, footerImageUrl == "" ? null : footerImageUrl);
                     break;
                 case EmbedConfigModuleType.Description:
-                    string newDesc = waitResult.Result.Content;
+                    var newDesc = waitResult.Result.Content;
                     if (newDesc.Length > 2048)
                         return Result<DiscordEmbedBuilder>.FromError(
                             new DiscordArgumentInvalidError("Description text has a limit of 4096 characters."));
@@ -371,7 +371,7 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
                     currentResult.WithDescription(newDesc);
                     break;
                 case EmbedConfigModuleType.Image:
-                    string newImage = waitResult.Result.Content;
+                    var newImage = waitResult.Result.Content;
                     currentResult.WithImageUrl(newImage);
                     break;
                 case EmbedConfigModuleType.Field:
@@ -379,8 +379,8 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
                         return Result<DiscordEmbedBuilder>.FromError(
                             new DiscordArgumentInvalidError("This embed already has maximum number of fields (25)."));
 
-                    string fieldTitle = waitResult.Result.Content.GetStringBetween("@title@", "@endTitle@").Trim();
-                    string fieldText = waitResult.Result.Content.GetStringBetween("@text@", "@endText@").Trim();
+                    var fieldTitle = waitResult.Result.Content.GetStringBetween("@title@", "@endTitle@").Trim();
+                    var fieldText = waitResult.Result.Content.GetStringBetween("@text@", "@endText@").Trim();
 
                     if (string.IsNullOrWhiteSpace(fieldTitle))
                         return Result<DiscordEmbedBuilder>.FromError(new ArgumentNullError_(nameof(fieldTitle)));
@@ -397,8 +397,8 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
                     currentResult.AddField(fieldTitle, fieldText);
                     break;
                 case EmbedConfigModuleType.RemoveField:
-                    string titleToRemove = waitResult.Result.Content.Trim();
-                    int index = currentResult.Fields.ToList().FindIndex(x => x.Name == titleToRemove);
+                    var titleToRemove = waitResult.Result.Content.Trim();
+                    var index = currentResult.Fields.ToList().FindIndex(x => x.Name == titleToRemove);
 
                     if (index == -1)
                         return Result<DiscordEmbedBuilder>.FromError(
@@ -407,8 +407,8 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
                     currentResult.RemoveFieldAt(index);
                     break;
                 case EmbedConfigModuleType.Color:
-                    string colorToSet = waitResult.Result.Content.Trim();
-                    bool isValid = new Regex("^#?[0-9A-Fa-f]{6}$").IsMatch(colorToSet);
+                    var colorToSet = waitResult.Result.Content.Trim();
+                    var isValid = new Regex("^#?[0-9A-Fa-f]{6}$").IsMatch(colorToSet);
 
                     if (!isValid)
                         return Result<DiscordEmbedBuilder>.FromError(
@@ -417,7 +417,7 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
                     currentResult.WithColor(new DiscordColor(colorToSet));
                     break;
                 case EmbedConfigModuleType.Title:
-                    string titleToSet = waitResult.Result.Content.Trim();
+                    var titleToSet = waitResult.Result.Content.Trim();
                     if (titleToSet.Length > 256)
                         return Result<DiscordEmbedBuilder>.FromError(
                             new DiscordArgumentInvalidError("Embed title has a limit of 256 characters."));
@@ -425,9 +425,9 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
                     currentResult.WithTitle(titleToSet);
                     break;
                 case EmbedConfigModuleType.Timestamp:
-                    string timeStamp = waitResult.Result.Content.Trim();
-                    bool isValidDateTime = DateTime.TryParseExact(timeStamp, "d/MM/yyyy h:mm tt",
-                        DateTimeFormatInfo.InvariantInfo, DateTimeStyles.None, out DateTime parsedDate);
+                    var timeStamp = waitResult.Result.Content.Trim();
+                    var isValidDateTime = DateTime.TryParseExact(timeStamp, "d/MM/yyyy h:mm tt",
+                        DateTimeFormatInfo.InvariantInfo, DateTimeStyles.None, out var parsedDate);
 
                     if (!isValidDateTime)
                         return Result<DiscordEmbedBuilder>.FromError(
@@ -436,19 +436,19 @@ public class DiscordEmbedConfiguratorService<T> : IDiscordEmbedConfiguratorServi
                     currentResult.WithTimestamp(parsedDate);
                     break;
                 case EmbedConfigModuleType.Thumbnail:
-                    string thumbnail = waitResult.Result.Content.Trim();
-                    string thumbnailUrl = thumbnail.GetStringBetween("@url@", "@endUrl@").Trim();
-                    string height = thumbnail.GetStringBetween("@height@", "@endHeight@").Trim();
-                    string width = thumbnail.GetStringBetween("@width@", "@endWidth@").Trim();
+                    var thumbnail = waitResult.Result.Content.Trim();
+                    var thumbnailUrl = thumbnail.GetStringBetween("@url@", "@endUrl@").Trim();
+                    var height = thumbnail.GetStringBetween("@height@", "@endHeight@").Trim();
+                    var width = thumbnail.GetStringBetween("@width@", "@endWidth@").Trim();
 
                     if (string.IsNullOrWhiteSpace(thumbnailUrl))
                         return Result<DiscordEmbedBuilder>.FromError(
                             new DiscordArgumentInvalidError("Thumbnail URL is required."));
 
-                    bool isHeightValid = false;
-                    bool isWidthValid = false;
-                    int parsedWidth = 0;
-                    int parsedHeight = 0;
+                    var isHeightValid = false;
+                    var isWidthValid = false;
+                    var parsedWidth = 0;
+                    var parsedHeight = 0;
 
                     if (!string.IsNullOrWhiteSpace(height)) isHeightValid = int.TryParse(height, out parsedHeight);
                     if (!string.IsNullOrWhiteSpace(width)) isWidthValid = int.TryParse(height, out parsedWidth);

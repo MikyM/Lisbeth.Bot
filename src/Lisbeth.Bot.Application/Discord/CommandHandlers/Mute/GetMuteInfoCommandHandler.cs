@@ -52,9 +52,9 @@ public class GetMuteInfoCommandHandler : IAsyncCommandHandler<GetMuteInfoCommand
         if (command is null) throw new ArgumentNullException(nameof(command));
 
         // data req
-        DiscordGuild guild = command.Ctx?.Guild ??
-                             command.MenuCtx?.Guild ?? await _discord.Client.GetGuildAsync(command.Dto.GuildId);
-        DiscordMember requestingUser = command.Ctx?.User as DiscordMember ?? command.MenuCtx?.User as DiscordMember ??
+        var guild = command.Ctx?.Guild ??
+                    command.MenuCtx?.Guild ?? await _discord.Client.GetGuildAsync(command.Dto.GuildId);
+        var requestingUser = command.Ctx?.User as DiscordMember ?? command.MenuCtx?.User as DiscordMember ??
             await guild.GetMemberAsync(command.Dto.RequestedOnBehalfOfId);
 
         if (!requestingUser.IsModerator())
@@ -75,7 +75,7 @@ public class GetMuteInfoCommandHandler : IAsyncCommandHandler<GetMuteInfoCommand
 
         if (!res.IsDefined(out var foundMute)) return new NotFoundError();
 
-        DiscordMember target = command.Ctx?.ResolvedUserMentions[0] as DiscordMember ?? command.MenuCtx?.TargetMember ??
+        var target = command.Ctx?.ResolvedUserMentions[0] as DiscordMember ?? command.MenuCtx?.TargetMember ??
             command.MenuCtx?.TargetMessage.Author as DiscordMember ??
             await guild.GetMemberAsync(foundMute.UserId);
 

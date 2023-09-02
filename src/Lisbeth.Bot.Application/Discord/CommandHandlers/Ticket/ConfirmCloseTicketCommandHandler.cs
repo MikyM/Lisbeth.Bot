@@ -57,7 +57,7 @@ public class ConfirmCloseTicketCommandHandler : IAsyncCommandHandler<ConfirmClos
 
         var guildRes =
             await _guildDataService.GetSingleBySpecAsync(
-                new ActiveGuildByDiscordIdWithTicketingSpecifications(command.Dto.GuildId));
+                new ActiveGuildByDiscordIdWithTicketingSpecifications(command.Dto.GuildId), cancellationToken);
 
         if (!guildRes.IsDefined(out var guildCfg)) return Result.FromError(guildRes);
 
@@ -65,7 +65,7 @@ public class ConfirmCloseTicketCommandHandler : IAsyncCommandHandler<ConfirmClos
             return new DisabledEntityError($"Guild with Id:{command.Dto.GuildId} doesn't have ticketing enabled.");
 
         var res = await _ticketDataService.GetSingleBySpecAsync(
-            new TicketByChannelIdOrGuildAndOwnerIdSpec(command.Dto.ChannelId, command.Dto.GuildId, command.Dto.OwnerId));
+            new TicketByChannelIdOrGuildAndOwnerIdSpec(command.Dto.ChannelId, command.Dto.GuildId, command.Dto.OwnerId), cancellationToken);
 
         if (!res.IsDefined(out var ticket)) return new NotFoundError("Ticket with given params doesn't exist.");
 
@@ -78,8 +78,8 @@ public class ConfirmCloseTicketCommandHandler : IAsyncCommandHandler<ConfirmClos
         if (!initRes.IsSuccess)
             return initRes;
 
-        DiscordGuild guild = _requestDataProvider.DiscordGuild;
-        DiscordMember requestingMember = _requestDataProvider.RequestingMember;
+        var guild = _requestDataProvider.DiscordGuild;
+        var requestingMember = _requestDataProvider.RequestingMember;
 
         var channelRes = await _requestDataProvider.GetChannelAsync(ticket.ChannelId);
         if (!channelRes.IsDefined(out var target))
@@ -132,7 +132,8 @@ public class ConfirmCloseTicketCommandHandler : IAsyncCommandHandler<ConfirmClos
                 ? requestingMember // means requested by owner so we don't need to grab the owner again
                 : await guild.GetMemberAsync(ticket.UserId);
 
-            await target.AddOverwriteAsync(owner, deny: Permissions.AccessChannels);
+            // allow them to see the closed ticket until it's deleted
+            //await target.AddOverwriteAsync(owner, deny: Permissions.AccessChannels);
 
             if (ticket.AddedUserIds is not null)
                 foreach (var userId in ticket.AddedUserIds)
@@ -140,11 +141,11 @@ public class ConfirmCloseTicketCommandHandler : IAsyncCommandHandler<ConfirmClos
                     try
                     {
                         var member = await guild.GetMemberAsync(userId);
-                        await Task.Delay(150);
+                        await Task.Delay(150, cancellationToken);
                         if (member is null || member.IsModerator()) continue;
 
                         await target.AddOverwriteAsync(member, deny: Permissions.AccessChannels);
-                        await Task.Delay(250);
+                        await Task.Delay(250, cancellationToken);
                     }
                     catch
                     {
@@ -159,8 +160,8 @@ public class ConfirmCloseTicketCommandHandler : IAsyncCommandHandler<ConfirmClos
                         var role = guild.GetRole(roleId);
                         if (role is null || role.IsModeratorRole()) continue;
 
-                        await target.AddOverwriteAsync(role, deny: Permissions.AccessChannels);
-                        await Task.Delay(250);
+                        //await target.AddOverwriteAsync(role, deny: Permissions.AccessChannels);
+                        await Task.Delay(250, cancellationToken);
                     }
                     catch
                     {
@@ -174,7 +175,7 @@ public class ConfirmCloseTicketCommandHandler : IAsyncCommandHandler<ConfirmClos
             // ignored
         }
 
-        await Task.Delay(500);
+        await Task.Delay(500, cancellationToken);
 
         await target.ModifyAsync(x =>
             x.Name = $"{guildCfg.TicketingConfig.ClosedNamePrefix}-{ticket.GuildSpecificId:D4}");

@@ -70,8 +70,8 @@ public class MemberModAddReqResponseEnricher : EmbedEnricher<IApplyInfractionReq
         embedBuilder.AddInvisibleField();
         embedBuilder.AddField("Moderator user ID and profile", $"[{PrimaryEnricher.RequestedOnBehalfOfId}](https://discordapp.com/users/{PrimaryEnricher.RequestedOnBehalfOfId})", true);
 
-        TimeSpan duration = PrimaryEnricher.AppliedUntil.Subtract(DateTime.UtcNow);
-        string lengthString = PrimaryEnricher.AppliedUntil == DateTime.MaxValue
+        var duration = PrimaryEnricher.AppliedUntil.Subtract(DateTime.UtcNow);
+        var lengthString = PrimaryEnricher.AppliedUntil == DateTime.MaxValue
             ? "Permanent"
             : $"{duration.Days} days, {duration.Hours} hrs, {duration.Minutes} mins";
 

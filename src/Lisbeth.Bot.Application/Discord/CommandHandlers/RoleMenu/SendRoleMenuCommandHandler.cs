@@ -45,11 +45,11 @@ public class SendRoleMenuCommandHandler : IAsyncCommandHandler<SendRoleMenuComma
         if (command is null) throw new ArgumentNullException(nameof(command));
 
         //data req
-        DiscordGuild guild = command.Ctx?.Guild ?? await _discord.Client.GetGuildAsync(command.Dto.GuildId);
-        DiscordChannel target =
+        var guild = command.Ctx?.Guild ?? await _discord.Client.GetGuildAsync(command.Dto.GuildId);
+        var target =
             command.Ctx?.ResolvedChannelMentions?[0] ?? guild.GetChannel(command.Dto.ChannelId);
-        DiscordMember requestingUser = command.Ctx?.User as DiscordMember ??
-                                       await guild.GetMemberAsync(command.Dto.RequestedOnBehalfOfId);
+        var requestingUser = command.Ctx?.User as DiscordMember ??
+                             await guild.GetMemberAsync(command.Dto.RequestedOnBehalfOfId);
 
         if (guild is null)
             return new DiscordNotFoundError(DiscordEntity.Guild);

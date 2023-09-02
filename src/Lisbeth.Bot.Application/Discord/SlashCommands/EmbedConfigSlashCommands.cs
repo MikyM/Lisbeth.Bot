@@ -36,7 +36,7 @@ public class EmbedConfigSlashCommands : ApplicationCommandModule
         [Option("target", "The id of a reminder, tag or role menu to create embed for,")]
         string id)
     {
-        if (!long.TryParse(id, out long parsedId)) throw new ArgumentException(nameof(id));
+        if (!long.TryParse(id, out var parsedId)) throw new ArgumentException(nameof(id));
 
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 

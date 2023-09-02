@@ -105,7 +105,7 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                     .OrderByDescending(x => x.Length)
                     .ToList();
 
-                int pageNumber = 1;
+                var pageNumber = 1;
 
                 foreach (var chunk in chunked)
                 {
@@ -243,7 +243,7 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                     .OrderByDescending(x => x.Length)
                     .ToList();
 
-                int pageNumber = 1;
+                var pageNumber = 1;
 
                 foreach (var chunk in chunked)
                 {
@@ -286,7 +286,7 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                     .OrderByDescending(x => x.Length)
                     .ToList();
 
-                int pageNumberActive = 1;
+                var pageNumberActive = 1;
                 
                 foreach (var chunk in chunkedActive)
                 {
@@ -323,7 +323,7 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                     .OrderByDescending(x => x.Length)
                     .ToList();
                 
-                int pageNumberActiveDisc = 1;
+                var pageNumberActiveDisc = 1;
                 
                 foreach (var chunk in chunkedActiveDisc)
                 {

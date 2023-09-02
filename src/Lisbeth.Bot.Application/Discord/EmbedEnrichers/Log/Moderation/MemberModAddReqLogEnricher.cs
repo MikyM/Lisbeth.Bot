@@ -45,8 +45,8 @@ public class MemberModAddReqLogEnricher : EmbedEnricher<IApplyInfractionReq>
         embedBuilder.AddField($"Target user ID and profile",
             $"[{PrimaryEnricher.TargetUserId}](https://discordapp.com/users/{PrimaryEnricher.TargetUserId})", true);
 
-        TimeSpan duration = PrimaryEnricher.AppliedUntil.Subtract(DateTime.UtcNow);
-        string lengthString = PrimaryEnricher.AppliedUntil == DateTime.MaxValue
+        var duration = PrimaryEnricher.AppliedUntil.Subtract(DateTime.UtcNow);
+        var lengthString = PrimaryEnricher.AppliedUntil == DateTime.MaxValue
             ? "Permanent"
             : $"{duration.Days} days, {duration.Hours} hrs, {duration.Minutes} mins";
 

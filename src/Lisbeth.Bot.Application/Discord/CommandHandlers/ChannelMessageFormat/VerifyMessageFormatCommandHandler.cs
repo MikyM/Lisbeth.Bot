@@ -106,7 +106,7 @@ public class VerifyMessageFormatCommandHandler : IAsyncCommandHandler<VerifyMess
         var isCompliant = format.IsTextCompliant(target.Content ?? string.Empty);
 
         VerifyMessageFormatResDto? res = null;
-        bool wasAuthorInformed = false;
+        var wasAuthorInformed = false;
 
         switch (isCompliant)
         {

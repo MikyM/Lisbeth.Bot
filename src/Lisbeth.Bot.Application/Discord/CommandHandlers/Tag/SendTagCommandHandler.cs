@@ -42,10 +42,10 @@ public class SendTagCommandHandler : IAsyncCommandHandler<SendTagCommand>
         if (command is null) throw new ArgumentNullException(nameof(command));
 
         // data req
-        DiscordGuild guild = command.Ctx?.Guild ?? await _discord.Client.GetGuildAsync(command.Dto.GuildId);
-        DiscordMember requestingUser = command.Ctx?.User as DiscordMember ??
-                                       await guild.GetMemberAsync(command.Dto.RequestedOnBehalfOfId);
-        DiscordChannel channel = command.Ctx?.ResolvedChannelMentions?[0] ?? guild.GetChannel(command.Dto.ChannelId!.Value);
+        var guild = command.Ctx?.Guild ?? await _discord.Client.GetGuildAsync(command.Dto.GuildId);
+        var requestingUser = command.Ctx?.User as DiscordMember ??
+                             await guild.GetMemberAsync(command.Dto.RequestedOnBehalfOfId);
+        var channel = command.Ctx?.ResolvedChannelMentions?[0] ?? guild.GetChannel(command.Dto.ChannelId!.Value);
         
         if (guild is null)
             return new DiscordNotFoundError(DiscordEntity.Guild);

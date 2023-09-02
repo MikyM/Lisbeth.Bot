@@ -50,9 +50,9 @@ public class CreateRoleMenuCommandHandler : IAsyncCommandHandler<CreateRoleMenuC
         if (command is null) throw new ArgumentNullException(nameof(command));
 
         // data req
-        DiscordGuild guild = command.Ctx.Guild ?? await _discord.Client.GetGuildAsync(command.Dto.GuildId);
-        DiscordMember requestingUser = command.Ctx.User as DiscordMember ??
-                              await guild.GetMemberAsync(command.Dto.RequestedOnBehalfOfId);
+        var guild = command.Ctx.Guild ?? await _discord.Client.GetGuildAsync(command.Dto.GuildId);
+        var requestingUser = command.Ctx.User as DiscordMember ??
+                             await guild.GetMemberAsync(command.Dto.RequestedOnBehalfOfId);
 
         if (guild is null)
             return new DiscordNotFoundError(DiscordEntity.Guild);
@@ -71,7 +71,7 @@ public class CreateRoleMenuCommandHandler : IAsyncCommandHandler<CreateRoleMenuC
             return new SameEntityNamePerGuildError("Role menu", command.Dto.Name ?? "null");
 
         var intr = _discord.Client.GetInteractivity();
-        int loopCount = 0;
+        var loopCount = 0;
 
         var mainMenu = new DiscordEmbedBuilder();
         mainMenu.WithAuthor("Role menu configurator menu");
@@ -140,7 +140,7 @@ public class CreateRoleMenuCommandHandler : IAsyncCommandHandler<CreateRoleMenuC
 
         foreach (var option in roleMenu.RoleMenuOptions ?? throw new ArgumentNullException())
         {
-            DiscordRole role = await guild.CreateRoleAsync(option.Name);
+            var role = await guild.CreateRoleAsync(option.Name);
             option.RoleId = role.Id;
             option.CustomSelectOptionValueId = $"role_menu_option_{role.Id}";
             await Task.Delay(300);
@@ -180,9 +180,9 @@ public class CreateRoleMenuCommandHandler : IAsyncCommandHandler<CreateRoleMenuC
             return Result<(DiscordEmbedBuilder Embed, Domain.Entities.RoleMenu CurrentMenu)>.FromError(
                 new DiscordArgumentInvalidError("Response can't be empty"));
 
-        string name = waitResult.Result.Content.GetStringBetween("@name@", "@endName@").Trim();
-        string desc = waitResult.Result.Content.GetStringBetween("@desc@", "@endDesc@").Trim();
-        string emoji = waitResult.Result.Content.GetStringBetween("@emoji@", "@endEmoji@").Trim();
+        var name = waitResult.Result.Content.GetStringBetween("@name@", "@endName@").Trim();
+        var desc = waitResult.Result.Content.GetStringBetween("@desc@", "@endDesc@").Trim();
+        var emoji = waitResult.Result.Content.GetStringBetween("@emoji@", "@endEmoji@").Trim();
 
         if (string.IsNullOrWhiteSpace(name))
             return Result<(DiscordEmbedBuilder Embed, Domain.Entities.RoleMenu CurrentMenu)>.FromError(

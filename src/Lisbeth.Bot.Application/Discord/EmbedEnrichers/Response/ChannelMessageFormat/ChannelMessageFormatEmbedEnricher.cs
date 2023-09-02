@@ -37,7 +37,7 @@ public class ChannelMessageFormatEmbedEnricher : EmbedEnricherBase<Domain.Entiti
 
     public override void Enrich(IDiscordEmbedBuilderWrapper embedBuilder)
     {
-        string action = SecondaryEnricher switch
+        var action = SecondaryEnricher switch
         {
             ChannelMessageFormatActionType.Create => "created",
             ChannelMessageFormatActionType.Get => "retrieved",

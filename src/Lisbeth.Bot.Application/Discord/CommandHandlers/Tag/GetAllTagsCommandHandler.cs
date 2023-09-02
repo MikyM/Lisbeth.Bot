@@ -40,9 +40,9 @@ public class GetAllTagsCommandHandler : IAsyncCommandHandler<GetAllTagsCommand, 
         if (command is null) throw new ArgumentNullException(nameof(command));
 
         // data req
-        DiscordGuild guild = command.Ctx?.Guild ?? await _discord.Client.GetGuildAsync(command.Dto.GuildId);
-        DiscordMember requestingUser = command.Ctx?.User as DiscordMember ??
-                                       await guild.GetMemberAsync(command.Dto.RequestedOnBehalfOfId);
+        var guild = command.Ctx?.Guild ?? await _discord.Client.GetGuildAsync(command.Dto.GuildId);
+        var requestingUser = command.Ctx?.User as DiscordMember ??
+                             await guild.GetMemberAsync(command.Dto.RequestedOnBehalfOfId);
 
         if (guild is null)
             return new DiscordNotFoundError(DiscordEntity.Guild);
@@ -69,7 +69,7 @@ public class GetAllTagsCommandHandler : IAsyncCommandHandler<GetAllTagsCommand, 
             .OrderByDescending(x => x.Length)
             .ToList();
 
-        int pageNumber = 1;
+        var pageNumber = 1;
         foreach (var chunk in chunked)
         {
             var embedBuilder = new DiscordEmbedBuilder().WithColor(new DiscordColor(guildCfg.EmbedHexColor))

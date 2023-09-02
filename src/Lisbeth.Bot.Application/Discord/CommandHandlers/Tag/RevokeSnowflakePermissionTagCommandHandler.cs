@@ -60,13 +60,13 @@ public class RevokeSnowflakePermissionTagCommandHandler : IAsyncCommandHandler<R
                 "Found tag is disabled.");
 
         // data req
-        DiscordGuild guild = command.Ctx?.Guild ?? await _discord.Client.GetGuildAsync(command.Dto.GuildId);
-        DiscordMember requestingMember = command.Ctx?.Member ?? await guild.GetMemberAsync(command.Dto.RequestedOnBehalfOfId);
+        var guild = command.Ctx?.Guild ?? await _discord.Client.GetGuildAsync(command.Dto.GuildId);
+        var requestingMember = command.Ctx?.Member ?? await guild.GetMemberAsync(command.Dto.RequestedOnBehalfOfId);
         if (!requestingMember.IsModerator())
             return new DiscordNotAuthorizedError("Requesting member doesn't have moderator rights.");
 
-        DiscordRole? targetRole = command.Ctx?.ResolvedRoleMentions?[0] ?? guild.GetRole(command.Dto.SnowflakeId!.Value);
-        DiscordMember? targetMember = command.Ctx?.ResolvedUserMentions?[0] as DiscordMember ?? await guild.GetMemberAsync(command.Dto.SnowflakeId!.Value);
+        var targetRole = command.Ctx?.ResolvedRoleMentions?[0] ?? guild.GetRole(command.Dto.SnowflakeId!.Value);
+        var targetMember = command.Ctx?.ResolvedUserMentions?[0] as DiscordMember ?? await guild.GetMemberAsync(command.Dto.SnowflakeId!.Value);
 
         if (targetMember is null && targetRole is null)
             return new DiscordNotFoundError("Didn't find any roles or members with given snowflake Id");

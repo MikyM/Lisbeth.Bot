@@ -29,7 +29,7 @@ public class ReminderEmbedEnricher : EmbedEnricherBase<ReminderResDto, ReminderA
 
     public override void Enrich(IDiscordEmbedBuilderWrapper embedBuilder)
     {
-        string action = SecondaryEnricher switch
+        var action = SecondaryEnricher switch
         {
             ReminderActionType.Set => "set",
             ReminderActionType.Reschedule => "rescheduled",

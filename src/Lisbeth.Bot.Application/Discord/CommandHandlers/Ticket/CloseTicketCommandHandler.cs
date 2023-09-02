@@ -39,7 +39,7 @@ public class CloseTicketCommandHandler : IAsyncCommandHandler<CloseTicketCommand
     {
         var guildRes =
             await _guildDataService.GetSingleBySpecAsync(
-                new ActiveGuildByDiscordIdWithTicketingSpecifications(command.Interaction.Guild.Id));
+                new ActiveGuildByDiscordIdWithTicketingSpecifications(command.Interaction.Guild.Id), cancellationToken);
 
         if (!guildRes.IsDefined(out var guildCfg)) return Result.FromError(guildRes);
 

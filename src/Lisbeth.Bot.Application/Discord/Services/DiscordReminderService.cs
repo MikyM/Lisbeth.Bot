@@ -43,7 +43,7 @@ public class DiscordReminderService : IDiscordReminderService
     {
         if (req is null) throw new ArgumentNullException(nameof(req));
 
-        DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
+        var guild = await _discord.Client.GetGuildAsync(req.GuildId);
 
         return await SetNewReminderAsync(guild, await guild.GetMemberAsync(req.RequestedOnBehalfOfId), req);
     }
@@ -61,7 +61,7 @@ public class DiscordReminderService : IDiscordReminderService
     {
         if (req is null) throw new ArgumentNullException(nameof(req));
 
-        DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
+        var guild = await _discord.Client.GetGuildAsync(req.GuildId);
 
         return await DisableReminderAsync(guild, await guild.GetMemberAsync(req.RequestedOnBehalfOfId), req);
     }
@@ -79,7 +79,7 @@ public class DiscordReminderService : IDiscordReminderService
     {
         if (req is null) throw new ArgumentNullException(nameof(req));
 
-        DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
+        var guild = await _discord.Client.GetGuildAsync(req.GuildId);
 
         return await RescheduleReminderAsync(guild, await guild.GetMemberAsync(req.RequestedOnBehalfOfId), req);
     }

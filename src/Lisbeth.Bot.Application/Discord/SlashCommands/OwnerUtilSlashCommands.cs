@@ -72,7 +72,7 @@ public class OwnerUtilSlashCommands : ExtendedApplicationCommandModule
 
         if (!res.IsDefined()) throw new InvalidOperationException();
 
-        string botRes = res.Entity.Aggregate("",
+        var botRes = res.Entity.Aggregate("",
             (current, resp) =>
                 current +
                 $"\n Affected columns: {resp.AffectedColumns}, Table: {resp.TableName}, Old: {resp.OldValues}, New: {resp.NewValues}, Type: {resp.Type}");

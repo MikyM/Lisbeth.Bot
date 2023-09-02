@@ -81,9 +81,9 @@ public class DiscordBanService : IDiscordBanService
     {
         if (req is null) throw new ArgumentNullException(nameof(req));
 
-        DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
-        DiscordMember target = await guild.GetMemberAsync(req.TargetUserId);
-        DiscordMember moderator = await guild.GetMemberAsync(req.RequestedOnBehalfOfId);
+        var guild = await _discord.Client.GetGuildAsync(req.GuildId);
+        var target = await guild.GetMemberAsync(req.TargetUserId);
+        var moderator = await guild.GetMemberAsync(req.RequestedOnBehalfOfId);
 
         return await BanAsync(guild, target, moderator, req);
     }
@@ -132,7 +132,7 @@ public class DiscordBanService : IDiscordBanService
 
         if (guild is null || target is null) throw new DiscordNotFoundException();
 
-        DiscordMember moderator = await guild.GetMemberAsync(req.RequestedOnBehalfOfId);
+        var moderator = await guild.GetMemberAsync(req.RequestedOnBehalfOfId);
 
         return await UnbanAsync(guild, target, moderator, req);
     }
@@ -200,7 +200,7 @@ public class DiscordBanService : IDiscordBanService
             throw new InvalidOperationException();
         }
 
-        DiscordMember moderator = await guild.GetMemberAsync(req.RequestedOnBehalfOfId);
+        var moderator = await guild.GetMemberAsync(req.RequestedOnBehalfOfId);
 
         return await GetSpecificUserBanAsync(guild, target, moderator, req);
     }

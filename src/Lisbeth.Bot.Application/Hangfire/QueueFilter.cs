@@ -32,7 +32,7 @@ public sealed class QueueFilter : IClientFilter, IElectStateFilter
 
     public void OnCreated(CreatedContext filterContext)
     {
-        string? queue = filterContext.InitialState switch
+        var queue = filterContext.InitialState switch
         {
             EnqueuedState enqueuedState => enqueuedState.Queue,
             ScheduledEnqueuedState scheduledEnqueuedState => scheduledEnqueuedState.Queue,
@@ -46,7 +46,7 @@ public sealed class QueueFilter : IClientFilter, IElectStateFilter
     {
         if (context.CandidateState.Name != EnqueuedState.StateName) return;
 
-        string queue = context.GetJobParameter<string>(QueueParameterName.Trim());
+        var queue = context.GetJobParameter<string>(QueueParameterName.Trim());
 
         if (!string.IsNullOrWhiteSpace(queue)) context.CandidateState = new EnqueuedState(queue);
     }

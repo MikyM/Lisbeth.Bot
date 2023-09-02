@@ -16,7 +16,7 @@ public class RestrictDomainAttribute : Attribute, IAuthorizationFilter
 
     public void OnAuthorization(AuthorizationFilterContext context)
     {
-        string host = context.HttpContext.Request.Host.Host;
+        var host = context.HttpContext.Request.Host.Host;
         if (!AllowedHosts.Contains(host, StringComparer.OrdinalIgnoreCase))
             context.Result = new UnauthorizedResult();
     }

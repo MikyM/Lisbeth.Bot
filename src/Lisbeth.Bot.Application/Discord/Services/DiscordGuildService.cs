@@ -94,7 +94,7 @@ public class DiscordGuildService : IDiscordGuildService
     {
         if (req is null) throw new ArgumentNullException(nameof(req));
 
-        DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
+        var guild = await _discord.Client.GetGuildAsync(req.GuildId);
 
         return await CreateTicketingModuleAsync(guild, await guild.GetMemberAsync(req.RequestedOnBehalfOfId), req);
     }
@@ -111,7 +111,7 @@ public class DiscordGuildService : IDiscordGuildService
     {
         if (req is null) throw new ArgumentNullException(nameof(req));
 
-        DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
+        var guild = await _discord.Client.GetGuildAsync(req.GuildId);
 
         return await CreateModerationModuleAsync(guild, await guild.GetMemberAsync(req.RequestedOnBehalfOfId), req);
     }
@@ -128,7 +128,7 @@ public class DiscordGuildService : IDiscordGuildService
     {
         if (req is null) throw new ArgumentNullException(nameof(req));
 
-        DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
+        var guild = await _discord.Client.GetGuildAsync(req.GuildId);
 
         return await CreateReminderModuleAsync(guild, await guild.GetMemberAsync(req.RequestedOnBehalfOfId), req);
     }
@@ -154,7 +154,7 @@ public class DiscordGuildService : IDiscordGuildService
     {
         if (req is null) throw new ArgumentNullException(nameof(req));
 
-        DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
+        var guild = await _discord.Client.GetGuildAsync(req.GuildId);
 
         return await RepairConfigAsync(guild, GuildModule.Ticketing,
             await guild.GetMemberAsync(req.RequestedOnBehalfOfId));
@@ -164,7 +164,7 @@ public class DiscordGuildService : IDiscordGuildService
     {
         if (req is null) throw new ArgumentNullException(nameof(req));
 
-        DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
+        var guild = await _discord.Client.GetGuildAsync(req.GuildId);
 
         return await RepairConfigAsync(guild, GuildModule.Moderation,
             await guild.GetMemberAsync(req.RequestedOnBehalfOfId));
@@ -183,7 +183,7 @@ public class DiscordGuildService : IDiscordGuildService
     {
         if (req is null) throw new ArgumentNullException(nameof(req));
 
-        DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
+        var guild = await _discord.Client.GetGuildAsync(req.GuildId);
 
         return await RepairConfigAsync(guild, GuildModule.Reminders,
             await guild.GetMemberAsync(req.RequestedOnBehalfOfId), req);
@@ -202,7 +202,7 @@ public class DiscordGuildService : IDiscordGuildService
     {
         if (req is null) throw new ArgumentNullException(nameof(req));
 
-        DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
+        var guild = await _discord.Client.GetGuildAsync(req.GuildId);
 
         return await DisableModuleAsync(guild, await guild.GetMemberAsync(req.RequestedOnBehalfOfId),
             GuildModule.Moderation);
@@ -212,7 +212,7 @@ public class DiscordGuildService : IDiscordGuildService
     {
         if (req is null) throw new ArgumentNullException(nameof(req));
 
-        DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
+        var guild = await _discord.Client.GetGuildAsync(req.GuildId);
 
         return await DisableModuleAsync(guild, await guild.GetMemberAsync(req.RequestedOnBehalfOfId),
             GuildModule.Ticketing);
@@ -249,7 +249,7 @@ public class DiscordGuildService : IDiscordGuildService
     {
         if (req is null) throw new ArgumentNullException(nameof(req));
 
-        DiscordGuild guild = await _discord.Client.GetGuildAsync(req.GuildId);
+        var guild = await _discord.Client.GetGuildAsync(req.GuildId);
 
         return await DisableModuleAsync(guild, await guild.GetMemberAsync(req.RequestedOnBehalfOfId),
             GuildModule.Reminders);
@@ -728,7 +728,7 @@ public class DiscordGuildService : IDiscordGuildService
 
         if (!requestingMember.IsAdmin()) return new DiscordNotAuthorizedError();
 
-        int count = 0;
+        var count = 0;
         foreach (var channel in discordGuild.Channels.Values.Where(x =>
                      x.Type is ChannelType.Category or ChannelType.Text))
         {

@@ -46,9 +46,9 @@ public class SetNewReminderCommandHandler : IAsyncCommandHandler<SetNewReminderC
         if (command is null) throw new ArgumentNullException(nameof(command));
 
         // req data
-        DiscordGuild guild = command.Ctx?.Guild ?? await _discord.Client.GetGuildAsync(command.Dto.GuildId);
-        DiscordMember requestingUser = command.Ctx?.User as DiscordMember ??
-                                       await guild.GetMemberAsync(command.Dto.RequestedOnBehalfOfId);
+        var guild = command.Ctx?.Guild ?? await _discord.Client.GetGuildAsync(command.Dto.GuildId);
+        var requestingUser = command.Ctx?.User as DiscordMember ??
+                             await guild.GetMemberAsync(command.Dto.RequestedOnBehalfOfId);
 
         if (guild is null) return new DiscordNotFoundError(DiscordEntity.Guild);
         if (requestingUser is null) return new DiscordNotFoundError(DiscordEntity.User);

@@ -96,7 +96,7 @@ public class DiscordMessageService : IDiscordMessageService
         await _discordGuildLogger.LogToDiscordAsync(discordGuild, req, DiscordModeration.Prune, moderator, targetAuthor,
             guild.EmbedHexColor);
 
-        int count = 0;
+        var count = 0;
 
         if (req.Count is not null)
         {
@@ -129,8 +129,8 @@ public class DiscordMessageService : IDiscordMessageService
         else if (req.MessageId is not null)
         {
             List<DiscordMessage> messagesToDelete = new();
-            int cycles = 0;
-            bool shouldStop = false;
+            var cycles = 0;
+            var shouldStop = false;
             DiscordMessage? targetMessage;
 
             try
@@ -228,14 +228,14 @@ public class DiscordMessageService : IDiscordMessageService
 
         if (guild.ModerationConfig?.MessageUpdatedEventsLogChannelId is null) return;
 
-        DiscordChannel logChannel = args.Guild.GetChannel(guild.ModerationConfig.MessageUpdatedEventsLogChannelId);
+        var logChannel = args.Guild.GetChannel(guild.ModerationConfig.MessageUpdatedEventsLogChannelId);
 
         if (logChannel is null) return;
 
-        string oldContent = args.MessageBefore.Content;
-        string newContent = args.Message.Content;
-        string oldAttachmentsString = "No attachments";
-        string newAttachmentsString = "No attachments";
+        var oldContent = args.MessageBefore.Content;
+        var newContent = args.Message.Content;
+        var oldAttachmentsString = "No attachments";
+        var newAttachmentsString = "No attachments";
 
         var oldAttachments = args.MessageBefore.Attachments;
         var newAttachments = args.Message.Attachments;
@@ -299,14 +299,14 @@ public class DiscordMessageService : IDiscordMessageService
 
         if (guild.ModerationConfig?.MessageDeletedEventsLogChannelId is null) return;
 
-        DiscordChannel logChannel = args.Guild.GetChannel(guild.ModerationConfig.MessageDeletedEventsLogChannelId);
+        var logChannel = args.Guild.GetChannel(guild.ModerationConfig.MessageDeletedEventsLogChannelId);
 
         if (logChannel is null) return;
 
-        string content = args.Message.Content;
-        string attachmentsString = "No attachments";
+        var content = args.Message.Content;
+        var attachmentsString = "No attachments";
         var attachments = args.Message.Attachments;
-        DiscordUser deletedBy = args.Message.Author;
+        var deletedBy = args.Message.Author;
 
         await Task.Delay(500);
 
@@ -381,7 +381,7 @@ public class DiscordMessageService : IDiscordMessageService
 
         if (guild.ModerationConfig?.MessageDeletedEventsLogChannelId is null) return;
 
-        DiscordChannel logChannel = args.Guild.GetChannel(guild.ModerationConfig.MessageDeletedEventsLogChannelId);
+        var logChannel = args.Guild.GetChannel(guild.ModerationConfig.MessageDeletedEventsLogChannelId);
 
         if (logChannel is null) return;
 

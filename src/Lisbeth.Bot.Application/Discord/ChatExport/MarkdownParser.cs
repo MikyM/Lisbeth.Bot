@@ -21,7 +21,7 @@ public class MarkdownParser
 
     public async Task<string> GetParsedContentAsync()
     {
-        string result = DiscordHtml;
+        var result = DiscordHtml;
         result = await ParseMentionsAsync(result);
         result = ParseCustomEmojis(result);
         result = ParseNewLines(result);
@@ -45,7 +45,7 @@ public class MarkdownParser
         var userMatches = Regex.Matches(result, @"(?<=\<@!|\<@)[0-9]{17,18}(?=\>)");
         foreach (var userMatch in userMatches)
         {
-            DiscordUser? user = Users.FirstOrDefault(x => x.Id == ulong.Parse(userMatch.ToString() ?? "0"));
+            var user = Users.FirstOrDefault(x => x.Id == ulong.Parse(userMatch.ToString() ?? "0"));
             if (user is not null)
                 result = result.Replace($"<@!{user.Id}>", $"<span class=\"user-mention\">@{user.Username}</span>");
             else
@@ -70,7 +70,7 @@ public class MarkdownParser
         var roleMatches = Regex.Matches(result, @"(?<=\<@&)[0-9]{17,18}(?=\>)");
         foreach (var roleMatch in roleMatches)
         {
-            DiscordRole? role = Guild.Roles
+            var role = Guild.Roles
                 .FirstOrDefault(x => x.Value.Id == ulong.Parse(roleMatch.ToString() ?? "0"))
                 .Value;
             if (role is not null)
@@ -93,7 +93,7 @@ public class MarkdownParser
         foreach (var channelMatch in channelMatches)
             try
             {
-                DiscordChannel channel = Guild.GetChannel(ulong.Parse(channelMatch.ToString() ?? "0"));
+                var channel = Guild.GetChannel(ulong.Parse(channelMatch.ToString() ?? "0"));
                 result = result.Replace($"<#{channel.Id}>",
                     $"<span class=\"channel-mention\">#{channel.Name}</span>");
             }
@@ -111,7 +111,7 @@ public class MarkdownParser
         //replace custom emojis with grabbed image from discord based on id
         result = Regex.Replace(result, @"(<a?:).+?(>)", x =>
         {
-            string id = Regex.Match(x.Value.Split(':').Last(), @"\d+").Value;
+            var id = Regex.Match(x.Value.Split(':').Last(), @"\d+").Value;
             if (x.Value.Split(':').First().Replace("<", "") == "a")
                 //if animated
                 return $"<img class=\"emoji\" src=\"https://cdn.discordapp.com/emojis/{id}.gif?v=1\">";

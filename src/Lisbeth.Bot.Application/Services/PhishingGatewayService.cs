@@ -88,7 +88,7 @@ public sealed class PhishingGatewayService : IHostedService
     {
         try
         {
-            CancellationToken stoppingToken = _cts.Token;
+            var stoppingToken = _cts.Token;
 
             // 16KB cache; should be more than sufficient for the foreseeable future. //
             using var buffer = new ArrayPoolBufferWriter<byte>(WebSocketBufferSize);
@@ -102,7 +102,7 @@ public sealed class PhishingGatewayService : IHostedService
                 ValueWebSocketReceiveResult result;
                 do
                 {
-                    Memory<byte> mem = buffer.GetMemory(WebSocketBufferSize);
+                    var mem = buffer.GetMemory(WebSocketBufferSize);
                     result = await _ws.ReceiveAsync(mem, CancellationToken.None);
 
                     if (result.MessageType is WebSocketMessageType.Close) break; // Damn it, CloudFlare. //
@@ -117,7 +117,7 @@ public sealed class PhishingGatewayService : IHostedService
                     return;
                 }
 
-                string? json = Encoding.UTF8.GetString(buffer.WrittenSpan);
+                var json = Encoding.UTF8.GetString(buffer.WrittenSpan);
 
                 //JObject? payload = JObject.Parse(json);
                 var payload = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
@@ -170,7 +170,7 @@ public sealed class PhishingGatewayService : IHostedService
             Headers = { { HeaderName, "Lisbeth.Bot" } } // X-Identifier MUST be set or we get 403'd //
         };
 
-        using HttpResponseMessage? res = await _client.SendAsync(req);
+        using var res = await _client.SendAsync(req);
 
         if (!res.IsSuccessStatusCode)
         {
@@ -178,7 +178,7 @@ public sealed class PhishingGatewayService : IHostedService
             return false;
         }
 
-        string? json = await res.Content.ReadAsStringAsync();
+        var json = await res.Content.ReadAsStringAsync();
         string[]? payload = JsonSerializer.Deserialize<string[]>(json)!;
 
         foreach (var domain in payload) _domains.Add(domain);

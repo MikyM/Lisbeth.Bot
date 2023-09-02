@@ -27,13 +27,13 @@ public class HtmlVideo : IAsyncHtmlBuilder
         var client = new VimeoClient(BotConfiguration.VimeoApiKey);
         IUploadRequest request;
 
-        using (HttpClient httpClient = ChatExportHttpClientFactory.Build())
+        using (var httpClient = ChatExportHttpClientFactory.Build())
         {
             try
             {
                 using HttpRequestMessage req = new(HttpMethod.Get, DiscordLink);
-                using HttpResponseMessage response = await httpClient.SendAsync(req);
-                Stream stream = await response.Content.ReadAsStreamAsync();
+                using var response = await httpClient.SendAsync(req);
+                var stream = await response.Content.ReadAsStreamAsync();
                 request = await client.UploadEntireFileAsync(new BinaryContent(stream,
                     "application/x-www-form-urlencoded"));
             }
@@ -48,7 +48,7 @@ public class HtmlVideo : IAsyncHtmlBuilder
 
     public async Task<string> BuildAsync()
     {
-        string link = await GetVimeoLinkAsync();
+        var link = await GetVimeoLinkAsync();
         return link switch
         {
             "" => "",

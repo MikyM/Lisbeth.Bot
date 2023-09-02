@@ -67,8 +67,8 @@ public class ReopenTicketCommandHandler : IAsyncCommandHandler<ReopenTicketComma
         if (!initRes.IsSuccess)
             return Result<DiscordMessageBuilder>.FromError(initRes);
 
-        DiscordGuild guild = _requestDataProvider.DiscordGuild;
-        DiscordMember requestingMember = _requestDataProvider.RequestingMember;
+        var guild = _requestDataProvider.DiscordGuild;
+        var requestingMember = _requestDataProvider.RequestingMember;
 
         var channelRes = await _requestDataProvider.GetChannelAsync(ticket.ChannelId);
         if (!channelRes.IsDefined(out var target))
@@ -99,7 +99,7 @@ public class ReopenTicketCommandHandler : IAsyncCommandHandler<ReopenTicketComma
 
         try
         {
-            DiscordMember owner = requestingMember.Id == ticket.UserId
+            var owner = requestingMember.Id == ticket.UserId
                 ? requestingMember // means requested by owner so we don't need to grab the owner again
                 : await guild.GetMemberAsync(ticket.UserId);
 

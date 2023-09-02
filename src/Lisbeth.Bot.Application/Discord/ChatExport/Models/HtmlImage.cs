@@ -27,11 +27,11 @@ public class HtmlImage : IAsyncHtmlBuilder
 
         ApiClient apiClient = new (BotConfiguration.ImgurApiKey);
         IImage imageUpload;
-        using HttpClient httpClient = ChatExportHttpClientFactory.Build();
-        using HttpClient imgurHttpClient = ChatExportHttpClientFactory.Build();
+        using var httpClient = ChatExportHttpClientFactory.Build();
+        using var imgurHttpClient = ChatExportHttpClientFactory.Build();
         using HttpRequestMessage req = new(HttpMethod.Get, DiscordLink);
-        using HttpResponseMessage response = await httpClient.SendAsync(req);
-        Stream stream = await response.Content.ReadAsStreamAsync();
+        using var response = await httpClient.SendAsync(req);
+        var stream = await response.Content.ReadAsStreamAsync();
         try
         {
             ImageEndpoint imageEndpoint = new(apiClient, imgurHttpClient);
@@ -47,7 +47,7 @@ public class HtmlImage : IAsyncHtmlBuilder
 
     public async Task<string> BuildAsync()
     {
-        string link = await GetImgurLinkAsync();
+        var link = await GetImgurLinkAsync();
         return link switch
         {
             "" => "",

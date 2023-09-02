@@ -36,7 +36,7 @@ public class MembersHtmlWrapperBuilder : IAsyncHtmlBuilder
     {
         if (Users.Count == 0) return "";
 
-        string usersHtml = "";
+        var usersHtml = "";
         foreach (var user in Users)
         {
             HtmlUser userModel = new (user, BotConfiguration);

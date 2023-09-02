@@ -40,8 +40,8 @@ public class AttachmentsHtmlWrapperBuilder : IAsyncHtmlBuilder
             .Where(a => HtmlImage.SupportedTypes.Any(x => x == a.Url.Split('.').Last())).ToList();
         var videoAttachments = Attachments
             .Where(a => HtmlVideo.SupportedTypes.Any(x => x == a.Url.Split('.').Last())).ToList();
-        string imagesHtml = "";
-        string videosHtml = "";
+        var imagesHtml = "";
+        var videosHtml = "";
 
         if (imageAttachments.Count != 0)
         {

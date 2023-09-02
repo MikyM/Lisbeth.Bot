@@ -52,9 +52,9 @@ public class RevokeMuteCommandHandler : IAsyncCommandHandler<RevokeMuteCommand, 
         if (command is null) throw new ArgumentNullException(nameof(command));
 
         // data req
-        DiscordGuild guild = command.Ctx?.Guild ??
-                             command.MenuCtx?.Guild ?? await _discord.Client.GetGuildAsync(command.Dto.GuildId);
-        DiscordMember requestingUser = command.Ctx?.User as DiscordMember ?? command.MenuCtx?.User as DiscordMember ??
+        var guild = command.Ctx?.Guild ??
+                    command.MenuCtx?.Guild ?? await _discord.Client.GetGuildAsync(command.Dto.GuildId);
+        var requestingUser = command.Ctx?.User as DiscordMember ?? command.MenuCtx?.User as DiscordMember ??
             await guild.GetMemberAsync(command.Dto.RequestedOnBehalfOfId);
 
         DiscordMember? target;
@@ -86,7 +86,7 @@ public class RevokeMuteCommandHandler : IAsyncCommandHandler<RevokeMuteCommand, 
         if (!guild.IsRoleHierarchyValid(mutedRole)) return new DiscordError("Bots role is below muted role in the role hierarchy.");
         if (!guild.HasSelfPermissions(Permissions.ManageRoles)) return new DiscordError("Bot doesn't have manage roles permission.");
 
-        bool isMuted = false;
+        var isMuted = false;
         if (target is not null)
             isMuted = target.Roles.Any(r => r.Id == guildEntity.ModerationConfig.MuteRoleId);
 

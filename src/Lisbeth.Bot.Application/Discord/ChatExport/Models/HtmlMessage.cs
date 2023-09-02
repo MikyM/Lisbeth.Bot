@@ -17,9 +17,9 @@ public class HtmlMessage : IAsyncHtmlBuilder
 
     public async Task<string> BuildAsync()
     {
-        string messageBot = "";
-        string attachmentsHtml = "";
-        string reactionsHtml = "";
+        var messageBot = "";
+        var attachmentsHtml = "";
+        var reactionsHtml = "";
 
         var messageTop =
             $"<span class=\"nickname\">{Msg.Author?.Username ?? "Deleted user"}</span> <span class=\"message-info-details\">{Msg.Timestamp} Message ID: {Msg.Id}</span>";

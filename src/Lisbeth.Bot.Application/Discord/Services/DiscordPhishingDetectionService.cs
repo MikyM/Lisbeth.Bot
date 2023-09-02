@@ -93,7 +93,7 @@ public sealed class DiscordPhishingDetectionService : IDiscordPhishingDetectionS
         // Run(), the method which it invokes returns Match?, which can cause an unexpected null ref.
         // You'd think this would be documented, but I digress.
         // Source: https://source.dot.net/#System.Text.RegularExpressions/System/Text/RegularExpressions/Regex.cs,388
-        MatchCollection links = LinkRegex.Matches(message.Content);
+        var links = LinkRegex.Matches(message.Content);
 
         foreach (Match match in links)
         {

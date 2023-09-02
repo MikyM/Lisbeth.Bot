@@ -92,12 +92,12 @@ public class RoleMenuOptionSelectedCommandHandler  : IAsyncCommandHandler<RoleMe
                 .WithFooter($"Member Id: {member.Id}")
                 .WithColor(new DiscordColor(roleMenu.Guild?.EmbedHexColor));
 
-            for (int i = 0; i < roleLists.Count; i++)
+            for (var i = 0; i < roleLists.Count; i++)
             {
                 if (roleLists[i].Count == 0) continue;
 
-                string joined = "";
-                for (int j = 0; j < roleLists[i].Count; j++)
+                var joined = "";
+                for (var j = 0; j < roleLists[i].Count; j++)
                 {
                     var toAdd = (j is 0 ? "" : "\n") + roleLists[i][j];
 
@@ -111,7 +111,7 @@ public class RoleMenuOptionSelectedCommandHandler  : IAsyncCommandHandler<RoleMe
                     break;
                 }
 
-                string fieldName = i switch
+                var fieldName = i switch
                 {
                     0 => "Granted roles",
                     1 => "Revoked roles",

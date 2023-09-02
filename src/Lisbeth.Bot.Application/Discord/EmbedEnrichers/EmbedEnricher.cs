@@ -32,7 +32,7 @@ public abstract class EmbedEnricher<TPrimaryEnricher> : EmbedEnricherBase<TPrima
 
     protected (DiscordModeration Moderation, string PastTense) GetModerationTypeAndPastTense()
     {
-        string type = PrimaryEnricher.GetType().Name;
+        var type = PrimaryEnricher.GetType().Name;
         if (type.Contains("ban", StringComparison.InvariantCultureIgnoreCase) && type.Contains("revoke", StringComparison.InvariantCultureIgnoreCase)) return (DiscordModeration.Unban, "Unbanned");
         if (type.Contains("mute", StringComparison.InvariantCultureIgnoreCase) && type.Contains("revoke", StringComparison.InvariantCultureIgnoreCase)) return (DiscordModeration.Unmute, "Unmuted");
         if (type.Contains("ban", StringComparison.InvariantCultureIgnoreCase)) return (DiscordModeration.Ban, "Banned");

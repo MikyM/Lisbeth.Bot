@@ -53,8 +53,8 @@ public class OpenTicketCommandHandler : IAsyncCommandHandler<OpenTicketCommand>
         if (!initRes.IsSuccess)
             return initRes;
 
-        DiscordGuild guild = _requestDataProvider.DiscordGuild;
-        DiscordMember owner = _requestDataProvider.RequestingMember;
+        var guild = _requestDataProvider.DiscordGuild;
+        var owner = _requestDataProvider.RequestingMember;
 
 
         if (owner.Guild.Id != guild.Id) return new DiscordNotAuthorizedError(nameof(owner));
@@ -103,7 +103,7 @@ public class OpenTicketCommandHandler : IAsyncCommandHandler<OpenTicketCommand>
         overwrites.Add(new DiscordOverwriteBuilder(guild.EveryoneRole).Deny(Permissions.AccessChannels));
         overwrites.Add(new DiscordOverwriteBuilder(owner).Allow(Permissions.AccessChannels));
 
-        string topic = $"Support ticket opened by user {owner.GetFullUsername()} at {DateTime.UtcNow}";
+        var topic = $"Support ticket opened by user {owner.GetFullUsername()} at {DateTime.UtcNow}";
 
         var openedCatRes = await _requestDataProvider.GetChannelAsync(guildCfg.TicketingConfig.OpenedCategoryId);
         if (!openedCatRes.IsDefined(out var openedCat))
@@ -114,10 +114,10 @@ public class OpenTicketCommandHandler : IAsyncCommandHandler<OpenTicketCommand>
         
         try
         {
-            DiscordChannel newTicketChannel = await guild.CreateChannelAsync(
+            var newTicketChannel = await guild.CreateChannelAsync(
                 $"{guildCfg.TicketingConfig.OpenedNamePrefix}-{command.Dto.GuildSpecificId:D4}", ChannelType.Text,
                 isOpenedCatFull ? null : openedCat, topic, null, null, overwrites);
-            DiscordMessage msg =
+            var msg =
                 await newTicketChannel.SendMessageAsync(message);
             //Program.cachedMsgs.Add(msg.Id, msg);
 

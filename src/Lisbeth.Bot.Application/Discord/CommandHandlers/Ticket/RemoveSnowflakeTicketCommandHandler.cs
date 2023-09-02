@@ -70,8 +70,8 @@ public class RemoveSnowflakeTicketCommandHandler : IAsyncCommandHandler<RemoveSn
         if (!initRes.IsSuccess)
             return Result<DiscordEmbed>.FromError(initRes);
 
-        DiscordGuild guild = _requestDataProvider.DiscordGuild;
-        DiscordMember requestingMember = _requestDataProvider.RequestingMember;
+        var guild = _requestDataProvider.DiscordGuild;
+        var requestingMember = _requestDataProvider.RequestingMember;
 
         var channelRes = await _requestDataProvider.GetChannelAsync(ticket.ChannelId);
         if (!channelRes.IsDefined(out var ticketChannel))

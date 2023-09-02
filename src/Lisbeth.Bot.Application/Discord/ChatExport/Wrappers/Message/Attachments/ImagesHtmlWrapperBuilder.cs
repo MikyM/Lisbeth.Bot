@@ -35,7 +35,7 @@ public class ImagesHtmlWrapperBuilder : IAsyncHtmlBuilder
     public async Task<string> BuildAsync()
     {
         if (Images.Count == 0) return "";
-        string imagesHtml = "";
+        var imagesHtml = "";
         foreach (var attachment in Images)
         {
             HtmlImage image = new (attachment.Url,BotConfiguration);

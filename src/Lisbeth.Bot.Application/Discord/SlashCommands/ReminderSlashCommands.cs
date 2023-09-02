@@ -71,13 +71,13 @@ public class ReminderSlashCommands : ExtendedApplicationCommandModule
             new DiscordInteractionResponseBuilder().AsEphemeral());
         Result<DiscordEmbed> result;
         
-        bool isValidDateTime = DateTime.TryParse(time, DateTimeFormatInfo.InvariantInfo,
-            DateTimeStyles.None, out DateTime parsedDateTime);
-        bool isValidTime = DateTime.TryParse(time, DateTimeFormatInfo.InvariantInfo,
-            DateTimeStyles.None, out DateTime parsedTime);
-        bool isValidStringRep = !string.IsNullOrWhiteSpace(time) && time.TryParseToDurationAndNextOccurrence(out _, out _);
-        bool isValidCron = true;
-        string exMessage = "";
+        var isValidDateTime = DateTime.TryParse(time, DateTimeFormatInfo.InvariantInfo,
+            DateTimeStyles.None, out var parsedDateTime);
+        var isValidTime = DateTime.TryParse(time, DateTimeFormatInfo.InvariantInfo,
+            DateTimeStyles.None, out var parsedTime);
+        var isValidStringRep = !string.IsNullOrWhiteSpace(time) && time.TryParseToDurationAndNextOccurrence(out _, out _);
+        var isValidCron = true;
+        var exMessage = "";
 
         parsedDateTime = DateTime.SpecifyKind(parsedDateTime, DateTimeKind.Utc);
         parsedTime = DateTime.SpecifyKind(parsedTime, DateTimeKind.Utc);

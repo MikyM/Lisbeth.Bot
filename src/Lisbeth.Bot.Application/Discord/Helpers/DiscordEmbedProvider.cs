@@ -151,7 +151,7 @@ public class DiscordEmbedProvider : IDiscordEmbedProvider
     {
         var (name, pastTense) = GetUnderlyingNameAndPastTense(req);
 
-        bool isOverlapping = previous is not null && previous.AppliedUntil > req.AppliedUntil && !previous.IsDisabled;
+        var isOverlapping = previous is not null && previous.AppliedUntil > req.AppliedUntil && !previous.IsDisabled;
 
         var embed = new DiscordEmbedBuilder();
         embed.WithColor(new DiscordColor(hexColor));
@@ -179,8 +179,8 @@ public class DiscordEmbedProvider : IDiscordEmbedProvider
         embed.AddField("Moderator", ExtendedFormatter.Mention(req.RequestedOnBehalfOfId, DiscordEntity.Member),
             true);
 
-        TimeSpan duration = req.AppliedUntil.Subtract(DateTime.UtcNow);
-        string lengthString = req.AppliedUntil == DateTime.MaxValue
+        var duration = req.AppliedUntil.Subtract(DateTime.UtcNow);
+        var lengthString = req.AppliedUntil == DateTime.MaxValue
             ? "Permanent"
             : $"{duration.Days} days, {duration.Hours} hrs, {duration.Minutes} mins";
 
@@ -252,8 +252,8 @@ public class DiscordEmbedProvider : IDiscordEmbedProvider
         var embed = new DiscordEmbedBuilder();
         embed.WithColor(new DiscordColor(hexColor));
 
-        TimeSpan duration = req.AppliedUntil.Subtract(DateTime.UtcNow);
-        string lengthString = req.AppliedUntil == DateTime.MaxValue
+        var duration = req.AppliedUntil.Subtract(DateTime.UtcNow);
+        var lengthString = req.AppliedUntil == DateTime.MaxValue
             ? "Permanent"
             : $"{duration.Days} days, {duration.Hours} hrs, {duration.Minutes} mins";
 
@@ -281,7 +281,7 @@ public class DiscordEmbedProvider : IDiscordEmbedProvider
         embed.AddField("Moderator", ExtendedFormatter.Mention(req.RequestedOnBehalfOfId, DiscordEntity.User), true);
         embed.AddField("Action", $"Get {name.ToLower()}", true);
 
-        string reqParams = req.ToString();
+        var reqParams = req.ToString();
         if (reqParams.Length <= 4096) embed.WithDescription(reqParams);
 
         embed.WithFooter($"Case Id: {(caseId is null ? "Unknown" : caseId)}");
@@ -291,7 +291,7 @@ public class DiscordEmbedProvider : IDiscordEmbedProvider
 
     private static (string Name, string PastTense) GetUnderlyingNameAndPastTense(object req)
     {
-        string type = req.GetType().Name;
+        var type = req.GetType().Name;
         if (type.Contains("Ban")) return ("Ban", "Banned");
         if (type.Contains("Mute")) return ("Mute", "Muted");
 

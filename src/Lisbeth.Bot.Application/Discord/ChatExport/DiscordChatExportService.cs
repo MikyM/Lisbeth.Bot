@@ -219,12 +219,12 @@ public class DiscordChatExportService : IDiscordChatExportService
                 .WithJs(_options.Value.ChatExportJs)
                 .WithOptions(_options.Value)
                 .WithGuild(guild);
-            string html = await htmlChatBuilder.BuildAsync();
+            var html = await htmlChatBuilder.BuildAsync();
 
             var parser = new MarkdownParser(html, users, guild, _discord);
             html = await parser.GetParsedContentAsync();
 
-            string usersString = users.Aggregate("", (current, user) => current + $"{user.Mention}\n");
+            var usersString = users.Aggregate("", (current, user) => current + $"{user.Mention}\n");
 
             var embedBuilder = new DiscordEmbedBuilder();
 

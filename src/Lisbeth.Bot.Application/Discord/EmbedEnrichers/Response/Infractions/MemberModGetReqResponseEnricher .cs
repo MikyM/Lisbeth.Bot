@@ -41,8 +41,8 @@ public class MemberModGetReqResponseEnricher : EmbedEnricher<IModEntity>
         embedBuilder.AddInvisibleField();
         embedBuilder.AddField("Moderator ID and profile", $"[{PrimaryEnricher.AppliedById}](https://discordapp.com/users/{PrimaryEnricher.AppliedById})", true);
 
-        TimeSpan duration = PrimaryEnricher.AppliedUntil.Subtract(DateTime.UtcNow);
-        string lengthString = PrimaryEnricher.AppliedUntil == DateTime.MaxValue
+        var duration = PrimaryEnricher.AppliedUntil.Subtract(DateTime.UtcNow);
+        var lengthString = PrimaryEnricher.AppliedUntil == DateTime.MaxValue
             ? "Permanent"
             : $"{duration.Days} days, {duration.Hours} hrs, {duration.Minutes} mins";
 

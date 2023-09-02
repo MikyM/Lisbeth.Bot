@@ -44,13 +44,13 @@ public class MainReminderService : IMainReminderService
             await _reminderDataDataService.LongCountAsync(new ActiveRemindersPerUserSpec(req.RequestedOnBehalfOfId));
         var recUser = await _reminderDataDataService.LongCountAsync(
             new ActiveRecurringRemindersPerUserSpec(req.RequestedOnBehalfOfId));
-        long remindersPerUser = reUser.Entity + recUser.Entity;
+        var remindersPerUser = reUser.Entity + recUser.Entity;
 
         var reGuild = await _reminderDataDataService.LongCountAsync(
             new ActiveRecurringRemindersPerGuildSpec(req.RequestedOnBehalfOfId));
         var recGuild =
             await _reminderDataDataService.LongCountAsync(new ActiveRemindersPerGuildSpec(req.RequestedOnBehalfOfId));
-        long remindersPerGuild = recGuild.Entity + reGuild.Entity;
+        var remindersPerGuild = recGuild.Entity + reGuild.Entity;
 
         if (recGuild.Entity >= 20)
             return new DiscordArgumentInvalidError(nameof(recGuild.Entity),
@@ -82,7 +82,7 @@ public class MainReminderService : IMainReminderService
                 req.Name = $"{req.GuildId}_{req.RequestedOnBehalfOfId}_{Guid.NewGuid().ToString()}";
 
             var partial = await _reminderDataDataService.AddAsync(req, true);
-            string hangfireId = _backgroundJobClient.Schedule<IDiscordSendReminderService>(
+            var hangfireId = _backgroundJobClient.Schedule<IDiscordSendReminderService>(
                 x => x.SendReminderAsync(partial.Entity, ReminderType.Single), setFor.ToUniversalTime(),
                 "reminder");
             await _reminderDataDataService.SetHangfireIdAsync(partial.Entity, hangfireId, true);
@@ -113,7 +113,7 @@ public class MainReminderService : IMainReminderService
             return new DiscordArgumentInvalidError(nameof(recGuild.Entity),
                 $"This guild already has a recurring reminder with name: {req.Name}");
 
-        string jobName = $"{req.GuildId}_{req.Name}";
+        var jobName = $"{req.GuildId}_{req.Name}";
 
         req.SetFor = null;
         req.TimeSpanExpression = null; // clean these just in case
@@ -156,11 +156,11 @@ public class MainReminderService : IMainReminderService
                 setFor = req.SetFor ?? throw new InvalidOperationException();
             }
 
-            bool res = BackgroundJob.Delete(reminder.HangfireId);
+            var res = BackgroundJob.Delete(reminder.HangfireId);
 
             if (!res) return new HangfireError("Hangfire failed to delete the job");
 
-            string hangfireId = _backgroundJobClient.Schedule<IDiscordSendReminderService>(
+            var hangfireId = _backgroundJobClient.Schedule<IDiscordSendReminderService>(
                  x => x.SendReminderAsync(reminder.Id, ReminderType.Single), setFor.ToUniversalTime(),
                 "reminder");
 
@@ -185,7 +185,7 @@ public class MainReminderService : IMainReminderService
         if (req.RequestedOnBehalfOfId != recurringReminder.CreatorId)
             return new DiscordNotAuthorizedError("Only the creator of a reminder can make changes to it.");
 
-        string jobName = $"{recurringReminder.GuildId}_{recurringReminder.Name}";
+        var jobName = $"{recurringReminder.GuildId}_{recurringReminder.Name}";
 
         RecurringJob.AddOrUpdate<IDiscordSendReminderService>(jobName,
             x => x.SendReminderAsync(recurringReminder.Id, ReminderType.Recurring), req.CronExpression,
@@ -211,7 +211,7 @@ public class MainReminderService : IMainReminderService
                 if (req.RequestedOnBehalfOfId != reminder.CreatorId)
                     return new DiscordNotAuthorizedError("Only the creator of a reminder can make changes to it.");
 
-                bool res = BackgroundJob.Delete(reminder.HangfireId);
+                var res = BackgroundJob.Delete(reminder.HangfireId);
 
                 if (!res) throw new Exception("Hangfire failed to delete a scheduled job");
 

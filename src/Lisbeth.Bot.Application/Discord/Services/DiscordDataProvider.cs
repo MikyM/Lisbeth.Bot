@@ -227,7 +227,7 @@ public class DiscordGuildRequestDataProvider : IDiscordGuildRequestDataProvider
             throw new InvalidOperationException();
 
         SnowflakeObject? snowflake;
-        DiscordEntity resultType = DiscordEntity.Guild;
+        var resultType = DiscordEntity.Guild;
         try
         {
             snowflake = InteractionContext?.ResolvedChannelMentions?.ElementAtOrDefault(0);
@@ -296,7 +296,7 @@ public class DiscordGuildRequestDataProvider : IDiscordGuildRequestDataProvider
             throw new InvalidOperationException();
 
         SnowflakeObject? snowflake;
-        DiscordEntity resultType = DiscordEntity.Guild;
+        var resultType = DiscordEntity.Guild;
         try
         {
             snowflake = InteractionContext?.ResolvedRoleMentions?.ElementAtOrDefault(0);

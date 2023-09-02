@@ -58,7 +58,7 @@ public class Program
             Log.Information("Loading configuration");
             
             // Read shorteners
-            string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resource", "Shorteners.txt");
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resource", "Shorteners.txt");
             string[] shorteners;
             if (File.Exists(path))
             {

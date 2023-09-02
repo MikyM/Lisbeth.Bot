@@ -46,7 +46,7 @@ public static class StringExtensions
         TimeSpan tmsp = new ();
         DateTime result;
 
-        if (int.TryParse(input, out int inputInMinutes))
+        if (int.TryParse(input, out var inputInMinutes))
         {
             if (inputInMinutes > 44640) inputInMinutes = 44640;
             tmsp = TimeSpan.FromMinutes(inputInMinutes);
@@ -58,8 +58,8 @@ public static class StringExtensions
         }
         else
         {
-            int parsedInput = 0;
-            char inputType = 'x';
+            var parsedInput = 0;
+            var inputType = 'x';
 
             if (!char.IsDigit(input.First()))
             {

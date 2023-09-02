@@ -35,7 +35,7 @@ public class MessagesHtmlWrapperBuilder : IAsyncHtmlBuilder
     public async Task<string> BuildAsync()
     {
         if (Messages.Count == 0) return "";
-        string messagesHtml = "";
+        var messagesHtml = "";
         foreach (var msg in Messages)
         {
             if (msg.Author.IsBot) continue;
