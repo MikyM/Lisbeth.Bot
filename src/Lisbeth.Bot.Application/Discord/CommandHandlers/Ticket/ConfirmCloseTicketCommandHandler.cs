@@ -204,7 +204,7 @@ public class ConfirmCloseTicketCommandHandler : IAsyncCommandHandler<ConfirmClos
         if (ticket.IsPrivate) return Result.FromSuccess();
 
         _ = _asyncExecutor.ExecuteAsync<IDiscordChatExportService>(async x => await x.ExportToHtmlAsync(guild,
-            target, requestingMember,
+            target, guild.CurrentMember,
             owner ?? await _discord.Client.GetUserAsync(ticket.UserId), ticket));
 
         return Result.FromSuccess();
