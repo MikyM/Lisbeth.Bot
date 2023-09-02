@@ -29,4 +29,8 @@ public class TicketExportReqDto : BaseTicketGetReqDto
         ChannelId = channelId;
         RequestedOnBehalfOfId = requestedOnBehalfOfId;
     }
+
+    public TicketExportReqDto()
+    {
+    }
 }

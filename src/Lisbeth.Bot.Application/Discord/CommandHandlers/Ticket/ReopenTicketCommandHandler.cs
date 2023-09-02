@@ -46,7 +46,7 @@ public class ReopenTicketCommandHandler : IAsyncCommandHandler<ReopenTicketComma
 
         var guildRes =
             await _guildDataService.GetSingleBySpecAsync(
-                new ActiveGuildByDiscordIdWithTicketingSpecifications(command.Dto.GuildId));
+                new ActiveGuildByDiscordIdWithTicketingSpecifications(command.Dto.GuildId), cancellationToken);
 
         if (!guildRes.IsDefined(out var guildCfg)) return Result<DiscordMessageBuilder>.FromError(guildRes);
 
@@ -54,7 +54,7 @@ public class ReopenTicketCommandHandler : IAsyncCommandHandler<ReopenTicketComma
             return new DisabledEntityError($"Guild with Id:{command.Dto.GuildId} doesn't have ticketing enabled.");
 
         var res = await _ticketDataService.GetSingleBySpecAsync(
-            new TicketByChannelIdOrGuildAndOwnerIdSpec(command.Dto.ChannelId, command.Dto.GuildId, command.Dto.OwnerId));
+            new TicketByChannelIdOrGuildAndOwnerIdSpec(command.Dto.ChannelId, command.Dto.GuildId, command.Dto.OwnerId), cancellationToken);
 
         if (!res.IsDefined(out var ticket)) return new NotFoundError("Ticket with given params doesn't exist.");
 

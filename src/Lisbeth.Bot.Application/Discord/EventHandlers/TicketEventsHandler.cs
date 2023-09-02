@@ -104,7 +104,12 @@ public class TicketEventsHandler : IDiscordMiscEventsSubscriber, IDiscordChannel
                         await _chatExportService.ExportToHtmlAsync(args.Interaction);
                         break;
                     case nameof(TicketSelectValue.TicketDeleteValue):
-                        await _commandHandlerFactory.GetHandler<IAsyncCommandHandler<DeleteTicketCommand>>().HandleAsync(new DeleteTicketCommand(args.Interaction));
+                        var deleteReq = new TicketRemoveReqDto
+                        {
+                            GuildId = args.Guild.Id, ChannelId = args.Channel.Id,
+                            RequestedOnBehalfOfId = args.User.Id
+                        };
+                        await _commandHandlerFactory.GetHandler<IAsyncCommandHandler<DeleteTicketCommand>>().HandleAsync(new DeleteTicketCommand(deleteReq, args.Interaction));
                         break;
                 }
                 break;

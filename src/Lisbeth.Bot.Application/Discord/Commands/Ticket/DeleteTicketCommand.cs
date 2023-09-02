@@ -15,14 +15,18 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using Lisbeth.Bot.Domain.DTOs.Request.Ticket;
+
 namespace Lisbeth.Bot.Application.Discord.Commands.Ticket;
 
 public class DeleteTicketCommand : ICommand
 {
-    public DeleteTicketCommand(DiscordInteraction interaction)
+    public DeleteTicketCommand(TicketRemoveReqDto dto, DiscordInteraction interaction)
     {
+        Dto = dto;
         Interaction = interaction;
     }
 
-    public DiscordInteraction Interaction { get; set; }        
+    public DiscordInteraction Interaction { get; set; }    
+    public TicketRemoveReqDto Dto { get; set; }
 }

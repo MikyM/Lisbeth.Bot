@@ -32,5 +32,9 @@ public class TicketRemoveReqDto : BaseTicketGetReqDto
         SnowflakeId = snowflakeId;
     }
 
+    public TicketRemoveReqDto()
+    {
+    }
+
     public ulong SnowflakeId { get; set; }
 }

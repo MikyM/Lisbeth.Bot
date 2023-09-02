@@ -102,6 +102,9 @@ public class DiscordChatExportService : IDiscordChatExportService
         try
         {
             requestingMember = await guild.GetMemberAsync(req.RequestedOnBehalfOfId);
+            if (!requestingMember.IsModerator())
+                return new DiscordNotAuthorizedError();
+
         }
         catch (Exception)
         {
@@ -121,7 +124,7 @@ public class DiscordChatExportService : IDiscordChatExportService
 
         return await ExportToHtmlAsync(guild, target, requestingMember, owner, ticket);
     }
-
+    
     public async Task<Result<DiscordEmbed>> ExportToHtmlAsync(DiscordInteraction intr)
     {
         if (intr is null) throw new ArgumentNullException(nameof(intr));

@@ -17,6 +17,7 @@
 
 using Lisbeth.Bot.Application.Discord.Commands.Ticket;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
+using MikyM.Discord.Extensions.BaseExtensions;
 
 namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 
@@ -24,24 +25,36 @@ namespace Lisbeth.Bot.Application.Discord.CommandHandlers.Ticket;
 public class DeleteTicketCommandHandler : IAsyncCommandHandler<DeleteTicketCommand>
 {
     private readonly IGuildDataService _guildDataService;
+    private readonly IDiscordGuildRequestDataProvider _requestDataProvider;
 
-    public DeleteTicketCommandHandler(IGuildDataService guildDataService)
+    public DeleteTicketCommandHandler(IGuildDataService guildDataService, IDiscordGuildRequestDataProvider requestDataProvider)
     {
         _guildDataService = guildDataService;
+        _requestDataProvider = requestDataProvider;
     }
 
     public async Task<Result> HandleAsync(DeleteTicketCommand command, CancellationToken cancellationToken = default)
     {
-        var guildRes = await _guildDataService.GetSingleBySpecAsync(new ActiveGuildByIdSpec(command.Interaction.Guild.Id));
+        var guildRes = await _guildDataService.GetSingleBySpecAsync(new ActiveGuildByIdSpec(command.Interaction.Guild.Id), cancellationToken);
 
         if (!guildRes.IsDefined(out var guild))
             return Result.FromError(guildRes);
+        
+        // data req
+        var initRes = await _requestDataProvider.InitializeAsync(command.Dto, command.Interaction);
+        if (!initRes.IsSuccess)
+            return initRes;
+        
+        var requestingMember = _requestDataProvider.RequestingMember;
+        
+        if (!requestingMember.IsModerator())
+            return new DiscordNotAuthorizedError();
 
         await command.Interaction.CreateFollowupMessageAsync(
             new DiscordFollowupMessageBuilder().AddEmbed(
                 new DiscordEmbedBuilder().WithColor(new DiscordColor(guild.EmbedHexColor)).WithDescription("This ticket will be deleted in 5 seconds")));
 
-        await Task.Delay(5000);
+        await Task.Delay(millisecondsDelay: 5000, cancellationToken: cancellationToken);
 
         await command.Interaction.Channel.DeleteAsync();
 

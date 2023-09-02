@@ -23,7 +23,6 @@ public interface IDiscordChatExportService
 {
     public Task<Result<DiscordEmbed>> ExportToHtmlAsync(DiscordInteraction intr);
     public Task<Result<DiscordEmbed>> ExportToHtmlAsync(TicketExportReqDto req);
-
     public Task<Result<DiscordEmbed>> ExportToHtmlAsync(DiscordGuild guild, DiscordChannel target,
         DiscordMember requestingMember, DiscordUser? owner = null, Ticket? ticket = null);
 }
