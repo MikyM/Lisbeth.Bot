@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Generic;
 using DSharpPlus.SlashCommands.Attributes;
 using FluentValidation;
 using Lisbeth.Bot.Application.Discord.Commands.ChannelMessageFormat;
@@ -312,7 +313,10 @@ public class AdminUtilSlashCommands : ExtendedApplicationCommandModule
 
         if (targetRoleOrUser is DiscordRole targetRole)
         {
-            var users = await ctx.Guild.GetAllMembersAsync();
+            var users = new List<DiscordMember>();
+            await foreach(var usr in ctx.Guild.GetAllMembersAsync())
+                users.Add(usr);
+            
             var targets = users.Where(x => x.HasRole(targetRole.Id, out _));
 
             foreach (var target in targets)

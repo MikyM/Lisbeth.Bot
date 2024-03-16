@@ -191,18 +191,29 @@ public class DiscordChatExportService : IDiscordChatExportService
                 return new DiscordNotAuthorizedError("Requesting member isn't in this guild");
 
             await Task.Delay(500);
+            
             List<DiscordUser> users = new();
+            
             List<DiscordMessage> messages = new();
 
-            messages.AddRange(await target.GetMessagesAsync());
+            await foreach(var msg in target.GetMessagesAsync())
+                messages.Add(msg);
+            
+            messages.AddRange(messages);
 
             var embed = new DiscordEmbedBuilder();
 
             while (true)
             {
                 await Task.Delay(1000);
-                var newMessages = await target.GetMessagesBeforeAsync(messages.Last().Id);
-                if (newMessages.Count == 0) break;
+                
+                var newMessages = new List<DiscordMessage>();
+                
+                await foreach(var msg in target.GetMessagesBeforeAsync(messages.Last().Id))
+                    newMessages.Add(msg);
+                
+                if (newMessages.Count == 0) 
+                    break;
 
                 messages.AddRange(newMessages);
 
@@ -245,7 +256,8 @@ public class DiscordChatExportService : IDiscordChatExportService
             DiscordMessageBuilder messageBuilder = new();
 
             messageBuilder.AddFile($"transcript-{target.Name}.html", ms);
-            messageBuilder.WithEmbed(embedBuilder.Build());
+            
+            messageBuilder.AddEmbed(embedBuilder.Build());
 
             await ticketLogChannel.SendMessageAsync(messageBuilder);
 

@@ -74,10 +74,13 @@ public class CleanClosedTicketsCommandHandler : IAsyncCommandHandler<CleanClosed
                     if ((guildCfg.Tickets ?? throw new InvalidOperationException()).All(x =>
                             x.ChannelId != closedTicketChannel.Id)) continue;
 
-                    IReadOnlyList<DiscordMessage> lastMessages;
+                    IList<DiscordMessage> lastMessages;
                     try
                     {
-                        lastMessages = await closedTicketChannel.GetMessagesAsync(1);
+                        lastMessages = new List<DiscordMessage>();
+
+                        await foreach(var message in closedTicketChannel.GetMessagesAsync(1))
+                            lastMessages.Add(message);
                     }
                     catch
                     {

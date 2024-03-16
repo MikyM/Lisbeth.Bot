@@ -20,8 +20,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net.Http;
 using System.Text;
-using DataExplorer.Audit;
-using DataExplorer.EfCore.Abstractions.DataServices;
 using DSharpPlus.SlashCommands.Attributes;
 using Lisbeth.Bot.Application.Discord.ChatExport;
 using Lisbeth.Bot.Application.Discord.Exceptions;
@@ -43,43 +41,16 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 public class OwnerUtilSlashCommands : ExtendedApplicationCommandModule
 {
     private readonly ILisbethBotDbContext _ctx;
-    private readonly IReadOnlyDataService<AuditLog, ILisbethBotDbContext> _dataService;
     private readonly IDiscordGuildService _discordGuildService;
     private readonly IOptions<BotConfiguration> _options;
 
-    public OwnerUtilSlashCommands(ILisbethBotDbContext ctx, IReadOnlyDataService<AuditLog, ILisbethBotDbContext> dataService,
-        IDiscordGuildService discordGuildService, IOptions<BotConfiguration> options)
+    public OwnerUtilSlashCommands(ILisbethBotDbContext ctx, IDiscordGuildService discordGuildService, IOptions<BotConfiguration> options)
     {
         _ctx = ctx;
-        _dataService = dataService;
         _discordGuildService = discordGuildService;
         _options = options;
     }
-
-    [UsedImplicitly]
-    [SlashRequireOwner]
-    [SlashCommand("audit", "Gets last 10 audit logs.", false)]
-    public async Task AuditCommand(InteractionContext ctx,
-        [Option("ephemeral", "Whether response should be eph")] string shouldEph = "true")
-    {
-        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
-            new DiscordInteractionResponseBuilder().AsEphemeral(bool.Parse(shouldEph)));
-
-        if (!ctx.User.IsBotOwner(ctx.Client))
-            throw new DiscordNotAuthorizedException();
-
-        var res = await _dataService!.GetAllAsync<AuditLog>();
-
-        if (!res.IsDefined()) throw new InvalidOperationException();
-
-        var botRes = res.Entity.Aggregate("",
-            (current, resp) =>
-                current +
-                $"\n Affected columns: {resp.AffectedColumns}, Table: {resp.TableName}, Old: {resp.OldValues}, New: {resp.NewValues}, Type: {resp.Type}");
-
-        await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent(botRes));
-    }
-
+    
     [UsedImplicitly]
     [SlashRequireOwner]
     [SlashCommand("sql", "Command that runs sql query.", false)]

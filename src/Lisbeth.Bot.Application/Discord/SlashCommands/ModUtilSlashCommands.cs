@@ -140,7 +140,9 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                         .WithTitle("Member history").WithDescription("No history entries available.").WithColor(new DiscordColor(guild.EmbedHexColor))));
                 break;
             case MemberActionType.Backtrack:
-                var members = await ctx.Guild.GetAllMembersAsync();
+                var members = new List<DiscordMember>();
+                await foreach(var usr in ctx.Guild.GetAllMembersAsync())
+                    members.Add(usr);
 
                 foreach (var memberBacktrack in members)
                 {
@@ -315,7 +317,9 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
             case BoosterActionType.ActiveByDiscord:
                 var intrActiveDisc = ctx.Client.GetInteractivity();
                 var pagesActiveDisc = new List<Page>();
-                var membersActiveDisc = await ctx.Guild.GetAllMembersAsync();
+                var membersActiveDisc = new List<DiscordMember>();
+                await foreach(var usr in ctx.Guild.GetAllMembersAsync())
+                    membersActiveDisc.Add(usr);
                 var chunkedActiveDisc = membersActiveDisc.Where(x => x.Roles.Any(y => y.Tags.IsPremiumSubscriber))
                     .OrderBy(x => x.PremiumSince!.Value)
                     .Take(1000)
@@ -349,7 +353,10 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                         .WithTitle("Boosters").WithDescription("No active boosters found.").WithColor(new DiscordColor(guild.EmbedHexColor))));
                 break;
             case BoosterActionType.Backtrack:
-                var members = await ctx.Guild.GetAllMembersAsync();
+                var members = new List<DiscordMember>();
+                await foreach(var usr in ctx.Guild.GetAllMembersAsync())
+                    members.Add(usr);
+                
                 var boosters = members.Where(x => x.Roles.Any(y => y.Tags.IsPremiumSubscriber)).ToList();
 
                 var guildRes =

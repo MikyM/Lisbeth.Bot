@@ -21,7 +21,6 @@ using DataExplorer;
 using DataExplorer.EfCore;
 using DataExplorer.EfCore.Extensions;
 using IdGen;
-using Lisbeth.Bot.DataAccessLayer;
 using MikyM.Common.Utilities;
 using ResultCommander.Autofac;
 

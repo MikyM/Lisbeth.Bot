@@ -109,7 +109,7 @@ public class CreateMessageFormatCommandHandler : IAsyncCommandHandler<CreateMess
         _guildDataService.BeginUpdate(guildCfg);
         var mapped = _mapper.Map<Domain.Entities.ChannelMessageFormat>(command.Dto);
         guildCfg.AddChannelMessageFormat(mapped);
-        await _guildDataService.CommitAsync(requestingUser.Id.ToString());
+        await _guildDataService.CommitAsync();
 
         return _embedBuilder
             .WithType(RegularUserInteraction.ChannelMessageFormat)

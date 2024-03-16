@@ -108,7 +108,7 @@ public class EditMessageFormatCommandHandler : IAsyncCommandHandler<EditMessageF
         _guildDataService.BeginUpdate(guildCfg);
         format.MessageFormat = command.Dto.MessageFormat;
         format.LastEditById = command.Dto.RequestedOnBehalfOfId;
-        await _guildDataService.CommitAsync(requestingUser.Id.ToString());
+        await _guildDataService.CommitAsync();
 
         return _embedBuilder
             .WithType(RegularUserInteraction.ChannelMessageFormat)

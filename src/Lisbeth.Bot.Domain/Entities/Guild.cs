@@ -19,7 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using DSharpPlus.Entities;
+using DSharpPlus.Entities.AuditLogs;
 using Lisbeth.Bot.Domain.Enums;
 using MikyM.Discord.Extensions.BaseExtensions;
 // ReSharper disable CollectionNeverUpdated.Local
@@ -130,8 +130,8 @@ public sealed class Guild : LisbethEntity
             {
                 memberHistoryEntry.PunishmentReason = discordAuditLogEntry.Reason == string.Empty ? null : discordAuditLogEntry.Reason;
                 memberHistoryEntry.Punishment = discordAuditLogEntry.ActionType;
-                memberHistoryEntry.PunishmentById = discordAuditLogEntry.UserResponsible.Id;
-                memberHistoryEntry.PunishmentByUsername = discordAuditLogEntry.UserResponsible.GetFullUsername(); 
+                memberHistoryEntry.PunishmentById = discordAuditLogEntry.UserResponsible?.Id;
+                memberHistoryEntry.PunishmentByUsername = discordAuditLogEntry.UserResponsible?.GetFullUsername(); 
             }
 
             if (memberHistoryEntry.ServerBoosterHistoryEntries is null) 

@@ -1,4 +1,6 @@
-﻿using System.Globalization;
+﻿using System.Collections.Generic;
+using System.Globalization;
+using DSharpPlus.Entities.AuditLogs;
 using Lisbeth.Bot.Application.Discord.Commands.MemberHistoryEntry;
 using Lisbeth.Bot.DataAccessLayer.Specifications.Guild;
 using MikyM.Discord.Extensions.BaseExtensions;
@@ -31,9 +33,16 @@ public class DisableMemberHistoryEntryCommandHandler : IAsyncCommandHandler<Disa
         if (guildCfg.IsModerationModuleEnabled && historyEntryCommand.Guild.Channels.TryGetValue(guildCfg.ModerationConfig.MemberEventsLogChannelId,
                 out var logChannel))
         {
-            var auditLogsBans = await historyEntryCommand.Guild.GetAuditLogsAsync(1, null, AuditLogActionType.Ban);
+            var auditLogsBans = new List<DiscordAuditLogEntry>();
+            await foreach (var log in historyEntryCommand.Guild.GetAuditLogsAsync(1, null, DiscordAuditLogActionType.Ban))
+                auditLogsBans.Add(log);
+            
             await Task.Delay(500);
-            var auditLogsKicks = await historyEntryCommand.Guild.GetAuditLogsAsync(1, null, AuditLogActionType.Kick);
+            
+            var auditLogsKicks = new List<DiscordAuditLogEntry>();
+            await foreach (var log in historyEntryCommand.Guild.GetAuditLogsAsync(1, null, DiscordAuditLogActionType.Kick))
+                auditLogsKicks.Add(log);
+            
             var filtered = auditLogsBans.Concat(auditLogsKicks).Where(m =>
                 m.CreationTimestamp.UtcDateTime > DateTime.UtcNow.Subtract(new TimeSpan(0, 0, 4))).ToList();
 
@@ -48,14 +57,14 @@ public class DisableMemberHistoryEntryCommandHandler : IAsyncCommandHandler<Disa
                 var userResponsible = auditLog.UserResponsible.Mention;
                 reasonLeft = logType switch
                 {
-                    AuditLogActionType.Ban =>
+                    DiscordAuditLogActionType.Ban =>
                         $"Banned by {userResponsible} {(string.IsNullOrEmpty(auditLog.Reason) ? "" : $"with reason: {auditLog.Reason}")}",
-                    AuditLogActionType.Kick =>
+                    DiscordAuditLogActionType.Kick =>
                         $"Kicked by {userResponsible} {(string.IsNullOrEmpty(auditLog.Reason) ? "" : $"with reason: {auditLog.Reason}")}",
                     _ => reasonLeft
                 };
 
-                if (logType is AuditLogActionType.Ban or AuditLogActionType.Kick)
+                if (logType is DiscordAuditLogActionType.Ban or DiscordAuditLogActionType.Kick)
                     auditLogEntry = auditLog;
             }
 

@@ -93,7 +93,7 @@ public static class ServiceCollectionExtensions
             options.PaginationBehaviour = PaginationBehaviour.Ignore;
             //options.ResponseBehavior = InteractionResponseBehavior.Respond;
             options.ButtonBehavior = ButtonPaginationBehavior.Disable;
-            options.AckPaginationButtons = true;
+            //options.AckPaginationButtons = true;
             options.Timeout = TimeSpan.FromSeconds(10);
             //options.ResponseMessage = "Oh noes! Something went wrong!";
 

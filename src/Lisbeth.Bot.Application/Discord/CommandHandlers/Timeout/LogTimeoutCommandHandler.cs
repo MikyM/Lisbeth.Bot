@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Generic;
+using DSharpPlus.Entities.AuditLogs;
 using Lisbeth.Bot.Application.Discord.Commands.Mute;
 using Lisbeth.Bot.Application.Discord.Commands.Timeout;
 using Lisbeth.Bot.Domain.DTOs.Request.Mute;
@@ -47,7 +49,10 @@ public class LogTimeoutCommandHandler : IAsyncCommandHandler<LogTimeoutCommand>
         var wasTimeoutApplied = !command.CommunicationDisabledUntilBefore.HasValue && command.CommunicationDisabledUntilAfter.HasValue;
         var wasTimeoutRevoked = command.CommunicationDisabledUntilBefore.HasValue && !command.CommunicationDisabledUntilAfter.HasValue;
 
-        var auditLogs = await command.Member.Guild.GetAuditLogsAsync(1, null, AuditLogActionType.MemberUpdate);
+        var auditLogs = new List<DiscordAuditLogEntry>();
+        await foreach(var log in command.Member.Guild.GetAuditLogsAsync(1, null, DiscordAuditLogActionType.MemberUpdate))
+            auditLogs.Add(log);
+        
         await Task.Delay(500);
         var filtered = auditLogs.Where(m =>
             m.CreationTimestamp.UtcDateTime > DateTime.UtcNow.Subtract(new TimeSpan(0, 0, 4)))

@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.IO;
 using System.Net.Http;
 using Lisbeth.Bot.Application.Discord.ChatExport.Wrappers;
 using Lisbeth.Bot.Domain;

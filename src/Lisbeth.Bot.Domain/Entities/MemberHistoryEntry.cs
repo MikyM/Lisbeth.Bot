@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using DSharpPlus.Entities;
+using DSharpPlus.Entities.AuditLogs;
 
 namespace Lisbeth.Bot.Domain.Entities;
 
@@ -12,7 +12,7 @@ public class MemberHistoryEntry : LisbethEntity
     public ulong UserId { get; set; }
     public ulong GuildId { get; set; }
     public Guild? Guild { get; set; }
-    public AuditLogActionType? Punishment { get; set; }
+    public DiscordAuditLogActionType? Punishment { get; set; }
     public string? PunishmentReason { get; set; }
     public string? PunishmentByUsername { get; set; }
     public ulong? PunishmentById { get; set; }

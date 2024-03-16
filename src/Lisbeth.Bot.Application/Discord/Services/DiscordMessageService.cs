@@ -18,6 +18,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using AutoMapper;
+using DSharpPlus.Entities.AuditLogs;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Exceptions;
 using Lisbeth.Bot.Application.Discord.EmbedEnrichers.Response.Prune;
@@ -100,11 +101,16 @@ public class DiscordMessageService : IDiscordMessageService
 
         if (req.Count is not null)
         {
-            var messages = await channel.GetMessagesAsync(req.Count.Value);
+            var messages = new List<DiscordMessage>();
+            await foreach(var msg in channel.GetMessagesAsync(req.Count.Value))
+                messages.Add(msg);
+            
             await channel.DeleteMessagesAsync(interactionId is null
                 ? messages
-                : messages.TakeWhile(x => x.Interaction is null || x.Interaction.Id != interactionId));
+                : messages.TakeWhile(x => x.Interaction is null || x.Interaction.Id != interactionId).ToList());
+            
             count = messages.Count;
+            
             req.Messages = _mapper.Map<List<MessageLog>>(messages);
         }
         else if (req.IsTargetedMessageDelete.HasValue && req.IsTargetedMessageDelete.Value && req.MessageId is not null)
@@ -144,7 +150,10 @@ public class DiscordMessageService : IDiscordMessageService
             if (targetMessage is null) 
                 return new DiscordNotFoundError("Message with given Id was not found");
 
-            var messages = await channel.GetMessagesAsync(1);
+            var messages = new List<DiscordMessage>();
+            await foreach(var msg in channel.GetMessagesAsync(1))
+                messages.Add(msg);
+
             var lastMessage = messages[0];
 
             while (cycles <= 10 && !shouldStop)
@@ -153,7 +162,12 @@ public class DiscordMessageService : IDiscordMessageService
 
                 messagesToDelete.Add(lastMessage);
 
-                messagesToDelete.AddRange(await channel.GetMessagesBeforeAsync(lastMessage.Id));
+                var messagesBefore = new List<DiscordMessage>();
+                await foreach(var msg in channel.GetMessagesBeforeAsync(lastMessage.Id))
+                    messagesBefore.Add(msg);
+                
+                messagesToDelete.AddRange(messagesBefore);
+                
                 await Task.Delay(300);
 
                 var target = messagesToDelete.FirstOrDefault(x => x.Id == req.MessageId);
@@ -192,10 +206,15 @@ public class DiscordMessageService : IDiscordMessageService
         }
         else if (req.TargetAuthorId.HasValue)
         {
-            var messages = await channel.GetMessagesAsync();
-            var messagesToDelete = messages.Where(x => x.Author.Id == req.TargetAuthorId.Value);
+            var messages = new List<DiscordMessage>();
+            await foreach(var msg in channel.GetMessagesAsync())
+                messages.Add(msg);
+            
+            var messagesToDelete = messages.Where(x => x.Author?.Id == req.TargetAuthorId.Value);
+            
             req.Messages = _mapper.Map<List<MessageLog>>(messagesToDelete);
-            await channel.DeleteMessagesAsync(messagesToDelete);
+            
+            await channel.DeleteMessagesAsync(messagesToDelete.ToList());
         }
 
         var res = await _pruneDataService.AddAsync(req, true);
@@ -310,10 +329,17 @@ public class DiscordMessageService : IDiscordMessageService
 
         await Task.Delay(500);
 
-        var auditLogs = await args.Guild.GetAuditLogsAsync(1, null, AuditLogActionType.MessageDelete);
-        var auditLogsBans = await args.Guild.GetAuditLogsAsync(1, null, AuditLogActionType.Ban);
+        var auditLogs = new List<DiscordAuditLogEntry>();
+        await foreach(var log in args.Guild.GetAuditLogsAsync(1, null, DiscordAuditLogActionType.MessageDelete))
+            auditLogs.Add(log);
+        
+        var auditLogsBans = new List<DiscordAuditLogEntry>();
+        await foreach(var log in args.Guild.GetAuditLogsAsync(1, null, DiscordAuditLogActionType.Ban))
+            auditLogsBans.Add(log);
+
         var filtered = auditLogs
             .Where(m => m.CreationTimestamp.UtcDateTime > DateTime.UtcNow.Subtract(new TimeSpan(0, 0, 4))).ToList();
+        
         var filteredBans = auditLogsBans
             .Where(m => m.CreationTimestamp.UtcDateTime > DateTime.UtcNow.Subtract(new TimeSpan(0, 0, 4))).ToList();
 
@@ -386,9 +412,15 @@ public class DiscordMessageService : IDiscordMessageService
         if (logChannel is null) return;
 
         await Task.Delay(500);
-
-        var auditLogs = await args.Guild.GetAuditLogsAsync(1, null, AuditLogActionType.Ban);
-        var auditBulkLogs = await args.Guild.GetAuditLogsAsync(1, null, AuditLogActionType.MessageBulkDelete);
+        
+        var auditLogs = new List<DiscordAuditLogEntry>();
+        await foreach(var log in args.Guild.GetAuditLogsAsync(1, null, DiscordAuditLogActionType.Ban))
+            auditLogs.Add(log);
+        
+        var auditBulkLogs = new List<DiscordAuditLogEntry>();
+        await foreach(var log in args.Guild.GetAuditLogsAsync(1, null, DiscordAuditLogActionType.MessageBulkDelete))
+            auditBulkLogs.Add(log);
+        
         var filtered = auditLogs
             .Where(m => m.CreationTimestamp.UtcDateTime > DateTime.UtcNow.Subtract(new TimeSpan(0, 0, 4)))
             .ToList();

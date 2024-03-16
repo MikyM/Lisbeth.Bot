@@ -76,10 +76,13 @@ public class CloseInactiveTicketsCommandHandler : IAsyncCommandHandler<CloseInac
                     if ((guildCfg.Tickets ?? throw new InvalidOperationException()).All(x =>
                             x.ChannelId != openedTicketChannel.Id)) continue;
 
-                    IReadOnlyList<DiscordMessage> lastMessages;
+                    IList<DiscordMessage> lastMessages;
                     try
                     {
-                        lastMessages = await openedTicketChannel.GetMessagesAsync(1);
+                        lastMessages = new List<DiscordMessage>();
+
+                        await foreach(var message in openedTicketChannel.GetMessagesAsync(1))
+                            lastMessages.Add(message);
                     }
                     catch
                     {

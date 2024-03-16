@@ -86,7 +86,7 @@ public class DisableMessageFormatCommandHandler : IAsyncCommandHandler<DisableMe
         _guildDataService.BeginUpdate(guildCfg);
         format.IsDisabled = command.Dto.IsDisabled;
         format.LastEditById = command.Dto.RequestedOnBehalfOfId;
-        await _guildDataService.CommitAsync(requestingUser.Id.ToString());
+        await _guildDataService.CommitAsync();
 
         return _embedBuilder
             .WithType(RegularUserInteraction.ChannelMessageFormat)

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using DSharpPlus.Entities;
+using DSharpPlus.Entities.AuditLogs;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
@@ -42,7 +42,7 @@ public class MemberHistoryEntryConfig : IEntityTypeConfiguration<MemberHistoryEn
         builder.Property(x => x.PunishmentReason).HasColumnName("punishment_reason").HasColumnType("text");
         builder.Property(x => x.PunishmentByUsername).HasColumnName("punishment_by_username").HasColumnType("text");
         builder.Property(x => x.Punishment).HasColumnName("punishment").HasColumnType("text")
-            .HasConversion<EnumToStringConverter<AuditLogActionType>>();
+            .HasConversion<EnumToStringConverter<DiscordAuditLogActionType>>();
         builder.Property(x => x.PunishmentById).HasColumnName("punishment_by_id").HasColumnType("bigint");
         builder.Property(x => x.AccountCreated).HasColumnName("account_created").HasColumnType("timestamptz")
             .IsRequired();

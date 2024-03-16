@@ -306,7 +306,7 @@ public class DiscordGuildService : IDiscordGuildService
 
         _guildDataService.BeginUpdate(cfg);
         cfg.PhishingDetection = req.PhishingDetection;
-        await _guildDataService.CommitAsync(req.RequestedOnBehalfOfId.ToString());
+        await _guildDataService.CommitAsync();
 
         return Result.FromSuccess();
     }
