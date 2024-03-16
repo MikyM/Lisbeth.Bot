@@ -35,13 +35,13 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                         .HasColumnName("applied_by_id");
 
                     b.Property<DateTime>("AppliedUntil")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp")
                         .HasColumnName("applied_until");
 
                     b.Property<DateTime?>("CreatedAt")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp")
                         .HasColumnName("created_at");
 
                     b.Property<long>("GuildId")
@@ -59,7 +59,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                         .HasColumnName("lifted_by_id");
 
                     b.Property<DateTime?>("LiftedOn")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp")
                         .HasColumnName("lifted_on");
 
                     b.Property<string>("Reason")
@@ -69,7 +69,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
 
                     b.Property<DateTime?>("UpdatedAt")
                         .IsRequired()
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp")
                         .HasColumnName("updated_at");
 
                     b.Property<long>("UserId")
@@ -113,7 +113,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     b.Property<DateTime?>("CreatedAt")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp")
                         .HasColumnName("created_at");
 
                     b.Property<long>("CreatorId")
@@ -171,7 +171,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                         .HasColumnName("thumbnail_width");
 
                     b.Property<DateTime?>("Timestamp")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp")
                         .HasColumnName("Timestamp");
 
                     b.Property<string>("Title")
@@ -181,7 +181,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
 
                     b.Property<DateTime?>("UpdatedAt")
                         .IsRequired()
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp")
                         .HasColumnName("updated_at");
 
                     b.HasKey("Id");
@@ -201,7 +201,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     b.Property<DateTime?>("CreatedAt")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp")
                         .HasColumnName("created_at");
 
                     b.Property<string>("EmbedHexColor")
@@ -227,7 +227,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
 
                     b.Property<DateTime?>("UpdatedAt")
                         .IsRequired()
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp")
                         .HasColumnName("updated_at");
 
                     b.Property<long>("UserId")
@@ -279,7 +279,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     b.Property<DateTime?>("CreatedAt")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp")
                         .HasColumnName("created_at");
 
                     b.Property<long>("GuildId")
@@ -318,7 +318,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
 
                     b.Property<DateTime?>("UpdatedAt")
                         .IsRequired()
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp")
                         .HasColumnName("updated_at");
 
                     b.HasKey("Id");
@@ -346,13 +346,13 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                         .HasColumnName("applied_by_id");
 
                     b.Property<DateTime>("AppliedUntil")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp")
                         .HasColumnName("applied_until");
 
                     b.Property<DateTime?>("CreatedAt")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp")
                         .HasColumnName("created_at");
 
                     b.Property<long>("GuildId")
@@ -370,7 +370,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                         .HasColumnName("lifted_by_id");
 
                     b.Property<DateTime?>("LiftedOn")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp")
                         .HasColumnName("lifted_on");
 
                     b.Property<string>("Reason")
@@ -380,7 +380,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
 
                     b.Property<DateTime?>("UpdatedAt")
                         .IsRequired()
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp")
                         .HasColumnName("updated_at");
 
                     b.Property<long>("UserId")
@@ -417,7 +417,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     b.Property<DateTime?>("CreatedAt")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp")
                         .HasColumnName("created_at");
 
                     b.Property<long>("GuildId")
@@ -441,7 +441,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
 
                     b.Property<DateTime?>("UpdatedAt")
                         .IsRequired()
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp")
                         .HasColumnName("updated_at");
 
                     b.Property<long>("UserId")
@@ -474,7 +474,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     b.Property<DateTime?>("CreatedAt")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp")
                         .HasColumnName("created_at");
 
                     b.Property<long>("CreatorId")
@@ -529,7 +529,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
 
                     b.Property<DateTime?>("UpdatedAt")
                         .IsRequired()
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp")
                         .HasColumnName("updated_at");
 
                     b.HasKey("Id");
@@ -558,7 +558,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     b.Property<DateTime?>("CreatedAt")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp")
                         .HasColumnName("created_at");
 
                     b.Property<long>("CreatorId")
@@ -602,7 +602,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                         .HasColumnName("name");
 
                     b.Property<DateTime>("SetFor")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp")
                         .HasColumnName("set_for");
 
                     b.Property<string>("Text")
@@ -611,7 +611,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
 
                     b.Property<DateTime?>("UpdatedAt")
                         .IsRequired()
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp")
                         .HasColumnName("updated_at");
 
                     b.HasKey("Id");
@@ -636,7 +636,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     b.Property<DateTime?>("CreatedAt")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp")
                         .HasColumnName("created_at");
 
                     b.Property<long>("CreatorId")
@@ -683,7 +683,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
 
                     b.Property<DateTime?>("UpdatedAt")
                         .IsRequired()
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp")
                         .HasColumnName("updated_at");
 
                     b.HasKey("Id");
@@ -708,7 +708,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     b.Property<DateTime?>("CreatedAt")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp")
                         .HasColumnName("created_at");
 
                     b.Property<string>("CustomSelectOptionValueId")
@@ -747,7 +747,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
 
                     b.Property<DateTime?>("UpdatedAt")
                         .IsRequired()
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp")
                         .HasColumnName("updated_at");
 
                     b.HasKey("Id");
@@ -771,13 +771,13 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                         .HasColumnName("boost_count");
 
                     b.Property<DateTime>("BoostingSince")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp")
                         .HasColumnName("boosting_since");
 
                     b.Property<DateTime?>("CreatedAt")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp")
                         .HasColumnName("created_at");
 
                     b.Property<long>("GuildId")
@@ -793,7 +793,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
 
                     b.Property<DateTime?>("UpdatedAt")
                         .IsRequired()
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp")
                         .HasColumnName("updated_at");
 
                     b.Property<long>("UserId")
@@ -830,7 +830,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     b.Property<DateTime?>("CreatedAt")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp")
                         .HasColumnName("created_at");
 
                     b.Property<long>("CreatorId")
@@ -868,7 +868,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
 
                     b.Property<DateTime?>("UpdatedAt")
                         .IsRequired()
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp")
                         .HasColumnName("updated_at");
 
                     b.HasKey("Id");
@@ -907,13 +907,13 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                         .HasColumnName("closed_by_id");
 
                     b.Property<DateTime?>("ClosedOn")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp")
                         .HasColumnName("closed_on");
 
                     b.Property<DateTime?>("CreatedAt")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp")
                         .HasColumnName("created_at");
 
                     b.Property<long>("GuildId")
@@ -951,12 +951,12 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                         .HasColumnName("reopened_by_id");
 
                     b.Property<DateTime?>("ReopenedOn")
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp")
                         .HasColumnName("reopened_on");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .IsRequired()
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp")
                         .HasColumnName("updated_at");
 
                     b.Property<long>("UserId")
@@ -1017,7 +1017,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     b.Property<DateTime?>("CreatedAt")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp")
                         .HasColumnName("created_at");
 
                     b.Property<long>("GuildId")
@@ -1050,7 +1050,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
 
                     b.Property<DateTime?>("UpdatedAt")
                         .IsRequired()
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp")
                         .HasColumnName("updated_at");
 
                     b.Property<long?>("WelcomeEmbedConfigId")
@@ -1089,7 +1089,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     b.Property<DateTime?>("CreatedAt")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp")
                         .HasColumnName("created_at");
 
                     b.Property<bool>("IsDisabled")
@@ -1130,7 +1130,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
 
                     b.Property<DateTime?>("UpdatedAt")
                         .IsRequired()
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp")
                         .HasColumnName("updated_at");
 
                     b.Property<string>("UserId")

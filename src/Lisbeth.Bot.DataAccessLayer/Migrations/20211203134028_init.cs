@@ -22,8 +22,8 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     new_values = table.Column<string>(type: "text", nullable: false),
                     affected_columns = table.Column<string>(type: "varchar(1000)", maxLength: 1000, nullable: true),
                     primary_key = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamptz", nullable: false),
-                    updated_at = table.Column<DateTime>(type: "timestamptz", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "timestamp", nullable: false),
                     is_disabled = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
@@ -50,11 +50,11 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     title = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true),
                     creator_id = table.Column<long>(type: "bigint", nullable: false),
                     last_edit_by_id = table.Column<long>(type: "bigint", nullable: false),
-                    Timestamp = table.Column<DateTime>(type: "timestamptz", nullable: true),
+                    Timestamp = table.Column<DateTime>(type: "timestamp", nullable: true),
                     hex_color = table.Column<string>(type: "varchar(40)", maxLength: 40, nullable: false),
                     fields = table.Column<string>(type: "text", nullable: true),
-                    created_at = table.Column<DateTime>(type: "timestamptz", nullable: false),
-                    updated_at = table.Column<DateTime>(type: "timestamptz", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "timestamp", nullable: false),
                     is_disabled = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
@@ -73,8 +73,8 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     inviter_id = table.Column<long>(type: "bigint", nullable: false),
                     reminder_channel_id = table.Column<long>(type: "bigint", nullable: true),
                     embed_hex_color = table.Column<string>(type: "varchar(40)", maxLength: 40, nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamptz", nullable: false),
-                    updated_at = table.Column<DateTime>(type: "timestamptz", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "timestamp", nullable: false),
                     is_disabled = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
@@ -93,10 +93,10 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     user_id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    boosting_since = table.Column<DateTime>(type: "timestamptz", nullable: false),
+                    boosting_since = table.Column<DateTime>(type: "timestamp", nullable: false),
                     boost_count = table.Column<int>(type: "int", nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamptz", nullable: false),
-                    updated_at = table.Column<DateTime>(type: "timestamptz", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "timestamp", nullable: false),
                     is_disabled = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
@@ -114,13 +114,13 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     guild_id = table.Column<long>(type: "bigint", nullable: false),
                     user_id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    lifted_on = table.Column<DateTime>(type: "timestamptz", nullable: true),
-                    applied_until = table.Column<DateTime>(type: "timestamptz", nullable: false),
+                    lifted_on = table.Column<DateTime>(type: "timestamp", nullable: true),
+                    applied_until = table.Column<DateTime>(type: "timestamp", nullable: false),
                     applied_by_id = table.Column<long>(type: "bigint", nullable: false),
                     lifted_by_id = table.Column<long>(type: "bigint", nullable: false),
                     reason = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: true),
-                    created_at = table.Column<DateTime>(type: "timestamptz", nullable: false),
-                    updated_at = table.Column<DateTime>(type: "timestamptz", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "timestamp", nullable: false),
                     is_disabled = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
@@ -148,8 +148,8 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     member_welcome_message = table.Column<string>(type: "text", nullable: true),
                     member_welcome_embed_config_id = table.Column<long>(type: "bigint", nullable: true),
                     guild_id = table.Column<long>(type: "bigint", nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamptz", nullable: false),
-                    updated_at = table.Column<DateTime>(type: "timestamptz", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "timestamp", nullable: false),
                     is_disabled = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
@@ -177,13 +177,13 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     guild_id = table.Column<long>(type: "bigint", nullable: false),
                     user_id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    lifted_on = table.Column<DateTime>(type: "timestamptz", nullable: true),
-                    applied_until = table.Column<DateTime>(type: "timestamptz", nullable: false),
+                    lifted_on = table.Column<DateTime>(type: "timestamp", nullable: true),
+                    applied_until = table.Column<DateTime>(type: "timestamp", nullable: false),
                     applied_by_id = table.Column<long>(type: "bigint", nullable: false),
                     lifted_by_id = table.Column<long>(type: "bigint", nullable: false),
                     reason = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: true),
-                    created_at = table.Column<DateTime>(type: "timestamptz", nullable: false),
-                    updated_at = table.Column<DateTime>(type: "timestamptz", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "timestamp", nullable: false),
                     is_disabled = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
@@ -210,8 +210,8 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     messages = table.Column<string>(type: "text", nullable: true),
                     count = table.Column<int>(type: "int", nullable: false),
                     guild_id = table.Column<long>(type: "bigint", nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamptz", nullable: false),
-                    updated_at = table.Column<DateTime>(type: "timestamptz", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "timestamp", nullable: false),
                     is_disabled = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
@@ -237,8 +237,8 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     text = table.Column<string>(type: "text", nullable: true),
                     tags = table.Column<string>(type: "text", nullable: true),
                     is_guild_reminder = table.Column<bool>(type: "boolean", nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamptz", nullable: false),
-                    updated_at = table.Column<DateTime>(type: "timestamptz", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "timestamp", nullable: false),
                     is_disabled = table.Column<bool>(type: "boolean", nullable: false),
                     embed_config_id = table.Column<long>(type: "bigint", nullable: true),
                     creator_id = table.Column<long>(type: "bigint", nullable: false),
@@ -267,14 +267,14 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    set_for = table.Column<DateTime>(type: "timestamptz", nullable: false),
+                    set_for = table.Column<DateTime>(type: "timestamp", nullable: false),
                     text = table.Column<string>(type: "text", nullable: true),
                     hangfire_id = table.Column<string>(type: "varchar(300)", maxLength: 300, nullable: true),
                     bigint = table.Column<decimal>(type: "numeric(20,0)", nullable: true),
                     tags = table.Column<string>(type: "text", nullable: true),
                     is_guild_reminder = table.Column<bool>(type: "boolean", nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamptz", nullable: false),
-                    updated_at = table.Column<DateTime>(type: "timestamptz", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "timestamp", nullable: false),
                     is_disabled = table.Column<bool>(type: "boolean", nullable: false),
                     embed_config_id = table.Column<long>(type: "bigint", nullable: true),
                     creator_id = table.Column<long>(type: "bigint", nullable: false),
@@ -306,8 +306,8 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     text = table.Column<string>(type: "text", nullable: true),
                     custom_select_component_id = table.Column<string>(type: "varchar(120)", maxLength: 120, nullable: false),
                     custom_button_id = table.Column<string>(type: "varchar(120)", maxLength: 120, nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamptz", nullable: false),
-                    updated_at = table.Column<DateTime>(type: "timestamptz", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "timestamp", nullable: false),
                     is_disabled = table.Column<bool>(type: "boolean", nullable: false),
                     embed_config_id = table.Column<long>(type: "bigint", nullable: true),
                     creator_id = table.Column<long>(type: "bigint", nullable: false),
@@ -338,8 +338,8 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     text = table.Column<string>(type: "text", nullable: true),
-                    created_at = table.Column<DateTime>(type: "timestamptz", nullable: false),
-                    updated_at = table.Column<DateTime>(type: "timestamptz", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "timestamp", nullable: false),
                     is_disabled = table.Column<bool>(type: "boolean", nullable: false),
                     embed_config_id = table.Column<long>(type: "bigint", nullable: true),
                     creator_id = table.Column<long>(type: "bigint", nullable: false),
@@ -372,8 +372,8 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     channel_id = table.Column<long>(type: "bigint", nullable: false),
                     guild_specific_id = table.Column<long>(type: "bigint", nullable: false),
-                    reopened_on = table.Column<DateTime>(type: "timestamptz", nullable: true),
-                    closed_on = table.Column<DateTime>(type: "timestamptz", nullable: true),
+                    reopened_on = table.Column<DateTime>(type: "timestamp", nullable: true),
+                    closed_on = table.Column<DateTime>(type: "timestamp", nullable: true),
                     closed_by_id = table.Column<long>(type: "bigint", nullable: true),
                     reopened_by_id = table.Column<long>(type: "bigint", nullable: true),
                     message_open_id = table.Column<long>(type: "bigint", nullable: false),
@@ -383,8 +383,8 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     added_roles = table.Column<string>(type: "text", nullable: true),
                     is_private = table.Column<bool>(type: "boolean", nullable: false),
                     guild_id = table.Column<long>(type: "bigint", nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamptz", nullable: false),
-                    updated_at = table.Column<DateTime>(type: "timestamptz", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "timestamp", nullable: false),
                     is_disabled = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
@@ -417,8 +417,8 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     center_message_description = table.Column<string>(type: "text", nullable: false),
                     center_embed_config_id = table.Column<long>(type: "bigint", nullable: true),
                     guild_id = table.Column<long>(type: "bigint", nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamptz", nullable: false),
-                    updated_at = table.Column<DateTime>(type: "timestamptz", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "timestamp", nullable: false),
                     is_disabled = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
@@ -478,8 +478,8 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     name = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
                     description = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true),
                     custom_select_option_value_id = table.Column<string>(type: "varchar(120)", maxLength: 120, nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamptz", nullable: false),
-                    updated_at = table.Column<DateTime>(type: "timestamptz", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "timestamp", nullable: false),
                     is_disabled = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>

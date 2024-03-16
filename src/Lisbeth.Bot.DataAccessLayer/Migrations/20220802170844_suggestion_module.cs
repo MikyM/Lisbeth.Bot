@@ -30,8 +30,8 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     should_create_threads = table.Column<bool>(type: "boolean", nullable: false),
                     should_add_vote_reactions = table.Column<bool>(type: "boolean", nullable: false),
                     is_disabled = table.Column<bool>(type: "boolean", nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamptz", nullable: false),
-                    updated_at = table.Column<DateTime>(type: "timestamptz", nullable: false)
+                    created_at = table.Column<DateTime>(type: "timestamp", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "timestamp", nullable: false)
                 },
                 constraints: table =>
                 {

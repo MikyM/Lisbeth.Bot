@@ -11,10 +11,10 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
             migrationBuilder.AlterColumn<DateTime>(
                 name: "set_for",
                 table: "reminder",
-                type: "timestamptz",
+                type: "timestamp",
                 nullable: true,
                 oldClrType: typeof(DateTime),
-                oldType: "timestamptz");
+                oldType: "timestamp");
 
             migrationBuilder.AlterColumn<string>(
                 name: "name",
@@ -49,11 +49,11 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
             migrationBuilder.AlterColumn<DateTime>(
                 name: "set_for",
                 table: "reminder",
-                type: "timestamptz",
+                type: "timestamp",
                 nullable: false,
                 defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                 oldClrType: typeof(DateTime),
-                oldType: "timestamptz",
+                oldType: "timestamp",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<string>(

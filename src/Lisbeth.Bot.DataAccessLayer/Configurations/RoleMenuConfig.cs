@@ -30,10 +30,10 @@ public class RoleMenuConfig : IEntityTypeConfiguration<RoleMenu>
         builder.Property(x => x.IsDisabled).HasColumnName("is_disabled").HasColumnType("boolean").IsRequired();
         builder.Property(x => x.CreatedAt)
             .HasColumnName("created_at")
-            .HasColumnType("timestamptz")
+            .HasColumnType("timestamp")
             .ValueGeneratedOnAdd()
             .IsRequired();
-        builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz").IsRequired();
+        builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamp").IsRequired();
 
         builder.Property(x => x.Name)
             .HasColumnName("name")

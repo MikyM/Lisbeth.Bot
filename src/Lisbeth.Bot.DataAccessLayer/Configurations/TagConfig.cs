@@ -30,9 +30,9 @@ public class TagConfig : IEntityTypeConfiguration<Tag>
 
         builder.Property(x => x.Id).HasColumnName("id").HasColumnType("bigint").ValueGeneratedNever().IsRequired();
         builder.Property(x => x.IsDisabled).HasColumnName("is_disabled").HasColumnType("boolean").IsRequired();
-        builder.Property(x => x.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz")
+        builder.Property(x => x.CreatedAt).HasColumnName("created_at").HasColumnType("timestamp")
             .ValueGeneratedOnAdd().IsRequired();
-        builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz").IsRequired();
+        builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamp").IsRequired();
 
         builder.Property(x => x.Name).HasColumnName("name").HasColumnType("varchar(100)").HasMaxLength(100)
             .IsRequired().ValueGeneratedOnAdd();

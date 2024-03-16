@@ -30,9 +30,9 @@ public class PruneConfig : IEntityTypeConfiguration<Prune>
 
         builder.Property(x => x.Id).HasColumnName("id").HasColumnType("bigint").ValueGeneratedNever().IsRequired();
         builder.Property(x => x.IsDisabled).HasColumnName("is_disabled").HasColumnType("boolean").IsRequired();
-        builder.Property(x => x.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz")
+        builder.Property(x => x.CreatedAt).HasColumnName("created_at").HasColumnType("timestamp")
             .ValueGeneratedOnAdd().IsRequired();
-        builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz").IsRequired();
+        builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamp").IsRequired();
 
         builder.Property(x => x.GuildId).HasColumnName("guild_id").HasColumnType("bigint").ValueGeneratedOnAdd()
             .IsRequired();

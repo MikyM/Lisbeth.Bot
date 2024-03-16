@@ -19,7 +19,7 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
             migrationBuilder.AddColumn<DateTime>(
                 name: "account_created",
                 table: "member_history_entry",
-                type: "timestamptz",
+                type: "timestamp",
                 nullable: false,
                 defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
 

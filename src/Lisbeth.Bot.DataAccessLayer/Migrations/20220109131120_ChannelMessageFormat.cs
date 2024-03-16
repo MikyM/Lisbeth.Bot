@@ -31,8 +31,8 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     lat_edit_by_id = table.Column<long>(type: "bigint", nullable: false),
                     message_format = table.Column<string>(type: "varchar(2000)", maxLength: 2000, nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamptz", nullable: false),
-                    updated_at = table.Column<DateTime>(type: "timestamptz", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "timestamp", nullable: false),
                     is_disabled = table.Column<bool>(type: "boolean", nullable: false),
                     guild_id = table.Column<long>(type: "bigint", nullable: false)
                 },

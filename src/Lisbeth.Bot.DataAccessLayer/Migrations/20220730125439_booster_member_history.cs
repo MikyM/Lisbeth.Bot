@@ -29,8 +29,8 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     guild_id = table.Column<long>(type: "bigint", nullable: false),
                     is_disabled = table.Column<bool>(type: "boolean", nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamptz", nullable: false),
-                    updated_at = table.Column<DateTime>(type: "timestamptz", nullable: false)
+                    created_at = table.Column<DateTime>(type: "timestamp", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "timestamp", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -51,8 +51,8 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     user_id = table.Column<long>(type: "bigint", nullable: false),
                     guild_id = table.Column<long>(type: "bigint", nullable: false),
                     is_disabled = table.Column<bool>(type: "boolean", nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamptz", nullable: false),
-                    updated_at = table.Column<DateTime>(type: "timestamptz", nullable: false)
+                    created_at = table.Column<DateTime>(type: "timestamp", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "timestamp", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -96,12 +96,12 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                 {
                     id = table.Column<long>(type: "bigint", nullable: false),
                     boost_count = table.Column<int>(type: "int", nullable: false),
-                    boosting_since = table.Column<DateTime>(type: "timestamptz", nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamptz", nullable: false),
+                    boosting_since = table.Column<DateTime>(type: "timestamp", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp", nullable: false),
                     guild_id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     is_disabled = table.Column<bool>(type: "boolean", nullable: false),
-                    updated_at = table.Column<DateTime>(type: "timestamptz", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "timestamp", nullable: false),
                     user_id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn)
                 },

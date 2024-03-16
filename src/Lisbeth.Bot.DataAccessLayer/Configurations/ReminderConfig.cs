@@ -32,10 +32,10 @@ public class ReminderConfig : IEntityTypeConfiguration<Reminder>
         builder.Property(x => x.IsDisabled).HasColumnName("is_disabled").HasColumnType("boolean").IsRequired();
         builder.Property(x => x.CreatedAt)
             .HasColumnName("created_at")
-            .HasColumnType("timestamptz")
+            .HasColumnType("timestamp")
             .ValueGeneratedOnAdd()
             .IsRequired();
-        builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz").IsRequired();
+        builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamp").IsRequired();
         
         builder.Property(x => x.ShouldAddCreationInfo).HasColumnName("should_add_creation_info").HasColumnType("boolean").IsRequired();
         builder.Property(x => x.Mentions)
@@ -53,7 +53,7 @@ public class ReminderConfig : IEntityTypeConfiguration<Reminder>
             .HasColumnType("bigint")
             .IsRequired();
         builder.Property(x => x.Text).HasColumnName("text").HasColumnType("text");
-        builder.Property(x => x.SetFor).HasColumnName("set_for").HasColumnType("timestamptz");
+        builder.Property(x => x.SetFor).HasColumnName("set_for").HasColumnType("timestamp");
         builder.Property(x => x.CronExpression).HasColumnName("cron_expression").HasColumnType("varchar(200)")
             .HasMaxLength(200);
         builder.Property(x => x.EmbedConfigId).HasColumnName("embed_config_id").HasColumnType("bigint");

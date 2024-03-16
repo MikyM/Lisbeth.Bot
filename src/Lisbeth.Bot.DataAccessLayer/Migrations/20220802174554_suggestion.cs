@@ -17,8 +17,8 @@ namespace Lisbeth.Bot.DataAccessLayer.Migrations
                     user_id = table.Column<long>(type: "bigint", nullable: false),
                     username = table.Column<string>(type: "text", nullable: false),
                     text = table.Column<string>(type: "text", nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamptz", nullable: false),
-                    updated_at = table.Column<DateTime>(type: "timestamptz", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "timestamp", nullable: false),
                     guild_id = table.Column<long>(type: "bigint", nullable: false),
                     is_disabled = table.Column<bool>(type: "boolean", nullable: false)
                 },
