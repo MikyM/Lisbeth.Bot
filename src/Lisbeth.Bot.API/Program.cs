@@ -134,9 +134,6 @@ public class Program
                 .ReadFrom.Configuration(hostBuilder.Configuration)
                 .ReadFrom.Services(services));
 
-            // Configure Sentry
-            builder.WebHost.UseSentry();
-
             var app = builder.Build();
 
             // Set shorteners and chat export files
@@ -166,7 +163,6 @@ public class Program
             app.UseMiddleware<CustomExceptionMiddleware>();
             app.UseHttpsRedirection();
             app.UseRouting();
-            app.UseSentryTracing();
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseSerilogRequestLogging();
