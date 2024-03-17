@@ -71,9 +71,8 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
                     await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent(getBuilder.Content)
                         .AddEmbeds(getBuilder.Embeds));
                 else
-                    await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder()
-                        .AddEmbed(GetUnsuccessfulResultEmbed(getRes, ctx.Client))
-                        .AsEphemeral());
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder()
+                        .AddEmbed(GetUnsuccessfulResultEmbed(getRes, ctx.Client)));
                 break;
             case TagActionType.Create:
                 var addReq = new TagAddReqDto
