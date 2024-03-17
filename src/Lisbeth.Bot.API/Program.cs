@@ -25,6 +25,7 @@ using Hangfire;
 using Lisbeth.Bot.API.ExceptionMiddleware;
 using Lisbeth.Bot.API.Helpers;
 using Lisbeth.Bot.Application.Discord.ChatExport;
+using Lisbeth.Bot.Application.Services;
 using Lisbeth.Bot.Domain;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -123,6 +124,8 @@ public class Program
             builder.Services.AddEnrichedDiscordEmbedBuilders();
             builder.Services.ConfigurePhishingGateway();
             builder.Services.ConfigureBotOptions();
+
+            builder.Services.AddHostedService<InitializationService>();
             
             // Configure Autofac
             builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
