@@ -22,6 +22,7 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity.Enums;
 using DSharpPlus.Interactivity.EventHandling;
+using DSharpPlus.SlashCommands;
 using EasyCaching.InMemory;
 using EFCoreSecondLevelCacheInterceptor;
 using FluentValidation;
@@ -74,6 +75,7 @@ public static class ServiceCollectionExtensions
                 ? null
                 : configuration.GetValue<ulong>("BotOptions:TestGuildId");
 
+            /*
             extension?.RegisterCommands<MuteApplicationCommands>(guildId);
             extension?.RegisterCommands<BanApplicationCommands>(guildId);
             extension?.RegisterCommands<TicketSlashCommands>(guildId);
@@ -85,7 +87,9 @@ public static class ServiceCollectionExtensions
             extension?.RegisterCommands<ReminderSlashCommands>(guildId);
             extension?.RegisterCommands<EmbedConfigSlashCommands>(guildId);
             extension?.RegisterCommands<RoleMenuSlashCommands>(guildId);
-            extension?.RegisterCommands<UtilitySlashCommands>(guildId);
+            extension?.RegisterCommands<UtilitySlashCommands>(guildId);*/
+            
+            extension?.RegisterCommands<ApplicationCommandModule>();
         });
 
         services.AddDiscordInteractivity(options =>
