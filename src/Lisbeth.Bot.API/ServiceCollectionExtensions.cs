@@ -71,7 +71,7 @@ public static class ServiceCollectionExtensions
 
         services.AddDiscordSlashCommands(_ => { }, extension =>
         {
-            /*extension?.RegisterCommands<MuteApplicationCommands>();
+            extension?.RegisterCommands<MuteApplicationCommands>();
             extension?.RegisterCommands<BanApplicationCommands>();
             extension?.RegisterCommands<TicketSlashCommands>();
             extension?.RegisterCommands<OwnerUtilSlashCommands>();
@@ -82,10 +82,10 @@ public static class ServiceCollectionExtensions
             extension?.RegisterCommands<ReminderSlashCommands>();
             extension?.RegisterCommands<EmbedConfigSlashCommands>();
             extension?.RegisterCommands<RoleMenuSlashCommands>();
-            extension?.RegisterCommands<UtilitySlashCommands>();*/
+            extension?.RegisterCommands<UtilitySlashCommands>();
             
-            // TODO COMMENT OUT - CLEARS COMMANDS
-            extension?.RegisterCommands<ApplicationCommandModule>();
+            // CLEARS COMMANDS
+            //extension?.RegisterCommands<ApplicationCommandModule>();
         });
 
         services.AddDiscordInteractivity(options =>

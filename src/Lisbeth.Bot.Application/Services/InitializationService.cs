@@ -16,11 +16,12 @@ public class InitializationService : IHostedService
         _options = options;
     }
 
-    public async Task StartAsync(CancellationToken cancellationToken)
+    public Task StartAsync(CancellationToken cancellationToken)
     {
-        // TODO COMMENT OUT - CLEARS COMMANDS
-        await _discordService.Client.BulkOverwriteGlobalApplicationCommandsAsync(Array.Empty<DiscordApplicationCommand>());
-        await _discordService.Client.BulkOverwriteGuildApplicationCommandsAsync(_options.Value.TestGuildId, Array.Empty<DiscordApplicationCommand>());
+        return Task.CompletedTask;
+        // CLEARS COMMANDS
+        /*await _discordService.Client.BulkOverwriteGlobalApplicationCommandsAsync(Array.Empty<DiscordApplicationCommand>());
+        await _discordService.Client.BulkOverwriteGuildApplicationCommandsAsync(_options.Value.TestGuildId, Array.Empty<DiscordApplicationCommand>());*/
     }
 
     public Task StopAsync(CancellationToken cancellationToken)
