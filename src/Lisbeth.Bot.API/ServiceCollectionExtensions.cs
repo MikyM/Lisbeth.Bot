@@ -140,10 +140,7 @@ public static class ServiceCollectionExtensions
         {
             options.UseRecommendedSerializerSettings();
             options.UsePostgreSqlStorage(
-                (environment.IsProduction()
-                    ? configuration.GetConnectionString("HangfireDb")
-                    : Environment.GetEnvironmentVariable("DevLisbethHangfireDb")) ??
-                throw new InvalidOperationException("Couldn't retrieve dev db connection string from env var."),
+                configuration.GetConnectionString("HangfireDb") ?? throw new InvalidOperationException(),
                 new PostgreSqlStorageOptions { QueuePollInterval = TimeSpan.FromSeconds(15) });
         });
 
@@ -263,16 +260,12 @@ public static class ServiceCollectionExtensions
     public static void ConfigureHealthChecks(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
         services.AddHealthChecks()
-            .AddNpgSql((environment.IsProduction()
-                           ? configuration.GetConnectionString("MainDb")
-                           : Environment.GetEnvironmentVariable("DevLisbethMainDb")) ??
-                       throw new InvalidOperationException("Couldn't retrieve dev db connection string from env var."),
+            .AddNpgSql(configuration.GetConnectionString("MainDb") ??
+                       throw new InvalidOperationException(),
                 name: "Base DB")
             .AddNpgSql(
-                (environment.IsProduction()
-                    ? configuration.GetConnectionString("HangfireDb")
-                    : Environment.GetEnvironmentVariable("DevLisbethHangfireDb")) ??
-                throw new InvalidOperationException("Couldn't retrieve dev db connection string from env var."),
+                configuration.GetConnectionString("HangfireDb") ??
+                throw new InvalidOperationException(),
                 name: "Hangfire DB")
             .AddHangfire(options =>
             {
@@ -293,10 +286,8 @@ public static class ServiceCollectionExtensions
         services.AddDbContextPool<ILisbethBotDbContext, LisbethBotDbContext>((provider, options) =>
         {
             options.AddInterceptors(provider.GetRequiredService<SecondLevelCacheInterceptor>());
-            options.UseNpgsql((environment.IsProduction()
-                                  ? configuration.GetConnectionString("MainDb")
-                                  : Environment.GetEnvironmentVariable("DevLisbethMainDb")) ??
-                              throw new InvalidOperationException("Couldn't retrieve dev db connection string from env var."));
+            options.UseNpgsql(configuration.GetConnectionString("MainDb") ??
+                              throw new InvalidOperationException());
 #if DEBUG
             options.EnableSensitiveDataLogging();
 #endif

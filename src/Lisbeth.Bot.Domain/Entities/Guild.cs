@@ -82,8 +82,10 @@ public sealed class Guild : LisbethEntity
             throw new InvalidOperationException();
         
         var date = dateOverride ?? DateTime.UtcNow;
+        var local = DateTime.SpecifyKind(date, DateTimeKind.Local);
+        
         _serverBoosterHistoryEntries ??= new HashSet<ServerBoosterHistoryEntry>();
-        _serverBoosterHistoryEntries.Add(new ServerBoosterHistoryEntry { UserId = userId, GuildId = this.GuildId, MemberHistoryEntryId = memberHistoryEntry.Id, CreatedAt = date, Username = username } );
+        _serverBoosterHistoryEntries.Add(new ServerBoosterHistoryEntry { UserId = userId, GuildId = this.GuildId, MemberHistoryEntryId = memberHistoryEntry.Id, CreatedAt = local, Username = username } );
     }
 
     public void DisableServerBoosterHistoryEntry(ServerBoosterHistoryEntry entry)

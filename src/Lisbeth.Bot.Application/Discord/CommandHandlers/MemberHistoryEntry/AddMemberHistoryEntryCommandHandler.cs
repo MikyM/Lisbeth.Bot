@@ -23,9 +23,13 @@ public class AddMemberHistoryEntryCommandHandler : IAsyncCommandHandler<AddMembe
         if (!guildRes.IsDefined(out var guildCfg))
             return Result.FromError(guildRes);
 
+        var dt = historyEntryCommand.Member.CreationTimestamp.UtcDateTime;
+        var dtLocal = DateTime.SpecifyKind(dt, DateTimeKind.Local);
+        
         _ = _guildDataService.BeginUpdate(guildCfg);
         guildCfg.AddMemberHistoryEntry(historyEntryCommand.Member.Id, historyEntryCommand.Member.GetFullUsername(),
-            historyEntryCommand.Member.CreationTimestamp.UtcDateTime);
+            dtLocal);
+        
         _ = await _guildDataService.CommitAsync();
 
         return Result.FromSuccess();

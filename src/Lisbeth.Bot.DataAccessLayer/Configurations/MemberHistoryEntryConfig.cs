@@ -29,9 +29,9 @@ public class MemberHistoryEntryConfig : IEntityTypeConfiguration<MemberHistoryEn
 
         builder.Property(x => x.Id).HasColumnName("id").HasColumnType("bigint").ValueGeneratedNever().IsRequired();
         builder.Property(x => x.IsDisabled).HasColumnName("is_disabled").HasColumnType("boolean").IsRequired();
-        builder.Property(x => x.CreatedAt).HasColumnName("created_at").HasColumnType("timestamp")
+        builder.Property(x => x.CreatedAt).HasColumnName("created_at").HasColumnType("timestamp").HasConversion<DateTimeKindConverter>()
             .ValueGeneratedOnAdd().IsRequired();
-        builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamp").IsRequired();
+        builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamp").HasConversion<DateTimeKindConverter>().IsRequired();
 
         builder.Property(x => x.GuildId).HasColumnName("guild_id").HasColumnType("bigint").ValueGeneratedOnAdd()
             .IsRequired();
@@ -44,7 +44,7 @@ public class MemberHistoryEntryConfig : IEntityTypeConfiguration<MemberHistoryEn
         builder.Property(x => x.Punishment).HasColumnName("punishment").HasColumnType("text")
             .HasConversion<EnumToStringConverter<DiscordAuditLogActionType>>();
         builder.Property(x => x.PunishmentById).HasColumnName("punishment_by_id").HasColumnType("bigint");
-        builder.Property(x => x.AccountCreated).HasColumnName("account_created").HasColumnType("timestamp")
+        builder.Property(x => x.AccountCreated).HasColumnName("account_created").HasColumnType("timestamp").HasConversion<DateTimeKindConverter>()
             .IsRequired();
 
         builder

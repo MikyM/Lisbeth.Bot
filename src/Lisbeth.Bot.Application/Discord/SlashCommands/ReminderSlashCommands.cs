@@ -79,8 +79,8 @@ public class ReminderSlashCommands : ExtendedApplicationCommandModule
         var isValidCron = true;
         var exMessage = "";
 
-        parsedDateTime = DateTime.SpecifyKind(parsedDateTime, DateTimeKind.Utc);
-        parsedTime = DateTime.SpecifyKind(parsedTime, DateTimeKind.Utc);
+        parsedDateTime = DateTime.SpecifyKind(parsedDateTime, DateTimeKind.Local);
+        parsedTime = DateTime.SpecifyKind(parsedTime, DateTimeKind.Local);
 
         try
         {

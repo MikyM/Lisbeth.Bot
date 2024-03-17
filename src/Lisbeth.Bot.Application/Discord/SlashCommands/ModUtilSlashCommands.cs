@@ -151,7 +151,12 @@ public class ModUtilSlashCommands : ExtendedApplicationCommandModule
                         : DateTime.UtcNow;
 
                     _ = _guildDataService.BeginUpdate(guild);
-                    guild.AddMemberHistoryEntry(memberBacktrack.Id, memberBacktrack.GetFullUsername(), memberBacktrack.CreationTimestamp.UtcDateTime, dateBacktrack);
+                    
+                    var dt = memberBacktrack.CreationTimestamp.UtcDateTime;
+                    var dtLocal = DateTime.SpecifyKind(dt, DateTimeKind.Local);
+                    
+                    guild.AddMemberHistoryEntry(memberBacktrack.Id, memberBacktrack.GetFullUsername(), 
+                        dtLocal, dateBacktrack);
                 }
 
                 _ = await _guildDataService.CommitAsync();

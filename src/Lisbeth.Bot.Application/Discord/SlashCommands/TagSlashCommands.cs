@@ -21,6 +21,7 @@ using Lisbeth.Bot.Application.Discord.Commands.Tag;
 using Lisbeth.Bot.Application.Discord.SlashCommands.Base;
 using Lisbeth.Bot.Application.Validation.Tag;
 using Lisbeth.Bot.Domain.DTOs.Request.Tag;
+using Microsoft.Extensions.Logging;
 
 namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 
@@ -29,16 +30,17 @@ namespace Lisbeth.Bot.Application.Discord.SlashCommands;
 public class TagSlashCommands : ExtendedApplicationCommandModule
 {
     public TagSlashCommands(IDiscordEmbedConfiguratorService<Tag> discordEmbedTagConfiguratorService,
-        ICommandHandlerResolver commandHandlerFactory)
+        ICommandHandlerResolver commandHandlerFactory, ILogger<TagSlashCommands> logger)
     {
         _discordEmbedTagConfiguratorService = discordEmbedTagConfiguratorService;
         _commandHandlerFactory = commandHandlerFactory;
+        _logger = logger;
     }
 
     private readonly IDiscordEmbedConfiguratorService<Tag> _discordEmbedTagConfiguratorService;
     private readonly ICommandHandlerResolver _commandHandlerFactory;
-
-    [SlashCooldown(20, 120, CooldownBucketType.Guild)]
+    private readonly ILogger<TagSlashCommands> _logger;
+    
     [UsedImplicitly]
     [SlashCommand("tag", "Command that allows working with tags")]
     public async Task TagCommand(InteractionContext ctx,
@@ -51,7 +53,11 @@ public class TagSlashCommands : ExtendedApplicationCommandModule
         [Option("text", "Base text for the tag")]
         string text = "")
     {
+        _logger.LogInformation("Tag command invoked by {User} in {Guild}", ctx.User.Id, ctx.Guild.Id);
+        
         await ctx.DeferAsync();
+        
+        _logger.LogInformation("Tag command deferred for {User} in {Guild}", ctx.User.Id, ctx.Guild.Id);
 
         switch (action)
         {

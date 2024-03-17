@@ -43,7 +43,7 @@ public class AutofacContainerModule : Module
             {
                 var idStructure = new IdStructure(45, 2, 16);
                 var defaultTimeSource =
-                    new DefaultTimeSource(new DateTime(2021, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+                    new DefaultTimeSource(new DateTime(2021, 1, 1, 0, 0, 0, DateTimeKind.Local));
                 return new IdGeneratorOptions(idStructure, defaultTimeSource, SequenceOverflowStrategy.SpinWait);
             });
 
