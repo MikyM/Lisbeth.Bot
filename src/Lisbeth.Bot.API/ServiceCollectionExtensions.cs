@@ -71,25 +71,20 @@ public static class ServiceCollectionExtensions
 
         services.AddDiscordSlashCommands(_ => { }, extension =>
         {
-            ulong? guildId = configuration.GetValue<bool>("BotOptions:GlobalRegister")
-                ? null
-                : configuration.GetValue<ulong>("BotOptions:TestGuildId");
-
-            /*
-            extension?.RegisterCommands<MuteApplicationCommands>(guildId);
-            extension?.RegisterCommands<BanApplicationCommands>(guildId);
-            extension?.RegisterCommands<TicketSlashCommands>(guildId);
-            extension?.RegisterCommands<OwnerUtilSlashCommands>(guildId);
-            extension?.RegisterCommands<PruneApplicationCommands>(guildId);
-            extension?.RegisterCommands<AdminUtilSlashCommands>(guildId);
-            extension?.RegisterCommands<ModUtilSlashCommands>(guildId);
-            extension?.RegisterCommands<TagSlashCommands>(guildId);
-            extension?.RegisterCommands<ReminderSlashCommands>(guildId);
-            extension?.RegisterCommands<EmbedConfigSlashCommands>(guildId);
-            extension?.RegisterCommands<RoleMenuSlashCommands>(guildId);
-            extension?.RegisterCommands<UtilitySlashCommands>(guildId);*/
+            extension?.RegisterCommands<MuteApplicationCommands>();
+            extension?.RegisterCommands<BanApplicationCommands>();
+            extension?.RegisterCommands<TicketSlashCommands>();
+            extension?.RegisterCommands<OwnerUtilSlashCommands>();
+            extension?.RegisterCommands<PruneApplicationCommands>();
+            extension?.RegisterCommands<AdminUtilSlashCommands>();
+            extension?.RegisterCommands<ModUtilSlashCommands>();
+            extension?.RegisterCommands<TagSlashCommands>();
+            extension?.RegisterCommands<ReminderSlashCommands>();
+            extension?.RegisterCommands<EmbedConfigSlashCommands>();
+            extension?.RegisterCommands<RoleMenuSlashCommands>();
+            extension?.RegisterCommands<UtilitySlashCommands>();
             
-            extension?.RegisterCommands<ApplicationCommandModule>();
+            /*extension?.RegisterCommands<ApplicationCommandModule>();*/
         });
 
         services.AddDiscordInteractivity(options =>
