@@ -130,6 +130,7 @@ public static class ServiceCollectionExtensions
         services.AddDiscordMessageEventsSubscriber<PhishingEventsHandler>();
         services.AddDiscordGuildBanEventsSubscriber<BanEventsHandler>();
         services.AddDiscordGuildMemberEventsSubscriber<MemberEventsHandler>();
+        services.AddDiscordWebSocketEventSubscriber<ZombiedEventHandler>();
 
         #endregion
     }
