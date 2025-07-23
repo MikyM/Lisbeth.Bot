@@ -16,9 +16,20 @@ public class InitializationService : IHostedService
         _options = options;
     }
 
-    public Task StartAsync(CancellationToken cancellationToken)
+    private static readonly ulong[] GuildIds = [ 942512020656357396, 1122172811293769828, 596706031954952192, 432630458837106699, 717213120837451816 ]; 
+
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
-        return Task.CompletedTask;
+        var guilds = _discordService.Client.Guilds;
+        foreach (var (_, guild) in guilds)
+        {
+            if (!GuildIds.Contains(guild.Id))
+            {
+                await guild.LeaveAsync();
+            }
+        }
+        
+        //return Task.CompletedTask;
         // CLEARS COMMANDS
         /*await _discordService.Client.BulkOverwriteGlobalApplicationCommandsAsync(Array.Empty<DiscordApplicationCommand>());
         await _discordService.Client.BulkOverwriteGuildApplicationCommandsAsync(_options.Value.TestGuildId, Array.Empty<DiscordApplicationCommand>());*/
